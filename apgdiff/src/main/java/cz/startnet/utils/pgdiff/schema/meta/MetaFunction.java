@@ -1,4 +1,4 @@
-package cz.startnet.utils.pgdiff.schema.system;
+package cz.startnet.utils.pgdiff.schema.meta;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,12 +9,14 @@ import java.util.Map;
 import cz.startnet.utils.pgdiff.PgDiffUtils;
 import cz.startnet.utils.pgdiff.schema.ArgMode;
 import cz.startnet.utils.pgdiff.schema.Argument;
+import cz.startnet.utils.pgdiff.schema.GenericColumn;
 import cz.startnet.utils.pgdiff.schema.IFunction;
+import cz.startnet.utils.pgdiff.schema.PgObjLocation;
 import ru.taximaxim.codekeeper.apgdiff.model.difftree.DbObjType;
 
-public class PgSystemFunction extends PgSystemStatement implements IFunction {
+public class MetaFunction extends MetaStatement implements IFunction {
 
-    private static final long serialVersionUID = -7905948011960006249L;
+    private static final long serialVersionUID = -585518205768372673L;
 
     private List<Argument> arguments;
     private transient String signatureCache;
@@ -35,8 +37,12 @@ public class PgSystemFunction extends PgSystemStatement implements IFunction {
     private String returns;
     private boolean setof;
 
-    public PgSystemFunction(final String name) {
-        super(name, DbObjType.FUNCTION);
+    public MetaFunction(PgObjLocation object) {
+        super(object);
+    }
+
+    public MetaFunction(String schemaName, String name) {
+        super(new GenericColumn(schemaName, name, DbObjType.FUNCTION));
     }
 
     @Override
@@ -53,7 +59,7 @@ public class PgSystemFunction extends PgSystemStatement implements IFunction {
 
     @Override
     public String getBareName() {
-        return name;
+        return super.getName();
     }
 
     @Override
@@ -114,68 +120,51 @@ public class PgSystemFunction extends PgSystemStatement implements IFunction {
      */
     public String getSignature() {
         if (signatureCache == null) {
-            signatureCache = appendFunctionSignature().toString();
+            signatureCache = getFunctionSignature();
         }
         return signatureCache;
     }
 
-    public StringBuilder appendFunctionSignature() {
+    private String getFunctionSignature() {
         StringBuilder sb = new StringBuilder();
 
-        if (signatureCache != null) {
-            return sb.append(signatureCache);
-        }
-        final int sigStart = sb.length();
-
-        sb.append(PgDiffUtils.getQuotedName(name)).append('(');
+        sb.append(PgDiffUtils.getQuotedName(getBareName())).append('(');
         boolean addComma = false;
         for (final Argument argument : getArguments()) {
-            if (ArgMode.OUT == argument.getMode()) {
+            ArgMode mode = argument.getMode();
+            if (ArgMode.OUT == mode) {
                 continue;
             }
             if (addComma) {
                 sb.append(", ");
             }
-            sb.append(getDeclaration(argument, false, false));
+
+            if (ArgMode.IN != mode) {
+                sb.append(mode);
+                sb.append(' ');
+            }
+
+            sb.append(argument.getDataType());
             addComma = true;
         }
         sb.append(')');
 
-        signatureCache = sb.substring(sigStart, sb.length());
-
-        return sb;
+        return sb.toString();
     }
 
     @Override
-    public PgSystemSchema getContainingSchema() {
-        return (PgSystemSchema) getParent();
+    public MetaSchema getContainingSchema() {
+        return (MetaSchema) getParent();
     }
 
-    public String getDeclaration(Argument arg, boolean includeDefaultValue, boolean includeArgName) {
-        final StringBuilder sbString = new StringBuilder();
-
-        ArgMode mode = arg.getMode();
-        if (ArgMode.IN != mode) {
-            sbString.append(mode);
-            sbString.append(' ');
-        }
-
-        String name = arg.getName();
-
-        if (name != null && !name.isEmpty() && includeArgName) {
-            sbString.append(PgDiffUtils.getQuotedName(name));
-            sbString.append(' ');
-        }
-
-        sbString.append(arg.getDataType());
-
-        String def = arg.getDefaultExpression();
-
-        if (includeDefaultValue && def != null && !def.isEmpty()) {
-            sbString.append(" = ");
-            sbString.append(def);
-        }
-
-        return sbString.toString();
+    @Override
+    public MetaStatement getCopy() {
+        MetaFunction copy = new MetaFunction(getObject());
+        getArguments().forEach(copy::addArgument);
+        getOrderBy().forEach(copy::addArgument);
+        getReturnsColumns().forEach(copy::addReturnsColumn);
+        copy.setReturns(getReturns());
+        copy.setSetof(isSetof());
+        return copy;
     }
 }
