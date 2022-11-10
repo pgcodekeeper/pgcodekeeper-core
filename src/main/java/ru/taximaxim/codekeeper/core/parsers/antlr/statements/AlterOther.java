@@ -170,6 +170,21 @@ public class AlterOther extends ParserAbstract {
         if (ctx.alter_database_statement() != null) {
             return ctx.alter_database_statement().identifier();
         }
+        if (ctx.alter_foreign_data_wrapper() != null) {
+            return ctx.alter_foreign_data_wrapper().identifier();
+        }
+        if (ctx.alter_policy_statement() != null) {
+            return ctx.alter_policy_statement().identifier();
+        }
+        if (ctx.alter_collation_statement() != null) {
+            return ctx.alter_collation_statement().schema_qualified_name();
+        }
+        if (ctx.alter_server_statement() != null) {
+            return ctx.alter_server_statement().identifier();
+        }
+        if (ctx.alter_user_mapping_statement() != null) {
+            return ctx.alter_user_mapping_statement().user_mapping_name().identifier();
+        }
         return null;
     }
 }
