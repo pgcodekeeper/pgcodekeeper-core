@@ -715,6 +715,15 @@ public abstract class ParserAbstract {
     }
 
     protected static String getStrForStmtAction(String action, DbObjType type, String id) {
-        return action + ' ' + type + ' ' + id;
+        String s;
+        switch (type) {
+            case FTS_CONFIGURATION:
+                s = "TEXT SEARCH CONFIGURATION";
+                break;
+            default:
+                s = type.name();
+                break;
+        }
+        return action + ' ' + s + ' ' + id;
     }
 }
