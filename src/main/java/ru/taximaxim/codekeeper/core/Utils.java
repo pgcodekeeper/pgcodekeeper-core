@@ -13,10 +13,12 @@ import java.nio.file.Paths;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.URIUtil;
-
-import ru.taximaxim.codekeeper.core.log.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class Utils {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 
     /**
      * @param url url should NOT be URL-encoded
@@ -48,7 +50,7 @@ public final class Utils {
                 oos.flush();
             }
         } catch (IOException e) {
-            Log.log(Log.LOG_DEBUG, "Error while serialize object!", e);
+            LOG.debug("Error while serialize object!", e);
         }
     }
 
@@ -67,7 +69,7 @@ public final class Utils {
         try (ObjectInputStream oin = new ObjectInputStream(inputStream)) {
             return oin.readObject();
         } catch (ClassNotFoundException | IOException e) {
-            Log.log(Log.LOG_DEBUG, "Error while deserialize object!", e);
+            LOG.debug("Error while deserialize object!", e);
         }
         return null;
     }

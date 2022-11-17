@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.Parser;
 import org.eclipse.core.runtime.SubMonitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.taximaxim.codekeeper.core.Consts;
 import ru.taximaxim.codekeeper.core.MsDiffUtils;
@@ -27,7 +29,6 @@ import ru.taximaxim.codekeeper.core.loader.JdbcConnector;
 import ru.taximaxim.codekeeper.core.loader.JdbcQueries;
 import ru.taximaxim.codekeeper.core.loader.JdbcRunner;
 import ru.taximaxim.codekeeper.core.loader.SupportedVersion;
-import ru.taximaxim.codekeeper.core.log.Log;
 import ru.taximaxim.codekeeper.core.model.difftree.DbObjType;
 import ru.taximaxim.codekeeper.core.model.difftree.IgnoreSchemaList;
 import ru.taximaxim.codekeeper.core.parsers.antlr.AntlrParser;
@@ -50,6 +51,8 @@ import ru.taximaxim.codekeeper.core.schema.PgStatementWithSearchPath;
  * @author levsha_aa
  */
 public abstract class JdbcLoaderBase extends DatabaseLoader implements PgCatalogStrings {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JdbcLoaderBase.class);
 
     private static final int DEFAULT_OBJECTS_COUNT = 100;
 
@@ -460,17 +463,16 @@ public abstract class JdbcLoaderBase extends DatabaseLoader implements PgCatalog
             while (res.next()) {
                 String version = res.getString("extversion");
                 if (!version.equals(Consts.EXTENSION_VERSION)) {
-                    Log.log(Log.LOG_INFO, "pg_dbo_timestamps: old version of extension is used: " +
-                            version + ", current version: " + Consts.EXTENSION_VERSION);
+                    LOG.info("pg_dbo_timestamps: old version of extension is used: {}, current version: {}",
+                            version, Consts.EXTENSION_VERSION);
                 } else if (res.getBoolean("disabled")) {
-                    Log.log(Log.LOG_INFO, "pg_dbo_timestamps: event trigger is disabled");
+                    LOG.info("pg_dbo_timestamps: event trigger is disabled");
                 } else {
                     extensionSchema = res.getString("nspname");
                 }
             }
         }
     }
-
 
     protected <T> void submitAntlrTask(String sql,
             Function<SQLParser, T> parserCtxReader, Consumer<T> finalizer) {
