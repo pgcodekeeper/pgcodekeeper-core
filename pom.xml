@@ -14,6 +14,8 @@
 
 		<sonar.java.source>11</sonar.java.source>
 		<sonar.java.target>11</sonar.java.target>
+		<sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
+		<sonar.language>java</sonar.language>
 	</properties>
 
 	<dependencies>
@@ -91,6 +93,16 @@
 								</goals>
 							</execution>
 						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.22.2</version>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-report-plugin</artifactId>
+						<version>2.22.2</version>
 					</plugin>
 				</plugins>
 			</build>
