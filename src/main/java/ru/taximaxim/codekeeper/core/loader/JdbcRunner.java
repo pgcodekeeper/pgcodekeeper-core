@@ -17,6 +17,8 @@ import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.taximaxim.codekeeper.core.DaemonThreadFactory;
 import ru.taximaxim.codekeeper.core.IProgressReporter;
@@ -24,10 +26,11 @@ import ru.taximaxim.codekeeper.core.loader.callables.QueriesBatchCallable;
 import ru.taximaxim.codekeeper.core.loader.callables.QueryCallable;
 import ru.taximaxim.codekeeper.core.loader.callables.ResultSetCallable;
 import ru.taximaxim.codekeeper.core.loader.callables.StatementCallable;
-import ru.taximaxim.codekeeper.core.log.Log;
 import ru.taximaxim.codekeeper.core.schema.PgObjLocation;
 
 public class JdbcRunner {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JdbcRunner.class);
 
     private static final ExecutorService THREAD_POOL = new ThreadPoolExecutor(1,
             Integer.MAX_VALUE, 2, TimeUnit.SECONDS, new SynchronousQueue<>(),
@@ -113,7 +116,7 @@ public class JdbcRunner {
 
         while (true) {
             if (monitor.isCanceled()) {
-                Log.log(Log.LOG_INFO, MESSAGE);
+                LOG.info(MESSAGE);
                 callable.cancel();
                 throw new InterruptedException(MESSAGE);
             }

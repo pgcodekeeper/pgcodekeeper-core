@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 
-import ru.taximaxim.codekeeper.core.log.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.taximaxim.codekeeper.core.model.difftree.DbObjType;
 import ru.taximaxim.codekeeper.core.parsers.antlr.TSQLParser.As_table_aliasContext;
 import ru.taximaxim.codekeeper.core.parsers.antlr.TSQLParser.Change_tableContext;
@@ -36,6 +38,8 @@ import ru.taximaxim.codekeeper.core.parsers.antlr.rulectx.MsSelectStmt;
 import ru.taximaxim.codekeeper.core.schema.GenericColumn;
 
 public class MsSelect extends MsAbstractExprWithNmspc<Select_statementContext> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MsSelect.class);
 
     /**
      * Flags for proper FROM (subquery) analysis.<br>
@@ -104,7 +108,7 @@ public class MsSelect extends MsAbstractExprWithNmspc<Select_statementContext> {
                 ret = select(query);
             }
         } else {
-            log(Log.LOG_WARNING, "No alternative in SelectOps!");
+            LOG.warn("No alternative in SelectOps!");
         }
         return ret;
     }
@@ -226,7 +230,7 @@ public class MsSelect extends MsAbstractExprWithNmspc<Select_statementContext> {
         } else if ((primary = item.from_primary()) != null) {
             primary(primary);
         } else {
-            log(Log.LOG_WARNING, "No alternative in from_item!");
+            LOG.warn("No alternative in from_item!");
         }
     }
 

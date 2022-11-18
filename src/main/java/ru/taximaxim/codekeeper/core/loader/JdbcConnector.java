@@ -12,15 +12,16 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
 
-import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import ru.taximaxim.codekeeper.core.Activator;
 import ru.taximaxim.codekeeper.core.Consts;
-import ru.taximaxim.codekeeper.core.log.Log;
 import ru.taximaxim.pgpass.PgPass;
 import ru.taximaxim.pgpass.PgPassException;
 
 public class JdbcConnector {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JdbcConnector.class);
 
     protected String host;
     protected int port;
@@ -64,7 +65,7 @@ public class JdbcConnector {
         try {
             return URLDecoder.decode(encoded, Consts.UTF_8);
         } catch (UnsupportedEncodingException ex) {
-            Log.log(ex);
+            LOG.error(ex.getLocalizedMessage(), ex);
             return encoded;
         }
     }
@@ -154,7 +155,7 @@ public class JdbcConnector {
         try {
             db = URLEncoder.encode(dbName, Consts.UTF_8);
         } catch (UnsupportedEncodingException ex) {
-            Log.log(ex);
+            LOG.error(ex.getLocalizedMessage(), ex);
             db = dbName;
         }
         return "jdbc:postgresql://" + host + ':' + port + '/' + db;
@@ -178,8 +179,8 @@ public class JdbcConnector {
     }
 
     protected Connection establishConnection() throws SQLException, IOException {
-        Log.log(Log.LOG_INFO, "Establishing JDBC connection with host:port " +
-                host + ":" + port + ", db name " + dbName + ", username " + user);
+        LOG.info("Establishing JDBC connection with host:port {}:{}, db name {}, username {}",
+                host, port, dbName, user);
         return DriverManager.getConnection(url, makeProperties());
     }
 
@@ -193,10 +194,9 @@ public class JdbcConnector {
         props.setProperty("user", user);
         props.setProperty("password", pass);
 
-        String coreVer = "unknown";
-        BundleContext bctx = Activator.getContext();
-        if (bctx != null) {
-            coreVer = bctx.getBundle().getVersion().toString();
+        String coreVer = getClass().getPackage().getImplementationVersion();
+        if (coreVer == null) {
+            coreVer = "unknown";
         }
         props.setProperty("ApplicationName", "pgCodeKeeper core module, Bundle-Version: " + coreVer);
 
@@ -207,20 +207,20 @@ public class JdbcConnector {
         return timezone;
     }
 
-    protected String getPgPassPassword(){
-        Log.log(Log.LOG_INFO, "User provided an empty password. Reading password from pgpass file."); //$NON-NLS-1$
+    protected String getPgPassPassword() {
+        LOG.info("User provided an empty password. Reading password from pgpass file.");
 
         try {
-            String pass = PgPass.get(host, String.valueOf(port), dbName, user);
-            if (pass != null) {
-                return pass;
+            String password = PgPass.get(host, String.valueOf(port), dbName, user);
+            if (password != null) {
+                return password;
             }
-        } catch (PgPassException e) {
-            Log.log(e);
+        } catch (PgPassException ex) {
+            LOG.error(ex.getLocalizedMessage(), ex);
         }
 
-        Log.log(Log.LOG_INFO, "Using empty password, because no password has been found " //$NON-NLS-1$
-                + "in pgpass file for " + host + ":" + port + ":" + dbName + ":" + user); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+        LOG.info("Using empty password, because no password has been found in pgpass file for {}:{}:{}:{} ",
+                host, port, dbName, user);
         return "";
     }
 }

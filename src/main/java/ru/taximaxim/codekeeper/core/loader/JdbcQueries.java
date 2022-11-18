@@ -3,8 +3,10 @@ package ru.taximaxim.codekeeper.core.loader;
 import java.io.IOException;
 import java.lang.reflect.Field;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.taximaxim.codekeeper.core.fileutils.FileUtils;
-import ru.taximaxim.codekeeper.core.log.Log;
 
 /**
  * For every field in this class that starts with 'QUERY_'
@@ -19,6 +21,8 @@ import ru.taximaxim.codekeeper.core.log.Log;
  * @author levsha_aa, galiev_mr
  */
 public final class JdbcQueries {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JdbcQueries.class);
 
     // SONAR-OFF
 
@@ -87,8 +91,7 @@ public final class JdbcQueries {
                     f.set(null, readResource(res));
                 }
             } catch (Exception ex) {
-                Log.log(Log.LOG_ERROR,
-                        "Error while loading JDBC SQL Queries resource: " + f.getName(), ex);
+                LOG.error("Error while loading JDBC SQL Queries resource: " + f.getName(), ex);
             }
         }
     }
