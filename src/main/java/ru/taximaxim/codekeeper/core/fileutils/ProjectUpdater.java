@@ -58,7 +58,7 @@ public class ProjectUpdater {
     public void updatePartial() throws IOException {
         LOG.info("Project updater: started partial"); //$NON-NLS-1$
         if (dbOld == null){
-            throw new IOException(Messages.ProjectUpdater_old_db_null);
+            throw new IOException(Messages.getString("ProjectUpdater_old_db_null"));
         }
 
         boolean caughtProcessingEx = false;
@@ -98,12 +98,12 @@ public class ProjectUpdater {
                 } catch (Exception exRestore) {
                     LOG.error("Error while restoring backups after update error!", exRestore); //$NON-NLS-1$
                     IOException exNew = new IOException(
-                            Messages.ProjectUpdater_error_backup_restore, exRestore);
+                            Messages.getString("ProjectUpdater_error_backup_restore"), exRestore);
                     exNew.addSuppressed(ex);
                     throw exNew;
                 }
                 throw new IOException(MessageFormat.format(
-                        Messages.ProjectUpdater_error_update,
+                        Messages.getString("ProjectUpdater_error_update"),
                         ex.getLocalizedMessage()), ex);
             }
         } catch (IOException ex) {
@@ -112,7 +112,7 @@ public class ProjectUpdater {
                 throw ex;
             }
             throw new IOException(MessageFormat.format(
-                    Messages.ProjectUpdater_error_no_tempdir,
+                    Messages.getString("ProjectUpdater_error_no_tempdir"),
                     ex.getLocalizedMessage()), ex);
         }
     }
@@ -161,12 +161,12 @@ public class ProjectUpdater {
                 } catch (Exception exRestore) {
                     LOG.error("Error while restoring backups after update error!", exRestore); //$NON-NLS-1$
                     IOException exNew = new IOException(
-                            Messages.ProjectUpdater_error_backup_restore, exRestore);
+                            Messages.getString("ProjectUpdater_error_backup_restore"), exRestore);
                     exNew.addSuppressed(ex);
                     throw exNew;
                 }
                 throw new IOException(MessageFormat.format(
-                        Messages.ProjectUpdater_error_update,
+                        Messages.getString("ProjectUpdater_error_update"),
                         ex.getLocalizedMessage()), ex);
             }
         } catch (IOException ex) {
@@ -175,7 +175,7 @@ public class ProjectUpdater {
                 throw ex;
             }
             throw new IOException(MessageFormat.format(
-                    Messages.ProjectUpdater_error_no_tempdir,
+                    Messages.getString("ProjectUpdater_error_no_tempdir"),
                     ex.getLocalizedMessage()), ex);
         }
     }

@@ -349,7 +349,7 @@ public class PgColumn extends AbstractColumn implements PgSimpleOptionContainer 
                 sb.append(" USING ").append(PgDiffUtils.getQuotedName(newColumn.getName()))
                 .append("::").append(newType);
             }
-            sb.append("; /* " + MessageFormat.format(Messages.Table_TypeParameterChange,
+            sb.append("; /* " + MessageFormat.format(Messages.getString("Table_TypeParameterChange"),
                     newColumn.getParent().getParent().getName() + '.' + newColumn.getParent().getName(),
                     oldType, newType) + " */");
         }
@@ -476,7 +476,7 @@ public class PgColumn extends AbstractColumn implements PgSimpleOptionContainer 
             StringBuilder sb) {
         if (newStorage == null && oldStorage != null) {
             sb.append("\n\n" + MessageFormat.format(
-                    Messages.Storage_WarningUnableToDetermineStorageType,
+                    Messages.getString("Storage_WarningUnableToDetermineStorageType"),
                     getParent().getName(), getName()));
         } else if (newStorage != null && !newStorage.equalsIgnoreCase(oldStorage)) {
             sb.append(getAlterColumn(true, true, name))

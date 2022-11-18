@@ -86,7 +86,7 @@ public abstract class XmlStore<T> {
             return xml;
         } catch (ParserConfigurationException ex) {
             throw new IOException(MessageFormat.format(
-                    Messages.XmlStore_write_error, ex.getLocalizedMessage()), ex);
+                    Messages.getString("XmlStore_write_error"), ex.getLocalizedMessage()), ex);
         }
     }
 
@@ -99,7 +99,7 @@ public abstract class XmlStore<T> {
             }
         } catch (IOException | TransformerException ex) {
             throw new IOException(MessageFormat.format(
-                    Messages.XmlStore_write_error, ex.getLocalizedMessage()), ex);
+                    Messages.getString("XmlStore_write_error"), ex.getLocalizedMessage()), ex);
         }
     }
 
@@ -122,7 +122,7 @@ public abstract class XmlStore<T> {
             xml.normalize();
 
             if (!xml.getDocumentElement().getNodeName().equals(rootTag)) {
-                throw new IOException(Messages.XmlStore_root_error);
+                throw new IOException(Messages.getString("XmlStore_root_error"));
             }
 
             cachedDocument = xml;
@@ -131,7 +131,7 @@ public abstract class XmlStore<T> {
             throw ex;
         } catch (IOException | SAXException | ParserConfigurationException ex) {
             throw new IOException(MessageFormat.format(
-                    Messages.XmlStore_read_error, ex.getLocalizedMessage()), ex);
+                    Messages.getString("XmlStore_read_error"), ex.getLocalizedMessage()), ex);
         }
     }
 

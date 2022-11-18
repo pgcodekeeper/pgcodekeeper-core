@@ -82,7 +82,7 @@ public class JdbcSystemLoader extends JdbcLoaderBase {
             throw ex;
         } catch (Exception e) {
             // connection is closed at this point, trust Postgres to rollback it; we're a read-only xact anyway
-            throw new IOException(MessageFormat.format(Messages.Connection_DatabaseJdbcAccessError,
+            throw new IOException(MessageFormat.format(Messages.getString("Connection_DatabaseJdbcAccessError"),
                     e.getLocalizedMessage(), getCurrentLocation()), e);
         }
 

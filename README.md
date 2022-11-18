@@ -1,4 +1,4 @@
-[![Apache 2.0](https://img.shields.io/github/license/pgcodekeeper/pgcodekeeper.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+[![Apache 2.0](https://img.shields.io/github/license/pgcodekeeper/pgcodekeeper-core.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
 # pgCodeKeeper-core
 

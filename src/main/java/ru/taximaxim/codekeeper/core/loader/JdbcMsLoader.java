@@ -83,7 +83,7 @@ public class JdbcMsLoader extends JdbcLoaderBase {
             throw ex;
         } catch (Exception e) {
             // connection is closed at this point
-            throw new IOException(MessageFormat.format(Messages.Connection_DatabaseJdbcAccessError,
+            throw new IOException(MessageFormat.format(Messages.getString("Connection_DatabaseJdbcAccessError"),
                     e.getLocalizedMessage(), getCurrentLocation()), e);
         }
         return d;
