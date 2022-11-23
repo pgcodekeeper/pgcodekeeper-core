@@ -9,8 +9,9 @@ import java.util.Map.Entry;
 import java.util.function.Predicate;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import ru.taximaxim.codekeeper.core.log.Log;
 import ru.taximaxim.codekeeper.core.model.difftree.DbObjType;
 import ru.taximaxim.codekeeper.core.parsers.antlr.QNameParser;
 import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser.After_opsContext;
@@ -54,6 +55,8 @@ import ru.taximaxim.codekeeper.core.utils.ModPair;
 import ru.taximaxim.codekeeper.core.utils.Pair;
 
 public class Select extends AbstractExprWithNmspc<Select_stmtContext> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Select.class);
 
     /**
      * Flags for proper FROM (subquery) analysis.<br>
@@ -212,14 +215,14 @@ public class Select extends AbstractExprWithNmspc<Select_stmtContext> {
             } else if (selectStmt != null) {
                 select.analyze(selectStmt);
             } else {
-                Log.log(Log.LOG_WARNING, "No alternative in right part of SelectOps!");
+                LOG.warn("No alternative in right part of SelectOps!");
             }
         } else if (primary != null) {
             ret = primary(primary);
         } else if (selectOps.leftParen() != null && selectOps.rightParen() != null && selectStmt != null) {
             ret = analyze(selectStmt);
         } else {
-            Log.log(Log.LOG_WARNING, "No alternative in SelectOps!");
+            LOG.warn("No alternative in SelectOps!");
             ret = Collections.emptyList();
         }
         return ret;
@@ -275,7 +278,7 @@ public class Select extends AbstractExprWithNmspc<Select_stmtContext> {
                 }
             }
         } else {
-            Log.log(Log.LOG_WARNING, "No alternative in select_primary!");
+            LOG.warn("No alternative in select_primary!");
             ret = Collections.emptyList();
         }
         return ret;
@@ -338,18 +341,18 @@ public class Select extends AbstractExprWithNmspc<Select_stmtContext> {
 
         List<IndirectionContext> ind = indList.indirection();
         switch (ind.size()) {
-            case 0:
-                return qualAster(Arrays.asList(id), cols);
-            case 1:
-                IndirectionContext second = ind.get(0);
-                if (second.LEFT_BRACKET() == null) {
-                    return qualAster(Arrays.asList(id, second.col_label()), cols);
-                }
-                // cannot handle asterisk indirection from an array element
-                //$FALL-THROUGH$
-            default:
-                // long indirections are unsupported
-                return false;
+        case 0:
+            return qualAster(Arrays.asList(id), cols);
+        case 1:
+            IndirectionContext second = ind.get(0);
+            if (second.LEFT_BRACKET() == null) {
+                return qualAster(Arrays.asList(id, second.col_label()), cols);
+            }
+            // cannot handle asterisk indirection from an array element
+            //$FALL-THROUGH$
+        default:
+            // long indirections are unsupported
+            return false;
         }
     }
 
@@ -430,7 +433,7 @@ public class Select extends AbstractExprWithNmspc<Select_stmtContext> {
 
         Entry<String, GenericColumn> ref = findReference(schema, relation, null);
         if (ref == null) {
-            Log.log(Log.LOG_WARNING, "Asterisk qualification not found: " + schema + '.' + relation);
+            LOG.warn("Asterisk qualification not found: {}.{}", schema, relation);
             return false;
         }
         GenericColumn relationGc = ref.getValue();
@@ -457,7 +460,7 @@ public class Select extends AbstractExprWithNmspc<Select_stmtContext> {
                 .forEach(cols::add);
                 return true;
             } else {
-                Log.log(Log.LOG_WARNING, "Complex not found: " + relation);
+                LOG.warn("Complex not found: {}", relation);
                 return false;
             }
         }
@@ -545,10 +548,10 @@ public class Select extends AbstractExprWithNmspc<Select_stmtContext> {
                     lateralAllowed = oldLateral;
                 }
             } else {
-                Log.log(Log.LOG_WARNING, "No alternative in from_primary!");
+                LOG.warn("No alternative in from_primary!");
             }
         } else {
-            Log.log(Log.LOG_WARNING, "No alternative in from_item!");
+            LOG.warn("No alternative in from_item!");
         }
     }
 

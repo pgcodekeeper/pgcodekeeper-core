@@ -12,6 +12,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.taximaxim.codekeeper.core.Consts;
 import ru.taximaxim.codekeeper.core.MsDiffUtils;
 import ru.taximaxim.codekeeper.core.PgDiffArguments;
@@ -22,7 +25,6 @@ import ru.taximaxim.codekeeper.core.hashers.Hasher;
 import ru.taximaxim.codekeeper.core.hashers.IHashable;
 import ru.taximaxim.codekeeper.core.hashers.JavaHasher;
 import ru.taximaxim.codekeeper.core.hashers.ShaHasher;
-import ru.taximaxim.codekeeper.core.log.Log;
 import ru.taximaxim.codekeeper.core.model.difftree.DbObjType;
 import ru.taximaxim.codekeeper.core.parsers.antlr.exception.ObjectCreationException;
 
@@ -34,6 +36,9 @@ import ru.taximaxim.codekeeper.core.parsers.antlr.exception.ObjectCreationExcept
  * @author Alexander Levsha
  */
 public abstract class PgStatement implements IStatement, IHashable {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PgColumn.class);
+
     //TODO move to MS SQL statement abstract class.
     public static final String GO = "\nGO";
     protected final String name;
@@ -155,7 +160,8 @@ public abstract class PgStatement implements IStatement, IHashable {
     public void addDep(GenericColumn dep){
         // TODO remove after fix
         if (dep == null) {
-            Log.log(new Exception("null dependency added for " + getQualifiedName()));
+            Exception ex = new Exception("null dependency added for " + getQualifiedName());
+            LOG.error(ex.getLocalizedMessage(), ex);
         }
         deps.add(dep);
     }
@@ -163,7 +169,8 @@ public abstract class PgStatement implements IStatement, IHashable {
     public void addAllDeps(Collection<GenericColumn> deps){
         // TODO remove after fix
         if (deps.contains(null)) {
-            Log.log(new Exception("null dependency added for " + getQualifiedName()));
+            Exception ex = new Exception("null dependency added for " + getQualifiedName());
+            LOG.error(ex.getLocalizedMessage(), ex);
         }
         this.deps.addAll(deps);
     }
@@ -391,7 +398,7 @@ public abstract class PgStatement implements IStatement, IHashable {
         try {
             return fileForm.formatText();
         } catch (FormatterException e) {
-            Log.log(e);
+            LOG.error(e.getLocalizedMessage(), e);
             return sql;
         }
     }

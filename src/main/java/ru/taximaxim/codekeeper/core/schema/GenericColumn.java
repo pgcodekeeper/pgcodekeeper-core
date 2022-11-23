@@ -7,13 +7,17 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.taximaxim.codekeeper.core.Consts;
 import ru.taximaxim.codekeeper.core.PgDiffUtils;
 import ru.taximaxim.codekeeper.core.Utils;
-import ru.taximaxim.codekeeper.core.log.Log;
 import ru.taximaxim.codekeeper.core.model.difftree.DbObjType;
 
 public class GenericColumn implements Serializable {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GenericColumn.class);
 
     private static final long serialVersionUID = -3196057456408062736L;
 
@@ -80,7 +84,7 @@ public class GenericColumn implements Serializable {
         }
 
         // not a silent failure, log
-        Log.log(Log.LOG_WARNING, "Could not find statement for reference: " + this);
+        LOG.warn("Could not find statement for reference: " + this);
         return null;
     }
 

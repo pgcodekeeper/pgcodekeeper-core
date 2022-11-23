@@ -6,8 +6,9 @@ import java.util.Map.Entry;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import ru.taximaxim.codekeeper.core.log.Log;
 import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser.Additional_statementContext;
 import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser.Arguments_listContext;
 import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser.Assign_stmtContext;
@@ -61,6 +62,8 @@ import ru.taximaxim.codekeeper.core.utils.Pair;
 
 
 public class Function extends AbstractExprWithNmspc<Plpgsql_functionContext> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Function.class);
 
     public Function(MetaContainer meta) {
         super(meta);
@@ -149,7 +152,7 @@ public class Function extends AbstractExprWithNmspc<Plpgsql_functionContext> {
                 type = pair.getSecond();
             } else {
                 type = TypesSetManually.UNKNOWN;
-                Log.log(Log.LOG_WARNING, "Variable not found: " + var);
+                LOG.warn("Variable not found: {}", var);
             }
 
             addNamespaceVariable(new Pair<>(alias, type));

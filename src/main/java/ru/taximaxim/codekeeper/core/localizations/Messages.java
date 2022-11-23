@@ -1,43 +1,22 @@
 package ru.taximaxim.codekeeper.core.localizations;
 
-import org.eclipse.osgi.util.NLS;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
-public final class Messages extends NLS {
-    public static final String BUNDLE_NAME = "ru.taximaxim.codekeeper.core.localizations.messages"; //$NON-NLS-1$
+public class Messages {
 
-    // SONAR-OFF
+    private static final String BUNDLE_NAME = Messages.class.getPackageName() + ".messages"; //$NON-NLS-1$
 
-    // common
-    public static String UnknownDBFormat;
-
-    // pgdiff.loader
-    public static String Connection_DatabaseJdbcAccessError;
-
-    public static String ProjectUpdater_error_backup_restore;
-
-    public static String ProjectUpdater_error_no_tempdir;
-
-    public static String ProjectUpdater_error_update;
-
-    public static String ProjectUpdater_old_db_null;
-    public static String PgDiff_read_error;
-
-    public static String Table_TypeParameterChange;
-    public static String Storage_WarningUnableToDetermineStorageType;
-
-    public static String XmlStore_read_error;
-
-    public static String XmlStore_root_error;
-
-    public static String XmlStore_write_error;
-
-    // SONAR-ON
-
-    static {
-        // initialize resource bundle
-        NLS.initializeMessages(BUNDLE_NAME, Messages.class);
-    }
+    private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
     private Messages() {
+    }
+
+    public static String getString(String key) {
+        try {
+            return RESOURCE_BUNDLE.getString(key);
+        } catch (MissingResourceException e) {
+            return '!' + key + '!';
+        }
     }
 }

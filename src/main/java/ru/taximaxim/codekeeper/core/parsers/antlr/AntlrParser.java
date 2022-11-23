@@ -27,11 +27,12 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.taximaxim.codekeeper.core.DaemonThreadFactory;
 import ru.taximaxim.codekeeper.core.PgDiffUtils;
 import ru.taximaxim.codekeeper.core.fileutils.InputStreamProvider;
-import ru.taximaxim.codekeeper.core.log.Log;
 import ru.taximaxim.codekeeper.core.parsers.antlr.AntlrContextProcessor.SqlContextProcessor;
 import ru.taximaxim.codekeeper.core.parsers.antlr.AntlrContextProcessor.TSqlContextProcessor;
 import ru.taximaxim.codekeeper.core.parsers.antlr.exception.MonitorCancelledRuntimeException;
@@ -136,8 +137,7 @@ public class AntlrParser {
 
     public static void parseSqlStream(InputStreamProvider inputStream, String charsetName,
             String parsedObjectName, List<Object> errors, IProgressMonitor mon, int monitoringLevel,
-            SqlContextProcessor listener, Queue<AntlrTask<?>> antlrTasks)
-                    throws InterruptedException {
+            SqlContextProcessor listener, Queue<AntlrTask<?>> antlrTasks) {
         submitAntlrTask(antlrTasks, () -> {
             PgDiffUtils.checkCancelled(mon);
             try(InputStream stream = inputStream.getStream()) {
@@ -161,8 +161,7 @@ public class AntlrParser {
 
     public static void parseTSqlStream(InputStreamProvider inputStream, String charsetName,
             String parsedObjectName, List<Object> errors, IProgressMonitor mon, int monitoringLevel,
-            TSqlContextProcessor listener, Queue<AntlrTask<?>> antlrTasks)
-                    throws InterruptedException {
+            TSqlContextProcessor listener, Queue<AntlrTask<?>> antlrTasks) {
         submitAntlrTask(antlrTasks, () -> {
             PgDiffUtils.checkCancelled(mon);
             try(InputStream stream = inputStream.getStream()) {
@@ -329,6 +328,8 @@ class CustomParseTreeListener implements ParseTreeListener{
 
 class CustomAntlrErrorListener extends BaseErrorListener {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CustomAntlrErrorListener.class);
+
     private final String parsedObjectName;
     private final List<Object> errors;
     private final int offset;
@@ -351,7 +352,7 @@ class CustomAntlrErrorListener extends BaseErrorListener {
         AntlrError error = new AntlrError(token, parsedObjectName, line, charPositionInLine, msg)
                 .copyWithOffset(offset, lineOffset, inLineOffset);
 
-        Log.log(Log.LOG_WARNING, "ANTLR Error:\n" + error.toString());
+        LOG.warn("ANTLR Error:\n{}", error);
         if (errors != null) {
             errors.add(error);
         }

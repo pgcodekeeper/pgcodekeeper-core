@@ -36,8 +36,8 @@ import ru.taximaxim.codekeeper.core.model.difftree.DiffTree;
 import ru.taximaxim.codekeeper.core.model.difftree.IgnoreList;
 import ru.taximaxim.codekeeper.core.model.difftree.IgnoreSchemaList;
 import ru.taximaxim.codekeeper.core.model.difftree.TreeElement;
-import ru.taximaxim.codekeeper.core.model.difftree.TreeFlattener;
 import ru.taximaxim.codekeeper.core.model.difftree.TreeElement.DiffSide;
+import ru.taximaxim.codekeeper.core.model.difftree.TreeFlattener;
 import ru.taximaxim.codekeeper.core.model.graph.ActionsToScriptConverter;
 import ru.taximaxim.codekeeper.core.model.graph.DepcyResolver;
 import ru.taximaxim.codekeeper.core.parsers.antlr.exception.LibraryObjectDuplicationException;
@@ -202,7 +202,7 @@ public class PgDiff {
             }
         } else {
             throw new UnsupportedOperationException(
-                    MessageFormat.format(Messages.UnknownDBFormat, format));
+                    MessageFormat.format(Messages.getString("UnknownDBFormat"), format));
         }
 
         try {
@@ -302,7 +302,7 @@ public class PgDiff {
             prePostScript = "-- " + fileName + "\n\n" + prePostScript;
             script.addStatement(prePostScript);
         } catch (IOException e) {
-            throw new IOException(Messages.PgDiff_read_error + e.getLocalizedMessage(), e);
+            throw new IOException(Messages.getString("PgDiff_read_error") + e.getLocalizedMessage(), e);
         }
     }
 

@@ -13,17 +13,21 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ru.taximaxim.codekeeper.core.PgDiffArguments;
 import ru.taximaxim.codekeeper.core.PgDiffUtils;
 import ru.taximaxim.codekeeper.core.hashers.Hasher;
 import ru.taximaxim.codekeeper.core.localizations.Messages;
-import ru.taximaxim.codekeeper.core.log.Log;
 import ru.taximaxim.codekeeper.core.model.difftree.DbObjType;
 
 /**
  * Stores column information.
  */
 public class PgColumn extends AbstractColumn implements PgSimpleOptionContainer  {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PgColumn.class);
 
     private static final String ALTER_FOREIGN_OPTION =  "{0} OPTIONS ({1} {2} {3});";
     protected static final String COMPRESSION = " COMPRESSION ";
@@ -345,7 +349,7 @@ public class PgColumn extends AbstractColumn implements PgSimpleOptionContainer 
                 sb.append(" USING ").append(PgDiffUtils.getQuotedName(newColumn.getName()))
                 .append("::").append(newType);
             }
-            sb.append("; /* " + MessageFormat.format(Messages.Table_TypeParameterChange,
+            sb.append("; /* " + MessageFormat.format(Messages.getString("Table_TypeParameterChange"),
                     newColumn.getParent().getParent().getName() + '.' + newColumn.getParent().getName(),
                     oldType, newType) + " */");
         }
@@ -472,7 +476,7 @@ public class PgColumn extends AbstractColumn implements PgSimpleOptionContainer 
             StringBuilder sb) {
         if (newStorage == null && oldStorage != null) {
             sb.append("\n\n" + MessageFormat.format(
-                    Messages.Storage_WarningUnableToDetermineStorageType,
+                    Messages.getString("Storage_WarningUnableToDetermineStorageType"),
                     getParent().getName(), getName()));
         } else if (newStorage != null && !newStorage.equalsIgnoreCase(oldStorage)) {
             sb.append(getAlterColumn(true, true, name))
@@ -504,8 +508,7 @@ public class PgColumn extends AbstractColumn implements PgSimpleOptionContainer 
             PgStatement parent = new GenericColumn(in.getKey(), in.getValue(),
                     DbObjType.TABLE).getStatement(getDatabase());
             if (parent == null) {
-                Log.log(Log.LOG_ERROR, "There is no such object of inheritance as table: "
-                        + in.getQualifiedName());
+                LOG.error("There is no such object of inheritance as table: {}", in.getQualifiedName());
                 continue;
             }
 

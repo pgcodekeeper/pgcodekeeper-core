@@ -6,9 +6,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.taximaxim.codekeeper.core.Utils;
-import ru.taximaxim.codekeeper.core.log.Log;
 import ru.taximaxim.codekeeper.core.model.difftree.DbObjType;
 import ru.taximaxim.codekeeper.core.parsers.antlr.TSQLParser.Data_typeContext;
 import ru.taximaxim.codekeeper.core.parsers.antlr.TSQLParser.Full_column_nameContext;
@@ -19,6 +20,8 @@ import ru.taximaxim.codekeeper.core.schema.PgObjLocation;
 import ru.taximaxim.codekeeper.core.schema.PgObjLocation.LocationType;
 
 public abstract class MsAbstractExpr {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MsAbstractExpr.class);
 
     private final String schema;
     private final MsAbstractExpr parent;
@@ -155,8 +158,7 @@ public abstract class MsAbstractExpr {
                         columnName, DbObjType.COLUMN), columnCtx);
             }
         } else {
-            log(Log.LOG_WARNING, "Unknown column reference: "
-                    + schemaName + ' ' + relationName + ' ' + columnName);
+            LOG.warn("Unknown column reference: {} {} {}", schemaName, relationName, columnName);
         }
     }
 

@@ -1,0 +1,3 @@
+CREATE SCHEMA test;
+
+ALTER SCHEMA test OWNER TO galiev_mr;

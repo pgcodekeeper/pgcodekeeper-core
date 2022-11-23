@@ -6,6 +6,8 @@ import java.sql.Statement;
 import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.SubMonitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ru.taximaxim.codekeeper.core.PgDiffArguments;
 import ru.taximaxim.codekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -22,11 +24,12 @@ import ru.taximaxim.codekeeper.core.loader.jdbc.MsTypesReader;
 import ru.taximaxim.codekeeper.core.loader.jdbc.MsUsersReader;
 import ru.taximaxim.codekeeper.core.loader.jdbc.SchemasMsReader;
 import ru.taximaxim.codekeeper.core.localizations.Messages;
-import ru.taximaxim.codekeeper.core.log.Log;
 import ru.taximaxim.codekeeper.core.model.difftree.IgnoreSchemaList;
 import ru.taximaxim.codekeeper.core.schema.PgDatabase;
 
 public class JdbcMsLoader extends JdbcLoaderBase {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JdbcMsLoader.class);
 
     public JdbcMsLoader(JdbcConnector connector, PgDiffArguments args) {
         this(connector, args, SubMonitor.convert(null), null);
@@ -41,7 +44,7 @@ public class JdbcMsLoader extends JdbcLoaderBase {
     public PgDatabase load() throws IOException, InterruptedException {
         PgDatabase d = new PgDatabase(args);
 
-        Log.log(Log.LOG_INFO, "Reading db using JDBC.");
+        LOG.info("Reading db using JDBC.");
         setCurrentOperation("connection setup");
         try (Connection connection = connector.getConnection();
                 Statement statement = connection.createStatement()) {
@@ -75,12 +78,12 @@ public class JdbcMsLoader extends JdbcLoaderBase {
 
             connection.commit();
 
-            Log.log(Log.LOG_INFO, "Database object has been successfully queried from JDBC");
+            LOG.info("Database object has been successfully queried from JDBC");
         } catch (InterruptedException ex) {
             throw ex;
         } catch (Exception e) {
             // connection is closed at this point
-            throw new IOException(MessageFormat.format(Messages.Connection_DatabaseJdbcAccessError,
+            throw new IOException(MessageFormat.format(Messages.getString("Connection_DatabaseJdbcAccessError"),
                     e.getLocalizedMessage(), getCurrentLocation()), e);
         }
         return d;
