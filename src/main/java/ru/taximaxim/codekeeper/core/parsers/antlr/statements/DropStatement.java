@@ -169,7 +169,7 @@ public class DropStatement extends ParserAbstract {
         if (ctx.COLLATION() != null) {
             return DbObjType.COLLATION;
         }
-        if (ctx.FOREIGN() != null && ctx.DATA() != null && ctx.WRAPPER() != null) {
+        if (ctx.WRAPPER() != null) {
             return DbObjType.FOREIGN_DATA_WRAPPER;
         }
         return null;
