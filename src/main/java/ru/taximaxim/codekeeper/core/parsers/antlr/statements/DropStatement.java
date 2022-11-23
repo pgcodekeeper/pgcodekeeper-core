@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 
 import ru.taximaxim.codekeeper.core.DangerStatement;
 import ru.taximaxim.codekeeper.core.model.difftree.DbObjType;
+import ru.taximaxim.codekeeper.core.parsers.antlr.QNameParser;
 import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser.Drop_cast_statementContext;
 import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser.Drop_database_statementContext;
 import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser.Drop_function_statementContext;
@@ -16,6 +17,7 @@ import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser.Drop_policy_statemen
 import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser.Drop_rule_statementContext;
 import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser.Drop_statementsContext;
 import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser.Drop_trigger_statementContext;
+import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser.Drop_user_mapping_statementContext;
 import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser.IdentifierContext;
 import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser.Operator_nameContext;
 import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser.Schema_dropContext;
@@ -51,8 +53,11 @@ public class DropStatement extends ParserAbstract {
             dropOperator(ctx.drop_operator_statement());
         } else if (ctx.drop_cast_statement() != null) {
             dropCast(ctx.drop_cast_statement());
+        } else if (ctx.drop_user_mapping_statement() != null) {
+        	dropUserMapping(ctx.drop_user_mapping_statement());
         }
     }
+
 
     private void dropDatabase(Drop_database_statementContext ctx) {
         addObjReference(Arrays.asList(ctx.identifier()), DbObjType.DATABASE, ACTION_DROP);
@@ -89,8 +94,15 @@ public class DropStatement extends ParserAbstract {
     }
 
     private void dropPolicy(Drop_policy_statementContext ctx) {
+    	List<ParserRuleContext> ids = getIdentifiers(ctx.schema_qualified_name());
+        addObjReference(ids, DbObjType.TABLE, null);
         dropChild(getIdentifiers(ctx.schema_qualified_name()), ctx.identifier(), DbObjType.POLICY);
     }
+    
+    private void dropUserMapping(Drop_user_mapping_statementContext ctx) {
+    	addObjReference(Arrays.asList(ctx.user_mapping_name()), DbObjType.USER_MAPPING, ACTION_DROP);
+    }
+
 
     public void dropChild(List<ParserRuleContext> tableIds, IdentifierContext nameCtx, DbObjType type) {
         tableIds.add(nameCtx);
@@ -140,6 +152,12 @@ public class DropStatement extends ParserAbstract {
             return DbObjType.FTS_PARSER;
         } else if (ctx.CONFIGURATION() != null) {
             return DbObjType.FTS_CONFIGURATION;
+        } else if (ctx.SERVER() != null) {
+        	return DbObjType.SERVER;
+        } else if (ctx.COLLATION() != null) {
+        	return DbObjType.COLLATION;
+        } else if (ctx.FOREIGN() != null && ctx.DATA() != null && ctx.WRAPPER() != null) {
+        	return DbObjType.FOREIGN_DATA_WRAPPER;
         }
         return null;
     }

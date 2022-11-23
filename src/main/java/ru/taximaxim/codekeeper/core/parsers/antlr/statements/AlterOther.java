@@ -173,10 +173,8 @@ public class AlterOther extends ParserAbstract {
         if (ctx.alter_foreign_data_wrapper() != null) {
             return ctx.alter_foreign_data_wrapper().identifier();
         }
-        // TODO сделать нормальый вывод alter policy в консоль(schema.table.policy)
-        // TODO ParserAbstract.getStrForStmtAction сделать вывод типов без "_"
         if (ctx.alter_policy_statement() != null) {
-            return ctx.alter_policy_statement().schema_qualified_name();
+            return ctx.alter_policy_statement().identifier();
         }
         if (ctx.alter_collation_statement() != null) {
             return ctx.alter_collation_statement().schema_qualified_name();

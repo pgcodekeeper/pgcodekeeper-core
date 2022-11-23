@@ -717,12 +717,27 @@ public abstract class ParserAbstract {
     protected static String getStrForStmtAction(String action, DbObjType type, String id) {
         String s;
         switch (type) {
-            case FTS_CONFIGURATION:
-                s = "TEXT SEARCH CONFIGURATION";
-                break;
-            default:
-                s = type.name();
-                break;
+        case FTS_CONFIGURATION:
+            s = "TEXT SEARCH CONFIGURATION";
+            break;
+        case FTS_DICTIONARY:
+        	s = "TEXT SEARCH DICTIONARY";
+        	break;
+        case FTS_TEMPLATE:
+        	s = "TEXT SEARCH TEMPLATE";
+        	break;
+        case FTS_PARSER:
+        	s = "TEXT SEARCH PARSER";
+        	break;
+        case FOREIGN_DATA_WRAPPER:
+        	s = "FOREIGN DATA WRAPPER";
+        	break;
+        case USER_MAPPING:
+        	s = "USER MAPPING";
+        	break;
+        default:
+            s = type.name();
+            break;
         }
         return action + ' ' + s + ' ' + id;
     }

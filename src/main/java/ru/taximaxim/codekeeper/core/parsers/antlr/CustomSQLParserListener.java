@@ -226,7 +226,9 @@ implements SqlContextProcessor {
                 || ctx.drop_rule_statement() != null
                 || ctx.drop_statements() != null
                 || ctx.drop_operator_statement() != null
-                || ctx.drop_cast_statement() != null) {
+                || ctx.drop_cast_statement() != null
+                || ctx.drop_policy_statement() != null
+                || ctx.drop_user_mapping_statement() != null) {
             p = new DropStatement(ctx, db);
         } else {
             addToQueries(ctx, getAction(ctx));
