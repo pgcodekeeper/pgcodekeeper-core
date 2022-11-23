@@ -4,3 +4,7 @@ ru.taximaxim.codekeeper.core.iml
 /.idea
 /antlr-src/.antlr/
 /gen/
+.project
+.classpath
+.settings/
+
