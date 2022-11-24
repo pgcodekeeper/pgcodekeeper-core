@@ -4,7 +4,7 @@
 
 	<groupId>ru.taximaxim.codeKeeper</groupId>
 	<artifactId>codekeeper-core</artifactId>
-	<version>7.0.1-SNAPSHOT</version>
+	<version>7.1.0</version>
 
 	<properties>
 		<sonar.exclusions>**/ru/taximaxim/codekeeper/core/parsers/antlr/SQL*.java,
