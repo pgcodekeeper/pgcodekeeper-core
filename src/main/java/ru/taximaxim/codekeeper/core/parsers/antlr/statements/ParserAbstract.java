@@ -597,9 +597,12 @@ public abstract class ParserAbstract {
     }
 
     /**
-     * Заполняет владельца
-     * @param ctx контекст парсера с владельцем
-     * @param st объект
+     * Fill owner
+     *
+     * @param owner
+     *            parser context with owner
+     * @param st
+     *            object
      */
     protected void fillOwnerTo(IdentifierContext owner, PgStatement st) {
         if (owner == null || db.getArguments().isIgnorePrivileges() || refMode) {

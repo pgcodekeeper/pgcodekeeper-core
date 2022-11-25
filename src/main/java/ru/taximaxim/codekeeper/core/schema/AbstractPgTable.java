@@ -423,7 +423,6 @@ public abstract class AbstractPgTable extends AbstractTable {
     /**
      * Compare tables types and generate transform scripts for change tables type
      *
-     * @param oldTable - old table
      * @param newTable - new table
      * @param sb - StringBuilder for statements
      */
