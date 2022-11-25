@@ -443,10 +443,10 @@ public abstract class PgStatement implements IStatement, IHashable {
      * sb.length() говорит о возможностиизменить состояние объекта ALTERом (если объект вообще изменился).<br>
      * <br>
      *
-     * <code>sb == 0 and rv == false</code> - не требуется действий<br>
-     * <code>sb >  0 and rv == false</code> - illegal state, неизмененный объект с ALTER<br>
-     * <code>sb == 0 and rv == true</code> - ALTER невозможен, делаем DROP/CREATE<br>
-     * <code>sb >  0 and rv == true</code> - делаем ALTER
+     * {@code sb == 0 and rv == false} - не требуется действий<br>
+     * {@code sb >  0 and rv == false} - illegal state, неизмененный объект с ALTER<br>
+     * {@code sb == 0 and rv == true} - ALTER невозможен, делаем DROP/CREATE<br>
+     * {@code sb >  0 and rv == true} - делаем ALTER
      *
      * @param newCondition
      *            новое состоятние объекта
