@@ -205,9 +205,6 @@ class PgDiffDepciesTest {
             // изменение сиквенсов с зависимостями
             // пользователь выбрал таблицу t6
             "change_sequence_usr_t6",
-            // добавление таблицы с цикличной зависимотью к функции
-            // пользователь выбрал таблицу t1
-            /* "add_table_with_cyclic_dep_usr_t1", true},*/
             // изменение функции от которой зависит триггер
             // пользователь выбрал функцию f1
             "modify_trigger_function_usr_f1",
@@ -240,9 +237,11 @@ class PgDiffDepciesTest {
         // (опеределение обеих функций написано на языке SQL)
         // ('f2' зависит от 'f1')
         // (обе функции находятся в разных схемах)
-        "change_func_arg_name_sch_usr_f1, true"
+        "change_func_arg_name_sch_usr_f1, true",
+        // добавление таблицы с цикличной зависимотью к функции
+        // пользователь выбрал таблицу t1
+        "add_table_with_cyclic_dep_usr_t1, true",
     })
-
     void runDiff(String userSelTemplate, Boolean isEnableDepcies) throws IOException, InterruptedException {
         PgDatabase oldDatabase;
         PgDatabase newDatabase;
