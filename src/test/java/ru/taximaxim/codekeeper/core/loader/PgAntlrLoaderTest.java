@@ -117,6 +117,8 @@ class PgAntlrLoaderTest {
      * Tests ModelExporter exportFull() method
      * @throws InterruptedException
      */
+    @ParameterizedTest(name = "PG DB [{0}]")
+    @MethodSource("range")
     void exportFullDb(int fileIndex) throws IOException, InterruptedException {
         // prepare db object from sql file
         String filename = "schema_" + fileIndex + ".sql";

@@ -110,7 +110,9 @@ class MsAntlrLoaderTest {
      * Tests ModelExporter exportFull() method
      * @throws InterruptedException
      */
-    public void exportFullDb(int fileIndex) throws IOException, InterruptedException {
+    @ParameterizedTest(name = "MS DB [{0}]")
+    @MethodSource("range")
+    void exportFullDb(int fileIndex) throws IOException, InterruptedException {
         // prepare db object from sql file
         String filename = "ms_schema_" + fileIndex + ".sql";
         PgDiffArguments args = new PgDiffArguments();
