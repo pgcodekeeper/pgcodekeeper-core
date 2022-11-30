@@ -1,6 +1,6 @@
 package ru.taximaxim.codekeeper.core.model.exporter;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import ru.taximaxim.codekeeper.core.Consts;
 import ru.taximaxim.codekeeper.core.PgDiffUtils;
@@ -74,10 +74,10 @@ public class PartialExportTestFileVisitor extends SimpleFileVisitor<Path>{
             File file = isInSource ? file2 : file1.toFile();
             String partialFile = new String(Files.readAllBytes(file.toPath()), Consts.UTF_8);
 
-            Assert.assertEquals("Files differ, and partial file has unexpected hash"
-                    + "\nPartial file:\n" + partialFile,
+            Assertions.assertEquals(
                     hash,
-                    PgDiffUtils.md5(partialFile));
+                    PgDiffUtils.md5(partialFile), "Files differ, and partial file has unexpected hash"
+                            + "\nPartial file:\n" + partialFile);
         }
         return FileVisitResult.CONTINUE;
     }

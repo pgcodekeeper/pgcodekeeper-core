@@ -11,15 +11,10 @@ import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.dfa.DFA;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-import ru.taximaxim.codekeeper.core.PgDiffTest;
 import ru.taximaxim.codekeeper.core.TestUtils;
 import ru.taximaxim.codekeeper.core.parsers.antlr.AntlrParser;
 import ru.taximaxim.codekeeper.core.parsers.antlr.AntlrUtils;
@@ -31,32 +26,18 @@ import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser;
  * @author galiev_mr
  * @since 5.9.0
  */
-@RunWith(value = Parameterized.class)
 public class PlpgParserTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PgDiffTest.class);
-
-    @Parameters
-    public static Iterable<Object[]> parameters() {
-        return TestUtils.getParameters(new Object[][] {
-            {"plpgsql", 21},
-        });
+    public void runDiff(String fileNameTemplate) throws IOException {
+        runDiff(fileNameTemplate, 0);
     }
 
-    /**
-     * Template name for file names that should be used for the test.
-     */
-    private final String fileNameTemplate;
-    private final int allowedAmbiguity;
+    @ParameterizedTest
+    @CsvSource({
+        "plpgsql, 21",
+    })
 
-    public PlpgParserTest(final String fileNameTemplate, Integer allowedAmbiguity) {
-        this.fileNameTemplate = fileNameTemplate;
-        this.allowedAmbiguity = allowedAmbiguity != null ? allowedAmbiguity : 0;
-        LOG.debug(fileNameTemplate);
-    }
-
-    @Test
-    public void runDiff() throws IOException {
+    public void runDiff(final String fileNameTemplate, int allowedAmbiguity) throws IOException {
         List<Object> errors = new ArrayList<>();
         AtomicInteger ambiguity = new AtomicInteger();
 
@@ -79,8 +60,7 @@ public class PlpgParserTest {
         parser.plpgsql_function_test_list();
 
         int count = ambiguity.intValue();
-        Assert.assertTrue("File: " + fileNameTemplate + " - ANTLR Error", errors.isEmpty());
-        Assert.assertFalse("File: " + fileNameTemplate + " - ANTLR Ambiguity " + count + " expected " + allowedAmbiguity,
-                count != allowedAmbiguity);
+        Assertions.assertTrue(errors.isEmpty(), "File: " + fileNameTemplate + " - ANTLR Error");
+        Assertions.assertFalse(count != allowedAmbiguity, "File: " + fileNameTemplate + " - ANTLR Ambiguity " + count + " expected " + allowedAmbiguity);
     }
 }

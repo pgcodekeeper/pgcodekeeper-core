@@ -11,15 +11,11 @@ import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.dfa.DFA;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import ru.taximaxim.codekeeper.core.PgDiffTest;
 import ru.taximaxim.codekeeper.core.TestUtils;
 import ru.taximaxim.codekeeper.core.parsers.antlr.AntlrParser;
 import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser;
@@ -30,124 +26,115 @@ import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser;
  * @author galiev_mr
  * @since 5.3.8
  */
-@RunWith(value = Parameterized.class)
+
 public class PgParserTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PgDiffTest.class);
-
-    @Parameters
-    public static Iterable<Object[]> parameters() {
-        return TestUtils.getParameters(new Object[][] {
+    @ParameterizedTest
+    @ValueSource(strings = {
             // basetype = 'ANY'
             // func args in refs
-            {"aggregates"},
-            {"alter_table"},
-            {"arrays"},
-            {"case"},
-            {"cluster"},
-            {"collate", 7},
-            {"conversion"},
-            {"copy"},
-            {"create_cast"},
-            {"create_function"},
-            {"create_misc"},
-            {"create_procedure"},
-            {"create_table_like"},
-            {"create_table"},
-            {"database"},
-            {"date"},
-            {"delete"},
-            {"dependency"},
-            {"domain"},
-            {"drop_if_exists"},
-            {"drop_operator"},
-            {"enum"},
-            {"event_trigger"},
-            {"fast_default"},
-            {"float8"},
-            {"foreign_data"},
-            {"foreign_key"},
-            {"functional_deps"},
-            {"geometry"},
-            {"groupingsets", 47},
-            {"index"},
-            {"inherit"},
-            {"insert_conflict"},
-            {"insert"},
-            {"interval"},
-            {"join"},
-            {"json_encoding"},
-            {"jsonb"},
-            {"lseg"},
-            {"misc_functions"},
-            {"misc_sanity"},
-            {"merge"},
-            {"name"},
-            {"namespace"},
-            {"numeric_big"},
-            {"numeric"},
-            {"numerology"},
-            {"object_address"},
-            {"oid"},
-            {"oidjoins"},
-            {"operator"},
-            {"opr_sanity"},
-            {"other"},
-            {"partition_aggregate", 1},
-            {"partition_join"},
-            {"partition_prune", 6},
-            {"plancache"},
-            {"point"},
-            {"policy"},
-            {"polygon"},
-            {"polymorphism"},
-            {"privileges"},
-            {"publication"},
-            {"rangefuncs"},
-            {"rangetypes"},
-            {"reloptions"},
-            {"role"},
-            {"rowtypes"},
-            {"rules"},
-            {"select", 2},
-            {"set"},
-            {"sequence"},
-            {"spgist"},
+            "aggregates",
+            "alter_table",
+            "arrays",
+            "case",
+            "cluster",
+            "conversion",
+            "copy",
+            "create_cast",
+            "create_function",
+            "create_misc",
+            "create_procedure",
+            "create_table_like",
+            "create_table",
+            "database",
+            "date",
+            "delete",
+            "dependency",
+            "domain",
+            "drop_if_exists",
+            "drop_operator",
+            "enum",
+            "event_trigger",
+            "fast_default",
+            "float8",
+            "foreign_data",
+            "foreign_key",
+            "functional_deps",
+            "geometry",
+            "index",
+            "inherit",
+            "insert_conflict",
+            "insert",
+            "interval",
+            "join",
+            "json_encoding",
+            "jsonb",
+            "lseg",
+            "misc_functions",
+            "misc_sanity",
+            "merge",
+            "name",
+            "namespace",
+            "numeric_big",
+            "numeric",
+            "numerology",
+            "object_address",
+            "oid",
+            "oidjoins",
+            "operator",
+            "opr_sanity",
+            "other",
+            "partition_join",
+            "plancache",
+            "point",
+            "policy",
+            "polygon",
+            "polymorphism",
+            "privileges",
+            "publication",
+            "rangefuncs",
+            "rangetypes",
+            "reloptions",
+            "role",
+            "rowtypes",
+            "rules",
+            "set",
+            "sequence",
+            "spgist",
             // some string are unsupported
-            {"strings"},
-            {"subscription"},
-            {"subselect"},
-            {"sysviews"},
-            {"time"},
-            {"timestamp"},
-            {"timestamptz"},
-            {"timetz"},
-            {"transactions"},
-            {"triggers"},
-            {"tsdicts"},
-            {"tsearch"},
-            {"type"},
-            {"update"},
-            {"view"},
-            {"window"},
-            {"with"},
-        });
+            "strings",
+            "subscription",
+            "subselect",
+            "sysviews",
+            "time",
+            "timestamp",
+            "timestamptz",
+            "timetz",
+            "transactions",
+            "triggers",
+            "tsdicts",
+            "tsearch",
+            "type",
+            "update",
+            "view",
+            "window",
+            "with",
+    })
+
+    void runDiff(final String fileNameTemplate) throws IOException {
+        runDiff(fileNameTemplate, 0);
     }
 
-    /**
-     * Template name for file names that should be used for the test.
-     */
-    private final String fileNameTemplate;
-    private final int allowedAmbiguity;
+    @ParameterizedTest
+    @CsvSource({
+        "collate, 7",
+        "groupingsets, 47",
+        "partition_aggregate, 1",
+        "partition_prune, 6",
+        "select, 2"
+    })
 
-    public PgParserTest(final String fileNameTemplate, Integer allowedAmbiguity) {
-        this.fileNameTemplate = fileNameTemplate;
-        this.allowedAmbiguity = allowedAmbiguity != null ? allowedAmbiguity : 0;
-        LOG.debug(fileNameTemplate);
-    }
-
-    @Test
-    public void runDiff() throws IOException {
+    void runDiff(String fileNameTemplate, int allowedAmbiguity) throws IOException {
         List<Object> errors = new ArrayList<>();
         AtomicInteger ambiguity = new AtomicInteger();
 
@@ -170,8 +157,7 @@ public class PgParserTest {
         parser.sql();
 
         int count = ambiguity.intValue();
-        Assert.assertTrue("File: " + fileNameTemplate + " - ANTLR Error", errors.isEmpty());
-        Assert.assertFalse("File: " + fileNameTemplate + " - ANTLR Ambiguity " + count + " expected " + allowedAmbiguity,
-                count != allowedAmbiguity);
+        Assertions.assertTrue(errors.isEmpty(), "File: " + fileNameTemplate + " - ANTLR Error");
+        Assertions.assertFalse(count != allowedAmbiguity, "File: " + fileNameTemplate + " - ANTLR Ambiguity " + count + " expected " + allowedAmbiguity);
     }
 }

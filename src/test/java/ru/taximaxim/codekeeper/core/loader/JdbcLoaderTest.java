@@ -1,7 +1,7 @@
 package ru.taximaxim.codekeeper.core.loader;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ru.taximaxim.codekeeper.core.PgDiffUtils;
 
@@ -10,8 +10,8 @@ public class JdbcLoaderTest {
     @Test
     public void functionDollars() {
         String def = "asdad$_XXXXXXX_XXXXXXXasdaasdsad";
-        Assert.assertEquals("Function dollars fail",
+        Assertions.assertEquals(
                 PgDiffUtils.quoteStringDollar(def),
-                "$_XXXXXXX_XXXXXXX_$" + def + "$_XXXXXXX_XXXXXXX_$");
+                "$_XXXXXXX_XXXXXXX_$" + def + "$_XXXXXXX_XXXXXXX_$", "Function dollars fail");
     }
 }

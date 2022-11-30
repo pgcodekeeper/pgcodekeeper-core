@@ -2,55 +2,37 @@ package ru.taximaxim.codekeeper.core.formatter;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import ru.taximaxim.codekeeper.core.PgDiffTest;
 import ru.taximaxim.codekeeper.core.fileutils.FileUtils;
 import ru.taximaxim.codekeeper.core.formatter.FormatConfiguration.IndentType;
 
-@RunWith(value = Parameterized.class)
 public class FormatterTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PgDiffTest.class);
-
-    @Parameters
-    public static Iterable<FormatConfigProvider[]> parameters() {
-        List<FormatConfigProvider[]> p = Arrays.asList(new FormatConfigProvider[][] {
-            {new DefaultConfigProvider()},
-            {new IndentTypeConfigProvider()},
-            {new RemoveTrailingWhitespaceConfigProvider()},
-            {new AddWhitespaceAfterOpConfigProvider()},
-            {new AddWhitespaceBeforeOpConfigProvider()},
-            {new AddSpacesForTabsConfigProvider()},
-            {new IndentSizeConfigProvider()},
-            {new IndentTypeTabConfigProvider()},
-        });
-        return p.stream()::iterator;
-    }
-
-    private final FormatConfigProvider args;
-
-    public FormatterTest(FormatConfigProvider args) {
-        this.args = args;
-        LOG.debug(args.getClass().getSimpleName());
-    }
-
-    @Test
-    public void testFormatterParams() throws IOException, URISyntaxException, FormatterException {
+    @ParameterizedTest
+    @MethodSource("generator")
+    void testFormatterParams(FormatConfigProvider args) throws IOException, URISyntaxException, FormatterException {
         FileFormatter fileform = new FileFormatter(args.getOldFile(), 0,
                 args.getOldFile().length(), args.getConfig(), false);
-        Assert.assertEquals(
-                args.getClass().getSimpleName() + ": Formatted files are different. ",
-                args.getNewFile(), fileform.formatText());
+        Assertions.assertEquals(
+                args.getNewFile(), fileform.formatText(), args.getClass().getSimpleName() + ": Formatted files are different. ");
+    }
+
+    private static Stream<Arguments> generator() {
+        return Stream.of(
+                Arguments.of(new DefaultConfigProvider()),
+                Arguments.of(new IndentTypeConfigProvider()),
+                Arguments.of(new RemoveTrailingWhitespaceConfigProvider()),
+                Arguments.of(new AddWhitespaceAfterOpConfigProvider()),
+                Arguments.of(new AddWhitespaceBeforeOpConfigProvider()),
+                Arguments.of(new AddSpacesForTabsConfigProvider()),
+                Arguments.of(new IndentSizeConfigProvider()),
+                Arguments.of(new IndentTypeTabConfigProvider(), 5));
     }
 }
 

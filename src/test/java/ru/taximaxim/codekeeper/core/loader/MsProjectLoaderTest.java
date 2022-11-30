@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 import org.eclipse.core.runtime.SubMonitor;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ru.taximaxim.codekeeper.core.Consts;
 import ru.taximaxim.codekeeper.core.PgDiffArguments;
@@ -43,10 +43,11 @@ public class MsProjectLoaderTest {
 
             for (AbstractSchema dbSchema : loader.getSchemas()) {
                 if (TestUtils.IGNORED_SCHEMAS_LIST.contains(dbSchema.getName())) {
-                    Assert.fail("Ignored Schema loaded " + dbSchema.getName());
+                    Assertions.fail("Ignored Schema loaded " + dbSchema.getName());
                 } else {
-                    Assert.assertEquals("Schema from ms dump isn't equal schema from loader",
-                            msDbDump.getSchema(dbSchema.getName()), dbSchema);
+                    Assertions.assertEquals(
+                            msDbDump.getSchema(dbSchema.getName()), dbSchema,
+                            "Schema from ms dump isn't equal schema from loader");
                 }
             }
         }

@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import ru.taximaxim.codekeeper.core.loader.PgDumpLoader;
 import ru.taximaxim.codekeeper.core.model.difftree.DbObjType;
@@ -64,25 +64,15 @@ public final class TestUtils {
     public static void runDiffSame(PgDatabase db, String template, PgDiffArguments args)
             throws IOException, InterruptedException {
         String script = new PgDiff(args).diffDatabaseSchemas(db, db, null);
-        Assert.assertEquals("File name template: " + template, "", script.trim());
+        Assertions.assertEquals("", script.trim(), "File name template: " + template);
     }
 
     public static void compareResult(String script, String template,
             Class<?> clazz) throws IOException {
-        Assert.assertEquals("File name template: " + template,
+        Assertions.assertEquals(
                 TestUtils.inputStreamToString(clazz.getResourceAsStream(
                         template + FILES_POSTFIX.DIFF_SQL)).trim(),
-                script.trim());
-    }
-
-    public static Iterable<Object[]> getParameters(Object[][] objects) {
-        List<Object[]> p = Arrays.asList(objects);
-        int maxLength = p.stream()
-                .mapToInt(oo -> oo.length)
-                .max().getAsInt();
-        return p.stream()
-                .map(oo -> oo.length < maxLength ? Arrays.copyOf(oo, maxLength) : oo)
-                ::iterator;
+                script.trim(), "File name template: " + template);
     }
 
     /**

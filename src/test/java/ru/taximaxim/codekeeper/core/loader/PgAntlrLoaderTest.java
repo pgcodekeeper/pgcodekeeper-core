@@ -8,11 +8,9 @@ package ru.taximaxim.codekeeper.core.loader;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import ru.taximaxim.codekeeper.core.Consts;
 import ru.taximaxim.codekeeper.core.PgDiffArguments;
@@ -65,28 +63,9 @@ interface PgDatabaseObjectCreator {
  *
  * @author fordfrog
  */
-@RunWith(value = Parameterized.class)
 public class PgAntlrLoaderTest {
 
     private static final String ENCODING = Consts.UTF_8;
-    /**
-     * Provides parameters for running the tests.
-     *
-     * @return parameters for the tests
-     */
-    @Parameters
-    public static Iterable<Object[]> parameters() {
-        return TestUtils.getParameters(new Object[][] {
-            // SONAR-OFF
-            {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10},
-            {11}, {12}, {13}, {14}, {15}, {16}, {17}
-            // SONAR-ON
-        });
-    }
-    /**
-     * Index of the file that should be tested.
-     */
-    private final int fileIndex;
 
     /**
      * Array of implementations of {@link PgDatabaseObjectCreator}
@@ -113,17 +92,15 @@ public class PgAntlrLoaderTest {
     };
 
     /**
-     * Creates a new instance of PgDumpLoaderTest.
+     * Provides parameters for running the tests.
      *
-     * @param fileIndex {@link #fileIndex}
+     * @return parameters for the tests
      */
-    public PgAntlrLoaderTest(final int fileIndex) {
-        this.fileIndex = fileIndex;
-    }
+    @ParameterizedTest
+    @ValueSource(ints = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+            11, 12, 13, 14, 15, 16, 17 })
 
-    @Test
-    public void loadSchema() throws InterruptedException, IOException {
-
+    void loadSchema(int fileIndex) throws IOException, InterruptedException {
         // first test the dump loader itself
         String filename = "schema_" + fileIndex + ".sql";
         PgDiffArguments args = new PgDiffArguments();
@@ -134,24 +111,24 @@ public class PgAntlrLoaderTest {
 
         // then check result's validity against handmade DB object
         if(fileIndex > DB_OBJS.length) {
-            Assert.fail("No predefined object for file: " + filename);
+            Assertions.fail("No predefined object for file: " + filename);
         }
 
         PgDatabase dbPredefined = DB_OBJS[fileIndex - 1].getDatabase();
-        Assert.assertEquals("PgDumpLoader: predefined object is not equal to file "
-                + filename, dbPredefined, d);
+        Assertions.assertEquals(dbPredefined,d, "PgDumpLoader: predefined object is not equal to file "
+                + filename);
 
         // test deepCopy mechanism
-        Assert.assertEquals("PgStatement deep copy altered", d, d.deepCopy());
-        Assert.assertEquals("PgStatement deep copy altered original", dbPredefined, d);
+        Assertions.assertEquals(d, d.deepCopy(), "PgStatement deep copy altered");
+        Assertions.assertEquals(dbPredefined, d, "PgStatement deep copy altered original");
     }
 
     /**
+     * fileIndex - Index of the file that should be tested.
      * Tests ModelExporter exportFull() method
      * @throws InterruptedException
      */
-    @Test
-    public void exportFullDb() throws IOException, InterruptedException {
+    void exportFullDb(int fileIndex) throws IOException, InterruptedException {
         // prepare db object from sql file
         String filename = "schema_" + fileIndex + ".sql";
         PgDiffArguments args = new PgDiffArguments();
@@ -172,11 +149,11 @@ public class PgAntlrLoaderTest {
             PgDatabase dbAfterExport = new ProjectLoader(exportDir.toString(), args).loadAndAnalyze();
 
             // check the same db similarity before and after export
-            Assert.assertEquals("ModelExporter: predefined object PgDB" + fileIndex +
-                    " is not equal to exported'n'loaded.", dbPredefined, dbAfterExport);
+            Assertions.assertEquals(dbPredefined, dbAfterExport, "ModelExporter: predefined object PgDB" + fileIndex +
+                    " is not equal to exported'n'loaded.");
 
-            Assert.assertEquals("ModelExporter: exported predefined object is not "
-                    + "equal to file " + filename, dbAfterExport, dbFromFile);
+            Assertions.assertEquals(dbAfterExport, dbFromFile, "ModelExporter: exported predefined object is not "
+                    + "equal to file " + filename);
         }
     }
 }

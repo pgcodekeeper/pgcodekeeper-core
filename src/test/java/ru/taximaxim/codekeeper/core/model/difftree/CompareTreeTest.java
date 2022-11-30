@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import ru.taximaxim.codekeeper.core.model.difftree.TreeElement.DiffSide;
 
@@ -14,10 +14,10 @@ public class CompareTreeTest {
 
     private static final int N = 1000;
 
-    private List<TreeElement> list;
+    private static List<TreeElement> list;
 
-    @Before
-    public void beforeTest() {
+    @BeforeAll
+    public static void beforeTest() {
         list = new ArrayList<>(N * DiffSide.values().length * DbObjType.values().length);
         for (DiffSide side : DiffSide.values()) {
             for (DbObjType type : DbObjType.values()) {
@@ -38,7 +38,7 @@ public class CompareTreeTest {
         for (TreeElement el : list) {
             if (el.getSide() == DiffSide.LEFT
                     && prevSide != DiffSide.LEFT) {
-                Assert.fail("Side left is after another type");
+                Assertions.fail("Side left is after another type");
             }
 
             int res = el.getType().ordinal() - prevType.ordinal();
@@ -46,13 +46,13 @@ public class CompareTreeTest {
             if (el.getSide() == DiffSide.RIGHT
                     && prevSide == DiffSide.BOTH
                     && res <= 0) {
-                Assert.fail("Side wrong");
+                Assertions.fail("Side wrong");
             }
             if (el.getSide() == DiffSide.LEFT) {
                 res = -res;
             }
             if (res < 0) {
-                Assert.fail("Element type is less than expected");
+                Assertions.fail("Element type is less than expected");
             }
             prevSide = el.getSide();
             prevType = el.getType();
