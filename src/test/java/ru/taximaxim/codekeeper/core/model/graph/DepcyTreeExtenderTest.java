@@ -43,7 +43,7 @@ interface TreeElementCreator {
  * @author ryabinin_av
  */
 
-public class DepcyTreeExtenderTest {
+class DepcyTreeExtenderTest {
     /**
      * Тестирует зависимости от новых(и возможных edit) объектов, полученные из dte
      * @throws IOException
@@ -72,7 +72,7 @@ public class DepcyTreeExtenderTest {
         DepcyTreeExtender dte = new DepcyTreeExtender(dbSource, dbTarget, tree);
         Set<TreeElement> depcy = dte.getDepcies();
         Set<TreeElement> depcyPredefined = predefined.getDepcySet(dbSource, dbTarget, tree);
-        Assertions.assertTrue(depcy.equals(depcyPredefined), "List of dependencies is not as expected");
+        Assertions.assertEquals(depcyPredefined, depcy, "List of dependencies is not as expected");
     }
 
     private static Stream<Arguments> generator() {

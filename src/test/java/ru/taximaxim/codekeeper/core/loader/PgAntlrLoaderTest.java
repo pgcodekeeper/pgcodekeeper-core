@@ -7,10 +7,12 @@ package ru.taximaxim.codekeeper.core.loader;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import ru.taximaxim.codekeeper.core.Consts;
 import ru.taximaxim.codekeeper.core.PgDiffArguments;
@@ -45,25 +47,11 @@ import ru.taximaxim.codekeeper.core.schema.PgView;
 import ru.taximaxim.codekeeper.core.schema.SimplePgTable;
 
 /**
- * An abstract 'factory' that creates 'artificial'
- * PgDatabase objects for specific test-cases.
- *
- * @author Alexander Levsha
- */
-interface PgDatabaseObjectCreator {
-
-    /**
-     * The method makes up a PgDatabase object specific to the test needs.
-     */
-    PgDatabase getDatabase();
-}
-
-/**
  * Tests for PgDiffLoader class.
  *
  * @author fordfrog
  */
-public class PgAntlrLoaderTest {
+class PgAntlrLoaderTest {
 
     private static final String ENCODING = Consts.UTF_8;
 
@@ -71,7 +59,7 @@ public class PgAntlrLoaderTest {
      * Array of implementations of {@link PgDatabaseObjectCreator}
      * each returning a specific {@link PgDatabase} for a test-case.
      */
-    private static final PgDatabaseObjectCreator[] DB_OBJS = {
+    private static final DatabaseObjectCreator[] DB_OBJS = {
             new PgDB1(),
             new PgDB2(),
             new PgDB3(),
@@ -91,15 +79,16 @@ public class PgAntlrLoaderTest {
             new PgDB17()
     };
 
-    /**
-     * Provides parameters for running the tests.
-     *
-     * @return parameters for the tests
-     */
-    @ParameterizedTest
-    @ValueSource(ints = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-            11, 12, 13, 14, 15, 16, 17 })
+    static Stream<Integer> range() {
+        return IntStream.range(1, DB_OBJS.length + 1).boxed();
+    }
 
+    /**
+     * @param fileIndex
+     *            - index of the file that should be tested.
+     */
+    @ParameterizedTest(name = "PG DB [{0}]")
+    @MethodSource("range")
     void loadSchema(int fileIndex) throws IOException, InterruptedException {
         // first test the dump loader itself
         String filename = "schema_" + fileIndex + ".sql";
@@ -160,7 +149,7 @@ public class PgAntlrLoaderTest {
 
 // SONAR-OFF
 
-class PgDB1 implements PgDatabaseObjectCreator {
+class PgDB1 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(true);
@@ -254,7 +243,7 @@ class PgDB1 implements PgDatabaseObjectCreator {
     }
 }
 
-class PgDB2 implements PgDatabaseObjectCreator {
+class PgDB2 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(true);
@@ -292,7 +281,7 @@ class PgDB2 implements PgDatabaseObjectCreator {
     }
 }
 
-class PgDB3 implements PgDatabaseObjectCreator {
+class PgDB3 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(true);
@@ -387,7 +376,7 @@ class PgDB3 implements PgDatabaseObjectCreator {
     }
 }
 
-class PgDB4 implements PgDatabaseObjectCreator {
+class PgDB4 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(true);
@@ -406,7 +395,7 @@ class PgDB4 implements PgDatabaseObjectCreator {
     }
 }
 
-class PgDB5 implements PgDatabaseObjectCreator {
+class PgDB5 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(true);
@@ -480,7 +469,7 @@ class PgDB5 implements PgDatabaseObjectCreator {
     }
 }
 
-class PgDB6 implements PgDatabaseObjectCreator {
+class PgDB6 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(true);
@@ -515,7 +504,7 @@ class PgDB6 implements PgDatabaseObjectCreator {
     }
 }
 
-class PgDB7 implements PgDatabaseObjectCreator {
+class PgDB7 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(true);
@@ -576,7 +565,7 @@ class PgDB7 implements PgDatabaseObjectCreator {
     }
 }
 
-class PgDB8 implements PgDatabaseObjectCreator {
+class PgDB8 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(true);
@@ -611,7 +600,7 @@ class PgDB8 implements PgDatabaseObjectCreator {
     }
 }
 
-class PgDB9 implements PgDatabaseObjectCreator {
+class PgDB9 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(true);
@@ -692,7 +681,7 @@ class PgDB9 implements PgDatabaseObjectCreator {
     }
 }
 
-class PgDB10 implements PgDatabaseObjectCreator {
+class PgDB10 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(true);
@@ -783,7 +772,7 @@ class PgDB10 implements PgDatabaseObjectCreator {
     }
 }
 
-class PgDB11 implements PgDatabaseObjectCreator {
+class PgDB11 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(true);
@@ -799,7 +788,7 @@ class PgDB11 implements PgDatabaseObjectCreator {
     }
 }
 
-class PgDB12 implements PgDatabaseObjectCreator {
+class PgDB12 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(true);
@@ -810,7 +799,7 @@ class PgDB12 implements PgDatabaseObjectCreator {
     }
 }
 
-class PgDB13 implements PgDatabaseObjectCreator {
+class PgDB13 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(true);
@@ -830,7 +819,7 @@ class PgDB13 implements PgDatabaseObjectCreator {
     }
 }
 
-class PgDB14 implements PgDatabaseObjectCreator {
+class PgDB14 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(true);
@@ -932,7 +921,7 @@ class PgDB14 implements PgDatabaseObjectCreator {
     }
 }
 
-class PgDB15 implements PgDatabaseObjectCreator {
+class PgDB15 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(true);
@@ -957,7 +946,7 @@ class PgDB15 implements PgDatabaseObjectCreator {
  * @author ryabinin_av
  *
  */
-class PgDB16 implements PgDatabaseObjectCreator {
+class PgDB16 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(true);
@@ -996,7 +985,7 @@ class PgDB16 implements PgDatabaseObjectCreator {
  * @author ryabinin_av
  *
  */
-class PgDB17 implements PgDatabaseObjectCreator {
+class PgDB17 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(true);

@@ -17,7 +17,7 @@ import ru.taximaxim.codekeeper.core.schema.PgDatabase;
  *
  * @author fordfrog
  */
-public class PgDiffTest {
+class PgDiffTest {
 
     /**
      * Template name for file names that should be used for the test. Testing
@@ -531,7 +531,6 @@ public class PgDiffTest {
             // Tests scenario where NULLS DISTINCT option of index is altered.
             "alter_index_nulls_distinction",
     })
-
     void runDiff(String fileNameTemplate) throws IOException, InterruptedException {
         PgDiffArguments args = new PgDiffArguments();
         PgDatabase dbOld = TestUtils.loadTestDump(

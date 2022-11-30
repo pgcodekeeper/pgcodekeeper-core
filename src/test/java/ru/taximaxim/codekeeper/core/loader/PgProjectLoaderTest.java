@@ -17,10 +17,10 @@ import ru.taximaxim.codekeeper.core.model.exporter.ModelExporter;
 import ru.taximaxim.codekeeper.core.schema.AbstractSchema;
 import ru.taximaxim.codekeeper.core.schema.PgDatabase;
 
-public class PgProjectLoaderTest {
+class PgProjectLoaderTest {
 
     @Test
-    public void testProjectLoaderWithIgnoredSchemas() throws IOException, InterruptedException {
+    void testProjectLoaderWithIgnoredSchemas() throws IOException, InterruptedException {
         try(TempDir tempDir = new TempDir("ignore-schemas-test-project")){
             Path dir = tempDir.get();
             PgDiffArguments args = new PgDiffArguments();

@@ -17,11 +17,11 @@ import ru.taximaxim.codekeeper.core.model.exporter.MsModelExporter;
 import ru.taximaxim.codekeeper.core.schema.AbstractSchema;
 import ru.taximaxim.codekeeper.core.schema.PgDatabase;
 
-public class MsProjectLoaderTest {
+class MsProjectLoaderTest {
 
     @Test
-    public void testProjectLoaderWithIgnoredSchemas() throws IOException, InterruptedException {
-        try(TempDir tempDir = new TempDir("ignore-schemas test project")){
+    void testProjectLoaderWithIgnoredSchemas() throws IOException, InterruptedException {
+        try (TempDir tempDir = new TempDir("ignore-schemas test project")) {
             Path dir = tempDir.get();
             PgDiffArguments args = new PgDiffArguments();
             args.setMsSql(true);
@@ -39,7 +39,8 @@ public class MsProjectLoaderTest {
             IgnoreParser ignoreParser = new IgnoreParser(ignoreSchemaList);
             ignoreParser.parse(listFile);
 
-            PgDatabase loader = new ProjectLoader(dir.toString(),  args, SubMonitor.convert(null), null, ignoreSchemaList).load();
+            PgDatabase loader = new ProjectLoader(dir.toString(), args, SubMonitor.convert(null), null,
+                    ignoreSchemaList).load();
 
             for (AbstractSchema dbSchema : loader.getSchemas()) {
                 if (TestUtils.IGNORED_SCHEMAS_LIST.contains(dbSchema.getName())) {

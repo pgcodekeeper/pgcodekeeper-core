@@ -5,20 +5,17 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import ru.taximaxim.codekeeper.core.model.difftree.TreeElement.DiffSide;
 
-public class CompareTreeTest {
+class CompareTreeTest {
 
     private static final int N = 1000;
 
-    private static List<TreeElement> list;
-
-    @BeforeAll
-    public static void beforeTest() {
-        list = new ArrayList<>(N * DiffSide.values().length * DbObjType.values().length);
+    @Test
+    void test() {
+        List<TreeElement> list = new ArrayList<>(N * DiffSide.values().length * DbObjType.values().length);
         for (DiffSide side : DiffSide.values()) {
             for (DbObjType type : DbObjType.values()) {
                 for (int i = 0; i < N; ++i) {
@@ -26,11 +23,9 @@ public class CompareTreeTest {
                 }
             }
         }
-        Collections.shuffle(list);
-    }
 
-    @Test
-    public void test() {
+        Collections.shuffle(list);
+
         DiffSide prevSide = DiffSide.LEFT;
         DbObjType prevType = DbObjType.values()[DbObjType.values().length - 1];
 

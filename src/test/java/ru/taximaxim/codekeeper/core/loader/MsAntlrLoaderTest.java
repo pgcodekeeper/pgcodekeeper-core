@@ -7,10 +7,12 @@ package ru.taximaxim.codekeeper.core.loader;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import ru.taximaxim.codekeeper.core.Consts;
 import ru.taximaxim.codekeeper.core.PgDiffArguments;
@@ -36,26 +38,11 @@ import ru.taximaxim.codekeeper.core.schema.PgDatabase;
 import ru.taximaxim.codekeeper.core.schema.PgPrivilege;
 
 /**
- * An abstract 'factory' that creates 'artificial'
- * PgDatabase MSSQL-objects for specific test-cases.
- *
- * @author Alexander Levsha
- */
-interface MsDatabaseObjectCreator {
-
-    /**
-     * The method makes up a PgDatabase object specific to the test needs.
-     */
-    PgDatabase getDatabase();
-}
-
-/**
  * Tests for PgDiffLoader class.
  *
  * @author fordfrog
  */
-
-public class MsAntlrLoaderTest {
+class MsAntlrLoaderTest {
 
     private static final String ENCODING = Consts.UTF_8;
 
@@ -63,7 +50,7 @@ public class MsAntlrLoaderTest {
      * Array of implementations of {@link MsDatabaseObjectCreator}
      * each returning a specific {@link PgDatabase} for a test-case.
      */
-    private static final MsDatabaseObjectCreator[] DB_OBJS = {
+    private static final DatabaseObjectCreator[] DB_OBJS = {
             new MsDB0(),
             new MsDB1(),
             new MsDB2(),
@@ -83,19 +70,17 @@ public class MsAntlrLoaderTest {
             new MsDB16()
     };
 
-    /**
-     * Provides parameters for running the tests.
-     *
-     * @return parameters for the tests
-     */
-    @ParameterizedTest
-    @ValueSource(ints = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-            11, 12, 13, 14, 15, 16 })
+    static Stream<Integer> range() {
+        return IntStream.range(0, DB_OBJS.length).boxed();
+    }
 
     /**
-     * fileIndex - index of the file that should be tested.
+     * @param fileIndex
+     *            - index of the file that should be tested.
      */
-    public void loadSchema(int fileIndex) throws InterruptedException, IOException {
+    @ParameterizedTest(name = "MS DB [{0}]")
+    @MethodSource("range")
+    void loadSchema(int fileIndex) throws InterruptedException, IOException {
 
         // first test the dump loader itself
         String filename = "ms_schema_" + fileIndex + ".sql";
@@ -159,7 +144,7 @@ public class MsAntlrLoaderTest {
 
 // SONAR-OFF
 
-class MsDB0 implements MsDatabaseObjectCreator {
+class MsDB0 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(false);
@@ -278,7 +263,7 @@ class MsDB0 implements MsDatabaseObjectCreator {
     }
 }
 
-class MsDB1 implements MsDatabaseObjectCreator {
+class MsDB1 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(false);
@@ -312,7 +297,7 @@ class MsDB1 implements MsDatabaseObjectCreator {
     }
 }
 
-class MsDB2 implements MsDatabaseObjectCreator {
+class MsDB2 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(false);
@@ -450,7 +435,7 @@ class MsDB2 implements MsDatabaseObjectCreator {
 
 }
 
-class MsDB3 implements MsDatabaseObjectCreator {
+class MsDB3 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(false);
@@ -487,7 +472,7 @@ class MsDB3 implements MsDatabaseObjectCreator {
     }
 }
 
-class MsDB4 implements MsDatabaseObjectCreator {
+class MsDB4 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(false);
@@ -566,7 +551,7 @@ class MsDB4 implements MsDatabaseObjectCreator {
     }
 }
 
-class MsDB5 implements MsDatabaseObjectCreator {
+class MsDB5 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(false);
@@ -605,7 +590,7 @@ class MsDB5 implements MsDatabaseObjectCreator {
     }
 }
 
-class MsDB6 implements MsDatabaseObjectCreator {
+class MsDB6 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(false);
@@ -633,7 +618,7 @@ class MsDB6 implements MsDatabaseObjectCreator {
     }
 }
 
-class MsDB7 implements MsDatabaseObjectCreator {
+class MsDB7 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(false);
@@ -678,7 +663,7 @@ class MsDB7 implements MsDatabaseObjectCreator {
     }
 }
 
-class MsDB8 implements MsDatabaseObjectCreator {
+class MsDB8 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(false);
@@ -798,7 +783,7 @@ class MsDB8 implements MsDatabaseObjectCreator {
     }
 }
 
-class MsDB9 implements MsDatabaseObjectCreator {
+class MsDB9 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(false);
@@ -911,7 +896,7 @@ class MsDB9 implements MsDatabaseObjectCreator {
     }
 }
 
-class MsDB10 implements MsDatabaseObjectCreator {
+class MsDB10 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(false);
@@ -936,7 +921,7 @@ class MsDB10 implements MsDatabaseObjectCreator {
     }
 }
 
-class MsDB11 implements MsDatabaseObjectCreator {
+class MsDB11 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(false);
@@ -981,7 +966,7 @@ class MsDB11 implements MsDatabaseObjectCreator {
     }
 }
 
-class MsDB12 implements MsDatabaseObjectCreator {
+class MsDB12 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(false);
@@ -1036,7 +1021,7 @@ class MsDB12 implements MsDatabaseObjectCreator {
     }
 }
 
-class MsDB13 implements MsDatabaseObjectCreator {
+class MsDB13 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(false);
@@ -1202,7 +1187,7 @@ class MsDB13 implements MsDatabaseObjectCreator {
     }
 }
 
-class MsDB14 implements MsDatabaseObjectCreator {
+class MsDB14 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(false);
@@ -1229,7 +1214,7 @@ class MsDB14 implements MsDatabaseObjectCreator {
  * @author ryabinin_av
  *
  */
-class MsDB15 implements MsDatabaseObjectCreator {
+class MsDB15 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(false);
@@ -1277,7 +1262,7 @@ class MsDB15 implements MsDatabaseObjectCreator {
  * @author ryabinin_av
  *
  */
-class MsDB16 implements MsDatabaseObjectCreator {
+class MsDB16 implements DatabaseObjectCreator {
     @Override
     public PgDatabase getDatabase() {
         PgDatabase d = TestUtils.createDumpDB(false);

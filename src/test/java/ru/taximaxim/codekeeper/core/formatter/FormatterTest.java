@@ -12,16 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import ru.taximaxim.codekeeper.core.fileutils.FileUtils;
 import ru.taximaxim.codekeeper.core.formatter.FormatConfiguration.IndentType;
 
-public class FormatterTest {
-
-    @ParameterizedTest
-    @MethodSource("generator")
-    void testFormatterParams(FormatConfigProvider args) throws IOException, URISyntaxException, FormatterException {
-        FileFormatter fileform = new FileFormatter(args.getOldFile(), 0,
-                args.getOldFile().length(), args.getConfig(), false);
-        Assertions.assertEquals(
-                args.getNewFile(), fileform.formatText(), args.getClass().getSimpleName() + ": Formatted files are different. ");
-    }
+class FormatterTest {
 
     private static Stream<Arguments> generator() {
         return Stream.of(
@@ -32,12 +23,23 @@ public class FormatterTest {
                 Arguments.of(new AddWhitespaceBeforeOpConfigProvider()),
                 Arguments.of(new AddSpacesForTabsConfigProvider()),
                 Arguments.of(new IndentSizeConfigProvider()),
-                Arguments.of(new IndentTypeTabConfigProvider(), 5));
+                Arguments.of(new IndentTypeTabConfigProvider()));
+    }
+
+    @ParameterizedTest
+    @MethodSource("generator")
+    void testFormatterParams(FormatConfigProvider args) throws IOException, URISyntaxException, FormatterException {
+        FileFormatter fileform = new FileFormatter(args.getOldFile(), 0,
+                args.getOldFile().length(), args.getConfig(), false);
+        Assertions.assertEquals(
+                args.getNewFile(), fileform.formatText(),
+                args.getClass().getSimpleName() + ": Formatted files are different. ");
     }
 }
 
 interface FormatConfigProvider {
     String getOldFile() throws IOException, URISyntaxException;
+
     String getNewFile() throws IOException, URISyntaxException;
 
     void fillConfig(FormatConfiguration config);
@@ -54,7 +56,7 @@ interface FormatConfigProvider {
 }
 
 /**
-Testing default parameteres
+ * Testing default parameteres
  */
 class DefaultConfigProvider implements FormatConfigProvider {
 
@@ -79,19 +81,20 @@ class DefaultConfigProvider implements FormatConfigProvider {
 }
 
 /**
-Testing setIndentType(IndentType.Tab)
+ * Testing setIndentType(IndentType.Tab)
  */
 class IndentTypeConfigProvider implements FormatConfigProvider {
 
     @Override
     public String getOldFile() throws IOException, URISyntaxException {
-        return getFileContent("old.sql" );
+        return getFileContent("old.sql");
     }
 
     @Override
     public String getNewFile() throws IOException, URISyntaxException {
         return getFileContent("new_indent_type.sql");
     }
+
     @Override
     public void fillConfig(FormatConfiguration config) {
         config.setIndentType(IndentType.TAB);
@@ -100,7 +103,7 @@ class IndentTypeConfigProvider implements FormatConfigProvider {
 }
 
 /**
- Testing RemoveTrailingWhitespace option
+ * Testing RemoveTrailingWhitespace option
  */
 class RemoveTrailingWhitespaceConfigProvider implements FormatConfigProvider {
 
@@ -121,7 +124,7 @@ class RemoveTrailingWhitespaceConfigProvider implements FormatConfigProvider {
 }
 
 /**
-Testing AddWhitespaceAfterOp option
+ * Testing AddWhitespaceAfterOp option
  */
 class AddWhitespaceAfterOpConfigProvider implements FormatConfigProvider {
 
@@ -142,7 +145,7 @@ class AddWhitespaceAfterOpConfigProvider implements FormatConfigProvider {
 }
 
 /**
-Testing WhitespaceBeforeOp option
+ * Testing WhitespaceBeforeOp option
  */
 class AddWhitespaceBeforeOpConfigProvider implements FormatConfigProvider {
 
@@ -150,6 +153,7 @@ class AddWhitespaceBeforeOpConfigProvider implements FormatConfigProvider {
     public String getOldFile() throws IOException, URISyntaxException {
         return getFileContent("old_AddWhitespaceOp.sql");
     }
+
     @Override
     public String getNewFile() throws IOException, URISyntaxException {
         return getFileContent("new_AddWhitespaceBeforeOp.sql");
@@ -162,7 +166,7 @@ class AddWhitespaceBeforeOpConfigProvider implements FormatConfigProvider {
 }
 
 /**
-Testing SpacesForTabs option
+ * Testing SpacesForTabs option
  */
 class AddSpacesForTabsConfigProvider implements FormatConfigProvider {
 
@@ -170,6 +174,7 @@ class AddSpacesForTabsConfigProvider implements FormatConfigProvider {
     public String getOldFile() throws IOException, URISyntaxException {
         return getFileContent("old_SpacesForTabs.sql");
     }
+
     @Override
     public String getNewFile() throws IOException, URISyntaxException {
         return getFileContent("new_SpacesForTabs.sql");
@@ -183,7 +188,7 @@ class AddSpacesForTabsConfigProvider implements FormatConfigProvider {
 }
 
 /**
-Testing IndentSize option
+ * Testing IndentSize option
  */
 class IndentSizeConfigProvider implements FormatConfigProvider {
 
@@ -191,6 +196,7 @@ class IndentSizeConfigProvider implements FormatConfigProvider {
     public String getOldFile() throws IOException, URISyntaxException {
         return getFileContent("old.sql");
     }
+
     @Override
     public String getNewFile() throws IOException, URISyntaxException {
         return getFileContent("new_IndentSize.sql");
@@ -204,7 +210,7 @@ class IndentSizeConfigProvider implements FormatConfigProvider {
 }
 
 /**
-Testing IndentTypeTab option
+ * Testing IndentTypeTab option
  */
 class IndentTypeTabConfigProvider implements FormatConfigProvider {
 
@@ -212,6 +218,7 @@ class IndentTypeTabConfigProvider implements FormatConfigProvider {
     public String getOldFile() throws IOException, URISyntaxException {
         return getFileContent("old.sql");
     }
+
     @Override
     public String getNewFile() throws IOException, URISyntaxException {
         return getFileContent("new_IndentTypeTab.sql");

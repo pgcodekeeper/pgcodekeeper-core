@@ -26,8 +26,7 @@ import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser;
  * @author galiev_mr
  * @since 5.3.8
  */
-
-public class PgParserTest {
+class PgParserTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -120,29 +119,27 @@ public class PgParserTest {
             "window",
             "with",
     })
-
-    void runDiff(final String fileNameTemplate) throws IOException {
-        runDiff(fileNameTemplate, 0);
+    void parse(final String fileNameTemplate) throws IOException {
+        parse(fileNameTemplate, 0);
     }
 
     @ParameterizedTest
     @CsvSource({
-        "collate, 7",
-        "groupingsets, 47",
-        "partition_aggregate, 1",
-        "partition_prune, 6",
-        "select, 2"
+            "collate, 7",
+            "groupingsets, 47",
+            "partition_aggregate, 1",
+            "partition_prune, 6",
+            "select, 2"
     })
-
-    void runDiff(String fileNameTemplate, int allowedAmbiguity) throws IOException {
+    void parse(String fileNameTemplate, int allowedAmbiguity) throws IOException {
         List<Object> errors = new ArrayList<>();
         AtomicInteger ambiguity = new AtomicInteger();
 
         String sql = TestUtils.inputStreamToString(PgParserTest.class
-                .getResourceAsStream(fileNameTemplate + ".sql"));
+            .getResourceAsStream(fileNameTemplate + ".sql"));
 
         SQLParser parser = AntlrParser
-                .makeBasicParser(SQLParser.class, sql, fileNameTemplate, errors);
+            .makeBasicParser(SQLParser.class, sql, fileNameTemplate, errors);
 
         parser.getInterpreter().setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
         parser.addErrorListener(new BaseErrorListener() {
@@ -158,6 +155,7 @@ public class PgParserTest {
 
         int count = ambiguity.intValue();
         Assertions.assertTrue(errors.isEmpty(), "File: " + fileNameTemplate + " - ANTLR Error");
-        Assertions.assertFalse(count != allowedAmbiguity, "File: " + fileNameTemplate + " - ANTLR Ambiguity " + count + " expected " + allowedAmbiguity);
+        Assertions.assertEquals(allowedAmbiguity, count,
+                "File: " + fileNameTemplate + " - ANTLR Ambiguity " + count + " expected " + allowedAmbiguity);
     }
 }

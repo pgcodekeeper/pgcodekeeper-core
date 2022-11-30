@@ -33,46 +33,49 @@ import ru.taximaxim.codekeeper.core.utils.Pair;
  * @author shamsutdinov_lr
  */
 
-public class ExprTypeTest {
+class ExprTypeTest {
 
-    private static final String CHECK = "check_";
-    private static final String COMPARE = "compare_";
+    @ParameterizedTest
+    @ValueSource(strings = {
+            // Check types in columns of asterisk in view.
+            "check_types_aster_cols_view",
+            // Check types in columns of view.
+            "check_types_cols_view",
+            // Check types in columns of view (extended).
+            "check_types_cols_view_extended",
+            // Check types in table-less columns.
+            "check_tableless_cols_types",
+            // Check array types.
+            "check_array_types",
+            // Check ANY type-matching
+            "check_anytype_resolution",
+            // Check by named notation type
+            "check_named_notation",
+    })
+    void runCheck(String fileNameTemplate) throws IOException, InterruptedException {
+        PgDiffArguments args = new PgDiffArguments();
+        String typesForCompare = TestUtils.inputStreamToString(ExprTypeTest.class
+            .getResourceAsStream(fileNameTemplate + FILES_POSTFIX.DIFF_SQL));
+
+        runDiff(fileNameTemplate, args, typesForCompare);
+    }
 
     @ParameterizedTest
     @ValueSource(strings = {
             // Compare the types between an asterisk and an ordinary in view.
-            COMPARE + "types_aster_ord_view",
-            // Check types in columns of asterisk in view.
-            CHECK + "types_aster_cols_view",
-            // Check types in columns of view.
-            CHECK + "types_cols_view",
-            // Check types in columns of view (extended).
-            CHECK + "types_cols_view_extended",
-            // Check types in table-less columns.
-            CHECK + "tableless_cols_types",
-            // Check array types.
-            CHECK + "array_types",
-            // Check ANY type-matching
-            CHECK + "anytype_resolution",
-            // Check by named notation type
-            CHECK + "named_notation",
+            "compare_types_aster_ord_view",
     })
-
-    public void runDiff(String fileNameTemplate) throws IOException, InterruptedException {
+    void runCompare(String fileNameTemplate) throws IOException, InterruptedException {
         PgDiffArguments args = new PgDiffArguments();
-        MetaContainer dbNew = loadAndAnalyze(fileNameTemplate, args, FILES_POSTFIX.NEW_SQL);
-
-        String typesForCompare = null;
-        if (fileNameTemplate.startsWith(CHECK)) {
-            // compare with a "type-dump"
-            typesForCompare = TestUtils.inputStreamToString(ExprTypeTest.class
-                    .getResourceAsStream(fileNameTemplate + FILES_POSTFIX.DIFF_SQL));
-        } else if (fileNameTemplate.startsWith(COMPARE)) {
-            // compare with types with another SQL representation
-            typesForCompare = getRelationColumnsTypes(
+        String typesForCompare = getRelationColumnsTypes(
                     loadAndAnalyze(fileNameTemplate, args, FILES_POSTFIX.ORIGINAL_SQL));
-        }
 
+        runDiff(fileNameTemplate, args, typesForCompare);
+    }
+
+    private void runDiff(String fileNameTemplate, PgDiffArguments args, String typesForCompare)
+            throws InterruptedException, IOException {
+        MetaContainer dbNew = loadAndAnalyze(fileNameTemplate, args, FILES_POSTFIX.NEW_SQL);
         Assertions.assertEquals(typesForCompare,
                 getRelationColumnsTypes(dbNew), "File: " + fileNameTemplate);
     }

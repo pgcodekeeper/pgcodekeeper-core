@@ -12,8 +12,8 @@ import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser;
 import ru.taximaxim.codekeeper.core.sql.Keyword;
 import ru.taximaxim.codekeeper.core.sql.Keyword.LabelCategory;
 
+class KeywordAliasParseTest {
 
-public class KeywordAliasParseTest {
     @ParameterizedTest
     @EnumSource(LabelCategory.class)
     void testAliases(LabelCategory labelCategory) {
@@ -21,8 +21,8 @@ public class KeywordAliasParseTest {
         String as = labelCategory == LabelCategory.AS_LABEL ? "AS " : "";
         StringBuilder sb = new StringBuilder("SELECT ");
         Keyword.KEYWORDS.values().stream()
-        .filter(k -> k.getLabelCategory() == labelCategory)
-        .forEach(k -> sb.append("\nCol ").append(as).append(k.getKeyword()).append(','));
+            .filter(k -> k.getLabelCategory() == labelCategory)
+            .forEach(k -> sb.append("\nCol ").append(as).append(k.getKeyword()).append(','));
 
         sb.setLength(sb.length() - 1);
         sb.append(';');

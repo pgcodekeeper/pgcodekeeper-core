@@ -4,8 +4,6 @@ import java.io.IOException;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ru.taximaxim.codekeeper.core.schema.PgDatabase;
 
@@ -14,9 +12,7 @@ import ru.taximaxim.codekeeper.core.schema.PgDatabase;
  *
  * @author galiev_mr
  */
-public class MsDiffTest {
-
-    private static final Logger LOG = LoggerFactory.getLogger(MsDiffTest.class);
+class MsDiffTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -292,8 +288,7 @@ public class MsDiffTest {
             // TODO broken order, set default must be last
             "modify_ms_column_default_with_dep",
     })
-
-    public void runDiff(String fileNameTemplate) throws IOException, InterruptedException {
+    void runDiff(String fileNameTemplate) throws IOException, InterruptedException {
         PgDiffArguments args = new PgDiffArguments();
         args.setMsSql(true);
 

@@ -18,8 +18,7 @@ import ru.taximaxim.codekeeper.core.schema.PgDatabase;
  * Тестирует сравнение БД с неполным выбором различающихся объектов
  * @author botov_av
  */
-public class MsDiffDepciesTest {
-    private String userSelTemplate;
+class MsDiffDepciesTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -29,9 +28,7 @@ public class MsDiffDepciesTest {
             // user: t1
             "change_ms_table_usr_t1"
     })
-
-    public void runDiff(String userSelTemplate) throws IOException, InterruptedException {
-        this.userSelTemplate = userSelTemplate;
+    void runDiff(String userSelTemplate) throws IOException, InterruptedException {
         runDiff(userSelTemplate, false);
     }
 
@@ -50,13 +47,11 @@ public class MsDiffDepciesTest {
         // user: f2
         "change_ms_func_arg_usr_f2, true",
     })
-
     /**
      * Шаблон для выбора пользователя userSelTemplate, содержит часть БД, выбранную пользователем
      * _original.sql, _new.sql and _diff.sql to the file name
      */
-    public void runDiff(String userSelTemplate, Boolean isEnableDepcies) throws IOException, InterruptedException {
-        this.userSelTemplate = userSelTemplate;
+    void runDiff(String userSelTemplate, Boolean isEnableDepcies) throws IOException, InterruptedException {
         String dbTemplate = userSelTemplate.replaceAll("_usr.*", "");
         PgDiffArguments args = new PgDiffArguments();
 
@@ -64,9 +59,9 @@ public class MsDiffDepciesTest {
         args.setEnableFunctionBodiesDependencies(isEnableDepcies);
 
         PgDatabase oldDatabase = TestUtils.loadTestDump(
-                getUsrSelName(FILES_POSTFIX.ORIGINAL_SQL), MsDiffDepciesTest.class, args);
+                userSelTemplate + FILES_POSTFIX.ORIGINAL_SQL, MsDiffDepciesTest.class, args);
         PgDatabase newDatabase = TestUtils.loadTestDump(
-                getUsrSelName(FILES_POSTFIX.NEW_SQL), MsDiffDepciesTest.class, args);
+                userSelTemplate + FILES_POSTFIX.NEW_SQL, MsDiffDepciesTest.class, args);
         PgDatabase oldDbFull;
         PgDatabase newDbFull;
         if (userSelTemplate.equals(dbTemplate)) {
@@ -74,9 +69,9 @@ public class MsDiffDepciesTest {
             newDbFull = newDatabase;
         } else {
             oldDbFull = TestUtils.loadTestDump(
-                    getDbName(FILES_POSTFIX.ORIGINAL_SQL), MsDiffDepciesTest.class, args);
+                    dbTemplate + FILES_POSTFIX.ORIGINAL_SQL, MsDiffDepciesTest.class, args);
             newDbFull = TestUtils.loadTestDump(
-                    getDbName(FILES_POSTFIX.NEW_SQL), MsDiffDepciesTest.class, args);
+                    dbTemplate + FILES_POSTFIX.NEW_SQL, MsDiffDepciesTest.class, args);
         }
 
         TestUtils.runDiffSame(oldDbFull, dbTemplate, args);
@@ -88,13 +83,5 @@ public class MsDiffDepciesTest {
                 tree, oldDbFull, newDbFull, null, null);
 
         TestUtils.compareResult(script, userSelTemplate, MsDiffDepciesTest.class);
-    }
-
-    private String getUsrSelName(FILES_POSTFIX postfix) {
-        return userSelTemplate + postfix;
-    }
-
-    private String getDbName(FILES_POSTFIX postfix) {
-        return userSelTemplate.replaceAll("_usr.*", "") + postfix;
     }
 }

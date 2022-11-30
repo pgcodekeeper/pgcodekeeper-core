@@ -26,7 +26,8 @@ import ru.taximaxim.codekeeper.core.parsers.antlr.TSQLParser;
  * @author galiev_mr
  * @since 5.7.0
  */
-public class MsParserTest {
+class MsParserTest {
+
     @ParameterizedTest
     @ValueSource(strings =  {
             "ms_assemblies",
@@ -59,9 +60,8 @@ public class MsParserTest {
             "ms_update",
             "ms_users",
     })
-
-    public void runDiff(final String fileNameTemplate) throws IOException {
-        runDiff(fileNameTemplate,  0);
+    void parse(final String fileNameTemplate) throws IOException {
+        parse(fileNameTemplate, 0);
     }
 
     @ParameterizedTest
@@ -75,8 +75,7 @@ public class MsParserTest {
         "ms_statements, 31",
         "ms_xml_data_type, 1",
     })
-
-    public void runDiff(String fileNameTemplate, Integer allowedAmbiguity) throws IOException {
+    void parse(String fileNameTemplate, Integer allowedAmbiguity) throws IOException {
         List<Object> errors = new ArrayList<>();
         AtomicInteger ambiguity = new AtomicInteger();
 
@@ -100,6 +99,6 @@ public class MsParserTest {
 
         int count = ambiguity.intValue();
         Assertions.assertTrue(errors.isEmpty(), "File: " + fileNameTemplate + " - ANTLR Error");
-        Assertions.assertFalse(count != allowedAmbiguity, "File: " + fileNameTemplate + " - ANTLR Ambiguity " + count);
+        Assertions.assertEquals(allowedAmbiguity, count, "File: " + fileNameTemplate + " - ANTLR Ambiguity " + count);
     }
 }

@@ -26,18 +26,13 @@ import ru.taximaxim.codekeeper.core.parsers.antlr.SQLParser;
  * @author galiev_mr
  * @since 5.9.0
  */
-public class PlpgParserTest {
-
-    public void runDiff(String fileNameTemplate) throws IOException {
-        runDiff(fileNameTemplate, 0);
-    }
+class PlpgParserTest {
 
     @ParameterizedTest
     @CsvSource({
         "plpgsql, 21",
     })
-
-    public void runDiff(final String fileNameTemplate, int allowedAmbiguity) throws IOException {
+    void parse(final String fileNameTemplate, int allowedAmbiguity) throws IOException {
         List<Object> errors = new ArrayList<>();
         AtomicInteger ambiguity = new AtomicInteger();
 
@@ -61,6 +56,7 @@ public class PlpgParserTest {
 
         int count = ambiguity.intValue();
         Assertions.assertTrue(errors.isEmpty(), "File: " + fileNameTemplate + " - ANTLR Error");
-        Assertions.assertFalse(count != allowedAmbiguity, "File: " + fileNameTemplate + " - ANTLR Ambiguity " + count + " expected " + allowedAmbiguity);
+        Assertions.assertEquals(allowedAmbiguity, count,
+                "File: " + fileNameTemplate + " - ANTLR Ambiguity " + count + " expected " + allowedAmbiguity);
     }
 }

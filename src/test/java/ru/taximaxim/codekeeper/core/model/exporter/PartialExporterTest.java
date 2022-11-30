@@ -1,7 +1,6 @@
 package ru.taximaxim.codekeeper.core.model.exporter;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,11 +21,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import ru.taximaxim.codekeeper.core.Consts;
-import ru.taximaxim.codekeeper.core.PgCodekeeperException;
 import ru.taximaxim.codekeeper.core.PgDiffArguments;
 import ru.taximaxim.codekeeper.core.TestUtils;
 import ru.taximaxim.codekeeper.core.fileutils.TempDir;
-import ru.taximaxim.codekeeper.core.formatter.FormatterException;
 import ru.taximaxim.codekeeper.core.model.difftree.DiffTree;
 import ru.taximaxim.codekeeper.core.model.difftree.TreeElement;
 import ru.taximaxim.codekeeper.core.model.difftree.TreeFlattener;
@@ -89,14 +86,13 @@ import ru.taximaxim.codekeeper.core.schema.PgDatabase;
  *
  * @author ryabinin_av
  */
-
-public class PartialExporterTest {
+class PartialExporterTest {
 
     private static PgDatabase dbSource;
     private static PgDatabase dbTarget;
 
     @BeforeAll
-    public static void initDiffTree() throws InterruptedException, IOException {
+    static void initDiffTree() throws InterruptedException, IOException {
         String sourceFilename = "TestPartialExportSource.sql";
         String targetFilename = "TestPartialExportTarget.sql";
         PgDiffArguments args = new PgDiffArguments();
@@ -112,10 +108,9 @@ public class PartialExporterTest {
         Assertions.assertNotNull(dbTarget);
     }
 
-
     @ParameterizedTest
     @MethodSource("generator")
-    void testExportPartial(PartialExportInfo info) throws IOException, URISyntaxException, FormatterException, PgCodekeeperException, InterruptedException {
+    void testExportPartial(PartialExportInfo info) throws Exception {
         info.setDiffTree(DiffTree.create(dbSource, dbTarget, null));
         Path exportDirFull = null;
         Path exportDirPartial = null;

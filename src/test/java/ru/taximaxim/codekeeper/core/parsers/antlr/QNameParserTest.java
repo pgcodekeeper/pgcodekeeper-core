@@ -3,58 +3,58 @@ package ru.taximaxim.codekeeper.core.parsers.antlr;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class QNameParserTest {
+class QNameParserTest {
 
     private static final String SCHEMA = "schema";
     private static final String TABLE = "table";
     private static final Object COLUMN = "column";
 
     @Test
-    public void testParseSchemaBothQuoted() {
+    void testParseSchemaBothQuoted() {
         Assertions.assertEquals(SCHEMA, QNameParser.parsePg("\"schema\".\"table\"").getSchemaName());
     }
 
     @Test
-    public void testParseSchemaFirstQuoted() {
+    void testParseSchemaFirstQuoted() {
         Assertions.assertEquals(SCHEMA, QNameParser.parsePg("\"schema\".table").getSchemaName());
     }
 
     @Test
-    public void testParseSchemaSecondQuoted() {
+    void testParseSchemaSecondQuoted() {
         Assertions.assertEquals(SCHEMA, QNameParser.parsePg("schema.\"table\"").getSchemaName());
     }
 
     @Test
-    public void testParseSchemaNoneQuoted() {
+    void testParseSchemaNoneQuoted() {
         Assertions.assertEquals(SCHEMA, QNameParser.parsePg("schema.table").getSchemaName());
     }
 
     @Test
-    public void testParseSchemaThreeQuoted() {
+    void testParseSchemaThreeQuoted() {
         Assertions.assertEquals(SCHEMA, QNameParser.parsePg("\"schema\".\"table\".\"column\"").getSchemaName());
     }
 
     @Test
-    public void testParseObjectBothQuoted() {
+    void testParseObjectBothQuoted() {
         Assertions.assertEquals(TABLE, QNameParser.parsePg("\"schema\".\"table\"").getFirstName());
     }
 
-    public void testParseObjectFirstQuoted() {
+    void testParseObjectFirstQuoted() {
         Assertions.assertEquals(TABLE, QNameParser.parsePg("\"schema\".table").getFirstName());
     }
 
     @Test
-    public void testParseObjectSecondQuoted() {
+    void testParseObjectSecondQuoted() {
         Assertions.assertEquals(TABLE, QNameParser.parsePg("schema.\"table\"").getFirstName());
     }
 
     @Test
-    public void testParseObjectNoneQuoted() {
+    void testParseObjectNoneQuoted() {
         Assertions.assertEquals(TABLE, QNameParser.parsePg("schema.table").getFirstName());
     }
 
     @Test
-    public void testParseObjectThreeQuoted() {
+    void testParseObjectThreeQuoted() {
         Assertions.assertEquals(COLUMN, QNameParser.parsePg("\"schema\".\"table\".\"column\"").getFirstName());
     }
 }

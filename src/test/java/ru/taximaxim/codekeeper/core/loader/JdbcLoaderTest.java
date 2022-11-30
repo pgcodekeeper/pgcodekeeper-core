@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import ru.taximaxim.codekeeper.core.PgDiffUtils;
 
-public class JdbcLoaderTest {
+class JdbcLoaderTest {
 
     @Test
-    public void functionDollars() {
+    void functionDollars() {
         String def = "asdad$_XXXXXXX_XXXXXXXasdaasdsad";
         Assertions.assertEquals(
                 PgDiffUtils.quoteStringDollar(def),
