@@ -1,12 +1,9 @@
 [![Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+[![](https://jitpack.io/v/pgcodekeeper/pgcodekeeper-core.svg)](https://jitpack.io/#pgcodekeeper/pgcodekeeper-core)
 
 # pgCodeKeeper-core
 
-The core module containing database schema classes and loaders, comparison logic, SQL code generators and parsers.
-
-## Download
-
-pgCodeKeeper requires Java (JRE) 11+ to run.
+The core pgCodeKeeper module containing database schema classes and loaders, comparison logic, SQL code generators and parsers.
 
 ## Documentation
 
@@ -14,7 +11,26 @@ pgCodeKeeper requires Java (JRE) 11+ to run.
 
 ## Build
 
-Build requires Java (JDK) 11+ and Apache Maven 3.6+.
+You can add pgcodekeeper-core as a dependency from the JitPack repository:
+
+```xml
+  <repositories>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    ...
+    <dependency>
+      <groupId>com.github.pgcodekeeper</groupId>
+      <artifactId>pgcodekeeper-core</artifactId>
+      <version>version</version>
+    </dependency>
+    ...
+  </dependencies>
+```
 
 ## Notes
 

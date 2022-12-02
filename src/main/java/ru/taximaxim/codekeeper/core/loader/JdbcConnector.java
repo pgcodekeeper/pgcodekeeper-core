@@ -23,6 +23,8 @@ public class JdbcConnector {
 
     private static final Logger LOG = LoggerFactory.getLogger(JdbcConnector.class);
 
+    private static final int DEFAULT_PORT = 5432;
+
     protected String host;
     protected int port;
     protected String user;
@@ -77,7 +79,7 @@ public class JdbcConnector {
     public JdbcConnector(String host, int port, String user, String pass, String dbName,
             Map<String, String> properties, boolean readOnly, String timezone) {
         this.host = host;
-        this.port = port < 1 ? Consts.JDBC_CONSTS.JDBC_DEFAULT_PORT : port;
+        this.port = port < 1 ? DEFAULT_PORT : port;
         this.dbName = dbName;
         this.user = user.isEmpty() ? System.getProperty("user.name") : user;
         this.pass = pass == null || pass.isEmpty() ? getPgPassPassword() : pass;
@@ -140,7 +142,7 @@ public class JdbcConnector {
             }
         }
         this.host = host == null ? "" : host;
-        this.port = port < 1 ? Consts.JDBC_CONSTS.JDBC_DEFAULT_PORT : port;
+        this.port = port < 1 ? DEFAULT_PORT : port;
         this.dbName = dbName == null ? "" : dbName;
         this.user = user == null || user.isEmpty() ? System.getProperty("user.name") : user;
         this.pass = pass == null || pass.isEmpty() ? getPgPassPassword() : pass;

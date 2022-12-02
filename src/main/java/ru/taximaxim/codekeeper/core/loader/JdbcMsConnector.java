@@ -17,6 +17,7 @@ import ru.taximaxim.codekeeper.core.Consts;
 public class JdbcMsConnector extends JdbcConnector {
 
     private static final int DEFAULT_PORT = 1433;
+
     private static final Pattern PATTERN_PROPERTIES =
             Pattern.compile(";(?:(\\w+)=(\\w+|\\{[^}]*\\})?)?");
 
