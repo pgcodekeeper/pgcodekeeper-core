@@ -21,6 +21,8 @@ public class JdbcMsConnector extends JdbcConnector {
     private static final Pattern PATTERN_PROPERTIES =
             Pattern.compile(";(?:(\\w+)=(\\w+|\\{[^}]*\\})?)?");
 
+    private static final String MS_DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+
     private final boolean winAuth;
     private String domain;
 
@@ -113,6 +115,11 @@ public class JdbcMsConnector extends JdbcConnector {
     }
 
     @Override
+    protected String getDriverName() {
+        return MS_DRIVER;
+    }
+
+    @Override
     protected String generateBasicConnectionString() {
         return "jdbc:sqlserver://" + host + ':' + port
                 + (isDbNameEscapable() ? ";databaseName={" + dbName + '}' : "");
@@ -143,7 +150,7 @@ public class JdbcMsConnector extends JdbcConnector {
     }
 
     @Override
-    protected Connection establishConnection() throws SQLException, IOException {
+    protected Connection establishConnection() throws SQLException, IOException, ClassNotFoundException {
         try {
             return super.establishConnection();
         } catch (SQLException ex) {

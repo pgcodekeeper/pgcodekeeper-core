@@ -23,6 +23,8 @@ public class JdbcConnector {
 
     private static final Logger LOG = LoggerFactory.getLogger(JdbcConnector.class);
 
+    private static final String PG_DRIVER = "org.postgresql.Driver";
+
     private static final int DEFAULT_PORT = 5432;
 
     protected String host;
@@ -175,15 +177,20 @@ public class JdbcConnector {
             Connection connection = establishConnection();
             connection.setReadOnly(readOnly);
             return connection;
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             throw new IOException(e.getLocalizedMessage(), e);
         }
     }
 
-    protected Connection establishConnection() throws SQLException, IOException {
+    protected Connection establishConnection() throws SQLException, IOException, ClassNotFoundException {
         LOG.info("Establishing JDBC connection with host:port {}:{}, db name {}, username {}",
                 host, port, dbName, user);
+        Class.forName(getDriverName());
         return DriverManager.getConnection(url, makeProperties());
+    }
+
+    protected String getDriverName() {
+        return PG_DRIVER;
     }
 
     protected Properties makeProperties() {
@@ -200,7 +207,7 @@ public class JdbcConnector {
         if (coreVer == null) {
             coreVer = "unknown";
         }
-        props.setProperty("ApplicationName", "pgCodeKeeper core module, Bundle-Version: " + coreVer);
+        props.setProperty("ApplicationName", "pgCodeKeeper core module, version: " + coreVer);
 
         return props;
     }
