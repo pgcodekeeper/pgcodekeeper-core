@@ -214,7 +214,7 @@ public class PgDiff {
 
     public String diffDatabaseSchemas(PgDatabase oldDbFull, PgDatabase newDbFull,
             IgnoreList ignoreList) throws InterruptedException, IOException {
-        TreeElement root = DiffTree.create(oldDbFull, newDbFull, null);
+        TreeElement root = DiffTree.create(oldDbFull, newDbFull);
         root.setAllChecked();
         return arguments.isMsSql() ? diffMsDatabaseSchemas(root, oldDbFull, newDbFull, null, null, ignoreList) :
             diffDatabaseSchemasAdditionalDepcies(root, oldDbFull, newDbFull, null, null, ignoreList);

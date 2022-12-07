@@ -4,7 +4,7 @@
 
 	<groupId>ru.taximaxim.codekeeper</groupId>
 	<artifactId>codekeeper-core</artifactId>
-	<version>8.0.1</version>
+	<version>8.0.2</version>
 	<packaging>jar</packaging>
 
 	<properties>
@@ -62,7 +62,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.5.0</version>
+			<version>42.5.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -132,29 +132,6 @@
 						<id>antlr</id>
 						<goals>
 							<goal>antlr4</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.4.1</version>
-				<configuration>
-					<failOnError>true</failOnError>
-					<sourceFileExcludes>
-						<sourceFileExclude>**/parsers/antlr/SQL*.java</sourceFileExclude>
-						<sourceFileExclude>**/parsers/antlr/TSQL*.java</sourceFileExclude>
-						<sourceFileExclude>**/parsers/antlr/Ignore*.java</sourceFileExclude>
-						<sourceFileExclude>**/parsers/antlr/Privileges*.java</sourceFileExclude>
-					</sourceFileExcludes>
-				</configuration>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
 						</goals>
 					</execution>
 				</executions>
