@@ -15,18 +15,18 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.loader.DatabaseLoader;
 import org.pgcodekeeper.core.loader.LibraryLoader;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.settings.TestCoreSettings;
+import org.pgcodekeeper.core.settings.CoreSettings;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 class LibDiffTest {
 
@@ -58,7 +58,7 @@ class LibDiffTest {
 
     void runDiff(String fileNameTemplate, List<String> libList, boolean isIgnorePrivileges)
             throws IOException, InterruptedException, URISyntaxException {
-        var settings = new TestCoreSettings();
+        var settings = new CoreSettings();
         settings.setIgnorePrivileges(isIgnorePrivileges);
         List<String> libs = new ArrayList<>();
         for (String lib : libList) {

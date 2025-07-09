@@ -15,20 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.exporter;
 
-import java.io.IOException;
-import java.nio.file.FileVisitOption;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,65 +26,71 @@ import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeFlattener;
-import org.pgcodekeeper.core.model.exporter.ModelExporter;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.settings.TestCoreSettings;
+import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.utils.TempDir;
+
+import java.io.IOException;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Test for partial export
- *
+ * <p>
  * <!--
  * Below is the list of differences between DBs in TestPartialExportSource.sql
  * and TestPartialExportTarget.sql:
- *
+ * <p>
  * DELETED (exist in Source only):
- *      (TABLE)         public.t2
- *      (TRIGGER)       public.t2.t2_trigger
- *      (INDEX)         public.t2.t2_c5_idx
- *      (CONSTRAINT)    public.t2.constr_t2
- *
- *      (SEQUENCE)      public.t2_c1_seq
- *
- *      (FUNCTION)      public.proc(integer)
- *      (FUNCTION)      public.proc(integer, timestamp without time zone)
- *
- *      (FUNCTION)      public.fun2()
- *
- *      (SCHEMA)        test
- *      (TABLE)         test.test_table
- *      (INDEX)         test.test_table.test_table_c1_idx
- *      (INDEX)         test.test_table.test_table_c2_idx
- *      (CONSTRAINT)    test.test_table.contr_testtable_c5
- *      (TABLE)         test.test_table_2
- *
+ * (TABLE)         public.t2
+ * (TRIGGER)       public.t2.t2_trigger
+ * (INDEX)         public.t2.t2_c5_idx
+ * (CONSTRAINT)    public.t2.constr_t2
+ * <p>
+ * (SEQUENCE)      public.t2_c1_seq
+ * <p>
+ * (FUNCTION)      public.proc(integer)
+ * (FUNCTION)      public.proc(integer, timestamp without time zone)
+ * <p>
+ * (FUNCTION)      public.fun2()
+ * <p>
+ * (SCHEMA)        test
+ * (TABLE)         test.test_table
+ * (INDEX)         test.test_table.test_table_c1_idx
+ * (INDEX)         test.test_table.test_table_c2_idx
+ * (CONSTRAINT)    test.test_table.contr_testtable_c5
+ * (TABLE)         test.test_table_2
+ * <p>
  * MODIFIED:
- *      (TABLE)         public.rep2_workpool_data
- *      (TABLE)         public.table1
- *      (INDEX)         public.table1.idx_table1
- *      (CONSTRAINT)    public.table1.chk_table1 (GROUP: table1 changed as well)
- *      (TABLE)         public.t_auto_mark
- *      (TABLE)         public.t1
- *      (CONSTRAINT)    public.t1.t1_c2_key
- *      (TRIGGER)       public.t1.t1_trigger
- *      (TABLE)         public.t3
- *      (TABLE)         public.t4
- *      (CONSTRAINT)    public.t4.t4_c2_key
- *      (TABLE)         public.t5
- *      (INDEX)         public.t5.t5_c1_idx
- *      (FUNCTION)      public.fun1()
- *
+ * (TABLE)         public.rep2_workpool_data
+ * (TABLE)         public.table1
+ * (INDEX)         public.table1.idx_table1
+ * (CONSTRAINT)    public.table1.chk_table1 (GROUP: table1 changed as well)
+ * (TABLE)         public.t_auto_mark
+ * (TABLE)         public.t1
+ * (CONSTRAINT)    public.t1.t1_c2_key
+ * (TRIGGER)       public.t1.t1_trigger
+ * (TABLE)         public.t3
+ * (TABLE)         public.t4
+ * (CONSTRAINT)    public.t4.t4_c2_key
+ * (TABLE)         public.t5
+ * (INDEX)         public.t5.t5_c1_idx
+ * (FUNCTION)      public.fun1()
+ * <p>
  * NEW (exist in Target only):
- *      (FUNCTION)      public.fun3()
- *      (FUNCTION)      public.fun3(integer)
- *      (SCHEMA)        newschema
- *      (CONSTRAINT)    public.t3.constr_t3
- *      (TRIGGER)       public.t3.t3_trigger
- *      (VIEW)          public.v1
- *      (TABLE)         public.t/1
- *      (TABLE)         public.t_1
- *      (TABLE)         public.t?1
- *  -->
+ * (FUNCTION)      public.fun3()
+ * (FUNCTION)      public.fun3(integer)
+ * (SCHEMA)        newschema
+ * (CONSTRAINT)    public.t3.constr_t3
+ * (TRIGGER)       public.t3.t3_trigger
+ * (VIEW)          public.v1
+ * (TABLE)         public.t/1
+ * (TABLE)         public.t_1
+ * (TABLE)         public.t?1
+ * -->
  *
  * @author ryabinin_av
  */
@@ -111,7 +103,7 @@ public class PartialExporterTest {
     static void initDiffTree() throws InterruptedException, IOException {
         String sourceFilename = "TestPartialExportSource.sql";
         String targetFilename = "TestPartialExportTarget.sql";
-        var settings = new TestCoreSettings();
+        var settings = new CoreSettings();
         settings.setInCharsetName(Consts.UTF_8);
         dbSource = TestUtils.loadTestDump(sourceFilename, PartialExporterTest.class, settings, false);
         dbTarget = TestUtils.loadTestDump(targetFilename, PartialExporterTest.class, settings, false);
@@ -126,12 +118,12 @@ public class PartialExporterTest {
         TreeElement tree = DiffTree.create(dbSource, dbTarget);
         Path exportDirFull = null;
         Path exportDirPartial = null;
-        try  (TempDir dirFull = new TempDir("pgCodekeeper-test-files");
-                TempDir dirPartial = new TempDir("pgCodekeeper-test-export-partial")) {
+        try (TempDir dirFull = new TempDir("pgCodekeeper-test-files");
+             TempDir dirPartial = new TempDir("pgCodekeeper-test-export-partial")) {
             exportDirFull = dirFull.get();
             exportDirPartial = dirPartial.get();
 
-            var settings = new TestCoreSettings();
+            var settings = new CoreSettings();
 
             // full export of source
             new ModelExporter(exportDirFull, dbSource, DatabaseType.PG, Consts.UTF_8, settings).exportFull();
@@ -146,7 +138,7 @@ public class PartialExporterTest {
                     .flatten(tree);
             // apply partial changes to the full database
             new ModelExporter(exportDirPartial, dbTarget, dbSource, DatabaseType.PG, list, Consts.UTF_8, settings)
-            .exportPartial();
+                    .exportPartial();
 
             walkAndComare(exportDirFull, exportDirPartial, info);
         }
@@ -215,13 +207,15 @@ abstract class PartialExportInfo {
 
     public abstract void setUserSelection(TreeElement diffTree);
 
-    public Map<String, String> modifiedFiles(){
+    public Map<String, String> modifiedFiles() {
         return new HashMap<>();
     }
-    public List<String> newFiles(){
+
+    public List<String> newFiles() {
         return Collections.emptyList();
     }
-    public List<String> deletedFiles(){
+
+    public List<String> deletedFiles() {
         return Collections.emptyList();
     }
 }

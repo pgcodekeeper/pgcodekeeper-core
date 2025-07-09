@@ -15,12 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -30,9 +24,14 @@ import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
-import org.pgcodekeeper.core.model.graph.DepcyTreeExtender;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.settings.TestCoreSettings;
+import org.pgcodekeeper.core.settings.CoreSettings;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * An 'factory' that creates 'artificial' predefined objects
@@ -60,6 +59,7 @@ interface TreeElementCreator {
 class DepcyTreeExtenderTest {
     /**
      * Тестирует зависимости от новых(и возможных edit) объектов, полученные из dte
+     *
      * @throws IOException
      * @throws InterruptedException
      */
@@ -70,7 +70,7 @@ class DepcyTreeExtenderTest {
          * Index of the file that should be tested.
          */
 
-        var settings = new TestCoreSettings();
+        var settings = new CoreSettings();
 
         String fileName = "depcy_schema_" + fileIndex + ".sql";
         String targetFileName = "depcy_schema_new_" + fileIndex + ".sql";
@@ -106,7 +106,6 @@ class DepcyTreeExtenderTest {
  * колонок нет в дереве)
  *
  * @author botov_av
- *
  */
 class Predefined1 implements TreeElementCreator {
 
@@ -134,10 +133,11 @@ class Predefined1 implements TreeElementCreator {
         return new HashSet<>(Arrays.asList(table, publicSchema, view));
     }
 }
+
 /**
  * Различаются объекты: меняется сиквенс, пользователь выбрал его
- * @author botov_av
  *
+ * @author botov_av
  */
 class Predefined2 implements TreeElementCreator {
 
@@ -160,7 +160,7 @@ class Predefined2 implements TreeElementCreator {
 /**
  * Тест устарел по причине разрыва цикла зависимостей между таблицей и сиквенсом.
  * Код закомментирован по этой причине.
- *
+ * <p>
  * Различаются объекты: новый сиквенс, пользователь выбрал его.
  */
 class Predefined3 implements TreeElementCreator {
@@ -189,7 +189,6 @@ class Predefined3 implements TreeElementCreator {
  * выбрал сиквенс, по зависимости подтянулась схема
  *
  * @author botov_av
- *
  */
 class Predefined4 implements TreeElementCreator {
 
@@ -214,7 +213,6 @@ class Predefined4 implements TreeElementCreator {
  * выбрал внешний ключ, по зависимости тянется новая таблица
  *
  * @author botov_av
- *
  */
 class Predefined5 implements TreeElementCreator {
 

@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -30,7 +26,11 @@ import org.pgcodekeeper.core.loader.PgDumpLoader;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.settings.TestCoreSettings;
+import org.pgcodekeeper.core.settings.CoreSettings;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
 
 class ObjReferencesTest {
 
@@ -206,7 +206,7 @@ class ObjReferencesTest {
     }
 
     void compareReferences(String fileNameTemplate, DatabaseType dbType) throws IOException, InterruptedException {
-        var settings = new TestCoreSettings();
+        var settings = new CoreSettings();
         settings.setDbType(dbType);
 
         String resource = fileNameTemplate + FILES_POSTFIX.SQL;

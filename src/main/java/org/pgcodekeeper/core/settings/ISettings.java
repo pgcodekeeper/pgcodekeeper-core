@@ -15,11 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.settings;
 
-import java.util.Collection;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.formatter.FormatConfiguration;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
+
+import java.util.Collection;
 
 public interface ISettings {
 
@@ -74,10 +74,4 @@ public interface ISettings {
     Collection<String> getPreFilePath();
 
     Collection<String> getPostFilePath();
-
-    // FIXME move to implementation
-    ISettings createTempSettings(boolean isIgnorePriv);
-
-    // FIXME move to implementation
-    ISettings createTempSettings(String inCharsetName);
 }

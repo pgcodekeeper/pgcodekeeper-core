@@ -15,12 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
-import java.io.IOException;
-
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.settings.TestCoreSettings;
+import org.pgcodekeeper.core.settings.CoreSettings;
+
+import java.io.IOException;
 
 /**
  * Tests for migrate data option .
@@ -55,7 +55,7 @@ class MoveDataDiffTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings ={
+    @ValueSource(strings = {
             // implementation for data movement test in MS (without identity columns)
             "drop_ms_table",
             "move_data_ms",
@@ -66,7 +66,7 @@ class MoveDataDiffTest {
     }
 
     void runDiff(String fileNameTemplate, DatabaseType dbType) throws IOException, InterruptedException {
-        var settings = new TestCoreSettings();
+        var settings = new CoreSettings();
         settings.setDataMovementMode(true);
         settings.setDbType(dbType);
         AbstractDatabase dbOld = TestUtils.loadTestDump(

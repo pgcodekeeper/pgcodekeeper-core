@@ -15,6 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
+import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.libraries.PgLibrary;
+import org.pgcodekeeper.core.libraries.PgLibrarySource;
+import org.pgcodekeeper.core.schema.AbstractDatabase;
+import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.FileUtils;
+import org.pgcodekeeper.core.xmlstore.DependenciesXmlStore;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -22,21 +32,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
-
-import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.libraries.PgLibrary;
-import org.pgcodekeeper.core.libraries.PgLibrarySource;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.FileUtils;
-import org.pgcodekeeper.core.xmlstore.DependenciesXmlStore;
 
 public final class LibraryLoader extends DatabaseLoader {
 
@@ -63,7 +60,7 @@ public final class LibraryLoader extends DatabaseLoader {
     }
 
     public void loadLibraries(ISettings settings, boolean isIgnorePriv,
-            Collection<String> paths) throws InterruptedException, IOException {
+                              Collection<String> paths) throws InterruptedException, IOException {
         for (String path : paths) {
             database.addLib(getLibrary(path, settings, isIgnorePriv), path, null);
         }
@@ -98,25 +95,25 @@ public final class LibraryLoader extends DatabaseLoader {
         }
 
         ISettings copySettings;
-        if (!settings.isIgnorePrivileges()) {
-            copySettings = settings.createTempSettings(isIgnorePriv);
+        if (!settings.isIgnorePrivileges() && settings instanceof CoreSettings coreSettings) {
+            copySettings = coreSettings.createTempSettings(isIgnorePriv);
         } else {
             copySettings = settings;
         }
 
         switch (PgLibrarySource.getSource(path)) {
-        case JDBC:
-            return loadJdbc(copySettings, path);
-        case URL:
-            try {
-                return loadURI(new URI(path), copySettings, isIgnorePriv);
-            } catch (URISyntaxException ex) {
-                // shouldn't happen, already checked by getSource
-                // not URI, try to folder or file
-                break;
-            }
-        case LOCAL:
-            // continue below
+            case JDBC:
+                return loadJdbc(copySettings, path);
+            case URL:
+                try {
+                    return loadURI(new URI(path), copySettings, isIgnorePriv);
+                } catch (URISyntaxException ex) {
+                    // shouldn't happen, already checked by getSource
+                    // not URI, try to folder or file
+                    break;
+                }
+            case LOCAL:
+                // continue below
         }
         Path p = Paths.get(path);
         if (!p.isAbsolute() && xmlPath != null) {

@@ -15,19 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.URIUtil;
 import org.junit.jupiter.api.Assertions;
@@ -44,8 +31,21 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.ch.ChSchema;
 import org.pgcodekeeper.core.schema.ms.MsSchema;
 import org.pgcodekeeper.core.schema.pg.PgSchema;
+import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.settings.TestCoreSettings;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public final class TestUtils {
 
@@ -73,14 +73,14 @@ public final class TestUtils {
     }
 
     public static AbstractDatabase createDumpDB(DatabaseType dbType) {
-        var settings = new TestCoreSettings();
+        var settings = new CoreSettings();
         settings.setDbType(dbType);
         AbstractDatabase db = DatabaseLoader.createDb(settings);
         AbstractSchema schema = switch (dbType) {
-        case PG -> new PgSchema(Consts.PUBLIC);
-        case MS -> new MsSchema(Consts.DBO);
-        case CH -> new ChSchema(Consts.CH_DEFAULT_DB);
-        default -> throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + dbType);
+            case PG -> new PgSchema(Consts.PUBLIC);
+            case MS -> new MsSchema(Consts.DBO);
+            case CH -> new ChSchema(Consts.CH_DEFAULT_DB);
+            default -> throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + dbType);
         };
         db.addSchema(schema);
         db.setDefaultSchema(schema.getName());
@@ -98,7 +98,7 @@ public final class TestUtils {
     }
 
     public static void compareResult(String script, String template,
-            Class<?> clazz) throws IOException {
+                                     Class<?> clazz) throws IOException {
         Assertions.assertEquals(
                 readResource(template + FILES_POSTFIX.DIFF_SQL, clazz).trim(),
                 script.trim());
@@ -112,17 +112,17 @@ public final class TestUtils {
 
     public static void createIgnoredSchemaFile(Path dir) throws IOException {
         String rule = """
-            SHOW ALL
-            HIDE NONE country
-            HIDE NONE worker
-            HIDE REGEX 'ignore.*'""";
+                SHOW ALL
+                HIDE NONE country
+                HIDE NONE worker
+                HIDE REGEX 'ignore.*'""";
         Files.writeString(dir.resolve(".pgcodekeeperignoreschema"), rule);
     }
 
     public static void createIgnoreListFile(Path dir) throws IOException {
         String rule = """
-            SHOW ALL
-            HIDE REGEX 'people.*'""";
+                SHOW ALL
+                HIDE REGEX 'people.*'""";
         Files.writeString(dir.resolve(".pgcodekeeperignore"), rule);
     }
 
@@ -132,18 +132,18 @@ public final class TestUtils {
     }
 
     static void runDiff(String fileNameTemplate, DatabaseType dbType, Class<?> clazz) throws IOException, InterruptedException {
-        var settings = new TestCoreSettings();
+        var settings = new CoreSettings();
         settings.setDbType(dbType);
         String script = getScript(fileNameTemplate, settings, clazz);
         TestUtils.compareResult(script, fileNameTemplate, clazz);
     }
 
-    static String getScript(String fileNameTemplate, TestCoreSettings settings, Class<?> clazz)
+    static String getScript(String fileNameTemplate, CoreSettings settings, Class<?> clazz)
             throws IOException, InterruptedException {
         return getScript(fileNameTemplate, settings, clazz, false);
     }
 
-    static String getScript(String fileNameTemplate, TestCoreSettings settings, Class<?> clazz, boolean needTransaction)
+    static String getScript(String fileNameTemplate, CoreSettings settings, Class<?> clazz, boolean needTransaction)
             throws IOException, InterruptedException {
         AbstractDatabase dbOld = TestUtils.loadTestDump(fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, settings);
         TestUtils.runDiffSame(dbOld, fileNameTemplate, settings);
@@ -156,7 +156,7 @@ public final class TestUtils {
     }
 
     public static void testDepcy(String dbTemplate, String userTemplateName, Map<String, DbObjType> selectedObjs,
-            Class<?> clazz, ISettings settings) throws IOException, InterruptedException {
+                                 Class<?> clazz, ISettings settings) throws IOException, InterruptedException {
         AbstractDatabase oldDbFull = TestUtils.loadTestDump(dbTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, settings);
         AbstractDatabase newDbFull = TestUtils.loadTestDump(dbTemplate + FILES_POSTFIX.NEW_SQL, clazz, settings);
 
@@ -184,7 +184,7 @@ public final class TestUtils {
      * @param newDbFull    - new state of {@link AbstractDatabase}
      */
     private static void setSelected(Map<String, DbObjType> selectedObjs, TreeElement tree, AbstractDatabase oldDbFull,
-            AbstractDatabase newDbFull) {
+                                    AbstractDatabase newDbFull) {
         if (null == selectedObjs) {
             tree.setAllChecked();
             return;

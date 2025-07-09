@@ -15,13 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.verification;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Properties;
-import java.util.stream.Collectors;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,7 +23,14 @@ import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.loader.TokenLoader;
 import org.pgcodekeeper.core.parsers.antlr.verification.VerificationProperties;
-import org.pgcodekeeper.core.settings.TestCoreSettings;
+import org.pgcodekeeper.core.settings.CoreSettings;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Properties;
+import java.util.stream.Collectors;
 
 public class VerificationTest {
     private static final String RIGHT = "_right";
@@ -72,7 +72,7 @@ public class VerificationTest {
         rules.setProperty(paramKey, paramVal);
 
         String sourcePath = TestUtils.getPathToResource(fileName + FILES_POSTFIX.SQL, getClass()).toString();
-        List<Object> errors = TokenLoader.verify(new TestCoreSettings(), new VerificationProperties(rules),
+        List<Object> errors = TokenLoader.verify(new CoreSettings(), new VerificationProperties(rules),
                 List.of(sourcePath));
         String expectedErr = TestUtils.readResource(fileName + FILES_POSTFIX.ERRORS_TXT, getClass());
 
@@ -85,7 +85,7 @@ public class VerificationTest {
         Path path = TestUtils.getPathToResource("rules.properties", getClass());
         String sourcePathRight = TestUtils.getPathToResource(fileName + RIGHT + FILES_POSTFIX.SQL, getClass()).toString();
         String sourcePath = TestUtils.getPathToResource(fileName + FILES_POSTFIX.SQL, getClass()).toString();
-        List<Object> errors = TokenLoader.verify(new TestCoreSettings(), path, List.of(sourcePath, sourcePathRight));
+        List<Object> errors = TokenLoader.verify(new CoreSettings(), path, List.of(sourcePath, sourcePathRight));
         String expectedErr = TestUtils.readResource(fileName + FILES_POSTFIX.ERRORS_TXT, getClass());
         Assertions.assertEquals(expectedErr, errors.stream().map(Object::toString).collect(Collectors.joining("\n")));
     }
