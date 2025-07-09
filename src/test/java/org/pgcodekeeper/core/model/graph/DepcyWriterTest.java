@@ -15,19 +15,18 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
-import org.pgcodekeeper.core.model.graph.DepcyFinder;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.settings.TestCoreSettings;
+import org.pgcodekeeper.core.settings.CoreSettings;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 public class DepcyWriterTest {
 
@@ -59,24 +58,24 @@ public class DepcyWriterTest {
 
     @ParameterizedTest
     @CsvSource({
-        "table, public.t1",
-        "regex, public\\.t.",
-        //test searching deps of object "MyTable" by name without quotes and case insensitive mode for PG
-        "quotes, public.mytable",
-        //test searching deps of object "MyTable" by name with quotes for PG
-        "quotes, public.\"mytable\"",
-        // test searching deps of function by full name
-        "function_circle, public.f1\\(\\)",
-        //test searching deps of function by name with regex for PG
-        "function_circle, 'public\\.f1\\(.*'",
-        //test searching deps of function by name without parens for PG
-        "function_circle, 'public\\.f1'",
-        //test searching deps of function by name with quotes and without parens for PG
-        "function_circle_quotes, 'public\\.\"Func1\"\\(.*'",
-        //test searching deps of quoted function by name without quotes and parens for PG
-        "function_circle_quotes, 'public\\.func1'",
-        //test searching deps of table with system versioning
-        "ms_sys_ver_table, '\\[dbo\\]\\.\\[t1\\]'",
+            "table, public.t1",
+            "regex, public\\.t.",
+            //test searching deps of object "MyTable" by name without quotes and case insensitive mode for PG
+            "quotes, public.mytable",
+            //test searching deps of object "MyTable" by name with quotes for PG
+            "quotes, public.\"mytable\"",
+            // test searching deps of function by full name
+            "function_circle, public.f1\\(\\)",
+            //test searching deps of function by name with regex for PG
+            "function_circle, 'public\\.f1\\(.*'",
+            //test searching deps of function by name without parens for PG
+            "function_circle, 'public\\.f1'",
+            //test searching deps of function by name with quotes and without parens for PG
+            "function_circle_quotes, 'public\\.\"Func1\"\\(.*'",
+            //test searching deps of quoted function by name without quotes and parens for PG
+            "function_circle_quotes, 'public\\.func1'",
+            //test searching deps of table with system versioning
+            "ms_sys_ver_table, '\\[dbo\\]\\.\\[t1\\]'",
     })
     void compareBothGraph(String fileName, String objectName) throws IOException, InterruptedException {
         compareGraph(fileName, FILES_POSTFIX.DEPS_TXT, objectName, false);
@@ -85,7 +84,7 @@ public class DepcyWriterTest {
 
     void compareGraph(String fileName, FILES_POSTFIX expectedPostfix, String objectName, boolean isReverse)
             throws IOException, InterruptedException {
-        var settings = new TestCoreSettings();
+        var settings = new CoreSettings();
         if (fileName.startsWith("ms_")) {
             settings.setDbType(DatabaseType.MS);
         } else if (fileName.startsWith("ch_")) {

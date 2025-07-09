@@ -15,11 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
-import java.io.IOException;
-
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.pgcodekeeper.core.settings.TestCoreSettings;
+import org.pgcodekeeper.core.settings.CoreSettings;
+
+import java.io.IOException;
 
 /**
  * Tests for MS SQL statements
@@ -338,7 +338,7 @@ class MsDiffTest {
             "modify_ms_constraint_column",
     })
     void testCorrectOrderScript(String fileNameTamplate) throws IOException, InterruptedException {
-        var settings = new TestCoreSettings();
+        var settings = new CoreSettings();
         settings.setDbType(DatabaseType.MS);
         String script = TestUtils.getScript(fileNameTamplate, settings, PgDiffTest.class, true);
         TestUtils.compareResult(script, fileNameTamplate, PgDiffTest.class);

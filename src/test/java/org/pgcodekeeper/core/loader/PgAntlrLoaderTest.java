@@ -19,44 +19,21 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import java.io.IOException;
-import java.nio.file.Path;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.TestUtils;
-import org.pgcodekeeper.core.loader.ProjectLoader;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.exporter.ModelExporter;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.AbstractSequence;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.Argument;
-import org.pgcodekeeper.core.schema.EventType;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.PgPrivilege;
-import org.pgcodekeeper.core.schema.SimpleColumn;
-import org.pgcodekeeper.core.schema.pg.PgColumn;
-import org.pgcodekeeper.core.schema.pg.PgCompositeType;
-import org.pgcodekeeper.core.schema.pg.PgConstraintCheck;
-import org.pgcodekeeper.core.schema.pg.PgConstraintFk;
-import org.pgcodekeeper.core.schema.pg.PgConstraintPk;
-import org.pgcodekeeper.core.schema.pg.PgExtension;
-import org.pgcodekeeper.core.schema.pg.PgFunction;
-import org.pgcodekeeper.core.schema.pg.PgIndex;
-import org.pgcodekeeper.core.schema.pg.PgRule;
-import org.pgcodekeeper.core.schema.pg.PgSchema;
-import org.pgcodekeeper.core.schema.pg.PgSequence;
-import org.pgcodekeeper.core.schema.pg.PgTrigger;
-import org.pgcodekeeper.core.schema.pg.PgView;
-import org.pgcodekeeper.core.schema.pg.SimplePgTable;
+import org.pgcodekeeper.core.schema.*;
+import org.pgcodekeeper.core.schema.pg.*;
 import org.pgcodekeeper.core.schema.pg.PgTrigger.TgTypes;
-import org.pgcodekeeper.core.settings.TestCoreSettings;
+import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.utils.TempDir;
+
+import java.io.IOException;
+import java.nio.file.Path;
 
 /**
  * Tests for PgDiffLoader class.
@@ -78,7 +55,7 @@ class PgAntlrLoaderTest {
 
     void loadSchema(String fileName, AbstractDatabase dbPredefined) throws IOException, InterruptedException {
         // first test the dump loader itself
-        var settings = new TestCoreSettings();
+        var settings = new CoreSettings();
         settings.setKeepNewlines(true);
         AbstractDatabase d = TestUtils.loadTestDump(fileName, PgAntlrLoaderTest.class, settings);
 
@@ -91,7 +68,7 @@ class PgAntlrLoaderTest {
 
     void exportFullDb(String fileName, AbstractDatabase dbPredefined) throws IOException, InterruptedException {
         // prepare db object from sql file
-        var settings = new TestCoreSettings();
+        var settings = new CoreSettings();
         settings.setKeepNewlines(true);
         AbstractDatabase dbFromFile = TestUtils.loadTestDump(fileName, PgAntlrLoaderTest.class, settings);
 
@@ -591,7 +568,7 @@ class PgAntlrLoaderTest {
         PgSequence seq = new PgSequence("user_id_seq");
         seq.setMinMaxInc(1L, null, null, null, 0L);
         seq.setCache("1");
-        seq.setOwnedBy(new GenericColumn("public", "user_data" ,"id", DbObjType.COLUMN));
+        seq.setOwnedBy(new GenericColumn("public", "user_data", "id", DbObjType.COLUMN));
         schema.addSequence(seq);
         seq.setOwner(POSTGRES);
 
@@ -842,7 +819,7 @@ class PgAntlrLoaderTest {
         seq.setCache("1");
         schema.addSequence(seq);
 
-        seq.setOwnedBy(new GenericColumn("public", "test" ,"id", DbObjType.COLUMN));
+        seq.setOwnedBy(new GenericColumn("public", "test", "id", DbObjType.COLUMN));
 
         seq.setOwner("fordfrog");
 
@@ -910,7 +887,7 @@ class PgAntlrLoaderTest {
         // view
         PgView view = new PgView("v_subselect");
         view.setQuery("SELECT c.id, t.id FROM ( SELECT t_work.id FROM public.t_work) t "
-                + "JOIN public.t_chart c ON t.id = c.id",
+                        + "JOIN public.t_chart c ON t.id = c.id",
                 "SELECT c.id, t.id FROM (SELECT t_work.id FROM public.t_work) t "
                         + "JOIN public.t_chart c ON t.id = c.id");
         schema.addView(view);
@@ -948,17 +925,17 @@ class PgAntlrLoaderTest {
         // view
         PgView view = new PgView("v_subselect");
         view.setQuery("""
-            SELECT c.id, t.id AS second, t.name
-              FROM (( SELECT w.id, m.name
-                FROM (( SELECT t_work.id FROM public.t_work) w
-                 JOIN public.t_memo m ON (((w.id)::text = m.name)))) t
-                  JOIN public.t_chart c ON ((t.id = c.id)))""",
+                        SELECT c.id, t.id AS second, t.name
+                          FROM (( SELECT w.id, m.name
+                            FROM (( SELECT t_work.id FROM public.t_work) w
+                             JOIN public.t_memo m ON (((w.id)::text = m.name)))) t
+                              JOIN public.t_chart c ON ((t.id = c.id)))""",
 
-                  """
-                  SELECT c.id, t.id AS second, t.name \
-                  FROM ((SELECT w.id, m.name FROM ((SELECT t_work.id FROM public.t_work) w \
-                  JOIN public.t_memo m ON (((w.id) :: text = m.name)))) t \
-                  JOIN public.t_chart c ON ((t.id = c.id)))""");
+                """
+                        SELECT c.id, t.id AS second, t.name \
+                        FROM ((SELECT w.id, m.name FROM ((SELECT t_work.id FROM public.t_work) w \
+                        JOIN public.t_memo m ON (((w.id) :: text = m.name)))) t \
+                        JOIN public.t_chart c ON ((t.id = c.id)))""");
         schema.addView(view);
 
         testDatabase("schema_17.sql", d);

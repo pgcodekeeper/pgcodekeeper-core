@@ -19,11 +19,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -37,8 +32,13 @@ import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.IRelation;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.schema.meta.MetaUtils;
-import org.pgcodekeeper.core.settings.TestCoreSettings;
+import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.utils.Pair;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Tests for checking column types.
@@ -66,7 +66,7 @@ class ExprTypeTest {
             "check_named_notation",
     })
     void runCheck(String fileNameTemplate) throws IOException, InterruptedException {
-        var settings = new TestCoreSettings();
+        var settings = new CoreSettings();
         String typesForCompare = TestUtils.readResource(
                 fileNameTemplate + FILES_POSTFIX.DIFF_SQL, getClass());
 
@@ -79,21 +79,21 @@ class ExprTypeTest {
             "compare_types_aster_ord_view",
     })
     void runCompare(String fileNameTemplate) throws IOException, InterruptedException {
-        var settings = new TestCoreSettings();
+        var settings = new CoreSettings();
         String typesForCompare = getRelationColumnsTypes(
                 loadAndAnalyze(fileNameTemplate, settings, FILES_POSTFIX.ORIGINAL_SQL));
 
         runDiff(fileNameTemplate, settings, typesForCompare);
     }
 
-    private void runDiff(String fileNameTemplate, TestCoreSettings settings, String typesForCompare)
+    private void runDiff(String fileNameTemplate, CoreSettings settings, String typesForCompare)
             throws InterruptedException, IOException {
         MetaContainer dbNew = loadAndAnalyze(fileNameTemplate, settings, FILES_POSTFIX.NEW_SQL);
         Assertions.assertEquals(typesForCompare,
                 getRelationColumnsTypes(dbNew), "File: " + fileNameTemplate);
     }
 
-    private MetaContainer loadAndAnalyze(String fileNameTemplate, TestCoreSettings settings, FILES_POSTFIX postfix)
+    private MetaContainer loadAndAnalyze(String fileNameTemplate, CoreSettings settings, FILES_POSTFIX postfix)
             throws InterruptedException, IOException {
         AbstractDatabase dbNew = TestUtils.loadTestDump(
                 fileNameTemplate + postfix, ExprTypeTest.class, settings, false);

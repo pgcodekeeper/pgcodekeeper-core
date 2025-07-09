@@ -15,37 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import java.io.IOException;
-import java.nio.file.Path;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.TestUtils;
-import org.pgcodekeeper.core.loader.ProjectLoader;
 import org.pgcodekeeper.core.model.exporter.ModelExporter;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.Argument;
-import org.pgcodekeeper.core.schema.FuncTypes;
-import org.pgcodekeeper.core.schema.PgPrivilege;
-import org.pgcodekeeper.core.schema.SimpleColumn;
-import org.pgcodekeeper.core.schema.ms.MsColumn;
-import org.pgcodekeeper.core.schema.ms.MsConstraintCheck;
-import org.pgcodekeeper.core.schema.ms.MsConstraintFk;
-import org.pgcodekeeper.core.schema.ms.MsConstraintPk;
-import org.pgcodekeeper.core.schema.ms.MsFunction;
-import org.pgcodekeeper.core.schema.ms.MsIndex;
-import org.pgcodekeeper.core.schema.ms.MsProcedure;
-import org.pgcodekeeper.core.schema.ms.MsSchema;
-import org.pgcodekeeper.core.schema.ms.MsSequence;
-import org.pgcodekeeper.core.schema.ms.MsTable;
-import org.pgcodekeeper.core.schema.ms.MsTrigger;
-import org.pgcodekeeper.core.schema.ms.MsType;
-import org.pgcodekeeper.core.schema.ms.MsView;
-import org.pgcodekeeper.core.settings.TestCoreSettings;
+import org.pgcodekeeper.core.schema.*;
+import org.pgcodekeeper.core.schema.ms.*;
+import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.utils.TempDir;
+
+import java.io.IOException;
+import java.nio.file.Path;
 
 /**
  * Tests for PgDiffLoader class.
@@ -76,7 +58,7 @@ class MsAntlrLoaderTest {
 
     void loadSchema(String fileName, AbstractDatabase dbPredefined) throws IOException, InterruptedException {
         // first test the dump loader itself
-        var settings = new TestCoreSettings();
+        var settings = new CoreSettings();
         settings.setInCharsetName(ENCODING);
         settings.setKeepNewlines(true);
         settings.setDbType(DatabaseType.MS);
@@ -91,7 +73,7 @@ class MsAntlrLoaderTest {
 
     void exportFullDb(String fileName, AbstractDatabase dbPredefined) throws IOException, InterruptedException {
         // prepare db object from sql file
-        var settings = new TestCoreSettings();
+        var settings = new CoreSettings();
         settings.setInCharsetName(ENCODING);
         settings.setKeepNewlines(true);
         settings.setDbType(DatabaseType.MS);
@@ -428,16 +410,16 @@ class MsAntlrLoaderTest {
         func.addArgument(new Argument("@eid", "int"));
         func.setFirstPart("");
         func.setSecondPart("""
-            (@eid int)
-            RETURNS varchar(100)
-            WITH RETURNS NULL ON NULL INPUT
-            AS
-            BEGIN
-                Declare @logid varchar(50);
-                SELECT @logid = tbl1.id from [dbo].[table1] AS tbl1
-                WHERE tbl1.entityId = @eid
-                RETURN  @logid
-            END""");
+                (@eid int)
+                RETURNS varchar(100)
+                WITH RETURNS NULL ON NULL INPUT
+                AS
+                BEGIN
+                    Declare @logid varchar(50);
+                    SELECT @logid = tbl1.id from [dbo].[table1] AS tbl1
+                    WHERE tbl1.entityId = @eid
+                    RETURN  @logid
+                END""");
 
         schema.addFunction(func);
 
@@ -448,19 +430,19 @@ class MsAntlrLoaderTest {
         func.addArgument(new Argument("@Second", "int"));
         func.setFirstPart("");
         func.setSecondPart("""
-            (@First int, @Second int)\s
-            RETURNS integer
-            AS
-            BEGIN
-                DECLARE @Res integer = 0
-
-                SET @Res = @First * @Second
-
-                IF @Res < 0
-                    SET @Res = 0
-
-                RETURN @Res
-            END""");
+                (@First int, @Second int)\s
+                RETURNS integer
+                AS
+                BEGIN
+                    DECLARE @Res integer = 0
+                
+                    SET @Res = @First * @Second
+                
+                    IF @Res < 0
+                        SET @Res = 0
+                
+                    RETURN @Res
+                END""");
         schema.addFunction(func);
 
         func = new MsFunction("select_something");
@@ -470,14 +452,14 @@ class MsAntlrLoaderTest {
         func.addArgument(new Argument("@Second", "int"));
         func.setFirstPart("");
         func.setSecondPart("""
-            (@First int, @Second int)\s
-            RETURNS integer
-            AS
-            BEGIN
-                DECLARE @Res integer = 0
-                SELECT  @Res = COUNT(*) FROM [dbo].[table1];
-                RETURN @Res + @First * @Second
-            END""");
+                (@First int, @Second int)\s
+                RETURNS integer
+                AS
+                BEGIN
+                    DECLARE @Res integer = 0
+                    SELECT  @Res = COUNT(*) FROM [dbo].[table1];
+                    RETURN @Res + @First * @Second
+                END""");
         schema.addFunction(func);
 
         testDatabase("ms_schema_4.sql", d);
@@ -534,14 +516,14 @@ class MsAntlrLoaderTest {
         func.setQuotedIdentified(true);
         func.setFirstPart("");
         func.setSecondPart("""
-            ()
-            RETURNS varchar(100)
-            AS
-            BEGIN
-                DECLARE @Res varchar(100) = ''
-                SELECT  @Res = DATENAME(dw, '09/23/2013')
-                RETURN  @Res
-            END""");
+                ()
+                RETURNS varchar(100)
+                AS
+                BEGIN
+                    DECLARE @Res varchar(100) = ''
+                    SELECT  @Res = DATENAME(dw, '09/23/2013')
+                    RETURN  @Res
+                END""");
 
         schema.addFunction(func);
 
@@ -572,17 +554,17 @@ class MsAntlrLoaderTest {
         func.addArgument(new Argument("@arg1", "int"));
         func.setFirstPart("/*Name test*/\n");
         func.setSecondPart("""
-            (@arg1 int)
-            RETURNS bit
-            AS
-            BEGIN
-                DECLARE @Res bit = 0
-
-                IF @arg1 > 1
-                    SET @Res = 1
-
-                RETURN @Res
-            END""");
+                (@arg1 int)
+                RETURNS bit
+                AS
+                BEGIN
+                    DECLARE @Res bit = 0
+                
+                    IF @arg1 > 1
+                        SET @Res = 1
+                
+                    RETURN @Res
+                END""");
 
         func.setOwner(MS_USER);
 
@@ -639,12 +621,12 @@ class MsAntlrLoaderTest {
         view.setQuotedIdentified(true);
         view.setFirstPart("");
         view.setSecondPart("""
-             AS
-                SELECT\s
-                [user_data].[id],
-                [user_data].[email],
-                [user_data].[created]
-            FROM [dbo].[user_data]""");
+                 AS
+                    SELECT\s
+                    [user_data].[id],
+                    [user_data].[email],
+                    [user_data].[created]
+                FROM [dbo].[user_data]""");
 
         view.setOwner(MS_USER);
         schema.addView(view);
@@ -654,14 +636,14 @@ class MsAntlrLoaderTest {
         trigger.setQuotedIdentified(true);
         trigger.setFirstPart("");
         trigger.setSecondPart("""
-
-                INSTEAD OF DELETE
-                AS
-                BEGIN
-                    DELETE FROM [dbo].[user_data]
-                    WHERE id = 10 \s
-                END\
-            """);
+                
+                    INSTEAD OF DELETE
+                    AS
+                    BEGIN
+                        DELETE FROM [dbo].[user_data]
+                        WHERE id = 10 \s
+                    END\
+                """);
         view.addTrigger(trigger);
 
         trigger = new MsTrigger("instead_of_insert");
@@ -669,14 +651,14 @@ class MsAntlrLoaderTest {
         trigger.setQuotedIdentified(true);
         trigger.setFirstPart("");
         trigger.setSecondPart("""
-
-                INSTEAD OF INSERT
-                AS
-                BEGIN
-                    INSERT INTO [dbo].[user_data] (id, email, created)
-                    VALUES(1, 'test@supermail.loc', getdate())
-                END\
-            """);
+                
+                    INSTEAD OF INSERT
+                    AS
+                    BEGIN
+                        INSERT INTO [dbo].[user_data] (id, email, created)
+                        VALUES(1, 'test@supermail.loc', getdate())
+                    END\
+                """);
         view.addTrigger(trigger);
 
         trigger = new MsTrigger("instead_of_update");
@@ -684,15 +666,15 @@ class MsAntlrLoaderTest {
         trigger.setQuotedIdentified(true);
         trigger.setFirstPart("");
         trigger.setSecondPart("""
-
-                INSTEAD OF UPDATE
-                AS
-                BEGIN
-                    UPDATE [dbo].[user_data]\s
-                    SET id = 55, email = 'super@supermail.loc'
-                    WHERE id = 4
-                END\
-            """);
+                
+                    INSTEAD OF UPDATE
+                    AS
+                    BEGIN
+                        UPDATE [dbo].[user_data]\s
+                        SET id = 55, email = 'super@supermail.loc'
+                        WHERE id = 4
+                    END\
+                """);
         view.addTrigger(trigger);
 
         view = new MsView("ws_test");
@@ -700,10 +682,10 @@ class MsAntlrLoaderTest {
         view.setQuotedIdentified(true);
         view.setFirstPart("");
         view.setSecondPart("""
-             AS
-                SELECT\s
-                ud.[id] AS "   i   d   "
-            FROM [dbo].[user_data] ud""");
+                 AS
+                    SELECT\s
+                    ud.[id] AS "   i   d   "
+                FROM [dbo].[user_data] ud""");
         schema.addView(view);
 
         testDatabase("ms_schema_8.sql", d);
@@ -818,14 +800,14 @@ class MsAntlrLoaderTest {
         func.setQuotedIdentified(true);
         func.setFirstPart("");
         func.setSecondPart("""
-            ()
-            RETURNS nvarchar(30)
-            AS
-            BEGIN
-                Declare @textdate nvarchar(30);
-                SELECT @textdate = CAST(GETDATE() AS nvarchar(30));
-                RETURN  @textdate;
-            END""");
+                ()
+                RETURNS nvarchar(30)
+                AS
+                BEGIN
+                    Declare @textdate nvarchar(30);
+                    SELECT @textdate = CAST(GETDATE() AS nvarchar(30));
+                    RETURN  @textdate;
+                END""");
 
         schema.addFunction(func);
 
@@ -877,25 +859,25 @@ class MsAntlrLoaderTest {
         func.addArgument(new Argument("@delimiter", "char(1)"));
         func.setFirstPart("");
         func.setSecondPart("""
-
-            (@string nvarchar(MAX), @delimiter char(1))
-            RETURNS @output TABLE(tbldata nvarchar(256))
-            BEGIN
-                DECLARE @start INT, @end INT
-                SELECT @start = 1, @end = CHARINDEX(@delimiter, @string)
-
-                WHILE @start < LEN(@string) + 1 BEGIN
-                    IF @end = 0\s
-                        SET @end = LEN(@string) + 1
-
-                    INSERT INTO @output (tbldata)\s
-                    VALUES(SUBSTRING(@string, @start, @end - @start))
-                    SET @start = @end + 1
-                    SET @end = CHARINDEX(@delimiter, @string, @start)
-                END
-
-                RETURN
-            END""");
+                
+                (@string nvarchar(MAX), @delimiter char(1))
+                RETURNS @output TABLE(tbldata nvarchar(256))
+                BEGIN
+                    DECLARE @start INT, @end INT
+                    SELECT @start = 1, @end = CHARINDEX(@delimiter, @string)
+                
+                    WHILE @start < LEN(@string) + 1 BEGIN
+                        IF @end = 0\s
+                            SET @end = LEN(@string) + 1
+                
+                        INSERT INTO @output (tbldata)\s
+                        VALUES(SUBSTRING(@string, @start, @end - @start))
+                        SET @start = @end + 1
+                        SET @end = CHARINDEX(@delimiter, @string, @start)
+                    END
+                
+                    RETURN
+                END""");
         schema.addFunction(func);
 
         func = new MsFunction("function_empty");
@@ -906,13 +888,13 @@ class MsAntlrLoaderTest {
         func.addArgument(new Argument("@delimiter", "char(1)"));
         func.setFirstPart("");
         func.setSecondPart("""
-
-            (@string nvarchar(MAX), @delimiter char(1))
-            RETURNS @output TABLE(tbldata nvarchar(256))
-            BEGIN
-                -- aaa
-                RETURN
-            END""");
+                
+                (@string nvarchar(MAX), @delimiter char(1))
+                RETURNS @output TABLE(tbldata nvarchar(256))
+                BEGIN
+                    -- aaa
+                    RETURN
+                END""");
 
         schema.addFunction(func);
 
@@ -949,12 +931,12 @@ class MsAntlrLoaderTest {
         func.addArgument(new Argument("@arg", "nvarchar"));
         func.setFirstPart("");
         func.setSecondPart("""
-            (@arg nvarchar)\s
-            RETURNS bit
-            AS
-            BEGIN
-                RETURN 1
-            END""");
+                (@arg nvarchar)\s
+                RETURNS bit
+                AS
+                BEGIN
+                    RETURN 1
+                END""");
         func.setOwner(MS_USER);
 
         schema.addFunction(func);
@@ -964,12 +946,12 @@ class MsAntlrLoaderTest {
         func.setQuotedIdentified(true);
         func.setFirstPart("");
         func.setSecondPart("""
-            ()\s
-            RETURNS bit
-            AS
-            BEGIN
-                RETURN 1
-            END""");
+                ()\s
+                RETURNS bit
+                AS
+                BEGIN
+                    RETURN 1
+                END""");
 
 
         schema.addFunction(func);
@@ -981,12 +963,12 @@ class MsAntlrLoaderTest {
         proc.setQuotedIdentified(true);
         proc.setFirstPart("");
         proc.setSecondPart("""
-
-            AS
-            BEGIN
-                -- empty procedure
-                RETURN
-            END""");
+                
+                AS
+                BEGIN
+                    -- empty procedure
+                    RETURN
+                END""");
         schema.addFunction(proc);
 
         proc.setOwner(MS_USER);
@@ -1024,11 +1006,11 @@ class MsAntlrLoaderTest {
         view.setQuotedIdentified(true);
         view.setFirstPart("");
         view.setSecondPart("""
-             AS
-                SELECT\s
-                [test].[id],
-                [test].[text]
-            FROM [dbo].[test]""");
+                 AS
+                    SELECT\s
+                    [test].[id],
+                    [test].[text]
+                FROM [dbo].[test]""");
         schema.addView(view);
         view.setOwner(MS_USER);
 
@@ -1041,13 +1023,13 @@ class MsAntlrLoaderTest {
         trigger.setAnsiNulls(true);
         trigger.setFirstPart("");
         trigger.setSecondPart("""
-
-            FOR UPDATE
-            AS\s
-                BEGIN
-                    SET NOCOUNT ON;
-                    EXEC [dbo].[trigger_proc];
-                END""");
+                
+                FOR UPDATE
+                AS\s
+                    BEGIN
+                        SET NOCOUNT ON;
+                        EXEC [dbo].[trigger_proc];
+                    END""");
         table.addTrigger(trigger);
 
         testDatabase("ms_schema_13.sql", d);
@@ -1097,14 +1079,14 @@ class MsAntlrLoaderTest {
         view.setQuotedIdentified(true);
         view.setFirstPart("");
         view.setSecondPart("""
-             AS
-                SELECT\s
-                    c.[id] AS id_t_chart,\s
-                    t.[id] AS id_t_work\s
-                FROM ( SELECT\s
-                           ["t_work"].[id]\s
-                       FROM [dbo].["t_work"]) t\s
-            JOIN [dbo].["t_chart"] c ON t.[id] = c.[id]""");
+                 AS
+                    SELECT\s
+                        c.[id] AS id_t_chart,\s
+                        t.[id] AS id_t_work\s
+                    FROM ( SELECT\s
+                               ["t_work"].[id]\s
+                           FROM [dbo].["t_work"]) t\s
+                JOIN [dbo].["t_chart"] c ON t.[id] = c.[id]""");
         schema.addView(view);
 
         testDatabase("ms_schema_15.sql", d);
@@ -1146,20 +1128,20 @@ class MsAntlrLoaderTest {
         view.setQuotedIdentified(true);
         view.setFirstPart("");
         view.setSecondPart("""
-             AS
-                SELECT\s
-                    c.[id] AS id_t_chart,\s
-                    t.[id] AS id_t_work,\s
-                    t.[name]
-                FROM (SELECT\s
-                          w.[id],\s
-                          m.[name]\s
-                      FROM (SELECT\s
-                                ["t_work"].[id]
-                            FROM [dbo].["t_work"]) w\s
-                      JOIN [dbo].["t_memo"] m ON w.[id] = CONVERT(INT, CONVERT(VARCHAR(MAX), m.[name]))) t
-                JOIN [dbo].["t_chart"] c ON t.[id] = c.[id]\
-            """);
+                 AS
+                    SELECT\s
+                        c.[id] AS id_t_chart,\s
+                        t.[id] AS id_t_work,\s
+                        t.[name]
+                    FROM (SELECT\s
+                              w.[id],\s
+                              m.[name]\s
+                          FROM (SELECT\s
+                                    ["t_work"].[id]
+                                FROM [dbo].["t_work"]) w\s
+                          JOIN [dbo].["t_memo"] m ON w.[id] = CONVERT(INT, CONVERT(VARCHAR(MAX), m.[name]))) t
+                    JOIN [dbo].["t_chart"] c ON t.[id] = c.[id]\
+                """);
         schema.addView(view);
 
         testDatabase("ms_schema_16.sql", d);

@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
-
 import org.eclipse.core.runtime.SubMonitor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -26,25 +22,24 @@ import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.ignoreparser.IgnoreParser;
-import org.pgcodekeeper.core.loader.ProjectLoader;
-import org.pgcodekeeper.core.model.difftree.DiffTree;
-import org.pgcodekeeper.core.model.difftree.IgnoreList;
-import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
-import org.pgcodekeeper.core.model.difftree.TreeElement;
-import org.pgcodekeeper.core.model.difftree.TreeFlattener;
+import org.pgcodekeeper.core.model.difftree.*;
 import org.pgcodekeeper.core.model.exporter.ModelExporter;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.settings.TestCoreSettings;
+import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.utils.TempDir;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
 
 class PgProjectLoaderTest {
 
     @Test
     void testProjectLoaderWithIgnoredSchemas() throws IOException, InterruptedException {
-        try(TempDir tempDir = new TempDir("ignore-schemas-test-project")){
+        try (TempDir tempDir = new TempDir("ignore-schemas-test-project")) {
             Path dir = tempDir.get();
-            var settings = new TestCoreSettings();
+            var settings = new CoreSettings();
 
             AbstractDatabase dbDump = TestUtils.loadTestDump(TestUtils.RESOURCE_DUMP, TestUtils.class, settings);
 
@@ -74,9 +69,9 @@ class PgProjectLoaderTest {
 
     @Test
     void testModelExporterWithIgnoredLists() throws IOException, InterruptedException {
-        try(TempDir tempDir = new TempDir("new-project")){
+        try (TempDir tempDir = new TempDir("new-project")) {
             Path dir = tempDir.get();
-            var settings = new TestCoreSettings();
+            var settings = new CoreSettings();
 
             AbstractDatabase dbDump = TestUtils.loadTestDump(TestUtils.RESOURCE_DUMP, TestUtils.class, settings);
             TreeElement root = DiffTree.create(dbDump, null, null);

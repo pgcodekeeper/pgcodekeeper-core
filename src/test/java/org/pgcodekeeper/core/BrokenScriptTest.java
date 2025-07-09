@@ -15,13 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.loader.PgDumpLoader;
-import org.pgcodekeeper.core.settings.TestCoreSettings;
+import org.pgcodekeeper.core.settings.CoreSettings;
+
+import java.io.IOException;
 
 class BrokenScriptTest {
 
@@ -31,7 +31,7 @@ class BrokenScriptTest {
             "broken_duplicated_index, line 5:1 INDEX i already exists for TABLE t1"
     })
     void testPgBrokenScript(String fileNameTemplate, String expectedError) throws IOException, InterruptedException {
-        var settings = new TestCoreSettings();
+        var settings = new CoreSettings();
 
         String resource = fileNameTemplate + FILES_POSTFIX.SQL;
         PgDumpLoader loader = new PgDumpLoader(() -> getClass().getResourceAsStream(resource), resource, settings);

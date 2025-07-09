@@ -15,20 +15,21 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.depcies;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
-import java.util.stream.Stream;
-
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.settings.TestCoreSettings;
+import org.pgcodekeeper.core.settings.CoreSettings;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Тестирует сравнение БД с неполным выбором различающихся объектов
+ *
  * @author botov_av
  */
 class PgDiffDepciesTest {
@@ -264,14 +265,14 @@ class PgDiffDepciesTest {
                 // CREATE statistics object with dependencies, user selection : statistics
                 Arguments.of("add_statistics", "usr_s1", Map.of("second-s1", DbObjType.STATISTICS)),
                 Arguments.of("add_statistics", "usr_s2", Map.of("second-s2", DbObjType.STATISTICS))
-                );
+        );
     }
 
     @ParameterizedTest
     @MethodSource("provideSelectedObjects")
     void runDiff(final String dbTemplate, String userTemplateName, Map<String, DbObjType> selectedObjs)
             throws IOException, InterruptedException {
-        TestUtils.testDepcy(dbTemplate, userTemplateName, selectedObjs, getClass(), new TestCoreSettings());
+        TestUtils.testDepcy(dbTemplate, userTemplateName, selectedObjs, getClass(), new CoreSettings());
     }
 
     private static Stream<Arguments> provideSelectedObjectsWithFunctionBody() {
@@ -330,8 +331,8 @@ class PgDiffDepciesTest {
     @ParameterizedTest
     @MethodSource("provideSelectedObjectsWithFunctionBody")
     void runDiffWithFunctionDependencies(final String dbTemplate, String userTemplateName,
-            Map<String, DbObjType> selectedObjs) throws IOException, InterruptedException {
-        var settings = new TestCoreSettings();
+                                         Map<String, DbObjType> selectedObjs) throws IOException, InterruptedException {
+        var settings = new CoreSettings();
         settings.setEnableFunctionBodiesDependencies(true);
         TestUtils.testDepcy(dbTemplate, userTemplateName, selectedObjs, getClass(), settings);
     }

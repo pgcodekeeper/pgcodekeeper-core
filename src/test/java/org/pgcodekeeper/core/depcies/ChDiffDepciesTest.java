@@ -15,17 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.depcies;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.stream.Stream;
-
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.settings.TestCoreSettings;
+import org.pgcodekeeper.core.settings.CoreSettings;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.stream.Stream;
 
 class ChDiffDepciesTest {
 
@@ -57,14 +57,14 @@ class ChDiffDepciesTest {
                 // test scenario where user remove COLUMN in TABLE. VIEW dependency from TABLE.
                 // user choice TABLE
                 Arguments.of("ch_mat_view_deps_change_table", "usr_t3", Map.of("default-t3", DbObjType.TABLE))
-                );
+        );
     }
 
     @ParameterizedTest
     @MethodSource("provideSelectedObjects")
     void testDepcy(final String dbTemplate, String userTemplateName, Map<String, DbObjType> selectedObjs)
             throws IOException, InterruptedException {
-        var settings = new TestCoreSettings();
+        var settings = new CoreSettings();
         settings.setDbType(DatabaseType.CH);
         settings.setEnableFunctionBodiesDependencies(true);
         TestUtils.testDepcy(dbTemplate, userTemplateName, selectedObjs, getClass(), settings);

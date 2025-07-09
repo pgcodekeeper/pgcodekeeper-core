@@ -15,180 +15,250 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.settings;
 
-import java.util.Collection;
-
+import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.formatter.FormatConfiguration;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 public class CoreSettings implements ISettings {
+    private DatabaseType dbType = DatabaseType.PG;
+    private String inCharsetName = Consts.UTF_8;
+    private List<String> preFilePath = new ArrayList<>();
+    private List<String> postFilePath = new ArrayList<>();
+    private List<DbObjType> allowedTypes = new ArrayList<>();
+    private boolean printUsing = true;
+    private String timeZone;
+    private boolean ignorePrivileges;
+    private boolean keepNewlines;
+    private boolean simplifyView;
+    private boolean addTransaction;
+    private boolean disableCheckFunctionBodies;
+    private boolean enableFunctionBodiesDependencies;
+    private boolean ignoreColumnOrder;
+    private boolean generateConstraintNotValid;
+    private boolean dataMovementMode;
+    private boolean concurrentlyMode;
+    private boolean generateExists;
+    private boolean generateExistDoBlock;
+    private boolean dropBeforeCreate;
+    private boolean commentsToEnd;
+    private boolean stopNotAllowed;
+    private boolean selectedOnly;
+    private boolean ignoreConcurrentModification;
 
     @Override
     public DatabaseType getDbType() {
-        // TODO Auto-generated method stub
-        return null;
+        return dbType;
+    }
+
+    public void setDbType(DatabaseType dbType) {
+        this.dbType = dbType;
     }
 
     @Override
     public boolean isConcurrentlyMode() {
-        // TODO Auto-generated method stub
-        return false;
+        return concurrentlyMode;
     }
 
     @Override
     public boolean isAddTransaction() {
-        // TODO Auto-generated method stub
-        return false;
+        return addTransaction;
+    }
+
+    public void setAddTransaction(boolean addTransaction) {
+        this.addTransaction = addTransaction;
     }
 
     @Override
     public boolean isGenerateExists() {
-        // TODO Auto-generated method stub
-        return false;
+        return generateExists;
     }
 
     @Override
     public boolean isConstraintNotValid() {
-        // TODO Auto-generated method stub
-        return false;
+        return generateConstraintNotValid;
     }
 
     @Override
     public boolean isGenerateExistDoBlock() {
-        // TODO Auto-generated method stub
-        return false;
+        return generateExistDoBlock;
+    }
+
+    public void setGenerateExistDoBlock(boolean generateExistDoBlock) {
+        this.generateExistDoBlock = generateExistDoBlock;
     }
 
     @Override
     public boolean isPrintUsing() {
-        // TODO Auto-generated method stub
-        return false;
+        return printUsing;
+    }
+
+    public void setPrintUsing(boolean printUsing) {
+        this.printUsing = printUsing;
     }
 
     @Override
     public boolean isKeepNewlines() {
-        // TODO Auto-generated method stub
-        return false;
+        return keepNewlines;
+    }
+
+    public void setKeepNewlines(boolean keepNewlines) {
+        this.keepNewlines = keepNewlines;
     }
 
     @Override
     public boolean isCommentsToEnd() {
-        // TODO Auto-generated method stub
-        return false;
+        return commentsToEnd;
+    }
+
+    public void setCommentsToEnd(boolean commentsToEnd) {
+        this.commentsToEnd = commentsToEnd;
     }
 
     @Override
     public boolean isAutoFormatObjectCode() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public boolean isIgnorePrivileges() {
-        // TODO Auto-generated method stub
-        return false;
+        return ignorePrivileges;
+    }
+
+    public void setIgnorePrivileges(boolean ignorePrivileges) {
+        this.ignorePrivileges = ignorePrivileges;
     }
 
     @Override
     public boolean isIgnoreColumnOrder() {
-        // TODO Auto-generated method stub
-        return false;
+        return ignoreColumnOrder;
     }
 
     @Override
     public boolean isEnableFunctionBodiesDependencies() {
-        // TODO Auto-generated method stub
-        return false;
+        return enableFunctionBodiesDependencies;
+    }
+
+    public void setEnableFunctionBodiesDependencies(boolean enableFunctionBodiesDependencies) {
+        this.enableFunctionBodiesDependencies = enableFunctionBodiesDependencies;
     }
 
     @Override
     public boolean isDataMovementMode() {
-        // TODO Auto-generated method stub
-        return false;
+        return dataMovementMode;
+    }
+
+    public void setDataMovementMode(boolean dataMovementMode) {
+        this.dataMovementMode = dataMovementMode;
     }
 
     @Override
     public boolean isDropBeforeCreate() {
-        // TODO Auto-generated method stub
-        return false;
+        return dropBeforeCreate;
     }
 
     @Override
     public boolean isStopNotAllowed() {
-        // TODO Auto-generated method stub
-        return false;
+        return stopNotAllowed;
     }
 
     @Override
     public boolean isSelectedOnly() {
-        // TODO Auto-generated method stub
-        return false;
+        return selectedOnly;
     }
 
     @Override
     public boolean isIgnoreConcurrentModification() {
-        // TODO Auto-generated method stub
-        return false;
+        return ignoreConcurrentModification;
     }
 
     @Override
     public boolean isSimplifyView() {
-        // TODO Auto-generated method stub
-        return false;
+        return simplifyView;
     }
 
     @Override
     public boolean isDisableCheckFunctionBodies() {
-        // TODO Auto-generated method stub
-        return false;
+        return disableCheckFunctionBodies;
     }
 
     @Override
     public String getInCharsetName() {
-        // TODO Auto-generated method stub
-        return null;
+        return inCharsetName;
+    }
+
+    public void setInCharsetName(String inCharsetName) {
+        this.inCharsetName = inCharsetName;
     }
 
     @Override
     public String getTimeZone() {
-        // TODO Auto-generated method stub
-        return null;
+        return timeZone;
     }
 
     @Override
     public FormatConfiguration getFormatConfiguration() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Collection<DbObjType> getAllowedTypes() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.unmodifiableCollection(allowedTypes);
     }
 
     @Override
     public Collection<String> getPreFilePath() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.unmodifiableCollection(preFilePath);
     }
 
     @Override
     public Collection<String> getPostFilePath() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.unmodifiableCollection(postFilePath);
     }
 
-    @Override
-    public ISettings createTempSettings(boolean isIgnorePriv) {
-        // TODO Auto-generated method stub
-        return null;
+    private CoreSettings copy() {
+        var settings = new CoreSettings();
+        settings.addTransaction = addTransaction;
+        settings.allowedTypes = allowedTypes;
+        settings.commentsToEnd = commentsToEnd;
+        settings.concurrentlyMode = concurrentlyMode;
+        settings.dataMovementMode = dataMovementMode;
+        settings.dbType = dbType;
+        settings.disableCheckFunctionBodies = disableCheckFunctionBodies;
+        settings.dropBeforeCreate = dropBeforeCreate;
+        settings.enableFunctionBodiesDependencies = enableFunctionBodiesDependencies;
+        settings.generateConstraintNotValid = generateConstraintNotValid;
+        settings.generateExistDoBlock = generateExistDoBlock;
+        settings.generateExists = generateExists;
+        settings.ignoreColumnOrder = ignoreColumnOrder;
+        settings.ignoreConcurrentModification = ignoreConcurrentModification;
+        settings.ignorePrivileges = ignorePrivileges;
+        settings.inCharsetName = inCharsetName;
+        settings.keepNewlines = keepNewlines;
+        settings.postFilePath = postFilePath;
+        settings.preFilePath = preFilePath;
+        settings.selectedOnly = selectedOnly;
+        settings.simplifyView = simplifyView;
+        settings.stopNotAllowed = stopNotAllowed;
+        settings.timeZone = timeZone;
+        settings.printUsing = printUsing;
+        return settings;
     }
 
-    @Override
+    public ISettings createTempSettings(boolean ignorePrivileges) {
+        var settings = copy();
+        settings.ignorePrivileges = ignorePrivileges;
+        return settings;
+    }
+
     public ISettings createTempSettings(String inCharsetName) {
-        // TODO Auto-generated method stub
-        return null;
+        var settings = copy();
+        settings.inCharsetName = inCharsetName;
+        return settings;
     }
-
 }
