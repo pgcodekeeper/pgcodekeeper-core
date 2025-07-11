@@ -246,7 +246,7 @@ public final class FunctionsReader extends JdbcReader {
             sb.append(PgDiffUtils.quoteString(probin));
             if (!"-".equals(definition)) {
                 sb.append(", ");
-                if (!definition.contains("\'") && !definition.contains("\\")) {
+                if (!definition.contains("'") && !definition.contains("\\")) {
                     sb.append(PgDiffUtils.quoteString(definition));
                 } else {
                     sb.append(PgDiffUtils.quoteStringDollar(definition));
@@ -422,10 +422,7 @@ public final class FunctionsReader extends JdbcReader {
         String sortOpName = res.getString("sortop");
         if (sortOpName != null) {
             String operSchemaName = res.getString("sortop_nsp");
-            StringBuilder sb = new StringBuilder().append("OPERATOR(")
-                    .append(PgDiffUtils.getQuotedName(operSchemaName))
-                    .append('.').append(sortOpName).append(')');
-            aggregate.setSortOp(sb.toString());
+            aggregate.setSortOp("OPERATOR(" + PgDiffUtils.getQuotedName(operSchemaName) + '.' + sortOpName + ')');
 
             String operName = sortOpName + CreateAggregate.getSortOperSign(aggregate);
             addDep(aggregate, operSchemaName, operName, DbObjType.OPERATOR);
@@ -477,17 +474,16 @@ public final class FunctionsReader extends JdbcReader {
             JdbcType returnType = loader.getCachedTypeByOid(argTypes[i]);
             returnType.addTypeDepcy(f);
 
-            if ("t".equals(aMode)) {
-                String name = argNames[i];
+            String argName = argNames != null ? argNames[i] : null;
+            if ("t".equals(aMode) && argName != null) {
                 String type = returnType.getFullName();
-                sb.append(PgDiffUtils.getQuotedName(name)).append(" ")
-                .append(type).append(", ");
+                sb.append(PgDiffUtils.getQuotedName(argName)).append(" ")
+                        .append(type).append(", ");
                 f.addReturnsColumn(argNames[i], type);
                 continue;
             }
 
             JdbcType argJdbcType = loader.getCachedTypeByOid(argTypes[i]);
-            String argName = argNames != null ? argNames[i] : null;
 
             // these require resetHash functionality for defaults
             Argument a = f.new PgArgument(ArgMode.of(aMode), argName, argJdbcType.getFullName());
@@ -501,7 +497,7 @@ public final class FunctionsReader extends JdbcReader {
 
         if (DbObjType.FUNCTION == f.getStatementType() || DbObjType.AGGREGATE == f.getStatementType()) {
             // RETURN TYPE
-            if (sb.length() != 0) {
+            if (!sb.isEmpty()) {
                 sb.setLength(sb.length() - 2);
                 f.setReturns("TABLE(" + sb + ")");
             } else {
