@@ -33,7 +33,7 @@ import org.pgcodekeeper.core.script.SQLScript;
 public final class MsIndex extends AbstractIndex {
 
     private boolean isColumnstore;
-    private List<String> orderCols = new ArrayList<>();
+    private final List<String> orderCols = new ArrayList<>();
 
     public MsIndex(String name) {
         super(name);
@@ -105,8 +105,7 @@ public final class MsIndex extends AbstractIndex {
         }
         appendWhere(sb);
 
-        var tmpOptions = new LinkedHashMap<String, String>();
-        tmpOptions.putAll(options);
+        var tmpOptions = new LinkedHashMap<>(options);
         if (!isTypeIndex) {
             if (isConcurrentlyMode && !options.containsKey("ONLINE")) {
                 tmpOptions.put("ONLINE", "ON");
@@ -144,8 +143,8 @@ public final class MsIndex extends AbstractIndex {
 
     @Override
     public ObjectState appendAlterSQL(PgStatement newCondition, SQLScript script) {
-        if (!compare(newCondition)) {
-            MsIndex newIndex = (MsIndex) newCondition;
+        MsIndex newIndex = (MsIndex) newCondition;
+        if (!compare(newIndex)) {
             if (!isClustered || newIndex.isClustered) {
                 newIndex.getCreationSQL(script, true);
                 return ObjectState.ALTER_WITH_DEP;

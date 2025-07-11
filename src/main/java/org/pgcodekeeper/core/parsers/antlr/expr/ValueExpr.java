@@ -55,11 +55,11 @@ public final class ValueExpr extends AbstractExpr {
         super(meta);
     }
 
-    protected ValueExpr(AbstractExpr parent) {
+    ValueExpr(AbstractExpr parent) {
         super(parent);
     }
 
-    protected ValueExpr(AbstractExpr parent, Set<PgObjLocation> depcies) {
+    ValueExpr(AbstractExpr parent, Set<PgObjLocation> depcies) {
         super(parent, depcies);
     }
 
@@ -114,7 +114,7 @@ public final class ValueExpr extends AbstractExpr {
             return ret;
         }
 
-        if (vex.equal() != null || vex.and() != null) {
+        if (vex.eq() != null || vex.and() != null) {
             // BETWEEN is handled as AND, no separate processing required
             return new ModPair<>(NONAME, TypesSetManually.BOOLEAN);
         }
@@ -300,7 +300,7 @@ public final class ValueExpr extends AbstractExpr {
                 // we need the Pair of the last expression (ELSE)
                 ret = analyze(new Vex(v));
             }
-            if (ret.getFirst() == null || caseExpr.ELSE() == null) {
+            if (ret != null && (ret.getFirst() == null || caseExpr.ELSE() == null)) {
                 // CASE inherits its name only from the ELSE expression
                 // if it is missing or doesn't carry any name, the name becomes "case"
                 ret.setFirst("case");
