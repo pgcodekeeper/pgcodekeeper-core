@@ -15,20 +15,44 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.meta;
 
-import java.io.InputStream;
-import java.io.Serializable;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
+import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.loader.JdbcSystemLoader;
+import org.pgcodekeeper.core.loader.UrlJdbcConnector;
+import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
+import org.pgcodekeeper.core.localizations.Messages;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.pgcodekeeper.core.Utils;
-import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
-
 public final class MetaStorage implements Serializable {
 
+    private static final Logger LOG = LoggerFactory.getLogger(MetaStorage.class);
+
     private static final long serialVersionUID = 8194906497159326596L;
+
+    private static final String FILTER_PATTERN = """
+            maxdepth=7;\
+            org.pgcodekeeper.core.schema.meta.*;\
+            org.pgcodekeeper.core.schema.*;\
+            org.pgcodekeeper.core.DangerStatement;\
+            org.pgcodekeeper.core.model.difftree.DbObjType;\
+            org.pgcodekeeper.core.ContextLocation;\
+            org.pgcodekeeper.core.utils.Pair;\
+            java.util.ArrayList;\
+            java.lang.Object;\
+            java.lang.Enum;\
+            !*""";
+
+    private static final ObjectInputFilter DESERIALIZATION_FILTER = ObjectInputFilter.Config.createFilter(FILTER_PATTERN);
 
     public static final String FILE_NAME = "SYSTEM_OBJECTS_";
 
@@ -53,12 +77,38 @@ public final class MetaStorage implements Serializable {
 
         InputStream inputStream = MetaStorage.class.getResourceAsStream(FILE_NAME + ver + ".ser");
 
-        Object object = Utils.deserialize(inputStream);
-        if (object instanceof MetaStorage storage) {
-            MetaStorage other = STORAGE_CACHE.putIfAbsent(ver, storage);
-            return other == null ? storage : other;
+        MetaStorage object = deserialize(inputStream);
+        if (object != null) {
+            STORAGE_CACHE.putIfAbsent(ver, object);
         }
 
+        return object;
+    }
+
+    /**
+     * Deserializes object
+     *
+     * @param inputStream - stream of serialized file
+     * @return deserialized object or null if not found
+     */
+    private static MetaStorage deserialize(InputStream inputStream) {
+        if (inputStream == null) {
+            return null;
+        }
+
+        try (ObjectInputStream oin = new ObjectInputStream(inputStream)) {
+            oin.setObjectInputFilter(DESERIALIZATION_FILTER);
+            return (MetaStorage) oin.readObject();
+        } catch (ClassNotFoundException | IOException e) {
+            LOG.debug(Messages.Utils_log_err_deserialize, e);
+        }
         return null;
+    }
+
+    public static void serialize(String path, String url) throws IOException, InterruptedException {
+        UrlJdbcConnector jdbcConnector = new UrlJdbcConnector(url);
+        Serializable storage = new JdbcSystemLoader(jdbcConnector, Consts.UTC,
+                SubMonitor.convert(new NullProgressMonitor())).getStorageFromJdbc();
+        Utils.serialize(path, storage);
     }
 }
