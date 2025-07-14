@@ -15,9 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
+import org.pgcodekeeper.core.localizations.Messages;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
 import java.io.Serializable;
@@ -27,15 +34,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.pgcodekeeper.core.localizations.Messages;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 public final class Utils {
 
@@ -48,7 +46,7 @@ public final class Utils {
     /**
      * Serializes object
      *
-     * @param path - full path to file where the serialized object will be
+     * @param path   - full path to file where the serialized object will be
      * @param object - the object that you want to serialize
      */
     public static void serialize(Path path, Serializable object) {
@@ -65,31 +63,21 @@ public final class Utils {
         }
     }
 
-    /**
-     * Deserializes object
-     *
-     * @param inputStream
-     *            - stream of serialized file
-     *
-     * @return deserialized object or null if not found
-     */
-    public static Object deserialize(InputStream inputStream) {
-        if (inputStream == null) {
-            return null;
-        }
-        try (ObjectInputStream oin = new ObjectInputStream(inputStream)) {
-            return oin.readObject();
-        } catch (ClassNotFoundException | IOException e) {
-            LOG.debug(Messages.Utils_log_err_deserialize, e);
-        }
-        return null;
-    }
-
     public static Document readXml(Reader reader) throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        // Disable DOCTYPE declarations entirely
         factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true); //$NON-NLS-1$
+
+        // Disable external general entities
         factory.setFeature("http://xml.org/sax/features/external-general-entities", false); //$NON-NLS-1$
+
+        // Disable external parameter entities
         factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false); //$NON-NLS-1$
+
+        // Prohibit the use of all protocols by external entities (JAXP 1.5+)
+        factory.setAttribute(javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD, ""); //$NON-NLS-1$
+        factory.setAttribute(javax.xml.XMLConstants.ACCESS_EXTERNAL_SCHEMA, ""); //$NON-NLS-1$
+
         Document doc = factory.newDocumentBuilder().parse(new InputSource(reader));
         doc.normalize();
         return doc;

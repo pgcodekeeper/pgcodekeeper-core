@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.formatter.pg;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
@@ -30,16 +27,12 @@ import org.pgcodekeeper.core.formatter.StatementFormatter;
 import org.pgcodekeeper.core.parsers.antlr.CodeUnitToken;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLLexer;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_function_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Function_actions_commonContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Function_bodyContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Function_defContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_createContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.SqlContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.StatementContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.statements.pg.PgParserAbstract;
 import org.pgcodekeeper.core.utils.Pair;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PgFormatter extends AbstractFormatter {
 
@@ -67,7 +60,7 @@ public class PgFormatter extends AbstractFormatter {
     }
 
     private void fillChanges(StatementContext st, CommonTokenStream tokenStream,
-            List<FormatItem> changes) {
+                             List<FormatItem> changes) {
         Schema_statementContext schema = st.schema_statement();
         if (schema == null) {
             return;

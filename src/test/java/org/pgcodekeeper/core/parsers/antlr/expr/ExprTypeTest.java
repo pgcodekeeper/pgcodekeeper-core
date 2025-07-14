@@ -47,19 +47,18 @@ import java.util.Map.Entry;
  */
 
 class ExprTypeTest {
-
     @ParameterizedTest
     @ValueSource(strings = {
             // Check types in columns of asterisk in view.
-            // FIXME "check_types_aster_cols_view",
+            "check_types_aster_cols_view",
             // Check types in columns of view.
-            // FIXME "check_types_cols_view",
+            "check_types_cols_view",
             // Check types in columns of view (extended).
-            // FIXME "check_types_cols_view_extended",
+            "check_types_cols_view_extended",
             // Check types in table-less columns.
-            // FIXME "check_tableless_cols_types",
+            "check_tableless_cols_types",
             // Check array types.
-            // FIXME "check_array_types",
+            "check_array_types",
             // Check ANY type-matching
             "check_anytype_resolution",
             // Check by named notation type
