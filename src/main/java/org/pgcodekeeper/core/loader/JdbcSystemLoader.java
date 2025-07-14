@@ -67,7 +67,7 @@ public final class JdbcSystemLoader extends JdbcLoaderBase {
 
     @Override
     public AbstractDatabase load() throws IOException, InterruptedException {
-        throw new IllegalStateException("Unsuppoted operation for JdbcSystemLoader");
+        throw new IllegalStateException("Unsupported operation for JdbcSystemLoader");
     }
 
     public MetaStorage getStorageFromJdbc() throws IOException, InterruptedException {
@@ -79,8 +79,9 @@ public final class JdbcSystemLoader extends JdbcLoaderBase {
             this.connection = connection;
             this.statement = statement;
             connection.setAutoCommit(false);
-            statement.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY");
-            statement.execute("SET timezone = " + PgDiffUtils.quoteString(timezone));
+            getRunner().run(statement, "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY");
+            getRunner().run(statement, "SET search_path TO pg_catalog;");
+            getRunner().run(statement, "SET timezone = " + PgDiffUtils.quoteString(timezone));
 
             queryCheckPgVersion();
             queryCheckLastSysOid();
