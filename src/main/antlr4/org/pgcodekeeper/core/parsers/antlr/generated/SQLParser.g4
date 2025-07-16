@@ -458,7 +458,7 @@ table_action
     | CLUSTER ON index_name=schema_qualified_name
     | SET WITHOUT (CLUSTER | OIDS)
     | SET WITH OIDS
-    | SET ACCESS METHOD (access_method_name=identifier | DEFAULT)
+    | SET ACCESS METHOD (access_method_name=identifier with_storage_parameter? | DEFAULT)
     | set_logged
     | SET storage_parameters
     | RESET names_in_parens
