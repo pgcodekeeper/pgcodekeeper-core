@@ -19,8 +19,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
 
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -42,7 +42,7 @@ public abstract class AbstractConstraint extends PgStatement implements IConstra
     }
 
     @Override
-    public Set<String> getColumns() {
+    public Collection<String> getColumns() {
         return Collections.emptySet();
     }
 

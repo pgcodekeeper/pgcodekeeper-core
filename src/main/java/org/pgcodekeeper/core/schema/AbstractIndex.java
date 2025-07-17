@@ -20,12 +20,12 @@
 package org.pgcodekeeper.core.schema;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -65,7 +65,7 @@ implements ISimpleOptionContainer, ISimpleColumnContainer, ISearchPath {
         resetHash();
     }
 
-    public boolean compareColumns(Set<String> refs) {
+    public boolean compareColumns(Collection<String> refs) {
         if (refs.size() != columns.size()) {
             return false;
         }
