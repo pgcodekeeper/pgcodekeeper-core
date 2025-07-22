@@ -18,8 +18,30 @@ package org.pgcodekeeper.core;
 import org.pgcodekeeper.core.sql.Keyword;
 import org.pgcodekeeper.core.sql.Keyword.KeywordCategory;
 
+/**
+ * Utility class for handling quoting and unquoting of identifiers and literals in Microsoft SQL.
+ */
 public class MsDiffUtils {
 
+    /**
+     * Quotes an identifier using Microsoft SQL square bracket syntax.
+     * Escapes any existing square brackets in the name.
+     *
+     * @param name the identifier to quote
+     * @return the quoted identifier
+     */
+    public static String quoteName(String name) {
+        return '[' + name.replace("]", "]]") + ']';
+    }
+
+    /**
+     * Checks if a string is a valid Microsoft SQL identifier.
+     *
+     * @param id            the identifier to validate
+     * @param allowKeywords whether to allow reserved keywords as identifiers
+     * @param allowCaps     whether to allow uppercase letters
+     * @return true if the identifier is valid, false otherwise
+     */
     public static boolean isValidId(String id, boolean allowKeywords, boolean allowCaps) {
         if (id.isEmpty()) {
             return true;
@@ -33,18 +55,30 @@ public class MsDiffUtils {
 
         if (!allowKeywords) {
             Keyword keyword = Keyword.KEYWORDS.get(id);
-            if (keyword != null && keyword.getCategory() != KeywordCategory.UNRESERVED_KEYWORD) {
-                return false;
-            }
+            return keyword == null || keyword.getCategory() == KeywordCategory.UNRESERVED_KEYWORD;
         }
 
         return true;
     }
 
+    /**
+     * Checks if character is valid for Microsoft SQL identifiers.
+     *
+     * @param c the character to check
+     * @return true if character is valid for Microsoft SQL identifiers, false otherwise
+     */
     public static boolean isValidIdChar(char c) {
         return isValidIdChar(c, true, true);
     }
 
+    /**
+     * Checks if character is valid for Microsoft SQL identifiers.
+     *
+     * @param c           the character to check
+     * @param allowCaps   whether to allow uppercase letters
+     * @param allowDigits whether to allow digits
+     * @return true if character is valid for Microsoft SQL identifiers, false otherwise
+     */
     public static boolean isValidIdChar(char c, boolean allowCaps, boolean allowDigits) {
         return (c >= 'a' && c <= 'z') ||
                 (allowCaps && c >= 'A' && c <= 'Z') ||
@@ -65,16 +99,24 @@ public class MsDiffUtils {
         return isValidId(name, false, true) ? name : quoteName(name);
     }
 
-    public static String quoteName(String name) {
-        return '[' + name.replace("]", "]]") + ']';
-    }
-
+    /**
+     * Unquotes a square bracket-quoted identifier.
+     *
+     * @param name the quoted identifier
+     * @return the unquoted identifier
+     */
     public static String unquoteQuotedName(String name) {
         return name.substring(1, name.length() - 1).replace("]]", "]");
     }
 
+    /**
+     * Removes square brackets from an identifier if present.
+     *
+     * @param name the identifier to process
+     * @return the identifier without surrounding brackets
+     */
     public static String getUnQuotedName(String name) {
-        return name.contains("[") ? name.substring(1, name.length()).replace("]", "") : name;
+        return name.contains("[") ? name.substring(1).replace("]", "") : name;
     }
 
     private MsDiffUtils() {

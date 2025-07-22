@@ -19,26 +19,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Stream;
-
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.CompareTree;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.model.difftree.DiffTree;
-import org.pgcodekeeper.core.model.difftree.IgnoreList;
-import org.pgcodekeeper.core.model.difftree.TreeElement;
-import org.pgcodekeeper.core.model.difftree.TreeFlattener;
+import org.pgcodekeeper.core.model.difftree.*;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
 import org.pgcodekeeper.core.model.graph.ActionContainer;
 import org.pgcodekeeper.core.model.graph.ActionsToScriptConverter;
@@ -53,8 +35,19 @@ import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
+
 /**
- * Creates diff of two database schemas.
+ * Main class for generating SQL scripts that transform one database schema to another.
+ * <p>
+ * This class compares two database schemas (old and new) and generates the SQL
+ * statements needed to migrate from the old schema to the new one.
  *
  * @author fordfrog
  */
@@ -67,6 +60,11 @@ public class PgDiff {
     protected final ISettings settings;
     protected final List<Object> errors = new ArrayList<>();
 
+    /**
+     * Creates a new PgDiff instance with the specified settings.
+     *
+     * @param settings the configuration settings for the diff operation
+     */
     public PgDiff(ISettings settings) {
         this.settings = settings;
     }
@@ -75,6 +73,17 @@ public class PgDiff {
         return Collections.unmodifiableList(errors);
     }
 
+    /**
+     * Selects all objects for diff, compares them between source and target
+     * and generates a migration script.
+     *
+     * @param oldDb      the source database schema
+     * @param newDb      the target database schema
+     * @param ignoreList list of objects to ignore during comparison
+     * @return SQL migration script
+     * @throws InterruptedException if the operation is interrupted
+     * @throws IOException          if an I/O error occurs
+     */
     public String diff(AbstractDatabase oldDb, AbstractDatabase newDb, IgnoreList ignoreList)
             throws InterruptedException, IOException {
         TreeElement root = DiffTree.create(oldDb, newDb);
@@ -83,6 +92,19 @@ public class PgDiff {
         return diff(root, oldDb, newDb, null, null, ignoreList);
     }
 
+    /**
+     * Gets selected elements from root, compares them between source and target
+     * and generates a migration script.
+     *
+     * @param root                   the root of the diff tree
+     * @param oldDb                  the source database schema
+     * @param newDb                  the target database schema
+     * @param additionalDepciesOldDb additional dependencies in old database
+     * @param additionalDepciesNewDb additional dependencies in new database
+     * @param ignoreList             list of objects to ignore during comparison
+     * @return SQL migration script
+     * @throws IOException if an I/O error occurs
+     */
     public String diff(TreeElement root,
             AbstractDatabase oldDb, AbstractDatabase newDb,
             List<Entry<PgStatement, PgStatement>> additionalDepciesOldDb,
@@ -103,8 +125,6 @@ public class PgDiff {
             case MS -> getMsScript(actions, toRefresh, selected, oldDb, newDb);
             case PG -> getPgScript(actions, toRefresh, selected, oldDb, newDb);
             case CH -> getChScript(actions, toRefresh, selected, oldDb, newDb);
-            default -> throw new IllegalArgumentException(
-                Messages.DatabaseType_unsupported_type + settings.getDbType());
         };
     }
 
@@ -160,7 +180,7 @@ public class PgDiff {
 
     private void addPrePostScript(SQLScript script, Path fileName, SQLActionType actionType) throws IOException {
         try {
-            String prePostScript = new String(Files.readAllBytes(fileName), StandardCharsets.UTF_8);
+            String prePostScript = Files.readString(fileName);
             prePostScript = "-- " + fileName + "\n\n" + prePostScript; //$NON-NLS-1$ //$NON-NLS-2$
             script.addStatementWithoutSeparator(prePostScript, actionType);
         } catch (IOException e) {
@@ -203,11 +223,9 @@ public class PgDiff {
             AbstractDatabase oldDb, AbstractDatabase newDb,
             List<Entry<PgStatement, PgStatement>> additionalDepciesOldDb,
             List<Entry<PgStatement, PgStatement>> additionalDepciesNewDb, Set<PgStatement> toRefresh) {
-        //TODO----------КОСТЫЛЬ колонки добавляются как выбранные если выбрана таблица-----------
         addColumnsAsElements(oldDb, newDb, selected);
-        // ---КОСТЫЛЬ-----------
 
-        Collections.sort(selected, new CompareTree());
+        selected.sort(new CompareTree());
 
         List<DbObject> objects = new ArrayList<>();
         for (TreeElement st : selected) {
@@ -231,9 +249,6 @@ public class PgDiff {
                 additionalDepciesOldDb, additionalDepciesNewDb, toRefresh, objects, settings);
     }
 
-    /**
-     * После реализации колонок как подэлементов таблицы выпилить метод!
-     */
     @Deprecated
     private void addColumnsAsElements(AbstractDatabase oldDb, AbstractDatabase newDb,
             List<TreeElement> selected) {

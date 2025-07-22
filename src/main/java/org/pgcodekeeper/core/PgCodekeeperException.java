@@ -15,22 +15,46 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
+/**
+ * Exception class for pgCodeKeeper specific exceptions.
+ * <p>
+ * This exception should be used for all application-specific error conditions.
+ */
 public class PgCodekeeperException extends Exception {
 
     private static final long serialVersionUID = 8958777207045999192L;
 
+    /**
+     * Constructs a new pgCodeKeeper exception with no detail message.
+     */
     public PgCodekeeperException() {
         super();
     }
 
+    /**
+     * Constructs a new pgCodeKeeper exception with the specified detail message.
+     *
+     * @param message the detail message
+     */
     public PgCodekeeperException(String message) {
         super(message);
     }
 
+    /**
+     * Constructs a new pgCodeKeeper exception with the specified cause.
+     *
+     * @param cause the cause
+     */
     public PgCodekeeperException(Throwable cause) {
         super(cause);
     }
 
+    /**
+     * Constructs a new pgCodeKeeper exception with the specified detail message and cause.
+     *
+     * @param message the detail message
+     * @param cause   the cause
+     */
     public PgCodekeeperException(String message, Throwable cause) {
         super(message, cause);
     }

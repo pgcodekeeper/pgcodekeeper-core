@@ -18,6 +18,12 @@ package org.pgcodekeeper.core;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * Represents a location context within a file, storing position information
+ * including file path, offset, line number and character position.
+ * <p>
+ * This is an abstract base class for concrete location implementations.
+ */
 public abstract class ContextLocation implements Serializable {
 
     private static final long serialVersionUID = -7001017512350210951L;
@@ -33,7 +39,7 @@ public abstract class ContextLocation implements Serializable {
         this.lineNumber = lineNumber;
         this.charPositionInLine = charPositionInLine;
     }
-
+    
     public String getFilePath() {
         return filePath;
     }
@@ -50,6 +56,14 @@ public abstract class ContextLocation implements Serializable {
         return charPositionInLine;
     }
 
+
+    /**
+     * Compares this location with another object for equality.
+     *
+     * @param obj the object to compare with
+     * @return true if the other object is a ContextLocation with identical
+     * file path, offset, line number and character position
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -65,6 +79,11 @@ public abstract class ContextLocation implements Serializable {
         return false;
     }
 
+    /**
+     * Computes a hash code based on all location attributes.
+     *
+     * @return a hash code value for this location
+     */
     @Override
     public int hashCode() {
         final int prime = 31;

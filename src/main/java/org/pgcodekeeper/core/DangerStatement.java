@@ -18,6 +18,10 @@ package org.pgcodekeeper.core;
 import java.util.EnumSet;
 import java.util.Set;
 
+/**
+ * Enumeration of potentially dangerous SQL statements that should be handled with caution.
+ * Used to control which dangerous operations are allowed during database operations.
+ */
 public enum DangerStatement {
     DROP_TABLE,
     ALTER_COLUMN,
@@ -25,6 +29,12 @@ public enum DangerStatement {
     RESTART_WITH,
     UPDATE;
 
+    /**
+     * Creates a set of dangerous statements that should be considered "allowed"
+     * based on the provided ignore flags.
+     *
+     * @return EnumSet containing all allowed dangerous statements
+     */
     public static Set<DangerStatement> getAllowedDanger(boolean ignoreDropCol, boolean ignoreAlterCol,
             boolean ignoreDropTable, boolean ignoreRestartWith, boolean ignoreUpdate) {
         Set<DangerStatement> allowedDangers = EnumSet.noneOf(DangerStatement.class);
