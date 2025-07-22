@@ -15,16 +15,49 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
+/**
+ * Utility class for handling quoting and unquoting of identifiers and literals in ClickHouse.
+ */
 public class ChDiffUtils {
 
-    public static String quoteName(String name) {
-        return name.startsWith("`") ? name : '`' + name + '`';
-    }
-
+    /**
+     * Returns the name quoted with backticks (`) if it's not a valid identifier.
+     * If {@code name} is already valid, it is returned unchanged.
+     *
+     * @param name the name to check and quote if needed
+     * @return the original name (if valid) or a backtick-quoted version
+     */
     public static String getQuotedName(String name) {
         return isValidId(name, true) ? name : quoteName(name);
     }
 
+    /**
+     * Wraps the name in backticks (`) if not already quoted.
+     *
+     * @param name the name to quote
+     * @return the quoted name, or original if already quoted
+     */
+    public static String quoteName(String name) {
+        return name.startsWith("`") ? name : '`' + name + '`';
+    }
+
+    /**
+     * Quotes a string literal with single quotes (') if unquoted.
+     *
+     * @param name the string to quote (e.g., a SQL value)
+     * @return the quoted string, or original if already quoted
+     */
+    public static String quoteLiteralName(String name) {
+        return name.startsWith("'") ? name : '\'' + name + '\'';
+    }
+
+    /**
+     * Checks if the given string is a valid ClickHouse identifier.
+     *
+     * @param id        the identifier to validate
+     * @param allowCaps whether to allow uppercase letters in the identifier
+     * @return true if the identifier is valid, false otherwise
+     */
     public static boolean isValidId(String id, boolean allowCaps) {
         if (id.isEmpty()) {
             return true;
@@ -39,10 +72,14 @@ public class ChDiffUtils {
         return true;
     }
 
-    public static String quoteLiteralName(String name) {
-        return name.startsWith("'") ? name : '\'' + name + '\'';
-    }
-
+    /**
+     * Checks if character is valid for ClickHouse identifiers.
+     *
+     * @param c           the character to check
+     * @param allowCaps   whether to allow uppercase letters
+     * @param allowDigits whether to allow digits
+     * @return true if character is valid for ClickHouse identifiers, false otherwise
+     */
     public static boolean isValidIdChar(char c, boolean allowCaps, boolean allowDigits) {
         if (c >= 'a' && c <= 'z') {
             return true;
@@ -59,10 +96,24 @@ public class ChDiffUtils {
         return c == '_';
     }
 
+    /**
+     * Unquotes a backtick-quoted identifier.
+     * Handles escaped backticks (``) by converting them to single backticks.
+     *
+     * @param name the quoted identifier to unquote
+     * @return the unquoted identifier
+     */
     public static String unQuoteName(String name) {
         return name.startsWith("`") ? name.substring(1, name.length() - 1).replace("``", "`") : name;
     }
 
+    /**
+     * Unquotes a single-quoted string literal.
+     * Handles escaped single quotes ('') by converting them to single quotes.
+     *
+     * @param name the quoted string to unquote
+     * @return the unquoted string
+     */
     public static String unQuoteLiteralName(String name) {
         return name.startsWith("'") ? name.substring(1, name.length() - 1).replace("''", "'") : name;
     }

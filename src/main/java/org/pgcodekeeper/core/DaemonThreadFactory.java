@@ -25,8 +25,14 @@ import java.util.concurrent.ThreadFactory;
  */
 public class DaemonThreadFactory implements ThreadFactory {
 
-    ThreadFactory defaultTf = Executors.defaultThreadFactory();
+    private static final ThreadFactory defaultTf = Executors.defaultThreadFactory();
 
+    /**
+     * Creates a new daemon thread to run the given task.
+     *
+     * @param r the runnable task to be executed by the new thread
+     * @return a new daemon thread configured to run the given task
+     */
     @Override
     public Thread newThread(Runnable r) {
         Thread t = defaultTf.newThread(r);

@@ -19,39 +19,55 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.stream.Stream;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.pgcodekeeper.core.sql.Keyword;
 import org.pgcodekeeper.core.sql.Keyword.KeywordCategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.*;
+import java.util.stream.Stream;
+
 /**
- * Utilities for creation of diffs.
+ * A utility class providing various helper methods.
+ *
+ * <p>This class contains methods for:
+ * <ul>
+ *   <li>PostgreSQL identifier validation and quoting</li>
+ *   <li>String manipulation and quoting for SQL</li>
+ *   <li>Hashing functions (MD5, SHA-256)</li>
+ *   <li>Collection comparison utilities</li>
+ *   <li>Error handling and string processing</li>
+ *   <li>PostgreSQL-specific language validation</li>
+ *   <li>SQL statement wrapping</li>
+ * </ul>
  *
  * @author fordfrog
  */
 public final class PgDiffUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(PgDiffUtils.class);
-
-    public static final Random RANDOM = new SecureRandom();
     private static final int ERROR_SUBSTRING_LENGTH = 20;
     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
 
+    /**
+     * Secure random number generator instance.
+     */
+    public static final Random RANDOM = new SecureRandom();
+
+    /**
+     * Checks if string is a valid PostgreSQL identifier.
+     *
+     * @param id            the identifier to check
+     * @param allowKeywords whether to allow reserved keywords
+     * @param allowCaps     whether to allow uppercase letters
+     * @return true if valid identifier, false otherwise
+     */
     public static boolean isValidId(String id, boolean allowKeywords, boolean allowCaps) {
         if (id.isEmpty()) {
             return true;
@@ -69,19 +85,31 @@ public final class PgDiffUtils {
         }
 
         if (!allowKeywords) {
-            Keyword keyword = Keyword.KEYWORDS.get(allowCaps ? lowerId: id);
-            if (keyword != null && keyword.getCategory() != KeywordCategory.UNRESERVED_KEYWORD) {
-                return false;
-            }
+            Keyword keyword = Keyword.KEYWORDS.get(allowCaps ? lowerId : id);
+            return keyword == null || keyword.getCategory() == KeywordCategory.UNRESERVED_KEYWORD;
         }
 
         return true;
     }
 
+    /**
+     * Checks if character is valid for PostgreSQL identifiers.
+     *
+     * @param c the character to check
+     * @return true if valid identifier character, false otherwise
+     */
     public static boolean isValidIdChar(char c) {
         return isValidIdChar(c, true, true);
     }
 
+    /**
+     * Checks if character is valid for PostgreSQL identifiers.
+     *
+     * @param c           the character to check
+     * @param allowCaps   whether to allow uppercase letters
+     * @param allowDigits whether to allow digits (not in first position)
+     * @return true if valid identifier character, false otherwise
+     */
     public static boolean isValidIdChar(char c, boolean allowCaps, boolean allowDigits) {
         if (c >= 'a' && c <= 'z') {
             return true;
@@ -111,16 +139,32 @@ public final class PgDiffUtils {
         return isValidId(name, false, false) ? name : quoteName(name);
     }
 
+    /**
+     * Quotes PostgreSQL identifier with double quotes.
+     *
+     * @param name the name to quote
+     * @return quoted identifier
+     */
     public static String quoteName(String name) {
         return '"' + name.replace("\"", "\"\"") + '"';
     }
 
+    /**
+     * Quotes string with single quotes for SQL.
+     *
+     * @param s the string to quote
+     * @return quoted string
+     */
     public static String quoteString(String s) {
         return '\'' + s.replace("'", "''") + '\'';
     }
 
     /**
+     * Quotes string using dollar-quoting ($$) syntax.
+     * <p>
      * Function equivalent to appendStringLiteralDQ in pgdump's dumputils.c
+     * @param contents the string to quote
+     * @return dollar-quoted string
      */
     public static String quoteStringDollar(String contents) {
         final String suffixes = "_XXXXXXX";
@@ -136,19 +180,48 @@ public final class PgDiffUtils {
         return dollar + contents + dollar;
     }
 
+    /**
+     * Unquotes a double-quoted PostgreSQL identifier.
+     *
+     * @param name the quoted name
+     * @return unquoted identifier
+     */
     public static String unquoteQuotedName(String name) {
         return name.substring(1, name.length() - 1).replace("\"\"", "\"");
     }
 
+    /**
+     * Unquotes a single-quoted SQL string starting from specified position.
+     *
+     * @param s     the quoted string to unquote
+     * @param start the starting position of the quoted content
+     * @return unquoted string
+     */
     public static String unquoteQuotedString(String s, int start) {
         return s.substring(start, s.length() - 1).replace("''", "'");
     }
 
+    /**
+     * Computes hash of string using specified algorithm.
+     *
+     * @param s        the string to hash
+     * @param instance the hash algorithm to use
+     * @return the hash bytes
+     * @throws NoSuchAlgorithmException if algorithm is not available
+     */
     public static byte[] getHash(String s, String instance) throws NoSuchAlgorithmException {
         return MessageDigest.getInstance(instance)
                 .digest(s.getBytes(StandardCharsets.UTF_8));
     }
 
+
+    /**
+     * Returns hexadecimal string representation of hash.
+     *
+     * @param s        the string to hash
+     * @param instance the hash algorithm to use
+     * @return hexadecimal hash string
+     */
     public static String hash (String s, String instance) {
         try {
             byte[] hash = getHash(s, instance);
@@ -165,31 +238,52 @@ public final class PgDiffUtils {
     }
 
     /**
-     * @return lowercase hex MD5 for UTF-8 representation of given string.
+     * Returns MD5 hash of string as hexadecimal.
+     * @param s the string to hash
+     * @return lowercase hex MD5 for UTF-8 representation of given string
      */
     public static String md5(String s) {
         return hash(s, "MD5");
     }
 
     /**
-     * @return lowercase hex SHA-256 for UTF-8 representation of given string.
+     * Returns SHA-256 hash of string as hexadecimal.
+     * @param s the string to hash
+     * @return lowercase hex SHA-256 for UTF-8 representation of given string
      */
     public static String sha(String s) {
         return hash(s, "SHA-256");
     }
 
+    /**
+     * URL-encodes string using UTF-8 encoding.
+     *
+     * @param string the string to encode
+     * @return URL-encoded string
+     */
     public static String checkedEncodeUtf8(String string) {
-        try {
-            return URLEncoder.encode(string, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return string;
-        }
+        return URLEncoder.encode(string, StandardCharsets.UTF_8);
     }
 
+    /**
+     * Gets error substring from specified position with default length.
+     *
+     * @param s   the string to extract from
+     * @param pos the starting position
+     * @return substring of error text
+     */
     public static String getErrorSubstr(String s, int pos) {
         return getErrorSubstr(s, pos, ERROR_SUBSTRING_LENGTH);
     }
 
+    /**
+     * Gets error substring from specified position with custom length.
+     *
+     * @param s   the string to extract from
+     * @param pos the starting position
+     * @param len the maximum length of substring
+     * @return substring of error text
+     */
     public static String getErrorSubstr(String s, int pos, int len) {
         if (pos >= s.length()) {
             return "";
@@ -197,6 +291,12 @@ public final class PgDiffUtils {
         return pos + len < s.length() ? s.substring(pos, pos + len) : s.substring(pos);
     }
 
+    /**
+     * Checks if progress monitor has been cancelled.
+     *
+     * @param monitor the progress monitor to check
+     * @throws InterruptedException if monitor is cancelled
+     */
     public static void checkCancelled(IProgressMonitor monitor)
             throws InterruptedException {
         if (monitor != null && monitor.isCanceled()) {
@@ -214,6 +314,10 @@ public final class PgDiffUtils {
      *
      * Performance: best case O(1), worst case O(N) + new {@link HashMap} (in case N1 == N2), assuming size() takes
      * constant time.
+     *
+     * @param c1 first collection
+     * @param c2 second collection
+     * @return true if collections contain same elements in any order, false otherwise
      */
     public static boolean setlikeEquals(Collection<?> c1, Collection<?> c2) {
         final int s1 = c1.size();
@@ -229,8 +333,7 @@ public final class PgDiffUtils {
         final Map<Object, Integer> map =
                 new HashMap<>(Math.max((int) (s1/loadFactor) + 1, 16), loadFactor);
         for (Object el1 : c1) {
-            Integer i = map.get(el1);
-            map.put(el1, i == null ? 1 : (i + 1));
+            map.compute(el1, (k, i) -> i == null ? 1 : (i + 1));
         }
         for (Object el2 : c2) {
             Integer i = map.get(el2);
@@ -251,6 +354,14 @@ public final class PgDiffUtils {
         return map.isEmpty();
     }
 
+    /**
+     * Checks if text starts with identifier at specified offset.
+     *
+     * @param text   the text to check
+     * @param id     the identifier to look for
+     * @param offset the position to start checking
+     * @return true if text starts with identifier at offset, false otherwise
+     */
     public static boolean startsWithId(String text, String id, int offset) {
         if (offset != 0 && isValidIdChar(text.charAt(offset - 1))) {
             return false;
@@ -263,6 +374,13 @@ public final class PgDiffUtils {
         return text.startsWith(id, offset);
     }
 
+    /**
+     * Checks if string ends with suffix (case-insensitive).
+     *
+     * @param str    the string to check
+     * @param suffix the suffix to look for
+     * @return true if string ends with suffix (case-insensitive), false otherwise
+     */
     public static boolean endsWithIgnoreCase(String str, String suffix) {
         int suffixLength = suffix.length();
         return str.regionMatches(true, str.length() - suffixLength, suffix, 0, suffixLength);
@@ -275,10 +393,23 @@ public final class PgDiffUtils {
         return stream::iterator;
     }
 
+    /**
+     * Checks if language is valid for PostgreSQL (PLPGSQL or SQL).
+     *
+     * @param language the language to check
+     * @return true if language is valid, false otherwise
+     */
     public static boolean isValidLanguage(String language) {
         return "PLPGSQL".equalsIgnoreCase(language) || "SQL".equalsIgnoreCase(language);
     }
 
+    /**
+     * Wraps SQL in DO block with error handling.
+     *
+     * @param sbResult        the StringBuilder to append to
+     * @param sbSQL           the SQL to wrap
+     * @param expectedErrCode the expected error code to handle
+     */
     public static void appendSqlWrappedInDo(StringBuilder sbResult, StringBuilder sbSQL, String expectedErrCode) {
         String body = sbSQL.toString().replace("\n", "\n\t");
 

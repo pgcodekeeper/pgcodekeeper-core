@@ -15,22 +15,45 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
+/**
+ * Exception indicating that a {@code DbObjType} object
+ * is not allowed in the current context.
+ */
 public class NotAllowedObjectException extends RuntimeException {
 
     private static final long serialVersionUID = -283715845801619786L;
 
+    /**
+     * Constructs a new NotAllowedObjectException with no detail message.
+     */
     public NotAllowedObjectException() {
         super();
     }
 
+    /**
+     * Constructs a new NotAllowedObjectException with the specified detail message.
+     *
+     * @param message the detail message describing the restriction
+     */
     public NotAllowedObjectException(String message) {
         super(message);
     }
 
+    /**
+     * Constructs a new NotAllowedObjectException with the specified cause.
+     *
+     * @param cause the underlying cause of this exception
+     */
     public NotAllowedObjectException(Throwable cause) {
         super(cause);
     }
 
+    /**
+     * Constructs a new NotAllowedObjectException with the specified detail message and cause.
+     *
+     * @param message the detail message describing the restriction
+     * @param cause   the underlying cause of this exception
+     */
     public NotAllowedObjectException(String message, Throwable cause) {
         super(message, cause);
     }

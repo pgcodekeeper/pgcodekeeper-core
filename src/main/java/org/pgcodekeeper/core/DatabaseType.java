@@ -17,6 +17,16 @@ package org.pgcodekeeper.core;
 
 import org.pgcodekeeper.core.localizations.Messages;
 
+/**
+ * Enumeration representing different types of database management systems
+ * that are currently supported.
+ * <p>
+ * Each enum constant contains information about the database type including:
+ * <ul>
+ *   <li>Database name</li>
+ *   <li>Default connection port</li>
+ * </ul>
+ */
 public enum DatabaseType {
 
     PG("PostgreSQL", "5432"),
@@ -26,7 +36,7 @@ public enum DatabaseType {
     private final String dbTypeName;
     private final String defaultPort;
 
-    private DatabaseType(String dbTypeName, String defaultPort) {
+    DatabaseType(String dbTypeName, String defaultPort) {
         this.dbTypeName = dbTypeName;
         this.defaultPort = defaultPort;
     }
@@ -42,11 +52,11 @@ public enum DatabaseType {
     /**
      * Enums valuesOf method version with custom exception.
      *
-     * @param dbTypeText
-     *            - database name
-     * @return DatabaseType for given name or {@link IllegalArgumentException}
+     * @param dbTypeText database name
+     * @return DatabaseType for given name
+     * @throws IllegalArgumentException if provided database is not supported
      */
-    public static final DatabaseType getValue(String dbTypeText) {
+    public static DatabaseType getValue(String dbTypeText) {
         for (DatabaseType t : values()) {
             if (t.name().equalsIgnoreCase(dbTypeText)) {
                 return t;

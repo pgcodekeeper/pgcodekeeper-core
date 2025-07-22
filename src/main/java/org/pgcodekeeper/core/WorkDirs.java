@@ -15,16 +15,21 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
-import java.nio.file.Path;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.utils.FileUtils;
 
+import java.nio.file.Path;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * Provides directory structure definitions and path resolution utilities
+ * for different database types (PostgreSQL, Microsoft SQL, ClickHouse).
+ * Manages the organization of database objects in filesystem directories.
+ */
 public final class WorkDirs {
 
     public static final String OVERRIDES = "OVERRIDES";
@@ -84,31 +89,50 @@ public final class WorkDirs {
             DbObjType.OPERATOR, DbObjType.TABLE, DbObjType.VIEW, DbObjType.STATISTICS, DbObjType.DICTIONARY,
             DbObjType.FTS_PARSER, DbObjType.FTS_TEMPLATE, DbObjType.FTS_DICTIONARY, DbObjType.FTS_CONFIGURATION);
 
+    /**
+     * Gets the list of top-level directory names for the specified database type
+     *
+     * @param databaseType the database type (PG, MS, or CH)
+     * @return list of directory names
+     */
     public static List<String> getDirectoryNames(DatabaseType databaseType) {
         return switch (databaseType) {
             case CH -> CH_DIRECTORY_NAMES;
             case MS -> MS_DIRECTORY_NAMES;
             case PG -> PG_DIRECTORY_NAMES;
-            default -> throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + databaseType);
         };
     }
 
+    /**
+     * Gets the directory name for a specific database object type
+     *
+     * @param databaseType the database type
+     * @param type         the database object type
+     * @return directory name for the object type, or null if the object type doesn't have a dedicated directory
+     * @throws IllegalStateException if the object type is not supported
+     */
     public static String getDirectoryNameForType(DatabaseType databaseType, DbObjType type) {
         return switch (databaseType) {
             case CH -> getChDirectoryNameForType(type);
             case MS -> getMsDirectoryNameForType(type);
             case PG -> getPgDirectoryNameForType(type);
-            default -> throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + databaseType);
         };
     }
 
+    /**
+     * Gets the relative filesystem path for a database statement
+     *
+     * @param st      the database statement
+     * @param baseDir the base directory path
+     * @return relative path where the statement should be stored
+     * @throws IllegalStateException if the object type is not supported
+     */
     public static Path getRelativeFolderPath(PgStatement st, Path baseDir) {
         var databaseType = st.getDbType();
         return switch (databaseType) {
             case CH -> getChRelativeFolderPath(st, baseDir);
             case MS -> getMsRelativeFolderPath(st, baseDir);
             case PG -> getPgRelativeFolderPath(st, baseDir);
-            default -> throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + databaseType);
         };
     }
 
@@ -149,6 +173,12 @@ public final class WorkDirs {
         };
     }
 
+    /**
+     * Checks if a Microsoft SQL Server subdirectory belongs to a schema
+     *
+     * @param dirSub the subdirectory name
+     * @return true if the directory is schema-related, false otherwise
+     */
     public static boolean isInMsSchema(String dirSub) {
         return !MS_ASSEMBLIES.equals(dirSub) && !MS_SECURITY.equals(dirSub);
     }
@@ -199,6 +229,11 @@ public final class WorkDirs {
         };
     }
 
+    /**
+     * Gets the loading order for PostgreSQL object types
+     *
+     * @return set of database object types in loading order
+     */
     public static Set<DbObjType> getDirLoadOrder() {
         return DIR_LOAD_ORDER;
     }
