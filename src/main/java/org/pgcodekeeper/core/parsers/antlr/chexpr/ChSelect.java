@@ -32,7 +32,7 @@ public final class ChSelect extends ChAbstractExprWithNmspc<Select_stmtContext> 
 
     private final ChValueExpr vex = new ChValueExpr(this);
 
-    protected ChSelect(ChAbstractExpr parent) {
+    ChSelect(ChAbstractExpr parent) {
         super(parent, true);
     }
 

@@ -15,12 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map.Entry;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.pgcodekeeper.core.localizations.Messages;
@@ -35,6 +29,11 @@ import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map.Entry;
+
 public final class Function extends AbstractExprWithNmspc<Plpgsql_functionContext> {
 
     private static final Logger LOG = LoggerFactory.getLogger(Function.class);
@@ -43,7 +42,7 @@ public final class Function extends AbstractExprWithNmspc<Plpgsql_functionContex
         super(meta);
     }
 
-    protected Function(AbstractExpr parent) {
+    private Function(AbstractExpr parent) {
         super(parent);
     }
 
@@ -112,7 +111,7 @@ public final class Function extends AbstractExprWithNmspc<Plpgsql_functionContex
         } else {
             List<? extends ParserRuleContext> ids;
             if (ctx.dollar_number() != null) {
-                ids = Arrays.asList(ctx.dollar_number());
+                ids = Collections.singletonList(ctx.dollar_number());
             } else {
                 ids = PgParserAbstract.getIdentifiers(ctx.schema_qualified_name());
             }

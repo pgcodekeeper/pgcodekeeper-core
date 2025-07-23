@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Function_bodyContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Function_returnContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.StatementContext;
@@ -25,11 +22,10 @@ import org.pgcodekeeper.core.parsers.antlr.rulectx.Vex;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 
-public class SqlFunctionBody extends Statements<Function_bodyContext> {
+import java.util.Collections;
+import java.util.List;
 
-    protected SqlFunctionBody(AbstractExpr parent) {
-        super(parent);
-    }
+public class SqlFunctionBody extends Statements<Function_bodyContext> {
 
     public SqlFunctionBody(MetaContainer meta) {
         super(meta);

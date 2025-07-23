@@ -15,29 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.chexpr;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Alias_clauseContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Dml_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Qualified_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.With_clauseContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.With_queryContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.*;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.IRelation;
 import org.pgcodekeeper.core.schema.PgObjLocation.LocationType;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.Pair;
+
+import java.util.AbstractMap.SimpleEntry;
+import java.util.*;
+import java.util.Map.Entry;
 
 public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
 
@@ -142,12 +132,11 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
         addReference(alias, null);
     }
 
-    public boolean addRawTableReference(GenericColumn qualifiedTable) {
+    public void addRawTableReference(GenericColumn qualifiedTable) {
         boolean exists = !unaliasedNamespace.add(qualifiedTable);
         if (exists) {
             log("Duplicate unaliased table: {} {}", qualifiedTable.schema, qualifiedTable.table);
         }
-        return !exists;
     }
 
     @Override
@@ -203,12 +192,12 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
         }
     }
 
-    private GenericColumn addNameReference(Qualified_nameContext name, Alias_clauseContext alias, boolean isFrom) {
+    private void addNameReference(Qualified_nameContext name, Alias_clauseContext alias, boolean isFrom) {
         String firstName = QNameParser.getFirstName(name.identifier());
         boolean isCte = name.DOT().isEmpty() && hasCte(firstName);
         GenericColumn depcy = null;
         if (!isCte && isFrom) {
-            depcy = addObjectDepcy(name, DbObjType.TABLE);
+            depcy = addObjectDepcy(name);
         }
 
         if (alias != null) {
@@ -224,7 +213,6 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
             addRawTableReference(depcy);
         }
 
-        return depcy;
     }
 
     protected ParserRuleContext getAliasCtx(Alias_clauseContext alias) {

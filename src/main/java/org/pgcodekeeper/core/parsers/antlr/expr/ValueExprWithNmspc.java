@@ -15,14 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.VexContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Vex_bContext;
 import org.pgcodekeeper.core.parsers.antlr.rulectx.Vex;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * For use with value expressions that have predefined namespace.
@@ -47,6 +47,6 @@ public class ValueExprWithNmspc extends AbstractExprWithNmspc<VexContext> {
     }
 
     public List<ModPair<String, String>> analyze(Vex vex) {
-        return Arrays.asList(this.vex.analyze(vex));
+        return Collections.singletonList(this.vex.analyze(vex));
     }
 }

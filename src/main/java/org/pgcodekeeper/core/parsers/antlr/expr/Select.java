@@ -15,14 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.function.Predicate;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -40,6 +32,10 @@ import org.pgcodekeeper.core.utils.ModPair;
 import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Predicate;
 
 public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
 
@@ -63,7 +59,7 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
         super(db);
     }
 
-    protected Select(AbstractExpr parent) {
+    Select(AbstractExpr parent) {
         super(parent);
     }
 
@@ -85,7 +81,7 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
         return analyze(select, null);
     }
 
-    protected List<ModPair<String, String>> analyze(SelectStmt select, With_queryContext recursiveCteCtx) {
+    List<ModPair<String, String>> analyze(SelectStmt select, With_queryContext recursiveCteCtx) {
         With_clauseContext with = select.withClause();
         if (with != null) {
             analyzeCte(with);
@@ -329,7 +325,7 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
         List<IndirectionContext> ind = indList.indirection();
         switch (ind.size()) {
         case 0:
-            return qualAster(Arrays.asList(id), cols);
+            return qualAster(Collections.singletonList(id), cols);
         case 1:
             IndirectionContext second = ind.get(0);
             if (second.LEFT_BRACKET() == null) {
@@ -557,7 +553,7 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
                 String funcAlias = alias == null ? func.getFirst(): alias.getText();
                 addReference(funcAlias, null);
                 complexNamespace.put(funcAlias,
-                        Arrays.asList(new Pair<>(funcAlias, func.getSecond())));
+                        List.of(new Pair<>(funcAlias, func.getSecond())));
             }
         } finally {
             lateralAllowed = oldLateral;

@@ -15,16 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -36,16 +26,14 @@ import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.rulectx.Vex;
 import org.pgcodekeeper.core.parsers.antlr.statements.ParserAbstract;
 import org.pgcodekeeper.core.parsers.antlr.statements.pg.PgParserAbstract;
-import org.pgcodekeeper.core.schema.Argument;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.IFunction;
-import org.pgcodekeeper.core.schema.IOperator;
-import org.pgcodekeeper.core.schema.PgObjLocation;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 public final class ValueExpr extends AbstractExpr {
 
@@ -941,17 +929,11 @@ public final class ValueExpr extends AbstractExpr {
         if (token == null) {
             return null;
         }
-        switch (token.getSymbol().getType()) {
-        case SQLParser.PLUS:
-        case SQLParser.MINUS:
-        case SQLParser.EXP:
-        case SQLParser.MULTIPLY:
-        case SQLParser.DIVIDE:
-        case SQLParser.MODULAR:
-            return token.getText();
-        default:
-            return null;
-        }
+        return switch (token.getSymbol().getType()) {
+            case SQLParser.PLUS, SQLParser.MINUS, SQLParser.EXP, SQLParser.MULTIPLY, SQLParser.DIVIDE,
+                 SQLParser.MODULAR -> token.getText();
+            default -> null;
+        };
     }
 
     private String getFunctionReturns(IFunction f) {

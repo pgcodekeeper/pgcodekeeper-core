@@ -299,21 +299,19 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
         return !exists;
     }
 
-    public boolean addRawTableReference(GenericColumn qualifiedTable) {
+    public void addRawTableReference(GenericColumn qualifiedTable) {
         boolean exists = !unaliasedNamespace.add(qualifiedTable);
         if (exists) {
             LOG.warn(Messages.AbstractExprWithNmspc_log_dupl_unaliased_table, qualifiedTable.schema, qualifiedTable.table);
         }
-        return !exists;
     }
 
-    protected boolean addColumnReference(String alias, String column) {
+    protected void addColumnReference(String alias, String column) {
         Set<String> columns = columnAliases.computeIfAbsent(alias, k -> new HashSet<>());
         boolean exists = !columns.add(column);
         if (exists) {
             LOG.warn(Messages.AbstractExprWithNmspc_log_dupl_col_alias, alias, column);
         }
-        return !exists;
     }
 
     protected void addNameReference(Schema_qualified_nameContext name, Alias_clauseContext alias) {
