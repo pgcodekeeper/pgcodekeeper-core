@@ -15,6 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.formatter;
 
+/**
+ * Enumeration of indentation directions used during SQL formatting.
+ * Determines how indentation should be applied to different parts of SQL statements.
+ */
 public enum IndentDirection {
     /**
      * First token in new block

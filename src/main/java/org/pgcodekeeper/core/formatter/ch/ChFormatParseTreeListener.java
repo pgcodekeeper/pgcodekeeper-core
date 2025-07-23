@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.formatter.ch;
 
-import java.util.Map;
-import java.util.Set;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -25,16 +22,26 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pgcodekeeper.core.formatter.FormatParseTreeListener;
 import org.pgcodekeeper.core.formatter.IndentDirection;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHLexer;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.ExprContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.From_itemContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Select_opsContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Select_ops_no_parensContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Select_primaryContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.*;
 import org.pgcodekeeper.core.parsers.antlr.rulectx.ChSelectOps;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * ClickHouse-specific parse tree listener for SQL code formatting.
+ * Handles indentation and formatting rules for ClickHouse SQL syntax.
+ */
 public class ChFormatParseTreeListener extends FormatParseTreeListener {
 
+    /**
+     * Constructs a new ClickHouse format listener.
+     *
+     * @param tokens   The token stream being processed
+     * @param indents  Map to store indentation information for tokens
+     * @param unaryOps Set to track unary operators in the SQL
+     */
     public ChFormatParseTreeListener(CommonTokenStream tokens,
             Map<Token, Pair<IndentDirection, Integer>> indents,
             Set<Token> unaryOps) {

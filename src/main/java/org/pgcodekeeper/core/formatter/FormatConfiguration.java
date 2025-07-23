@@ -17,6 +17,11 @@ package org.pgcodekeeper.core.formatter;
 
 import java.util.Arrays;
 
+/**
+ * Configuration class for SQL formatting options.
+ * Controls various aspects of SQL code formatting including indentation,
+ * whitespace handling, and operator spacing.
+ */
 public class FormatConfiguration {
 
     public enum IndentType {
@@ -70,10 +75,23 @@ public class FormatConfiguration {
         this.indentType = indentType;
     }
 
+    /**
+     * Creates an indentation string based on current configuration.
+     *
+     * @param length desired length of indentation
+     * @return indentation string
+     */
     public String createIndent(int length) {
         return createIndent(length, getIndentType() == IndentType.TAB ? '\t' : ' ');
     }
 
+    /**
+     * Creates an indentation string with specified character.
+     *
+     * @param length     desired length of indentation
+     * @param indentChar character to use for indentation
+     * @return indentation string
+     */
     public static String createIndent(int length, char indentChar) {
         if (length <= 0) {
             return "";
@@ -85,6 +103,11 @@ public class FormatConfiguration {
         return new String(chars);
     }
 
+    /**
+     * Creates a copy of this configuration.
+     *
+     * @return new FormatConfiguration with same settings
+     */
     public FormatConfiguration copy() {
         FormatConfiguration config = new FormatConfiguration();
         config.addWhitespaceBeforeOp = isAddWhitespaceBeforeOp();

@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.formatter.ch;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
@@ -32,12 +29,34 @@ import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Ddl_stmtContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.QueryContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.StmtContext;
 
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * ClickHouse-specific SQL formatter implementation.
+ * Handles formatting of ClickHouse queries and DDL statements with dialect-specific rules.
+ */
 public class ChFormatter extends AbstractFormatter {
 
+    /**
+     * Constructs a new ClickHouse formatter instance.
+     *
+     * @param source The source SQL text to format
+     * @param start  The starting offset in the source text (inclusive)
+     * @param stop   The ending offset in the source text (exclusive)
+     * @param config The formatting configuration options
+     */
     public ChFormatter(String source, int start, int stop, FormatConfiguration config) {
         super(source, start, stop, config);
     }
 
+
+    /**
+     * Gets the list of formatting changes to apply to the ClickHouse SQL text.
+     * Parses the SQL and applies formatting rules to create view statements and their subqueries.
+     *
+     * @return List of FormatItem objects representing the formatting changes
+     */
     @Override
     public List<FormatItem> getFormatItems() {
         List<FormatItem> changes = new ArrayList<>();

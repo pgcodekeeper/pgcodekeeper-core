@@ -15,12 +15,23 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.formatter;
 
+/**
+ * Represents a single formatting operation to be applied to SQL text.
+ * Immutable class that describes a text modification at a specific position.
+ */
 public class FormatItem {
 
     private final int start;
     private final int length;
     private final String text;
 
+    /**
+     * Constructs a new FormatItem describing a text modification.
+     *
+     * @param start  The starting position in the original text (0-based index)
+     * @param length The number of characters to replace
+     * @param text   The new text to insert at the position
+     */
     public FormatItem(int start, int length, String text) {
         this.start = start;
         this.length = length;

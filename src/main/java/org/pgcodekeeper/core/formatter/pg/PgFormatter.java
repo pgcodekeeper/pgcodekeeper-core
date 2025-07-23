@@ -34,12 +34,30 @@ import org.pgcodekeeper.core.utils.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * PostgreSQL-specific SQL formatter implementation.
+ * Handles formatting of PostgreSQL functions and SQL statements with PostgreSQL-specific syntax rules.
+ */
 public class PgFormatter extends AbstractFormatter {
 
+    /**
+     * Constructs a new PostgreSQL formatter instance.
+     *
+     * @param source The source SQL text to format
+     * @param start  The starting offset in the source text
+     * @param stop   The ending offset in the source text
+     * @param config The formatting configuration
+     */
     public PgFormatter(String source, int start, int stop, FormatConfiguration config) {
         super(source, start, stop, config);
     }
 
+    /**
+     * Gets the list of formatting changes to apply to the SQL text.
+     * Parses the SQL and applies formatting rules based on the configuration.
+     *
+     * @return List of FormatItem objects representing formatting changes
+     */
     @Override
     public List<FormatItem> getFormatItems() {
         List<FormatItem> changes = new ArrayList<>();

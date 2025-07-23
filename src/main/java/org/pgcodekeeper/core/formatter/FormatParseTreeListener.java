@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.formatter;
 
-import java.util.Map;
-import java.util.Set;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -26,6 +23,12 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Abstract base class for parse tree listeners that handle code formatting.
+ */
 public abstract class FormatParseTreeListener implements ParseTreeListener {
 
     private final CommonTokenStream tokens;
@@ -33,12 +36,15 @@ public abstract class FormatParseTreeListener implements ParseTreeListener {
     protected final Set<Token> unaryOps;
 
     /**
-     * @param unaryOps
-     *            found unary operators and other operator-like tokens
+     * Creates new format listener instance.
+     *
+     * @param tokens   stream of tokens being formatted
+     * @param indents  map to store indentation information for tokens
+     * @param unaryOps set of unary operators and operator-like tokens
      */
     protected FormatParseTreeListener(CommonTokenStream tokens,
-            Map<Token, Pair<IndentDirection, Integer>> indents,
-            Set<Token> unaryOps) {
+                                      Map<Token, Pair<IndentDirection, Integer>> indents,
+                                      Set<Token> unaryOps) {
         this.tokens = tokens;
         this.indents = indents;
         this.unaryOps = unaryOps;

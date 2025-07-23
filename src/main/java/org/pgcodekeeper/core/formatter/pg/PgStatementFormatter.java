@@ -15,20 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.formatter.pg;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Lexer;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
-import org.pgcodekeeper.core.formatter.ErrorPresenceListener;
-import org.pgcodekeeper.core.formatter.FormatConfiguration;
-import org.pgcodekeeper.core.formatter.FormatParseTreeListener;
-import org.pgcodekeeper.core.formatter.IndentDirection;
-import org.pgcodekeeper.core.formatter.StatementFormatter;
+import org.antlr.v4.runtime.*;
+import org.pgcodekeeper.core.formatter.*;
 import org.pgcodekeeper.core.parsers.antlr.AntlrUtils;
 import org.pgcodekeeper.core.parsers.antlr.CodeUnitToken;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLLexer;
@@ -36,16 +24,43 @@ import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Function_bodyContext;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * PostgreSQL-specific implementation of SQL statement formatting.
+ * Handles formatting of PL/pgSQL functions and SQL statements with PostgreSQL-specific rules.
+ */
 public class PgStatementFormatter extends StatementFormatter {
 
-    private List<? extends Token> tokens;
+    private final List<? extends Token> tokens;
 
+    /**
+     * Constructs a formatter for PostgreSQL functions from string definition.
+     *
+     * @param start              The starting offset in the source text
+     * @param stop               The ending offset in the source text
+     * @param functionDefinition The function definition text to format
+     * @param defOffset          The function definition's offset in the source
+     * @param language           The language of the function ('SQL' or 'plpgsql')
+     * @param config             The formatting configuration
+     */
     public PgStatementFormatter(int start, int stop, String functionDefinition,
             int defOffset, String language, FormatConfiguration config) {
         super(start, stop, defOffset, defOffset, config);
         this.tokens = analyzeDefinition(functionDefinition, language);
     }
 
+    /**
+     * Constructs a formatter for PostgreSQL functions from parsed context.
+     *
+     * @param start       The starting offset in the source text
+     * @param stop        The ending offset in the source text
+     * @param definition  The parsed function body context
+     * @param tokenStream The token stream containing all tokens
+     * @param config      The formatting configuration
+     */
     public PgStatementFormatter(int start, int stop, Function_bodyContext definition,
             CommonTokenStream tokenStream, FormatConfiguration config) {
         super(start, stop, 0, 0, config);
@@ -88,6 +103,14 @@ public class PgStatementFormatter extends StatementFormatter {
         return stream.getTokens();
     }
 
+    /**
+     * Creates a PostgreSQL-specific parse tree listener for formatting.
+     *
+     * @param tokenStream The token stream being processed
+     * @param indents     Map to store indentation information
+     * @param unaryOps    Set to track unary operators
+     * @return PostgreSQL format listener instance
+     */
     @Override
     protected FormatParseTreeListener getListener(CommonTokenStream tokenStream,
             Map<Token, Pair<IndentDirection, Integer>> indents, Set<Token> unaryOps) {
