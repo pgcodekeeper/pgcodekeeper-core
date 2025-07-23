@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
@@ -24,6 +22,12 @@ import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
+/**
+ * Custom error listener for ANTLR parsing that collects and processes syntax errors.
+ * Handles error position adjustments and logging of parsing errors.
+ */
 final class CustomAntlrErrorListener extends BaseErrorListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(CustomAntlrErrorListener.class);
@@ -34,6 +38,15 @@ final class CustomAntlrErrorListener extends BaseErrorListener {
     private final int lineOffset;
     private final int inLineOffset;
 
+    /**
+     * Creates a new error listener with position adjustment parameters.
+     *
+     * @param parsedObjectName name of the object being parsed
+     * @param errors           list to collect parsing errors
+     * @param offset           character offset to apply to error positions
+     * @param lineOffset       line number offset to apply
+     * @param inLineOffset     in-line character position offset to apply
+     */
     CustomAntlrErrorListener(String parsedObjectName, List<Object> errors,
             int offset, int lineOffset, int inLineOffset) {
         this.parsedObjectName = parsedObjectName;
@@ -43,6 +56,17 @@ final class CustomAntlrErrorListener extends BaseErrorListener {
         this.inLineOffset = inLineOffset;
     }
 
+    /**
+     * Handles syntax errors detected during parsing.
+     * Adjusts error positions, logs the error, and collects it if errors list was provided.
+     *
+     * @param recognizer         the parser/lexer that detected the error
+     * @param offendingSymbol    the offending token/symbol
+     * @param line               the line where error occurred
+     * @param charPositionInLine the character position in line
+     * @param msg                the error message
+     * @param e                  the recognition exception
+     */
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol,
             int line, int charPositionInLine, String msg, RecognitionException e) {

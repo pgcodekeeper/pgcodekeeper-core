@@ -15,47 +15,102 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pgcodekeeper.core.parsers.antlr.statements.ch.ChParserAbstract;
 import org.pgcodekeeper.core.parsers.antlr.statements.pg.PgParserAbstract;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Utility class for parsing and processing qualified names (schema.object names)
+ * in SQL statements. Supports extracting individual name components from
+ * schema-qualified identifiers.
+ *
+ * @param <T> the type of parser context being processed
+ */
 public final class QNameParser<T extends ParserRuleContext> {
 
+    /**
+     * Gets the first (leftmost) name component from a list of identifiers.
+     *
+     * @param ids list of identifier contexts
+     * @return first name component or null if not available
+     */
     public static <T extends ParserRuleContext> String getFirstName(List<T> ids) {
         return getLastId(ids, 1);
     }
 
+    /**
+     * Gets the second name component from a list of identifiers.
+     *
+     * @param ids list of identifier contexts
+     * @return second name component or null if not available
+     */
     public static <T extends ParserRuleContext> String getSecondName(List<T> ids) {
         return getLastId(ids, 2);
     }
 
+    /**
+     * Gets the third name component from a list of identifiers.
+     *
+     * @param ids list of identifier contexts
+     * @return third name component or null if not available
+     */
     public static <T extends ParserRuleContext> String getThirdName(List<T> ids) {
         return getLastId(ids, 3);
     }
 
+    /**
+     * Gets the context for the first name component.
+     *
+     * @param ids list of identifier contexts
+     * @return parser context for first name or null
+     */
     public static <T extends ParserRuleContext> T getFirstNameCtx(List<T> ids) {
         return getLastIdCtx(ids, 1);
     }
 
+    /**
+     * Gets the context for the second name component.
+     *
+     * @param ids list of identifier contexts
+     * @return parser context for second name or null
+     */
     public static <T extends ParserRuleContext> T getSecondNameCtx(List<T> ids) {
         return getLastIdCtx(ids, 2);
     }
 
+    /**
+     * Gets the context for the third name component.
+     *
+     * @param ids list of identifier contexts
+     * @return parser context for third name or null
+     */
     public static <T extends ParserRuleContext> T getThirdNameCtx(List<T> ids) {
         return getLastIdCtx(ids, 3);
     }
 
+    /**
+     * Gets the schema name from a qualified identifier.
+     *
+     * @param ids list of identifier contexts
+     * @return schema name or null if not qualified
+     */
     public static <T extends ParserRuleContext> String getSchemaName(List<T> ids) {
         ParserRuleContext schemaCtx = getSchemaNameCtx(ids);
         return schemaCtx == null ? null : getText(schemaCtx);
     }
 
+    /**
+     * Gets the context for the schema name component.
+     *
+     * @param ids list of identifier contexts
+     * @return parser context for schema name or null
+     */
     public static <T extends ParserRuleContext> T getSchemaNameCtx(List<T> ids) {
         return ids.size() < 2 ? null : ids.get(0);
     }
@@ -96,6 +151,12 @@ public final class QNameParser<T extends ParserRuleContext> {
         return Collections.unmodifiableList(parts);
     }
 
+    /**
+     * Parses a PostgreSQL qualified name into its components.
+     *
+     * @param schemaQualifiedName the qualified name string to parse
+     * @return QNameParser instance containing parsed components
+     */
     public static QNameParser<ParserRuleContext> parsePg(String schemaQualifiedName) {
         List<Object> errors = new ArrayList<>();
         var parser = AntlrParser.createSQLParser(schemaQualifiedName, "qname: " + schemaQualifiedName, errors);
@@ -103,6 +164,12 @@ public final class QNameParser<T extends ParserRuleContext> {
         return new QNameParser<>(parts, errors);
     }
 
+    /**
+     * Parses a ClickHouse qualified name into its components.
+     *
+     * @param schemaQualifiedName the qualified name string to parse
+     * @return QNameParser instance containing parsed components
+     */
     public static QNameParser<ParserRuleContext> parseCh(String schemaQualifiedName) {
         List<Object> errors = new ArrayList<>();
         var parser = AntlrParser.createCHParser(schemaQualifiedName, "qname: " + schemaQualifiedName, errors);
@@ -110,6 +177,12 @@ public final class QNameParser<T extends ParserRuleContext> {
         return new QNameParser<>(parts, errors);
     }
 
+    /**
+     * Parses a PostgreSQL operator name into its components.
+     *
+     * @param schemaQualifiedName the operator name string to parse
+     * @return QNameParser instance containing parsed components
+     */
     public static QNameParser<ParserRuleContext> parsePgOperator(String schemaQualifiedName) {
         List<Object> errors = new ArrayList<>();
         var parser = AntlrParser.createSQLParser(schemaQualifiedName, "qname: " + schemaQualifiedName, errors);
@@ -122,22 +195,47 @@ public final class QNameParser<T extends ParserRuleContext> {
         this.parts = parts;
     }
 
+    /**
+     * Gets the first name component from this qualified name.
+     *
+     * @return first name component or null
+     */
     public String getFirstName() {
         return getFirstName(parts);
     }
 
+    /**
+     * Gets the second name component from this qualified name.
+     *
+     * @return second name component or null
+     */
     public String getSecondName() {
         return getSecondName(parts);
     }
 
+    /**
+     * Gets the third name component from this qualified name.
+     *
+     * @return third name component or null
+     */
     public String getThirdName() {
         return getThirdName(parts);
     }
 
+    /**
+     * Gets the schema name from this qualified name.
+     *
+     * @return schema name or null if not qualified
+     */
     public String getSchemaName() {
         return getSchemaName(parts);
     }
 
+    /**
+     * Checks if any errors occurred during parsing.
+     *
+     * @return true if parsing errors were encountered
+     */
     public boolean hasErrors() {
         return !errors.isEmpty();
     }

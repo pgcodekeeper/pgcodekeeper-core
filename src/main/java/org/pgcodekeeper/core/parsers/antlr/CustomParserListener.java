@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr;
 
-import java.util.List;
-import java.util.Locale;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -36,6 +33,15 @@ import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * Base class for custom ANTLR parse tree listeners that build database schema models.
+ * Provides common functionality for error handling and statement processing.
+ *
+ * @param <T> the type of database schema being built
+ */
 public class CustomParserListener<T extends AbstractDatabase> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CustomParserListener.class);
@@ -47,6 +53,16 @@ public class CustomParserListener<T extends AbstractDatabase> {
     protected final ISettings settings;
     private final IProgressMonitor monitor;
 
+    /**
+     * Creates a new parser listener for building database schemas.
+     *
+     * @param database the target database schema
+     * @param filename name of the file being parsed
+     * @param mode     parsing mode
+     * @param errors   list to collect parsing errors
+     * @param monitor  progress monitor for cancellation support
+     * @param settings application settings
+     */
     public CustomParserListener(T database, String filename,
             ParserListenerMode mode, List<Object> errors, IProgressMonitor monitor, ISettings settings) {
         this.db = database;
@@ -81,6 +97,13 @@ public class CustomParserListener<T extends AbstractDatabase> {
         }
     }
 
+    /**
+     * Handles unresolved reference exceptions during parsing.
+     *
+     * @param ex       the unresolved reference exception
+     * @param filename name of the file being parsed
+     * @return error object containing details about the failure
+     */
     public static AntlrError handleUnresolvedReference(UnresolvedReferenceException ex,
             String filename) {
         Token t = ex.getErrorToken();

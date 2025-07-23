@@ -15,26 +15,40 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr;
 
-import java.util.List;
-import java.util.Locale;
-
-import org.antlr.v4.runtime.CommonToken;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Parser;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Recognizer;
-import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Interval;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHLexer;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLLexer;
 
-public class AntlrUtils {
+import java.util.List;
+import java.util.Locale;
 
+/**
+ * Utility class providing helper methods for ANTLR parsing operations.
+ */
+public class AntlrUtils {
+    /**
+     * Normalizes whitespace in SQL text while preserving quoted sections.
+     * Uses PostgreSQL rules by default.
+     *
+     * @param ctx    the parser rule context containing the tokens
+     * @param stream token stream containing the tokens
+     * @return normalized SQL string with proper whitespace
+     */
     public static String normalizeWhitespaceUnquoted(ParserRuleContext ctx, CommonTokenStream stream) {
         return normalizeWhitespaceUnquoted(ctx, stream, DatabaseType.PG);
     }
 
+    /**
+     * Normalizes whitespace in SQL text while preserving quoted sections.
+     * Applies database-specific formatting rules.
+     *
+     * @param ctx    the parser rule context containing the tokens
+     * @param stream token stream containing the tokens
+     * @param dbType database type to determine specific formatting rules
+     * @return normalized SQL string with proper whitespace
+     */
     public static String normalizeWhitespaceUnquoted(ParserRuleContext ctx,
             CommonTokenStream stream, DatabaseType dbType) {
         StringBuilder sb = new StringBuilder();
@@ -107,26 +121,29 @@ public class AntlrUtils {
     }
 
 
-    /*
+    /**
+     * Removes INTO statements from SQL tokens that aren't part of PL/pgSQL INTO clauses.
+     * Handles special cases for INSERT INTO and IMPORT FOREIGN SCHEMA INTO.
+     * <p>
      * Because INTO is sometimes used in the main SQL grammar, we have to be
      * careful not to take any such usage of INTO as a PL/pgSQL INTO clause.
      * There are currently three such cases:
-     *
+     * <p>
      * 1. SELECT ... INTO.  We don't care, we just override that with the
      * PL/pgSQL definition.
-     *
+     * <p>
      * 2. INSERT INTO.  This is relatively easy to recognize since the words
      * must appear adjacently; but we can't assume INSERT starts the command,
      * because it can appear in CREATE RULE or WITH.  Unfortunately, INSERT is
      * *not* fully reserved, so that means there is a chance of a false match,
      * but it's not very likely.
-     *
+     * <p>
      * 3. IMPORT FOREIGN SCHEMA ... INTO.  This is not allowed in CREATE RULE
      * or WITH, so we just check for IMPORT as the command's first token.
      * (If IMPORT FOREIGN SCHEMA returned data someone might wish to capture
      * with an INTO-variables clause, we'd have to work much harder here.)
-     *
-     * See https://github.com/postgres/postgres/blob/master/src/pl/plpgsql/src/pl_gram.y
+     * <p>
+     * See <a href="https://github.com/postgres/postgres/blob/master/src/pl/plpgsql/src/pl_gram.y">pl_gram.y</a>
      */
     public static void removeIntoStatements(Parser parser) {
         CommonTokenStream stream = (CommonTokenStream) parser.getTokenStream();

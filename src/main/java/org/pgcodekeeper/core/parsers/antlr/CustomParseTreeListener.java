@@ -23,25 +23,54 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.parsers.antlr.exception.MonitorCancelledRuntimeException;
 
+/**
+ * Custom ANTLR parse tree listener that monitors parsing progress and checks for cancellation.
+ * Provides basic progress tracking during parsing operations.
+ */
 final class CustomParseTreeListener implements ParseTreeListener {
     private final int monitoringLevel;
     private final IProgressMonitor monitor;
 
+    /**
+     * Creates a new parse tree listener with progress monitoring.
+     *
+     * @param monitoringLevel the depth level at which to report progress
+     * @param monitor         the progress monitor to report to (cannot be null)
+     */
     public CustomParseTreeListener(int monitoringLevel, IProgressMonitor monitor) {
         this.monitoringLevel = monitoringLevel;
         this.monitor = monitor;
     }
 
+    /**
+     * Called when entering a terminal node in the parse tree.
+     * This implementation does nothing.
+     *
+     * @param node the terminal node being entered
+     */
     @Override
     public void visitTerminal(TerminalNode node) {
         // no imp
     }
 
+    /**
+     * Called when visiting an error node in the parse tree.
+     * This implementation does nothing.
+     *
+     * @param node the error node being visited
+     */
     @Override
     public void visitErrorNode(ErrorNode node) {
         // no imp
     }
 
+    /**
+     * Called when exiting any parser rule in the parse tree.
+     * Checks for cancellation and reports progress when exiting rules at or above monitoring level.
+     *
+     * @param ctx the parser rule context being exited
+     * @throws MonitorCancelledRuntimeException if parsing was cancelled
+     */
     @Override
     public void exitEveryRule(ParserRuleContext ctx) {
         if (ctx.depth() <= monitoringLevel) {

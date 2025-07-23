@@ -15,6 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr;
 
+/**
+ * Enumeration of error types used in ANTLR parsing error handling.
+ * Categorizes different types of parsing and validation errors.
+ */
 public enum ErrorTypes {
     MISPLACEERROR,
     VERIFICATIONERROR,

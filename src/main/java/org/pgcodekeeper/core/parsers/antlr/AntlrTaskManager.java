@@ -15,19 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr;
 
-import java.io.IOException;
-import java.util.Queue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
-
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.DaemonThreadFactory;
 import org.pgcodekeeper.core.parsers.antlr.exception.MonitorCancelledRuntimeException;
 
+import java.io.IOException;
+import java.util.Queue;
+import java.util.concurrent.*;
+import java.util.function.Consumer;
+
+/**
+ * Manages execution and completion of asynchronous ANTLR parsing tasks.
+ * Uses a fixed thread pool for parallel parsing operations.
+ */
 public final class AntlrTaskManager {
 
     private static final int POOL_SIZE = Integer.max(1,
@@ -36,19 +36,46 @@ public final class AntlrTaskManager {
     private static final ExecutorService ANTLR_POOL =
             Executors.newFixedThreadPool(POOL_SIZE, new DaemonThreadFactory());
 
+    /**
+     * Gets the size of the thread pool used for ANTLR parsing tasks.
+     *
+     * @return number of threads in the pool
+     */
     public static int getPoolSize() {
         return POOL_SIZE;
     }
 
+    /**
+     * Submits a parsing task for asynchronous execution.
+     *
+     * @param <T>  type of the parsing result
+     * @param task the parsing task to execute
+     * @return Future representing the pending result
+     */
     public static <T> Future<T> submit(Callable<T> task) {
         return ANTLR_POOL.submit(task);
     }
 
+    /**
+     * Submits a parsing task with completion handler.
+     *
+     * @param <T>        type of the parsing result
+     * @param antlrTasks queue to store the created task
+     * @param task       the parsing task to execute
+     * @param finalizer  consumer to process the result when complete
+     */
     public static <T> void submit(Queue<AntlrTask<?>> antlrTasks, Callable<T> task, Consumer<T> finalizer) {
         Future<T> future = submit(task);
         antlrTasks.add(new AntlrTask<>(future, finalizer));
     }
 
+    /**
+     * Processes all tasks in the queue until completion or failure.
+     *
+     * @param antlrTasks queue of tasks to process
+     * @throws InterruptedException if task processing was interrupted
+     * @throws IOException          if an I/O error occurred during parsing
+     */
     public static void finish(Queue<AntlrTask<?>> antlrTasks) throws InterruptedException, IOException {
         AntlrTask<?> task;
         try {
@@ -64,13 +91,14 @@ public final class AntlrTaskManager {
     }
 
     /**
-     * Uwraps potential parser Interrupted and IO Exceptions from ExecutionException.<br>
-     * If non-standard parser exception is caught in the wrapper, it is rethrown
-     * as an IllegalStateException.
+     * Unwraps and rethrows specific exceptions from ExecutionException wrapper.
+     * Handles InterruptedException and IOException by rethrowing them directly.
+     * All other exceptions are wrapped in IllegalStateException.
      *
-     * @throws InterruptedException
-     * @throws IOException
-     * @throws IllegalStateException
+     * @param ex the ExecutionException to unwrap
+     * @throws InterruptedException if the task was interrupted
+     * @throws IOException if an I/O error occurred during parsing
+     * @throws IllegalStateException for any other exception types
      */
     private static void handleAntlrTaskException(ExecutionException ex)
             throws InterruptedException, IOException {

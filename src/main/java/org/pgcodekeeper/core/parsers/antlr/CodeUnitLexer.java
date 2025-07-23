@@ -19,6 +19,13 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Token;
 
+/**
+ * Abstract base lexer class that tracks character offsets and positions
+ * for accurate source mapping, including support for 32-bit characters.
+ * <p>
+ * You should use this class instead of base Lexer to get actual characters
+ * offset in UTF-16 encoding.
+ */
 public abstract class CodeUnitLexer extends Lexer {
 
     private static final String CODE_POINT_32_BIT_CHAR_STREAM = "CodePoint32BitCharStream";

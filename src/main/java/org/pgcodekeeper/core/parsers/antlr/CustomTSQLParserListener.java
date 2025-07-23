@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr;
 
-import java.util.List;
-import java.util.Locale;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,17 +27,41 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * Custom ANTLR listener for parsing Microsoft SQL Server (T-SQL) statements.
+ * Processes CREATE, ALTER, DROP statements and builds database schema model.
+ */
 public final class CustomTSQLParserListener extends CustomParserListener<MsDatabase>
 implements TSqlContextProcessor {
 
     private boolean ansiNulls = true;
     private boolean quotedIdentifier = true;
 
+    /**
+     * Creates a new Microsoft SQL Server parser listener.
+     *
+     * @param database the target database schema to populate
+     * @param filename name of the file being parsed
+     * @param mode     parsing mode
+     * @param errors   list to collect parsing errors
+     * @param monitor  progress monitor for cancellation support
+     * @param settings application settings
+     */
     public CustomTSQLParserListener(MsDatabase database, String filename, ParserListenerMode mode, List<Object> errors,
             IProgressMonitor monitor, ISettings settings) {
         super(database, filename, mode, errors, monitor, settings);
     }
 
+    /**
+     * Processes the complete T-SQL file context.
+     * Extracts and processes all batches and statements in the file.
+     *
+     * @param rootCtx the root file context from ANTLR parser
+     * @param stream  the token stream associated with the context
+     */
     @Override
     public void process(Tsql_fileContext rootCtx, CommonTokenStream stream) {
         for (BatchContext b : rootCtx.batch()) {
@@ -70,6 +91,11 @@ implements TSqlContextProcessor {
         safeParseStatement(() -> db.addReference(filename, loc), goCtx);
     }
 
+    /**
+     * Processes a single T-SQL clause
+     *
+     * @param st the clause context to process
+     */
     public void clause(St_clauseContext st) {
         Ddl_clauseContext ddl = st.ddl_clause();
         Dml_clauseContext dml;

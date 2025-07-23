@@ -15,16 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
@@ -35,6 +25,16 @@ import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * Parses and analyzes SQL scripts, detecting dangerous statements and syntax errors.
+ * Provides access to parsed script batches and validation results.
+ */
 public final class ScriptParser {
 
     private static final Logger LOG = LoggerFactory.getLogger(ScriptParser.class);
@@ -44,6 +44,15 @@ public final class ScriptParser {
     private final List<Object> errors;
     private final Set<DangerStatement> dangerStatements;
 
+    /**
+     * Creates a new script parser and immediately processes the script.
+     *
+     * @param name     name of the script (for error reporting)
+     * @param script   the SQL script content to parse
+     * @param settings application settings to use for parsing
+     * @throws IOException          if there's an error reading the script
+     * @throws InterruptedException if parsing is interrupted
+     */
     public ScriptParser(String name, String script, ISettings settings)
             throws IOException, InterruptedException {
         this.script = script;
@@ -62,20 +71,42 @@ public final class ScriptParser {
         errors = loader.getErrors();
     }
 
+    /**
+     * Gets the parsed script batches (statements).
+     *
+     * @return list of parsed statement locations and metadata
+     */
     public List<PgObjLocation> batch() {
         return batches;
     }
 
+    /**
+     * Checks if the script contains dangerous DDL statements not in the allowed set.
+     *
+     * @param allowedDangers collection of dangerous statements that are permitted
+     * @return true if script contains unapproved dangerous statements
+     */
     public boolean isDangerDdl(Collection<DangerStatement> allowedDangers) {
         return !allowedDangers.containsAll(dangerStatements);
     }
 
+    /**
+     * Gets the set of dangerous DDL statements not in the allowed set.
+     *
+     * @param allowedDangers collection of dangerous statements that are permitted
+     * @return set of unapproved dangerous statements found in script
+     */
     public Set<DangerStatement> getDangerDdl(Collection<DangerStatement> allowedDangers) {
         Set<DangerStatement> danger = EnumSet.copyOf(dangerStatements);
         danger.removeAll(allowedDangers);
         return danger;
     }
 
+    /**
+     * Gets a formatted error message if parsing encountered errors.
+     *
+     * @return formatted error message string, or null if no errors
+     */
     public String getErrorMessage() {
         if (!errors.isEmpty()) {
             StringBuilder sb = new StringBuilder();

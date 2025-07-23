@@ -19,16 +19,34 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
+/**
+ * Wrapper for asynchronous ANTLR parsing tasks that combines a Future with a completion handler.
+ * Allows executing parsing tasks in background and processing results when complete.
+ *
+ * @param <T> type of the result produced by the parsing task
+ */
 public class AntlrTask<T> {
 
     private final Future<T> future;
     private final Consumer<T> finalizer;
 
+    /**
+     * Creates a new ANTLR task with a Future and completion handler.
+     *
+     * @param future    the Future representing the asynchronous parsing task
+     * @param finalizer consumer that will process the parsing result when task completes
+     */
     public AntlrTask(Future<T> future, Consumer<T> finalizer) {
         this.future = future;
         this.finalizer = finalizer;
     }
 
+    /**
+     * Waits for the task to complete and processes the result with the finalizer.
+     * Propagates any exceptions that occurred during execution.
+     *
+     * @throws ExecutionException if the computation threw an exception
+     */
     public void finish() throws ExecutionException {
         T t;
         try {

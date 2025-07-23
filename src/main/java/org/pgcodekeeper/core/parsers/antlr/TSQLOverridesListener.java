@@ -15,28 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr;
 
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.TSqlContextProcessor;
 import org.pgcodekeeper.core.parsers.antlr.exception.UnresolvedReferenceException;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Another_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.BatchContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Batch_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Create_assemblyContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Create_schemaContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Ddl_clauseContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.IdContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Schema_alterContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Schema_createContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Security_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Sql_clausesContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.St_clauseContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Tsql_fileContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.statements.ms.AlterMsAuthorization;
 import org.pgcodekeeper.core.parsers.antlr.statements.ms.GrantMsPrivilege;
 import org.pgcodekeeper.core.schema.PgStatement;
@@ -44,17 +28,43 @@ import org.pgcodekeeper.core.schema.StatementOverride;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+
+/**
+ * Custom ANTLR listener for processing Microsoft SQL Server (T-SQL) statements with override support.
+ * Handles authorization and privilege statements while applying statement overrides.
+ */
 public final class TSQLOverridesListener extends CustomParserListener<MsDatabase>
-implements TSqlContextProcessor {
+        implements TSqlContextProcessor {
 
     private final Map<PgStatement, StatementOverride> overrides;
 
+    /**
+     * Creates a new T-SQL listener with override support.
+     *
+     * @param db        the target Microsoft SQL Server database schema
+     * @param filename  name of the file being parsed
+     * @param mode      parsing mode (NORMAL or SCRIPT)
+     * @param errors    list to collect parsing errors
+     * @param mon       progress monitor for cancellation support
+     * @param overrides map of statement overrides to apply
+     * @param settings  application settings
+     */
     public TSQLOverridesListener(MsDatabase db, String filename, ParserListenerMode mode, List<Object> errors,
             IProgressMonitor mon, Map<PgStatement, StatementOverride> overrides, ISettings settings) {
         super(db, filename, mode, errors, mon, settings);
         this.overrides = overrides;
     }
 
+    /**
+     * Processes the complete T-SQL file context.
+     * Extracts and processes batches and statements that may need overrides.
+     *
+     * @param rootCtx the root file context from ANTLR parser
+     * @param stream  the token stream associated with the context
+     */
     @Override
     public void process(Tsql_fileContext rootCtx, CommonTokenStream stream) {
         for (BatchContext b : rootCtx.batch()) {
