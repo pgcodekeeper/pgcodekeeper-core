@@ -20,6 +20,10 @@ import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.Pair;
 
+/**
+ * Extended token class that tracks additional position information
+ * for accurate source mapping in code units.
+ */
 public class CodeUnitToken extends CommonToken {
 
     private static final long serialVersionUID = -7656354484680429471L;
@@ -28,6 +32,18 @@ public class CodeUnitToken extends CommonToken {
     private int codeUnitStop;
     private int codeUnitPositionInLine;
 
+    /**
+     * Creates a new CodeUnitToken with detailed position information.
+     *
+     * @param source                 the token source and input stream
+     * @param type                   the token type
+     * @param channel                the token channel
+     * @param start                  the start index in the input stream
+     * @param stop                   the stop index in the input stream
+     * @param codeUnitStart          the start position in code units
+     * @param codeUnitStop           the end position in code units
+     * @param codeUnitPositionInLine the character position in line (in code units)
+     */
     public CodeUnitToken(Pair<TokenSource, CharStream> source, int type, int channel, int start, int stop,
             int codeUnitStart, int codeUnitStop, int codeUnitPositionInLine) {
         super(source, type, channel, start, stop);
@@ -36,6 +52,11 @@ public class CodeUnitToken extends CommonToken {
         this.codeUnitPositionInLine = codeUnitPositionInLine;
     }
 
+    /**
+     * Creates a copy of an existing CodeUnitToken.
+     *
+     * @param oldToken the token to copy
+     */
     public CodeUnitToken(CodeUnitToken oldToken) {
         super(oldToken);
         this.codeUnitStart = oldToken.codeUnitStart;

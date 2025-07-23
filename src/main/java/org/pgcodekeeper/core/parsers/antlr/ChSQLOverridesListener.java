@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr;
 
-import java.util.List;
-import java.util.Map;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
@@ -31,16 +28,41 @@ import org.pgcodekeeper.core.schema.StatementOverride;
 import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+import java.util.Map;
+
+/**
+ * ANTLR listener for processing ClickHouse SQL statements with override support.
+ * Handles privilege statements and applies statement overrides.
+ */
 public final class ChSQLOverridesListener extends CustomParserListener<ChDatabase> implements ChSqlContextProcessor {
 
-    private Map<PgStatement, StatementOverride> overrides;
+    private final Map<PgStatement, StatementOverride> overrides;
 
+    /**
+     * Creates a new listener for ClickHouse SQL with override support.
+     *
+     * @param database  the target database schema
+     * @param filename  name of the file being parsed
+     * @param mode      parsing mode
+     * @param errors    list to collect parsing errors
+     * @param monitor   progress monitor for cancellation support
+     * @param overrides map of statement overrides to apply
+     * @param settings  application settings
+     */
     public ChSQLOverridesListener(ChDatabase database, String filename, ParserListenerMode mode, List<Object> errors,
             IProgressMonitor monitor, Map<PgStatement, StatementOverride> overrides, ISettings settings) {
         super(database, filename, mode, errors, monitor, settings);
         this.overrides = overrides;
     }
 
+    /**
+     * Processes the complete ClickHouse SQL file context.
+     * Extracts and processes all queries in the file.
+     *
+     * @param rootCtx the root file context from ANTLR parser
+     * @param stream  the token stream associated with the context
+     */
     @Override
     public void process(Ch_fileContext rootCtx, CommonTokenStream stream) {
         for (QueryContext query : rootCtx.query()) {

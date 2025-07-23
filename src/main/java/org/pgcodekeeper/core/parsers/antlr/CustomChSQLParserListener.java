@@ -15,45 +15,34 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.ChSqlContextProcessor;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Alter_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Alter_table_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Ch_fileContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Create_database_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Create_dictinary_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Create_function_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Create_role_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Create_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Create_table_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Create_user_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Create_view_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Drop_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Privilegy_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.QueryContext;
-import org.pgcodekeeper.core.parsers.antlr.statements.ch.AlterChOther;
-import org.pgcodekeeper.core.parsers.antlr.statements.ch.AlterChTable;
-import org.pgcodekeeper.core.parsers.antlr.statements.ch.ChParserAbstract;
-import org.pgcodekeeper.core.parsers.antlr.statements.ch.CreateChDictionary;
-import org.pgcodekeeper.core.parsers.antlr.statements.ch.CreateChFunction;
-import org.pgcodekeeper.core.parsers.antlr.statements.ch.CreateChPolicy;
-import org.pgcodekeeper.core.parsers.antlr.statements.ch.CreateChRole;
-import org.pgcodekeeper.core.parsers.antlr.statements.ch.CreateChSchema;
-import org.pgcodekeeper.core.parsers.antlr.statements.ch.CreateChTable;
-import org.pgcodekeeper.core.parsers.antlr.statements.ch.CreateChUser;
-import org.pgcodekeeper.core.parsers.antlr.statements.ch.CreateChView;
-import org.pgcodekeeper.core.parsers.antlr.statements.ch.DropChStatement;
-import org.pgcodekeeper.core.parsers.antlr.statements.ch.GrantChPrivilege;
+import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.*;
+import org.pgcodekeeper.core.parsers.antlr.statements.ch.*;
 import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
-public final class CustomChSQLParserListener extends CustomParserListener<ChDatabase> implements ChSqlContextProcessor {
+import java.util.List;
 
+/**
+ * Custom ANTLR listener for parsing ClickHouse SQL statements.
+ * Processes CREATE, ALTER, DROP statements and privilege grants,
+ * building a database schema model from the parsed statements.
+ */
+public final class CustomChSQLParserListener extends CustomParserListener<ChDatabase> implements ChSqlContextProcessor {
+    /**
+     * Creates a new ClickHouse SQL parser listener.
+     *
+     * @param database the target database schema to populate
+     * @param filename name of the file being parsed
+     * @param mode     parsing mode
+     * @param errors   list to collect parsing errors
+     * @param monitor  progress monitor for cancellation support
+     * @param settings application settings
+     */
     public CustomChSQLParserListener(ChDatabase database, String filename, ParserListenerMode mode,
             List<Object> errors, IProgressMonitor monitor, ISettings settings) {
         super(database, filename, mode, errors, monitor, settings);

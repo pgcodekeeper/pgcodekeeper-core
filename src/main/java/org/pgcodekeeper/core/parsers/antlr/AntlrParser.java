@@ -15,6 +15,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr;
 
+import org.antlr.v4.runtime.*;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.ChSqlContextProcessor;
+import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.SqlContextProcessor;
+import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.TSqlContextProcessor;
+import org.pgcodekeeper.core.parsers.antlr.exception.MonitorCancelledRuntimeException;
+import org.pgcodekeeper.core.parsers.antlr.exception.UnresolvedReferenceException;
+import org.pgcodekeeper.core.parsers.antlr.generated.*;
+import org.pgcodekeeper.core.utils.InputStreamProvider;
+import org.pgcodekeeper.core.utils.Pair;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -22,41 +36,23 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Queue;
 
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Lexer;
-import org.antlr.v4.runtime.Parser;
-import org.antlr.v4.runtime.Token;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.pgcodekeeper.core.DatabaseType;
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.ChSqlContextProcessor;
-import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.SqlContextProcessor;
-import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.TSqlContextProcessor;
-import org.pgcodekeeper.core.parsers.antlr.exception.MonitorCancelledRuntimeException;
-import org.pgcodekeeper.core.parsers.antlr.exception.UnresolvedReferenceException;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHLexer;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.IgnoreListLexer;
-import org.pgcodekeeper.core.parsers.antlr.generated.IgnoreListParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.PrivilegesLexer;
-import org.pgcodekeeper.core.parsers.antlr.generated.PrivilegesParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLLexer;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLLexer;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser;
-import org.pgcodekeeper.core.utils.InputStreamProvider;
-import org.pgcodekeeper.core.utils.Pair;
-
+/**
+ * Utility class for creating and managing ANTLR parsers for different SQL dialects.
+ * Provides methods for parsing SQL, Microsoft SQL, and ClickHouse SQL with error handling.
+ */
 public final class AntlrParser {
 
     private static volatile long pgParserLastStart;
     private static volatile long msParserLastStart;
     private static volatile long chParserLastStart;
 
+    /**
+     * Creates a parser for ignore list files.
+     *
+     * @param listFile path to the ignore list file
+     * @return configured IgnoreListParser instance
+     * @throws IOException if there's an error reading the file
+     */
     public static IgnoreListParser createIgnoreListParser(Path listFile) throws IOException {
         String parsedObjectName = listFile.toString();
         var stream = CharStreams.fromPath(listFile);
@@ -66,6 +62,12 @@ public final class AntlrParser {
         return parser;
     }
 
+    /**
+     * Creates a parser for PostgreSQL privilege strings.
+     *
+     * @param aclArrayAsString privilege string to parse
+     * @return configured PrivilegesParser instance
+     */
     public static PrivilegesParser createPrivilegesParser(String aclArrayAsString) {
         var stream = CharStreams.fromString(aclArrayAsString);
         Lexer lexer = new PrivilegesLexer(stream);
@@ -74,11 +76,28 @@ public final class AntlrParser {
         return parser;
     }
 
+    /**
+     * Creates a PostgreSQL SQL parser from string input.
+     *
+     * @param sql              SQL string to parse
+     * @param parsedObjectName name of the object being parsed (for error reporting)
+     * @param errors           list to collect parsing errors
+     * @return configured SQLParser instance
+     */
     public static SQLParser createSQLParser(String sql, String parsedObjectName, List<Object> errors) {
         var stream = CharStreams.fromString(sql);
         return createSQLParser(stream, parsedObjectName, errors, 0, 0, 0);
     }
 
+    /**
+     * Creates a PostgreSQL SQL parser from string input with position offset.
+     *
+     * @param sql              SQL string to parse
+     * @param parsedObjectName name of the object being parsed (for error reporting)
+     * @param errors           list to collect parsing errors
+     * @param start            token providing position offset information
+     * @return configured SQLParser instance
+     */
     public static SQLParser createSQLParser(String sql, String parsedObjectName, List<Object> errors, Token start) {
         var stream = CharStreams.fromString(sql);
         CodeUnitToken cuCodeStart = (CodeUnitToken) start;
@@ -88,6 +107,16 @@ public final class AntlrParser {
         return createSQLParser(stream, parsedObjectName, errors, offset, lineOffset, inLineOffset);
     }
 
+    /**
+     * Creates a PostgreSQL SQL parser from input stream.
+     *
+     * @param is               input stream containing SQL
+     * @param charset          character encoding of the stream
+     * @param parsedObjectName name of the object being parsed (for error reporting)
+     * @param errors           list to collect parsing errors
+     * @return configured SQLParser instance
+     * @throws IOException if there's an error reading the stream
+     */
     public static SQLParser createSQLParser(InputStream is, String charset, String parsedObjectName,
             List<Object> errors) throws IOException {
         var stream = CharStreams.fromStream(is, Charset.forName(charset));
@@ -103,11 +132,29 @@ public final class AntlrParser {
         return parser;
     }
 
+    /**
+     * Creates a Microsoft SQL parser from string input.
+     *
+     * @param sql              T-SQL string to parse
+     * @param parsedObjectName name of the object being parsed (for error reporting)
+     * @param errors           list to collect parsing errors
+     * @return configured TSQLParser instance
+     */
     public static TSQLParser createTSQLParser(String sql, String parsedObjectName, List<Object> errors) {
         var stream = CharStreams.fromString(sql);
         return createTSQLParser(stream, parsedObjectName, errors);
     }
 
+    /**
+     * Creates a Microsoft SQL parser from input stream.
+     *
+     * @param is               input stream containing T-SQL
+     * @param charset          character encoding of the stream
+     * @param parsedObjectName name of the object being parsed (for error reporting)
+     * @param errors           list to collect parsing errors
+     * @return configured TSQLParser instance
+     * @throws IOException if there's an error reading the stream
+     */
     public static TSQLParser createTSQLParser(InputStream is, String charset, String parsedObjectName,
             List<Object> errors) throws IOException {
         var stream = CharStreams.fromStream(is, Charset.forName(charset));
@@ -122,11 +169,29 @@ public final class AntlrParser {
         return parser;
     }
 
+    /**
+     * Creates a ClickHouse SQL parser from string input.
+     *
+     * @param sql              ClickHouse SQL string to parse
+     * @param parsedObjectName name of the object being parsed (for error reporting)
+     * @param errors           list to collect parsing errors
+     * @return configured CHParser instance
+     */
     public static CHParser createCHParser(String sql, String parsedObjectName, List<Object> errors) {
         var stream = CharStreams.fromString(sql);
         return createCHParser(stream, parsedObjectName, errors);
     }
 
+    /**
+     * Creates a ClickHouse SQL parser from input stream.
+     *
+     * @param is               input stream containing ClickHouse SQL
+     * @param charset          character encoding of the stream
+     * @param parsedObjectName name of the object being parsed
+     * @param errors           list to collect parsing errors
+     * @return configured CHParser instance
+     * @throws IOException if there's an error reading the stream
+     */
     public static CHParser createCHParser(InputStream is, String charset, String parsedObjectName,
             List<Object> errors) throws IOException {
         var stream = CharStreams.fromStream(is, Charset.forName(charset));
@@ -150,6 +215,18 @@ public final class AntlrParser {
         parser.addErrorListener(listener);
     }
 
+    /**
+     * Parses PostgreSQL SQL stream asynchronously.
+     *
+     * @param inputStream      provider of the input stream
+     * @param charsetName      character encoding of the stream
+     * @param parsedObjectName name of the object being parsed
+     * @param errors           list to collect parsing errors
+     * @param mon              progress monitor for cancellation support
+     * @param monitoringLevel  level of parse tree monitoring
+     * @param listener         processor for the parsed content
+     * @param antlrTasks       queue for parser tasks
+     */
     public static void parseSqlStream(InputStreamProvider inputStream, String charsetName,
             String parsedObjectName, List<Object> errors, IProgressMonitor mon, int monitoringLevel,
             SqlContextProcessor listener, Queue<AntlrTask<?>> antlrTasks) {
@@ -172,6 +249,18 @@ public final class AntlrParser {
         });
     }
 
+    /**
+     * Parses Microsoft SQL stream asynchronously.
+     *
+     * @param inputStream      provider of the input stream
+     * @param charsetName      character encoding of the stream
+     * @param parsedObjectName name of the object being parsed
+     * @param errors           list to collect parsing errors
+     * @param mon              progress monitor for cancellation support
+     * @param monitoringLevel  level of parse tree monitoring
+     * @param listener         processor for the parsed content
+     * @param antlrTasks       queue for parser tasks
+     */
     public static void parseTSqlStream(InputStreamProvider inputStream, String charsetName,
             String parsedObjectName, List<Object> errors, IProgressMonitor mon, int monitoringLevel,
             TSqlContextProcessor listener, Queue<AntlrTask<?>> antlrTasks) {
@@ -194,6 +283,18 @@ public final class AntlrParser {
         });
     }
 
+    /**
+     * Parses ClickHouse SQL stream asynchronously.
+     *
+     * @param inputStream      provider of the input stream
+     * @param charsetName      character encoding of the stream
+     * @param parsedObjectName name of the object being parsed
+     * @param errors           list to collect parsing errors
+     * @param mon              progress monitor for cancellation support
+     * @param monitoringLevel  level of parse tree monitoring
+     * @param listener         processor for the parsed content
+     * @param antlrTasks       queue for parser tasks
+     */
     public static void parseChSqlStream(InputStreamProvider inputStream, String charsetName, String parsedObjectName,
             List<Object> errors, IProgressMonitor mon, int monitoringLevel, ChSqlContextProcessor listener,
             Queue<AntlrTask<?>> antlrTasks) {
@@ -216,6 +317,9 @@ public final class AntlrParser {
         });
     }
 
+    /**
+     * Clears the parser cache for all database types that have been used.
+     */
     public static void cleanCacheOfAllParsers() {
         if (pgParserLastStart != 0) {
             cleanParserCache(DatabaseType.PG);
@@ -228,6 +332,11 @@ public final class AntlrParser {
         }
     }
 
+    /**
+     * Checks if parser caches need cleaning based on last usage time.
+     *
+     * @param cleaningInterval time interval in milliseconds after which cache should be cleaned
+     */
     public static void checkToClean(long cleaningInterval) {
         checkToClean(cleaningInterval, chParserLastStart, DatabaseType.CH);
         checkToClean(cleaningInterval, msParserLastStart, DatabaseType.MS);
@@ -259,7 +368,6 @@ public final class AntlrParser {
                 pgParserLastStart = 0;
                 yield pgParser;
             }
-            default -> throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + databaseType);
         };
         parser.getInterpreter().clearDFA();
     }

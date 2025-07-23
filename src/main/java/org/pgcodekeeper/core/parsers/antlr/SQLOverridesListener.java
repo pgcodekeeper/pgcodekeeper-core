@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr;
 
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -26,42 +22,51 @@ import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.SqlContextProcessor;
 import org.pgcodekeeper.core.parsers.antlr.exception.UnresolvedReferenceException;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Alter_owner_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Alter_table_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_schema_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.IdentifierContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Owner_toContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Rule_commonContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_alterContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_createContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.SqlContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.StatementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Table_actionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.User_nameContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.statements.pg.AlterOwner;
 import org.pgcodekeeper.core.parsers.antlr.statements.pg.GrantPrivilege;
 import org.pgcodekeeper.core.parsers.antlr.statements.pg.PgParserAbstract;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.IRelation;
-import org.pgcodekeeper.core.schema.IStatement;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.StatementOverride;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+
+/**
+ * Custom ANTLR listener for processing PostgreSQL SQL statements with override support.
+ * Handles schema and ownership changes while applying statement overrides.
+ */
 public final class SQLOverridesListener extends CustomParserListener<PgDatabase>
 implements SqlContextProcessor {
 
     private final Map<PgStatement, StatementOverride> overrides;
 
+    /**
+     * Creates a new listener with override support.
+     *
+     * @param db        the target database schema
+     * @param filename  name of the file being parsed
+     * @param mode      parsing mode
+     * @param errors    list to collect parsing errors
+     * @param mon       progress monitor for cancellation support
+     * @param overrides map of statement overrides to apply
+     * @param settings  application settings
+     */
     public SQLOverridesListener(PgDatabase db, String filename, ParserListenerMode mode, List<Object> errors,
             IProgressMonitor mon, Map<PgStatement, StatementOverride> overrides, ISettings settings) {
         super(db, filename, mode, errors, mon, settings);
         this.overrides = overrides;
     }
 
+    /**
+     * Processes the complete SQL file context.
+     * Extracts and processes schema statements that may need overrides.
+     *
+     * @param rootCtx the root file context from ANTLR parser
+     * @param stream  the token stream associated with the context
+     */
     @Override
     public void process(SqlContext rootCtx, CommonTokenStream stream) {
         for (StatementContext s : rootCtx.statement()) {

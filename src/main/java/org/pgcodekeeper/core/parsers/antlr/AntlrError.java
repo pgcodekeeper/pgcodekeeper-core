@@ -18,6 +18,9 @@ package org.pgcodekeeper.core.parsers.antlr;
 import org.antlr.v4.runtime.Token;
 import org.pgcodekeeper.core.ContextLocation;
 
+/**
+ * Represents an error found during ANTLR parsing with location information
+ */
 public class AntlrError extends ContextLocation {
 
     private static final long serialVersionUID = 3133510141858228651L;
@@ -27,10 +30,29 @@ public class AntlrError extends ContextLocation {
     private final int stop;
     private final ErrorTypes errorType;
 
+    /**
+     * Creates an ANTLR error with default error type
+     *
+     * @param tokenError         the token where error occurred (may be null)
+     * @param location           file path where error occurred
+     * @param line               line number where error occurred (1-based)
+     * @param charPositionInLine character position in line (0-based)
+     * @param msg                error message
+     */
     public AntlrError(Token tokenError, String location, int line, int charPositionInLine, String msg) {
         this(tokenError, location, line, charPositionInLine, msg, ErrorTypes.OTHER);
     }
 
+    /**
+     * Creates an ANTLR error with specified error type
+     *
+     * @param tokenError         the token where error occurred (may be null)
+     * @param location           file path where error occurred
+     * @param line               line number where error occurred (1-based)
+     * @param charPositionInLine character position in line (0-based)
+     * @param msg                error message
+     * @param errorType          type of the error
+     */
     public AntlrError(Token tokenError, String location, int line, int charPositionInLine, String msg, ErrorTypes errorType) {
         this(location, line, charPositionInLine, msg,
                 (tokenError == null ? -1 : ((CodeUnitToken) tokenError).getCodeUnitStart()),
@@ -48,10 +70,27 @@ public class AntlrError extends ContextLocation {
         this.errorType = errorType;
     }
 
+    /**
+     * Creates an ANTLR error without token information
+     *
+     * @param location           file path where error occurred
+     * @param line               line number where error occurred (1-based)
+     * @param charPositionInLine character position in line (0-based)
+     * @param msg                error message
+     * @param errorType          type of the error
+     */
     public AntlrError(String location, int line, int charPositionInLine, String msg, ErrorTypes errorType) {
         this(location, line, charPositionInLine, msg, -1, -1, null, errorType);
     }
 
+    /**
+     * Creates a copy of this error with adjusted positions
+     *
+     * @param offset       character offset to add
+     * @param lineOffset   line number offset to add
+     * @param inLineOffset in-line character position offset to add
+     * @return new error instance with adjusted positions
+     */
     public AntlrError copyWithOffset(int offset, int lineOffset, int inLineOffset) {
         return new AntlrError(getFilePath(), getLineNumber() + lineOffset,
                 (getLineNumber() == 1 ? getCharPositionInLine() + inLineOffset : getCharPositionInLine()),
@@ -60,6 +99,7 @@ public class AntlrError extends ContextLocation {
                 (stop == -1 ? -1: stop + offset),
                 text, errorType);
     }
+
 
     public String getMsg() {
         return msg;
@@ -81,6 +121,12 @@ public class AntlrError extends ContextLocation {
         return errorType;
     }
 
+    /**
+     * Returns formatted string representation of the error.
+     * Converts 0-based char position to 1-based for display.
+     *
+     * @return formatted error string with location info
+     */
     @Override
     public String toString() {
         // ANTLR position in line is 0-based, GUI's is 1-based

@@ -21,15 +21,35 @@ import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Ch_fileContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.SqlContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Tsql_fileContext;
 
+/**
+ * Interface for processing ANTLR parser rule contexts with token streams
+ *
+ * @param <R> type of the parser rule context to be processed
+ */
 public interface AntlrContextProcessor<R extends ParserRuleContext> {
+    /**
+     * Processes the ANTLR parser rule context with the given token stream
+     *
+     * @param rootCtx the root parser rule context to process
+     * @param stream  the token stream associated with the context
+     */
     void process(R rootCtx, CommonTokenStream stream);
 
-    public static interface SqlContextProcessor extends AntlrContextProcessor<SqlContext> {
+    /**
+     * Processor for PostgreSQL contexts
+     */
+    interface SqlContextProcessor extends AntlrContextProcessor<SqlContext> {
     }
 
-    public static interface TSqlContextProcessor extends AntlrContextProcessor<Tsql_fileContext> {
+    /**
+     * Processor for Microsoft SQL contexts
+     */
+    interface TSqlContextProcessor extends AntlrContextProcessor<Tsql_fileContext> {
     }
 
-    public static interface ChSqlContextProcessor extends AntlrContextProcessor<Ch_fileContext> {
+    /**
+     * Processor for ClickHouse SQL contexts
+     */
+    interface ChSqlContextProcessor extends AntlrContextProcessor<Ch_fileContext> {
     }
 }

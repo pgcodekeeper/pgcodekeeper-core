@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Queue;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -26,23 +22,19 @@ import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.SqlContextProcessor;
 import org.pgcodekeeper.core.parsers.antlr.exception.UnresolvedReferenceException;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Data_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_alterContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_createContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_dropContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Script_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Script_transactionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Session_local_optionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Set_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Set_statement_valueContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.SqlContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.StatementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.VexContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.statements.pg.*;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+import java.util.Locale;
+import java.util.Queue;
+
+/**
+ * Custom ANTLR listener for parsing PostgreSQL SQL statements.
+ * Processes CREATE, ALTER, DROP statements and builds database schema model.
+ */
 public final class CustomSQLParserListener extends CustomParserListener<PgDatabase>
 implements SqlContextProcessor {
 
@@ -51,12 +43,30 @@ implements SqlContextProcessor {
     private String oids;
     private final Queue<AntlrTask<?>> antlrTasks;
 
+    /**
+     * Creates a new PostgreSQL SQL parser listener.
+     *
+     * @param database   the target database schema to populate
+     * @param filename   name of the file being parsed
+     * @param mode       parsing mode
+     * @param errors     list to collect parsing errors
+     * @param antlrTasks queue for asynchronous parsing tasks
+     * @param monitor    progress monitor for cancellation support
+     * @param settings   application settings
+     */
     public CustomSQLParserListener(PgDatabase database, String filename, ParserListenerMode mode,
             List<Object> errors, Queue<AntlrTask<?>> antlrTasks, IProgressMonitor monitor, ISettings settings) {
         super(database, filename, mode, errors, monitor, settings);
         this.antlrTasks = antlrTasks;
     }
 
+    /**
+     * Processes the complete SQL file context.
+     * Extracts and processes all statements in the file.
+     *
+     * @param rootCtx the root file context from ANTLR parser
+     * @param stream  the token stream associated with the context
+     */
     @Override
     public void process(SqlContext rootCtx, CommonTokenStream stream) {
         for (StatementContext s : rootCtx.statement()) {
@@ -67,6 +77,13 @@ implements SqlContextProcessor {
         }
     }
 
+    /**
+     * Processes a single SQL statement.
+     * Routes to appropriate handler based on statement type.
+     *
+     * @param statement the statement context to process
+     * @param stream    the token stream for the statement
+     */
     public void statement(StatementContext statement, CommonTokenStream stream) {
         Schema_statementContext schema = statement.schema_statement();
         Data_statementContext ds;
