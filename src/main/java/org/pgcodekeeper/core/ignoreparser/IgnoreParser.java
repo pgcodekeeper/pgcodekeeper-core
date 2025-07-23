@@ -15,12 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.ignoreparser;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.antlr.v4.runtime.RuleContext;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -28,26 +22,45 @@ import org.pgcodekeeper.core.model.difftree.IIgnoreList;
 import org.pgcodekeeper.core.model.difftree.IgnoredObject;
 import org.pgcodekeeper.core.parsers.antlr.AntlrParser;
 import org.pgcodekeeper.core.parsers.antlr.generated.IgnoreListParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.IgnoreListParser.BlackContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.IgnoreListParser.FlagContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.IgnoreListParser.Hide_ruleContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.IgnoreListParser.Rule_listContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.IgnoreListParser.Rule_restContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.IgnoreListParser.Show_ruleContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.IgnoreListParser.WhiteContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.IgnoreListParser.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.EnumSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * Parser for ignore list files that determine which database objects
+ * should be included or excluded during processing. Supports both whitelist and
+ * blacklist patterns with various matching flags.
+ * <p>
+ * Whitelist rules have precedence over blacklist rules when both are present.
+ */
 public final class IgnoreParser {
 
     private static final Logger LOG = LoggerFactory.getLogger(IgnoreParser.class);
 
     private final IIgnoreList list;
 
+    /**
+     * Creates a new IgnoreParser that will populate the specified ignore list.
+     *
+     * @param list the ignore list implementation to populate with parsed rules
+     */
     public IgnoreParser(IIgnoreList list) {
         this.list = list;
     }
 
+    /**
+     * Parses an ignore list configuration file and adds the rules to the ignore list.
+     *
+     * @param listFile path to the ignore list configuration file
+     * @return this parser instance for method chaining
+     * @throws IOException if there's an error reading the configuration file
+     */
     public IgnoreParser parse(Path listFile) throws IOException {
         String parsedObjectName = listFile.toString();
         LOG.info(Messages.IgnoreParser_log_load_ignored_list, parsedObjectName);
@@ -56,7 +69,8 @@ public final class IgnoreParser {
         try {
             parse(parser);
         } catch (Exception ex) {
-            LOG.error(Messages.IgnoreParser_log_ignor_list_analyzing_err + parsedObjectName, ex);
+            LOG.error(Messages.IgnoreParser_log_ignor_list_analyzing_err,
+                    parsedObjectName, ex);
         }
         return this;
     }
@@ -101,7 +115,8 @@ public final class IgnoreParser {
         }
         String dbRegex = ruleRest.db == null ? null : ruleRest.db.getText();
 
-        Set<DbObjType> objTypes = ruleRest.type.stream().map(RuleContext::getText)
+        Set<DbObjType> objTypes = ruleRest.type.stream()
+                .map(RuleContext::getText)
                 .map(DbObjType::valueOf)
                 .collect(Collectors.toCollection(() -> EnumSet.noneOf(DbObjType.class)));
 

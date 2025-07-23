@@ -17,6 +17,11 @@ package org.pgcodekeeper.core.libraries;
 
 import java.util.Objects;
 
+/**
+ * Represents a database library with its metadata and properties.
+ * This class encapsulates information about a library including its name,
+ * file system path, privilege ignore flag, and owner information.
+ */
 public class PgLibrary {
 
     private final String name;
@@ -24,6 +29,14 @@ public class PgLibrary {
     private final boolean isIgnorePriv;
     private final String owner;
 
+    /**
+     * Constructs a new PgLibrary instance.
+     *
+     * @param name         the name of the library
+     * @param path         the file system path to the library
+     * @param isIgnorePriv whether to ignore privileges for this library
+     * @param owner        the owner of the library
+     */
     public PgLibrary(String name, String path, boolean isIgnorePriv, String owner) {
         this.name = name;
         this.path = path;
@@ -47,6 +60,12 @@ public class PgLibrary {
         return owner;
     }
 
+    /**
+     * Gets the display title for the library.
+     * Returns the library name if not blank, otherwise returns the path.
+     *
+     * @return the display title
+     */
     public String getTitle() {
         if (!name.isBlank()) {
             return name;
@@ -55,20 +74,31 @@ public class PgLibrary {
         return path;
     }
 
+    /**
+     * Computes the hash code based on the library title.
+     *
+     * @return the computed hash code
+     */
     @Override
     public int hashCode() {
         return Objects.hash(getTitle());
     }
 
+    /**
+     * Compares this library with another object for equality.
+     * Two libraries are considered equal if their titles match.
+     *
+     * @param obj the object to compare with
+     * @return true if the objects are equal, false otherwise
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof PgLibrary)) {
+        if (!(obj instanceof PgLibrary other)) {
             return false;
         }
-        PgLibrary other = (PgLibrary) obj;
         return Objects.equals(getTitle(), other.getTitle());
     }
 }

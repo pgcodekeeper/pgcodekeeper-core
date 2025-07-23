@@ -20,6 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Implementation of {@link Hasher} interface using Java's standard hash code computation.
+ * Uses prime number multiplication for combining hash values.
+ */
 public class JavaHasher implements Hasher {
 
     private static final int PRIME = 31;
@@ -31,11 +35,21 @@ public class JavaHasher implements Hasher {
         result = PRIME * result + (b ? HashConstant.TRUE : HashConstant.FALSE);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param b the Boolean to hash (null-safe)
+     */
     @Override
     public void put(Boolean b) {
         result = PRIME * result + ((b == null) ? 0 : b.hashCode());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param s the String to hash (null-safe)
+     */
     @Override
     public void put(String s) {
         result = PRIME * result + ((s == null) ? 0 : s.hashCode());
@@ -51,16 +65,31 @@ public class JavaHasher implements Hasher {
         result = PRIME * result + Float.hashCode(f);
     }
 
+    /**
+     * {{@inheritDoc}}
+     *
+     * @param i the Integer to hash (null-safe)
+     */
     @Override
     public void put(Integer i) {
         result = PRIME * result + ((i == null) ? 0 : i.hashCode());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param hashable the IHashable object to hash (null-safe)
+     */
     @Override
     public void put(IHashable hashable) {
         result = PRIME * result + ((hashable == null) ? 0 : hashable.hashCode());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param en the enum value to hash (null-safe)
+     */
     @Override
     public void put(Enum<?> en) {
         result = PRIME * result + ((en == null) ? 0 : en.hashCode());
@@ -91,10 +120,20 @@ public class JavaHasher implements Hasher {
         result = PRIME * result + unordered(col);
     }
 
+    /**
+     * Gets the current hash result.
+     *
+     * @return the accumulated hash value
+     */
     public int getResult() {
         return result;
     }
 
+    /**
+     * Adds an unordered Map of hashable objects to the hash computation.
+     *
+     * @param map the map to hash (order-insensitive)
+     */
     @Override
     public void putUnordered(Map<String, ? extends IHashable> map) {
         result = PRIME * result + map.hashCode();

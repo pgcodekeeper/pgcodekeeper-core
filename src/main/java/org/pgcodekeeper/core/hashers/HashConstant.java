@@ -15,6 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.hashers;
 
+/**
+ * Contains constants used for hashing operations.
+ * This class cannot be instantiated.
+ */
 public class HashConstant {
     static final short TRUE = 1231;
     static final short FALSE = 1237;

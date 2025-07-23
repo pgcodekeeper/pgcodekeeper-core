@@ -18,11 +18,21 @@ package org.pgcodekeeper.core.libraries;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+/**
+ * Enumerates possible source types for PostgreSQL libraries.
+ * Determines how a library is accessed and where it's located.
+ */
 public enum PgLibrarySource {
     LOCAL,
     JDBC,
     URL;
 
+    /**
+     * Determines the source type from a library path string.
+     *
+     * @param libPath the path/URL to analyze
+     * @return the determined source type (LOCAL if path doesn't match JDBC or URL patterns)
+     */
     public static PgLibrarySource getSource(String libPath) {
         if (libPath.startsWith("jdbc:")) {
             return PgLibrarySource.JDBC;

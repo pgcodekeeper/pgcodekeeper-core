@@ -15,6 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.hashers;
 
+/**
+ * Interface for objects that can compute their own hash value using a {@link Hasher}.
+ */
 public interface IHashable {
-    public void computeHash(Hasher hasher);
+    /**
+     * Computes the hash of the implementing object using the provided hasher.
+     * The implementation should call appropriate {@code put} methods on the hasher
+     * for all fields that should contribute to the hash value.
+     *
+     * @param hasher the hasher instance to use for hash computation
+     */
+    void computeHash(Hasher hasher);
 }
