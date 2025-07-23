@@ -46,6 +46,7 @@ import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.ISearchPath;
 import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.FileUtils;
 import org.slf4j.Logger;
@@ -123,7 +124,11 @@ public class ModelExporter {
         this.sqlEncoding = sqlEncoding;
         this.changeList = changedObjects;
         this.databaseType = databaseType;
-        this.settings = settings;
+
+        // we should create new settings to get correct script in project files
+        var copySettings = new CoreSettings();
+        copySettings.setDbType(settings.getDbType());
+        this.settings = copySettings;
     }
 
     /**
