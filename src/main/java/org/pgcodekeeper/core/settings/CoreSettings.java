@@ -130,6 +130,7 @@ public class CoreSettings implements ISettings {
         return ignorePrivileges;
     }
 
+    @Override
     public void setIgnorePrivileges(boolean ignorePrivileges) {
         this.ignorePrivileges = ignorePrivileges;
     }
@@ -221,7 +222,8 @@ public class CoreSettings implements ISettings {
         return Collections.unmodifiableCollection(postFilePath);
     }
 
-    private CoreSettings copy() {
+    @Override
+    public CoreSettings copy() {
         var settings = new CoreSettings();
         settings.addTransaction = addTransaction;
         settings.allowedTypes = allowedTypes;
@@ -247,18 +249,6 @@ public class CoreSettings implements ISettings {
         settings.stopNotAllowed = stopNotAllowed;
         settings.timeZone = timeZone;
         settings.printUsing = printUsing;
-        return settings;
-    }
-
-    public ISettings createTempSettings(boolean ignorePrivileges) {
-        var settings = copy();
-        settings.ignorePrivileges = ignorePrivileges;
-        return settings;
-    }
-
-    public ISettings createTempSettings(String inCharsetName) {
-        var settings = copy();
-        settings.inCharsetName = inCharsetName;
         return settings;
     }
 }

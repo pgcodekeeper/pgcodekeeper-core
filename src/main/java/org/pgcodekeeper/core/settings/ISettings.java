@@ -74,4 +74,8 @@ public interface ISettings {
     Collection<String> getPreFilePath();
 
     Collection<String> getPostFilePath();
+
+    ISettings copy();
+
+    void setIgnorePrivileges(boolean ignorePrivileges);
 }
