@@ -34,10 +34,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 
+/**
+ * Parser for PL/pgSQL function definitions with namespace support.
+ */
 public final class Function extends AbstractExprWithNmspc<Plpgsql_functionContext> {
 
     private static final Logger LOG = LoggerFactory.getLogger(Function.class);
 
+    /**
+     * Creates a Function parser with meta container.
+     *
+     * @param meta the meta container with schema information
+     */
     public Function(MetaContainer meta) {
         super(meta);
     }

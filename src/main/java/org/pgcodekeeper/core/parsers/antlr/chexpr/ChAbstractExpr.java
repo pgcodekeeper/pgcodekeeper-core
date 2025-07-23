@@ -36,6 +36,10 @@ import java.util.LinkedHashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 
+/**
+ * Abstract base class for ClickHouse SQL expression parsing and dependency analysis.
+ * Provides common functionality for tracking object references and dependencies.
+ */
 public abstract class ChAbstractExpr {
 
     private static final Logger LOG = LoggerFactory.getLogger(ChAbstractExpr.class);
@@ -60,6 +64,11 @@ public abstract class ChAbstractExpr {
         this(null, meta);
     }
 
+    /**
+     * Gets an unmodifiable set of database object dependencies found in this expression.
+     *
+     * @return set of {@link PgObjLocation} representing dependencies
+     */
     public Set<PgObjLocation> getDepcies() {
         return Collections.unmodifiableSet(depcies);
     }

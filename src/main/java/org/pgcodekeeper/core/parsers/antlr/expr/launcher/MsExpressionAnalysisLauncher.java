@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr.launcher;
 
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.ExpressionContext;
@@ -28,8 +26,21 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 
+import java.util.Set;
+
+/**
+ * Launcher for analyzing Microsoft SQL expressions.
+ * Handles both column expressions and standalone expressions with proper namespace management.
+ */
 public class MsExpressionAnalysisLauncher extends AbstractAnalysisLauncher {
 
+    /**
+     * Creates a Microsoft SQL expression analyzer.
+     *
+     * @param stmt     the statement containing the expression
+     * @param ctx      the expression parse tree context
+     * @param location the source location identifier
+     */
     public MsExpressionAnalysisLauncher(PgStatement stmt, ExpressionContext ctx, String location) {
         super(stmt, ctx, location);
     }

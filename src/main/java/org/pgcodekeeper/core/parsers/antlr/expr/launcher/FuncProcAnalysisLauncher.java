@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr.launcher;
 
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.expr.AbstractExprWithNmspc;
@@ -34,16 +30,33 @@ import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.schema.pg.AbstractPgFunction;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * Launcher for analyzing PostgreSQL function and procedure bodies.
+ * Handles SQL, function body and PL/pgSQL function contexts with argument namespace support.
+ */
 public final class FuncProcAnalysisLauncher extends AbstractAnalysisLauncher {
 
     /**
      * Contains pairs, each of which contains the name of the function argument
-     * and its full type name in GenericColumn object (typeSchema, typeName, DbObjType.TYPE).
+     * and its full type name in GenericColumn object
      * Used to set up namespace for function body analysis.
      */
     private final List<Pair<String, GenericColumn>> funcArgs;
     private final boolean isEnableFunctionBodiesDependencies;
 
+    /**
+     * Creates a function/procedure analyzer for SQL context.
+     *
+     * @param stmt                               the function/procedure statement
+     * @param ctx                                the SQL context to analyze
+     * @param location                           the source location identifier
+     * @param funcArgs                           list of function arguments
+     * @param isEnableFunctionBodiesDependencies flag to control function body dependency collection
+     */
     public FuncProcAnalysisLauncher(AbstractPgFunction stmt, SqlContext ctx,
             String location, List<Pair<String, GenericColumn>> funcArgs, boolean isEnableFunctionBodiesDependencies) {
         super(stmt, ctx, location);
@@ -51,6 +64,15 @@ public final class FuncProcAnalysisLauncher extends AbstractAnalysisLauncher {
         this.isEnableFunctionBodiesDependencies = isEnableFunctionBodiesDependencies;
     }
 
+    /**
+     * Creates a function/procedure analyzer for function body context.
+     *
+     * @param stmt                               the function/procedure statement
+     * @param ctx                                the function body context to analyze
+     * @param location                           the source location identifier
+     * @param funcArgs                           list of function arguments
+     * @param isEnableFunctionBodiesDependencies flag to control function body dependency collection
+     */
     public FuncProcAnalysisLauncher(AbstractPgFunction stmt, Function_bodyContext ctx,
             String location, List<Pair<String, GenericColumn>> funcArgs, boolean isEnableFunctionBodiesDependencies) {
         super(stmt, ctx, location);
@@ -58,6 +80,15 @@ public final class FuncProcAnalysisLauncher extends AbstractAnalysisLauncher {
         this.isEnableFunctionBodiesDependencies = isEnableFunctionBodiesDependencies;
     }
 
+    /**
+     * Creates a function/procedure analyzer for PL/pgSQL context.
+     *
+     * @param stmt                               the function/procedure statement
+     * @param ctx                                the PL/pgSQL function context to analyze
+     * @param location                           the source location identifier
+     * @param funcArgs                           list of function arguments
+     * @param isEnableFunctionBodiesDependencies flag to control function body dependency collection
+     */
     public FuncProcAnalysisLauncher(AbstractPgFunction stmt, Plpgsql_functionContext ctx,
             String location, List<Pair<String, GenericColumn>> funcArgs, boolean isEnableFunctionBodiesDependencies) {
         super(stmt, ctx, location);

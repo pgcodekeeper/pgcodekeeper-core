@@ -15,30 +15,25 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr;
 
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
+import org.pgcodekeeper.core.parsers.antlr.rulectx.Vex;
+import org.pgcodekeeper.core.utils.ModPair;
+
 import java.util.Collections;
 import java.util.List;
 
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Merge_matchedContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Merge_not_matchedContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Merge_stmt_for_psqlContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Merge_updateContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Values_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Values_valuesContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.VexContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.When_conditionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.With_clauseContext;
-import org.pgcodekeeper.core.parsers.antlr.rulectx.Vex;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
-import org.pgcodekeeper.core.utils.ModPair;
-
+/**
+ * Parser for MERGE statements with namespace support.
+ */
 public class Merge extends AbstractExprWithNmspc<Merge_stmt_for_psqlContext>  {
 
+    /**
+     * Creates a Merge parser with parent expression context.
+     *
+     * @param parent the parent expression context
+     */
     public Merge(AbstractExpr parent) {
         super(parent);
-    }
-
-    public Merge(MetaContainer meta) {
-        super(meta);
     }
 
     @Override

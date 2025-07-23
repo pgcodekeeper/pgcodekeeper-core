@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr.launcher;
 
-import java.util.EnumSet;
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.chexpr.ChValueExpr;
@@ -26,10 +23,25 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.ch.ChFunction;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 
+import java.util.EnumSet;
+import java.util.Set;
+
+/**
+ * Launcher for analyzing ClickHouse function bodies and dependencies.
+ * Provides control over function body dependency collection.
+ */
 public final class ChFuncAnalysisLauncher extends AbstractAnalysisLauncher {
 
     private final boolean isEnableFunctionBodiesDependencies;
 
+    /**
+     * Creates a function analyzer for ClickHouse.
+     *
+     * @param st                                 the function statement to analyze
+     * @param ctx                                the function body expression context
+     * @param location                           the source location identifier
+     * @param isEnableFunctionBodiesDependencies flag to control function body dependency collection
+     */
     public ChFuncAnalysisLauncher(ChFunction st, ExprContext ctx, String location,
             boolean isEnableFunctionBodiesDependencies) {
         super(st, ctx, location);

@@ -41,6 +41,10 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
+/**
+ * Abstract base class for SQL expression analysis.
+ * Provides core functionality for dependency tracking and reference resolution.
+ */
 public abstract class AbstractExpr {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractExpr.class);
@@ -85,10 +89,6 @@ public abstract class AbstractExpr {
 
     protected List<Pair<String, String>> findCte(String cteName) {
         return parent == null ? null : parent.findCte(cteName);
-    }
-
-    protected boolean hasCte(String cteName) {
-        return findCte(cteName) != null;
     }
 
     /**

@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr.launcher;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Index_columnContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Index_restContext;
@@ -27,12 +24,35 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.schema.pg.PgIndex;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+/**
+ * Launcher for analyzing PostgreSQL index definitions.
+ * Extracts dependencies from index columns, storage parameters and WHERE clauses.
+ */
 public class IndexAnalysisLauncher extends AbstractAnalysisLauncher {
+
+    /**
+     * Creates an index analyzer.
+     *
+     * @param stmt     the index statement to analyze
+     * @param ctx      the index definition context
+     * @param location the source location identifier
+     */
 
     public IndexAnalysisLauncher(PgIndex stmt, Index_restContext ctx, String location) {
         super(stmt, ctx, location);
     }
 
+    /**
+     * Analyzes the index definition to extract table dependencies.
+     * Processes index columns, storage parameters and WHERE clauses.
+     *
+     * @param ctx  the parse tree context
+     * @param meta metadata container for dependency resolution
+     * @return set of object locations referenced in the index definition
+     */
     @Override
     public Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
         Set<PgObjLocation> depcies = new LinkedHashSet<>();

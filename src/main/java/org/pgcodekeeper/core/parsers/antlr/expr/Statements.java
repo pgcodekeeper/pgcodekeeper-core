@@ -15,20 +15,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Data_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Delete_stmt_for_psqlContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Insert_stmt_for_psqlContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Merge_stmt_for_psqlContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Select_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.StatementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Update_stmt_for_psqlContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Abstract base class for statement parsers with namespace support.
+ * Handles common data statement parsing functionality.
+ *
+ * @param <T> the type of parser rule context this statement processor handles
+ */
 public abstract class Statements<T extends ParserRuleContext> extends AbstractExprWithNmspc<T> {
 
     protected Statements(AbstractExpr parent) {
@@ -53,6 +53,12 @@ public abstract class Statements<T extends ParserRuleContext> extends AbstractEx
         return Collections.emptyList();
     }
 
+    /**
+     * Analyzes and processes a data statement.
+     *
+     * @param data the data statement context to analyze
+     * @return list of modified pairs containing analyzed results
+     */
     public List<ModPair<String, String>> data(Data_statementContext data) {
         Select_stmtContext selCtx = data.select_stmt();
         Insert_stmt_for_psqlContext insCtx;

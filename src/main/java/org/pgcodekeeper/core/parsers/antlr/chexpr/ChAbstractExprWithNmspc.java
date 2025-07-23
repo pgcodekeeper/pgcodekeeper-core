@@ -29,6 +29,10 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
 import java.util.Map.Entry;
 
+/**
+ * Abstract class extending ChAbstractExpr with namespace support for SQL expression analysis.
+ * Handles table aliases, CTEs (Common Table Expressions) and namespace management.
+ */
 public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
 
     /**
@@ -128,10 +132,20 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
         namespace.put(alias, object);
     }
 
+    /**
+     * Adds a reference with the given alias
+     *
+     * @param alias the alias name to register
+     */
     public void addReference(String alias) {
         addReference(alias, null);
     }
 
+    /**
+     * Adds an unaliased table reference to the namespace.
+     *
+     * @param qualifiedTable the table reference to add
+     */
     public void addRawTableReference(GenericColumn qualifiedTable) {
         boolean exists = !unaliasedNamespace.add(qualifiedTable);
         if (exists) {
@@ -223,5 +237,12 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
         return aliasCtx;
     }
 
+    /**
+     * Analyzes the given SQL context and returns a list of processing results.
+     * Must be implemented by concrete subclasses.
+     *
+     * @param ruleCtx the ANTLR context to analyze
+     * @return list of analysis results (implementation-dependent)
+     */
     public abstract List<String> analyze(T ruleCtx);
 }

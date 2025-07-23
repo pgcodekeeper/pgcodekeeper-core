@@ -17,38 +17,81 @@ package org.pgcodekeeper.core.parsers.antlr.exception;
 
 import org.antlr.v4.runtime.Token;
 
+/**
+ * Exception thrown when a database object reference cannot be resolved.
+ * Indicates that a referenced object was not found in the database schema.
+ */
 public class UnresolvedReferenceException extends RuntimeException {
 
     private static final long serialVersionUID = 3362236974343429554L;
 
     private final transient Token errorToken;
 
+    /**
+     * Constructs exception with error token location.
+     *
+     * @param errorToken the token where unresolved reference occurred
+     */
     public UnresolvedReferenceException(Token errorToken) {
         super();
         this.errorToken = errorToken;
     }
 
+    /**
+     * Constructs exception with message and error token location.
+     *
+     * @param message    the detail message
+     * @param errorToken the token where unresolved reference occurred
+     */
     public UnresolvedReferenceException(String message, Token errorToken) {
         super(message);
         this.errorToken = errorToken;
     }
 
+
+    /**
+     * Constructs exception with cause and error token location.
+     *
+     * @param cause      the root cause exception
+     * @param errorToken the token where unresolved reference occurred
+     */
     public UnresolvedReferenceException(Throwable cause, Token errorToken) {
         super(cause);
         this.errorToken = errorToken;
     }
 
+    /**
+     * Constructs exception with message, cause and error token location.
+     *
+     * @param message    the detail message
+     * @param cause      the root cause exception
+     * @param errorToken the token where unresolved reference occurred
+     */
     public UnresolvedReferenceException(String message, Throwable cause, Token errorToken) {
         super(message, cause);
         this.errorToken = errorToken;
     }
 
+    /**
+     * Constructs exception with full exception details and error token location.
+     *
+     * @param message            the detail message
+     * @param cause              the root cause exception
+     * @param enableSuppression  whether suppression is enabled
+     * @param writableStackTrace whether stack trace is writable
+     * @param errorToken         the token where unresolved reference occurred
+     */
     public UnresolvedReferenceException(String message, Throwable cause,
             boolean enableSuppression, boolean writableStackTrace, Token errorToken) {
         super(message, cause, enableSuppression, writableStackTrace);
         this.errorToken = errorToken;
     }
 
+    /**
+     * Gets the token where unresolved reference occurred.
+     *
+     * @return the error token
+     */
     public Token getErrorToken() {
         return errorToken;
     }

@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr.launcher;
 
-import java.util.Collections;
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.parsers.antlr.chexpr.ChSelect;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Select_stmtContext;
@@ -26,8 +23,22 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.ch.ChView;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 
+import java.util.Collections;
+import java.util.Set;
+
+/**
+ * Launcher for analyzing ClickHouse view definitions.
+ * Handles the extraction of dependencies from view subqueries.
+ */
 public class ChViewAnalysisLauncher extends AbstractAnalysisLauncher {
 
+    /**
+     * Creates a view analyzer for ClickHouse.
+     *
+     * @param stmt     the view statement to analyze
+     * @param vQuery   the view subquery context
+     * @param location the source location identifier
+     */
     public ChViewAnalysisLauncher(ChView stmt, Subquery_clauseContext vQuery, String location) {
         super(stmt, vQuery, location);
     }

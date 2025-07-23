@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr.launcher;
 
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.parsers.antlr.expr.TypesSetManually;
 import org.pgcodekeeper.core.parsers.antlr.expr.ValueExprWithNmspc;
@@ -26,8 +24,21 @@ import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.schema.pg.PgDomain;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.util.Set;
+
+/**
+ * Launcher for analyzing domain type constraints.
+ * Handles validation expressions for domain types with special VALUE variable support.
+ */
 public class DomainAnalysisLauncher extends AbstractAnalysisLauncher {
 
+    /**
+     * Creates a domain analyzer.
+     *
+     * @param stmt     the domain statement to analyze
+     * @param ctx      the domain constraint expression context
+     * @param location the source location identifier
+     */
     public DomainAnalysisLauncher(PgDomain stmt, VexContext ctx, String location) {
         super(stmt, ctx, location);
     }

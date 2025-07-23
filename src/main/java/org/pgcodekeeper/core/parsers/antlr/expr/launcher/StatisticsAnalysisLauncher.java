@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr.launcher;
 
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.expr.ValueExprWithNmspc;
@@ -27,8 +25,21 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.schema.pg.PgStatistics;
 
+import java.util.Set;
+
+/**
+ * Launcher for analyzing PostgreSQL extended statistics expressions.
+ * Handles dependencies in statistics expressions with proper table reference setup.
+ */
 public class StatisticsAnalysisLauncher extends AbstractAnalysisLauncher {
 
+    /**
+     * Creates a statistics analyzer for PostgreSQL.
+     *
+     * @param stmt     the statistics statement to analyze
+     * @param ctx      the statistics expression context
+     * @param location the source location identifier
+     */
     public StatisticsAnalysisLauncher(PgStatistics stmt, VexContext ctx, String location) {
         super(stmt, ctx, location);
     }

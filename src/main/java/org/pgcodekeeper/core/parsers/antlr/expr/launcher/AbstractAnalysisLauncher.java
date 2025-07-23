@@ -15,13 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr.launcher;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.pgcodekeeper.core.localizations.Messages;
@@ -40,14 +33,12 @@ import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.VexContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.ExpressionContext;
 import org.pgcodekeeper.core.parsers.antlr.msexpr.MsAbstractExprWithNmspc;
 import org.pgcodekeeper.core.parsers.antlr.msexpr.MsValueExpr;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.ISearchPath;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * This class and all child classes contains statement, its contexts and
@@ -78,6 +69,11 @@ public abstract class AbstractAnalysisLauncher {
         return stmt;
     }
 
+    /**
+     * Gets the schema name for the statement if available.
+     *
+     * @return schema name or null if not applicable
+     */
     public String getSchemaName() {
         if (stmt instanceof ISearchPath path) {
             return path.getSchemaName();
@@ -86,6 +82,11 @@ public abstract class AbstractAnalysisLauncher {
         return null;
     }
 
+    /**
+     * Gets the list of object references founded during analysis.
+     *
+     * @return unmodifiable list of references
+     */
     public List<PgObjLocation> getReferences() {
         return Collections.unmodifiableList(references);
     }
@@ -113,6 +114,13 @@ public abstract class AbstractAnalysisLauncher {
         }
     }
 
+    /**
+     * Launches the analysis of the statement.
+     *
+     * @param errors list to collect analysis errors
+     * @param meta   metadata container for dependency resolution
+     * @return set of dependencies found
+     */
     public Set<GenericColumn> launchAnalyze(List<Object> errors, MetaContainer meta) {
         // Duplicated objects don't have parent, skip them
         if (stmt.getParent() == null) {
@@ -156,10 +164,26 @@ public abstract class AbstractAnalysisLauncher {
         return Collections.emptySet();
     }
 
+    /**
+     * Gets the set of database object types that should be excluded from dependency analysis.
+     * Can be overridden by subclasses to customize which dependency types are ignored.
+     * By default returns an empty set (no types are disabled).
+     *
+     * @return EnumSet of {@link DbObjType} that should be excluded from dependency collection
+     */
     protected EnumSet<DbObjType> getDisabledDepcies() {
         return EnumSet.noneOf(DbObjType.class);
     }
 
+    /**
+     * Performs analysis of the given parser context to extract object dependencies.
+     * Must be implemented by concrete subclasses to provide specific analysis logic.
+     *
+     * @param ctx  the parser rule context to analyze
+     * @param meta the metadata container providing schema information
+     * @return set of object locations representing dependencies found in the context
+     * @throws UnresolvedReferenceException if references cannot be resolved
+     */
     protected abstract Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta);
 
     protected <T extends ParserRuleContext> Set<PgObjLocation> analyze(

@@ -15,28 +15,30 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr.launcher;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.parsers.antlr.expr.Delete;
-import org.pgcodekeeper.core.parsers.antlr.expr.Insert;
-import org.pgcodekeeper.core.parsers.antlr.expr.Select;
-import org.pgcodekeeper.core.parsers.antlr.expr.Update;
-import org.pgcodekeeper.core.parsers.antlr.expr.ValueExprWithNmspc;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_rewrite_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Delete_stmt_for_psqlContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Insert_stmt_for_psqlContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Rewrite_commandContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Select_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Update_stmt_for_psqlContext;
+import org.pgcodekeeper.core.parsers.antlr.expr.*;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.schema.pg.PgRule;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+/**
+ * Launcher for analyzing PostgreSQL rule definitions.
+ * Handles WHERE conditions and rewrite commands (SELECT/INSERT/UPDATE/DELETE) in rule bodies.
+ */
 public class RuleAnalysisLauncher extends AbstractAnalysisLauncher {
 
+    /**
+     * Creates a rule analyzer for PostgreSQL.
+     *
+     * @param stmt     the rule statement to analyze
+     * @param ctx      the CREATE RULE statement context
+     * @param location the source location identifier
+     */
     public RuleAnalysisLauncher(PgRule stmt, Create_rewrite_statementContext ctx, String location) {
         super(stmt, ctx, location);
     }
@@ -79,7 +81,7 @@ public class RuleAnalysisLauncher extends AbstractAnalysisLauncher {
         if ((update = cmd.update_stmt_for_psql()) != null) {
             return analyzeTableChild(update, new Update(meta));
         }
- 
+
         return Collections.emptySet();
     }
 }

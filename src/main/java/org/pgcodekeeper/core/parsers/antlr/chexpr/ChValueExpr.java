@@ -28,16 +28,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Handles parsing and analysis of ClickHouse value expressions in SQL queries.
+ * Processes various expression types including function calls, column references and subqueries.
+ */
 public final class ChValueExpr extends ChAbstractExpr {
 
     ChValueExpr(ChAbstractExpr parent) {
         super(parent);
     }
 
+    /**
+     * Creates a value expression analyzer with metadata container.
+     *
+     * @param meta the metadata container for database objects
+     */
     public ChValueExpr(MetaContainer meta) {
         super(meta);
     }
 
+    /**
+     * Analyzes an expression context.
+     *
+     * @param expr the ANTLR expression context to analyze
+     */
     public void analyze(ExprContext expr) {
         var aliasExpr = expr.alias_expr();
         analyzeExprs(expr.expr());
@@ -272,7 +286,7 @@ public final class ChValueExpr extends ChAbstractExpr {
      * @param namePart - condition for filter
      * @param include  - true/false include/exclude
      * @param contains - true/false check that name contains/equals namePart
-     * @return boolean - if true we will be add this column at the depcies, and if false exclude
+     * @return boolean - if true we will be added this column at the depcies, and if false exclude
      */
     private boolean isNeedColumn(String name, String namePart, boolean include, boolean contains) {
         if (contains) {

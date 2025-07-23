@@ -25,8 +25,16 @@ import org.pgcodekeeper.core.utils.ModPair;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Parser for SQL function body statements with namespace support.
+ */
 public class SqlFunctionBody extends Statements<Function_bodyContext> {
 
+    /**
+     * Creates a SqlFunctionBody parser with meta container.
+     *
+     * @param meta the meta container with schema information
+     */
     public SqlFunctionBody(MetaContainer meta) {
         super(meta);
     }
@@ -36,6 +44,12 @@ public class SqlFunctionBody extends Statements<Function_bodyContext> {
         return ctx.statement();
     }
 
+    /**
+     * Analyzes a function body context and returns empty result list.
+     *
+     * @param ctx the function body context to analyze
+     * @return empty list as function body doesn't produce result types
+     */
     @Override
     public List<ModPair<String, String>> analyze(Function_bodyContext ctx) {
         super.analyze(ctx);

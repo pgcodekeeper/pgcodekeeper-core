@@ -15,22 +15,45 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.exception;
 
+/**
+ * Exception indicating that a monitoring operation was cancelled.
+ * Thrown when an ongoing monitoring process is interrupted by user request or system shutdown.
+ */
 public final class MonitorCancelledRuntimeException extends RuntimeException {
 
     private static final long serialVersionUID = 1305941709453867664L;
 
+    /**
+     * Constructs exception with null message and cause.
+     */
     public MonitorCancelledRuntimeException() {
         super();
     }
 
+    /**
+     * Constructs exception with specified message and cause.
+     *
+     * @param message the detail message
+     * @param cause   the root cause exception
+     */
     public MonitorCancelledRuntimeException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Constructs exception with specified message.
+     *
+     * @param message the detail message
+     */
     public MonitorCancelledRuntimeException(String message) {
         super(message);
     }
 
+    /**
+     * Constructs exception with specified cause.
+     *
+     * @param cause the root cause exception
+     */
     public MonitorCancelledRuntimeException(Throwable cause) {
         super(cause);
     }

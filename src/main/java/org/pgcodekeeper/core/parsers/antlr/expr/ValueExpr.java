@@ -35,10 +35,18 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+/**
+ * Parser for value expressions with namespace support.
+ */
 public final class ValueExpr extends AbstractExpr {
 
     private static final Logger LOG = LoggerFactory.getLogger(ValueExpr.class);
 
+    /**
+     * Creates a ValueExpr parser with meta container.
+     *
+     * @param meta the meta container with schema information
+     */
     public ValueExpr(MetaContainer meta) {
         super(meta);
     }
@@ -51,34 +59,13 @@ public final class ValueExpr extends AbstractExpr {
         super(parent, depcies);
     }
 
-    /*
-        Alternative checks are ordered for performance according to their usage frequency in real code.
-        Statistics gathered on the internal DB codebase as of 2019-10-16.
-        Also note that some checks are constrained by the grammar to go before others.
-        Otherwise some alternatives would be mis-processed as a wrong kind.
-
-        collate          1
-        isnull           3
-        similar          6
-        ilike          140
-        between        181
-        like           239
-        leq            311
-        not            328
-        geq            422
-        lth            468
-        in             622
-        gth            737
-        neq           1456
-        or            1525
-        op base       2404
-        is            3992
-        parens        5688
-        op full       6302
-        and           7594
-        eq           17496
-        cast         18050
-        primary     192884
+    /**
+     * Analyzes a value expression and returns its type information.
+     * <p>
+     * Alternative checks are ordered for performance according to their usage frequency in real code.
+     * Statistics gathered on the internal DB codebase as of 2019-10-16.
+     * Also note that some checks are constrained by the grammar to go before others.
+     * Otherwise, some alternatives would be mis-processed as a wrong kind.
      */
     public ModPair<String, String> analyze(Vex vex) {
         List<Vex> operandVexs = vex.vex();
@@ -468,7 +455,10 @@ public final class ValueExpr extends AbstractExpr {
     }
 
     /**
-     * @return return signature
+     * Analyzes a function call and returns its type information.
+     *
+     * @param function the function call context to analyze
+     * @return pair containing the function name and return type
      */
     public ModPair<String, String> function(Function_callContext function) {
         Schema_qualified_name_nontypeContext funcNameCtx = function.schema_qualified_name_nontype();
@@ -886,8 +876,7 @@ public final class ValueExpr extends AbstractExpr {
             return null;
         }
 
-        return Collections.max(matches,
-                (m1,m2) -> Integer.compare(m1.getSecond(), m2.getSecond()))
+        return Collections.max(matches, Comparator.comparingInt(Pair::getSecond))
                 .getFirst();
 
     }
@@ -940,12 +929,22 @@ public final class ValueExpr extends AbstractExpr {
         return f.getReturnsColumns().isEmpty() ? f.getReturns() : TypesSetManually.FUNCTION_TABLE;
     }
 
+    /**
+     * Processes an ORDER BY clause.
+     *
+     * @param orderBy the ORDER BY clause context
+     */
     public void orderBy(Orderby_clauseContext orderBy) {
         for (Sort_specifierContext sort : orderBy.sort_specifier()) {
             analyze(new Vex(sort.vex()));
         }
     }
 
+    /**
+     * Processes a WINDOW definition.
+     *
+     * @param window the WINDOW definition context
+     */
     public void window(Window_definitionContext window) {
         Partition_by_columnsContext partition = window.partition_by_columns();
         if (partition != null) {
