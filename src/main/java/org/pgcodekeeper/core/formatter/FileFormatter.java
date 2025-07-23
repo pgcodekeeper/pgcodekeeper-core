@@ -15,15 +15,18 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.formatter;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.formatter.ch.ChFormatter;
 import org.pgcodekeeper.core.formatter.ms.MsFormatter;
 import org.pgcodekeeper.core.formatter.pg.PgFormatter;
-import org.pgcodekeeper.core.localizations.Messages;
 
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Main formatter class that handles SQL file formatting for different database types.
+ * Acts as a facade that delegates to specific database formatter implementations.
+ */
 public class FileFormatter {
 
     private final String source;
@@ -33,6 +36,15 @@ public class FileFormatter {
 
     private final FormatConfiguration config;
 
+    /**
+     * Constructs a new FileFormatter instance.
+     *
+     * @param source The source SQL text to format
+     * @param offset Starting offset in the source text
+     * @param length Length of text to format
+     * @param config Formatting configuration options
+     * @param dbType Target database type for dialect-specific formatting
+     */
     public FileFormatter(String source, int offset, int length, FormatConfiguration config, DatabaseType dbType) {
         this.source = source;
         this.start = offset;
@@ -41,6 +53,11 @@ public class FileFormatter {
         this.dbType = dbType;
     }
 
+    /**
+     * Formats the source text according to configuration and database type.
+     *
+     * @return Formatted SQL string
+     */
     public String formatText() {
         List<FormatItem> list = getFormatItems();
         if (list.isEmpty()) {
@@ -58,23 +75,17 @@ public class FileFormatter {
     }
 
     /**
-     * @return list of formatting operations
+     * Gets the list of formatting operations that would be applied.
+     * This allows inspection of formatting changes without actually modifying the text.
+     *
+     * @return List of FormatItem objects representing formatting operations
      */
     public List<FormatItem> getFormatItems() {
-        AbstractFormatter formatter;
-        switch (dbType) {
-        case CH:
-            formatter = new ChFormatter(source, start, stop, config);
-            break;
-        case PG:
-            formatter = new PgFormatter(source, start, stop, config);
-            break;
-        case MS:
-            formatter = new MsFormatter(source, start, stop, config);
-            break;
-        default:
-            throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + dbType);
-        }
+        AbstractFormatter formatter = switch (dbType) {
+            case CH -> new ChFormatter(source, start, stop, config);
+            case PG -> new PgFormatter(source, start, stop, config);
+            case MS -> new MsFormatter(source, start, stop, config);
+        };
 
         return formatter.getFormatItems();
     }

@@ -15,13 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.formatter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Recognizer;
@@ -31,6 +24,13 @@ import org.pgcodekeeper.core.formatter.FormatConfiguration.IndentType;
 import org.pgcodekeeper.core.parsers.antlr.CodeUnitToken;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.util.*;
+
+/**
+ * Abstract base class for SQL statement formatting.
+ * Handles core formatting logic including indentation, whitespace management,
+ * and operator spacing for SQL statements.
+ */
 public abstract class StatementFormatter {
 
     private final int start;
@@ -81,20 +81,25 @@ public abstract class StatementFormatter {
      */
     private final List<FormatItem> changes = new ArrayList<>();
 
-    protected StatementFormatter(int start, int stop, int defOffset, int lastTokenOffset, FormatConfiguration config) {
+    protected StatementFormatter(int start, int stop, int defOffset, int lastTokenOffset,
+                                 FormatConfiguration config) {
         this.start = start;
         this.stop = stop;
         this.defOffset = defOffset;
         this.lastTokenOffset = lastTokenOffset;
         this.config = config;
-        this.tabReplace = config.getIndentType() == IndentType.WHITESPACE ? config.createIndent(config.getIndentSize())
-                : null;
+        this.tabReplace = config.getIndentType() == IndentType.WHITESPACE ?
+                config.createIndent(config.getIndentSize()) : null;
     }
 
     public List<FormatItem> getChanges() {
         return changes;
     }
 
+    /**
+     * Performs the formatting operation on the SQL statement.
+     * Processes tokens and applies formatting rules based on configuration.
+     */
     public void format() {
         for (Token t : getTokens()) {
             CodeUnitToken cuToken = (CodeUnitToken) t;
@@ -137,7 +142,7 @@ public abstract class StatementFormatter {
             tabs.clear();
 
             if (config.isAddWhitespaceAfterOp() || config.isAddWhitespaceBeforeOp()) {
-                proccessOperators(type, tokenStart, t);
+                processOperators(type, tokenStart, t);
             }
 
             isMixedIndent = false;
@@ -145,7 +150,6 @@ public abstract class StatementFormatter {
             lastTokenOffset = tokenStart + length;
         }
     }
-
 
     private void processSpaces(int type, int tokenStart, int length) {
         if (isTabToken(type) && config.getIndentType() == IndentType.WHITESPACE
@@ -188,7 +192,7 @@ public abstract class StatementFormatter {
         }
     }
 
-    private void proccessOperators(int type, int tokenStart, Token t) {
+    private void processOperators(int type, int tokenStart, Token t) {
         if (isOperatorToken(type, t)) {
             if (unaryOps.contains(t)) {
                 return;

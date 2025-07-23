@@ -15,13 +15,23 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.formatter.pg;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.Token;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLLexer;
 
+import java.util.List;
+
+/**
+ * Utility class containing PostgreSQL-specific formatting helper methods.
+ * Provides common operations for identifying and handling SQL operators.
+ */
 public class PgFormatterUtils {
 
+    /**
+     * Checks if a token type represents a SQL operator.
+     *
+     * @param type The token type to check (from SQLLexer)
+     * @return true if the token type is a recognized operator, false otherwise
+     */
     public static boolean isOperatorToken(int type) {
         return switch (type) {
             case SQLLexer.EQUAL, SQLLexer.NOT_EQUAL, SQLLexer.LTH, SQLLexer.LEQ, SQLLexer.GTH, SQLLexer.GEQ,
@@ -32,6 +42,15 @@ public class PgFormatterUtils {
         };
     }
 
+
+    /**
+     * Validates whether a token should be treated as an operator in its context.
+     *
+     * @param t      The token being checked
+     * @param type   The token type (from SQLLexer)
+     * @param tokens The complete list of tokens for context analysis
+     * @return true if the token should be treated as an operator, false otherwise
+     */
     public static boolean checkOperator(Token t, int type, List<? extends Token> tokens) {
         if (type == SQLLexer.MODULAR) {
             int nextTokenType = tokens.get(tokens.indexOf(t) + 1).getType();

@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.formatter.pg;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -33,11 +29,21 @@ import org.pgcodekeeper.core.parsers.antlr.rulectx.SelectStmt;
 import org.pgcodekeeper.core.parsers.antlr.rulectx.Vex;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * PostgreSQL-specific parse tree listener for SQL code formatting.
+ * Handles indentation and formatting rules for PostgreSQL syntax elements.
+ */
 public class PgFormatParseTreeListener extends FormatParseTreeListener {
 
     /**
-     * @param unaryOps
-     *            found unary operators and other operator-like tokens
+     * Constructs a new PostgreSQL format listener.
+     * @param tokens Token stream being processed
+     * @param indents Map to store indentation information
+     * @param unaryOps Set of unary operators to track
      */
     public PgFormatParseTreeListener(CommonTokenStream tokens,
             Map<Token, Pair<IndentDirection, Integer>> indents,

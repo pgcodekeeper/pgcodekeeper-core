@@ -15,15 +15,27 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.formatter.ms;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.pgcodekeeper.core.formatter.AbstractFormatter;
 import org.pgcodekeeper.core.formatter.FormatConfiguration;
 import org.pgcodekeeper.core.formatter.FormatItem;
 
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Microsoft SQL Server specific SQL formatter implementation.
+ * Handles formatting of T-SQL syntax according to configured rules.
+ */
 public class MsFormatter extends AbstractFormatter {
 
+    /**
+     * Constructs a new Microsoft SQL Server formatter instance.
+     *
+     * @param source The source SQL text to be formatted
+     * @param start  The starting offset in the source text for formatting
+     * @param stop   The ending offset in the source text for formatting
+     * @param config The formatting configuration containing style rules
+     */
     public MsFormatter(String source, int start, int stop, FormatConfiguration config) {
         super(source, start, stop, config);
     }

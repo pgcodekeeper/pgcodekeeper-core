@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.formatter.ch;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.pgcodekeeper.core.formatter.FormatConfiguration;
@@ -30,10 +26,27 @@ import org.pgcodekeeper.core.parsers.antlr.generated.CHLexer;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Select_stmtContext;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * ClickHouse-specific implementation of SQL statement formatting.
+ * Handles formatting of ClickHouse SELECT statements with dialect-specific rules.
+ */
 public class ChStatementFormatter extends StatementFormatter {
 
-    private List<? extends Token> tokens;
+    private final List<? extends Token> tokens;
 
+    /**
+     * Constructs a new ClickHouse statement formatter for a SELECT statement.
+     *
+     * @param start         The starting offset in the source text (inclusive)
+     * @param stop          The ending offset in the source text (exclusive)
+     * @param selectStmtCtx The ANTLR parse tree context for the SELECT statement
+     * @param tokenStream   The token stream containing all tokens
+     * @param config        The formatting configuration options
+     */
     public ChStatementFormatter(int start, int stop, Select_stmtContext selectStmtCtx,
             CommonTokenStream tokenStream, FormatConfiguration config) {
         super(start, stop, 0, 0, config);
@@ -71,28 +84,11 @@ public class ChStatementFormatter extends StatementFormatter {
 
     @Override
     protected boolean isOperatorToken(int type, Token t) {
-        switch (type) {
-        case CHLexer.EQ_DOUBLE:
-        case CHLexer.EQ_SINGLE:
-        case CHLexer.NOT_EQ:
-        case CHLexer.LE:
-        case CHLexer.GE:
-        case CHLexer.LT:
-        case CHLexer.GT:
-        case CHLexer.CONCAT:
-        case CHLexer.PLUS:
-        case CHLexer.MINUS:
-        case CHLexer.ASTERISK:
-        case CHLexer.SLASH:
-        case CHLexer.PERCENT:
-        case CHLexer.AND:
-        case CHLexer.OR:
-        case CHLexer.NOT_DIST:
-        case CHLexer.MOD:
-        case CHLexer.DIV:
-            return true;
-        default:
-            return false;
-        }
+        return switch (type) {
+            case CHLexer.EQ_DOUBLE, CHLexer.EQ_SINGLE, CHLexer.NOT_EQ, CHLexer.LE, CHLexer.GE, CHLexer.LT, CHLexer.GT,
+                 CHLexer.CONCAT, CHLexer.PLUS, CHLexer.MINUS, CHLexer.ASTERISK, CHLexer.SLASH, CHLexer.PERCENT,
+                 CHLexer.AND, CHLexer.OR, CHLexer.NOT_DIST, CHLexer.MOD, CHLexer.DIV -> true;
+            default -> false;
+        };
     }
 }

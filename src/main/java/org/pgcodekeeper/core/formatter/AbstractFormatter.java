@@ -17,6 +17,10 @@ package org.pgcodekeeper.core.formatter;
 
 import java.util.List;
 
+/**
+ * Abstract base class for SQL formatter implementations.
+ * Provides common functionality and structure for database-specific formatters.
+ */
 public abstract class AbstractFormatter {
 
     protected final String source;

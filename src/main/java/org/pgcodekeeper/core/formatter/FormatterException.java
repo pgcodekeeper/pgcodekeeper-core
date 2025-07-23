@@ -15,25 +15,56 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.formatter;
 
+/**
+ * Exception thrown when errors occur during SQL formatting operations.
+ * Wraps various formatting-related errors with appropriate context.
+ */
 public class FormatterException extends Exception {
 
     private static final long serialVersionUID = -3464810941906751101L;
 
+    /**
+     * Constructs a new FormatterException with no detail message.
+     */
     public FormatterException() {
     }
 
+    /**
+     * Constructs a new FormatterException with the specified detail message.
+     *
+     * @param message the detail message describing the formatting error
+     */
     public FormatterException(String message) {
         super(message);
     }
 
+    /**
+     * Constructs a new FormatterException with the specified cause.
+     *
+     * @param cause the underlying cause of the formatting error
+     */
     public FormatterException(Throwable cause) {
         super(cause);
     }
 
+    /**
+     * Constructs a new FormatterException with the specified detail message and cause.
+     *
+     * @param message the detail message describing the formatting error
+     * @param cause   the underlying cause of the formatting error
+     */
     public FormatterException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Constructs a new FormatterException with full configuration options.
+     *
+     * @param message            the detail message describing the formatting error
+     * @param cause              the underlying cause of the formatting error
+     * @param enableSuppression  whether exception suppression is enabled
+     * @param writableStackTrace whether the stack trace should be writable
+     */
     public FormatterException(String message, Throwable cause, boolean enableSuppression,
             boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
