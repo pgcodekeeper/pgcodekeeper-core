@@ -15,17 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.msexpr;
 
+import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
+
 import java.util.Collections;
 import java.util.List;
 
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Delete_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.ExpressionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.From_itemContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Qualified_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Search_conditionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Top_countContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.With_expressionContext;
-
+/**
+ * Microsoft SQL DELETE statement analyzer.
+ * Processes DELETE statements including CTEs, FROM clauses, and WHERE conditions
+ * to extract database object dependencies.
+ */
 public class MsDelete extends MsAbstractExprWithNmspc<Delete_statementContext> {
 
     protected MsDelete(MsAbstractExpr parent) {

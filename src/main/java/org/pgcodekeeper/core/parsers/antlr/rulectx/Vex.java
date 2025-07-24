@@ -15,26 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.rulectx;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Collate_identifierContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Data_typeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Indirection_listContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.OpContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Select_stmt_no_parensContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Truth_valueContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Type_listContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Value_expression_primaryContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.VexContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Vex_bContext;
-
 /**
- * Merging wrapper for vex/vex_b
+ * Merging wrapper for vex/vex_b.
+ * Provides a unified interface for working with PostgreSQL value expressions
+ * that can be either regular expressions (vex) or boolean expressions (vex_b).
  *
  * @author levsha_aa
  */
@@ -44,18 +37,33 @@ public class Vex {
     private final Vex_bContext vexB;
     private final boolean isB;
 
+    /**
+     * Creates a wrapper for a regular value expression (vex).
+     *
+     * @param vex the value expression context
+     */
     public Vex(VexContext vex) {
         this.vex = vex;
         this.vexB = null;
         this.isB = false;
     }
 
+    /**
+     * Creates a wrapper for a boolean value expression (vex_b).
+     *
+     * @param vex the boolean value expression context
+     */
     public Vex(Vex_bContext vex) {
         this.vex = null;
         this.vexB = vex;
         this.isB = true;
     }
 
+    /**
+     * Returns a list of child value expression wrappers.
+     *
+     * @return list of child Vex wrappers found in this expression
+     */
     public List<Vex> vex() {
         List<ParseTree> children = (isB ? vexB : vex).children;
         if (children == null || children.isEmpty()) {
@@ -72,6 +80,11 @@ public class Vex {
         return vex;
     }
 
+    /**
+     * Returns the underlying parser rule context.
+     *
+     * @return the parser rule context for this expression
+     */
     public ParserRuleContext getVexCtx() {
         return isB ? vexB : vex;
     }

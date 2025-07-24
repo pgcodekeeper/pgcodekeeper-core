@@ -15,34 +15,28 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.verification;
 
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.Locale;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.parsers.antlr.AntlrError;
-import org.pgcodekeeper.core.parsers.antlr.AntlrParser;
-import org.pgcodekeeper.core.parsers.antlr.AntlrUtils;
-import org.pgcodekeeper.core.parsers.antlr.CodeUnitToken;
-import org.pgcodekeeper.core.parsers.antlr.ErrorTypes;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_function_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Function_actions_commonContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Function_bodyContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Function_defContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_createContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.SconstContext;
+import org.pgcodekeeper.core.parsers.antlr.*;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.statements.ParserAbstract;
 import org.pgcodekeeper.core.parsers.antlr.statements.pg.PgParserAbstract;
 import org.pgcodekeeper.core.schema.ArgMode;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.Locale;
+
 /**
- * class for verify function statement
+ * Verification implementation for PostgreSQL function statements.
+ * Analyzes function definitions to ensure they comply with coding standards
+ * and best practices, including complexity checks, parameter validation,
+ * and code style verification.
  */
 public class VerificationFunction implements IVerification {
     private final Schema_createContext createCtx;
@@ -54,8 +48,16 @@ public class VerificationFunction implements IVerification {
     private String language;
     private int methodCount;
 
+    /**
+     * Creates a new function verification instance.
+     *
+     * @param createCtx the schema creation context containing the function
+     * @param rules     verification rules and properties to apply
+     * @param fileName  the name of the file being verified
+     * @param errors    list to collect verification errors
+     */
     public VerificationFunction(Schema_createContext createCtx, VerificationProperties rules,
-            String fileName, List<Object> errors) {
+                                String fileName, List<Object> errors) {
         this.createCtx = createCtx;
         this.ctx = createCtx.create_function_statement();
         this.rules = rules;

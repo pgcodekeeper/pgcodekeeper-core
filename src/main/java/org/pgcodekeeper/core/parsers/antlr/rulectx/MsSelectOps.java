@@ -15,41 +15,67 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.rulectx;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
+
 import java.util.List;
 
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Query_specificationContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Select_opsContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Select_ops_no_parensContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Select_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Set_qualifierContext;
-
+/**
+ * Merging wrapper for Microsoft SQL SELECT operations.
+ * Provides a unified interface for working with Microsoft SQL SELECT operations
+ * that may or may not be parenthesized.
+ */
 public class MsSelectOps {
 
     private final Select_opsContext ops;
     private final Select_ops_no_parensContext opsNp;
     private final boolean isNp;
 
+    /**
+     * Creates a wrapper for parenthesized Microsoft SQL SELECT operations.
+     *
+     * @param ops the SELECT operations context with parentheses
+     */
     public MsSelectOps(Select_opsContext ops) {
         this.ops = ops;
         this.opsNp = null;
         this.isNp = false;
     }
 
+    /**
+     * Creates a wrapper for non-parenthesized Microsoft SQL SELECT operations.
+     *
+     * @param ops the SELECT operations context without parentheses
+     */
     public MsSelectOps(Select_ops_no_parensContext ops) {
         this.opsNp = ops;
         this.ops = null;
         this.isNp = true;
     }
 
+    /**
+     * Returns the left parenthesis terminal node if present.
+     *
+     * @return the left parenthesis node or null if not present
+     */
     public TerminalNode leftParen() {
         return isNp ? null : ops.LR_BRACKET();
     }
 
+    /**
+     * Returns the right parenthesis terminal node if present.
+     *
+     * @return the right parenthesis node or null if not present
+     */
     public TerminalNode rightParen() {
         return isNp ? null : ops.RR_BRACKET();
     }
 
+    /**
+     * Returns the SELECT statement context.
+     *
+     * @return the SELECT statement context or null for non-parenthesized operations
+     */
     public Select_statementContext selectStmt() {
         return isNp ? null : ops.select_statement();
     }

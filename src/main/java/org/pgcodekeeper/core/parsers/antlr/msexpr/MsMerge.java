@@ -15,20 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.msexpr;
 
+import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
+
 import java.util.Collections;
 import java.util.List;
 
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.ExpressionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Expression_listContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.From_itemContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Full_column_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Merge_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Merge_whenContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Qualified_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Table_value_constructorContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Update_elemContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.With_expressionContext;
-
+/**
+ * Microsoft SQL MERGE statement analyzer.
+ * Processes MERGE statements including CTEs, target tables, source tables,
+ * and merge conditions to extract database object dependencies.
+ */
 public class MsMerge extends MsAbstractExprWithNmspc<Merge_statementContext> {
 
     protected MsMerge(MsAbstractExpr parent) {

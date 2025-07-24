@@ -15,18 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.msexpr;
 
+import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
+
 import java.util.Collections;
 import java.util.List;
 
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.ExpressionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.From_itemContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Full_column_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Qualified_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Search_conditionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Update_elemContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Update_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.With_expressionContext;
-
+/**
+ * Microsoft SQL UPDATE statement analyzer.
+ * Processes UPDATE statements including CTEs, SET clauses, FROM clauses,
+ * and WHERE conditions to extract database object dependencies.
+ */
 public class MsUpdate extends MsAbstractExprWithNmspc<Update_statementContext> {
 
     protected MsUpdate(MsAbstractExpr parent) {

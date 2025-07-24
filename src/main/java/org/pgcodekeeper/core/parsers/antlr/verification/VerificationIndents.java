@@ -15,19 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.verification;
 
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Lexer;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Recognizer;
-import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.pgcodekeeper.core.formatter.IndentDirection;
@@ -43,6 +31,14 @@ import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Function_bodyContext;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.text.MessageFormat;
+import java.util.*;
+
+/**
+ * Verification implementation for code indentation rules.
+ * Analyzes function bodies to ensure proper indentation according to
+ * configured style guidelines and formatting standards.
+ */
 public class VerificationIndents implements IVerification {
 
     /**
@@ -69,10 +65,6 @@ public class VerificationIndents implements IVerification {
      * whether current token is first non-whitespace token on the line
      */
     private boolean firstTokenInLine = true;
-    /**
-     * whether indent of the current line has characters mismatched with indent setting
-     */
-    //private boolean isMixedIndent;
 
     /**
      * whether a space is needed after an operator
@@ -81,15 +73,25 @@ public class VerificationIndents implements IVerification {
     private int currentIndent = 1;
     private boolean needSpaceAfterIf;
     private boolean needSpaceAfterComma;
-    private List<? extends Token> tokens;
+    private final List<? extends Token> tokens;
 
     private final Token codeStart;
     private final String filename;
     private final List<Object> errors;
     private final VerificationProperties rules;
 
+    /**
+     * Creates a new indentation verification instance for string-based function definitions.
+     *
+     * @param codeStart          the starting token of the function body
+     * @param functionDefinition the function definition as a string
+     * @param language           the function language (SQL, plpgsql, etc.)
+     * @param filename           the name of the file being verified
+     * @param errors             list to collect verification errors
+     * @param rules              verification rules and properties to apply
+     */
     public VerificationIndents(Token codeStart, String functionDefinition, String language,
-            String filename, List<Object> errors, VerificationProperties rules) {
+                               String filename, List<Object> errors, VerificationProperties rules) {
         CodeUnitToken cuCodeStart = (CodeUnitToken) codeStart;
         this.defOffset = cuCodeStart.getCodeUnitStart();
         this.lastTokenOffset = cuCodeStart.getCodeUnitStart();
@@ -100,8 +102,18 @@ public class VerificationIndents implements IVerification {
         this.tokens = analyzeDefinition(functionDefinition, language);
     }
 
+    /**
+     * Creates a new indentation verification instance for parsed function bodies.
+     *
+     * @param codeStart   the starting token of the function body
+     * @param definition  the parsed function body context
+     * @param tokenStream the token stream containing function tokens
+     * @param filename    the name of the file being verified
+     * @param errors      list to collect verification errors
+     * @param rules       verification rules and properties to apply
+     */
     public VerificationIndents(Token codeStart, Function_bodyContext definition, CommonTokenStream tokenStream,
-            String filename, List<Object> errors, VerificationProperties rules) {
+                               String filename, List<Object> errors, VerificationProperties rules) {
         this.defOffset = 0;
         this.codeStart = codeStart;
         this.filename = filename;
@@ -188,25 +200,25 @@ public class VerificationIndents implements IVerification {
     private void processIndents(Pair<IndentDirection, Integer> indent, int tokenStart, Token t) {
         if (indent != null) {
             switch (indent.getFirst()) {
-            case BLOCK_START:
-                writeIndent(true, currentIndent++, tokenStart, t);
-                currentIndent += indent.getSecond() - 1;
-                int cyclomaticComplexCount = rules.getMaxCyclomaticComplexity();
-                if (cyclomaticComplexCount > 0 && currentIndent > cyclomaticComplexCount) {
-                    String msg = MessageFormat.format(Messages.VerificationIndents_cyclomatic_complexy,
-                            currentIndent, cyclomaticComplexCount);
-                    addError(t, msg);
-                }
-                break;
-            case BLOCK_LINE:
-                writeIndent(true, currentIndent - 1, tokenStart, t);
-                break;
-            case BLOCK_STOP:
-                writeIndent(false, --currentIndent, tokenStart, t);
-                currentIndent -= indent.getSecond() - 1;
-                break;
-            default:
-                break;
+                case BLOCK_START:
+                    writeIndent(true, currentIndent++, tokenStart, t);
+                    currentIndent += indent.getSecond() - 1;
+                    int cyclomaticComplexCount = rules.getMaxCyclomaticComplexity();
+                    if (cyclomaticComplexCount > 0 && currentIndent > cyclomaticComplexCount) {
+                        String msg = MessageFormat.format(Messages.VerificationIndents_cyclomatic_complexy,
+                                currentIndent, cyclomaticComplexCount);
+                        addError(t, msg);
+                    }
+                    break;
+                case BLOCK_LINE:
+                    writeIndent(true, currentIndent - 1, tokenStart, t);
+                    break;
+                case BLOCK_STOP:
+                    writeIndent(false, --currentIndent, tokenStart, t);
+                    currentIndent -= indent.getSecond() - 1;
+                    break;
+                default:
+                    break;
             }
         } else if (firstTokenInLine) {
             writeIndent(false, currentIndent, tokenStart, t);
@@ -259,7 +271,7 @@ public class VerificationIndents implements IVerification {
             needSpaceAfterComma = true;
             return;
         }
-        if (needSpaceAfterComma && t.getType() != SQLLexer.Space)  {
+        if (needSpaceAfterComma && t.getType() != SQLLexer.Space) {
             addError(t, Messages.VerificationIndents_space_after_comma);
         }
         needSpaceAfterComma = false;
@@ -284,10 +296,10 @@ public class VerificationIndents implements IVerification {
      */
     private void checkSemicolonAfterSimpleSQL() {
         Token endToken = tokens.stream().filter(
-                token -> token.getType() != SQLLexer.NewLine
-                && token.getType() != SQLLexer.Space
-                && token.getType() != SQLLexer.END
-                && token.getType() != Recognizer.EOF)
+                        token -> token.getType() != SQLLexer.NewLine
+                                && token.getType() != SQLLexer.Space
+                                && token.getType() != SQLLexer.END
+                                && token.getType() != Recognizer.EOF)
                 .reduce((first, second) -> second).orElse(null);
 
         if (endToken != null && endToken.getType() != SQLLexer.SEMI_COLON) {
