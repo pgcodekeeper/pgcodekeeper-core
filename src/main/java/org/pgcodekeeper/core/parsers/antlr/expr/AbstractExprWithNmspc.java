@@ -15,37 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Stream;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Alias_clauseContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Data_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Delete_stmt_for_psqlContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.IdentifierContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Insert_stmt_for_psqlContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Merge_stmt_for_psqlContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_qualified_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Select_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Update_stmt_for_psqlContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.With_clauseContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.With_queryContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.rulectx.SelectStmt;
 import org.pgcodekeeper.core.parsers.antlr.statements.pg.PgParserAbstract;
 import org.pgcodekeeper.core.schema.GenericColumn;
@@ -56,6 +32,14 @@ import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
+
+/**
+ * Abstract expression parser with namespace support for tracking variables, references, and CTEs.
+ */
 public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends AbstractExpr {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractExprWithNmspc.class);
@@ -279,7 +263,7 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
     }
 
     /**
-     * Adds a "free-standing" variable (e.g. a non-table function parameter)
+     * Adds a "freestanding" variable (e.g. a non-table function parameter)
      * into a special complexNamespace container.
      */
     public void addNamespaceVariable(Pair<String, String> variable) {
@@ -287,7 +271,7 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
     }
 
     /**
-     * Clients may use this to setup pseudo-variable names before expression analysis.
+     * Clients may use this to set up pseudo-variable names before expression analysis.
      */
     public boolean addReference(String alias, GenericColumn object) {
         boolean exists = namespace.containsKey(alias);
@@ -299,21 +283,19 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
         return !exists;
     }
 
-    public boolean addRawTableReference(GenericColumn qualifiedTable) {
+    public void addRawTableReference(GenericColumn qualifiedTable) {
         boolean exists = !unaliasedNamespace.add(qualifiedTable);
         if (exists) {
             LOG.warn(Messages.AbstractExprWithNmspc_log_dupl_unaliased_table, qualifiedTable.schema, qualifiedTable.table);
         }
-        return !exists;
     }
 
-    protected boolean addColumnReference(String alias, String column) {
+    protected void addColumnReference(String alias, String column) {
         Set<String> columns = columnAliases.computeIfAbsent(alias, k -> new HashSet<>());
         boolean exists = !columns.add(column);
         if (exists) {
             LOG.warn(Messages.AbstractExprWithNmspc_log_dupl_col_alias, alias, column);
         }
-        return !exists;
     }
 
     protected void addNameReference(Schema_qualified_nameContext name, Alias_clauseContext alias) {
@@ -412,5 +394,11 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
         return cte.put(withName, unmodifiable) != null;
     }
 
+    /**
+     * Analyzes the given rule context.
+     *
+     * @param ruleCtx the parser rule context to analyze
+     * @return list of modifiable pairs containing analyzed results
+     */
     public abstract List<ModPair<String, String>> analyze(T ruleCtx);
 }

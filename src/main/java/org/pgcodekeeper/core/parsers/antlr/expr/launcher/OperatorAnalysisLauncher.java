@@ -15,21 +15,28 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr.launcher;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.pgcodekeeper.core.schema.*;
+import org.pgcodekeeper.core.schema.meta.MetaContainer;
+
 import java.util.Collections;
 import java.util.Set;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.IFunction;
-import org.pgcodekeeper.core.schema.IOperator;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
-
+/**
+ * Launcher for analyzing operator dependencies and return types.
+ * Handles type propagation between operators and their underlying functions.
+ */
 public class OperatorAnalysisLauncher extends AbstractAnalysisLauncher {
 
     private final GenericColumn function;
-
+    
+    /**
+     * Creates an operator analyzer.
+     *
+     * @param stmt     the operator statement to analyze
+     * @param function the underlying function implementation
+     * @param location the source location identifier
+     */
     public OperatorAnalysisLauncher(PgStatement stmt, GenericColumn function, String location) {
         super(stmt, null, location);
         this.function = function;

@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Insert_columnsContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Insert_stmt_for_psqlContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Select_stmtContext;
@@ -25,12 +22,23 @@ import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.With_clauseContex
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Parser for INSERT statements with namespace support.
+ */
 public class Insert extends AbstractExprWithNmspc<Insert_stmt_for_psqlContext> {
 
     protected Insert(AbstractExpr parent) {
         super(parent);
     }
 
+    /**
+     * Creates an Insert parser with meta container.
+     *
+     * @param meta the meta container with schema information
+     */
     public Insert(MetaContainer meta) {
         super(meta);
     }

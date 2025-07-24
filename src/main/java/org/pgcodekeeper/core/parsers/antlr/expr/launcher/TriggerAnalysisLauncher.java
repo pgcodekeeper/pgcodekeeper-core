@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr.launcher;
 
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.parsers.antlr.expr.ValueExprWithNmspc;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.VexContext;
@@ -24,8 +22,21 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.schema.pg.PgTrigger;
 
+import java.util.Set;
+
+/**
+ * Launcher for analyzing PostgreSQL trigger conditions.
+ * Handles the WHEN condition expressions in trigger definitions.
+ */
 public class TriggerAnalysisLauncher extends AbstractAnalysisLauncher {
 
+    /**
+     * Creates a trigger condition analyzer.
+     *
+     * @param stmt     the trigger statement being analyzed
+     * @param ctx      the trigger condition expression context
+     * @param location the source location identifier
+     */
     public TriggerAnalysisLauncher(PgTrigger stmt, VexContext ctx, String location) {
         super(stmt, ctx, location);
     }

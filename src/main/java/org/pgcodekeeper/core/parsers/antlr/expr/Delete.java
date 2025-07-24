@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Delete_stmt_for_psqlContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.VexContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.With_clauseContext;
@@ -25,12 +22,23 @@ import org.pgcodekeeper.core.parsers.antlr.rulectx.Vex;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Parser for DELETE statements with namespace support.
+ */
 public class Delete extends AbstractExprWithNmspc<Delete_stmt_for_psqlContext> {
 
     protected Delete(AbstractExpr parent) {
         super(parent);
     }
 
+    /**
+     * Creates a Delete parser with meta container.
+     *
+     * @param meta the meta container with schema information
+     */
     public Delete(MetaContainer meta) {
         super(meta);
     }

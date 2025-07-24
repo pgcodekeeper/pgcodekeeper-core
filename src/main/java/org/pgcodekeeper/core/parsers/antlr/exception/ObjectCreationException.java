@@ -15,10 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.exception;
 
-import java.text.MessageFormat;
-
 import org.pgcodekeeper.core.schema.PgStatement;
 
+import java.text.MessageFormat;
+
+/**
+ * Exception thrown when attempting to create a database object that already exists.
+ * Used for cases when object creation fails due to naming conflicts.
+ */
 public class ObjectCreationException extends RuntimeException {
 
     private static final String WITHOUT_PARENT = "{0} {1} already exists"; //$NON-NLS-1$
@@ -26,31 +30,69 @@ public class ObjectCreationException extends RuntimeException {
 
     private static final long serialVersionUID = -8514537124804597343L;
 
+    /**
+     * Constructs exception with null message and cause.
+     */
     public ObjectCreationException() {
         super();
     }
 
+    /**
+     * Constructs exception with specified message.
+     *
+     * @param message the detail message
+     */
     public ObjectCreationException(String message) {
         super(message);
     }
 
+    /**
+     * Constructs exception with specified cause.
+     *
+     * @param cause the root cause exception
+     */
     public ObjectCreationException(Throwable cause) {
         super(cause);
     }
 
+    /**
+     * Constructs exception with specified message and cause.
+     *
+     * @param message the detail message
+     * @param cause   the root cause exception
+     */
     public ObjectCreationException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Constructs exception with full exception details.
+     *
+     * @param message            the detail message
+     * @param cause              the root cause exception
+     * @param enableSuppression  whether suppression is enabled
+     * @param writableStackTrace whether stack trace is writable
+     */
     public ObjectCreationException(String message, Throwable cause,
             boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
+    /**
+     * Constructs exception for existing database statement.
+     *
+     * @param st the statement that already exists
+     */
     public ObjectCreationException(PgStatement st) {
         super(MessageFormat.format(WITHOUT_PARENT, st.getStatementType(), st.getName()));
     }
-
+    
+    /**
+     * Constructs exception for existing database statement with parent context.
+     *
+     * @param st     the statement that already exists
+     * @param parent the parent statement context
+     */
     public ObjectCreationException(PgStatement st, PgStatement parent) {
         super(MessageFormat.format(WITH_PARENT, st.getStatementType(), st.getName(),
                 parent.getStatementType(), parent.getName()));

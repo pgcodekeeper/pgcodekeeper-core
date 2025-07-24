@@ -15,6 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr;
 
+/**
+ * Contains manually defined type constants used in SQL analyzing.
+ */
 public interface TypesSetManually {
     String UNKNOWN = "unknown_unknown";
     String EMPTY = "empty";

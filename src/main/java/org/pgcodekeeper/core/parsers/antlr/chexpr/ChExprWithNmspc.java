@@ -15,21 +15,37 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.chexpr;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.ExprContext;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Concrete implementation of ChAbstractExprWithNmspc for analyzing ClickHouse SQL expressions.
+ * Provides specific handling of expression contexts with namespace support.
+ */
 public final class ChExprWithNmspc extends ChAbstractExprWithNmspc<ExprContext> {
 
     private final ChValueExpr expr;
 
+    /**
+     * Constructs a new expression analyzer with schema and metadata container.
+     *
+     * @param schema the database schema name
+     * @param meta   the metadata container for database objects
+     */
     public ChExprWithNmspc(String schema, MetaContainer meta) {
         super(schema, meta);
         expr = new ChValueExpr(this);
     }
 
+    /**
+     * Analyzes the given expression context and returns an empty list.
+     *
+     * @param ruleCtx the ANTLR expression context to analyze
+     * @return empty list
+     */
     @Override
     public List<String> analyze(ExprContext ruleCtx) {
         expr.analyze(ruleCtx);

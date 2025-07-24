@@ -15,17 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.chexpr;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.CodeUnitToken;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Alias_clauseContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Qualified_nameContext;
@@ -38,6 +31,15 @@ import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Map.Entry;
+import java.util.Set;
+
+/**
+ * Abstract base class for ClickHouse SQL expression parsing and dependency analysis.
+ * Provides common functionality for tracking object references and dependencies.
+ */
 public abstract class ChAbstractExpr {
 
     private static final Logger LOG = LoggerFactory.getLogger(ChAbstractExpr.class);
@@ -62,6 +64,11 @@ public abstract class ChAbstractExpr {
         this(null, meta);
     }
 
+    /**
+     * Gets an unmodifiable set of database object dependencies found in this expression.
+     *
+     * @return set of {@link PgObjLocation} representing dependencies
+     */
     public Set<PgObjLocation> getDepcies() {
         return Collections.unmodifiableSet(depcies);
     }
@@ -115,19 +122,11 @@ public abstract class ChAbstractExpr {
     }
 
     protected final void addDepcy(GenericColumn depcy, ParserRuleContext ctx) {
-        addDepcy(depcy, ctx, null);
-    }
-
-    protected final void addDepcy(GenericColumn depcy, ParserRuleContext ctx, Token start) {
         if (!Utils.isChSystemSchema(depcy.schema)) {
             PgObjLocation loc = new PgObjLocation.Builder()
                     .setObject(depcy)
                     .setCtx(ctx)
                     .build();
-            if (start instanceof CodeUnitToken codeUnitStart) {
-                loc = loc.copyWithOffset(codeUnitStart.getCodeUnitStart(),
-                        codeUnitStart.getLine() - 1, codeUnitStart.getCodeUnitPositionInLine(), null);
-            }
 
             depcies.add(loc);
         }
@@ -142,7 +141,7 @@ public abstract class ChAbstractExpr {
                 .build());
     }
 
-    protected final GenericColumn addObjectDepcy(Qualified_nameContext qualifiedName, DbObjType type) {
+    protected final GenericColumn addObjectDepcy(Qualified_nameContext qualifiedName) {
         var ids = qualifiedName.identifier();
         var schemaCtx = QNameParser.getSchemaNameCtx(ids);
         var relationName = QNameParser.getFirstName(ids);
@@ -150,7 +149,7 @@ public abstract class ChAbstractExpr {
         var schemaName = schemaCtx != null ? schemaCtx.getText() : Consts.CH_DEFAULT_DB;
 
         addDepcy(new GenericColumn(schemaName, DbObjType.SCHEMA), schemaCtx);
-        GenericColumn depcy = new GenericColumn(schemaName, relationName, type);
+        GenericColumn depcy = new GenericColumn(schemaName, relationName, DbObjType.TABLE);
         addDepcy(depcy, relationCtx);
         return depcy;
     }

@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr.launcher;
 
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Select_statementContext;
 import org.pgcodekeeper.core.parsers.antlr.msexpr.MsSelect;
@@ -24,8 +22,21 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.schema.ms.MsView;
 
+import java.util.Set;
+
+/**
+ * Launcher for analyzing Microsoft SQL view definitions.
+ * Specialized for processing SELECT statements in view definitions.
+ */
 public class MsViewAnalysisLauncher extends AbstractAnalysisLauncher {
 
+    /**
+     * Creates a view analyzer for Microsoft SQL.
+     *
+     * @param stmt     the view statement to analyze
+     * @param ctx      the SELECT statement context defining the view
+     * @param location the source location identifier
+     */
     public MsViewAnalysisLauncher(MsView stmt, Select_statementContext ctx,
             String location) {
         super(stmt, ctx, location);

@@ -15,14 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.function.Predicate;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -41,17 +33,24 @@ import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Predicate;
+
+/**
+ * Parser for SELECT statements with namespace support.
+ */
 public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
 
     private static final Logger LOG = LoggerFactory.getLogger(Select.class);
 
     /**
      * Flags for proper FROM (subquery) analysis.<br>
-     * {@link #findReferenceInNmspc(String, String, String)} assumes that when {@link #inFrom} is set the FROM clause
+     * {@link #findReference(String, String, String)} assumes that when inFrom is set the FROM clause
      * of that query is analyzed and skips that namespace entirely unless {@link #lateralAllowed} is also set
      * (when analyzing a lateral FROM subquery or a function call).<br>
      * This assumes that {@link #from(From_itemContext)} is the first method to fill the namespace.<br>
-     * Note: caller of {@link #from(From_itemContext)} is responsible for setting {@link #inFrom} flag.
+     * Note: caller of {@link #from(From_itemContext)} is responsible for setting #inFrom flag.
      */
     private boolean inFrom;
     /**
@@ -59,11 +58,16 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
      */
     private boolean lateralAllowed;
 
+    /**
+     * Creates a Select parser with meta container.
+     *
+     * @param db the meta container with schema information
+     */
     public Select(MetaContainer db) {
         super(db);
     }
 
-    protected Select(AbstractExpr parent) {
+    Select(AbstractExpr parent) {
         super(parent);
     }
 
@@ -77,15 +81,27 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
         return analyze(new SelectStmt(ruleCtx));
     }
 
+    /**
+     * Analyzes a SELECT statement without parentheses and returns the result types.
+     *
+     * @param ruleCtx the SELECT statement context to analyze
+     * @return list of modified pairs containing analyzed results
+     */
     public List<ModPair<String, String>> analyze(Select_stmt_no_parensContext ruleCtx) {
         return analyze(new SelectStmt(ruleCtx));
     }
 
+    /**
+     * Analyzes a SELECT statement wrapper and returns the result types.
+     *
+     * @param select the SELECT statement wrapper to analyze
+     * @return list of modified pairs containing analyzed results
+     */
     public List<ModPair<String, String>> analyze(SelectStmt select) {
         return analyze(select, null);
     }
 
-    protected List<ModPair<String, String>> analyze(SelectStmt select, With_queryContext recursiveCteCtx) {
+    List<ModPair<String, String>> analyze(SelectStmt select, With_queryContext recursiveCteCtx) {
         With_clauseContext with = select.withClause();
         if (with != null) {
             analyzeCte(with);
@@ -98,6 +114,12 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
         return ret;
     }
 
+    /**
+     * Analyzes a PERFORM statement and returns the result types.
+     *
+     * @param perform the PERFORM statement context to analyze
+     * @return list of modified pairs containing analyzed results
+     */
     public List<ModPair<String, String>> analyze(Perform_stmtContext perform) {
         List<ModPair<String, String>> ret = perform(perform);
 
@@ -329,7 +351,7 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
         List<IndirectionContext> ind = indList.indirection();
         switch (ind.size()) {
         case 0:
-            return qualAster(Arrays.asList(id), cols);
+            return qualAster(Collections.singletonList(id), cols);
         case 1:
             IndirectionContext second = ind.get(0);
             if (second.LEFT_BRACKET() == null) {
@@ -394,22 +416,22 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
     private void unqualAster(List<ModPair<String, String>> cols) {
         for (GenericColumn gc : unaliasedNamespace) {
             addFilteredRelationColumnsDepcies(gc.schema, gc.table, ANY)
-            .map(Pair::copyMod)
-            .forEach(cols::add);
+                    .map(Pair::copyMod)
+                    .forEach(cols::add);
         }
 
         for (GenericColumn gc : namespace.values()) {
             if (gc != null) {
                 addFilteredRelationColumnsDepcies(gc.schema, gc.table, ANY)
-                .map(Pair::copyMod)
-                .forEach(cols::add);
+                        .map(Pair::copyMod)
+                        .forEach(cols::add);
             }
         }
 
         complexNamespace.values().stream()
-        .flatMap(List::stream)
-        .map(Pair::copyMod)
-        .forEach(cols::add);
+                .flatMap(List::stream)
+                .map(Pair::copyMod)
+                .forEach(cols::add);
     }
 
     private boolean qualAster(List<? extends ParserRuleContext> ids, List<ModPair<String, String>> cols) {
@@ -436,15 +458,15 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
             }
 
             addFilteredRelationColumnsDepcies(relationGc.schema, relationGc.table, ANY)
-            .map(Pair::copyMod)
-            .forEach(cols::add);
+                    .map(Pair::copyMod)
+                    .forEach(cols::add);
             return true;
         }
         List<Pair<String, String>> complexNsp = findReferenceComplex(relation);
         if (complexNsp != null) {
             complexNsp.stream()
-            .map(Pair::copyMod)
-            .forEach(cols::add);
+                    .map(Pair::copyMod)
+                    .forEach(cols::add);
             return true;
         }
         LOG.warn(Messages.Select_log_complex_not_found, relation);
@@ -557,7 +579,7 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
                 String funcAlias = alias == null ? func.getFirst(): alias.getText();
                 addReference(funcAlias, null);
                 complexNamespace.put(funcAlias,
-                        Arrays.asList(new Pair<>(funcAlias, func.getSecond())));
+                        List.of(new Pair<>(funcAlias, func.getSecond())));
             }
         } finally {
             lateralAllowed = oldLateral;

@@ -15,16 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.pgcodekeeper.core.Consts;
@@ -34,19 +24,9 @@ import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.AntlrParser;
 import org.pgcodekeeper.core.parsers.antlr.CodeUnitToken;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Data_typeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Function_args_parserContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Indirection_identifierContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Operator_args_parserContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_qualified_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_qualified_name_nontypeContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.statements.pg.PgParserAbstract;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.IFunction;
-import org.pgcodekeeper.core.schema.IOperator;
-import org.pgcodekeeper.core.schema.IRelation;
-import org.pgcodekeeper.core.schema.IStatement;
-import org.pgcodekeeper.core.schema.PgObjLocation;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.PgObjLocation.LocationType;
 import org.pgcodekeeper.core.schema.meta.MetaCompositeType;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
@@ -55,6 +35,16 @@ import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
+
+/**
+ * Abstract base class for SQL expression analysis.
+ * Provides core functionality for dependency tracking and reference resolution.
+ */
 public abstract class AbstractExpr {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractExpr.class);
@@ -99,10 +89,6 @@ public abstract class AbstractExpr {
 
     protected List<Pair<String, String>> findCte(String cteName) {
         return parent == null ? null : parent.findCte(cteName);
-    }
-
-    protected boolean hasCte(String cteName) {
-        return findCte(cteName) != null;
     }
 
     /**
@@ -277,23 +263,17 @@ public abstract class AbstractExpr {
                 schemaName, relationName, col -> col.equals(colName));
         // handle system columns; look for relation anyway for a potential 'not found' warning
         // do not use the stream nor add the depcy though
-        switch (colName) {
-        case "oid", "tableoid":
-            return "oid";
-        case "xmin", "xmax":
-            return "xid";
-        case "cmin", "cmax":
-            return "cid";
-        case "ctid":
-            return "tid";
-        default:
-            break;
-        }
+        return switch (colName) {
+            case "oid", "tableoid" -> "oid";
+            case "xmin", "xmax" -> "xid";
+            case "cmin", "cmax" -> "cid";
+            case "ctid" -> "tid";
+            default -> columns.findAny().map(Pair::getSecond).orElseGet(() -> {
+                log("Column {} not found in relation {}", colName, relationName);
+                return TypesSetManually.COLUMN;
+            });
+        };
 
-        return columns.findAny().map(Pair::getSecond).orElseGet(() -> {
-            log("Column {} not found in relation {}", colName, relationName);
-            return TypesSetManually.COLUMN;
-        });
     }
 
     /**
@@ -312,9 +292,6 @@ public abstract class AbstractExpr {
      * <li>and/or other performance/allocation inefficiencies</li>
      * </ul>
      *
-     * @param schemaName
-     * @param relationName
-     * @param colNamePredicate
      *
      * @return column stream with attached depcy-addition peek-step; empty stream if no relation found
      */

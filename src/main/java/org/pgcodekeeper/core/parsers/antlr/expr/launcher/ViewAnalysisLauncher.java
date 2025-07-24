@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr.launcher;
 
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.loader.FullAnalyze;
 import org.pgcodekeeper.core.parsers.antlr.expr.Select;
@@ -26,10 +24,23 @@ import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.schema.meta.MetaUtils;
 import org.pgcodekeeper.core.schema.pg.AbstractPgView;
 
+import java.util.Set;
+
+/**
+ * Launcher for analyzing PostgreSQL view definitions.
+ * Handles SELECT statement analysis for views and manages view metadata initialization.
+ */
 public class ViewAnalysisLauncher extends AbstractAnalysisLauncher {
 
     private FullAnalyze fullAnalyze;
 
+    /**
+     * Creates a view analyzer for PostgreSQL.
+     *
+     * @param stmt     the view statement to analyze
+     * @param ctx      the SELECT statement context defining the view
+     * @param location the source location identifier
+     */
     public ViewAnalysisLauncher(AbstractPgView stmt, Select_stmtContext ctx, String location) {
         super(stmt, ctx, location);
     }

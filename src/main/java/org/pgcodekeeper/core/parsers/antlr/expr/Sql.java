@@ -15,18 +15,26 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr;
 
-import java.util.List;
-
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.SqlContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.StatementContext;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 
+import java.util.List;
+
+/**
+ * Parser for SQL statements with namespace support.
+ */
 public class Sql extends Statements<SqlContext> {
 
     protected Sql(AbstractExpr parent) {
         super(parent);
     }
 
+    /**
+     * Creates a Sql parser with meta container.
+     *
+     * @param meta the meta container with schema information
+     */
     public Sql(MetaContainer meta) {
         super(meta);
     }

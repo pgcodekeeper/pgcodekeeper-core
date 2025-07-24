@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr.launcher;
 
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.chexpr.ChExprWithNmspc;
@@ -27,8 +25,21 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 
+import java.util.Set;
+
+/**
+ * Launcher for analyzing ClickHouse SQL expressions.
+ * Handles both standalone expressions and expressions with namespace requirements.
+ */
 public class ChExpressionAnalysisLauncher extends AbstractAnalysisLauncher {
 
+    /**
+     * Creates an expression analyzer for ClickHouse SQL.
+     *
+     * @param stmt     the statement containing the expression
+     * @param ctx      the expression parse tree context
+     * @param location the source location identifier
+     */
     public ChExpressionAnalysisLauncher(PgStatement stmt, ExprContext ctx, String location) {
         super(stmt, ctx, location);
     }

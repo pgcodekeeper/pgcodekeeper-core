@@ -15,22 +15,46 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.exception;
 
+/**
+ * Exception thrown when concurrent modification of a resource is detected.
+ * Indicates that a modification conflict occurred while multiple threads or processes
+ * were attempting to modify the same resource.
+ */
 public final class ConcurrentModificationException extends RuntimeException {
 
     private static final long serialVersionUID = -6952773835185629552L;
 
+    /**
+     * Constructs a new exception.
+     */
     public ConcurrentModificationException() {
         super();
     }
 
+    /**
+     * Constructs a new exception with the specified detail message and cause.
+     *
+     * @param message the detail message
+     * @param cause   the cause of the exception
+     */
     public ConcurrentModificationException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Constructs a new exception with the specified detail message.
+     *
+     * @param message the detail message
+     */
     public ConcurrentModificationException(String message) {
         super(message);
     }
 
+    /**
+     * Constructs a new exception with the specified cause.
+     *
+     * @param cause the cause of the exception
+     */
     public ConcurrentModificationException(Throwable cause) {
         super(cause);
     }

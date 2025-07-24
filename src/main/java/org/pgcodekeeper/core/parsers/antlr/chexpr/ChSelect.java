@@ -15,40 +15,68 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.chexpr;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.From_itemContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.From_primaryContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Grouping_element_listContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Select_primaryContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Select_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Select_stmt_no_parensContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.*;
 import org.pgcodekeeper.core.parsers.antlr.rulectx.ChSelectOps;
 import org.pgcodekeeper.core.parsers.antlr.rulectx.ChSelectStmt;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Handles parsing and analysis of ClickHouse SELECT statements.
+ * Manages query structure including FROM, WHERE, GROUP BY clauses and more.
+ */
 public final class ChSelect extends ChAbstractExprWithNmspc<Select_stmtContext> {
 
     private final ChValueExpr vex = new ChValueExpr(this);
 
-    protected ChSelect(ChAbstractExpr parent) {
+    /**
+     * Creates a new SELECT analyzer with parent context.
+     *
+     * @param parent the parent expression analyzer
+     */
+    ChSelect(ChAbstractExpr parent) {
         super(parent, true);
     }
 
+    /**
+     * Creates a new SELECT analyzer with schema and metadata.
+     *
+     * @param schema the database schema name
+     * @param meta   the metadata container
+     */
     public ChSelect(String schema, MetaContainer meta) {
         super(schema, meta);
     }
 
+    /**
+     * Analyzes a SELECT statement context.
+     *
+     * @param ruleCtx the ANTLR parse tree context
+     * @return empty list (analysis results are stored internally)
+     */
     @Override
     public List<String> analyze(Select_stmtContext ruleCtx) {
         return analyze(new ChSelectStmt(ruleCtx));
     }
 
+    /**
+     * Analyzes a SELECT statement without parentheses context.
+     *
+     * @param ruleCtx the ANTLR parse tree context
+     * @return empty list (analysis results are stored internally)
+     */
     public List<String> analyze(Select_stmt_no_parensContext ruleCtx) {
         return analyze(new ChSelectStmt(ruleCtx));
     }
 
+    /**
+     * Analyzes a pre-parsed SELECT statement structure.
+     *
+     * @param select the pre-parsed SELECT statement wrapper
+     * @return empty list (analysis results are stored internally)
+     */
     public List<String> analyze(ChSelectStmt select) {
         return selectOps(select.selectOps());
     }

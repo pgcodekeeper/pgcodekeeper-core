@@ -15,39 +15,43 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.chexpr;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Alias_exprContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Arg_exprContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.ExprContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Expr_listContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Expr_primaryContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Function_callContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.LiteralContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Order_by_clauseContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Qualified_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Select_modeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Window_exprContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.*;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.IRelation;
 import org.pgcodekeeper.core.schema.PgObjLocation.LocationType;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Handles parsing and analysis of ClickHouse value expressions in SQL queries.
+ * Processes various expression types including function calls, column references and subqueries.
+ */
 public final class ChValueExpr extends ChAbstractExpr {
 
-    protected ChValueExpr(ChAbstractExpr parent) {
+    ChValueExpr(ChAbstractExpr parent) {
         super(parent);
     }
 
+    /**
+     * Creates a value expression analyzer with metadata container.
+     *
+     * @param meta the metadata container for database objects
+     */
     public ChValueExpr(MetaContainer meta) {
         super(meta);
     }
 
+    /**
+     * Analyzes an expression context.
+     *
+     * @param expr the ANTLR expression context to analyze
+     */
     public void analyze(ExprContext expr) {
         var aliasExpr = expr.alias_expr();
         analyzeExprs(expr.expr());
@@ -87,20 +91,21 @@ public final class ChValueExpr extends ChAbstractExpr {
         }
     }
 
-    private GenericColumn primary(Expr_primaryContext exprPrimary, Alias_exprContext aliasExpr) {
+    private void primary(Expr_primaryContext exprPrimary, Alias_exprContext aliasExpr) {
         if (exprPrimary == null) {
-            return null;
+            return;
         }
 
         var fc = exprPrimary.function_call();
         if (fc != null) {
-            return functionCall(fc);
+            functionCall(fc);
+            return;
         }
 
         var selectCtx = exprPrimary.select_stmt_no_parens();
         if (selectCtx != null) {
             new ChSelect(this).analyze(selectCtx);
-            return null;
+            return;
         }
 
         var stmtQualNameCtx = exprPrimary.qualified_name();
@@ -108,20 +113,21 @@ public final class ChValueExpr extends ChAbstractExpr {
             if (aliasExpr != null) {
                 addReferenceInRootParent(stmtQualNameCtx, aliasExpr.alias_clause(), false);
             }
-            return qualifiedName(stmtQualNameCtx);
+            qualifiedName(stmtQualNameCtx);
+            return;
         }
 
         analyzeExprs(exprPrimary.expr_list());
         addDynamicColumnDepcies(exprPrimary.literal(), true);
-        return null;
     }
 
-    private GenericColumn qualifiedName(Qualified_nameContext qualNameCtx) {
+    private void qualifiedName(Qualified_nameContext qualNameCtx) {
         var ids = qualNameCtx.identifier();
         if (ids.size() == 1) {
             var relCol = findColumn(qualNameCtx.getText());
             if (relCol != null) {
-                return addColumnDepcy(qualNameCtx, relCol);
+                addColumnDepcy(qualNameCtx, relCol);
+                return;
             }
         }
 
@@ -132,14 +138,15 @@ public final class ChValueExpr extends ChAbstractExpr {
             // if we don't found reference by alias try to find table in metadata where tableName will be schemaName
             // and columnName will be relationName
             if (findRelation(tableName, columnName) != null) {
-                return addObjectDepcy(qualNameCtx, DbObjType.TABLE);
+                addObjectDepcy(qualNameCtx);
+                return;
             }
-            return null;
+            return;
         }
 
         GenericColumn parent = ref.getValue();
         if (parent == null) {
-            return null;
+            return;
         }
 
         var schemaName = QNameParser.getThirdName(ids);
@@ -157,16 +164,15 @@ public final class ChValueExpr extends ChAbstractExpr {
 
         addDepcy(column, QNameParser.getFirstNameCtx(ids));
         addReference(parent, tableCtx, LocationType.LOCAL_REF);
-        return column;
     }
 
-    protected GenericColumn functionCall(Function_callContext functionCall) {
+    void functionCall(Function_callContext functionCall) {
         if (functionCall == null) {
-            return null;
+            return;
         }
         if (functionCall.COLUMNS() != null) {
             addDynamicColumnDepcies(functionCall.column, true);
-            return null;
+            return;
         }
 
         analyzeExprs(functionCall.expr());
@@ -175,35 +181,34 @@ public final class ChValueExpr extends ChAbstractExpr {
         var windowExpr = functionCall.window_expr();
         if (windowExpr != null) {
             window(windowExpr);
-            return null;
+            return;
         }
 
         var funcName = functionCall.name;
         if (funcName == null) {
-            return null;
+            return;
         }
 
         var argList = functionCall.arg_list();
         if (argList == null) {
-            return null;
+            return;
         }
 
         List<ExprContext> exprs = argList.arg_expr().stream()
                 .map(Arg_exprContext::expr)
-                .filter(e -> e != null)
+                .filter(Objects::nonNull)
                 .toList();
         analyzeExprs(exprs);
         GenericColumn depcy = new GenericColumn(funcName.getText(), DbObjType.FUNCTION);
         addDepcy(depcy, funcName);
-        return depcy;
     }
 
-    protected void window(Window_exprContext windowExpr) {
+    void window(Window_exprContext windowExpr) {
         analyzeExprs(windowExpr.expr_list());
         orderBy(windowExpr.order_by_clause());
     }
 
-    protected void orderBy(Order_by_clauseContext orderBy) {
+    void orderBy(Order_by_clauseContext orderBy) {
         if (orderBy == null) {
             return;
         }
@@ -224,25 +229,24 @@ public final class ChValueExpr extends ChAbstractExpr {
         }
     }
 
-    protected void analyzeExprs(Expr_listContext exprList) {
+    private void analyzeExprs(Expr_listContext exprList) {
         if (exprList != null) {
             analyzeExprs(exprList.expr());
         }
     }
 
-    protected void analyzeExprs(List<ExprContext> exprs) {
+    void analyzeExprs(List<ExprContext> exprs) {
         if (exprs != null) {
             exprs.forEach(this::analyze);
         }
     }
 
-    private GenericColumn addColumnDepcy(Qualified_nameContext qualNameCtx,
-            Pair<IRelation, Pair<String, String>> relCol) {
+    private void addColumnDepcy(Qualified_nameContext qualNameCtx,
+                                Pair<IRelation, Pair<String, String>> relCol) {
         IRelation rel = relCol.getFirst();
         Pair<String, String> col = relCol.getSecond();
         var column = new GenericColumn(rel.getSchemaName(), rel.getName(), col.getFirst(), DbObjType.COLUMN);
         addDepcy(column, qualNameCtx);
-        return column;
     }
 
     private void addDynamicColumnDepcies(LiteralContext lit, boolean include) {
@@ -251,8 +255,8 @@ public final class ChValueExpr extends ChAbstractExpr {
         }
 
         var rawNamePart = lit.getText();
-        var contains = rawNamePart.startsWith("\'");
-        var namePart = rawNamePart.replace("\'","");
+        var contains = rawNamePart.startsWith("'");
+        var namePart = rawNamePart.replace("'", "");
         // TODO add when we will understood how processing in ClickHouse this cases when argument is array
         if (namePart.startsWith("[") && namePart.endsWith("]")) {
             return;
@@ -282,14 +286,14 @@ public final class ChValueExpr extends ChAbstractExpr {
      * @param namePart - condition for filter
      * @param include  - true/false include/exclude
      * @param contains - true/false check that name contains/equals namePart
-     * @return boolean - if true we will be add this column at the depcies, and if false exclude
+     * @return boolean - if true we will be added this column at the depcies, and if false exclude
      */
     private boolean isNeedColumn(String name, String namePart, boolean include, boolean contains) {
         if (contains) {
             var cont = name.contains(namePart);
-            return include ? cont : !cont;
+            return include == cont;
         }
         var eq = name.equals(namePart);
-        return include ? eq : !eq;
+        return include == eq;
     }
 }

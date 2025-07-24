@@ -15,24 +15,28 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Table_subqueryContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Update_setContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Update_stmt_for_psqlContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.VexContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.With_clauseContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.rulectx.Vex;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Parser for UPDATE statements with namespace support.
+ */
 public class Update extends AbstractExprWithNmspc<Update_stmt_for_psqlContext> {
 
     protected Update(AbstractExpr parent) {
         super(parent);
     }
-
+    
+    /**
+     * Creates an Update parser with meta container.
+     *
+     * @param meta the meta container with schema information
+     */
     public Update(MetaContainer meta) {
         super(meta);
     }

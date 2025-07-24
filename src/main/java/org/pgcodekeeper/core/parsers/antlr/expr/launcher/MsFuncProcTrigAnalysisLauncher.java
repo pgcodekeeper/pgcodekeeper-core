@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr.launcher;
 
-import java.util.EnumSet;
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.ExpressionContext;
@@ -31,28 +28,67 @@ import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.schema.ms.AbstractMsFunction;
 import org.pgcodekeeper.core.schema.ms.MsTrigger;
 
+import java.util.EnumSet;
+import java.util.Set;
+
+/**
+ * Launcher for analyzing Microsoft SQL functions, procedures and triggers.
+ * Handles SQL clauses, SELECT statements and expressions with dependency control.
+ */
 public final class MsFuncProcTrigAnalysisLauncher extends AbstractAnalysisLauncher {
 
     private final boolean isEnableFunctionBodiesDependencies;
 
+    /**
+     * Creates analyzer for SQL clauses in functions/procedures.
+     *
+     * @param stmt                               the function/procedure statement
+     * @param ctx                                the SQL clauses context
+     * @param location                           source location identifier
+     * @param isEnableFunctionBodiesDependencies controls function body dependency collection
+     */
     public MsFuncProcTrigAnalysisLauncher(AbstractMsFunction stmt,
             Sql_clausesContext ctx, String location, boolean isEnableFunctionBodiesDependencies) {
         super(stmt, ctx, location);
         this.isEnableFunctionBodiesDependencies = isEnableFunctionBodiesDependencies;
     }
 
+    /**
+     * Creates analyzer for SELECT statements in functions/procedures.
+     *
+     * @param stmt                               the function/procedure statement
+     * @param ctx                                the SELECT statement context
+     * @param location                           source location identifier
+     * @param isEnableFunctionBodiesDependencies controls function body dependency collection
+     */
     public MsFuncProcTrigAnalysisLauncher(AbstractMsFunction stmt,
             Select_statementContext ctx, String location, boolean isEnableFunctionBodiesDependencies) {
         super(stmt, ctx, location);
         this.isEnableFunctionBodiesDependencies = isEnableFunctionBodiesDependencies;
     }
 
+    /**
+     * Creates analyzer for expressions in functions/procedures.
+     *
+     * @param stmt                               the function/procedure statement
+     * @param ctx                                the expression context
+     * @param location                           source location identifier
+     * @param isEnableFunctionBodiesDependencies controls function body dependency collection
+     */
     public MsFuncProcTrigAnalysisLauncher(AbstractMsFunction stmt,
             ExpressionContext ctx, String location, boolean isEnableFunctionBodiesDependencies) {
         super(stmt, ctx, location);
         this.isEnableFunctionBodiesDependencies = isEnableFunctionBodiesDependencies;
     }
 
+    /**
+     * Creates analyzer for trigger SQL clauses.
+     *
+     * @param stmt                               the trigger statement
+     * @param ctx                                the SQL clauses context
+     * @param location                           source location identifier
+     * @param isEnableFunctionBodiesDependencies controls function body dependency collection
+     */
     public MsFuncProcTrigAnalysisLauncher(MsTrigger stmt,
             Sql_clausesContext ctx, String location, boolean isEnableFunctionBodiesDependencies) {
         super(stmt, ctx, location);

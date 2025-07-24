@@ -15,14 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.VexContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Vex_bContext;
 import org.pgcodekeeper.core.parsers.antlr.rulectx.Vex;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * For use with value expressions that have predefined namespace.
@@ -31,7 +31,12 @@ import org.pgcodekeeper.core.utils.ModPair;
 public class ValueExprWithNmspc extends AbstractExprWithNmspc<VexContext> {
 
     private final ValueExpr vex;
-
+    
+    /**
+     * Creates a ValueExprWithNmspc parser with meta container.
+     *
+     * @param meta the meta container with schema information
+     */
     public ValueExprWithNmspc(MetaContainer meta) {
         super(meta);
         vex = new ValueExpr(this);
@@ -42,11 +47,23 @@ public class ValueExprWithNmspc extends AbstractExprWithNmspc<VexContext> {
         return analyze(new Vex(vex));
     }
 
+    /**
+     * Analyzes a value expression context.
+     *
+     * @param vex the value expression context to analyze
+     * @return list containing a single pair with expression name and type
+     */
     public List<ModPair<String, String>> analyze(Vex_bContext vex) {
         return analyze(new Vex(vex));
     }
 
+    /**
+     * Analyzes a value expression rule context.
+     *
+     * @param vex the value expression rule context to analyze
+     * @return list containing a single pair with expression name and type
+     */
     public List<ModPair<String, String>> analyze(Vex vex) {
-        return Arrays.asList(this.vex.analyze(vex));
+        return Collections.singletonList(this.vex.analyze(vex));
     }
 }

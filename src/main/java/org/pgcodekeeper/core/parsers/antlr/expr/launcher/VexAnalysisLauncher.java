@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr.launcher;
 
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.parsers.antlr.expr.ValueExpr;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.VexContext;
@@ -26,8 +24,21 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 
+import java.util.Set;
+
+/**
+ * Launcher for analyzing value expressions (VEX) in SQL definitions.
+ * Handles both column expressions and standalone value expressions.
+ */
 public class VexAnalysisLauncher extends AbstractAnalysisLauncher {
 
+    /**
+     * Creates a value expression analyzer.
+     *
+     * @param stmt     the statement containing the expression
+     * @param ctx      the value expression context to analyze
+     * @param location the source location identifier
+     */
     public VexAnalysisLauncher(PgStatement stmt, VexContext ctx, String location) {
         super(stmt, ctx, location);
     }

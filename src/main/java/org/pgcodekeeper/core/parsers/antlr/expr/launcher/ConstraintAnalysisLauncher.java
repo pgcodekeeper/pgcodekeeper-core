@@ -15,16 +15,27 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.expr.launcher;
 
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.VexContext;
 import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.schema.pg.PgConstraint;
 
+import java.util.Set;
+
+/**
+ * Launcher for analyzing table constraint expressions.
+ * Specialized for processing constraint check conditions and extracting dependencies.
+ */
 public class ConstraintAnalysisLauncher extends AbstractAnalysisLauncher {
 
+    /**
+     * Creates a constraint analyzer.
+     *
+     * @param stmt     the constraint statement to analyze
+     * @param ctx      the constraint expression context
+     * @param location the source location identifier
+     */
     public ConstraintAnalysisLauncher(PgConstraint stmt, VexContext ctx, String location) {
         super(stmt, ctx, location);
     }
