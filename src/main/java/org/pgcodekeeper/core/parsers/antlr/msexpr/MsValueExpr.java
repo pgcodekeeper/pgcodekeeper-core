@@ -15,23 +15,39 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.msexpr;
 
-import java.util.Map.Entry;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 
+import java.util.Map.Entry;
+
+/**
+ * Microsoft SQL value expression analyzer.
+ * Processes various types of expressions including functions, literals, column references,
+ * subqueries and other value expressions to extract database dependencies.
+ */
 public class MsValueExpr extends MsAbstractExpr {
 
     protected MsValueExpr(MsAbstractExpr parent) {
         super(parent);
     }
 
+    /**
+     * Creates a new Microsoft SQL value expression analyzer with the specified schema and metadata.
+     *
+     * @param schema the current schema context
+     * @param meta   the metadata container for database schema information
+     */
     public MsValueExpr(String schema, MetaContainer meta) {
         super(schema, meta);
     }
 
+    /**
+     * Analyzes a Microsoft SQL expression and extracts database dependencies.
+     *
+     * @param exp the expression context to analyze
+     */
     public void analyze(ExpressionContext exp) {
         for (ExpressionContext v : exp.expression()) {
             analyze(v);
@@ -86,7 +102,7 @@ public class MsValueExpr extends MsAbstractExpr {
             }
             overClause(functionCall.over_clause());
             return function(sfn);
-        } else if ((seq = functionCall.sequence_name)!= null) {
+        } else if ((seq = functionCall.sequence_name) != null) {
             addObjectDepcy(seq, DbObjType.SEQUENCE);
             overClause(functionCall.over_clause());
         } else if ((fc = functionCall.function_call()) != null) {
@@ -113,7 +129,7 @@ public class MsValueExpr extends MsAbstractExpr {
     }
 
     public void search(Search_conditionContext search) {
-        for (Search_condition_andContext sca: search.search_condition_and()) {
+        for (Search_condition_andContext sca : search.search_condition_and()) {
             for (Search_condition_notContext scn : sca.search_condition_not()) {
                 predicate(scn.predicate());
             }

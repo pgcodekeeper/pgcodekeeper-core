@@ -15,11 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.msexpr;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map.Entry;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.rulectx.MsSelectOps;
@@ -27,15 +22,25 @@ import org.pgcodekeeper.core.parsers.antlr.rulectx.MsSelectStmt;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map.Entry;
+
+/**
+ * Microsoft SQL SELECT statement analyzer.
+ * Processes SELECT statements including CTEs, subqueries, JOINs, and various SQL clauses
+ * to extract database object dependencies and column information.
+ */
 public class MsSelect extends MsAbstractExprWithNmspc<Select_statementContext> {
 
     /**
      * Flags for proper FROM (subquery) analysis.<br>
-     * {@link #findReferenceInNmspc(String, String, String)} assumes that when {@link #inFrom} is set the FROM clause
+     * {@link #findReferenceInNmspc(String, String)} assumes that when inFrom is set the FROM clause
      * of that query is analyzed and skips that namespace entirely unless {@link #lateralAllowed} is also set
      * (when analyzing a lateral FROM subquery or a function call).<br>
      * This assumes that {@link #from(From_itemContext)} is the first method to fill the namespace.<br>
-     * Note: caller of {@link #from(From_itemContext)} is responsible for setting {@link #inFrom} flag.
+     * Note: caller of {@link #from(From_itemContext)} is responsible for setting inFrom flag.
      */
     private boolean inFrom;
     /**
@@ -47,6 +52,12 @@ public class MsSelect extends MsAbstractExprWithNmspc<Select_statementContext> {
         super(parent);
     }
 
+    /**
+     * Creates a new Microsoft SQL SELECT analyzer with the specified schema and metadata.
+     *
+     * @param schema the current schema context
+     * @param meta   the metadata container for database schema information
+     */
     public MsSelect(String schema, MetaContainer meta) {
         super(schema, meta);
     }
@@ -61,10 +72,22 @@ public class MsSelect extends MsAbstractExprWithNmspc<Select_statementContext> {
         return analyze(new MsSelectStmt(ruleCtx));
     }
 
+    /**
+     * Analyzes a SELECT statement without parentheses.
+     *
+     * @param ruleCtx the SELECT statement context to analyze
+     * @return list of column names found during analysis
+     */
     public List<String> analyze(Select_stmt_no_parensContext ruleCtx) {
         return analyze(new MsSelectStmt(ruleCtx));
     }
 
+    /**
+     * Analyzes a Microsoft SQL SELECT statement wrapper.
+     *
+     * @param select the SELECT statement wrapper to analyze
+     * @return list of column names found during analysis
+     */
     public List<String> analyze(MsSelectStmt select) {
         With_expressionContext with = select.withExpression();
         if (with != null) {
@@ -125,7 +148,8 @@ public class MsSelect extends MsAbstractExprWithNmspc<Select_statementContext> {
         for (Select_list_elemContext target : query.select_list().select_list_elem()) {
             ExpressionContext exp = target.expression();
             if (exp != null) {
-                /*String column =*/ vex.analyze(exp);
+                /*String column =*/
+                vex.analyze(exp);
                 /*ret.add(target.column_alias() == null ? column : target.column_alias().getText());*/
             } else {
                 //TODO star, difficult

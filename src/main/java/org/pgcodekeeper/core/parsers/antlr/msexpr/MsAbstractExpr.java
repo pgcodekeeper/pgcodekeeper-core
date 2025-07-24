@@ -14,11 +14,6 @@
  * limitations under the License.
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.msexpr;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Locale;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.Utils;
@@ -36,6 +31,17 @@ import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.Map.Entry;
+import java.util.Set;
+
+/**
+ * Abstract base class for Microsoft SQL expression analysis.
+ * Provides common functionality for parsing and analyzing SQL expressions,
+ * managing dependencies, and handling database object references.
+ */
 public abstract class MsAbstractExpr {
 
     private static final Logger LOG = LoggerFactory.getLogger(MsAbstractExpr.class);
@@ -45,6 +51,11 @@ public abstract class MsAbstractExpr {
     private final MsAbstractExpr parent;
     private final Set<PgObjLocation> depcies;
 
+    /**
+     * Returns an unmodifiable set of dependencies found during expression analysis.
+     *
+     * @return unmodifiable set of database object dependencies
+     */
     public Set<PgObjLocation> getDepcies() {
         return Collections.unmodifiableSet(depcies);
     }
@@ -74,12 +85,9 @@ public abstract class MsAbstractExpr {
 
     /**
      * @param schema optional schema qualification of name, may be null
-     * @param name alias of the referenced object, lower-case for case-insensitive search
-     *             call {@link #findReference(String, String)} to lower-case automatically
+     * @param name   alias of the referenced object, lower-case for case-insensitive search
+     *               call {@link #findReference(String, String)} to lower-case automatically
      * @return a pair of (Alias, Dealiased name) where Alias is the given name.
-     *          Dealiased name can be null if the name is internal to the query
-     *          and is not a reference to external table.<br>
-     *          null if the name is not found
      */
     protected Entry<String, GenericColumn> findReferenceRecursive(String schema, String name) {
         return parent == null ? null : parent.findReferenceRecursive(schema, name);
@@ -104,7 +112,7 @@ public abstract class MsAbstractExpr {
         String schemaName;
         if (schemaCtx == null) {
             schemaName = schema;
-        }  else {
+        } else {
             schemaName = schemaCtx.getText();
             addDepcy(new GenericColumn(schemaName, DbObjType.SCHEMA), schemaCtx);
         }

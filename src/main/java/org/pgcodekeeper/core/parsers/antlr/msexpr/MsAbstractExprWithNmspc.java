@@ -15,17 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.msexpr;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Stream;
-
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -38,10 +27,18 @@ import org.pgcodekeeper.core.schema.IRelation;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
+
 /**
- * @author levsha_aa
+ * Abstract base class for analyzing Microsoft SQL expressions with namespace support.
+ * Provides functionality for managing table aliases, common table expressions (CTEs),
+ * and resolving object references within a specific namespace context.
  *
  * @param <T> analyzed expression, should be extension of ParserRuleContext or a rulectx wrapper class
+ * @author levsha_aa
  */
 public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
 
@@ -144,7 +141,12 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
     }
 
     /**
+     * Adds a reference to the namespace with the specified alias.
      * Clients may use this to setup pseudo-variable names before expression analysis.
+     *
+     * @param alias  the alias name for the reference
+     * @param object the database object being referenced, may be null for internal query names
+     * @return true if the reference was added successfully, false if alias already exists
      */
     public boolean addReference(String alias, GenericColumn object) {
         String aliasCi = alias.toLowerCase(Locale.ROOT);
@@ -157,12 +159,17 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
         return !exists;
     }
 
-    public boolean addRawTableReference(GenericColumn qualifiedTable) {
+    /**
+     * Adds an unaliased table reference to the namespace.
+     * Used for tables that don't have explicit aliases in the FROM clause.
+     *
+     * @param qualifiedTable the fully qualified table reference to add
+     */
+    public void addRawTableReference(GenericColumn qualifiedTable) {
         boolean exists = !unaliasedNamespace.add(qualifiedTable);
         if (exists) {
             log("Duplicate unaliased table: {} {}", qualifiedTable.schema, qualifiedTable.table);
         }
-        return !exists;
     }
 
     protected GenericColumn addNameReference(Qualified_nameContext name, As_table_aliasContext alias) {
@@ -201,5 +208,13 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
         }
     }
 
+    /**
+     * Analyzes the given rule context and returns a list of column names.
+     * Implementations should process the specific Microsoft SQL expression type
+     * and extract relevant database dependencies and column information.
+     *
+     * @param ruleCtx the parser rule context to analyze
+     * @return list of column names found during analysis
+     */
     public abstract List<String> analyze(T ruleCtx);
 }

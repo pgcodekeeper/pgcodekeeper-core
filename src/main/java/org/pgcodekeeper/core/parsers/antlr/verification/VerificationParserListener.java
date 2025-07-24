@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.verification;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.SqlContextProcessor;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_createContext;
@@ -24,12 +22,26 @@ import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_statementC
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.SqlContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.StatementContext;
 
+import java.util.List;
+
+/**
+ * Parser listener for SQL verification processes.
+ * Processes SQL contexts to identify and verify various statement types
+ * including functions and GRANT statements according to configured rules.
+ */
 public class VerificationParserListener implements SqlContextProcessor {
 
     private final VerificationProperties rules;
     private final String fileName;
     private final List<Object> errors;
 
+    /**
+     * Creates a new verification parser listener.
+     *
+     * @param rules    verification rules and properties to apply
+     * @param fileName the name of the file being verified
+     * @param errors   list to collect verification errors
+     */
     public VerificationParserListener(VerificationProperties rules, String fileName, List<Object> errors) {
         this.rules = rules;
         this.fileName = fileName;

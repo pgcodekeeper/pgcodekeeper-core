@@ -15,6 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.verification;
 
+/**
+ * Interface for code verification implementations.
+ * Provides a contract for various code quality and style verification checks.
+ */
 public interface IVerification {
+
+    /**
+     * Performs the verification check.
+     * Implementations should analyze code structures and report any violations
+     * or issues found during the verification process.
+     */
     void verify();
 }

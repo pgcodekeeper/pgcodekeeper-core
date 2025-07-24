@@ -15,21 +15,18 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.msexpr;
 
+import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
+import org.pgcodekeeper.core.schema.GenericColumn;
+
 import java.util.Collections;
 import java.util.List;
 
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Execute_moduleContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Execute_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.ExpressionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.IdContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Insert_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Name_list_in_bracketsContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Qualified_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Select_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.With_expressionContext;
-import org.pgcodekeeper.core.schema.GenericColumn;
-
+/**
+ * Microsoft SQL INSERT statement analyzer.
+ * Processes INSERT statements including CTEs, VALUES clauses, and SELECT subqueries
+ * to extract database object dependencies.
+ */
 public class MsInsert extends MsAbstractExprWithNmspc<Insert_statementContext> {
 
     protected MsInsert(MsAbstractExpr parent) {

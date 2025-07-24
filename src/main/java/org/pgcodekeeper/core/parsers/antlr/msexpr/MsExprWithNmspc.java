@@ -15,16 +15,27 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.msexpr;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.ExpressionContext;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Microsoft SQL expression analyzer with namespace support.
+ * Wraps expression analysis functionality to provide namespace capabilities
+ * for analyzing standalone expressions.
+ */
 public class MsExprWithNmspc extends MsAbstractExprWithNmspc<ExpressionContext> {
-    
+
     private final MsValueExpr expr;
 
+    /**
+     * Creates a new Microsoft SQL expression analyzer with namespace support.
+     *
+     * @param schema the current schema context
+     * @param meta   the metadata container for database schema information
+     */
     public MsExprWithNmspc(String schema, MetaContainer meta) {
         super(schema, meta);
         expr = new MsValueExpr(this);

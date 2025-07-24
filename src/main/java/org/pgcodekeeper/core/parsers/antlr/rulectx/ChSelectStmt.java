@@ -18,24 +18,44 @@ package org.pgcodekeeper.core.parsers.antlr.rulectx;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Select_stmtContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Select_stmt_no_parensContext;
 
+/**
+ * Merging wrapper for ClickHouse SELECT statements.
+ * Provides a unified interface for working with both parenthesized and non-parenthesized
+ * SELECT statements in ClickHouse syntax.
+ */
 public class ChSelectStmt {
 
     private final Select_stmtContext select;
     private final Select_stmt_no_parensContext selectNp;
     private final boolean isNp;
 
+    /**
+     * Creates a wrapper for a ClickHouse SELECT statement.
+     *
+     * @param select the SELECT statement context
+     */
     public ChSelectStmt(Select_stmtContext select) {
         this.select = select;
         this.selectNp = null;
         this.isNp = false;
     }
 
+    /**
+     * Creates a wrapper for a ClickHouse SELECT statement without parentheses.
+     *
+     * @param select the SELECT statement context without parentheses
+     */
     public ChSelectStmt(Select_stmt_no_parensContext select) {
         this.selectNp = select;
         this.select = null;
         this.isNp = true;
     }
 
+    /**
+     * Returns the ClickHouse SELECT operations wrapper.
+     *
+     * @return wrapper for the SELECT operations part of the statement
+     */
     public ChSelectOps selectOps() {
         // no null check since select_ops is mandatory in select_stmt
         return isNp ? new ChSelectOps(selectNp.select_ops_no_parens())

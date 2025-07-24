@@ -15,24 +15,41 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.msexpr;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Microsoft SQL clauses analyzer.
+ * Processes various SQL statement clauses including DML, DDL, and control flow statements
+ * to extract database object dependencies.
+ */
 public class MsSqlClauses extends MsAbstractExpr {
 
     protected MsSqlClauses(MsAbstractExpr parent) {
         super(parent);
     }
 
+    /**
+     * Creates a new Microsoft SQL clauses analyzer with the specified schema and metadata.
+     *
+     * @param schema the current schema context
+     * @param meta   the metadata container for database schema information
+     */
     public MsSqlClauses(String schema, MetaContainer meta) {
         super(schema, meta);
     }
 
+    /**
+     * Analyzes SQL clauses and extracts database object dependencies.
+     *
+     * @param sql the SQL clauses context to analyze
+     * @return empty list as this analyzer focuses on dependency extraction rather than column names
+     */
     public List<String> analyze(Sql_clausesContext sql) {
         for (St_clauseContext st : sql.st_clause()) {
             clause(st);
@@ -211,9 +228,9 @@ public class MsSqlClauses extends MsAbstractExpr {
             declare(dec);
         } else if ((cursor = another.cursor_statement()) != null) {
             cursor(cursor);
-        } else if ((receive = another.receive_statement())!= null) {
+        } else if ((receive = another.receive_statement()) != null) {
             receive(receive);
-        } else if ((exec = another.execute_statement())!= null) {
+        } else if ((exec = another.execute_statement()) != null) {
             Execute_moduleContext em = exec.execute_module();
             Qualified_nameContext qname;
             if (em != null && (qname = em.qualified_name()) != null) {

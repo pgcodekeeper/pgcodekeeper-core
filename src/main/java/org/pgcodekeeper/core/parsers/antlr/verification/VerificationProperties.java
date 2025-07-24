@@ -20,13 +20,14 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Properties;
+import java.util.*;
 import java.util.function.Predicate;
 
+/**
+ * Configuration properties for code verification rules.
+ * Manages various verification settings including complexity limits,
+ * formatting rules, and style preferences for database code analysis.
+ */
 public class VerificationProperties {
 
     // Rules for code verification
@@ -65,6 +66,11 @@ public class VerificationProperties {
     private final List<String> allowedFunctionStart;
     private final List<String> deniedUsers;
 
+    /**
+     * Creates a new verification properties instance from a Properties object.
+     *
+     * @param properties the properties object containing verification configuration
+     */
     public VerificationProperties(Properties properties) {
         this.maxFunctionLenght = getIntProperty(properties, MAX_FUNCTION_LENGTH, -1);
         this.methodCount = getIntProperty(properties, METHOD_COUNT, -1);
@@ -109,18 +115,38 @@ public class VerificationProperties {
         return Boolean.parseBoolean(temp);
     }
 
+    /**
+     * Returns the maximum allowed cyclomatic complexity for functions.
+     *
+     * @return maximum cyclomatic complexity limit, or -1 if not set
+     */
     public int getMaxCyclomaticComplexity() {
         return maxCyclomaticComplexity;
     }
 
+    /**
+     * Returns the maximum allowed length for functions.
+     *
+     * @return maximum function length limit, or -1 if not set
+     */
     public int getMaxFunctionLenght() {
         return maxFunctionLenght;
     }
 
+    /**
+     * Returns the maximum allowed number of parameters for functions.
+     *
+     * @return maximum function parameters limit, or -1 if not set
+     */
     public int getMaxFunctionParams() {
         return maxFunctionParams;
     }
 
+    /**
+     * Returns the expected indentation size in spaces.
+     *
+     * @return indentation size in spaces
+     */
     public int getIndentSize() {
         return indentSize;
     }
@@ -171,6 +197,13 @@ public class VerificationProperties {
         return deniedUsers;
     }
 
+    /**
+     * Reads verification properties from a file.
+     *
+     * @param path the path to the properties file
+     * @return a new VerificationProperties instance loaded from the file
+     * @throws IOException if an error occurs reading the file
+     */
     public static VerificationProperties readProperties(Path path) throws IOException {
         Properties rules = new Properties();
         try (Reader reader = Files.newBufferedReader((path), StandardCharsets.UTF_8)) {

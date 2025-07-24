@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.verification;
 
-import java.util.List;
-
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.parsers.antlr.AntlrError;
 import org.pgcodekeeper.core.parsers.antlr.CodeUnitToken;
@@ -25,18 +23,22 @@ import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.IdentifierContext
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Role_name_with_groupContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Rule_commonContext;
 
+import java.util.List;
+
 /**
- * class for checking objects according to general rules
+ * Verification implementation for GRANT/REVOKE statements.
+ * Checks GRANT statements against configured rules to ensure they comply
+ * with security policies, including restrictions on denied users and roles.
  */
 public final class VerificationGrant implements IVerification {
 
     private final Rule_commonContext ruleCtx;
     private final VerificationProperties rules;
     private final String fileName;
-    private List<Object> errors;
+    private final List<Object> errors;
 
-    protected VerificationGrant(Rule_commonContext ruleCtx, VerificationProperties rules, String fileName,
-            List<Object> errors) {
+    VerificationGrant(Rule_commonContext ruleCtx, VerificationProperties rules, String fileName,
+                      List<Object> errors) {
         this.ruleCtx = ruleCtx;
         this.rules = rules;
         this.fileName = fileName;

@@ -15,36 +15,61 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.rulectx;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Select_opsContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Select_ops_no_parensContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Select_primaryContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Select_stmtContext;
 
+import java.util.List;
+
+/**
+ * Merging wrapper for ClickHouse SELECT operations.
+ * Provides a unified interface for working with ClickHouse SELECT operations
+ * that may or may not be parenthesized.
+ */
 public class ChSelectOps {
 
     private final Select_opsContext ops;
     private final Select_ops_no_parensContext opsNp;
     private final boolean isNp;
 
+    /**
+     * Creates a wrapper for parenthesized ClickHouse SELECT operations.
+     *
+     * @param ops the SELECT operations context with parentheses
+     */
     public ChSelectOps(Select_opsContext ops) {
         this.ops = ops;
         this.opsNp = null;
         this.isNp = false;
     }
 
+    /**
+     * Creates a wrapper for non-parenthesized ClickHouse SELECT operations.
+     *
+     * @param ops the SELECT operations context without parentheses
+     */
     public ChSelectOps(Select_ops_no_parensContext ops) {
         this.opsNp = ops;
         this.ops = null;
         this.isNp = true;
     }
 
+    /**
+     * Returns the left parenthesis terminal node if present.
+     *
+     * @return the left parenthesis node or null if not present
+     */
     public TerminalNode leftParen() {
         return isNp ? null : ops.LPAREN();
     }
 
+    /**
+     * Returns the right parenthesis terminal node if present.
+     *
+     * @return the right parenthesis node or null if not present
+     */
     public TerminalNode rightParen() {
         return isNp ? null : ops.RPAREN();
     }

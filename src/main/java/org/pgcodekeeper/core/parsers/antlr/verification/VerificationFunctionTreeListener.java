@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.verification;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -28,6 +26,13 @@ import org.pgcodekeeper.core.parsers.antlr.CodeUnitToken;
 import org.pgcodekeeper.core.parsers.antlr.ErrorTypes;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 
+import java.util.List;
+
+/**
+ * Parse tree listener for function body verification.
+ * Walks through function parse trees to count methods and perform
+ * various code quality checks on function implementations.
+ */
 public class VerificationFunctionTreeListener implements ParseTreeListener {
 
     private final String fileName;
@@ -36,14 +41,27 @@ public class VerificationFunctionTreeListener implements ParseTreeListener {
     private final Token token;
     private int methodCount = 0;
 
+    /**
+     * Creates a new function tree listener for verification.
+     *
+     * @param fileName the name of the file being verified
+     * @param rules    verification rules and properties to apply
+     * @param errors   list to collect verification errors
+     * @param token    the token representing the function definition
+     */
     public VerificationFunctionTreeListener(String fileName, VerificationProperties rules, List<Object> errors,
-            Token token) {
+                                            Token token) {
         this.fileName = fileName;
         this.rules = rules;
         this.errors = errors;
         this.token = token;
     }
 
+    /**
+     * Returns the count of methods found during tree traversal.
+     *
+     * @return the number of methods counted in the function
+     */
     public int getMethodCount() {
         return methodCount;
     }
@@ -136,7 +154,7 @@ public class VerificationFunctionTreeListener implements ParseTreeListener {
                 || ctx instanceof Transaction_statementContext
                 || ctx instanceof Case_expressionContext
                 || ctx instanceof Set_statementContext
-                ) {
+        ) {
             methodCount++;
         } else if (ctx instanceof Control_statementContext controlCtx) {
             if (controlCtx.CALL() != null) {
