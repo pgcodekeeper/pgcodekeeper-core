@@ -15,18 +15,29 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ch;
 
-import java.util.Arrays;
-
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Create_user_stmtContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.HostContext;
 import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.schema.ch.ChUser;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for ClickHouse CREATE USER statements.
+ * Handles user creation including host configurations, storage types, roles, grantees, and default database settings.
+ */
 public final class CreateChUser extends ChParserAbstract {
 
     private final Create_user_stmtContext ctx;
 
+    /**
+     * Creates a parser for ClickHouse CREATE USER statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the CREATE USER statement
+     * @param db       the ClickHouse database schema being processed
+     * @param settings parsing configuration settings
+     */
     public CreateChUser(Create_user_stmtContext ctx, ChDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -55,7 +66,7 @@ public final class CreateChUser extends ChParserAbstract {
                 user.setDefaultDatabase(defDb.getText());
             }
 
-            addSafe(db, user, Arrays.asList(userNameCtx));
+            addSafe(db, user, List.of(userNameCtx));
         }
     }
 

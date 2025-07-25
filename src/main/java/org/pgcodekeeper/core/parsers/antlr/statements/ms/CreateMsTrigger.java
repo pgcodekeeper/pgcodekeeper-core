@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -31,6 +28,14 @@ import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.schema.ms.MsTrigger;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Parser for Microsoft SQL CREATE TRIGGER statements.
+ * Handles trigger creation including ANSI_NULLS and QUOTED_IDENTIFIER settings,
+ * table references, and trigger body analysis.
+ */
 public final class CreateMsTrigger extends BatchContextProcessor {
 
     private final Create_or_alter_triggerContext ctx;
@@ -38,8 +43,18 @@ public final class CreateMsTrigger extends BatchContextProcessor {
     private final boolean ansiNulls;
     private final boolean quotedIdentifier;
 
+    /**
+     * Creates a parser for Microsoft SQL CREATE TRIGGER statements.
+     *
+     * @param ctx              the batch statement context containing the trigger definition
+     * @param db               the Microsoft SQL database schema being processed
+     * @param ansiNulls        the ANSI_NULLS setting for the trigger
+     * @param quotedIdentifier the QUOTED_IDENTIFIER setting for the trigger
+     * @param stream           the token stream for source code processing
+     * @param settings         parsing configuration settings
+     */
     public CreateMsTrigger(Batch_statementContext ctx, MsDatabase db,
-            boolean ansiNulls, boolean quotedIdentifier, CommonTokenStream stream, ISettings settings) {
+                           boolean ansiNulls, boolean quotedIdentifier, CommonTokenStream stream, ISettings settings) {
         super(db, ctx, stream, settings);
         this.ctx = ctx.batch_statement_body().create_or_alter_trigger();
         this.ansiNulls = ansiNulls;
@@ -62,6 +77,14 @@ public final class CreateMsTrigger extends BatchContextProcessor {
         getObject(getSchemaSafe(ids), false);
     }
 
+    /**
+     * Creates and configures the trigger object from the parse context.
+     * Handles schema resolution, source parts, and trigger analysis setup.
+     *
+     * @param schema the schema containing the table
+     * @param isJdbc whether this is being parsed in JDBC mode
+     * @return the created trigger object
+     */
     public MsTrigger getObject(AbstractSchema schema, boolean isJdbc) {
         IdContext schemaCtx = ctx.trigger_name.schema;
         if (schemaCtx == null) {

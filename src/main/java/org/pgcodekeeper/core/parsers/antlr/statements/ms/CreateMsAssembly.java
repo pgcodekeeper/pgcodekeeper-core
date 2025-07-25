@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.regex.Pattern;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Assembly_permissionContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Create_assemblyContext;
@@ -28,6 +24,15 @@ import org.pgcodekeeper.core.schema.ms.MsAssembly;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+import java.util.Locale;
+import java.util.regex.Pattern;
+
+/**
+ * Parser for Microsoft SQL CREATE ASSEMBLY statements.
+ * Handles assembly creation including binary data, owner settings, and permission levels
+ * with proper formatting of binary hexadecimal data.
+ */
 public final class CreateMsAssembly extends MsParserAbstract {
 
     private static final Pattern BINARY_NEWLINE = Pattern.compile("\\\\\\r?\\n");
@@ -35,6 +40,13 @@ public final class CreateMsAssembly extends MsParserAbstract {
 
     private final Create_assemblyContext ctx;
 
+    /**
+     * Creates a parser for Microsoft SQL CREATE ASSEMBLY statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the CREATE ASSEMBLY statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public CreateMsAssembly(Create_assemblyContext ctx, MsDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -58,9 +70,16 @@ public final class CreateMsAssembly extends MsParserAbstract {
             ass.setPermission(getFullCtxText(permission).toUpperCase(Locale.ROOT));
         }
 
-        addSafe(db, ass, Arrays.asList(nameCtx));
+        addSafe(db, ass, List.of(nameCtx));
     }
 
+    /**
+     * Formats binary hexadecimal data for assembly storage.
+     * Removes newlines from input and reformats with proper line breaks for readability.
+     *
+     * @param hex the hexadecimal string to format
+     * @return formatted hexadecimal string with proper line breaks
+     */
     public static String formatBinary(String hex) {
         if (!hex.startsWith("0x")) {
             return hex;
@@ -69,7 +88,7 @@ public final class CreateMsAssembly extends MsParserAbstract {
         if (hex.indexOf('\\') != -1) {
             hex = BINARY_NEWLINE.matcher(hex).replaceAll("");
         }
-        StringBuilder sb = new StringBuilder(hex.length() + hex.length()/(BINARY_LINE_LENGTH/2));
+        StringBuilder sb = new StringBuilder(hex.length() + hex.length() / (BINARY_LINE_LENGTH / 2));
         sb.append("0x");
         int i = 2;
         do {
@@ -78,7 +97,7 @@ public final class CreateMsAssembly extends MsParserAbstract {
                 end = hex.length();
             }
             sb.append(hex, i, end)
-            .append("\\\n");
+                    .append("\\\n");
             i = end;
         } while (i < hex.length());
         // remove trailing newline

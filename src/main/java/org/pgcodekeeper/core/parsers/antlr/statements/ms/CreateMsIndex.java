@@ -15,16 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.ClusteredContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Create_indexContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.IdContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Index_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Qualified_nameContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
 import org.pgcodekeeper.core.schema.AbstractIndex;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.GenericColumn;
@@ -33,10 +26,25 @@ import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.schema.ms.MsIndex;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Parser for Microsoft SQL CREATE INDEX statements.
+ * Handles creation of regular indexes and columnstore indexes with support for
+ * unique, clustered/non-clustered options, and various index configurations.
+ */
 public final class CreateMsIndex extends MsParserAbstract {
 
     private final Create_indexContext ctx;
 
+    /**
+     * Creates a parser for Microsoft SQL CREATE INDEX statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the CREATE INDEX statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public CreateMsIndex(Create_indexContext ctx, MsDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;

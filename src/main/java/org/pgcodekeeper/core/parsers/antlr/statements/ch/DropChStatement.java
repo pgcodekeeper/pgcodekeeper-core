@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ch;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -26,10 +23,25 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Parser for ClickHouse DROP statements.
+ * Handles dropping of databases, views, tables, functions, roles, and users.
+ * Applies appropriate danger warnings for destructive operations like DROP TABLE.
+ */
 public final class DropChStatement extends ChParserAbstract {
 
     private final Drop_stmtContext ctx;
 
+    /**
+     * Creates a parser for ClickHouse DROP statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the DROP statement
+     * @param db       the ClickHouse database schema being processed
+     * @param settings parsing configuration settings
+     */
     public DropChStatement(Drop_stmtContext ctx, ChDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -39,7 +51,7 @@ public final class DropChStatement extends ChParserAbstract {
     public void parseObject() {
         var element = ctx.drop_element();
         if (element.DATABASE() != null) {
-            addObjReference(Arrays.asList(ctx.drop_element().name_with_cluster().identifier()),
+            addObjReference(Collections.singletonList(ctx.drop_element().name_with_cluster().identifier()),
                     DbObjType.SCHEMA, ACTION_DROP);
         } else if (element.VIEW() != null) {
             addObjReference(getIdentifiers(element.qualified_name()), DbObjType.VIEW, ACTION_DROP);
@@ -47,15 +59,15 @@ public final class DropChStatement extends ChParserAbstract {
             PgObjLocation loc = addObjReference(getIdentifiers(element.qualified_name()), DbObjType.TABLE, ACTION_DROP);
             loc.setWarning(DangerStatement.DROP_TABLE);
         } else if (element.FUNCTION() != null) {
-            addObjReference(Arrays.asList(ctx.drop_element().name_with_cluster().identifier()),
+            addObjReference(Collections.singletonList(ctx.drop_element().name_with_cluster().identifier()),
                     DbObjType.FUNCTION, ACTION_DROP);
         } else if (element.ROLE() != null) {
             for (var elementCtx : element.identifier_list().identifier()) {
-                addObjReference(Arrays.asList(elementCtx), DbObjType.ROLE, ACTION_DROP);
+                addObjReference(Collections.singletonList(elementCtx), DbObjType.ROLE, ACTION_DROP);
             }
         } else if (element.USER() != null) {
             for (var elementCtx : element.identifier_list().identifier()) {
-                addObjReference(Arrays.asList(elementCtx), DbObjType.USER, ACTION_DROP);
+                addObjReference(Collections.singletonList(elementCtx), DbObjType.USER, ACTION_DROP);
             }
         }
     }
@@ -67,7 +79,7 @@ public final class DropChStatement extends ChParserAbstract {
         List<ParserRuleContext> ids = null;
         if (element.DATABASE() != null) {
             type = DbObjType.SCHEMA;
-            ids = Arrays.asList(element.name_with_cluster().identifier());
+            ids = Collections.singletonList(element.name_with_cluster().identifier());
         } else if (element.VIEW() != null) {
             type = DbObjType.VIEW;
             ids = getIdentifiers(element.qualified_name());
@@ -76,14 +88,14 @@ public final class DropChStatement extends ChParserAbstract {
             ids = getIdentifiers(element.qualified_name());
         } else if (element.FUNCTION() != null) {
             type = DbObjType.FUNCTION;
-            ids = Arrays.asList(element.name_with_cluster().identifier());
+            ids = Collections.singletonList(element.name_with_cluster().identifier());
         } else if (element.ROLE() != null) {
             return "DROP ROLE";
         } else if (element.USER() != null) {
             return "DROP USER";
         }
 
-        return type != null && ids != null ? getStrForStmtAction(ACTION_DROP, type, ids) : null;
+        return type != null ? getStrForStmtAction(ACTION_DROP, type, ids) : null;
     }
 
 }

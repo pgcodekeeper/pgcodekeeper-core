@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ch;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
@@ -28,10 +26,24 @@ import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.schema.ch.ChDictionary;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for ClickHouse CREATE DICTIONARY statements.
+ * Handles dictionary creation including attributes, primary keys, source configurations,
+ * and various dictionary options like LIFETIME, LAYOUT, RANGE, and SETTINGS.
+ */
 public final class CreateChDictionary extends ChParserAbstract {
 
     private final Create_dictinary_stmtContext ctx;
 
+    /**
+     * Creates a parser for ClickHouse CREATE DICTIONARY statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the CREATE DICTIONARY statement
+     * @param db       the ClickHouse database schema being processed
+     * @param settings parsing configuration settings
+     */
     public CreateChDictionary(Create_dictinary_stmtContext ctx, ChDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -46,6 +58,12 @@ public final class CreateChDictionary extends ChParserAbstract {
         addSafe(getSchemaSafe(ids), dictionary, ids);
     }
 
+    /**
+     * Parses dictionary details including attributes, primary key, options, and comments.
+     * Processes dictionary attributes with their types, default values, and expressions.
+     *
+     * @param dictionary the dictionary object to populate with parsed information
+     */
     public void parseObject(ChDictionary dictionary) {
         for (var attrCtx : ctx.dictionary_attr_def()) {
             var col = new ChColumn(attrCtx.identifier().getText());
@@ -115,9 +133,9 @@ public final class CreateChDictionary extends ChParserAbstract {
 
             if ("clickhouse".equalsIgnoreCase(sourceType)) {
                 if ("table".equalsIgnoreCase(key)) {
-                    sourceTableName = value.replace("\'", "");
+                    sourceTableName = value.replace("'", "");
                 } else if ("db".equalsIgnoreCase(key)) {
-                    sourceDbName = value.replace("\'", "");
+                    sourceDbName = value.replace("'", "");
                 }
             }
         }

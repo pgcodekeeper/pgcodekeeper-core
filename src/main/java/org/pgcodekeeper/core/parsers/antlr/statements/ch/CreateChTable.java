@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ch;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
@@ -28,10 +26,24 @@ import org.pgcodekeeper.core.schema.ch.ChTable;
 import org.pgcodekeeper.core.schema.ch.ChTableLog;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for ClickHouse CREATE TABLE statements.
+ * Handles table creation including columns, engines, constraints, indexes, and projections.
+ * Automatically selects appropriate table type (ChTable or ChTableLog) based on engine type.
+ */
 public final class CreateChTable extends ChParserAbstract {
 
-    private Create_table_stmtContext ctx;
+    private final Create_table_stmtContext ctx;
 
+    /**
+     * Creates a parser for ClickHouse CREATE TABLE statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the CREATE TABLE statement
+     * @param db       the ClickHouse database schema being processed
+     * @param settings parsing configuration settings
+     */
     public CreateChTable(Create_table_stmtContext ctx, ChDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -56,6 +68,12 @@ public final class CreateChTable extends ChParserAbstract {
         addSafe(getSchemaSafe(ids), table, ids);
     }
 
+    /**
+     * Parses table details including engine, elements, and comments.
+     * Processes all table elements such as columns, constraints, indexes, and projections.
+     *
+     * @param table the table object to populate with parsed information
+     */
     public void parseObject(ChTable table) {
         table.setEngine(getEnginePart(ctx.table_body_expr().engine_clause()));
         for (Table_element_exprContext elementCtx : ctx.table_body_expr().table_element_expr()) {

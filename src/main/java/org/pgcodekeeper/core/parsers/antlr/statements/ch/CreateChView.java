@@ -15,34 +15,39 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ch;
 
-import java.util.List;
-import java.util.Locale;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.AntlrUtils;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.ChViewAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Create_live_view_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Create_mat_view_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Create_simple_view_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Create_view_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Definer_clauseContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Qualified_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Sql_security_clauseContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Table_column_defContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Table_schema_clauseContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.*;
 import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.schema.ch.ChView;
 import org.pgcodekeeper.core.schema.ch.ChView.ChViewType;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * Parser for ClickHouse CREATE VIEW statements.
+ * Handles creation of simple views, materialized views, and live views with support for
+ * columns, engines, destinations, definers, and SQL security settings.
+ */
 public final class CreateChView extends ChParserAbstract {
 
-    private Create_view_stmtContext ctx;
-    private CommonTokenStream stream;
+    private final Create_view_stmtContext ctx;
+    private final CommonTokenStream stream;
 
+    /**
+     * Creates a parser for ClickHouse CREATE VIEW statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the CREATE VIEW statement
+     * @param db       the ClickHouse database schema being processed
+     * @param stream   the token stream for whitespace normalization
+     * @param settings parsing configuration settings
+     */
     public CreateChView(Create_view_stmtContext ctx, ChDatabase db, CommonTokenStream stream, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -72,6 +77,12 @@ public final class CreateChView extends ChParserAbstract {
         addSafe(getSchemaSafe(ids), view, ids);
     }
 
+    /**
+     * Parses view details including query, comments, and view type-specific configurations.
+     * Handles simple views, materialized views, and live views with their respective options.
+     *
+     * @param view the view object to populate with parsed information
+     */
     public void parseObject(ChView view) {
         var vQuery = ctx.subquery_clause();
         if (vQuery != null) {

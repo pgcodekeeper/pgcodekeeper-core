@@ -22,10 +22,21 @@ import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.schema.ch.ChSchema;
 import org.pgcodekeeper.core.settings.ISettings;
 
+/**
+ * Parser for ClickHouse CREATE DATABASE statements.
+ * Handles database (schema) creation including engine specifications and comments.
+ */
 public final class CreateChSchema extends ChParserAbstract {
 
     private final Create_database_stmtContext ctx;
 
+    /**
+     * Creates a parser for ClickHouse CREATE DATABASE statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the CREATE DATABASE statement
+     * @param db       the ClickHouse database schema being processed
+     * @param settings parsing configuration settings
+     */
     public CreateChSchema(Create_database_stmtContext ctx, ChDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;

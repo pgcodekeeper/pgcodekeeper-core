@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Create_db_roleContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.IdContext;
@@ -24,10 +22,23 @@ import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.schema.ms.MsRole;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for Microsoft SQL CREATE ROLE statements.
+ * Handles database role creation including owner settings.
+ */
 public final class CreateMsRole extends MsParserAbstract {
 
     private final Create_db_roleContext ctx;
 
+    /**
+     * Creates a parser for Microsoft SQL CREATE ROLE statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the CREATE ROLE statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public CreateMsRole(Create_db_roleContext ctx, MsDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -42,7 +53,7 @@ public final class CreateMsRole extends MsParserAbstract {
             role.setOwner(ctx.owner_name.getText());
         }
 
-        addSafe(db, role, Arrays.asList(nameCtx));
+        addSafe(db, role, List.of(nameCtx));
     }
 
     @Override

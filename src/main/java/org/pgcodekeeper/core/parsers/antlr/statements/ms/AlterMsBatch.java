@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -29,10 +26,26 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Parser for Microsoft SQL ALTER statements in batch context.
+ * Handles ALTER PROCEDURE, ALTER FUNCTION, ALTER VIEW, and ALTER TRIGGER statements
+ * within batch processing context with proper location tracking.
+ */
 public final class AlterMsBatch extends BatchContextProcessor {
 
     private final Batch_statement_bodyContext ctx;
 
+    /**
+     * Creates a parser for Microsoft SQL ALTER statements in batch context.
+     *
+     * @param ctx      the batch statement body context containing the ALTER statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param stream   the token stream for source code processing
+     * @param settings parsing configuration settings
+     */
     public AlterMsBatch(Batch_statement_bodyContext ctx, MsDatabase db, CommonTokenStream stream, ISettings settings) {
         super(db, ctx, stream, settings);
         this.ctx = ctx;
@@ -66,7 +79,7 @@ public final class AlterMsBatch extends BatchContextProcessor {
         // second schema ref
         // CREATE TRIGGER schema.trigger ON schema.table ...
         if (secondCtx != null) {
-            addObjReference(Arrays.asList(secondCtx), DbObjType.SCHEMA, null);
+            addObjReference(List.of(secondCtx), DbObjType.SCHEMA, null);
         }
         addObjReference(Arrays.asList(schemaCtx, ctx.table_name.name),
                 DbObjType.TABLE, null);

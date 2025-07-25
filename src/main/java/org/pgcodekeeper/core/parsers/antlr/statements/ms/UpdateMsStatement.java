@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.pgcodekeeper.core.DangerStatement;
@@ -27,10 +25,24 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+
+/**
+ * Parser for Microsoft SQL UPDATE statements.
+ * Handles UPDATE operations including table references, dependency tracking,
+ * and danger statement warnings for potentially risky operations.
+ */
 public final class UpdateMsStatement extends MsParserAbstract {
 
     private final Update_statementContext ctx;
 
+    /**
+     * Creates a parser for Microsoft SQL UPDATE statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the UPDATE statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public UpdateMsStatement(Update_statementContext ctx, MsDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;

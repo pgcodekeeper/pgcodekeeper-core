@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -29,6 +26,14 @@ import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.schema.ms.MsView;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Parser for Microsoft SQL CREATE VIEW statements.
+ * Handles view creation with support for view attributes like SCHEMABINDING,
+ * ANSI_NULLS and QUOTED_IDENTIFIER settings, and analysis of SELECT statements.
+ */
 public final class CreateMsView extends BatchContextProcessor {
 
     private final Create_or_alter_viewContext ctx;
@@ -36,18 +41,20 @@ public final class CreateMsView extends BatchContextProcessor {
     private final boolean ansiNulls;
     private final boolean quotedIdentifier;
 
+    /**
+     * Creates a parser for Microsoft SQL CREATE VIEW statements from batch context.
+     *
+     * @param ctx              the batch statement context containing the view definition
+     * @param db               the Microsoft SQL database schema being processed
+     * @param ansiNulls        the ANSI_NULLS setting for the view
+     * @param quotedIdentifier the QUOTED_IDENTIFIER setting for the view
+     * @param stream           the token stream for source code processing
+     * @param settings         parsing configuration settings
+     */
     public CreateMsView(Batch_statementContext ctx, MsDatabase db,
-            boolean ansiNulls, boolean quotedIdentifier, CommonTokenStream stream, ISettings settings) {
+                        boolean ansiNulls, boolean quotedIdentifier, CommonTokenStream stream, ISettings settings) {
         super(db, ctx, stream, settings);
         this.ctx = ctx.batch_statement_body().create_or_alter_view();
-        this.ansiNulls = ansiNulls;
-        this.quotedIdentifier = quotedIdentifier;
-    }
-
-    public CreateMsView(Create_or_alter_viewContext ctx, MsDatabase db,
-            boolean ansiNulls, boolean quotedIdentifier, CommonTokenStream stream, ISettings settings) {
-        super(db, ctx.getParent(), stream, settings);
-        this.ctx = ctx;
         this.ansiNulls = ansiNulls;
         this.quotedIdentifier = quotedIdentifier;
     }
@@ -68,6 +75,12 @@ public final class CreateMsView extends BatchContextProcessor {
         addSafe(getSchemaSafe(ids), view, ids);
     }
 
+    /**
+     * Fills the view object with parsed information including attributes and SELECT statement.
+     * Processes ANSI_NULLS, QUOTED_IDENTIFIER, SCHEMABINDING, and sets up view analysis.
+     *
+     * @param view the view object to populate with parsed information
+     */
     public void fillObject(MsView view) {
         view.setAnsiNulls(ansiNulls);
         view.setQuotedIdentified(quotedIdentifier);

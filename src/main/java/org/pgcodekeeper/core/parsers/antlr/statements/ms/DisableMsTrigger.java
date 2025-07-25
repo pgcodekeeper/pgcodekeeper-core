@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Enable_disable_triggerContext;
@@ -30,10 +28,24 @@ import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.schema.ms.MsTrigger;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+
+/**
+ * Parser for Microsoft SQL ENABLE/DISABLE TRIGGER statements.
+ * Handles trigger activation and deactivation on tables including
+ * table and trigger reference tracking.
+ */
 public final class DisableMsTrigger extends MsParserAbstract {
 
     private final Enable_disable_triggerContext ctx;
 
+    /**
+     * Creates a parser for Microsoft SQL ENABLE/DISABLE TRIGGER statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the ENABLE/DISABLE TRIGGER statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public DisableMsTrigger(Enable_disable_triggerContext ctx, MsDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -69,7 +81,7 @@ public final class DisableMsTrigger extends MsParserAbstract {
         StringBuilder sb = new StringBuilder();
         Enable_disable_triggerContext ctxEnableDisableTr = (Enable_disable_triggerContext) ctx;
         sb.append(ctxEnableDisableTr.DISABLE() != null ? "DISABLE " : "ENABLE ")
-        .append("TRIGGER");
+                .append("TRIGGER");
 
         Names_referencesContext triggers = ctxEnableDisableTr.names_references();
         Qualified_nameContext parent = ctxEnableDisableTr.qualified_name();
@@ -82,9 +94,9 @@ public final class DisableMsTrigger extends MsParserAbstract {
 
             for (Qualified_nameContext qname : triggers.qualified_name()) {
                 sb.append(schemaName)
-                .append('.').append(parentName)
-                .append('.').append(qname.name.getText())
-                .append(", ");
+                        .append('.').append(parentName)
+                        .append('.').append(qname.name.getText())
+                        .append(", ");
             }
 
             sb.setLength(sb.length() - 2);

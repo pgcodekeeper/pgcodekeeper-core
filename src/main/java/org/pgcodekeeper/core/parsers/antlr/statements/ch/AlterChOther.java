@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ch;
 
-import java.util.Arrays;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Alter_policy_stmtContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Alter_role_stmtContext;
@@ -25,15 +23,33 @@ import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Alter_user_stmtCon
 import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.Collections;
+
+/**
+ * Parser for ClickHouse ALTER statements that handle policies, users, and roles.
+ * Processes ALTER POLICY, ALTER USER, and ALTER ROLE statements.
+ */
 public final class AlterChOther extends ChParserAbstract {
 
     private final Alter_stmtContext ctx;
 
+    /**
+     * Creates a parser for ClickHouse ALTER statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the ALTER statement
+     * @param db       the ClickHouse database schema being processed
+     * @param settings parsing configuration settings
+     */
     public AlterChOther(Alter_stmtContext ctx, ChDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
     }
 
+    /**
+     * Parses the ALTER statement and processes the appropriate database object type.
+     * Handles ALTER POLICY, ALTER USER, or ALTER ROLE statements based on the context.
+     */
     @Override
     public void parseObject() {
         var alterPolicyCtx = ctx.alter_policy_stmt();
@@ -43,7 +59,7 @@ public final class AlterChOther extends ChParserAbstract {
             alterPolicy(alterPolicyCtx);
         } else if (alterUserCtx != null) {
             alterUser(alterUserCtx);
-        }  else if (alterRoleCtx != null) {
+        } else if (alterRoleCtx != null) {
             alterRole(alterRoleCtx);
         }
     }
@@ -60,13 +76,13 @@ public final class AlterChOther extends ChParserAbstract {
 
     private void alterUser(Alter_user_stmtContext ctx) {
         for (var userNameCtx : ctx.name_with_cluster()) {
-            addObjReference(Arrays.asList(userNameCtx.identifier()), DbObjType.USER, ACTION_ALTER);
+            addObjReference(Collections.singletonList(userNameCtx.identifier()), DbObjType.USER, ACTION_ALTER);
         }
     }
 
     private void alterRole(Alter_role_stmtContext ctx) {
         for (var roleCtx : ctx.name_with_cluster()) {
-            addObjReference(Arrays.asList(roleCtx.identifier()), DbObjType.ROLE, ACTION_ALTER);
+            addObjReference(Collections.singletonList(roleCtx.identifier()), DbObjType.ROLE, ACTION_ALTER);
         }
     }
 

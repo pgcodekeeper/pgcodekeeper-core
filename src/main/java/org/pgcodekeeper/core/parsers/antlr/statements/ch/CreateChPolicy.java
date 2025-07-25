@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ch;
 
-import java.text.MessageFormat;
-import java.util.Arrays;
-
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.ChExpressionAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Create_policy_stmtContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.ExprContext;
@@ -26,17 +23,31 @@ import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.schema.ch.ChPolicy;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.text.MessageFormat;
+import java.util.Arrays;
+
+/**
+ * Parser for ClickHouse CREATE POLICY statements.
+ * Handles row-level security policy creation with support for multiple policies
+ * on multiple tables, including policy actions and role assignments.
+ */
 public final class CreateChPolicy extends ChParserAbstract {
 
     private static final String POLICY_NAME = "{0} ON {1}";
 
-    private Create_policy_stmtContext ctx;
+    private final Create_policy_stmtContext ctx;
 
+    /**
+     * Creates a parser for ClickHouse CREATE POLICY statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the CREATE POLICY statement
+     * @param db       the ClickHouse database schema being processed
+     * @param settings parsing configuration settings
+     */
     public CreateChPolicy(Create_policy_stmtContext ctx, ChDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
     }
-
 
     @Override
     public void parseObject() {
@@ -68,7 +79,6 @@ public final class CreateChPolicy extends ChParserAbstract {
 
         addRoles(actionCtx.users(), policy, ChPolicy::addRole, ChPolicy::addExcept, "ALL");
     }
-
 
     @Override
     protected String getStmtAction() {

@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -27,10 +25,25 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.Collections;
+
+/**
+ * Parser for Microsoft SQL ALTER statements that handle schemas, users, and sequences.
+ * Processes ALTER SCHEMA, ALTER USER, and ALTER SEQUENCE statements with appropriate
+ * danger warnings for potentially destructive operations like RESTART WITH.
+ */
 public final class AlterMsOther extends MsParserAbstract {
 
     private final Schema_alterContext ctx;
 
+    /**
+     * Creates a parser for Microsoft SQL ALTER statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the ALTER statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public AlterMsOther(Schema_alterContext ctx, MsDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -39,10 +52,10 @@ public final class AlterMsOther extends MsParserAbstract {
     @Override
     public void parseObject() {
         if (ctx.alter_schema_sql() != null) {
-            addObjReference(Arrays.asList(ctx.alter_schema_sql().schema_name),
+            addObjReference(Collections.singletonList(ctx.alter_schema_sql().schema_name),
                     DbObjType.SCHEMA, ACTION_ALTER);
         } else if (ctx.alter_user() != null) {
-            addObjReference(Arrays.asList(ctx.alter_user().username), DbObjType.USER, ACTION_ALTER);
+            addObjReference(Collections.singletonList(ctx.alter_user().username), DbObjType.USER, ACTION_ALTER);
         } else if (ctx.alter_sequence() != null) {
             alterSequence(ctx.alter_sequence());
         }

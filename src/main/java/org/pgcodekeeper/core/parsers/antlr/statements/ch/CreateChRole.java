@@ -15,17 +15,28 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ch;
 
-import java.util.Arrays;
-
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Create_role_stmtContext;
 import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.schema.ch.ChRole;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for ClickHouse CREATE ROLE statements.
+ * Handles role creation including storage type configuration and support for multiple roles in one statement.
+ */
 public final class CreateChRole extends ChParserAbstract {
 
     private final Create_role_stmtContext ctx;
 
+    /**
+     * Creates a parser for ClickHouse CREATE ROLE statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the CREATE ROLE statement
+     * @param db       the ClickHouse database schema being processed
+     * @param settings parsing configuration settings
+     */
     public CreateChRole(Create_role_stmtContext ctx, ChDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -40,7 +51,7 @@ public final class CreateChRole extends ChParserAbstract {
             if (storageType != null) {
                 role.setStorageType(storageType.getText());
             }
-            addSafe(db, role, Arrays.asList(roleNameCtx));
+            addSafe(db, role, List.of(roleNameCtx));
         }
     }
 

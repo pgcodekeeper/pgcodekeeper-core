@@ -15,29 +15,35 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Drop_backward_compatible_indexContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Drop_indexContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Drop_statementsContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.IdContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Index_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Qualified_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Schema_dropContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
 import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Parser for Microsoft SQL DROP statements.
+ * Handles dropping of assemblies, indexes, schemas, roles, users, triggers, functions,
+ * procedures, sequences, tables, types, and views with appropriate danger warnings.
+ */
 public final class DropMsStatement extends MsParserAbstract {
 
     private final Schema_dropContext ctx;
 
+    /**
+     * Creates a parser for Microsoft SQL DROP statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the DROP statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public DropMsStatement(Schema_dropContext ctx, MsDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -47,7 +53,7 @@ public final class DropMsStatement extends MsParserAbstract {
     public void parseObject() {
         if (ctx.drop_assembly() != null) {
             for (IdContext id : ctx.drop_assembly().name_list().id()) {
-                addObjReference(Arrays.asList(id), DbObjType.ASSEMBLY, ACTION_DROP);
+                addObjReference(Collections.singletonList(id), DbObjType.ASSEMBLY, ACTION_DROP);
             }
         } else if (ctx.drop_index() != null) {
             for (Index_nameContext ind : ctx.drop_index().index_name()) {
@@ -76,7 +82,7 @@ public final class DropMsStatement extends MsParserAbstract {
 
         if (type != null) {
             for (Qualified_nameContext qname : ctx.names_references().name) {
-                addObjReference(Arrays.asList(qname.name), type, ACTION_DROP);
+                addObjReference(Collections.singletonList(qname.name), type, ACTION_DROP);
             }
             return;
         }
@@ -135,13 +141,13 @@ public final class DropMsStatement extends MsParserAbstract {
         } else if (ctx.drop_index() != null) {
             Drop_indexContext dropIdxCtx = ctx.drop_index();
             List<Index_nameContext> indicesRel = dropIdxCtx.index_name();
-            if (indicesRel != null && !indicesRel.isEmpty() && indicesRel.size() == 1) {
-                ids = Arrays.asList(indicesRel.get(0).id());
+            if (indicesRel != null && indicesRel.size() == 1) {
+                ids = Collections.singletonList(indicesRel.get(0).id());
             } else {
                 List<Drop_backward_compatible_indexContext> indicesBack = dropIdxCtx
                         .drop_backward_compatible_index();
-                if (indicesBack != null && !indicesBack.isEmpty() && indicesBack.size() == 1) {
-                    ids = Arrays.asList(indicesBack.get(0).index);
+                if (indicesBack != null && indicesBack.size() == 1) {
+                    ids = Collections.singletonList(indicesBack.get(0).index);
                 } else {
                     ids = Collections.emptyList();
                 }

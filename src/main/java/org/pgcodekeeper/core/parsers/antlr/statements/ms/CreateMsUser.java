@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Create_userContext;
@@ -27,10 +25,24 @@ import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.schema.ms.MsUser;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for Microsoft SQL CREATE USER statements.
+ * Handles user creation including login association, default schema,
+ * language settings, and encryption options.
+ */
 public final class CreateMsUser extends MsParserAbstract {
 
     private final Create_userContext ctx;
 
+    /**
+     * Creates a parser for Microsoft SQL CREATE USER statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the CREATE USER statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public CreateMsUser(Create_userContext ctx, MsDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -59,7 +71,7 @@ public final class CreateMsUser extends MsParserAbstract {
             }
         }
 
-        addSafe(db, user, Arrays.asList(nameCtx));
+        addSafe(db, user, List.of(nameCtx));
     }
 
     @Override

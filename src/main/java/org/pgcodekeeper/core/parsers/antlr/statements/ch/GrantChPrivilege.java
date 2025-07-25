@@ -15,15 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ch;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.pgcodekeeper.core.ChDiffUtils;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -37,14 +28,31 @@ import org.pgcodekeeper.core.schema.StatementOverride;
 import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.*;
+import java.util.Map.Entry;
+
+/**
+ * Parser for ClickHouse GRANT and REVOKE privilege statements.
+ * Handles privilege assignment and revocation for users and roles on database objects,
+ * including support for column-level privileges and grant options.
+ */
 public final class GrantChPrivilege extends ChParserAbstract {
 
     private final Privilegy_stmtContext ctx;
     private final String state;
     private final Map<PgStatement, StatementOverride> overrides;
 
+    /**
+     * Creates a parser for ClickHouse GRANT/REVOKE privilege statements.
+     *
+     * @param ctx       the ANTLR parse tree context for the GRANT/REVOKE statement
+     * @param db        the ClickHouse database schema being processed
+     * @param overrides map of statement overrides for privilege modifications
+     * @param settings  parsing configuration settings
+     */
     public GrantChPrivilege(Privilegy_stmtContext ctx, ChDatabase db, Map<PgStatement, StatementOverride> overrides,
-            ISettings settings) {
+                            ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
         this.overrides = overrides;
@@ -83,7 +91,7 @@ public final class GrantChPrivilege extends ChParserAbstract {
                 if (st == null) {
                     continue;
                 }
-                addObjReference(Arrays.asList(user), st.getStatementType(), state);
+                addObjReference(List.of(user), st.getStatementType(), state);
                 // 1 privilege for each permission
                 for (String per : permissions) {
                     addPrivilege(st, new PgPrivilege(state, per, objectName,
@@ -94,21 +102,21 @@ public final class GrantChPrivilege extends ChParserAbstract {
     }
 
     private void parseColumns(Columns_permissionsContext columnsCtx, String objectName,
-            List<IdentifierContext> usersOrRoles, boolean isGrantOption) {
+                              List<IdentifierContext> usersOrRoles, boolean isGrantOption) {
         // collect information about column privileges
         Map<String, Entry<IdentifierContext, List<String>>> colPriv = new HashMap<>();
         for (var col : columnsCtx.table_column_privileges()) {
             String privName = getFullCtxText(col.permission()).toUpperCase(Locale.ROOT);
             for (var colName : col.identifier_list().identifier()) {
                 colPriv.computeIfAbsent(colName.getText(), k -> new SimpleEntry<>(colName, new ArrayList<>()))
-                .getValue().add(privName);
+                        .getValue().add(privName);
             }
         }
         setColumnPrivilege(objectName, colPriv, usersOrRoles, isGrantOption);
     }
 
     private void setColumnPrivilege(String objectName, Map<String, Entry<IdentifierContext, List<String>>> colPrivs,
-            List<IdentifierContext> usersOrRoles, boolean isGrantOption) {
+                                    List<IdentifierContext> usersOrRoles, boolean isGrantOption) {
         for (Entry<String, Entry<IdentifierContext, List<String>>> colPriv : colPrivs.entrySet()) {
             StringBuilder permission = new StringBuilder();
             for (String priv : colPriv.getValue().getValue()) {
@@ -123,7 +131,7 @@ public final class GrantChPrivilege extends ChParserAbstract {
                     continue;
                 }
 
-                addObjReference(Arrays.asList(user), st.getStatementType(), state);
+                addObjReference(List.of(user), st.getStatementType(), state);
                 addPrivilege(st, new PgPrivilege(state, permission.toString(), objectName,
                         userName, isGrantOption, DatabaseType.CH));
             }
