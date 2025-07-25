@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
@@ -26,10 +24,27 @@ import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgFtsDictionary;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE TEXT SEARCH DICTIONARY statements.
+ * <p>
+ * This class handles parsing of full-text search dictionary definitions
+ * including template references and dictionary-specific options. Text search
+ * dictionaries process words during full-text search indexing and querying
+ * operations.
+ */
 public final class CreateFtsDictionary extends PgParserAbstract {
 
     private final Create_fts_dictionary_statementContext ctx;
 
+    /**
+     * Constructs a new CreateFtsDictionary parser.
+     *
+     * @param ctx      the CREATE TEXT SEARCH DICTIONARY statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CreateFtsDictionary(Create_fts_dictionary_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;

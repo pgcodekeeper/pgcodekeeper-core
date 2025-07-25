@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.Arrays;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Cast_nameContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_cast_statementContext;
@@ -24,14 +22,30 @@ import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Data_typeContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_qualified_nameContext;
 import org.pgcodekeeper.core.schema.ICast.CastContext;
 import org.pgcodekeeper.core.schema.pg.PgCast;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgCast.CastMethod;
+import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE CAST statements.
+ * <p>
+ * This class handles parsing of type cast definitions including function-based
+ * casts, binary-compatible casts, and I/O conversion casts. It processes the
+ * source and target types, cast method, and cast context (implicit, assignment, explicit).
+ */
 public final class CreateCast extends PgParserAbstract {
 
     private final Create_cast_statementContext ctx;
 
+    /**
+     * Constructs a new CreateCast parser.
+     *
+     * @param ctx      the CREATE CAST statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CreateCast(Create_cast_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -63,15 +77,13 @@ public final class CreateCast extends PgParserAbstract {
             cast.setContext(CastContext.IMPLICIT);
         }
 
-        addSafe(db, cast, Arrays.asList(nameCtx));
+        addSafe(db, cast, List.of(nameCtx));
     }
 
     @Override
     protected String getStmtAction() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(ACTION_CREATE).append(' ').append(DbObjType.CAST).append(" (");
-        sb.append(getCastName(ctx.cast_name()));
-        sb.append(')');
-        return sb.toString();
+        return ACTION_CREATE + ' ' + DbObjType.CAST + " (" +
+                getCastName(ctx.cast_name()) +
+                ')';
     }
 }

@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.text.MessageFormat;
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pgcodekeeper.core.Consts.FUNC_SIGN;
@@ -29,19 +26,33 @@ import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Table_column_defi
 import org.pgcodekeeper.core.schema.AbstractColumn;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.AbstractType;
-import org.pgcodekeeper.core.schema.pg.PgBaseType;
-import org.pgcodekeeper.core.schema.pg.PgColumn;
-import org.pgcodekeeper.core.schema.pg.PgCompositeType;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgEnumType;
-import org.pgcodekeeper.core.schema.pg.PgRangeType;
-import org.pgcodekeeper.core.schema.pg.PgShellType;
+import org.pgcodekeeper.core.schema.pg.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.text.MessageFormat;
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE TYPE statements.
+ * <p>
+ * This class handles parsing of various type definitions including:
+ * - Composite types (records with named fields)
+ * - Enum types (enumerated values)
+ * - Range types (continuous ranges of values)
+ * - Base types (custom scalar types with I/O functions)
+ * - Shell types (forward declarations)
+ */
 public final class CreateType extends PgParserAbstract {
 
     private final Create_type_statementContext ctx;
 
+    /**
+     * Constructs a new CreateType parser.
+     *
+     * @param ctx      the CREATE TYPE statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CreateType(Create_type_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -52,7 +63,7 @@ public final class CreateType extends PgParserAbstract {
         List<ParserRuleContext> ids = getIdentifiers(ctx.name);
         String name = QNameParser.getFirstName(ids);
         AbstractSchema schema = getSchemaSafe(ids);
-        AbstractType type = null;
+        AbstractType type;
         if (ctx.RANGE() != null) {
             type = createRangeType(name, schema);
         } else if (ctx.ENUM() != null) {
@@ -69,7 +80,7 @@ public final class CreateType extends PgParserAbstract {
     }
 
     private PgCompositeType createCompositeType(String name) {
-        PgCompositeType type =  new PgCompositeType(name);
+        PgCompositeType type = new PgCompositeType(name);
         for (Table_column_definitionContext attr : ctx.attrs) {
             addAttr(attr, type);
         }
@@ -78,7 +89,7 @@ public final class CreateType extends PgParserAbstract {
     }
 
     private PgEnumType createEnumType(String name) {
-        PgEnumType type =  new PgEnumType(name);
+        PgEnumType type = new PgEnumType(name);
         for (var enume : ctx.enums) {
             type.addEnum(enume.getText());
         }

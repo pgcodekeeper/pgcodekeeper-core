@@ -15,17 +15,29 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.Arrays;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_database_statementContext;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Collections;
+
+/**
+ * PostgreSQL CREATE DATABASE statement parser that handles database creation.
+ * Extends {@link PgParserAbstract} to provide parsing functionality for
+ * CREATE DATABASE statements which create new PostgreSQL databases.
+ */
 public final class CreateDatabase extends PgParserAbstract {
 
     private final Create_database_statementContext ctx;
 
+    /**
+     * Constructs a new CreateDatabase parser.
+     *
+     * @param ctx      the CREATE DATABASE statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CreateDatabase(Create_database_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -33,11 +45,11 @@ public final class CreateDatabase extends PgParserAbstract {
 
     @Override
     public void parseObject() {
-        addObjReference(Arrays.asList(ctx.identifier()), DbObjType.DATABASE, ACTION_CREATE);
+        addObjReference(Collections.singletonList(ctx.identifier()), DbObjType.DATABASE, ACTION_CREATE);
     }
 
     @Override
     protected String getStmtAction() {
-        return getStrForStmtAction(ACTION_CREATE, DbObjType.DATABASE, Arrays.asList(ctx.identifier()));
+        return getStrForStmtAction(ACTION_CREATE, DbObjType.DATABASE, Collections.singletonList(ctx.identifier()));
     }
 }

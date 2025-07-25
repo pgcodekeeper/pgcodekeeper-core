@@ -20,10 +20,22 @@ import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Insert_stmt_for_p
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+/**
+ * PostgreSQL INSERT statement parser that handles data insertion operations.
+ * Extends {@link PgParserAbstract} to provide parsing functionality for
+ * INSERT INTO statements which add new rows to a table.
+ */
 public final class InsertStatement extends PgParserAbstract {
 
     private final Insert_stmt_for_psqlContext ctx;
 
+    /**
+     * Constructs an INSERT statement parser.
+     *
+     * @param ctx      the ANTLR parser context for the INSERT statement
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public InsertStatement(Insert_stmt_for_psqlContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;

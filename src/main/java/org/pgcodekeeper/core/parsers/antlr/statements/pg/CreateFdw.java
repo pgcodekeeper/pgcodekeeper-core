@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.Arrays;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_foreign_data_wrapper_statementContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Define_foreign_optionsContext;
@@ -26,13 +24,36 @@ import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgForeignDataWrapper;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE FOREIGN DATA WRAPPER statements.
+ * <p>
+ * This class handles parsing of foreign data wrapper definitions including
+ * handler and validator functions, and wrapper-specific options. Foreign
+ * data wrappers provide access to external data sources.
+ */
 public final class CreateFdw extends PgParserAbstract {
 
-    public static final String VALIDATOR_SIGNATURE  = "(text[], oid)";
-    public static final String HANDLER_SIGNATURE  = "()";
+    /**
+     * Function signature for foreign data wrapper validator functions.
+     */
+    public static final String VALIDATOR_SIGNATURE = "(text[], oid)";
+
+    /**
+     * Function signature for foreign data wrapper handler functions.
+     */
+    public static final String HANDLER_SIGNATURE = "()";
 
     private final Create_foreign_data_wrapper_statementContext ctx;
 
+    /**
+     * Constructs a new CreateFdw parser.
+     *
+     * @param ctx      the CREATE FOREIGN DATA WRAPPER statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CreateFdw(Create_foreign_data_wrapper_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -51,12 +72,12 @@ public final class CreateFdw extends PgParserAbstract {
             addDepSafe(fDW, getIdentifiers(ctx.validator_func), DbObjType.FUNCTION, VALIDATOR_SIGNATURE);
         }
         Define_foreign_optionsContext options = ctx.define_foreign_options();
-        if (options!= null) {
+        if (options != null) {
             for (Foreign_optionContext option : options.foreign_option()) {
                 fillOptionParams(option.sconst().getText(), option.col_label().getText(), false, fDW::addOption);
             }
         }
-        addSafe(db, fDW, Arrays.asList(nameCtx));
+        addSafe(db, fDW, List.of(nameCtx));
     }
 
     @Override

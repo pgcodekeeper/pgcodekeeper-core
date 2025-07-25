@@ -15,39 +15,43 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_foreign_table_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Define_columnsContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Define_foreign_optionsContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Define_partitionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Define_serverContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Foreign_optionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.IdentifierContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.statements.ParserAbstract;
 import org.pgcodekeeper.core.schema.AbstractColumn;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.AbstractSequence;
 import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.pg.AbstractForeignTable;
-import org.pgcodekeeper.core.schema.pg.AbstractPgTable;
-import org.pgcodekeeper.core.schema.pg.PartitionForeignPgTable;
-import org.pgcodekeeper.core.schema.pg.PgColumn;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.SimpleForeignPgTable;
+import org.pgcodekeeper.core.schema.pg.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE FOREIGN TABLE statements.
+ * <p>
+ * This class handles parsing of foreign table definitions including columns,
+ * partitioning information, server references, and foreign table options.
+ * Foreign tables provide access to data stored in external data sources
+ * through foreign data wrappers.
+ */
 public final class CreateForeignTable extends TableAbstract {
 
     private final Create_foreign_table_statementContext ctx;
 
+    /**
+     * Constructs a new CreateForeignTable parser.
+     *
+     * @param ctx      the CREATE FOREIGN TABLE statement context
+     * @param db       the PostgreSQL database object
+     * @param stream   the token stream for parsing
+     * @param settings the ISettings object
+     */
     public CreateForeignTable(Create_foreign_table_statementContext ctx, PgDatabase db, CommonTokenStream stream,
-            ISettings settings) {
+                              ISettings settings) {
         super(db, stream, settings);
         this.ctx = ctx;
     }
@@ -88,14 +92,14 @@ public final class CreateForeignTable extends TableAbstract {
             fillTypeColumns(partCtx.list_of_type_column_def(), table, schemaName, null);
             addInherit(table, getIdentifiers(partCtx.parent_table));
         }
-        addDepSafe(table, Arrays.asList(srvName), DbObjType.SERVER);
+        addDepSafe(table, List.of(srvName), DbObjType.SERVER);
 
         return table;
     }
 
     private AbstractForeignTable fillForeignTable(Define_serverContext server, AbstractForeignTable table) {
         Define_foreign_optionsContext options = server.define_foreign_options();
-        if (options != null){
+        if (options != null) {
             for (Foreign_optionContext option : options.foreign_option()) {
                 var opt = option.sconst();
                 String value = opt == null ? null : opt.getText();

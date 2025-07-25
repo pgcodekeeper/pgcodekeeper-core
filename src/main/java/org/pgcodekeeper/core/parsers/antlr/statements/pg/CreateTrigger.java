@@ -15,24 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.TriggerAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_trigger_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.IdentifierContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Identifier_listContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_qualified_name_nontypeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Table_deferrableContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Table_initialy_immedContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Trigger_referencingContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.VexContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.When_triggerContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.PgStatementContainer;
@@ -41,10 +29,28 @@ import org.pgcodekeeper.core.schema.pg.PgTrigger;
 import org.pgcodekeeper.core.schema.pg.PgTrigger.TgTypes;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE TRIGGER statements.
+ * <p>
+ * This class handles parsing of trigger definitions including trigger timing
+ * (BEFORE, AFTER, INSTEAD OF), events (INSERT, UPDATE, DELETE, TRUNCATE),
+ * trigger functions, referencing clauses, and constraint triggers.
+ */
 public final class CreateTrigger extends PgParserAbstract {
 
     private final Create_trigger_statementContext ctx;
 
+    /**
+     * Constructs a new CreateTrigger parser.
+     *
+     * @param ctx      the CREATE TRIGGER statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CreateTrigger(Create_trigger_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -75,12 +81,12 @@ public final class CreateTrigger extends PgParserAbstract {
         trigger.setOnTruncate(ctx.truncate_true != null);
         trigger.setFunction(getFullCtxText(ctx.func_name));
 
-        if (ctx.CONSTRAINT() != null ) {
+        if (ctx.CONSTRAINT() != null) {
             trigger.setConstraint(true);
-            Table_deferrableContext  def  = ctx.table_deferrable();
-            if (def != null && def.NOT() == null){
-                Table_initialy_immedContext  initImmed  = ctx.table_initialy_immed();
-                if (initImmed != null){
+            Table_deferrableContext def = ctx.table_deferrable();
+            if (def != null && def.NOT() == null) {
+                Table_initialy_immedContext initImmed = ctx.table_initialy_immed();
+                if (initImmed != null) {
                     trigger.setImmediate(initImmed.DEFERRED() == null);
                 }
             }
@@ -136,8 +142,19 @@ public final class CreateTrigger extends PgParserAbstract {
         addSafe(cont, trigger, Arrays.asList(schemaCtx, parentCtx, ctx.name));
     }
 
+    /**
+     * Parses the WHEN clause of a trigger definition.
+     * <p>
+     * This method processes trigger conditions that determine when the trigger
+     * should fire based on the values in the affected row.
+     *
+     * @param whenCtx  the WHEN trigger context, may be null
+     * @param trigger  the trigger object to configure
+     * @param db       the database for analysis launchers
+     * @param location the source location for error reporting
+     */
     public static void parseWhen(When_triggerContext whenCtx, PgTrigger trigger,
-            AbstractDatabase db, String location) {
+                                 AbstractDatabase db, String location) {
         if (whenCtx != null) {
             VexContext vex = whenCtx.vex();
             trigger.setWhen(getFullCtxText(vex));

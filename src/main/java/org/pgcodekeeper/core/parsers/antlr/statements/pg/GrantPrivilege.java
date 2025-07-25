@@ -15,51 +15,59 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Columns_permissionsContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Function_parametersContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.IdentifierContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Role_name_with_groupContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Rule_commonContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Rule_member_objectContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_qualified_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Table_column_privilegesContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.statements.ParserAbstract;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.PgPrivilege;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.StatementOverride;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.pg.AbstractPgFunction;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgSchema;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
+/**
+ * Parser for PostgreSQL GRANT and REVOKE privilege statements.
+ * <p>
+ * This class handles parsing of privilege management statements including
+ * object privileges (tables, sequences, functions), column privileges,
+ * schema privileges, and various privilege types like SELECT, INSERT,
+ * UPDATE, DELETE, USAGE, etc.
+ */
 public final class GrantPrivilege extends PgParserAbstract {
     private final Rule_commonContext ctx;
     private final String state;
     private final boolean isGO;
     private final Map<PgStatement, StatementOverride> overrides;
 
+    /**
+     * Constructs a new GrantPrivilege parser without statement overrides.
+     *
+     * @param ctx      the rule common context (GRANT/REVOKE statement)
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public GrantPrivilege(Rule_commonContext ctx, PgDatabase db, ISettings settings) {
         this(ctx, db, null, settings);
     }
 
+    /**
+     * Constructs a new GrantPrivilege parser with optional statement overrides.
+     *
+     * @param ctx       the rule common context (GRANT/REVOKE statement)
+     * @param db        the PostgreSQL database object
+     * @param overrides optional map for statement overrides, may be null
+     * @param settings  ISettings object
+     */
     public GrantPrivilege(Rule_commonContext ctx, PgDatabase db, Map<PgStatement, StatementOverride> overrides,
-            ISettings settings) {
+                          ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
         this.overrides = overrides;
@@ -199,7 +207,7 @@ public final class GrantPrivilege extends PgParserAbstract {
     }
 
     private void setColumnPrivilege(Schema_qualified_nameContext tbl,
-            Map<String, Entry<IdentifierContext, List<String>>> colPrivs, List<String> roles) {
+                                    Map<String, Entry<IdentifierContext, List<String>>> colPrivs, List<String> roles) {
         List<ParserRuleContext> ids = getIdentifiers(tbl);
 
         addObjReference(ids, DbObjType.TABLE, state);
@@ -221,7 +229,7 @@ public final class GrantPrivilege extends PgParserAbstract {
             StringBuilder permission = new StringBuilder();
             for (String priv : colPriv.getValue().getValue()) {
                 permission.append(priv).append('(')
-                .append(colPriv.getValue().getKey().getText()).append("),");
+                        .append(colPriv.getValue().getKey().getText()).append("),");
             }
 
             permission.setLength(permission.length() - 1);

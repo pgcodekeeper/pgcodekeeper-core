@@ -15,37 +15,43 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.AggregateAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Aggregate_paramContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.All_op_refContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.All_simple_opContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_aggregate_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Data_typeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Function_argsContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Function_argumentsContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.IdentifierContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Identifier_nontypeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_qualified_nameContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.schema.Argument;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.pg.PgAggregate;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgAggregate.AggFuncs;
 import org.pgcodekeeper.core.schema.pg.PgAggregate.AggKinds;
 import org.pgcodekeeper.core.schema.pg.PgAggregate.ModifyType;
+import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE AGGREGATE statements.
+ * <p>
+ * This class handles parsing of aggregate function definitions including
+ * state functions, final functions, parallel operations, and various
+ * aggregate-specific parameters like state types, initial conditions,
+ * and modification functions.
+ */
 public final class CreateAggregate extends PgParserAbstract {
 
     private final Create_aggregate_statementContext ctx;
 
+    /**
+     * Constructs a new CreateAggregate parser.
+     *
+     * @param ctx      the CREATE AGGREGATE statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CreateAggregate(Create_aggregate_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -175,8 +181,8 @@ public final class CreateAggregate extends PgParserAbstract {
                     StringBuilder sb = new StringBuilder();
                     if (schemaNameCxt != null) {
                         sb.append("OPERATOR(")
-                        .append(PgDiffUtils.getQuotedName(schemaNameCxt.getText()))
-                        .append('.');
+                                .append(PgDiffUtils.getQuotedName(schemaNameCxt.getText()))
+                                .append('.');
                     }
                     All_simple_opContext op = operCtx.all_simple_op();
                     sb.append(op.getText());
@@ -232,7 +238,7 @@ public final class CreateAggregate extends PgParserAbstract {
     }
 
     private void addFuncAsDepcy(AggFuncs paramName,
-            Schema_qualified_nameContext paramFuncCtx, PgAggregate aggr) {
+                                Schema_qualified_nameContext paramFuncCtx, PgAggregate aggr) {
         List<ParserRuleContext> ids = getIdentifiers(paramFuncCtx);
         ParserRuleContext schemaCtx = QNameParser.getSchemaNameCtx(ids);
         if (schemaCtx != null) {
@@ -248,14 +254,14 @@ public final class CreateAggregate extends PgParserAbstract {
     }
 
     /**
-     * Gets the signature for the given function name.
+     * Gets the function signature for the given aggregate function parameter.
+     * <p>
+     * This method constructs the appropriate function signature based on the
+     * aggregate's configuration and the specific function parameter type.
      *
-     * @param aggregate
-     *            aggregate object
-     * @param paramName
-     *            name of parameter
-     *
-     * @return function signature
+     * @param aggregate the aggregate object containing state and parameter information
+     * @param paramName the type of aggregate function parameter
+     * @return the formatted function signature string
      */
     public static String getParamFuncSignature(PgAggregate aggregate, AggFuncs paramName) {
         StringBuilder sb = new StringBuilder();
@@ -267,37 +273,37 @@ public final class CreateAggregate extends PgParserAbstract {
         int directCount = aggregate.getDirectCount();
         List<Argument> orderByArgs = args.subList(directCount, args.size());
 
-        switch(paramName) {
-        case SFUNC, MSFUNC, MINVFUNC:
-            sb.append(paramName == AggFuncs.SFUNC ? sType : mSType).append(", ");
-            fillStringByArgs(sb, orderByArgs.isEmpty() ? args : orderByArgs);
-            break;
-        case FINALFUNC, MFINALFUNC:
-            sb.append(paramName == AggFuncs.FINALFUNC ? sType : mSType).append(", ");
-            if (directCount > 0 && !orderByArgs.isEmpty()) {
-            // for signature: aggregateName(mode name type, ... ORDER BY modeN nameN typeN, ....)
-                fillStringByArgs(sb, args.subList(0, directCount));
-            }
-            break;
- 
-        case COMBINEFUNC:
-            sb.append(sType).append(", ").append(sType).append(", ");
-            break;
+        switch (paramName) {
+            case SFUNC, MSFUNC, MINVFUNC:
+                sb.append(paramName == AggFuncs.SFUNC ? sType : mSType).append(", ");
+                fillStringByArgs(sb, orderByArgs.isEmpty() ? args : orderByArgs);
+                break;
+            case FINALFUNC, MFINALFUNC:
+                sb.append(paramName == AggFuncs.FINALFUNC ? sType : mSType).append(", ");
+                if (directCount > 0 && !orderByArgs.isEmpty()) {
+                    // for signature: aggregateName(mode name type, ... ORDER BY modeN nameN typeN, ....)
+                    fillStringByArgs(sb, args.subList(0, directCount));
+                }
+                break;
 
-        case DESERIALFUNC:
-            sb.append("bytea").append(", ");
-            fillStringByArgs(sb, args);
-            break;
+            case COMBINEFUNC:
+                sb.append(sType).append(", ").append(sType).append(", ");
+                break;
 
-        case SERIALFUNC:
-            // Signature 'aggregateName(*)' with 'SERIALFUNC'-parameter could not be created.
-            fillStringByArgs(sb, args);
-            break;
+            case DESERIALFUNC:
+                sb.append("bytea").append(", ");
+                fillStringByArgs(sb, args);
+                break;
 
-        default:
-            throw new IllegalStateException("The parameter '" + paramName
-                    + "' of AGGREGATE '" + aggregate.getName()
-                    + "' is not processed!"); //$NON-NLS-1$
+            case SERIALFUNC:
+                // Signature 'aggregateName(*)' with 'SERIALFUNC'-parameter could not be created.
+                fillStringByArgs(sb, args);
+                break;
+
+            default:
+                throw new IllegalStateException("The parameter '" + paramName
+                        + "' of AGGREGATE '" + aggregate.getName()
+                        + "' is not processed!"); //$NON-NLS-1$
         }
 
         sb.setLength(sb.length() - 2);
@@ -312,6 +318,12 @@ public final class CreateAggregate extends PgParserAbstract {
         }
     }
 
+    /**
+     * Gets the sort operator signature for the aggregate's sort operation.
+     *
+     * @param aggr the aggregate object
+     * @return the sort operator signature string
+     */
     public static String getSortOperSign(PgAggregate aggr) {
         String argType = aggr.getArguments().get(0).getDataType();
         return '(' + argType + ", " + argType + ')';

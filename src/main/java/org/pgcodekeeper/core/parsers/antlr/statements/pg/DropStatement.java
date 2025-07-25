@@ -15,35 +15,36 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Drop_cast_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Drop_database_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Drop_function_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Drop_operator_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Drop_policy_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Drop_rule_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Drop_statementsContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Drop_trigger_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Drop_user_mapping_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.IdentifierContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Operator_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_dropContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_qualified_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Target_operatorContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL DROP statements.
+ * <p>
+ * This class handles parsing of various DROP statements including DROP TABLE,
+ * DROP FUNCTION, DROP PROCEDURE, DROP AGGREGATE, DROP TRIGGER, DROP RULE,
+ * DROP POLICY, DROP OPERATOR, DROP CAST, DROP USER MAPPING, and other
+ * database object types.
+ */
 public final class DropStatement extends PgParserAbstract {
 
     private final Schema_dropContext ctx;
 
+    /**
+     * Constructs a new DropStatement parser.
+     *
+     * @param ctx      the schema drop context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public DropStatement(Schema_dropContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -73,9 +74,14 @@ public final class DropStatement extends PgParserAbstract {
     }
 
     private void dropDatabase(Drop_database_statementContext ctx) {
-        addObjReference(Arrays.asList(ctx.identifier()), DbObjType.DATABASE, ACTION_DROP);
+        addObjReference(Collections.singletonList(ctx.identifier()), DbObjType.DATABASE, ACTION_DROP);
     }
 
+    /**
+     * Processes a DROP FUNCTION, DROP PROCEDURE, or DROP AGGREGATE statement.
+     *
+     * @param ctx the drop function statement context
+     */
     public void dropFunction(Drop_function_statementContext ctx) {
         DbObjType type;
         if (ctx.PROCEDURE() != null) {
@@ -95,7 +101,7 @@ public final class DropStatement extends PgParserAbstract {
     }
 
     private void dropCast(Drop_cast_statementContext ctx) {
-        addObjReference(Arrays.asList(ctx.cast_name()), DbObjType.CAST, ACTION_DROP);
+        addObjReference(Collections.singletonList(ctx.cast_name()), DbObjType.CAST, ACTION_DROP);
     }
 
     private void dropTrigger(Drop_trigger_statementContext ctx) {
@@ -113,7 +119,7 @@ public final class DropStatement extends PgParserAbstract {
     }
 
     private void dropUserMapping(Drop_user_mapping_statementContext ctx) {
-        addObjReference(Arrays.asList(ctx.user_mapping_name()), DbObjType.USER_MAPPING, ACTION_DROP);
+        addObjReference(Collections.singletonList(ctx.user_mapping_name()), DbObjType.USER_MAPPING, ACTION_DROP);
     }
 
     private void dropChild(List<ParserRuleContext> tableIds, IdentifierContext nameCtx, DbObjType type) {
@@ -210,7 +216,7 @@ public final class DropStatement extends PgParserAbstract {
         DbObjType type = null;
         if (ctx.drop_database_statement() != null) {
             Drop_database_statementContext dropDbCtx = ctx.drop_database_statement();
-            ids = Arrays.asList(dropDbCtx.identifier());
+            ids = Collections.singletonList(dropDbCtx.identifier());
             type = DbObjType.DATABASE;
         } else if (ctx.drop_function_statement() != null) {
             Drop_function_statementContext dropFuncCtx = ctx.drop_function_statement();
@@ -256,11 +262,9 @@ public final class DropStatement extends PgParserAbstract {
             ids = targetOpers.size() == 1 ? getIdentifiers(nameCtx) : Collections.emptyList();
             type = DbObjType.OPERATOR;
         } else if (ctx.drop_cast_statement() != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(ACTION_DROP).append(' ').append(DbObjType.CAST).append(" (");
-            sb.append(getCastName(ctx.drop_cast_statement().cast_name()));
-            sb.append(')');
-            return sb.toString();
+            return ACTION_DROP + ' ' + DbObjType.CAST + " (" +
+                    getCastName(ctx.drop_cast_statement().cast_name()) +
+                    ')';
         }
         return type != null ? getStrForStmtAction(ACTION_DROP, type, ids) : null;
     }

@@ -15,12 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -30,34 +24,40 @@ import org.pgcodekeeper.core.parsers.antlr.CodeUnitToken;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.statements.ParserAbstract;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.Argument;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.ICast;
-import org.pgcodekeeper.core.schema.ISimpleColumnContainer;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.SimpleColumn;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.PgObjLocation.LocationType;
-import org.pgcodekeeper.core.schema.pg.AbstractPgFunction;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgFunction;
-import org.pgcodekeeper.core.schema.pg.PgOperator;
-import org.pgcodekeeper.core.schema.pg.PgSchema;
+import org.pgcodekeeper.core.schema.pg.*;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 /**
- * Abstract Class contents common operations for parsing
+ * Abstract base class for PostgreSQL statement parsers that provides common
+ * operations and utilities for parsing PostgreSQL database objects.
+ * <p>
+ * This class extends ParserAbstract to handle PostgreSQL-specific parsing
+ * operations such as column definitions, data types, operators, and other
+ * database constructs specific to PostgreSQL syntax.
  */
 public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
 
+    /**
+     * Constructs a new PostgreSQL parser with the specified database and settings.
+     *
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     protected PgParserAbstract(PgDatabase db, ISettings settings) {
         super(db, settings);
     }
 
     protected void fillSimpleColumns(ISimpleColumnContainer cont,
-            List<Index_columnContext> cols, List<All_opContext> operators) {
+                                     List<Index_columnContext> cols, List<All_opContext> operators) {
         // we need this variable for take correct context from List
         int counter = 0;
 
@@ -154,6 +154,13 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
         };
     }
 
+    /**
+     * Unquotes a string constant from a parser context and returns both the unquoted
+     * string and the corresponding token.
+     *
+     * @param ctx the string constant context to unquote
+     * @return a pair containing the unquoted string and its token
+     */
     public static Pair<String, Token> unquoteQuotedString(SconstContext ctx) {
         TerminalNode string = ctx.StringConstant();
         if (string == null) {
@@ -181,6 +188,12 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
         return new Pair<>(s, dollarText.get(0).getSymbol());
     }
 
+    /**
+     * Extracts identifier contexts from a schema-qualified name context.
+     *
+     * @param qNameCtx the schema-qualified name context
+     * @return a list of parser rule contexts representing the identifiers
+     */
     public static List<ParserRuleContext> getIdentifiers(Schema_qualified_nameContext qNameCtx) {
         List<ParserRuleContext> ids = new ArrayList<>(3);
         ids.add(qNameCtx.identifier());
@@ -188,6 +201,12 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
         return ids;
     }
 
+    /**
+     * Extracts identifier contexts from a schema-qualified non-type name context.
+     *
+     * @param qNameNonTypeCtx the schema-qualified non-type name context
+     * @return a list of parser rule contexts representing the identifiers
+     */
     public static List<ParserRuleContext> getIdentifiers(Schema_qualified_name_nontypeContext qNameNonTypeCtx) {
         List<ParserRuleContext> ids;
         Identifier_nontypeContext singleId = qNameNonTypeCtx.identifier_nontype();
@@ -202,6 +221,12 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
         return ids;
     }
 
+    /**
+     * Extracts identifier contexts from an operator name context.
+     *
+     * @param operQNameCtx the operator name context
+     * @return a list of parser rule contexts representing the operator identifiers
+     */
     public static List<ParserRuleContext> getIdentifiers(Operator_nameContext operQNameCtx) {
         List<ParserRuleContext> ids = new ArrayList<>(2);
         ids.add(operQNameCtx.schema_name);
@@ -209,6 +234,13 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
         return ids;
     }
 
+    /**
+     * Extracts the normalized type name from a data type context, converting
+     * PostgreSQL type aliases to their canonical forms.
+     *
+     * @param datatype the data type context
+     * @return the normalized type name string
+     */
     public static String getTypeName(Data_typeContext datatype) {
         String full = getFullCtxText(datatype);
         Predefined_typeContext typeCtx = datatype.predefined_type();
@@ -230,14 +262,21 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
         String alias = type.toLowerCase(Locale.ROOT);
 
         switch (alias) {
-        case "int8": return "bigint";
-        case "bool": return "boolean";
-        case "float8": return "double precision";
-        case "int":
-        case "int4": return "integer";
-        case "float4": return "real";
-        case "int2": return "smallint";
-        default: break;
+            case "int8":
+                return "bigint";
+            case "bool":
+                return "boolean";
+            case "float8":
+                return "double precision";
+            case "int":
+            case "int4":
+                return "integer";
+            case "float4":
+                return "real";
+            case "int2":
+                return "smallint";
+            default:
+                break;
         }
 
         if (PgDiffUtils.startsWithId(alias, "varbit", 0)) {
@@ -267,6 +306,13 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
         return type;
     }
 
+    /**
+     * Parses an operator signature from the operator name and arguments context.
+     *
+     * @param name            the operator name
+     * @param operatorArgsCtx the operator arguments context
+     * @return the formatted operator signature string
+     */
     public static String parseOperatorSignature(String name, Operator_argsContext operatorArgsCtx) {
         PgOperator oper = new PgOperator(name);
         Data_typeContext leftType = null;
@@ -281,10 +327,23 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
         return oper.getSignature();
     }
 
+    /**
+     * Parses function arguments from the function arguments context.
+     *
+     * @param argsContext the function arguments context
+     * @return the formatted arguments string
+     */
     public String parseArguments(Function_argsContext argsContext) {
         return parseSignature(null, argsContext);
     }
 
+    /**
+     * Parses a function signature from the function name and arguments context.
+     *
+     * @param name        the function name (can be null for unnamed functions)
+     * @param argsContext the function arguments context
+     * @return the formatted function signature string
+     */
     public static String parseSignature(String name, Function_argsContext argsContext) {
         AbstractPgFunction function = new PgFunction(name == null ? "noname" : name);
         fillFuncArgs(argsContext.function_arguments(), function);
@@ -337,7 +396,7 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
 
     @Override
     protected PgObjLocation getLocation(List<? extends ParserRuleContext> ids, DbObjType type, String action,
-            boolean isDep, String signature, LocationType locationType) {
+                                        boolean isDep, String signature, LocationType locationType) {
         if (type == DbObjType.CAST) {
             ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
             return buildLocation(nameCtx, action, locationType,

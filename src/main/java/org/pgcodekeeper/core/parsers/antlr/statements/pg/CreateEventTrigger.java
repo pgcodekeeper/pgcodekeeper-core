@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.Arrays;
-import java.util.Locale;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_event_trigger_statementContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Event_trigger_filter_variablesContext;
@@ -26,11 +23,33 @@ import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgEventTrigger;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Collections;
+import java.util.Locale;
+
+/**
+ * Parser for PostgreSQL CREATE EVENT TRIGGER statements.
+ * <p>
+ * This class handles parsing of event trigger definitions including
+ * trigger events (DDL_COMMAND_START, DDL_COMMAND_END, TABLE_REWRITE),
+ * filter conditions using tag matching, and the executable function
+ * that responds to the database events.
+ */
 public final class CreateEventTrigger extends PgParserAbstract {
 
-    private static final String TAG = "tag";
+    /**
+     * Constant for the "tag" filter variable name.
+     */
+    public static final String TAG = "tag";
+
     private final Create_event_trigger_statementContext ctx;
 
+    /**
+     * Constructs a new CreateEventTrigger parser.
+     *
+     * @param ctx      the CREATE EVENT TRIGGER statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CreateEventTrigger(Create_event_trigger_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -57,11 +76,11 @@ public final class CreateEventTrigger extends PgParserAbstract {
         if (funcNameCtx.schema != null) {
             addDepSafe(eventTrigger, getIdentifiers(funcNameCtx), DbObjType.FUNCTION, "()");
         }
-        addSafe(db, eventTrigger, Arrays.asList(ctx.name));
+        addSafe(db, eventTrigger, Collections.singletonList(ctx.name));
     }
 
     @Override
     protected String getStmtAction() {
-        return getStrForStmtAction(ACTION_CREATE, DbObjType.EVENT_TRIGGER, Arrays.asList(ctx.name));
+        return getStrForStmtAction(ACTION_CREATE, DbObjType.EVENT_TRIGGER, Collections.singletonList(ctx.name));
     }
 }

@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
@@ -29,36 +25,38 @@ import org.pgcodekeeper.core.parsers.antlr.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.VexAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
-import org.pgcodekeeper.core.schema.AbstractConstraint;
-import org.pgcodekeeper.core.schema.AbstractIndex;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.IRelation;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.PgStatementContainer;
-import org.pgcodekeeper.core.schema.pg.AbstractPgTable;
-import org.pgcodekeeper.core.schema.pg.AbstractRegularTable;
-import org.pgcodekeeper.core.schema.pg.PartitionGpTable;
-import org.pgcodekeeper.core.schema.pg.PartitionTemplateContainer;
-import org.pgcodekeeper.core.schema.pg.PgColumn;
-import org.pgcodekeeper.core.schema.pg.PgConstraint;
-import org.pgcodekeeper.core.schema.pg.PgConstraintPk;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgRule;
-import org.pgcodekeeper.core.schema.pg.PgSequence;
-import org.pgcodekeeper.core.schema.pg.PgTrigger;
-import org.pgcodekeeper.core.schema.pg.TriggerState;
+import org.pgcodekeeper.core.schema.*;
+import org.pgcodekeeper.core.schema.pg.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL ALTER TABLE statements.
+ * <p>
+ * This class handles parsing of table alterations including adding/dropping columns,
+ * modifying constraints, changing table properties, managing triggers and rules,
+ * setting table ownership, and handling Greenplum partition templates.
+ */
 public final class AlterTable extends TableAbstract {
 
     private final Alter_table_statementContext ctx;
     private final String tablespace;
     private final CommonTokenStream stream;
 
+    /**
+     * Constructs a new AlterTable parser.
+     *
+     * @param ctx        the ALTER TABLE statement context
+     * @param db         the PostgreSQL database object
+     * @param tablespace the default tablespace name
+     * @param stream     the token stream for parsing
+     * @param settings   the ISettings object
+     */
     public AlterTable(Alter_table_statementContext ctx, PgDatabase db, String tablespace, CommonTokenStream stream,
-            ISettings settings) {
+                      ISettings settings) {
         super(db, stream, settings);
         this.ctx = ctx;
         this.tablespace = tablespace;
@@ -70,7 +68,7 @@ public final class AlterTable extends TableAbstract {
         List<ParserRuleContext> ids = getIdentifiers(ctx.name);
         AbstractSchema schema = getSchemaSafe(ids);
         ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
-        AbstractPgTable tabl = null;
+        AbstractPgTable tabl;
 
         PgObjLocation loc = addObjReference(ids, DbObjType.TABLE, ACTION_ALTER);
 
@@ -108,7 +106,7 @@ public final class AlterTable extends TableAbstract {
 
             if (tablAction.drop_constraint() != null) {
                 addObjReference(Arrays.asList(QNameParser.getSchemaNameCtx(ids), nameCtx,
-                        tablAction.drop_constraint().constraint_name),
+                                tablAction.drop_constraint().constraint_name),
                         DbObjType.CONSTRAINT, ACTION_DROP);
             }
 
@@ -196,8 +194,15 @@ public final class AlterTable extends TableAbstract {
 
     }
 
+    /**
+     * Parses Greenplum partition template specifications from ALTER PARTITION clause.
+     *
+     * @param tabl           the Greenplum partitioned table to modify
+     * @param alterPartition the ALTER PARTITION context
+     * @param stream         the token stream for parsing
+     */
     public static void parseGpPartitionTemplate(PartitionGpTable tabl, Alter_partition_gpContext alterPartition,
-            CommonTokenStream stream) {
+                                                CommonTokenStream stream) {
         // ALTER PARTITION partition_name clause
         String partitionName = null;
         var alterPartitionClause = alterPartition.alter_partition_gp_name();
@@ -219,7 +224,7 @@ public final class AlterTable extends TableAbstract {
     }
 
     private void parseColumnAction(AbstractSchema schema, PgColumn col,
-            Column_actionContext colAction) {
+                                   Column_actionContext colAction) {
         // column statistics
         Set_statisticsContext statistics = colAction.set_statistics();
         if (statistics != null) {
@@ -340,7 +345,7 @@ public final class AlterTable extends TableAbstract {
     }
 
     public AbstractConstraint parseAlterTableConstraint(Table_actionContext tableAction,
-            PgConstraint constrBlank, String schemaName, String tableName, String location) {
+                                                        PgConstraint constrBlank, String schemaName, String tableName, String location) {
         processTableConstraintBlank(tableAction.tabl_constraint, constrBlank,
                 schemaName, tableName, tablespace, location);
         return constrBlank;

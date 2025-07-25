@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
@@ -26,10 +24,26 @@ import org.pgcodekeeper.core.schema.pg.PgCollation;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE COLLATION statements.
+ * <p>
+ * This class handles parsing of collation definitions including locale settings
+ * (LC_COLLATE, LC_CTYPE), provider information, rules, and deterministic
+ * behavior options for text sorting and comparison.
+ */
 public final class CreateCollation extends PgParserAbstract {
 
     private final Create_collation_statementContext ctx;
 
+    /**
+     * Constructs a new CreateCollation parser.
+     *
+     * @param ctx      the CREATE COLLATION statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CreateCollation(Create_collation_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;

@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
@@ -29,11 +27,26 @@ import org.pgcodekeeper.core.schema.pg.PgIndex;
 import org.pgcodekeeper.core.schema.pg.PgSchema;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL ALTER INDEX statements.
+ * <p>
+ * This class handles parsing of index alterations including index inheritance
+ * operations and ALTER INDEX ALL statements that affect all indexes in a tablespace.
+ */
 public final class AlterIndex extends PgParserAbstract {
 
     private final Alter_index_statementContext ctx;
     private final String alterIdxAllAction;
 
+    /**
+     * Constructs a new AlterIndex parser.
+     *
+     * @param ctx      the ALTER INDEX statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public AlterIndex(Alter_index_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -74,7 +87,7 @@ public final class AlterIndex extends PgParserAbstract {
             if (index == null) {
                 getSafe(AbstractSchema::getConstraintByName, schema, inhName);
             } else {
-                doSafe((i,o) -> i.addInherit(inhSchemaName, inhTableName), index, null);
+                doSafe((i, o) -> i.addInherit(inhSchemaName, inhTableName), index, null);
                 addDepSafe(index, ids, DbObjType.INDEX);
             }
 
@@ -87,6 +100,6 @@ public final class AlterIndex extends PgParserAbstract {
     protected String getStmtAction() {
         return alterIdxAllAction != null ? alterIdxAllAction
                 : getStrForStmtAction(ACTION_ALTER, DbObjType.INDEX,
-                        getIdentifiers(ctx.schema_qualified_name()));
+                getIdentifiers(ctx.schema_qualified_name()));
     }
 }

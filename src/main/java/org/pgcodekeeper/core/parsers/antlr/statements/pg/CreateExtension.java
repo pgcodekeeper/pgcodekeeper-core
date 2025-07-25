@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.Arrays;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_extension_statementContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.IdentifierContext;
@@ -24,10 +22,26 @@ import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgExtension;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE EXTENSION statements.
+ * <p>
+ * This class handles parsing of extension creation statements, including
+ * the extension name and optional schema specification where the extension
+ * should be installed.
+ */
 public final class CreateExtension extends PgParserAbstract {
 
     private final Create_extension_statementContext ctx;
 
+    /**
+     * Constructs a new CreateExtension parser.
+     *
+     * @param ctx      the CREATE EXTENSION statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CreateExtension(Create_extension_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -40,10 +54,10 @@ public final class CreateExtension extends PgParserAbstract {
         IdentifierContext id = ctx.schema;
         if (id != null) {
             ext.setSchema(id.getText());
-            addDepSafe(ext, Arrays.asList(id), DbObjType.SCHEMA);
+            addDepSafe(ext, List.of(id), DbObjType.SCHEMA);
         }
 
-        addSafe(db, ext, Arrays.asList(nameCtx));
+        addSafe(db, ext, List.of(nameCtx));
     }
 
     @Override

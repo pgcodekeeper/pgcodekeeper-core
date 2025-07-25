@@ -15,21 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.Consts.FUNC_SIGN;
+import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.AntlrParser;
-import org.pgcodekeeper.core.parsers.antlr.AntlrTask;
-import org.pgcodekeeper.core.parsers.antlr.AntlrTaskManager;
-import org.pgcodekeeper.core.parsers.antlr.AntlrUtils;
-import org.pgcodekeeper.core.parsers.antlr.QNameParser;
+import org.pgcodekeeper.core.parsers.antlr.*;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.FuncProcAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.VexAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
@@ -42,17 +34,39 @@ import org.pgcodekeeper.core.schema.pg.PgProcedure;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
+
+/**
+ * Parser for PostgreSQL CREATE FUNCTION and CREATE PROCEDURE statements.
+ * <p>
+ * This class handles parsing of function and procedure definitions, including
+ * their parameters, return types, body, language, and various attributes such as
+ * volatility, security, parallel execution, and configuration parameters.
+ */
 public final class CreateFunction extends PgParserAbstract {
 
-    private static final String DEFAULT = "DEFAULT";
+    /**
+     * Default value constant used in configuration parameters.
+     */
+    public static final String DEFAULT = "DEFAULT";
 
     private final List<Object> errors;
     private final Queue<AntlrTask<?>> antlrTasks;
     private final Create_function_statementContext ctx;
 
-
+    /**
+     * Constructs a new CreateFunction parser.
+     *
+     * @param ctx        the CREATE FUNCTION statement context
+     * @param db         the PostgreSQL database object
+     * @param errors     list to collect parsing errors
+     * @param antlrTasks queue for scheduling ANTLR analysis tasks
+     * @param settings   the ISettings object
+     */
     public CreateFunction(Create_function_statementContext ctx, PgDatabase db,
-            List<Object> errors, Queue<AntlrTask<?>> antlrTasks, ISettings settings) {
+                          List<Object> errors, Queue<AntlrTask<?>> antlrTasks, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
         this.errors = errors;
@@ -129,7 +143,7 @@ public final class CreateFunction extends PgParserAbstract {
 
                     sb.append(PgDiffUtils.quoteString(probin)).append(", ");
 
-                    if (!symbol.contains("\'") && !symbol.contains("\\")) {
+                    if (!symbol.contains("'") && !symbol.contains("\\")) {
                         sb.append(PgDiffUtils.quoteString(symbol));
                     } else {
                         sb.append(PgDiffUtils.quoteStringDollar(symbol));
@@ -255,7 +269,7 @@ public final class CreateFunction extends PgParserAbstract {
     }
 
     private void analyzeFunctionDefinition(AbstractPgFunction function, String language,
-            SconstContext definition, List<Pair<String, GenericColumn>> funcArgs) {
+                                           SconstContext definition, List<Pair<String, GenericColumn>> funcArgs) {
         Pair<String, Token> pair = unquoteQuotedString(definition);
         String def = pair.getFirst();
         Token start = pair.getSecond();
@@ -294,7 +308,7 @@ public final class CreateFunction extends PgParserAbstract {
     }
 
     private void analyzeFunctionBody(AbstractPgFunction function, Function_bodyContext body,
-            List<Pair<String, GenericColumn>> funcArgs) {
+                                     List<Pair<String, GenericColumn>> funcArgs) {
         // finalizer-only task, defers analyzer until finalizing stage
         AntlrTaskManager.submit(antlrTasks, () -> body,
                 funcCtx -> {
@@ -348,6 +362,6 @@ public final class CreateFunction extends PgParserAbstract {
     protected String getStmtAction() {
         return getStrForStmtAction(ACTION_CREATE,
                 ctx.PROCEDURE() != null ? DbObjType.PROCEDURE : DbObjType.FUNCTION,
-                        getIdentifiers(ctx.function_parameters().schema_qualified_name()));
+                getIdentifiers(ctx.function_parameters().schema_qualified_name()));
     }
 }

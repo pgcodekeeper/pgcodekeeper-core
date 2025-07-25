@@ -20,10 +20,22 @@ import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Delete_stmt_for_p
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+/**
+ * PostgreSQL DELETE statement parser that handles data deletion operations.
+ * Extends {@link PgParserAbstract} to provide parsing functionality for
+ * DELETE FROM statements which remove rows from a table.
+ */
 public final class DeleteStatement extends PgParserAbstract {
 
     private final Delete_stmt_for_psqlContext ctx;
 
+    /**
+     * Constructs a DELETE statement parser.
+     *
+     * @param ctx      the ANTLR parser context for the DELETE statement
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public DeleteStatement(Delete_stmt_for_psqlContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
