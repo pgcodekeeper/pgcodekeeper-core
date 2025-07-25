@@ -15,11 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
@@ -34,10 +29,29 @@ import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgPolicy;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * Parser for PostgreSQL CREATE POLICY statements.
+ * <p>
+ * This class handles parsing of row-level security policy definitions including
+ * policy type (permissive/restrictive), events (SELECT, INSERT, UPDATE, DELETE),
+ * target roles, and policy expressions (USING and WITH CHECK clauses).
+ */
 public final class CreatePolicy extends PgParserAbstract {
 
     private final Create_policy_statementContext ctx;
 
+    /**
+     * Constructs a new CreatePolicy parser.
+     *
+     * @param ctx      the CREATE POLICY statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CreatePolicy(Create_policy_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;

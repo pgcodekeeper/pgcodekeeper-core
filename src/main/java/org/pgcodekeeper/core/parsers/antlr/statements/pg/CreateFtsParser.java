@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
@@ -25,10 +23,27 @@ import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgFtsParser;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE TEXT SEARCH PARSER statements.
+ * <p>
+ * This class handles parsing of full-text search parser definitions
+ * including start, gettoken, end, lextypes, and optional headline functions.
+ * Text search parsers break documents into tokens for full-text search
+ * indexing and provide token type information.
+ */
 public final class CreateFtsParser extends PgParserAbstract {
 
     private final Create_fts_parser_statementContext ctx;
 
+    /**
+     * Constructs a new CreateFtsParser parser.
+     *
+     * @param ctx      the CREATE TEXT SEARCH PARSER statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CreateFtsParser(Create_fts_parser_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;

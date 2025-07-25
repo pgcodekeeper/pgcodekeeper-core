@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.text.MessageFormat;
-import java.util.List;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -25,36 +22,53 @@ import org.pgcodekeeper.core.parsers.antlr.AntlrParser;
 import org.pgcodekeeper.core.parsers.antlr.AntlrUtils;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.ViewAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_view_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.IdentifierContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Select_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Storage_parameter_optionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Storage_parametersContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Table_spaceContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.VexContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.schema.pg.AbstractPgView;
 import org.pgcodekeeper.core.schema.pg.MaterializedPgView;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgView;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.text.MessageFormat;
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE VIEW and CREATE MATERIALIZED VIEW statements.
+ * <p>
+ * This class handles parsing of view definitions including regular views,
+ * materialized views, recursive views, and their associated properties such as
+ * column names, storage parameters, tablespace, and check options.
+ */
 public final class CreateView extends PgParserAbstract {
 
-    private static final String RECURSIVE_PATTERN = """
-        CREATE VIEW {0}
-        AS WITH RECURSIVE {0}({1}) AS (
-        {2}
-        )
-        SELECT {1}
-        FROM {0};""";
+    /**
+     * Pattern for transforming recursive view definitions into standard form.
+     */
+    public static final String RECURSIVE_PATTERN = """
+            CREATE VIEW {0}
+            AS WITH RECURSIVE {0}({1}) AS (
+            {2}
+            )
+            SELECT {1}
+            FROM {0};""";
 
     private final Create_view_statementContext context;
     private final String tablespace;
     private final String accessMethod;
     private final CommonTokenStream stream;
 
+    /**
+     * Constructs a new CreateView parser.
+     *
+     * @param context      the CREATE VIEW statement context
+     * @param db           the PostgreSQL database object
+     * @param tablespace   the default tablespace name
+     * @param accessMethod the default access method
+     * @param stream       the token stream for parsing
+     * @param settings     the ISettings object
+     */
     public CreateView(Create_view_statementContext context, PgDatabase db,
-            String tablespace, String accessMethod, CommonTokenStream stream, ISettings settings) {
+                      String tablespace, String accessMethod, CommonTokenStream stream, ISettings settings) {
         super(db, settings);
         this.context = context;
         this.tablespace = tablespace;
@@ -104,15 +118,15 @@ public final class CreateView extends PgParserAbstract {
             }
         }
         Storage_parametersContext storage = ctx.storage_parameters();
-        if (storage != null){
-            List <Storage_parameter_optionContext> options = storage.storage_parameter_option();
-            for (Storage_parameter_optionContext option: options){
+        if (storage != null) {
+            List<Storage_parameter_optionContext> options = storage.storage_parameter_option();
+            for (Storage_parameter_optionContext option : options) {
                 String key = option.storage_parameter_name().getText();
                 VexContext value = option.vex();
                 fillOptionParams(value != null ? value.getText() : "", key, false, view::addOption);
             }
         }
-        if (ctx.with_check_option() != null){
+        if (ctx.with_check_option() != null) {
             view.addOption(AbstractPgView.CHECK_OPTION,
                     ctx.with_check_option().LOCAL() != null ? "local" : "cascaded");
         }

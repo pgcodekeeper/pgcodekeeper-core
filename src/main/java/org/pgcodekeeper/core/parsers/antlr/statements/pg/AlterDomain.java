@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
@@ -29,10 +27,25 @@ import org.pgcodekeeper.core.schema.pg.PgDomain;
 import org.pgcodekeeper.core.schema.pg.PgSchema;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL ALTER DOMAIN statements.
+ * <p>
+ * This class handles parsing of domain alterations, primarily focused on
+ * adding check constraints to existing domains.
+ */
 public final class AlterDomain extends PgParserAbstract {
 
     private final Alter_domain_statementContext ctx;
 
+    /**
+     * Constructs a new AlterDomain parser.
+     *
+     * @param ctx      the ALTER DOMAIN statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public AlterDomain(Alter_domain_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;

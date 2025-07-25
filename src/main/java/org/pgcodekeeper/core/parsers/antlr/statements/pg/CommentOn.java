@@ -15,37 +15,42 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.exception.UnresolvedReferenceException;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Cast_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Comment_member_objectContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Comment_on_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.SconstContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Target_operatorContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.schema.AbstractTable;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.schema.PgStatementContainer;
-import org.pgcodekeeper.core.schema.pg.AbstractPgTable;
-import org.pgcodekeeper.core.schema.pg.AbstractPgView;
-import org.pgcodekeeper.core.schema.pg.PgColumn;
-import org.pgcodekeeper.core.schema.pg.PgCompositeType;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgDomain;
-import org.pgcodekeeper.core.schema.pg.PgSchema;
+import org.pgcodekeeper.core.schema.pg.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
+
+/**
+ * Parser for PostgreSQL COMMENT ON statements.
+ * <p>
+ * This class handles parsing of comments on various database objects including
+ * tables, columns, functions, procedures, operators, constraints, indexes,
+ * views, types, domains, sequences, triggers, rules, policies, and other
+ * PostgreSQL database objects.
+ */
 public final class CommentOn extends PgParserAbstract {
 
     private final Comment_on_statementContext ctx;
 
+    /**
+     * Constructs a new CommentOn parser.
+     *
+     * @param ctx      the COMMENT ON statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CommentOn(Comment_on_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -57,15 +62,15 @@ public final class CommentOn extends PgParserAbstract {
         String comment = str == null ? null : getFullCtxTextWithCheckNewLines(str);
         Comment_member_objectContext obj = ctx.comment_member_object();
 
-        List<ParserRuleContext> ids = null;
+        List<ParserRuleContext> ids;
         if (obj.target_operator() != null) {
             ids = getIdentifiers(obj.target_operator().name);
         } else if (obj.name != null) {
             ids = getIdentifiers(obj.name);
         } else if (obj.cast_name() != null) {
-            ids = Arrays.asList(obj.cast_name());
+            ids = Collections.singletonList(obj.cast_name());
         } else {
-            ids = Arrays.asList(obj.identifier());
+            ids = Collections.singletonList(obj.identifier());
         }
 
         ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
@@ -178,10 +183,10 @@ public final class CommentOn extends PgParserAbstract {
         } else if (obj.INDEX() != null) {
             type = DbObjType.INDEX;
             st = getSafe((sc, n) -> sc.getStatementContainers()
-                    .flatMap(c -> Stream.concat(c.getIndexes().stream(), c.getConstraints().stream()))
-                    .filter(s -> s.getName().equals(n))
-                    .collect(Collectors.reducing((a, b) -> b.getStatementType() == DbObjType.INDEX ? b : a))
-                    .orElse(null),
+                            .flatMap(c -> Stream.concat(c.getIndexes().stream(), c.getConstraints().stream()))
+                            .filter(s -> s.getName().equals(n))
+                            .reduce((a, b) -> b.getStatementType() == DbObjType.INDEX ? b : a)
+                            .orElse(null),
                     schema, nameCtx);
         } else if (obj.SCHEMA() != null && !Consts.PUBLIC.equals(name)) {
             type = DbObjType.SCHEMA;
@@ -247,7 +252,6 @@ public final class CommentOn extends PgParserAbstract {
         } else {
             addObjReference(ids, type, ACTION_COMMENT);
         }
-
     }
 
     @Override

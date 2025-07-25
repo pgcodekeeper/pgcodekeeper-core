@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -25,10 +23,25 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * PostgreSQL UPDATE statement parser that handles data modification operations.
+ * Extends {@link PgParserAbstract} to provide parsing functionality for
+ * UPDATE statements which modify existing rows in a table. This parser
+ * automatically marks the operation as dangerous due to data modification risks.
+ */
 public final class UpdateStatement extends PgParserAbstract {
 
     private final Update_stmt_for_psqlContext ctx;
 
+    /**
+     * Constructs an UPDATE statement parser.
+     *
+     * @param ctx      the ANTLR parser context for the UPDATE statement
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public UpdateStatement(Update_stmt_for_psqlContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;

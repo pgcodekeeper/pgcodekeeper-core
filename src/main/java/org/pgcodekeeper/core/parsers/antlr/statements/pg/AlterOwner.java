@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.List;
-import java.util.Map;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -31,17 +28,43 @@ import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgSchema;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Parser for PostgreSQL ALTER ... OWNER TO statements.
+ * <p>
+ * This class handles parsing of ownership changes for various database objects
+ * including schemas, functions, operators, tables, views, domains, types, and
+ * other PostgreSQL objects. It supports both direct ownership changes and
+ * statement overrides for batch processing.
+ */
 public final class AlterOwner extends PgParserAbstract {
 
     private final Alter_owner_statementContext ctx;
     private final Map<PgStatement, StatementOverride> overrides;
 
+    /**
+     * Constructs a new AlterOwner parser without statement overrides.
+     *
+     * @param ctx      the ALTER ... OWNER TO statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public AlterOwner(Alter_owner_statementContext ctx, PgDatabase db, ISettings settings) {
         this(ctx, db, null, settings);
     }
 
+    /**
+     * Constructs a new AlterOwner parser with optional statement overrides.
+     *
+     * @param ctx       the ALTER ... OWNER TO statement context
+     * @param db        the PostgreSQL database object
+     * @param overrides optional map for statement overrides, may be null
+     * @param settings  the ISettings object
+     */
     public AlterOwner(Alter_owner_statementContext ctx, PgDatabase db,
-            Map<PgStatement, StatementOverride> overrides, ISettings settings) {
+                      Map<PgStatement, StatementOverride> overrides, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
         this.overrides = overrides;
@@ -155,7 +178,7 @@ public final class AlterOwner extends PgParserAbstract {
 
     @Override
     protected String getStmtAction() {
-        DbObjType type = null;
+        DbObjType type;
         var objCtx = ctx.owner_member_object();
         if (objCtx.SCHEMA() != null) {
             type = DbObjType.SCHEMA;

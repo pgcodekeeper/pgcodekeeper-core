@@ -15,40 +15,28 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.AntlrUtils;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Col_labelContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_table_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Data_typeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Define_columnsContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Define_partitionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Define_tableContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Define_typeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Partition_byContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Storage_parameter_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Storage_parameter_oidContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Storage_parameter_optionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.VexContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.With_storage_parameterContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.schema.AbstractColumn;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.pg.AbstractPgTable;
-import org.pgcodekeeper.core.schema.pg.AbstractRegularTable;
-import org.pgcodekeeper.core.schema.pg.PartitionGpTable;
-import org.pgcodekeeper.core.schema.pg.PartitionPgTable;
-import org.pgcodekeeper.core.schema.pg.PgColumn;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgSequence;
-import org.pgcodekeeper.core.schema.pg.SimplePgTable;
-import org.pgcodekeeper.core.schema.pg.TypedPgTable;
+import org.pgcodekeeper.core.schema.pg.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE TABLE statements.
+ * <p>
+ * This class handles parsing of table definitions including regular tables,
+ * partitioned tables, typed tables, and Greenplum-specific table types.
+ * It processes columns, constraints, inheritance, storage parameters, and
+ * table-specific options like tablespace, access method, and OIDs.
+ */
 public final class CreateTable extends TableAbstract {
     private final Create_table_statementContext ctx;
     private final String tablespace;
@@ -56,9 +44,19 @@ public final class CreateTable extends TableAbstract {
     private final String oids;
     private final CommonTokenStream stream;
 
-
+    /**
+     * Constructs a new CreateTable parser.
+     *
+     * @param ctx          the CREATE TABLE statement context
+     * @param db           the PostgreSQL database object
+     * @param tablespace   the default tablespace name
+     * @param accessMethod the default access method
+     * @param oids         the default OIDs setting
+     * @param stream       the token stream for parsing
+     * @param settings     the ISettings object
+     */
     public CreateTable(Create_table_statementContext ctx, PgDatabase db,
-            String tablespace, String accessMethod, String oids, CommonTokenStream stream, ISettings settings) {
+                       String tablespace, String accessMethod, String oids, CommonTokenStream stream, ISettings settings) {
         super(db, stream, settings);
         this.ctx = ctx;
         this.tablespace = tablespace;
@@ -117,7 +115,7 @@ public final class CreateTable extends TableAbstract {
     }
 
     private TypedPgTable defineType(Define_typeContext typeCtx, String tableName,
-            String schemaName) {
+                                    String schemaName) {
         Data_typeContext typeName = typeCtx.type_name;
         String ofType = getTypeName(typeName);
         TypedPgTable table = new TypedPgTable(tableName, ofType);
@@ -182,8 +180,8 @@ public final class CreateTable extends TableAbstract {
         return table;
     }
 
-    private void parseOptions(List<Storage_parameter_optionContext> options, AbstractRegularTable table){
-        for (Storage_parameter_optionContext option : options){
+    private void parseOptions(List<Storage_parameter_optionContext> options, AbstractRegularTable table) {
+        for (Storage_parameter_optionContext option : options) {
             Storage_parameter_nameContext key = option.storage_parameter_name();
             List<Col_labelContext> optionIds = key.col_label();
             VexContext valueCtx = option.vex();
@@ -193,7 +191,7 @@ public final class CreateTable extends TableAbstract {
                 if ("TRUE".equalsIgnoreCase(value) || "'TRUE'".equalsIgnoreCase(value)) {
                     table.setHasOids(true);
                 }
-            } else if("toast".equals(QNameParser.getSecondName(optionIds))) {
+            } else if ("toast".equals(QNameParser.getSecondName(optionIds))) {
                 fillOptionParams(value, QNameParser.getFirstName(optionIds), true, table::addOption);
             } else {
                 fillOptionParams(value, optionText, false, table::addOption);

@@ -20,10 +20,23 @@ import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Merge_stmt_for_ps
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+/**
+ * PostgreSQL MERGE statement parser that handles table merge operations.
+ * Extends {@link PgParserAbstract} to provide parsing functionality for
+ * MERGE INTO statements which conditionally insert, update, or delete rows
+ * in a target table based on matching criteria.
+ */
 public final class MergeStatement extends PgParserAbstract {
 
     private final Merge_stmt_for_psqlContext ctx;
 
+    /**
+     * Constructs a MERGE statement parser.
+     *
+     * @param ctx      the ANTLR parser context for the MERGE statement
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public MergeStatement(Merge_stmt_for_psqlContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;

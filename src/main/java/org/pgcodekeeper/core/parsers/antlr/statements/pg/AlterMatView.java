@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
@@ -28,11 +26,27 @@ import org.pgcodekeeper.core.schema.pg.AbstractPgView;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL ALTER MATERIALIZED VIEW statements.
+ * <p>
+ * This class handles parsing of materialized view alterations including
+ * setting clustered indexes and handling ALTER MATERIALIZED VIEW ALL
+ * operations that affect all materialized views in a tablespace.
+ */
 public final class AlterMatView extends PgParserAbstract {
 
     private final Alter_materialized_view_statementContext ctx;
     private final String action;
 
+    /**
+     * Constructs a new AlterMatView parser.
+     *
+     * @param ctx      the ALTER MATERIALIZED VIEW statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public AlterMatView(Alter_materialized_view_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;

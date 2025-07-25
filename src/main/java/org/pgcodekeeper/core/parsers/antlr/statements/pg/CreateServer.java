@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_server_statementContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Define_foreign_optionsContext;
@@ -27,10 +24,27 @@ import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgServer;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE SERVER statements.
+ * <p>
+ * This class handles parsing of foreign server definitions including
+ * server type, version, associated foreign data wrapper, and server-specific
+ * options. Foreign servers define connections to external data sources.
+ */
 public final class CreateServer extends PgParserAbstract {
 
     private final Create_server_statementContext ctx;
 
+    /**
+     * Constructs a new CreateServer parser.
+     *
+     * @param ctx      the CREATE SERVER statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CreateServer(Create_server_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -48,15 +62,15 @@ public final class CreateServer extends PgParserAbstract {
             server.setVersion(getFullCtxText(ctx.version));
         }
         server.setFdw(ids.get(1).getText());
-        addDepSafe(server, Arrays.asList(ids.get(1)), DbObjType.FOREIGN_DATA_WRAPPER);
+        addDepSafe(server, Collections.singletonList(ids.get(1)), DbObjType.FOREIGN_DATA_WRAPPER);
 
         Define_foreign_optionsContext options = ctx.define_foreign_options();
-        if (options!= null) {
+        if (options != null) {
             for (Foreign_optionContext option : options.foreign_option()) {
                 fillOptionParams(option.sconst().getText(), option.col_label().getText(), false, server::addOption);
             }
         }
-        addSafe(db, server, Arrays.asList(ids.get(0)));
+        addSafe(db, server, Collections.singletonList(ids.get(0)));
     }
 
     @Override

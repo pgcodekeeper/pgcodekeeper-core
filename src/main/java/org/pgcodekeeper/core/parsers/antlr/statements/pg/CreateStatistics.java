@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -30,13 +28,31 @@ import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgStatistics;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE STATISTICS statements.
+ * <p>
+ * This class handles parsing of extended statistics definitions including
+ * statistics kinds (ndistinct, dependencies, mcv), target table references,
+ * and column expressions. Extended statistics provide improved query planning
+ * by collecting multi-column statistics.
+ */
 public final class CreateStatistics extends PgParserAbstract {
 
     private final Create_statistics_statementContext ctx;
     private final CommonTokenStream stream;
 
+    /**
+     * Constructs a new CreateStatistics parser.
+     *
+     * @param ctx      the CREATE STATISTICS statement context
+     * @param db       the PostgreSQL database object
+     * @param stream   the token stream for parsing expressions
+     * @param settings the ISettings object
+     */
     public CreateStatistics(Create_statistics_statementContext ctx, PgDatabase db, CommonTokenStream stream,
-            ISettings settings) {
+                            ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
         this.stream = stream;
@@ -58,6 +74,11 @@ public final class CreateStatistics extends PgParserAbstract {
         addSafe(getSchemaSafe(ids), stat, ids);
     }
 
+    /**
+     * Parses statistics configuration from the statement context.
+     *
+     * @param stat the statistics object to populate with parsed data
+     */
     public void parseStatistics(PgStatistics stat) {
         if (ctx.kind != null) {
             for (IdentifierContext k : ctx.kind.identifier()) {

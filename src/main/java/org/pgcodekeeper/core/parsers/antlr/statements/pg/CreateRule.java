@@ -15,11 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -35,9 +30,29 @@ import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgRule;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * Parser for PostgreSQL CREATE RULE statements.
+ * <p>
+ * This class handles parsing of rewrite rule definitions including rule events
+ * (SELECT, INSERT, UPDATE, DELETE), conditions, and action commands.
+ * Rules provide a mechanism for query rewriting and can implement views,
+ * triggers, and other query transformations.
+ */
 public final class CreateRule extends PgParserAbstract {
     private final Create_rewrite_statementContext ctx;
 
+    /**
+     * Constructs a new CreateRule parser.
+     *
+     * @param ctx      the CREATE RULE statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CreateRule(Create_rewrite_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -50,7 +65,7 @@ public final class CreateRule extends PgParserAbstract {
 
         PgRule rule = new PgRule(ctx.name.getText());
         rule.setEvent(EventType.valueOf(ctx.event.getText().toUpperCase(Locale.ROOT)));
-        if (ctx.INSTEAD() != null){
+        if (ctx.INSTEAD() != null) {
             rule.setInstead(true);
         }
 
@@ -63,7 +78,7 @@ public final class CreateRule extends PgParserAbstract {
     }
 
     public static void setConditionAndAddCommands(Create_rewrite_statementContext ctx,
-            PgRule rule, AbstractDatabase db, String location, ISettings settings) {
+                                                  PgRule rule, AbstractDatabase db, String location, ISettings settings) {
         rule.setCondition((ctx.WHERE() != null) ? getFullCtxText(ctx.vex()) : null);
 
         // allows to write a common namespace-setup code with no copy-paste for each cmd type

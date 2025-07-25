@@ -24,10 +24,23 @@ import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+/**
+ * PostgreSQL CREATE SCHEMA statement parser that handles schema creation.
+ * Extends {@link PgParserAbstract} to provide parsing functionality for
+ * CREATE SCHEMA statements which create new database schemas with optional
+ * ownership information.
+ */
 public final class CreateSchema extends PgParserAbstract {
 
     private final Create_schema_statementContext ctx;
 
+    /**
+     * Constructs a CREATE SCHEMA statement parser.
+     *
+     * @param ctx      the ANTLR parser context for the CREATE SCHEMA statement
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CreateSchema(Create_schema_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;

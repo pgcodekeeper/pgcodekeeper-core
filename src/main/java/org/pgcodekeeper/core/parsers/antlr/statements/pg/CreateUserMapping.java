@@ -15,22 +15,34 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.Arrays;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_user_mapping_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Define_foreign_optionsContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Foreign_optionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.User_mapping_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.User_nameContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgUserMapping;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE USER MAPPING statements.
+ * <p>
+ * This class handles parsing of user mapping definitions that associate
+ * database users with foreign servers, including user-specific options
+ * for authentication and connection parameters. User mappings are used
+ * with foreign data wrappers to access external data sources.
+ */
 public final class CreateUserMapping extends PgParserAbstract {
 
     private final Create_user_mapping_statementContext ctx;
 
+    /**
+     * Constructs a new CreateUserMapping parser.
+     *
+     * @param ctx      the CREATE USER MAPPING statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CreateUserMapping(Create_user_mapping_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -47,7 +59,7 @@ public final class CreateUserMapping extends PgParserAbstract {
         String server = userMapping.identifier().getText();
 
         PgUserMapping usm = new PgUserMapping(userName.getText(), server);
-        addDepSafe(usm, Arrays.asList(userMapping.identifier()), DbObjType.SERVER);
+        addDepSafe(usm, Collections.singletonList(userMapping.identifier()), DbObjType.SERVER);
 
         Define_foreign_optionsContext options = ctx.define_foreign_options();
         if (options != null) {
@@ -55,14 +67,12 @@ public final class CreateUserMapping extends PgParserAbstract {
                 fillOptionParams(option.sconst().getText(), option.col_label().getText(), false, usm::addOption);
             }
         }
-        addSafe(db, usm, Arrays.asList(userMapping));
+        addSafe(db, usm, List.of(userMapping));
     }
 
     @Override
     protected String getStmtAction() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(ACTION_CREATE).append(' ').append(DbObjType.USER_MAPPING).append(" ");
-        sb.append(getUserMappingName(ctx.user_mapping_name()));
-        return sb.toString();
+        return ACTION_CREATE + ' ' + DbObjType.USER_MAPPING + " " +
+                getUserMappingName(ctx.user_mapping_name());
     }
 }

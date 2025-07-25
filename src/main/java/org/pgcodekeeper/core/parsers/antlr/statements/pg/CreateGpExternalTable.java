@@ -15,34 +15,43 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.List;
-import java.util.Locale;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_table_external_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Define_foreign_optionsContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.External_table_executeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.External_table_formatContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.External_table_locationContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.External_table_logContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Foreign_optionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Format_optionsContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.IdentifierContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.AbstractTable;
 import org.pgcodekeeper.core.schema.pg.GpExternalTable;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * Parser for Greenplum CREATE EXTERNAL TABLE statements.
+ * <p>
+ * This class handles parsing of Greenplum-specific external table definitions
+ * including location specifications, execution commands, format options
+ * (CSV, text, custom), encoding settings, error logging, and distribution
+ * clauses. External tables provide access to data in external files or
+ * through custom protocols.
+ */
 public final class CreateGpExternalTable extends TableAbstract {
 
     private final Create_table_external_statementContext ctx;
 
+    /**
+     * Constructs a new CreateGpExternalTable parser.
+     *
+     * @param db       the PostgreSQL database object
+     * @param stream   the token stream for parsing
+     * @param ctx      the CREATE EXTERNAL TABLE statement context
+     * @param settings the ISettings object
+     */
     public CreateGpExternalTable(PgDatabase db, CommonTokenStream stream,
-            Create_table_external_statementContext ctx, ISettings settings) {
+                                 Create_table_external_statementContext ctx, ISettings settings) {
         super(db, stream, settings);
         this.ctx = ctx;
     }
@@ -89,7 +98,7 @@ public final class CreateGpExternalTable extends TableAbstract {
             } else if (executeCtx.segment_nubmer != null) {
                 table.setExLocation("ON " + executeCtx.segment_nubmer.getText());
             } else if (executeCtx.HOST() != null) {
-                if (executeCtx.hostname != null ) {
+                if (executeCtx.hostname != null) {
                     table.setExLocation("ON HOST " + getFullCtxText(executeCtx.hostname));
                 } else {
                     table.setExLocation("ON HOST");

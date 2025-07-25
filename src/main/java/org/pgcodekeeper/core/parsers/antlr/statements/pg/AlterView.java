@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -30,11 +28,28 @@ import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgView;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL ALTER VIEW statements.
+ * <p>
+ * This class handles parsing of view alterations including setting and dropping
+ * default values for view columns. These operations affect how the view
+ * behaves during INSERT operations.
+ */
 public final class AlterView extends PgParserAbstract {
 
     private final Alter_view_statementContext ctx;
     private final CommonTokenStream stream;
 
+    /**
+     * Constructs a new AlterView parser.
+     *
+     * @param ctx      the ALTER VIEW statement context
+     * @param db       the PostgreSQL database object
+     * @param stream   the token stream for parsing
+     * @param settings the ISettings object
+     */
     public AlterView(Alter_view_statementContext ctx, PgDatabase db, CommonTokenStream stream, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;

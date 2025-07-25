@@ -15,26 +15,39 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.AbstractType;
-import org.pgcodekeeper.core.schema.pg.PgBaseType;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgEventTrigger;
-import org.pgcodekeeper.core.schema.pg.PgSchema;
-import org.pgcodekeeper.core.schema.pg.PgStatistics;
+import org.pgcodekeeper.core.schema.pg.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Parser for miscellaneous PostgreSQL ALTER statements.
+ * <p>
+ * This class handles parsing of various ALTER statements that don't have
+ * dedicated parsers, including ALTER DATABASE, ALTER SCHEMA, ALTER TYPE,
+ * ALTER OPERATOR, ALTER EXTENSION, ALTER FOREIGN DATA WRAPPER, ALTER POLICY,
+ * ALTER COLLATION, ALTER SERVER, ALTER USER MAPPING, ALTER EVENT TRIGGER,
+ * and ALTER STATISTICS.
+ */
 public final class AlterOther extends PgParserAbstract {
 
     private final Schema_alterContext ctx;
 
+    /**
+     * Constructs a new AlterOther parser.
+     *
+     * @param ctx      the schema alter context containing the ALTER statement
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public AlterOther(Schema_alterContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -72,7 +85,7 @@ public final class AlterOther extends PgParserAbstract {
     }
 
     private void alterDatabase(Alter_database_statementContext ctx) {
-        addObjReference(Arrays.asList(ctx.identifier()), DbObjType.DATABASE, ACTION_ALTER);
+        addObjReference(Collections.singletonList(ctx.identifier()), DbObjType.DATABASE, ACTION_ALTER);
     }
 
     private void alterFunction(Alter_function_statementContext ctx) {
@@ -90,7 +103,7 @@ public final class AlterOther extends PgParserAbstract {
     }
 
     private void alterSchema(Alter_schema_statementContext ctx) {
-        addObjReference(Arrays.asList(ctx.identifier()), DbObjType.SCHEMA, ACTION_ALTER);
+        addObjReference(Collections.singletonList(ctx.identifier()), DbObjType.SCHEMA, ACTION_ALTER);
     }
 
     private void alterType(Alter_type_statementContext ctx) {
@@ -125,11 +138,11 @@ public final class AlterOther extends PgParserAbstract {
     }
 
     private void alterExtension(Alter_extension_statementContext ctx) {
-        addObjReference(Arrays.asList(ctx.identifier()), DbObjType.EXTENSION, ACTION_ALTER);
+        addObjReference(Collections.singletonList(ctx.identifier()), DbObjType.EXTENSION, ACTION_ALTER);
     }
 
     private void alterEventTrigger(Alter_event_trigger_statementContext ctx) {
-        addObjReference(Arrays.asList(ctx.identifier()), DbObjType.EVENT_TRIGGER, ACTION_ALTER);
+        addObjReference(Collections.singletonList(ctx.identifier()), DbObjType.EVENT_TRIGGER, ACTION_ALTER);
         PgEventTrigger eventTrigger = getSafe(PgDatabase::getEventTrigger, db, ctx.name);
         if (eventTrigger != null) {
             if (ctx.alter_event_trigger_action().DISABLE() != null) {
@@ -155,7 +168,7 @@ public final class AlterOther extends PgParserAbstract {
     }
 
     private void alterForeignDataWrapper(Alter_foreign_data_wrapperContext ctx) {
-        addObjReference(Arrays.asList(ctx.identifier()), DbObjType.FOREIGN_DATA_WRAPPER, ACTION_ALTER);
+        addObjReference(Collections.singletonList(ctx.identifier()), DbObjType.FOREIGN_DATA_WRAPPER, ACTION_ALTER);
     }
 
     private void alterPolicy(Alter_policy_statementContext ctx) {
@@ -171,11 +184,11 @@ public final class AlterOther extends PgParserAbstract {
     }
 
     private void alterServer(Alter_server_statementContext ctx) {
-        addObjReference(Arrays.asList(ctx.identifier()), DbObjType.SERVER, ACTION_ALTER);
+        addObjReference(Collections.singletonList(ctx.identifier()), DbObjType.SERVER, ACTION_ALTER);
     }
 
     private void alterUserMapping(Alter_user_mapping_statementContext ctx) {
-        addObjReference(Arrays.asList(ctx.user_mapping_name()), DbObjType.USER_MAPPING, ACTION_ALTER);
+        addObjReference(Collections.singletonList(ctx.user_mapping_name()), DbObjType.USER_MAPPING, ACTION_ALTER);
     }
 
     @Override

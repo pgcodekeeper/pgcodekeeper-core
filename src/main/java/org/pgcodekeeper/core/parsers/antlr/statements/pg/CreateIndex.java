@@ -15,45 +15,66 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.IndexAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_index_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.IdentifierContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Including_indexContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Index_restContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Index_whereContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Nulls_distinctionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Storage_parameter_optionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.VexContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.With_storage_parameterContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.PgStatementContainer;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgIndex;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE INDEX statements.
+ * <p>
+ * This class handles parsing of index definitions including unique indexes,
+ * partial indexes, expression indexes, and various index parameters such as
+ * storage parameters, tablespace, and included columns.
+ */
 public final class CreateIndex extends PgParserAbstract {
 
     private final Create_index_statementContext ctx;
     private final String tablespace;
     private final CommonTokenStream stream;
 
+    /**
+     * Constructs a new CreateIndex parser.
+     *
+     * @param ctx        the CREATE INDEX statement context
+     * @param db         the PostgreSQL database object
+     * @param tablespace the default tablespace name
+     * @param stream     the token stream for parsing
+     * @param settings   the ISettings object
+     */
     public CreateIndex(Create_index_statementContext ctx, PgDatabase db, String tablespace, CommonTokenStream stream,
-            ISettings settings) {
+                       ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
         this.tablespace = tablespace;
         this.stream = stream;
     }
 
+    /**
+     * Parses index definition from an index rest context and populates the given index object.
+     *
+     * @param rest       the index rest context containing index definition
+     * @param tablespace the default tablespace name
+     * @param schemaName the schema name containing the index
+     * @param tableName  the table name for the index
+     * @param ind        the index object to populate
+     * @param db         the PostgreSQL database object
+     * @param location   the source location for error reporting
+     * @param stream     the token stream for parsing
+     * @param settings   the ISettings object
+     */
     public static void parseIndex(Index_restContext rest, String tablespace, String schemaName, String tableName,
-            PgIndex ind, PgDatabase db, String location, CommonTokenStream stream, ISettings settings) {
+                                  PgIndex ind, PgDatabase db, String location, CommonTokenStream stream, ISettings settings) {
         new CreateIndex(null, db, tablespace, stream, settings).parseIndex(rest, schemaName, tableName, ind, location);
     }
 
@@ -115,7 +136,7 @@ public final class CreateIndex extends PgParserAbstract {
         }
 
         Index_whereContext wherePart = rest.index_where();
-        if (wherePart != null){
+        if (wherePart != null) {
             ind.setWhere(getExpressionText(wherePart.vex(), stream));
         }
     }

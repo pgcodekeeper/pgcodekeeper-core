@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -29,30 +27,36 @@ import org.pgcodekeeper.core.schema.AbstractTable;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.pg.AbstractForeignTable;
-import org.pgcodekeeper.core.schema.pg.AbstractPgTable;
-import org.pgcodekeeper.core.schema.pg.PgColumn;
-import org.pgcodekeeper.core.schema.pg.PgConstraint;
-import org.pgcodekeeper.core.schema.pg.PgConstraintCheck;
-import org.pgcodekeeper.core.schema.pg.PgConstraintExclude;
-import org.pgcodekeeper.core.schema.pg.PgConstraintFk;
-import org.pgcodekeeper.core.schema.pg.PgConstraintPk;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgIndexParamContainer;
-import org.pgcodekeeper.core.schema.pg.PgSequence;
+import org.pgcodekeeper.core.schema.pg.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Abstract base class for PostgreSQL table-related statement parsers.
+ * <p>
+ * This class provides common functionality for parsing table definitions,
+ * including columns, constraints, inheritance, and storage parameters.
+ * It serves as the foundation for CREATE TABLE and ALTER TABLE parsers.
+ */
 public abstract class TableAbstract extends PgParserAbstract {
 
     private final CommonTokenStream stream;
 
+    /**
+     * Constructs a new TableAbstract parser.
+     *
+     * @param db       the PostgreSQL database object
+     * @param stream   the token stream for parsing
+     * @param settings the ISettings object
+     */
     protected TableAbstract(PgDatabase db, CommonTokenStream stream, ISettings settings) {
         super(db, settings);
         this.stream = stream;
     }
 
     protected void fillTypeColumns(List_of_type_column_defContext columns,
-            AbstractTable table, String schemaName, String tablespace) {
+                                   AbstractTable table, String schemaName, String tablespace) {
         if (columns == null) {
             return;
         }
@@ -66,7 +70,7 @@ public abstract class TableAbstract extends PgParserAbstract {
     }
 
     protected void addTableConstraint(Constraint_commonContext tblConstrCtx,
-            AbstractTable table, String schemaName, String tablespace) {
+                                      AbstractTable table, String schemaName, String tablespace) {
         PgConstraint constrBlank = createTableConstraintBlank(tblConstrCtx);
         processTableConstraintBlank(tblConstrCtx, constrBlank, schemaName,
                 table.getName(), tablespace, fileName);
@@ -74,7 +78,7 @@ public abstract class TableAbstract extends PgParserAbstract {
     }
 
     private void addTableConstraint(Constraint_commonContext ctx, PgColumn col,
-            AbstractTable table, String schemaName) {
+                                    AbstractTable table, String schemaName) {
         Constr_bodyContext body = ctx.constr_body();
         PgConstraint constr = null;
         String colName = col.getName();
@@ -142,7 +146,7 @@ public abstract class TableAbstract extends PgParserAbstract {
     }
 
     protected void fillColumns(Define_columnsContext columnsCtx, AbstractPgTable table,
-            String schemaName, String tablespace) {
+                               String schemaName, String tablespace) {
         for (Table_column_defContext colCtx : columnsCtx.table_column_def()) {
             if (colCtx.tabl_constraint != null) {
                 addTableConstraint(colCtx.tabl_constraint, table, schemaName, tablespace);
@@ -164,9 +168,9 @@ public abstract class TableAbstract extends PgParserAbstract {
     }
 
     protected void addColumn(String columnName, Data_typeContext datatype, Storage_optionContext storage,
-            Collate_identifierContext collate, Compression_identifierContext compression,
-            List<Constraint_commonContext> constraints, Encoding_identifierContext encOptions,
-            Define_foreign_optionsContext options, AbstractTable table, String schemaName) {
+                             Collate_identifierContext collate, Compression_identifierContext compression,
+                             List<Constraint_commonContext> constraints, Encoding_identifierContext encOptions,
+                             Define_foreign_optionsContext options, AbstractTable table, String schemaName) {
         PgColumn col = new PgColumn(columnName);
         if (datatype != null) {
             col.setType(getTypeName(datatype));
@@ -212,7 +216,7 @@ public abstract class TableAbstract extends PgParserAbstract {
     }
 
     protected void addColumn(String columnName, List<Constraint_commonContext> constraints,
-            AbstractTable table, String schemaName) {
+                             AbstractTable table, String schemaName) {
         addColumn(columnName, null, null, null, null, constraints, null, null, table, schemaName);
     }
 
@@ -223,6 +227,13 @@ public abstract class TableAbstract extends PgParserAbstract {
         addDepSafe(table, idsInh, DbObjType.TABLE);
     }
 
+    /**
+     * Creates a blank constraint object based on the constraint type in the context.
+     *
+     * @param ctx the constraint common context
+     * @return a new constraint object of the appropriate type
+     * @throws IllegalArgumentException if the constraint type is not supported
+     */
     protected static PgConstraint createTableConstraintBlank(Constraint_commonContext ctx) {
         IdentifierContext id = ctx.identifier();
         String constrName = id == null ? "" : id.getText();
@@ -245,8 +256,8 @@ public abstract class TableAbstract extends PgParserAbstract {
     }
 
     protected void processTableConstraintBlank(Constraint_commonContext ctx,
-            PgConstraint constrBlank, String schemaName, String tableName,
-            String tablespace, String location) {
+                                               PgConstraint constrBlank, String schemaName, String tableName,
+                                               String tablespace, String location) {
         Constr_bodyContext constrBody = ctx.constr_body();
 
         if (constrBlank instanceof PgConstraintFk fk) {
@@ -285,7 +296,7 @@ public abstract class TableAbstract extends PgParserAbstract {
     }
 
     private void fillConstrFk(PgConstraintFk constrFk, Constr_bodyContext body, String columnName, String schemaName,
-            String tableName) {
+                              String tableName) {
         Schema_qualified_nameContext tblRef = body.schema_qualified_name();
         List<ParserRuleContext> ids = getIdentifiers(tblRef);
 
@@ -351,7 +362,7 @@ public abstract class TableAbstract extends PgParserAbstract {
     }
 
     private void fillConstrPk(PgConstraintPk constrPk, Constr_bodyContext body, PgColumn col, String colName,
-            String schemaName, String tableName) {
+                              String schemaName, String tableName) {
         if (body.PRIMARY() != null) {
             if (col != null) {
                 col.setNullValue(false);
@@ -376,16 +387,15 @@ public abstract class TableAbstract extends PgParserAbstract {
     }
 
     private void fillConstrCheck(PgConstraintCheck constrCheck, Constr_bodyContext constrBody, boolean isNeedParens) {
-        var sb = new StringBuilder();
-        sb.append(isNeedParens ? "(" : "")
-        .append(getFullCtxText(constrBody.expression))
-        .append(isNeedParens ? ")" : "");
-        constrCheck.setExpression(sb.toString());
+        String expr = (isNeedParens ? "(" : "") +
+                getFullCtxText(constrBody.expression) +
+                (isNeedParens ? ")" : "");
+        constrCheck.setExpression(expr);
         constrCheck.setInherit(constrBody.INHERIT() == null);
     }
 
     private void fillConstrExcl(PgConstraintExclude constrExcl, Constr_bodyContext body, String schemaName,
-            String tableName) {
+                                String tableName) {
         if (body.index_method != null) {
             constrExcl.setIndexMethod(body.index_method.getText());
         }
@@ -397,7 +407,7 @@ public abstract class TableAbstract extends PgParserAbstract {
     }
 
     private void fillParam(PgIndexParamContainer constr, Index_parametersContext parameters, String schemaName,
-            String tableName) {
+                           String tableName) {
         if (parameters.including_index() != null) {
             fillIncludingDepcy(parameters.including_index(), (PgStatement) constr, schemaName, tableName);
             for (var incl : parameters.including_index().identifier()) {

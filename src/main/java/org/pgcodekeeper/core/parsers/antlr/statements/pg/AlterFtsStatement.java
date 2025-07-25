@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
@@ -30,10 +27,28 @@ import org.pgcodekeeper.core.schema.pg.PgFtsConfiguration;
 import org.pgcodekeeper.core.schema.pg.PgSchema;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL ALTER TEXT SEARCH statements.
+ * <p>
+ * This class handles parsing of various ALTER statements for full-text search
+ * objects including configurations, dictionaries, templates, and parsers.
+ * Supports modifying configuration mappings and other properties of
+ * text search objects.
+ */
 public final class AlterFtsStatement extends PgParserAbstract {
 
     private final Alter_fts_statementContext ctx;
 
+    /**
+     * Constructs a new AlterFtsStatement parser.
+     *
+     * @param ctx      the ALTER TEXT SEARCH statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public AlterFtsStatement(Alter_fts_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -73,7 +88,7 @@ public final class AlterFtsStatement extends PgParserAbstract {
                     addDepSafe(config, dIds, DbObjType.FTS_DICTIONARY);
                 }
 
-                doSafe((s,o) -> s.addDictionary(getFullCtxText(type), dics),
+                doSafe((s, o) -> s.addDictionary(getFullCtxText(type), dics),
                         config, null);
             }
         }

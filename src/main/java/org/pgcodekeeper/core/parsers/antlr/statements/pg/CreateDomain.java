@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.Utils;
@@ -24,22 +22,36 @@ import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.DomainAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.VexAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Collate_identifierContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_domain_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Domain_constraintContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.IdentifierContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.VexContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.pg.PgConstraintCheck;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgDomain;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE DOMAIN statements.
+ * <p>
+ * This class handles parsing of domain definitions including the underlying
+ * data type, default values, check constraints, collation, and null constraints.
+ * Domains are user-defined data types based on existing types with additional
+ * constraints and default values.
+ */
 public final class CreateDomain extends PgParserAbstract {
 
     private final Create_domain_statementContext ctx;
     private final CommonTokenStream stream;
 
+    /**
+     * Constructs a new CreateDomain parser.
+     *
+     * @param ctx      the CREATE DOMAIN statement context
+     * @param db       the PostgreSQL database object
+     * @param stream   the token stream for parsing
+     * @param settings the ISettings object
+     */
     public CreateDomain(Create_domain_statementContext ctx, PgDatabase db, CommonTokenStream stream, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -78,8 +90,21 @@ public final class CreateDomain extends PgParserAbstract {
         addSafe(getSchemaSafe(ids), domain, ids);
     }
 
+    /**
+     * Parses a domain constraint definition and configures the constraint object.
+     * <p>
+     * This method processes CHECK constraints for domains, including the constraint
+     * expression and sets up analysis launchers for dependency tracking.
+     *
+     * @param domain   the domain object that owns the constraint
+     * @param constr   the constraint object to configure
+     * @param ctx      the domain constraint context
+     * @param db       the database for analysis launchers
+     * @param location the source location for error reporting
+     * @param settings the parser settings
+     */
     public static void parseDomainConstraint(PgDomain domain, PgConstraintCheck constr,
-            Domain_constraintContext ctx, AbstractDatabase db, String location, ISettings settings) {
+                                             Domain_constraintContext ctx, AbstractDatabase db, String location, ISettings settings) {
         VexContext vexCtx = ctx.vex();
         constr.setExpression(Utils.checkNewLines(getFullCtxText(vexCtx), settings.isKeepNewlines()));
         db.addAnalysisLauncher(new DomainAnalysisLauncher(domain, vexCtx, location));

@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
@@ -28,10 +26,26 @@ import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgSequence;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE SEQUENCE statements.
+ * <p>
+ * This class handles parsing of sequence definitions including data type,
+ * increment, min/max values, start value, cache, cycle options, and
+ * ownership relationships.
+ */
 public final class CreateSequence extends PgParserAbstract {
 
     private final Create_sequence_statementContext ctx;
 
+    /**
+     * Constructs a new CreateSequence parser.
+     *
+     * @param ctx      the CREATE SEQUENCE statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CreateSequence(Create_sequence_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -49,6 +63,15 @@ public final class CreateSequence extends PgParserAbstract {
         addSafe(getSchemaSafe(ids), sequence, ids);
     }
 
+    /**
+     * Fills sequence properties from a list of sequence body contexts.
+     * <p>
+     * This method processes sequence options like data type, cache, increment,
+     * min/max values, start value, cycle behavior, and ownership.
+     *
+     * @param sequence the sequence object to populate
+     * @param list     the list of sequence body contexts containing the options
+     */
     public static void fillSequence(PgSequence sequence, List<Sequence_bodyContext> list) {
         long inc = 1;
         Long maxValue = null;

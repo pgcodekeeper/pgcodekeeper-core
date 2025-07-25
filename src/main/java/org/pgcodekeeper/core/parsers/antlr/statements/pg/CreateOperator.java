@@ -15,28 +15,37 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.pg;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.OperatorAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.All_op_refContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_operator_optionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Create_operator_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Data_typeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.IdentifierContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Schema_qualified_nameContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgOperator;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for PostgreSQL CREATE OPERATOR statements.
+ * <p>
+ * This class handles parsing of operator definitions including left and right
+ * argument types, operator function, commutator and negator operators,
+ * and various operator properties like MERGES, HASHES, RESTRICT, and JOIN.
+ */
 public final class CreateOperator extends PgParserAbstract {
 
     private final Create_operator_statementContext ctx;
 
+    /**
+     * Constructs a new CreateOperator parser.
+     *
+     * @param ctx      the CREATE OPERATOR statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
     public CreateOperator(Create_operator_statementContext ctx, PgDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -68,8 +77,8 @@ public final class CreateOperator extends PgParserAbstract {
                     StringBuilder sb = new StringBuilder();
                     if (schemaNameCxt != null) {
                         sb.append("OPERATOR(")
-                        .append(PgDiffUtils.getQuotedName(schemaNameCxt.getText()))
-                        .append('.');
+                                .append(PgDiffUtils.getQuotedName(schemaNameCxt.getText()))
+                                .append('.');
                     }
                     sb.append(comutNameCtx.all_simple_op().getText());
                     if (schemaNameCxt != null) {
