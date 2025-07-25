@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Insert_statementContext;
@@ -24,10 +22,23 @@ import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Qualified_nameCo
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+
+/**
+ * Parser for Microsoft SQL INSERT statements.
+ * Handles INSERT operations including table references and dependency tracking.
+ */
 public final class InsertMsStatement extends MsParserAbstract {
 
     private final Insert_statementContext ctx;
 
+    /**
+     * Creates a parser for Microsoft SQL INSERT statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the INSERT statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public InsertMsStatement(Insert_statementContext ctx, MsDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;

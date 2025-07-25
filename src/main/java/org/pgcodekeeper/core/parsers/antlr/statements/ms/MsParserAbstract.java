@@ -15,53 +15,27 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.MsExpressionAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Column_optionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Column_with_orderContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Data_typeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.ExpressionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.IdContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Identity_valueContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Index_includeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Index_optionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Index_optionsContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Index_restContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Index_whereContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.On_optionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Qualified_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Table_constraint_bodyContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.statements.ParserAbstract;
-import org.pgcodekeeper.core.schema.AbstractConstraint;
-import org.pgcodekeeper.core.schema.AbstractIndex;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.IOptionContainer;
-import org.pgcodekeeper.core.schema.ISimpleColumnContainer;
-import org.pgcodekeeper.core.schema.IStatementContainer;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.SimpleColumn;
-import org.pgcodekeeper.core.schema.ms.GeneratedType;
-import org.pgcodekeeper.core.schema.ms.MsColumn;
-import org.pgcodekeeper.core.schema.ms.MsConstraintCheck;
-import org.pgcodekeeper.core.schema.ms.MsConstraintFk;
-import org.pgcodekeeper.core.schema.ms.MsConstraintPk;
-import org.pgcodekeeper.core.schema.ms.MsDatabase;
-import org.pgcodekeeper.core.schema.ms.MsIndex;
-import org.pgcodekeeper.core.schema.ms.MsSchema;
-import org.pgcodekeeper.core.schema.ms.MsTable;
-import org.pgcodekeeper.core.schema.ms.MsType;
+import org.pgcodekeeper.core.schema.*;
+import org.pgcodekeeper.core.schema.ms.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Abstract base class for Microsoft SQL statement parsers.
+ * Provides common functionality for parsing Microsoft SQL-specific database objects
+ * including tables, columns, constraints, indexes, and various SQL Server features.
+ */
 public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
 
     private static final String SIZE_ONE = " (1)";
@@ -71,7 +45,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
     }
 
     protected AbstractConstraint getMsPKConstraint(String schema, String table, String conName,
-            Table_constraint_bodyContext body) {
+                                                   Table_constraint_bodyContext body) {
         var constrPk = new MsConstraintPk(conName, body.PRIMARY() != null);
         var clusteredCtx = body.clustered();
         constrPk.setClustered(clusteredCtx != null && clusteredCtx.CLUSTERED() != null);
@@ -104,7 +78,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
     }
 
     protected void parseIndexOptions(AbstractIndex index, Index_whereContext wherePart,
-            Index_optionsContext options, IdContext tablespace) {
+                                     Index_optionsContext options, IdContext tablespace) {
         if (wherePart != null) {
             index.setWhere(getFullCtxText(wherePart.where));
         }
@@ -317,7 +291,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
     }
 
     protected void fillColumns(ISimpleColumnContainer stmt, List<Column_with_orderContext> cols, String schema,
-            String table) {
+                               String table) {
         SimpleColumn simpCol;
         for (var col : cols) {
             var name = col.id().getText();

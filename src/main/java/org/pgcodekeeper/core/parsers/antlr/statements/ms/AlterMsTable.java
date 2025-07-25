@@ -15,36 +15,37 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.MsExpressionAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Alter_tableContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.ExpressionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.IdContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Schema_alterContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Table_action_dropContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Table_constraintContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Table_constraint_bodyContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Table_elements_extendedContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
 import org.pgcodekeeper.core.schema.AbstractConstraint;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.AbstractTable;
 import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.ms.MsColumn;
-import org.pgcodekeeper.core.schema.ms.MsConstraint;
-import org.pgcodekeeper.core.schema.ms.MsDatabase;
-import org.pgcodekeeper.core.schema.ms.MsTable;
-import org.pgcodekeeper.core.schema.ms.MsTrigger;
+import org.pgcodekeeper.core.schema.ms.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Parser for Microsoft SQL ALTER TABLE statements.
+ * Handles table modifications including constraint additions, column changes, trigger operations,
+ * change tracking, and system versioning with appropriate danger warnings.
+ */
 public final class AlterMsTable extends MsTableAbstract {
 
     private final Alter_tableContext ctx;
 
+    /**
+     * Creates a parser for Microsoft SQL ALTER TABLE statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the ALTER TABLE statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public AlterMsTable(Alter_tableContext ctx, MsDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -102,7 +103,7 @@ public final class AlterMsTable extends MsTableAbstract {
     }
 
     private void addConstraints(Table_elements_extendedContext elementsCtx, AbstractTable table, IdContext schemaCtx,
-            IdContext nameCtx) {
+                                IdContext nameCtx) {
         for (var elementCtx : elementsCtx.table_element_extended()) {
             Table_constraintContext constrCtx = elementCtx.table_constraint();
             if (constrCtx == null) {
@@ -134,7 +135,7 @@ public final class AlterMsTable extends MsTableAbstract {
     @Override
     protected PgObjLocation fillQueryLocation(ParserRuleContext ctx) {
         PgObjLocation loc = super.fillQueryLocation(ctx);
-        Alter_tableContext alterTblCtx  = ((Schema_alterContext) ctx).alter_table();
+        Alter_tableContext alterTblCtx = ((Schema_alterContext) ctx).alter_table();
         var tableActionCtx = alterTblCtx.alter_table_action();
         if (tableActionCtx.DROP() != null && tableActionCtx.COLUMN() != null) {
             loc.setWarning(DangerStatement.DROP_COLUMN);

@@ -15,26 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.MsExpressionAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.ClusteredContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Column_defContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Column_optionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Columnstore_indexContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Create_tableContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Data_typeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.ExpressionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.IdContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Period_for_system_timeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Table_constraintContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Table_element_extendedContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Table_indexContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Table_optionsContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
 import org.pgcodekeeper.core.schema.AbstractIndex;
 import org.pgcodekeeper.core.schema.AbstractTable;
 import org.pgcodekeeper.core.schema.GenericColumn;
@@ -44,12 +29,28 @@ import org.pgcodekeeper.core.schema.ms.MsIndex;
 import org.pgcodekeeper.core.schema.ms.MsTable;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Parser for Microsoft SQL CREATE TABLE statements.
+ * Handles table creation including columns, constraints, indexes, system versioning,
+ * tablespaces, and various Microsoft SQL-specific features.
+ */
 public final class CreateMsTable extends MsTableAbstract {
 
     private final Create_tableContext ctx;
 
     private final boolean ansiNulls;
 
+    /**
+     * Creates a parser for Microsoft SQL CREATE TABLE statements.
+     *
+     * @param ctx       the ANTLR parse tree context for the CREATE TABLE statement
+     * @param db        the Microsoft SQL database schema being processed
+     * @param ansiNulls the ANSI_NULLS setting for the table
+     * @param settings  parsing configuration settings
+     */
     public CreateMsTable(Create_tableContext ctx, MsDatabase db, boolean ansiNulls, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -110,7 +111,7 @@ public final class CreateMsTable extends MsTableAbstract {
             table.addChild(getMsConstraint(constrCtx, schemaName, tableName));
         } else if ((indCtx = tableElementCtx.table_index()) != null) {
             parseTableIndex(indCtx, table, schemaName, tableName);
-        } else if ((periodCtx = tableElementCtx.period_for_system_time())!= null) {
+        } else if ((periodCtx = tableElementCtx.period_for_system_time()) != null) {
             var startCol = getSafe(AbstractTable::getColumn, table, periodCtx.start_col_name);
             var endCol = getSafe(AbstractTable::getColumn, table, periodCtx.end_col_name);
 

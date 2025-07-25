@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -32,6 +29,15 @@ import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.schema.ms.MsFunction;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Parser for Microsoft SQL CREATE FUNCTION statements.
+ * Handles both regular T-SQL functions and CLR functions with support for
+ * different function types (scalar, table-valued, multi-statement table-valued).
+ */
 public final class CreateMsFunction extends BatchContextProcessor {
 
     private final Create_or_alter_functionContext ctx;
@@ -39,8 +45,18 @@ public final class CreateMsFunction extends BatchContextProcessor {
     private final boolean ansiNulls;
     private final boolean quotedIdentifier;
 
+    /**
+     * Creates a parser for Microsoft SQL CREATE FUNCTION statements.
+     *
+     * @param ctx              the batch statement context containing the function definition
+     * @param db               the Microsoft SQL database schema being processed
+     * @param ansiNulls        the ANSI_NULLS setting for the function
+     * @param quotedIdentifier the QUOTED_IDENTIFIER setting for the function
+     * @param stream           the token stream for source code processing
+     * @param settings         parsing configuration settings
+     */
     public CreateMsFunction(Batch_statementContext ctx, MsDatabase db,
-            boolean ansiNulls, boolean quotedIdentifier, CommonTokenStream stream, ISettings settings) {
+                            boolean ansiNulls, boolean quotedIdentifier, CommonTokenStream stream, ISettings settings) {
         super(db, ctx, stream, settings);
         this.ctx = ctx.batch_statement_body().create_or_alter_function();
         this.ansiNulls = ansiNulls;
@@ -58,6 +74,14 @@ public final class CreateMsFunction extends BatchContextProcessor {
         getObject(getSchemaSafe(Arrays.asList(qname.schema, qname.name)), false);
     }
 
+    /**
+     * Creates and configures the function object from the parse context.
+     * Handles both CLR external functions and regular T-SQL functions with appropriate analysis setup.
+     *
+     * @param schema the schema to add the function to
+     * @param isJdbc whether this is being parsed in JDBC mode
+     * @return the created function object
+     */
     public AbstractFunction getObject(AbstractSchema schema, boolean isJdbc) {
         IdContext nameCtx = ctx.qualified_name().name;
         List<ParserRuleContext> ids = Arrays.asList(ctx.qualified_name().schema, nameCtx);
@@ -74,7 +98,7 @@ public final class CreateMsFunction extends BatchContextProcessor {
             MsClrFunction func = new MsClrFunction(name, assembly,
                     assemblyClass, assemblyMethod);
 
-            addDepSafe(func, Arrays.asList(assemblyCtx.assembly_name), DbObjType.ASSEMBLY);
+            addDepSafe(func, Collections.singletonList(assemblyCtx.assembly_name), DbObjType.ASSEMBLY);
 
             for (Function_optionContext option : ctx.function_option()) {
                 func.addOption(getFullCtxText(option));

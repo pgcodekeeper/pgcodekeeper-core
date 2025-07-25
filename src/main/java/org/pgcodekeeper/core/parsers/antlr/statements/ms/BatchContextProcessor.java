@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.List;
-import java.util.Locale;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -28,13 +25,21 @@ import org.pgcodekeeper.core.schema.SourceStatement;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * Abstract base class for Microsoft SQL parsers that handle batch context processing.
+ * Provides functionality for processing statements with source code preservation
+ * and proper location tracking for batch-oriented SQL objects like functions, procedures, and views.
+ */
 public abstract class BatchContextProcessor extends MsParserAbstract {
 
     private final ParserRuleContext batchCtx;
     private final CommonTokenStream stream;
 
     protected BatchContextProcessor(MsDatabase db, ParserRuleContext batchCtx,
-            CommonTokenStream stream, ISettings settings) {
+                                    CommonTokenStream stream, ISettings settings) {
         super(db, settings);
         this.batchCtx = batchCtx;
         this.stream = stream;

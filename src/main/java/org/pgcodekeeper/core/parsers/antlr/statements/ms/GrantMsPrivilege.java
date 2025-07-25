@@ -15,48 +15,52 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Class_typeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Columns_permissionsContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.IdContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Name_list_in_bracketsContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Object_typeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Rule_commonContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Table_column_privilegesContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.statements.ParserAbstract;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.ISearchPath;
-import org.pgcodekeeper.core.schema.PgPrivilege;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.StatementOverride;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.*;
+import java.util.Map.Entry;
+
+/**
+ * Parser for Microsoft SQL GRANT, REVOKE, and DENY privilege statements.
+ * Handles privilege assignment, revocation, and denial for users and roles on database objects,
+ * including support for column-level privileges and grant options.
+ */
 public final class GrantMsPrivilege extends MsParserAbstract {
     private final Rule_commonContext ctx;
     private final String state;
     private final boolean isGO;
     private final Map<PgStatement, StatementOverride> overrides;
 
+    /**
+     * Creates a parser for Microsoft SQL privilege statements without overrides.
+     *
+     * @param ctx      the ANTLR parse tree context for the privilege statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public GrantMsPrivilege(Rule_commonContext ctx, MsDatabase db, ISettings settings) {
         this(ctx, db, null, settings);
     }
 
+    /**
+     * Creates a parser for Microsoft SQL privilege statements with statement overrides.
+     *
+     * @param ctx       the ANTLR parse tree context for the privilege statement
+     * @param db        the Microsoft SQL database schema being processed
+     * @param overrides map of statement overrides for privilege modifications
+     * @param settings  parsing configuration settings
+     */
     public GrantMsPrivilege(Rule_commonContext ctx, MsDatabase db, Map<PgStatement, StatementOverride> overrides,
-            ISettings settings) {
+                            ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
         this.overrides = overrides;
@@ -144,7 +148,7 @@ public final class GrantMsPrivilege extends MsParserAbstract {
             AbstractSchema schema = getSchemaSafe(
                     Arrays.asList(object.qualified_name().schema, nameCtx));
             st = getSafe((k, v) -> k.getChildren().filter(
-                    e -> e.getBareName().equals(v))
+                            e -> e.getBareName().equals(v))
                     .findAny().orElse(null), schema, nameCtx);
         } else if (type.ASSEMBLY() != null) {
             st = getSafe(MsDatabase::getAssembly, db, nameCtx);
@@ -162,7 +166,7 @@ public final class GrantMsPrivilege extends MsParserAbstract {
     }
 
     private void parseColumns(Columns_permissionsContext columnsCtx,
-            Object_typeContext nameCtx, List<String> roles) {
+                              Object_typeContext nameCtx, List<String> roles) {
         // collect information about column privileges
         Map<String, Entry<IdContext, List<String>>> colPriv = new HashMap<>();
         for (Table_column_privilegesContext priv : columnsCtx.table_column_privileges()) {
@@ -177,8 +181,8 @@ public final class GrantMsPrivilege extends MsParserAbstract {
     }
 
     private void setColumnPrivilege(Object_typeContext nameCtx,
-            Map<String, Entry<IdContext, List<String>>> colPrivs,
-            List<String> roles) {
+                                    Map<String, Entry<IdContext, List<String>>> colPrivs,
+                                    List<String> roles) {
         PgStatement st = getStatement(nameCtx);
 
         if (st == null) {

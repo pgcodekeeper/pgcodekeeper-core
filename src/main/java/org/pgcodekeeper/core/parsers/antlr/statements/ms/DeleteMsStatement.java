@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Delete_statementContext;
@@ -24,10 +22,23 @@ import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Qualified_nameCo
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+
+/**
+ * Parser for Microsoft SQL DELETE statements.
+ * Handles DELETE operations including table references and dependency tracking.
+ */
 public final class DeleteMsStatement extends MsParserAbstract {
 
     private final Delete_statementContext ctx;
 
+    /**
+     * Creates a parser for Microsoft SQL DELETE statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the DELETE statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public DeleteMsStatement(Delete_statementContext ctx, MsDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;

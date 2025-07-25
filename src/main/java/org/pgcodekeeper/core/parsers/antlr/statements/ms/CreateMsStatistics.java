@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Create_statisticsContext;
@@ -29,10 +26,25 @@ import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.schema.ms.MsStatistics;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Parser for Microsoft SQL CREATE STATISTICS statements.
+ * Handles statistics creation on table columns including filter conditions
+ * and various statistics options like SAMPLE, NORECOMPUTE, AUTO_DROP, and INCREMENTAL.
+ */
 public final class CreateMsStatistics extends MsParserAbstract {
 
     private final Create_statisticsContext ctx;
 
+    /**
+     * Creates a parser for Microsoft SQL CREATE STATISTICS statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the CREATE STATISTICS statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public CreateMsStatistics(Create_statisticsContext ctx, MsDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;

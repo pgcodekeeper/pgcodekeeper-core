@@ -15,15 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.IdContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Name_list_in_bracketsContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Qualified_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Table_constraintContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Table_constraint_bodyContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
 import org.pgcodekeeper.core.schema.AbstractConstraint;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.PgObjLocation;
@@ -32,6 +25,14 @@ import org.pgcodekeeper.core.schema.ms.MsConstraintFk;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Abstract base class for Microsoft SQL table-related parsers.
+ * Provides common functionality for processing table constraints including
+ * foreign keys, primary keys, unique constraints, and check constraints.
+ */
 public abstract class MsTableAbstract extends MsParserAbstract {
 
     protected MsTableAbstract(MsDatabase db, ISettings settings) {
@@ -39,7 +40,7 @@ public abstract class MsTableAbstract extends MsParserAbstract {
     }
 
     protected AbstractConstraint getMsConstraint(Table_constraintContext conCtx,
-            String schema, String table) {
+                                                 String schema, String table) {
         String conName = conCtx.id() == null ? "" : conCtx.id().getText();
         Table_constraint_bodyContext body = conCtx.table_constraint_body();
         if (body.REFERENCES() != null) {
@@ -56,7 +57,7 @@ public abstract class MsTableAbstract extends MsParserAbstract {
     }
 
     private AbstractConstraint getMsFKConstraint(String schema, String table, String conName,
-            Table_constraint_bodyContext body) {
+                                                 Table_constraint_bodyContext body) {
         var constrFk = new MsConstraintFk(conName);
 
         var cols = body.fk;

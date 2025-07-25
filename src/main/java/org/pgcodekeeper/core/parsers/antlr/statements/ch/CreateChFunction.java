@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ch;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
@@ -29,10 +27,23 @@ import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.schema.ch.ChFunction;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+
+/**
+ * Parser for ClickHouse CREATE FUNCTION statements.
+ * Handles function creation including lambda expressions, function arguments, and body parsing.
+ */
 public final class CreateChFunction extends ChParserAbstract {
 
     private final Create_function_stmtContext ctx;
 
+    /**
+     * Creates a parser for ClickHouse CREATE FUNCTION statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the CREATE FUNCTION statement
+     * @param db       the ClickHouse database schema being processed
+     * @param settings parsing configuration settings
+     */
     public CreateChFunction(Create_function_stmtContext ctx, ChDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -48,6 +59,12 @@ public final class CreateChFunction extends ChParserAbstract {
         addSafe(db, function, ids);
     }
 
+    /**
+     * Parses function details including body expression and arguments.
+     * Sets up expression analysis launcher for dependency tracking if enabled.
+     *
+     * @param function the function object to populate with parsed information
+     */
     public void parseObject(ChFunction function) {
         var bodyCtx = ctx.lambda_expr().expr();
         function.setBody(getFullCtxText(bodyCtx));

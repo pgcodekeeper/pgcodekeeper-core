@@ -15,18 +15,29 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Alter_db_roleContext;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.schema.ms.MsRole;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Collections;
+
+/**
+ * Parser for Microsoft SQL ALTER ROLE statements.
+ * Handles role modifications including adding members to database roles.
+ */
 public class AlterMsRole extends MsParserAbstract {
 
     private final Alter_db_roleContext ctx;
 
+    /**
+     * Creates a parser for Microsoft SQL ALTER ROLE statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the ALTER ROLE statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public AlterMsRole(Alter_db_roleContext ctx, MsDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -40,7 +51,7 @@ public class AlterMsRole extends MsParserAbstract {
             doSafe(MsRole::addMember, role, ctx.database_principal.getText());
         }
 
-        addObjReference(Arrays.asList(ctx.role_name), DbObjType.ROLE, ACTION_ALTER);
+        addObjReference(Collections.singletonList(ctx.role_name), DbObjType.ROLE, ACTION_ALTER);
     }
 
     @Override

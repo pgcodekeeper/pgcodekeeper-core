@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Alter_assemblyContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Assembly_optionContext;
@@ -25,10 +22,24 @@ import org.pgcodekeeper.core.schema.ms.MsAssembly;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Parser for Microsoft SQL ALTER ASSEMBLY statements.
+ * Handles assembly modifications including visibility settings and other assembly options.
+ */
 public final class AlterMsAssembly extends MsParserAbstract {
 
     private final Alter_assemblyContext ctx;
 
+    /**
+     * Creates a parser for Microsoft SQL ALTER ASSEMBLY statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the ALTER ASSEMBLY statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public AlterMsAssembly(Alter_assemblyContext ctx, MsDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -37,7 +48,7 @@ public final class AlterMsAssembly extends MsParserAbstract {
     @Override
     public void parseObject() {
         MsAssembly assembly = getSafe(MsDatabase::getAssembly, db, ctx.name);
-        addObjReference(Arrays.asList(ctx.name), DbObjType.ASSEMBLY, ACTION_ALTER);
+        addObjReference(Collections.singletonList(ctx.name), DbObjType.ASSEMBLY, ACTION_ALTER);
 
         List<Assembly_optionContext> options = ctx.assembly_option();
         if (options != null) {

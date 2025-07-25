@@ -15,20 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.MsFuncProcTrigAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Assembly_specifierContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Batch_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Create_or_alter_procedureContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.IdContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Procedure_optionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Procedure_paramContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Qualified_nameContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
 import org.pgcodekeeper.core.schema.AbstractFunction;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.Argument;
@@ -37,6 +28,15 @@ import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.schema.ms.MsProcedure;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Parser for Microsoft SQL CREATE PROCEDURE statements.
+ * Handles both regular T-SQL procedures and CLR procedures with support for
+ * arguments, procedure options, and proper analysis setup.
+ */
 public final class CreateMsProcedure extends BatchContextProcessor {
 
     private final Create_or_alter_procedureContext ctx;
@@ -44,8 +44,18 @@ public final class CreateMsProcedure extends BatchContextProcessor {
     private final boolean ansiNulls;
     private final boolean quotedIdentifier;
 
+    /**
+     * Creates a parser for Microsoft SQL CREATE PROCEDURE statements.
+     *
+     * @param ctx              the batch statement context containing the procedure definition
+     * @param db               the Microsoft SQL database schema being processed
+     * @param ansiNulls        the ANSI_NULLS setting for the procedure
+     * @param quotedIdentifier the QUOTED_IDENTIFIER setting for the procedure
+     * @param stream           the token stream for source code processing
+     * @param settings         parsing configuration settings
+     */
     public CreateMsProcedure(Batch_statementContext ctx, MsDatabase db,
-            boolean ansiNulls, boolean quotedIdentifier, CommonTokenStream stream, ISettings settings) {
+                             boolean ansiNulls, boolean quotedIdentifier, CommonTokenStream stream, ISettings settings) {
         super(db, ctx, stream, settings);
         this.ctx = ctx.batch_statement_body().create_or_alter_procedure();
         this.ansiNulls = ansiNulls;
@@ -63,6 +73,14 @@ public final class CreateMsProcedure extends BatchContextProcessor {
         getObject(getSchemaSafe(Arrays.asList(qname.schema, qname.name)), false);
     }
 
+    /**
+     * Creates and configures the procedure object from the parse context.
+     * Handles both CLR external procedures and regular T-SQL procedures with appropriate analysis setup.
+     *
+     * @param schema the schema to add the procedure to
+     * @param isJdbc whether this is being parsed in JDBC mode
+     * @return the created procedure object
+     */
     public AbstractFunction getObject(AbstractSchema schema, boolean isJdbc) {
         IdContext nameCtx = ctx.qualified_name().name;
         List<ParserRuleContext> ids = Arrays.asList(ctx.qualified_name().schema, nameCtx);
@@ -74,7 +92,7 @@ public final class CreateMsProcedure extends BatchContextProcessor {
             MsClrProcedure procedure = new MsClrProcedure(nameCtx.getText(),
                     assembly, assemblyClass, assemblyMethod);
 
-            addDepSafe(procedure, Arrays.asList(assemblyCtx.assembly_name), DbObjType.ASSEMBLY);
+            addDepSafe(procedure, Collections.singletonList(assemblyCtx.assembly_name), DbObjType.ASSEMBLY);
             fillArguments(procedure);
 
             for (Procedure_optionContext option : ctx.procedure_option()) {

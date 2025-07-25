@@ -15,26 +15,34 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Create_sequenceContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Data_typeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Data_type_sizeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.IdContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Sequence_bodyContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.schema.ms.MsSequence;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * Parser for Microsoft SQL CREATE SEQUENCE statements.
+ * Handles sequence creation with various options including data type, start value,
+ * increment, min/max values, cache settings, and cycle options.
+ */
 public final class CreateMsSequence extends MsParserAbstract {
 
     private final Create_sequenceContext ctx;
 
+    /**
+     * Creates a parser for Microsoft SQL CREATE SEQUENCE statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the CREATE SEQUENCE statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public CreateMsSequence(Create_sequenceContext ctx, MsDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -81,7 +89,7 @@ public final class CreateMsSequence extends MsParserAbstract {
                 maxValue = Long.parseLong(body.maxval.getText());
             } else if (body.minval != null) {
                 minValue = Long.parseLong(body.minval.getText());
-            }  else if (body.cycle_val != null) {
+            } else if (body.cycle_val != null) {
                 sequence.setCycle(body.cycle_true == null);
             }
         }

@@ -15,47 +15,39 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ch;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.BiConsumer;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.ChExpressionAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Data_type_exprContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Engine_clauseContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Engine_optionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.ExprContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Qualified_nameContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Subquery_clauseContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Table_column_defContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Table_constraint_defContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Table_index_defContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.UsersContext;
+import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.*;
 import org.pgcodekeeper.core.parsers.antlr.statements.ParserAbstract;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.PgObjLocation.LocationType;
-import org.pgcodekeeper.core.schema.ch.ChColumn;
-import org.pgcodekeeper.core.schema.ch.ChConstraint;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
-import org.pgcodekeeper.core.schema.ch.ChEngine;
-import org.pgcodekeeper.core.schema.ch.ChIndex;
-import org.pgcodekeeper.core.schema.ch.ChSchema;
+import org.pgcodekeeper.core.schema.ch.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.BiConsumer;
+
+/**
+ * Abstract base class for ClickHouse SQL statement parsers.
+ * Provides common functionality for parsing ClickHouse-specific database objects
+ * including tables, columns, engines, constraints, and indexes.
+ */
 public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
 
     protected ChParserAbstract(ChDatabase db, ISettings settings) {
         super(db, settings);
     }
 
+    /**
+     * Extracts identifier contexts from a qualified name.
+     *
+     * @param qNameCtx the qualified name context to process
+     * @return list of identifier contexts from the qualified name
+     */
     public static List<ParserRuleContext> getIdentifiers(Qualified_nameContext qNameCtx) {
         List<ParserRuleContext> ids = new ArrayList<>(3);
         ids.addAll(qNameCtx.identifier());
@@ -190,14 +182,14 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
     }
 
     private <T extends PgStatement> void setExprWithAnalyze(BiConsumer<T, String> adder, T stmt,
-            ExprContext ctx) {
+                                                            ExprContext ctx) {
         adder.accept(stmt, getFullCtxText(ctx));
         db.addAnalysisLauncher(new ChExpressionAnalysisLauncher(stmt, ctx, fileName));
     }
 
     @Override
     protected PgObjLocation getLocation(List<? extends ParserRuleContext> ids, DbObjType type, String action,
-            boolean isDep, String signature, LocationType locationType) {
+                                        boolean isDep, String signature, LocationType locationType) {
         ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
 
         if (type == DbObjType.FUNCTION) {
@@ -215,14 +207,14 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
     }
 
     protected <T extends PgStatement> void addRoles(UsersContext usersCtx, T stmt,
-            BiConsumer<T, String> addRoleMethod, BiConsumer<T, String> addExceptMethod, String ignoreRole) {
+                                                    BiConsumer<T, String> addRoleMethod, BiConsumer<T, String> addExceptMethod, String ignoreRole) {
         if (usersCtx == null) {
             return;
         }
 
         for (var roleCtx : usersCtx.roles.identifier()) {
             String role = roleCtx.getText();
-            addDepSafe(stmt, Arrays.asList(roleCtx), DbObjType.ROLE);
+            addDepSafe(stmt, List.of(roleCtx), DbObjType.ROLE);
             if (!ignoreRole.equalsIgnoreCase(role)) {
                 addRoleMethod.accept(stmt, role);
             }
@@ -233,7 +225,7 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
         if (exceptRolesCtx != null) {
             for (var exceptCtx : exceptRolesCtx.identifier()) {
                 addExceptMethod.accept(stmt, exceptCtx.getText());
-                addDepSafe(stmt, Arrays.asList(exceptCtx), DbObjType.ROLE);
+                addDepSafe(stmt, List.of(exceptCtx), DbObjType.ROLE);
             }
         }
     }

@@ -15,51 +15,40 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.DatabaseType;
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.Utils;
-import org.pgcodekeeper.core.WorkDirs;
+import org.pgcodekeeper.core.*;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.exporter.ModelExporter;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.exception.MisplacedObjectException;
 import org.pgcodekeeper.core.parsers.antlr.exception.UnresolvedReferenceException;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.ArgMode;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.IStatement;
-import org.pgcodekeeper.core.schema.IStatementContainer;
-import org.pgcodekeeper.core.schema.PgObjLocation;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.PgObjLocation.LocationType;
-import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.Locale;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+
 /**
- * Abstract Class contents common operations for parsing
+ * Abstract base class for database object parsers that provides common parsing functionality
+ * and utilities for working with ANTLR-generated parse trees.
  */
 public abstract class ParserAbstract<S extends AbstractDatabase> {
 
     private static final String SCHEMA_ERROR = "Object must be schema qualified: ";
-    private static final String LOCATION_ERROR  = "The object {0} must be defined in the file: {1}";
+    private static final String LOCATION_ERROR = "The object {0} must be defined in the file: {1}";
 
     protected static final String ACTION_CREATE = "CREATE";
     protected static final String ACTION_ALTER = "ALTER";
@@ -81,6 +70,13 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
         this.settings = settings;
     }
 
+    /**
+     * Parses a database object from the given parse tree context.
+     *
+     * @param fileName the source file being parsed
+     * @param mode     the parsing mode (REF, SCRIPT, etc.)
+     * @param ctx      the ANTLR parse tree context to parse from
+     */
     public void parseObject(String fileName, ParserListenerMode mode, ParserRuleContext ctx) {
         this.fileName = fileName;
         refMode = ParserListenerMode.REF == mode;
@@ -96,21 +92,27 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
     }
 
     /**
-     * Parse object from context
+     * Parses a database object from the current context. Must be implemented
+     * by concrete subclasses to handle specific object types.
      */
     public abstract void parseObject();
 
     /**
      * Extracts raw text from context
      *
-     * @param ctx
-     *            context
+     * @param ctx context
      * @return raw string
      */
     public static String getFullCtxText(ParserRuleContext ctx) {
         return getFullCtxText(ctx, ctx);
     }
 
+    /**
+     * Extracts raw text from context with new lines check according to current settings
+     *
+     * @param ctx context
+     * @return raw string
+     */
     protected String getFullCtxTextWithCheckNewLines(ParserRuleContext ctx) {
         String text = getFullCtxText(ctx, ctx);
         return checkNewLines(text);
@@ -132,10 +134,24 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
         return getFullCtxText(ids.get(0), ids.get(ids.size() - 1));
     }
 
+    /**
+     * Extracts raw text between two parse tree contexts.
+     *
+     * @param start the starting context
+     * @param end   the ending context
+     * @return the text between the contexts
+     */
     public static String getFullCtxText(ParserRuleContext start, ParserRuleContext end) {
         return getFullCtxText(start.getStart(), end.getStop());
     }
 
+    /**
+     * Extracts raw text between two tokens.
+     *
+     * @param start the starting token
+     * @param end   the ending token
+     * @return the text between the tokens
+     */
     public static String getFullCtxText(Token start, Token end) {
         if (start.getStartIndex() > end.getStopIndex()) { // safe to use code point methods
             // broken ctx
@@ -156,14 +172,6 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
         return "";
     }
 
-    protected String getFullCtxTextWithHidden(ParserRuleContext ctx, CommonTokenStream stream) {
-        List<Token> startTokens = stream.getHiddenTokensToLeft(ctx.getStart().getTokenIndex());
-        List<Token> stopTokens = stream.getHiddenTokensToRight(ctx.getStop().getTokenIndex());
-        Token start = startTokens != null ? startTokens.get(0) : ctx.getStart();
-        Token stop = stopTokens != null ? stopTokens.get(stopTokens.size() - 1) : ctx.getStop();
-        return getFullCtxText(start, stop);
-    }
-
     protected String getExpressionText(ParserRuleContext def, CommonTokenStream stream) {
         String expression = getFullCtxTextWithCheckNewLines(def);
         String whitespace = getHiddenLeftCtxText(def, stream);
@@ -171,6 +179,12 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
         return newline != -1 ? (whitespace.substring(newline) + expression) : expression;
     }
 
+    /**
+     * Parses an argument mode from a parse tree context.
+     *
+     * @param mode the mode parse tree context
+     * @return the parsed ArgMode
+     */
     public static ArgMode parseArgMode(ParserRuleContext mode) {
         if (mode == null) {
             return ArgMode.IN;
@@ -180,7 +194,7 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
     }
 
     protected PgObjLocation addObjReference(List<? extends ParserRuleContext> ids,
-            DbObjType type, String action, String signature) {
+                                            DbObjType type, String action, String signature) {
         PgObjLocation loc = getLocation(ids, type, action, false, signature, LocationType.REFERENCE);
         if (loc != null) {
             db.addReference(fileName, loc);
@@ -190,17 +204,44 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
     }
 
     protected PgObjLocation addObjReference(List<? extends ParserRuleContext> ids,
-            DbObjType type, String action) {
+                                            DbObjType type, String action) {
         return addObjReference(ids, type, action, null);
     }
 
+    /**
+     * Safely retrieves a database statement with validation.
+     * <p>
+     * Note: Always returns null if parser is in ref mode.
+     *
+     * @param <T>       the container statement type
+     * @param <R>       the child statement type
+     * @param getter    the getter function to retrieve the child
+     * @param container the containing statement
+     * @param ctx       the parse tree context
+     * @return the found statement or null if parser is in ref mode
+     * @throws UnresolvedReferenceException if statement not found
+     */
     public <T extends IStatement, R extends IStatement> R getSafe(
             BiFunction<T, String, R> getter, T container, ParserRuleContext ctx) {
         return getSafe(getter, container, ctx.getText(), ctx.start);
     }
 
+    /**
+     * Safely retrieves a database statement by name with validation.
+     * <p>
+     * Note: Always returns null if parser is in ref mode.
+     *
+     * @param <T>       the container statement type
+     * @param <R>       the child statement type
+     * @param getter    the getter function to retrieve the child
+     * @param container the containing statement
+     * @param name      the name of the statement to find
+     * @param errToken  the token for error reporting
+     * @return the found statement
+     * @throws UnresolvedReferenceException if statement not found
+     */
     public <T extends IStatement, R extends IStatement> R getSafe(BiFunction<T, String, R> getter,
-            T container, String name, Token errToken) {
+                                                                  T container, String name, Token errToken) {
         if (isRefMode()) {
             return null;
         }
@@ -216,12 +257,12 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
     }
 
     protected void addSafe(IStatementContainer parent, PgStatement child,
-            List<? extends ParserRuleContext> ids) {
+                           List<? extends ParserRuleContext> ids) {
         addSafe(parent, child, ids, null);
     }
 
     protected void addSafe(IStatementContainer parent, PgStatement child,
-            List<? extends ParserRuleContext> ids, String signature){
+                           List<? extends ParserRuleContext> ids, String signature) {
         doSafe(IStatementContainer::addChild, parent, child);
         PgObjLocation loc = getLocation(ids, child.getStatementType(),
                 ACTION_CREATE, false, signature, LocationType.DEFINITION);
@@ -268,28 +309,28 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
     }
 
     protected PgObjLocation getLocation(List<? extends ParserRuleContext> ids,
-            DbObjType type, String action, boolean isDep, String signature,
-            LocationType locationType) {
+                                        DbObjType type, String action, boolean isDep, String signature,
+                                        LocationType locationType) {
         ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
         switch (type) {
-        case ASSEMBLY:
-        case EXTENSION:
-        case EVENT_TRIGGER:
-        case FOREIGN_DATA_WRAPPER:
-        case SERVER:
-        case SCHEMA:
-        case ROLE:
-        case USER:
-        case DATABASE:
-            return buildLocation(nameCtx, action, locationType, new GenericColumn(nameCtx.getText(), type));
-        default:
-            break;
+            case ASSEMBLY:
+            case EXTENSION:
+            case EVENT_TRIGGER:
+            case FOREIGN_DATA_WRAPPER:
+            case SERVER:
+            case SCHEMA:
+            case ROLE:
+            case USER:
+            case DATABASE:
+                return buildLocation(nameCtx, action, locationType, new GenericColumn(nameCtx.getText(), type));
+            default:
+                break;
         }
 
         ParserRuleContext schemaCtx = QNameParser.getSchemaNameCtx(ids);
         String schemaName;
         if (schemaCtx != null) {
-            addObjReference(Arrays.asList(schemaCtx), DbObjType.SCHEMA, null);
+            addObjReference(List.of(schemaCtx), DbObjType.SCHEMA, null);
             schemaName = schemaCtx.getText();
         } else if (refMode && !isDep) {
             schemaName = null;
@@ -304,40 +345,19 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
         if (signature != null) {
             name = PgDiffUtils.getQuotedName(name) + signature;
         }
-        switch (type) {
-        case DOMAIN:
-        case FTS_CONFIGURATION:
-        case FTS_DICTIONARY:
-        case FTS_PARSER:
-        case FTS_TEMPLATE:
-        case OPERATOR:
-        case SEQUENCE:
-        case TABLE:
-        case DICTIONARY:
-        case TYPE:
-        case VIEW:
-        case INDEX:
-        case STATISTICS:
-        case COLLATION:
-        case FUNCTION:
-        case PROCEDURE:
-        case AGGREGATE:
-            return buildLocation(nameCtx, action, locationType,
-                    new GenericColumn(schemaName, name, type));
-        case CONSTRAINT:
-        case TRIGGER:
-        case RULE:
-        case POLICY:
-        case COLUMN:
-            return buildLocation(nameCtx, action, locationType,
+        return switch (type) {
+            case DOMAIN, FTS_CONFIGURATION, FTS_DICTIONARY, FTS_PARSER, FTS_TEMPLATE, OPERATOR, SEQUENCE, TABLE,
+                 DICTIONARY, TYPE, VIEW, INDEX, STATISTICS, COLLATION, FUNCTION, PROCEDURE, AGGREGATE ->
+                    buildLocation(nameCtx, action, locationType,
+                            new GenericColumn(schemaName, name, type));
+            case CONSTRAINT, TRIGGER, RULE, POLICY, COLUMN -> buildLocation(nameCtx, action, locationType,
                     new GenericColumn(schemaName, QNameParser.getSecondName(ids), name, type));
-        default:
-            return null;
-        }
+            default -> null;
+        };
     }
 
     protected PgObjLocation buildLocation(ParserRuleContext nameCtx, String action, LocationType locationType,
-            GenericColumn object) {
+                                          GenericColumn object) {
         return new PgObjLocation.Builder()
                 .setFilePath(fileName)
                 .setCtx(nameCtx)
@@ -347,8 +367,8 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
                 .build();
     }
 
-    protected <T extends IStatement, U extends Object> void doSafe(BiConsumer<T, U> adder,
-            T statement, U object) {
+    protected <T extends IStatement, U> void doSafe(BiConsumer<T, U> adder,
+                                                    T statement, U object) {
         if (!refMode) {
             adder.accept(statement, object);
         }
@@ -407,8 +427,17 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
                 QNameParser.getFirstNameCtx(ids).start);
     }
 
+    /**
+     * Processes option parameters into key-value pairs.
+     *
+     * @param options    the option strings to parse
+     * @param c          the consumer to receive each key-value pair
+     * @param isToast    whether these are TOAST options
+     * @param forceQuote whether to force quoting of values
+     * @param isQuoted   whether values are already quoted
+     */
     public static void fillOptionParams(String[] options, BiConsumer<String, String> c,
-            boolean isToast, boolean forceQuote, boolean isQuoted) {
+                                        boolean isToast, boolean forceQuote, boolean isQuoted) {
         for (String pair : options) {
             int sep = pair.indexOf('=');
             String option;
@@ -429,8 +458,16 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
         }
     }
 
+    /**
+     * Processes a single option parameter.
+     *
+     * @param value   the option value
+     * @param option  the option name
+     * @param isToast whether this is a TOAST option
+     * @param c       the consumer to receive the key-value pair
+     */
     public static void fillOptionParams(String value, String option, boolean isToast,
-            BiConsumer<String, String> c) {
+                                        BiConsumer<String, String> c) {
         String quotedOption = PgDiffUtils.getQuotedName(option);
         if (isToast) {
             quotedOption = "toast." + quotedOption;
@@ -439,7 +476,7 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
     }
 
     /**
-     * Fills the 'PgObjLocation'-object with action information, query of statement
+     * Fills the 'PgObjLocation'-object with action information, query of statement,
      * and it's position in the script from statement context, and then puts
      * filled 'PgObjLocation'-object to the storage of queries.
      */
@@ -476,10 +513,8 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
      * Used in general cases in {@link #getStmtAction()} for get action information.
      */
     protected static String getStrForStmtAction(String action, DbObjType type, List<? extends ParseTree> ids) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(action).append(' ').append(type.getTypeName()).append(' ');
-        sb.append(ids.stream().map(ParseTree::getText).collect(Collectors.joining(".")));
-        return sb.toString();
+        return action + ' ' + type.getTypeName() + ' ' +
+                ids.stream().map(ParseTree::getText).collect(Collectors.joining("."));
     }
 
     /**
@@ -494,14 +529,14 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
         // override the default schema location if we created it
         if (defaultSchema != null && defaultSchema.getBareName().equals(name)
                 && defaultSchema.getLocation().getFilePath() == null) {
-            var location = getLocation(Arrays.asList(nameCtx), DbObjType.SCHEMA, ACTION_CREATE, false, null,
+            var location = getLocation(List.of(nameCtx), DbObjType.SCHEMA, ACTION_CREATE, false, null,
                     LocationType.DEFINITION);
             defaultSchema.setLocation(location);
             return defaultSchema;
         }
 
         AbstractSchema schema = createSchema(name);
-        addSafe(db, schema, Arrays.asList(nameCtx));
+        addSafe(db, schema, List.of(nameCtx));
         return schema;
     }
 

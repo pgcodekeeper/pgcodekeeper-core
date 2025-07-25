@@ -15,29 +15,32 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Column_optionContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Create_typeContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.IdContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Table_constraint_bodyContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Table_elementContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Table_indexContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Type_definitionContext;
-import org.pgcodekeeper.core.schema.ms.MsColumn;
-import org.pgcodekeeper.core.schema.ms.MsConstraintCheck;
-import org.pgcodekeeper.core.schema.ms.MsDatabase;
-import org.pgcodekeeper.core.schema.ms.MsIndex;
-import org.pgcodekeeper.core.schema.ms.MsType;
+import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.*;
+import org.pgcodekeeper.core.schema.ms.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Parser for Microsoft SQL CREATE TYPE statements.
+ * Handles creation of user-defined types including alias types (FROM clause),
+ * CLR types (EXTERNAL clause), and table types with columns, constraints, and indexes.
+ */
 public final class CreateMsType extends MsParserAbstract {
 
     private final Create_typeContext ctx;
 
+    /**
+     * Creates a parser for Microsoft SQL CREATE TYPE statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the CREATE TYPE statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public CreateMsType(Create_typeContext ctx, MsDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -56,7 +59,7 @@ public final class CreateMsType extends MsParserAbstract {
         } else if (def.EXTERNAL() != null) {
             String assemblyName = def.assembly_name.getText();
             type.setAssemblyName(assemblyName);
-            addDepSafe(type, Arrays.asList(def.assembly_name), DbObjType.ASSEMBLY);
+            addDepSafe(type, Collections.singletonList(def.assembly_name), DbObjType.ASSEMBLY);
             String assemblyClass;
             if (def.class_name != null) {
                 assemblyClass = def.class_name.getText();

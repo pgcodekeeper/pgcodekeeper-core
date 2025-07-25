@@ -21,10 +21,21 @@ import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+/**
+ * Parser for Microsoft SQL CREATE SCHEMA statements.
+ * Handles schema creation including owner settings.
+ */
 public final class CreateMsSchema extends MsParserAbstract {
 
     private final Create_schemaContext ctx;
 
+    /**
+     * Creates a parser for Microsoft SQL CREATE SCHEMA statements.
+     *
+     * @param ctx      the ANTLR parse tree context for the CREATE SCHEMA statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public CreateMsSchema(Create_schemaContext ctx, MsDatabase db, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;

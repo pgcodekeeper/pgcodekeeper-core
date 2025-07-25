@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.statements.ms;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Alter_authorizationContext;
@@ -30,17 +26,41 @@ import org.pgcodekeeper.core.schema.StatementOverride;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Parser for Microsoft SQL ALTER AUTHORIZATION statements.
+ * Handles ownership changes for database objects including tables, assemblies, roles, and schemas
+ * with support for statement overrides.
+ */
 public final class AlterMsAuthorization extends MsParserAbstract {
 
     private final Alter_authorizationContext ctx;
     private final Map<PgStatement, StatementOverride> overrides;
 
+    /**
+     * Creates a parser for Microsoft SQL ALTER AUTHORIZATION statements without overrides.
+     *
+     * @param ctx      the ANTLR parse tree context for the ALTER AUTHORIZATION statement
+     * @param db       the Microsoft SQL database schema being processed
+     * @param settings parsing configuration settings
+     */
     public AlterMsAuthorization(Alter_authorizationContext ctx, MsDatabase db, ISettings settings) {
         this(ctx, db, null, settings);
     }
 
+    /**
+     * Creates a parser for Microsoft SQL ALTER AUTHORIZATION statements with statement overrides.
+     *
+     * @param ctx       the ANTLR parse tree context for the ALTER AUTHORIZATION statement
+     * @param db        the Microsoft SQL database schema being processed
+     * @param overrides map of statement overrides for ownership modifications
+     * @param settings  parsing configuration settings
+     */
     public AlterMsAuthorization(Alter_authorizationContext ctx, MsDatabase db,
-            Map<PgStatement, StatementOverride> overrides, ISettings settings) {
+                                Map<PgStatement, StatementOverride> overrides, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
         this.overrides = overrides;
@@ -63,7 +83,7 @@ public final class AlterMsAuthorization extends MsParserAbstract {
         if (type == null || type.OBJECT() != null || type.TYPE() != null) {
             AbstractSchema schema = getSchemaSafe(ids);
             st = getSafe((k, v) -> k.getChildren().filter(
-                    e -> e.getBareName().equals(v))
+                            e -> e.getBareName().equals(v))
                     .findAny().orElse(null), schema, nameCtx);
 
             // when type is not defined (sometimes in ref mode), suppose it is a table
@@ -71,13 +91,13 @@ public final class AlterMsAuthorization extends MsParserAbstract {
                     st != null ? st.getStatementType() : DbObjType.TABLE, ACTION_ALTER);
         } else if (type.ASSEMBLY() != null) {
             st = getSafe(MsDatabase::getAssembly, db, nameCtx);
-            addObjReference(Arrays.asList(nameCtx), DbObjType.ASSEMBLY, ACTION_ALTER);
+            addObjReference(List.of(nameCtx), DbObjType.ASSEMBLY, ACTION_ALTER);
         } else if (type.ROLE() != null) {
             st = getSafe(MsDatabase::getRole, db, nameCtx);
-            addObjReference(Arrays.asList(nameCtx), DbObjType.ROLE, ACTION_ALTER);
+            addObjReference(List.of(nameCtx), DbObjType.ROLE, ACTION_ALTER);
         } else if (type.SCHEMA() != null) {
             st = getSafe(MsDatabase::getSchema, db, nameCtx);
-            addObjReference(Arrays.asList(nameCtx), DbObjType.SCHEMA, ACTION_ALTER);
+            addObjReference(List.of(nameCtx), DbObjType.SCHEMA, ACTION_ALTER);
         }
 
         if (st != null) {
@@ -95,6 +115,6 @@ public final class AlterMsAuthorization extends MsParserAbstract {
 
     @Override
     protected String getStmtAction() {
-        return new StringBuilder(ACTION_ALTER).append(" AUTHORIZATION").toString();
+        return ACTION_ALTER + " AUTHORIZATION";
     }
 }
