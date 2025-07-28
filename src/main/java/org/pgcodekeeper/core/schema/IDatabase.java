@@ -17,7 +17,23 @@ package org.pgcodekeeper.core.schema;
 
 import java.util.Collection;
 
+/**
+ * Interface representing a database containing schemas.
+ * Provides access to database schemas and extends statement container functionality.
+ */
 public interface IDatabase extends IStatementContainer {
+    /**
+     * Gets all schemas in this database.
+     *
+     * @return a collection of schemas
+     */
     Collection<? extends ISchema> getSchemas();
+
+    /**
+     * Gets a schema by name.
+     *
+     * @param name the schema name
+     * @return the schema with the given name, or null if not found
+     */
     ISchema getSchema(String name);
 }

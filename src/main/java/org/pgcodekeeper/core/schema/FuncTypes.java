@@ -15,6 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
+/**
+ * Enumeration of function return types.
+ * Defines whether a function returns scalar values, table values, or multiple result sets.
+ */
 public enum FuncTypes {
     SCALAR,
     TABLE,

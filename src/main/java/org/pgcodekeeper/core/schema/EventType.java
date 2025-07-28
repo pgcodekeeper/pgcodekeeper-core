@@ -15,6 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
+/**
+ * Enumeration of database event types used for triggers and policies.
+ * Defines the types of database operations that can trigger actions.
+ */
 public enum EventType {
     SELECT, INSERT, UPDATE, DELETE
 }

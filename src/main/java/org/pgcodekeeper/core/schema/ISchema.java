@@ -18,10 +18,38 @@ package org.pgcodekeeper.core.schema;
 import java.util.Collection;
 import java.util.stream.Stream;
 
+/**
+ * Interface representing a database schema containing tables, views, functions, and other objects.
+ * Extends statement container functionality with schema-specific operations.
+ */
 public interface ISchema extends IStatementContainer {
+    /**
+     * Gets all relations (tables, views, sequences) in this schema.
+     *
+     * @return a stream of relations
+     */
     Stream<IRelation> getRelations();
+
+    /**
+     * Gets a relation by name.
+     *
+     * @param name the relation name
+     * @return the relation with the given name, or null if not found
+     */
     IRelation getRelation(String name);
 
+    /**
+     * Gets all functions in this schema.
+     *
+     * @return a collection of functions
+     */
     Collection<IFunction> getFunctions();
+
+    /**
+     * Gets a function by its signature.
+     *
+     * @param signature the function signature
+     * @return the function with the given signature, or null if not found
+     */
     IFunction getFunction(String signature);
 }

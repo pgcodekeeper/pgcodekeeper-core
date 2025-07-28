@@ -15,18 +15,22 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
-import java.util.Map;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Map;
+
+/**
+ * Interface for database objects that support simple option management with ALTER statements.
+ * Provides default implementation for comparing and updating options using SET and RESET syntax.
+ */
 public interface ISimpleOptionContainer extends IOptionContainer {
 
     @Override
     default void compareOptions(IOptionContainer newContainer, SQLScript script) {
-        Map <String, String> oldOptions = getOptions();
-        Map <String, String> newOptions = newContainer.getOptions();
+        Map<String, String> oldOptions = getOptions();
+        Map<String, String> newOptions = newContainer.getOptions();
 
         StringBuilder setOptions = new StringBuilder();
         StringBuilder resetOptions = new StringBuilder();
@@ -60,22 +64,30 @@ public interface ISimpleOptionContainer extends IOptionContainer {
             });
         }
 
-        if (setOptions.length() > 0 || resetOptions.length() > 0) {
+        if (!setOptions.isEmpty() || !resetOptions.isEmpty()) {
             appendOptions(newContainer, setOptions, resetOptions, script);
         }
     }
 
+    /**
+     * Appends SQL options to set and reset option builders for ALTER statements.
+     *
+     * @param newContainer the new option container to compare against
+     * @param setOptions   builder for SET option clauses
+     * @param resetOptions builder for RESET option clauses
+     * @param script       the SQL script context for generating statements
+     */
     default void appendOptions(IOptionContainer newContainer, StringBuilder setOptions,
-            StringBuilder resetOptions, SQLScript script) {
+                               StringBuilder resetOptions, SQLScript script) {
         DbObjType type = getStatementType();
         String typeName = type == DbObjType.VIEW ? ((PgStatement) newContainer).getTypeName() : type.name();
         getAlterOptionAction(setOptions, " SET (", script, type, typeName);
         getAlterOptionAction(resetOptions, " RESET (", script, type, typeName);
     }
-    
+
     private void getAlterOptionAction(StringBuilder option, String action, SQLScript script, DbObjType type,
-            String typeName) {
-        if (option.length() < 1) {
+                                      String typeName) {
+        if (option.isEmpty()) {
             return;
         }
         StringBuilder sql = new StringBuilder();
@@ -83,9 +95,9 @@ public interface ISimpleOptionContainer extends IOptionContainer {
         sql.append("ALTER ");
         if (type == DbObjType.COLUMN) {
             sql.append("TABLE ONLY ")
-            .append(PgDiffUtils.getQuotedName(getParent().getParent().getName()))
-            .append('.').append(PgDiffUtils.getQuotedName(getParent().getName()))
-            .append(" ALTER ");
+                    .append(PgDiffUtils.getQuotedName(getParent().getParent().getName()))
+                    .append('.').append(PgDiffUtils.getQuotedName(getParent().getName()))
+                    .append(" ALTER ");
         }
         sql.append(typeName).append(' ');
         if (type != DbObjType.COLUMN) {

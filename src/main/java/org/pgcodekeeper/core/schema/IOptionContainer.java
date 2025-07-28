@@ -15,13 +15,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
+import org.pgcodekeeper.core.script.SQLScript;
+
 import java.util.List;
 import java.util.Map;
 
-import org.pgcodekeeper.core.script.SQLScript;
-
+/**
+ * Interface for database objects that support storage and configuration options.
+ * Provides functionality for managing key-value option pairs.
+ */
 public interface IOptionContainer extends IStatement {
 
+    /**
+     * List of Greenplum-specific storage options.
+     */
     List<String> GP_OPTION_LIST = List.of(
             "appendonly",
             "appendoptimized",
@@ -32,8 +39,26 @@ public interface IOptionContainer extends IStatement {
             "compresslevel",
             "analyze_hll_non_part_table");
 
+    /**
+     * Adds an option to this container.
+     *
+     * @param key the option key
+     * @param value the option value
+     */
     void addOption(String key, String value);
+
+    /**
+     * Gets all options for this container.
+     *
+     * @return a map of option keys to values
+     */
     Map<String, String> getOptions();
 
+    /**
+     * Compares options between this container and a new container, generating SQL to update differences.
+     *
+     * @param newContainer the new container to compare against
+     * @param script the script to append changes to
+     */
     void compareOptions(IOptionContainer newContainer, SQLScript script);
 }

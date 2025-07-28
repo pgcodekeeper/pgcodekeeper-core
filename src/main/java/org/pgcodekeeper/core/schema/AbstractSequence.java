@@ -15,18 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
+
 /**
- * Stores sequence information.
+ * Abstract base class for database sequences.
+ * Provides common functionality for auto-incrementing sequences across different database types.
  */
 public abstract class AbstractSequence extends PgStatement implements IRelation, ISearchPath {
 
@@ -73,23 +74,32 @@ public abstract class AbstractSequence extends PgStatement implements IRelation,
         resetHash();
     }
 
-    public abstract void setMinMaxInc(long inc, Long max, Long min, String dataType, long presicion);
+    /**
+     * Sets the minimum, maximum, and increment values for this sequence.
+     *
+     * @param inc       the increment value
+     * @param max       the maximum value
+     * @param min       the minimum value
+     * @param dataType  the data type of the sequence
+     * @param precision the precision for numeric types
+     */
+    public abstract void setMinMaxInc(long inc, Long max, Long min, String dataType, long precision);
 
-    protected long getBoundaryTypeVal(String type, boolean needMaxVal, long presicion) {
+    protected long getBoundaryTypeVal(String type, boolean needMaxVal, long precision) {
         return switch (type) {
-        case "tinyint" -> needMaxVal ? 255 : 0;
-        case "smallint" -> needMaxVal ? Short.MAX_VALUE : Short.MIN_VALUE;
-        case "int", "integer" -> needMaxVal ? Integer.MAX_VALUE : Integer.MIN_VALUE;
-        case BIGINT -> needMaxVal ? Long.MAX_VALUE : Long.MIN_VALUE;
-        case "numeric", "decimal" -> {
-            // It used for MS SQL.
-            long boundaryTypeVal = (long) (Math.pow(10, presicion)) - 1;
-            yield needMaxVal ? boundaryTypeVal : -boundaryTypeVal;
-        }
-        default -> {
-            LOG.warn("Unsupported sequence type: {}", type);
-            yield needMaxVal ? Long.MAX_VALUE : Long.MIN_VALUE;
-        }
+            case "tinyint" -> needMaxVal ? 255 : 0;
+            case "smallint" -> needMaxVal ? Short.MAX_VALUE : Short.MIN_VALUE;
+            case "int", "integer" -> needMaxVal ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+            case BIGINT -> needMaxVal ? Long.MAX_VALUE : Long.MIN_VALUE;
+            case "numeric", "decimal" -> {
+                // It used for MS SQL.
+                long boundaryTypeVal = (long) (Math.pow(10, precision)) - 1;
+                yield needMaxVal ? boundaryTypeVal : -boundaryTypeVal;
+            }
+            default -> {
+                LOG.warn("Unsupported sequence type: {}", type);
+                yield needMaxVal ? Long.MAX_VALUE : Long.MIN_VALUE;
+            }
         };
     }
 
@@ -153,6 +163,11 @@ public abstract class AbstractSequence extends PgStatement implements IRelation,
 
     protected abstract AbstractSequence getSequenceCopy();
 
+    /**
+     * Fills the sequence body SQL definition.
+     *
+     * @param sbSQL the StringBuilder to append the sequence body to
+     */
     public abstract void fillSequenceBody(StringBuilder sbSQL);
 
     @Override

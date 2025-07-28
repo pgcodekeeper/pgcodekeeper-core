@@ -15,6 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
+/**
+ * Enumeration of possible states for database objects during schema comparison and migration.
+ * Defines what action needs to be taken for an object when applying schema changes.
+ */
 public enum ObjectState {
     CREATE,
     RECREATE,
@@ -23,6 +27,12 @@ public enum ObjectState {
     ALTER_WITH_DEP,
     NOTHING;
 
+    /**
+     * Checks if this state matches any of the provided states.
+     *
+     * @param states the states to check against
+     * @return true if this state is in the provided list
+     */
     public boolean in(ObjectState... states) {
         for (ObjectState state : states) {
             if (this == state) {

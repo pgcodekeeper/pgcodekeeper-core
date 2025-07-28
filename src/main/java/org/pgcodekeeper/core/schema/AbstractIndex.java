@@ -19,22 +19,18 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 
+import java.util.*;
+
 /**
- * Stores table index information.
+ * Abstract base class for database table indexes.
+ * Provides common functionality for indexes across different database types including
+ * unique indexes, clustered indexes, and partial indexes with WHERE clauses.
  */
 public abstract class AbstractIndex extends PgStatement
-implements ISimpleOptionContainer, ISimpleColumnContainer, ISearchPath {
+        implements ISimpleOptionContainer, ISimpleColumnContainer, ISearchPath {
 
     protected String where;
     protected String tablespace;
@@ -65,6 +61,12 @@ implements ISimpleOptionContainer, ISimpleColumnContainer, ISearchPath {
         resetHash();
     }
 
+    /**
+     * Compares the columns of this index with a collection of column references.
+     *
+     * @param refs the collection of column references to compare against
+     * @return true if the columns match in order and count
+     */
     public boolean compareColumns(Collection<String> refs) {
         if (refs.size() != columns.size()) {
             return false;

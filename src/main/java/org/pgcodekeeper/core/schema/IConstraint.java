@@ -17,12 +17,47 @@ package org.pgcodekeeper.core.schema;
 
 import java.util.Collection;
 
+/**
+ * Interface for database table constraints.
+ * Provides common functionality for all constraint types including primary keys,
+ * foreign keys, unique constraints, and check constraints.
+ */
 public interface IConstraint extends ISearchPath {
+    /**
+     * Checks if this constraint is a primary key constraint.
+     *
+     * @return true if this is a primary key constraint
+     */
     default boolean isPrimaryKey() {
         return false;
     }
+
+    /**
+     * Gets the SQL definition of this constraint.
+     *
+     * @return the constraint definition
+     */
     String getDefinition();
+
+    /**
+     * Gets the columns involved in this constraint.
+     *
+     * @return a collection of column names
+     */
     Collection<String> getColumns();
+
+    /**
+     * Checks if this constraint involves the specified column.
+     *
+     * @param name the column name to check
+     * @return true if the column is part of this constraint
+     */
     boolean containsColumn(String name);
+
+    /**
+     * Gets the name of the table this constraint belongs to.
+     *
+     * @return the table name
+     */
     String getTableName();
 }

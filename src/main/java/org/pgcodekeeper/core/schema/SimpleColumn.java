@@ -15,16 +15,21 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
+import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.hashers.IHashable;
+import org.pgcodekeeper.core.hashers.JavaHasher;
+
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.hashers.IHashable;
-import org.pgcodekeeper.core.hashers.JavaHasher;
-
+/**
+ * Represents a simple column reference with ordering and operator class information.
+ * Used primarily for index column definitions and similar contexts where column
+ * attributes like sorting, collation, and operator classes are needed.
+ */
 public class SimpleColumn implements Serializable, IHashable {
 
     private static final long serialVersionUID = 2305486126854181859L;
@@ -42,6 +47,12 @@ public class SimpleColumn implements Serializable, IHashable {
         this.name = name;
     }
 
+    /**
+     * Adds an operator class parameter.
+     *
+     * @param key the parameter key
+     * @param value the parameter value
+     */
     public void addOpClassParam(String key, String value) {
         opClassParams.put(key, value);
     }
@@ -117,10 +128,9 @@ public class SimpleColumn implements Serializable, IHashable {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof SimpleColumn)) {
+        if (!(obj instanceof SimpleColumn other)) {
             return false;
         }
-        SimpleColumn other = (SimpleColumn) obj;
         return Objects.equals(name, other.name)
                 && Objects.equals(opClassParams, other.opClassParams)
                 && Objects.equals(collation, other.collation)

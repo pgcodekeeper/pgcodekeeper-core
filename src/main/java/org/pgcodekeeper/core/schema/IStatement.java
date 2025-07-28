@@ -17,12 +17,57 @@ package org.pgcodekeeper.core.schema;
 
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 
+/**
+ * Base interface for all database statements and objects.
+ * Provides common functionality for identifying and accessing database objects.
+ */
 public interface IStatement {
+    /**
+     * Gets the name of this statement.
+     *
+     * @return the statement name
+     */
     String getName();
+
+    /**
+     * Gets the type of this database object.
+     *
+     * @return the database object type
+     */
     DbObjType getStatementType();
+
+    /**
+     * Gets the database that contains this statement.
+     *
+     * @return the containing database
+     */
     AbstractDatabase getDatabase();
+
+    /**
+     * Gets the parent statement that contains this statement.
+     *
+     * @return the parent statement, or null if this is a top-level object
+     */
     IStatement getParent();
+
+    /**
+     * Gets the fully qualified name of this statement.
+     *
+     * @return the qualified name
+     */
     String getQualifiedName();
+
+    /**
+     * Gets the comment associated with this statement.
+     *
+     * @return the comment, or null if no comment is set
+     */
     String getComment();
+
+    /**
+     * Gets the bare name without qualifiers or arguments.
+     *
+     * @return the bare name
+     */
     String getBareName();
 }

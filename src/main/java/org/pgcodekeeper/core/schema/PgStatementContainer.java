@@ -15,18 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.pg.PgRule;
 
+import java.util.*;
+
+/**
+ * Abstract base class for database objects that can contain other statements.
+ * Provides common functionality for containers like tables and views that can have
+ * indexes, triggers, rules, policies, and constraints as child objects.
+ */
 public abstract class PgStatementContainer extends PgStatement
-implements IRelation, IStatementContainer, ISearchPath {
+        implements IRelation, IStatementContainer, ISearchPath {
 
     private final Map<String, AbstractIndex> indexes = new LinkedHashMap<>();
     private final Map<String, AbstractTrigger> triggers = new LinkedHashMap<>();
@@ -48,12 +49,12 @@ implements IRelation, IStatementContainer, ISearchPath {
     @Override
     public PgStatement getChild(String name, DbObjType type) {
         return switch (type) {
-        case INDEX -> getIndex(name);
-        case TRIGGER -> getTrigger(name);
-        case RULE -> getRule(name);
-        case CONSTRAINT -> getConstraint(name);
-        case POLICY -> getPolicy(name);
-        default -> null;
+            case INDEX -> getIndex(name);
+            case TRIGGER -> getTrigger(name);
+            case RULE -> getRule(name);
+            case CONSTRAINT -> getConstraint(name);
+            case POLICY -> getPolicy(name);
+            default -> null;
         };
     }
 
@@ -61,26 +62,29 @@ implements IRelation, IStatementContainer, ISearchPath {
     public void addChild(IStatement st) {
         DbObjType type = st.getStatementType();
         switch (type) {
-        case INDEX:
-            addIndex((AbstractIndex) st);
-            break;
-        case CONSTRAINT:
-            addConstraint((AbstractConstraint) st);
-            break;
-        case TRIGGER:
-            addTrigger((AbstractTrigger) st);
-            break;
-        case RULE:
-            addRule((PgRule) st);
-            break;
-        case POLICY:
-            addPolicy((AbstractPolicy) st);
-            break;
-        default:
-            throw new IllegalArgumentException("Unsupported child type: " + type);
+            case INDEX:
+                addIndex((AbstractIndex) st);
+                break;
+            case CONSTRAINT:
+                addConstraint((AbstractConstraint) st);
+                break;
+            case TRIGGER:
+                addTrigger((AbstractTrigger) st);
+                break;
+            case RULE:
+                addRule((PgRule) st);
+                break;
+            case POLICY:
+                addPolicy((AbstractPolicy) st);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported child type: " + type);
         }
     }
 
+    /**
+     * Checks if this container has any clustered indexes or constraints.
+     */
     public final boolean isClustered() {
         for (AbstractIndex ind : getIndexes()) {
             if (ind.isClustered) {
@@ -101,7 +105,6 @@ implements IRelation, IStatementContainer, ISearchPath {
      * Finds constraint according to specified constraint {@code name}.
      *
      * @param name name of the constraint to be searched
-     *
      * @return found constraint or null if no such constraint has been found
      */
     public abstract AbstractConstraint getConstraint(final String name);
@@ -110,7 +113,6 @@ implements IRelation, IStatementContainer, ISearchPath {
      * Finds index according to specified index {@code name}.
      *
      * @param name name of the index to be searched
-     *
      * @return found index or null if no such index has been found
      */
     public AbstractIndex getIndex(final String name) {
@@ -121,7 +123,6 @@ implements IRelation, IStatementContainer, ISearchPath {
      * Finds trigger according to specified trigger {@code name}.
      *
      * @param name name of the trigger to be searched
-     *
      * @return found trigger or null if no such trigger has been found
      */
     public AbstractTrigger getTrigger(final String name) {
@@ -132,7 +133,6 @@ implements IRelation, IStatementContainer, ISearchPath {
      * Finds rule according to specified rule {@code name}.
      *
      * @param name name of the rule to be searched
-     *
      * @return found rule or null if no such rule has been found
      */
     public PgRule getRule(final String name) {
@@ -143,7 +143,6 @@ implements IRelation, IStatementContainer, ISearchPath {
      * Finds policy according to specified policy {@code name}.
      *
      * @param name name of the policy to be searched
-     *
      * @return found policy or null if no such policy has been found
      */
     public AbstractPolicy getPolicy(String name) {
@@ -188,20 +187,45 @@ implements IRelation, IStatementContainer, ISearchPath {
         return Collections.unmodifiableCollection(policies.values());
     }
 
+    /**
+     * Adds a constraint to this container.
+     *
+     * @param constraint the constraint to add
+     */
     public abstract void addConstraint(final AbstractConstraint constraint);
 
+    /**
+     * Adds an index to this container.
+     *
+     * @param index the index to add
+     */
     public void addIndex(final AbstractIndex index) {
         addUnique(indexes, index);
     }
 
+    /**
+     * Adds a trigger to this container.
+     *
+     * @param trigger the trigger to add
+     */
     public void addTrigger(final AbstractTrigger trigger) {
         addUnique(triggers, trigger);
     }
 
+    /**
+     * Adds a rule to this container.
+     *
+     * @param rule the rule to add
+     */
     public void addRule(final PgRule rule) {
         addUnique(rules, rule);
     }
 
+    /**
+     * Adds a policy to this container.
+     *
+     * @param policy the policy to add
+     */
     public void addPolicy(AbstractPolicy policy) {
         addUnique(policies, policy);
     }

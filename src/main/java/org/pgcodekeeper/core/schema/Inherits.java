@@ -15,13 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.hashers.IHashable;
 import org.pgcodekeeper.core.hashers.JavaHasher;
 
+import java.util.Objects;
+
+/**
+ * Represents a table inheritance relationship in PostgreSQL.
+ * Contains the schema and table name of a parent table that is inherited by another table.
+ */
 public class Inherits implements IHashable {
 
     private final String key;
@@ -35,11 +39,22 @@ public class Inherits implements IHashable {
         return value;
     }
 
+    /**
+     * Creates a new inheritance relationship.
+     *
+     * @param key   the inherits key
+     * @param value the inherits value
+     */
     public Inherits(String key, String value) {
         this.key = key;
         this.value = value;
     }
 
+    /**
+     * Gets the qualified name of the inherited table.
+     *
+     * @return the qualified table name in the format schema.table
+     */
     public String getQualifiedName() {
         return (key == null ? "" : (PgDiffUtils.getQuotedName(key) + '.'))
                 + PgDiffUtils.getQuotedName(value);
