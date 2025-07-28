@@ -15,26 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.schema.AbstractConstraint;
-import org.pgcodekeeper.core.schema.IConstraintPk;
-import org.pgcodekeeper.core.schema.IOptionContainer;
-import org.pgcodekeeper.core.schema.ISimpleColumnContainer;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.SimpleColumn;
-import org.pgcodekeeper.core.schema.StatementUtils;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.*;
+
+/**
+ * Represents a Microsoft SQL PRIMARY KEY or UNIQUE constraint.
+ * Supports both clustered and non-clustered indexes with various options.
+ */
 public final class MsConstraintPk extends MsConstraint
-implements IConstraintPk, IOptionContainer, ISimpleColumnContainer {
+        implements IConstraintPk, IOptionContainer, ISimpleColumnContainer {
 
     private final boolean isPrimaryKey;
     private boolean isClustered;
@@ -43,6 +36,12 @@ implements IConstraintPk, IOptionContainer, ISimpleColumnContainer {
     private final List<SimpleColumn> columns = new ArrayList<>();
     private final Map<String, String> options = new HashMap<>();
 
+    /**
+     * Creates a new Microsoft SQL PRIMARY KEY or UNIQUE constraint.
+     *
+     * @param name         the constraint name
+     * @param isPrimaryKey true for PRIMARY KEY, false for UNIQUE
+     */
     public MsConstraintPk(String name, boolean isPrimaryKey) {
         super(name);
         this.isPrimaryKey = isPrimaryKey;
@@ -85,6 +84,12 @@ implements IConstraintPk, IOptionContainer, ISimpleColumnContainer {
         resetHash();
     }
 
+    /**
+     * Throws an exception as include columns are not supported for primary key/unique constraints.
+     *
+     * @param column the column name (not used)
+     * @throws IllegalStateException always, as this operation is unsupported
+     */
     @Override
     public void addInclude(String column) {
         throw new IllegalStateException("Unsupported operation");
@@ -185,6 +190,6 @@ implements IConstraintPk, IOptionContainer, ISimpleColumnContainer {
 
     @Override
     public void compareOptions(IOptionContainer newContainer, SQLScript script) {
-        // no imple
+        // no implementation
     }
 }

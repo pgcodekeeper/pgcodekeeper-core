@@ -23,10 +23,19 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+/**
+ * Abstract base class for Microsoft SQL table constraints.
+ * Provides common functionality for constraint management including disabled state handling.
+ */
 public abstract class MsConstraint extends AbstractConstraint {
 
     private boolean isDisabled;
 
+    /**
+     * Creates a new Microsoft SQL constraint with the specified name.
+     *
+     * @param name the constraint name
+     */
     protected MsConstraint(String name) {
         super(name);
     }

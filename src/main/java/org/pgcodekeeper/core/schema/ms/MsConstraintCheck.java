@@ -15,17 +15,25 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractConstraint;
 import org.pgcodekeeper.core.schema.PgStatement;
 
+import java.util.Objects;
+
+/**
+ * Represents a Microsoft SQL CHECK constraint that validates column values against a boolean expression.
+ */
 public final class MsConstraintCheck extends MsConstraint {
 
     private boolean isNotForRepl;
     private String expression;
 
+    /**
+     * Creates a new Microsoft SQL CHECK constraint.
+     *
+     * @param name the constraint name
+     */
     public MsConstraintCheck(String name) {
         super(name);
     }

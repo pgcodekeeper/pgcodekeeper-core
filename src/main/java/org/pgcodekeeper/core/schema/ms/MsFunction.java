@@ -15,13 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.AbstractFunction;
 import org.pgcodekeeper.core.schema.FuncTypes;
 
+import java.util.Objects;
+
+/**
+ * Represents a Microsoft SQL user-defined function.
+ * Supports scalar, table-valued, and other function types.
+ */
 public final class MsFunction extends AbstractMsFunction {
 
     private FuncTypes funcType = FuncTypes.SCALAR;
@@ -31,6 +35,11 @@ public final class MsFunction extends AbstractMsFunction {
         return DbObjType.FUNCTION;
     }
 
+    /**
+     * Creates a new Microsoft SQL function.
+     *
+     * @param name the function name
+     */
     public MsFunction(String name) {
         super(name);
     }

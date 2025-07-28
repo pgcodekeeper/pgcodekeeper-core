@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
@@ -28,10 +24,23 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
+
+/**
+ * Represents a Microsoft SQL database role.
+ * Roles are used to group users and manage permissions at the database level.
+ */
 public final class MsRole extends PgStatement {
 
     private final Set<String> members = new LinkedHashSet<>();
 
+    /**
+     * Creates a new Microsoft SQL role.
+     *
+     * @param name the role name
+     */
     public MsRole(String name) {
         super(name);
     }
@@ -104,6 +113,11 @@ public final class MsRole extends PgStatement {
         script.addStatement(sql);
     }
 
+    /**
+     * Adds a member to this role.
+     *
+     * @param member the user or role name to add as a member
+     */
     public void addMember(String member) {
         members.add(member);
         resetHash();

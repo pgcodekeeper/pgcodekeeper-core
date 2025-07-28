@@ -15,29 +15,29 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.AbstractStatistics;
-import org.pgcodekeeper.core.schema.ISchema;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.StatementUtils;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.*;
+
+/**
+ * Represents Microsoft SQL table statistics.
+ * Statistics are used by the query optimizer to create efficient query execution plans.
+ */
 public final class MsStatistics extends AbstractStatistics {
 
     private String filter;
     private final List<String> cols = new ArrayList<>();
     private final Map<String, String> options = new HashMap<>();
 
+    /**
+     * Creates a new Microsoft SQL statistics object.
+     *
+     * @param name the statistics name
+     */
     public MsStatistics(String name) {
         super(name);
     }
@@ -89,7 +89,7 @@ public final class MsStatistics extends AbstractStatistics {
         if (!Objects.equals(newStat.options, options)) {
             StringBuilder sql = new StringBuilder();
             sql.append("UPDATE STATISTICS ")
-            .append(parent.getQualifiedName()).append(" (").append(name).append(")");
+                    .append(parent.getQualifiedName()).append(" (").append(name).append(")");
             appendOptions(sql, newStat.options);
             script.addStatement(sql);
         }
@@ -118,7 +118,7 @@ public final class MsStatistics extends AbstractStatistics {
         return false;
     }
 
-    private boolean compareUnalterable (MsStatistics stat) {
+    private boolean compareUnalterable(MsStatistics stat) {
         return Objects.equals(filter, stat.filter)
                 && Objects.equals(cols, stat.cols);
     }
@@ -152,11 +152,22 @@ public final class MsStatistics extends AbstractStatistics {
         resetHash();
     }
 
+    /**
+     * Adds a column to this statistics object.
+     *
+     * @param col the column name to add
+     */
     public void addCol(String col) {
         cols.add(col);
         resetHash();
     }
 
+    /**
+     * Adds an option to this statistics object.
+     *
+     * @param key the option name
+     * @param value the option value
+     */
     public void putOption(String key, String value) {
         options.put(key, value);
         resetHash();

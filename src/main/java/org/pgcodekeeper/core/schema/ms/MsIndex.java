@@ -15,26 +15,31 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
+import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.MsDiffUtils;
+import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.schema.*;
+import org.pgcodekeeper.core.script.SQLScript;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 
-import org.pgcodekeeper.core.DatabaseType;
-import org.pgcodekeeper.core.MsDiffUtils;
-import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.schema.AbstractIndex;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.SimpleColumn;
-import org.pgcodekeeper.core.schema.StatementUtils;
-import org.pgcodekeeper.core.script.SQLScript;
-
+/**
+ * Represents a Microsoft SQL index with support for clustered, non-clustered,
+ * and columnstore indexes.
+ */
 public final class MsIndex extends AbstractIndex {
 
     private boolean isColumnstore;
     private final List<String> orderCols = new ArrayList<>();
 
+    /**
+     * Creates a new Microsoft SQL index.
+     *
+     * @param name the index name
+     */
     public MsIndex(String name) {
         super(name);
     }
@@ -44,6 +49,11 @@ public final class MsIndex extends AbstractIndex {
         resetHash();
     }
 
+    /**
+     * Adds a column to the ORDER clause for columnstore indexes.
+     *
+     * @param orderCol the column specification for ordering
+     */
     public void addOrderCol(String orderCol) {
         this.orderCols.add(orderCol);
         resetHash();
@@ -164,8 +174,8 @@ public final class MsIndex extends AbstractIndex {
     @Override
     protected StringBuilder appendFullName(StringBuilder sb) {
         sb.append(MsDiffUtils.quoteName(name))
-        .append(" ON ")
-        .append(parent.getQualifiedName());
+                .append(" ON ")
+                .append(parent.getQualifiedName());
         return sb;
     }
 

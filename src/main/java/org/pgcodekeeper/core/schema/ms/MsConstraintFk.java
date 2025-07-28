@@ -15,11 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractConstraint;
@@ -27,6 +22,15 @@ import org.pgcodekeeper.core.schema.IConstraintFk;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.schema.StatementUtils;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Represents a Microsoft SQL FOREIGN KEY constraint that enforces referential integrity
+ * between tables.
+ */
 public final class MsConstraintFk extends MsConstraint implements IConstraintFk {
 
     private final List<String> columns = new ArrayList<>();
@@ -37,6 +41,11 @@ public final class MsConstraintFk extends MsConstraint implements IConstraintFk 
     private String updAction;
     private boolean isNotForRepl;
 
+    /**
+     * Creates a new Microsoft SQL FOREIGN KEY constraint.
+     *
+     * @param name the constraint name
+     */
     public MsConstraintFk(String name) {
         super(name);
     }
@@ -46,6 +55,11 @@ public final class MsConstraintFk extends MsConstraint implements IConstraintFk 
         return Collections.unmodifiableList(columns);
     }
 
+    /**
+     * Adds a column to this foreign key constraint.
+     *
+     * @param column the column name to add
+     */
     public void addColumn(String column) {
         columns.add(column);
         resetHash();
@@ -56,6 +70,11 @@ public final class MsConstraintFk extends MsConstraint implements IConstraintFk 
         return Collections.unmodifiableList(refs);
     }
 
+    /**
+     * Adds a referenced column to this foreign key constraint.
+     *
+     * @param referencedColumn the referenced column name to add
+     */
     public void addForeignColumn(String referencedColumn) {
         refs.add(referencedColumn);
         resetHash();
@@ -102,7 +121,7 @@ public final class MsConstraintFk extends MsConstraint implements IConstraintFk 
         sbSQL.append("FOREIGN KEY ");
         StatementUtils.appendCols(sbSQL, columns, getDbType());
         sbSQL.append(" REFERENCES ").append(MsDiffUtils.quoteName(foreignSchema)).append('.')
-        .append(MsDiffUtils.quoteName(foreignTable));
+                .append(MsDiffUtils.quoteName(foreignTable));
         if (!refs.isEmpty()) {
             sbSQL.append(' ');
             StatementUtils.appendCols(sbSQL, refs, getDbType());

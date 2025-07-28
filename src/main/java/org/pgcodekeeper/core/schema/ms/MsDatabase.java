@@ -15,23 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.IStatement;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.schema.*;
+
+import java.util.*;
 
 /**
- * Stores MS SQL database information.
+ * Represents a Microsoft SQL database with its schemas, assemblies, roles, and users.
+ * Provides functionality for managing database-level objects and their relationships.
  */
 public final class MsDatabase extends AbstractDatabase {
 
@@ -62,29 +55,27 @@ public final class MsDatabase extends AbstractDatabase {
     public void addChild(IStatement st) {
         DbObjType type = st.getStatementType();
         switch (type) {
-        case SCHEMA:
-            addSchema((AbstractSchema) st);
-            break;
-        case ASSEMBLY:
-            addAssembly((MsAssembly) st);
-            break;
-        case ROLE:
-            addRole((MsRole) st);
-            break;
-        case USER:
-            addUser((MsUser) st);
-            break;
-        default:
-            throw new IllegalArgumentException("Unsupported child type: " + type);
+            case SCHEMA:
+                addSchema((AbstractSchema) st);
+                break;
+            case ASSEMBLY:
+                addAssembly((MsAssembly) st);
+                break;
+            case ROLE:
+                addRole((MsRole) st);
+                break;
+            case USER:
+                addUser((MsUser) st);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported child type: " + type);
         }
     }
 
     /**
      * Returns assembly of given name or null if the assembly has not been found.
      *
-     * @param name
-     *            assembly name
-     *
+     * @param name assembly name
      * @return found assembly or null
      */
     public MsAssembly getAssembly(final String name) {
@@ -94,9 +85,7 @@ public final class MsDatabase extends AbstractDatabase {
     /**
      * Returns role of given name or null if the role has not been found.
      *
-     * @param name
-     *            role name
-     *
+     * @param name role name
      * @return found role or null
      */
     public MsRole getRole(final String name) {
@@ -106,9 +95,7 @@ public final class MsDatabase extends AbstractDatabase {
     /**
      * Returns user of given name or null if the user has not been found.
      *
-     * @param name
-     *            user name
-     *
+     * @param name user name
      * @return found user or null
      */
     public MsUser getUser(final String name) {
@@ -116,18 +103,18 @@ public final class MsDatabase extends AbstractDatabase {
     }
 
     /**
-     * Getter for {@link #assemblies}. The list cannot be modified.
+     * Gets all assemblies in this database.
      *
-     * @return {@link #assemblies}
+     * @return unmodifiable collection of assemblies
      */
     public Collection<MsAssembly> getAssemblies() {
         return Collections.unmodifiableCollection(assemblies.values());
     }
 
     /**
-     * Getter for {@link #roles}. The list cannot be modified.
+     * Gets all roles in this database.
      *
-     * @return {@link #roles}
+     * @return unmodifiable collection of roles
      */
     public Collection<MsRole> getRoles() {
         return Collections.unmodifiableCollection(roles.values());
@@ -142,14 +129,29 @@ public final class MsDatabase extends AbstractDatabase {
         return Collections.unmodifiableCollection(users.values());
     }
 
+    /**
+     * Adds an assembly to this database.
+     *
+     * @param assembly the assembly to add
+     */
     public void addAssembly(final MsAssembly assembly) {
         addUnique(assemblies, assembly);
     }
 
+    /**
+     * Adds a role to this database.
+     *
+     * @param role the role to add
+     */
     public void addRole(final MsRole role) {
         addUnique(roles, role);
     }
 
+    /**
+     * Adds a user to this database.
+     *
+     * @param user the user to add
+     */
     public void addUser(final MsUser user) {
         addUnique(users, user);
     }

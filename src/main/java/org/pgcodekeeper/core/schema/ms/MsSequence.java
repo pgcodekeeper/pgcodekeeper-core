@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.Locale;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractSequence;
@@ -25,10 +22,22 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Locale;
+import java.util.Objects;
+
+/**
+ * Represents a Microsoft SQL sequence object.
+ * Sequences generate sequential numeric values and are commonly used for primary keys and unique identifiers.
+ */
 public final class MsSequence extends AbstractSequence {
 
     private boolean isCached;
 
+    /**
+     * Creates a new Microsoft SQL sequence with BIGINT data type as default.
+     *
+     * @param name the sequence name
+     */
     public MsSequence(String name) {
         super(name);
         setDataType(BIGINT);
@@ -90,7 +99,7 @@ public final class MsSequence extends AbstractSequence {
 
         StringBuilder sbSQL = new StringBuilder();
         if (compareSequenceBody(newSequence, sbSQL)) {
-            script.addStatement("ALTER SEQUENCE " + getQualifiedName() + sbSQL.toString());
+            script.addStatement("ALTER SEQUENCE " + getQualifiedName() + sbSQL);
         }
 
         appendAlterOwner(newSequence, script);
@@ -159,24 +168,24 @@ public final class MsSequence extends AbstractSequence {
             sbSQL.append("\n\tCYCLE");
         }
 
-        return sbSQL.length() > 0;
+        return !sbSQL.isEmpty();
     }
 
     @Override
     public void setDataType(String dataType) {
         String type = dataType.toLowerCase(Locale.ROOT);
         switch (type) {
-        case "tinyint":
-        case "smallint":
-        case "int":
-        case BIGINT:
-        case "numeric":
-        case "decimal":
-            // set lowercased version for simple system types
-            break;
-        default:
-            // set exactly as given
-            type = dataType;
+            case "tinyint":
+            case "smallint":
+            case "int":
+            case BIGINT:
+            case "numeric":
+            case "decimal":
+                // set lowercased version for simple system types
+                break;
+            default:
+                // set exactly as given
+                type = dataType;
         }
         super.setDataType(type);
     }
@@ -221,5 +230,4 @@ public final class MsSequence extends AbstractSequence {
     public DatabaseType getDbType() {
         return DatabaseType.MS;
     }
-
 }

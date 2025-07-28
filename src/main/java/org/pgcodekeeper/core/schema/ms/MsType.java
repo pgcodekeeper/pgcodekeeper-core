@@ -15,22 +15,21 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractType;
-import org.pgcodekeeper.core.schema.IConstraint;
-import org.pgcodekeeper.core.schema.IStatement;
-import org.pgcodekeeper.core.schema.IStatementContainer;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.schema.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Represents a Microsoft SQL user-defined type that can be an alias type,
+ * assembly type, or table type. Each type has specific properties and behaviors.
+ */
 public final class MsType extends AbstractType implements IStatementContainer {
 
     // base type
@@ -47,6 +46,11 @@ public final class MsType extends AbstractType implements IStatementContainer {
     private final List<String> constraints = new ArrayList<>();
     private final List<String> indices = new ArrayList<>();
 
+    /**
+     * Creates a new Microsoft SQL user-defined type.
+     *
+     * @param name the type name
+     */
     public MsType(String name) {
         super(name);
     }
@@ -60,7 +64,7 @@ public final class MsType extends AbstractType implements IStatementContainer {
             }
         } else if (assemblyName != null) {
             sb.append("\nEXTERNAL NAME ").append(MsDiffUtils.quoteName(assemblyName))
-            .append('.').append(MsDiffUtils.quoteName(assemblyClass));
+                    .append('.').append(MsDiffUtils.quoteName(assemblyClass));
         } else {
             sb.append(" AS TABLE(");
             for (String col : columns) {
@@ -170,17 +174,17 @@ public final class MsType extends AbstractType implements IStatementContainer {
     public void addChild(IStatement stmt) {
         var type = stmt.getStatementType();
         switch (type) {
-        case INDEX:
-            indices.add(((MsIndex) stmt).getDefinition(true, false, false));
-            break;
-        case CONSTRAINT:
-            constraints.add(((IConstraint) stmt).getDefinition());
-            break;
-        case COLUMN:
-            columns.add(((AbstractColumn) stmt).getFullDefinition());
-            break;
-        default:
-            throw new IllegalArgumentException("Unsupported child type: " + type);
+            case INDEX:
+                indices.add(((MsIndex) stmt).getDefinition(true, false, false));
+                break;
+            case CONSTRAINT:
+                constraints.add(((IConstraint) stmt).getDefinition());
+                break;
+            case COLUMN:
+                columns.add(((AbstractColumn) stmt).getFullDefinition());
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported child type: " + type);
         }
         resetHash();
     }
@@ -195,5 +199,4 @@ public final class MsType extends AbstractType implements IStatementContainer {
     public DatabaseType getDbType() {
         return DatabaseType.MS;
     }
-
 }

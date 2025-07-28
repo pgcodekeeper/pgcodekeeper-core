@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
@@ -28,6 +25,14 @@ import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLActionType;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+/**
+ * Represents a Microsoft SQL table column with its properties and constraints.
+ * Handles column-specific features like SPARSE, ROWGUIDCOL, PERSISTED, identity columns,
+ * generated columns, and data masking functions.
+ */
 public final class MsColumn extends AbstractColumn {
 
     private static final String SPARSE = "SPARSE";
@@ -43,10 +48,15 @@ public final class MsColumn extends AbstractColumn {
     private String seed;
     private String increment;
     private String defaultName;
-    private String expession;
+    private String expression;
     private String maskingFunction;
     private GeneratedType generated;
 
+    /**
+     * Creates a new Microsoft SQL column with the specified name.
+     *
+     * @param name the column name
+     */
     public MsColumn(String name) {
         super(name);
     }
@@ -56,8 +66,8 @@ public final class MsColumn extends AbstractColumn {
         final StringBuilder sbDefinition = new StringBuilder();
         sbDefinition.append(MsDiffUtils.quoteName(name));
         sbDefinition.append(' ');
-        if (expession != null) {
-            sbDefinition.append("AS ").append(expession);
+        if (expression != null) {
+            sbDefinition.append("AS ").append(expression);
         } else {
             sbDefinition.append(type);
         }
@@ -86,7 +96,7 @@ public final class MsColumn extends AbstractColumn {
             appendGenerated(sbDefinition);
         }
 
-        if (expession == null) {
+        if (expression == null) {
             sbDefinition.append(nullValue ? NULL : NOT_NULL);
         }
 
@@ -114,8 +124,8 @@ public final class MsColumn extends AbstractColumn {
         StringBuilder sql = new StringBuilder();
         sql.append(getAlterTable(false));
         sql.append("\n\tADD ").append(MsDiffUtils.quoteName(name)).append(' ');
-        if (expession != null) {
-            sql.append("AS ").append(expession);
+        if (expression != null) {
+            sql.append("AS ").append(expression);
         } else {
             sql.append(type);
         }
@@ -139,7 +149,7 @@ public final class MsColumn extends AbstractColumn {
             appendGenerated(sql);
         }
 
-        boolean isJoinNotNull = expession == null && defaultValue == null && !nullValue;
+        boolean isJoinNotNull = expression == null && defaultValue == null && !nullValue;
         if (isJoinNotNull) {
             sql.append(NOT_NULL);
         }
@@ -148,7 +158,7 @@ public final class MsColumn extends AbstractColumn {
 
         compareDefaults(null, null, defaultName, defaultValue, script);
 
-        if (!isJoinNotNull && expession == null && !nullValue) {
+        if (!isJoinNotNull && expression == null && !nullValue) {
             if (defaultValue != null) {
                 addUpdateStatement(script);
             }
@@ -176,7 +186,7 @@ public final class MsColumn extends AbstractColumn {
     }
 
     private void compareOption(boolean oldOption, boolean newOption, String optionName,
-            AtomicBoolean isNeedDepcies, SQLScript script) {
+                               AtomicBoolean isNeedDepcies, SQLScript script) {
         if (oldOption == newOption) {
             return;
         }
@@ -188,14 +198,13 @@ public final class MsColumn extends AbstractColumn {
         if (isNeedDepcies != null && (oldOption || !PERSISTED.equalsIgnoreCase(optionName))) {
             isNeedDepcies.set(true);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(getAlterColumn(name));
-        sb.append(newOption ? " ADD " : " DROP ");
-        sb.append(optionName);
+        String sb = getAlterColumn(name) +
+                (newOption ? " ADD " : " DROP ") +
+                optionName;
 
         // before adding the ROWGUIDCOL option to a column, we must first remove it from another
         var orderType = !newOption && ROWGUIDCOL.equalsIgnoreCase(optionName) ? SQLActionType.BEGIN : SQLActionType.MID;
-        script.addStatement(sb.toString(), orderType);
+        script.addStatement(sb, orderType);
     }
 
     private void appendGenerated(StringBuilder sb) {
@@ -213,7 +222,7 @@ public final class MsColumn extends AbstractColumn {
         // recreate column to change identity or computed value
         if (!Objects.equals(newColumn.seed, seed)
                 || !Objects.equals(newColumn.increment, increment)
-                || !Objects.equals(newColumn.expession, expession)
+                || !Objects.equals(newColumn.expression, expression)
                 || newColumn.generated != generated
                 || !Objects.equals(newColumn.isHidden, isHidden)) {
             return ObjectState.RECREATE;
@@ -221,7 +230,7 @@ public final class MsColumn extends AbstractColumn {
 
         boolean isNeedDropDefault = !Objects.equals(type, newColumn.type)
                 && (!Objects.equals(defaultValue, newColumn.defaultValue)
-                        || !Objects.equals(defaultName, newColumn.defaultName));
+                || !Objects.equals(defaultName, newColumn.defaultName));
 
         if (isNeedDropDefault) {
             compareDefaults(defaultName, defaultValue, null, null, script);
@@ -247,7 +256,7 @@ public final class MsColumn extends AbstractColumn {
     }
 
     private void compareDefaults(String oldDefaultName, String oldDefault,
-            String newDefaultName, String newDefault, SQLScript script) {
+                                 String newDefaultName, String newDefault, SQLScript script) {
         if (Objects.equals(oldDefault, newDefault) && Objects.equals(oldDefaultName, newDefaultName)) {
             return;
         }
@@ -292,7 +301,7 @@ public final class MsColumn extends AbstractColumn {
             return;
         }
 
-        if (newColumn.defaultValue != null && nullValue && !newColumn.nullValue) {
+        if (newColumn.defaultValue != null && nullValue) {
             addUpdateStatement(script);
         }
 
@@ -322,9 +331,9 @@ public final class MsColumn extends AbstractColumn {
     private void addUpdateStatement(SQLScript script) {
         StringBuilder sb = new StringBuilder();
         sb.append("UPDATE ").append(parent.getQualifiedName())
-        .append("\n\tSET ").append(MsDiffUtils.quoteName(name))
-        .append(" = DEFAULT WHERE ")
-        .append(MsDiffUtils.quoteName(name)).append(" IS").append(NULL);
+                .append("\n\tSET ").append(MsDiffUtils.quoteName(name))
+                .append(" = DEFAULT WHERE ")
+                .append(MsDiffUtils.quoteName(name)).append(" IS").append(NULL);
         script.addStatement(sb);
     }
 
@@ -375,11 +384,11 @@ public final class MsColumn extends AbstractColumn {
     }
 
     public String getExpression() {
-        return expession;
+        return expression;
     }
 
-    public void setExpression(final String expession) {
-        this.expession = expession;
+    public void setExpression(final String expression) {
+        this.expression = expression;
         resetHash();
     }
 
@@ -392,6 +401,12 @@ public final class MsColumn extends AbstractColumn {
         return isIdentity;
     }
 
+    /**
+     * Configures this column as an identity column with the specified seed and increment values.
+     *
+     * @param seed      the starting value for the identity
+     * @param increment the increment value for each new identity value
+     */
     public void setIdentity(String seed, String increment) {
         this.seed = seed;
         this.increment = increment;
@@ -425,7 +440,7 @@ public final class MsColumn extends AbstractColumn {
                     && Objects.equals(seed, col.seed)
                     && Objects.equals(increment, col.increment)
                     && Objects.equals(defaultName, col.defaultName)
-                    && Objects.equals(expession, col.expession)
+                    && Objects.equals(expression, col.expression)
                     && Objects.equals(maskingFunction, col.maskingFunction)
                     && generated == col.generated;
         }
@@ -445,7 +460,7 @@ public final class MsColumn extends AbstractColumn {
         hasher.put(seed);
         hasher.put(increment);
         hasher.put(defaultName);
-        hasher.put(expession);
+        hasher.put(expression);
         hasher.put(maskingFunction);
         hasher.put(generated);
     }
@@ -462,7 +477,7 @@ public final class MsColumn extends AbstractColumn {
         copy.seed = seed;
         copy.increment = increment;
         copy.setDefaultName(defaultName);
-        copy.setExpression(expession);
+        copy.setExpression(expression);
         copy.setMaskingFunction(maskingFunction);
         copy.setGenerated(generated);
         return copy;
