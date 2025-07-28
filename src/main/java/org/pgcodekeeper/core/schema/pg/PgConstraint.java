@@ -28,11 +28,21 @@ import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
+/**
+ * Base PostgreSQL constraint implementation.
+ * Provides common functionality for all PostgreSQL constraint types
+ * including deferrable and initially deferred properties.
+ */
 public abstract class PgConstraint extends AbstractConstraint {
 
     protected boolean deferrable;
     protected boolean initially;
 
+    /**
+     * Creates a new PostgreSQL constraint.
+     *
+     * @param name constraint name
+     */
     protected PgConstraint(String name) {
         super(name);
     }
@@ -77,8 +87,8 @@ public abstract class PgConstraint extends AbstractConstraint {
             sbSQL.append("\n\n");
             appendAlterTable(sbSQL);
             sbSQL.append(" VALIDATE CONSTRAINT ")
-            .append(PgDiffUtils.getQuotedName(name))
-            .append(';');
+                    .append(PgDiffUtils.getQuotedName(name))
+                    .append(';');
         }
 
         appendExtraOptions(sbSQL);

@@ -19,14 +19,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.AbstractFunction;
 
+import java.util.Objects;
+
 /**
- * Stores Postgres function information.
+ * PostgreSQL function implementation.
+ * Represents a regular PostgreSQL function (as opposed to procedures or aggregates)
+ * with a return type and function body.
  */
 public final class PgFunction extends AbstractPgFunction {
 
@@ -37,6 +39,11 @@ public final class PgFunction extends AbstractPgFunction {
         return DbObjType.FUNCTION;
     }
 
+    /**
+     * Creates a new PostgreSQL function.
+     *
+     * @param name function name
+     */
     public PgFunction(String name) {
         super(name);
     }

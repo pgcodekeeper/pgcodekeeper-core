@@ -20,14 +20,21 @@ import org.pgcodekeeper.core.schema.AbstractTable;
 import org.pgcodekeeper.core.script.SQLScript;
 
 /**
- * Simple foreign table object
+ * PostgreSQL simple foreign table implementation.
+ * Represents a basic foreign table that accesses data from external sources
+ * through foreign data wrappers without complex inheritance or special features.
  *
- * @since 4.1.1
  * @author galiev_mr
- *
+ * @since 4.1.1
  */
 public final class SimpleForeignPgTable extends AbstractForeignTable {
 
+    /**
+     * Creates a new PostgreSQL simple foreign table.
+     *
+     * @param name       table name
+     * @param serverName foreign server name this table connects to
+     */
     public SimpleForeignPgTable(String name, String serverName) {
         super(name, serverName);
     }

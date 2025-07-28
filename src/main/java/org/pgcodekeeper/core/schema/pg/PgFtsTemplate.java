@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.AbstractSchema;
@@ -25,11 +23,23 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Objects;
+
+/**
+ * PostgreSQL full-text search template implementation.
+ * Templates define the interface for FTS dictionaries by specifying
+ * the functions that dictionaries must provide for text processing.
+ */
 public final class PgFtsTemplate extends PgStatement implements ISearchPath {
 
     private String initFunction;
     private String lexizeFunction;
 
+    /**
+     * Creates a new PostgreSQL FTS template.
+     *
+     * @param name template name
+     */
     public PgFtsTemplate(String name) {
         super(name);
     }
@@ -48,7 +58,7 @@ public final class PgFtsTemplate extends PgStatement implements ISearchPath {
     public void getCreationSQL(SQLScript script) {
         StringBuilder sbSql = new StringBuilder();
         sbSql.append("CREATE TEXT SEARCH TEMPLATE ")
-        .append(getQualifiedName()).append(" (\n\t");
+                .append(getQualifiedName()).append(" (\n\t");
 
         if (initFunction != null) {
             sbSql.append("INIT = ").append(initFunction).append(",\n\t");

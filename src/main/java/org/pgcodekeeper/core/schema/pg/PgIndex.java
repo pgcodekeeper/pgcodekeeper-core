@@ -19,23 +19,22 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.List;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.schema.AbstractIndex;
-import org.pgcodekeeper.core.schema.Inherits;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.PgStatementContainer;
-import org.pgcodekeeper.core.schema.SimpleColumn;
-import org.pgcodekeeper.core.schema.StatementUtils;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * PostgreSQL index implementation.
+ * Supports all PostgreSQL index features including unique constraints,
+ * partial indexes, expression indexes, and index inheritance for partitioned tables.
+ */
 public final class PgIndex extends AbstractIndex {
 
     private static final String ALTER_INDEX = "ALTER INDEX ";
@@ -43,6 +42,11 @@ public final class PgIndex extends AbstractIndex {
     private String method;
     private boolean nullsDistinction = true;
 
+    /**
+     * Creates a new PostgreSQL index.
+     *
+     * @param name index name
+     */
     public PgIndex(String name) {
         super(name);
     }
@@ -75,7 +79,7 @@ public final class PgIndex extends AbstractIndex {
             sbSQL.append("IF NOT EXISTS ");
         }
         sbSQL.append(PgDiffUtils.getQuotedName(name))
-        .append(" ON ");
+                .append(" ON ");
         if (parent instanceof AbstractRegularTable regTable && regTable.getPartitionBy() != null) {
             sbSQL.append("ONLY ");
         }
@@ -163,11 +167,11 @@ public final class PgIndex extends AbstractIndex {
                 getDropSQL(script);
                 StringBuilder sql = new StringBuilder();
                 sql.append(ALTER_INDEX)
-                .append(PgDiffUtils.getQuotedName(getSchemaName()))
-                .append('.')
-                .append(PgDiffUtils.getQuotedName(tmpName))
-                .append(" RENAME TO ")
-                .append(PgDiffUtils.getQuotedName(getName()));
+                        .append(PgDiffUtils.getQuotedName(getSchemaName()))
+                        .append('.')
+                        .append(PgDiffUtils.getQuotedName(tmpName))
+                        .append(" RENAME TO ")
+                        .append(PgDiffUtils.getQuotedName(getName()));
                 script.addStatement(sql);
 
                 newIndex.appendComments(script);
@@ -179,7 +183,7 @@ public final class PgIndex extends AbstractIndex {
         if (!Objects.equals(tablespace, newIndex.tablespace)) {
             StringBuilder sql = new StringBuilder();
             sql.append(ALTER_INDEX).append(newIndex.getQualifiedName())
-            .append(" SET TABLESPACE ");
+                    .append(" SET TABLESPACE ");
 
             String newSpace = newIndex.tablespace;
             sql.append(newSpace == null ? Consts.PG_DEFAULT : newSpace);
@@ -204,6 +208,11 @@ public final class PgIndex extends AbstractIndex {
         return "ALTER " + parent.getTypeName() + ' ' + parent.getQualifiedName() + " CLUSTER ON " + name;
     }
 
+    /**
+     * Gets the index access method (btree, hash, gin, gist, etc.).
+     *
+     * @return index method name
+     */
     public String getMethod() {
         return method;
     }
@@ -213,13 +222,15 @@ public final class PgIndex extends AbstractIndex {
         resetHash();
     }
 
+    /**
+     * Sets the parent index for this partitioned index.
+     *
+     * @param schemaName parent index schema name
+     * @param indexName  parent index name
+     */
     public void addInherit(final String schemaName, final String indexName) {
         inherit = new Inherits(schemaName, indexName);
         resetHash();
-    }
-
-    public boolean isNullsDistinction() {
-        return nullsDistinction;
     }
 
     public void setNullsDistinction(boolean nullsDistinction) {
@@ -248,7 +259,7 @@ public final class PgIndex extends AbstractIndex {
 
     @Override
     protected AbstractIndex getIndexCopy() {
-        PgIndex index =  new PgIndex(name);
+        PgIndex index = new PgIndex(name);
         index.inherit = inherit;
         index.setMethod(method);
         index.setNullsDistinction(nullsDistinction);

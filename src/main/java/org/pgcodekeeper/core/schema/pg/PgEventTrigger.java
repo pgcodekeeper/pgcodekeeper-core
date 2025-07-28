@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
@@ -26,6 +22,15 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * PostgreSQL event trigger implementation.
+ * Event triggers fire automatically when specified database events occur,
+ * such as DDL commands or user login attempts.
+ */
 public final class PgEventTrigger extends PgStatement {
 
     private String executable;
@@ -33,6 +38,11 @@ public final class PgEventTrigger extends PgStatement {
     private String event;
     private String mode;
 
+    /**
+     * Creates a new PostgreSQL event trigger.
+     *
+     * @param name trigger name
+     */
     public PgEventTrigger(String name) {
         super(name);
     }
@@ -41,8 +51,8 @@ public final class PgEventTrigger extends PgStatement {
     public void getCreationSQL(SQLScript script) {
         StringBuilder sb = new StringBuilder();
         sb.append("CREATE EVENT TRIGGER ")
-        .append(getQualifiedName())
-        .append("\n\tON ").append(event);
+                .append(getQualifiedName())
+                .append("\n\tON ").append(event);
         if (!tags.isEmpty()) {
             sb.append("\n\tWHEN TAG IN (");
             for (String tag : tags) {
@@ -76,7 +86,7 @@ public final class PgEventTrigger extends PgStatement {
         if (!Objects.equals(mode, newEventTrigger.mode)) {
             StringBuilder sql = new StringBuilder();
             sql.append("ALTER EVENT TRIGGER ").append(getQualifiedName())
-            .append(" ").append(newEventTrigger.mode);
+                    .append(" ").append(newEventTrigger.mode);
             script.addStatement(sql);
         }
 
@@ -140,6 +150,11 @@ public final class PgEventTrigger extends PgStatement {
         resetHash();
     }
 
+    /**
+     * Adds a command tag that this trigger should respond to.
+     *
+     * @param tag command tag to add
+     */
     public void addTag(String tag) {
         this.tags.add(tag);
         resetHash();

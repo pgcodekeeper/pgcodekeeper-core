@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Map.Entry;
-
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
@@ -28,14 +26,16 @@ import org.pgcodekeeper.core.script.SQLActionType;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Map.Entry;
 import java.util.Objects;
 
 /**
- * Base implementation of regular table
+ * Base PostgreSQL regular table implementation.
+ * Provides common functionality for standard PostgreSQL tables including
+ * logging, tablespace, row-level security, partitioning, and Greenplum distribution options.
  *
- * @since 4.1.1
  * @author galiev_mr
- *
+ * @since 4.1.1
  */
 public abstract class AbstractRegularTable extends AbstractPgTable implements ISimpleOptionContainer {
 
@@ -47,6 +47,11 @@ public abstract class AbstractRegularTable extends AbstractPgTable implements IS
     private String distribution;
     private String method = Consts.HEAP;
 
+    /**
+     * Creates a new PostgreSQL regular table.
+     *
+     * @param name table name
+     */
     protected AbstractRegularTable(String name) {
         super(name);
     }
@@ -85,7 +90,7 @@ public abstract class AbstractRegularTable extends AbstractPgTable implements IS
         }
 
         StringBuilder sb = new StringBuilder();
-        for (Entry <String, String> entry : options.entrySet()) {
+        for (Entry<String, String> entry : options.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
 
@@ -97,10 +102,10 @@ public abstract class AbstractRegularTable extends AbstractPgTable implements IS
         }
 
         if (hasOids) {
-            sb.append("OIDS=").append(hasOids).append(", ");
+            sb.append("OIDS=").append(true).append(", ");
         }
 
-        if (sb.length() > 0){
+        if (!sb.isEmpty()) {
             sb.setLength(sb.length() - 2);
             sql.append("\nWITH (").append(sb).append(")");
         }
@@ -146,7 +151,7 @@ public abstract class AbstractRegularTable extends AbstractPgTable implements IS
             StringBuilder sql = new StringBuilder();
 
             sql.append(getAlterTable(false))
-            .append("\n\tSET TABLESPACE ");
+                    .append("\n\tSET TABLESPACE ");
 
             String newSpace = newRegTable.tablespace;
             sql.append(newSpace == null ? Consts.PG_DEFAULT : newSpace);
@@ -157,8 +162,8 @@ public abstract class AbstractRegularTable extends AbstractPgTable implements IS
         if (isLogged != newRegTable.isLogged) {
             StringBuilder sql = new StringBuilder();
             sql.append(getAlterTable(false))
-            .append("\n\tSET ")
-            .append(newRegTable.isLogged ? "LOGGED" : "UNLOGGED");
+                    .append("\n\tSET ")
+                    .append(newRegTable.isLogged ? "LOGGED" : "UNLOGGED");
             script.addStatement(sql);
         }
 
@@ -166,8 +171,8 @@ public abstract class AbstractRegularTable extends AbstractPgTable implements IS
         if (isRowSecurity != newRegTable.isRowSecurity) {
             StringBuilder sql = new StringBuilder();
             sql.append(getAlterTable(false))
-            .append(newRegTable.isRowSecurity ? " ENABLE" : " DISABLE")
-            .append(" ROW LEVEL SECURITY");
+                    .append(newRegTable.isRowSecurity ? " ENABLE" : " DISABLE")
+                    .append(" ROW LEVEL SECURITY");
             script.addStatement(sql);
         }
 
@@ -175,8 +180,8 @@ public abstract class AbstractRegularTable extends AbstractPgTable implements IS
         if (isForceSecurity != newRegTable.isForceSecurity) {
             StringBuilder sql = new StringBuilder();
             sql.append(getAlterTable(true))
-            .append(newRegTable.isForceSecurity ? "" : " NO")
-            .append(" FORCE ROW LEVEL SECURITY");
+                    .append(newRegTable.isForceSecurity ? "" : " NO")
+                    .append(" FORCE ROW LEVEL SECURITY");
             script.addStatement(sql);
         }
 
@@ -254,11 +259,16 @@ public abstract class AbstractRegularTable extends AbstractPgTable implements IS
         PgSequence sequence = super.writeSequences(column, sbOption);
         if (isLogged != sequence.isLogged()) {
             sbOption.append("\nALTER SEQUENCE ").append(sequence.getQualifiedName()).append(" SET ")
-            .append(sequence.isLogged() ? "LOGGED;" : "UNLOGGED;");
+                    .append(sequence.isLogged() ? "LOGGED;" : "UNLOGGED;");
         }
         return sequence;
     }
 
+    /**
+     * Checks if this table is logged (writes to WAL).
+     *
+     * @return true if logged, false if unlogged
+     */
     public boolean isLogged() {
         return isLogged;
     }
@@ -283,12 +293,17 @@ public abstract class AbstractRegularTable extends AbstractPgTable implements IS
         resetHash();
     }
 
+    /**
+     * Gets the partition specification for this table.
+     *
+     * @return partition by clause or null if not partitioned
+     */
     public String getPartitionBy() {
         return partitionBy;
     }
 
-    public void setPartitionBy(final String partionBy) {
-        this.partitionBy = partionBy;
+    public void setPartitionBy(final String partitionBy) {
+        this.partitionBy = partitionBy;
         resetHash();
     }
 

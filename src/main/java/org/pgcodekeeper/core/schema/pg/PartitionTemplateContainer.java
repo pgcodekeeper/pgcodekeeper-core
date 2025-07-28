@@ -15,36 +15,61 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.hashers.IHashable;
 import org.pgcodekeeper.core.hashers.JavaHasher;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Container for Greenplum partition template information.
+ * Manages subpartition template definitions for Greenplum partitioned tables.
+ */
 public final class PartitionTemplateContainer implements IHashable {
 
     private static final String SET_SUBPARTITION = "\nSET SUBPARTITION TEMPLATE (";
 
-    private String partitionName;
+    private final String partitionName;
     private final List<String> subElements = new ArrayList<>();
     private final List<String> normalizedSubElements = new ArrayList<>();
 
+    /**
+     * Adds a subpartition element to this template.
+     *
+     * @param subElement           raw subpartition element
+     * @param normalizedSubElement normalized subpartition element for comparison
+     */
     public void setSubElems(String subElement, String normalizedSubElement) {
         this.subElements.add(subElement);
         this.normalizedSubElements.add(normalizedSubElement);
     }
 
+    /**
+     * Creates a new partition template container.
+     *
+     * @param partitionName name of the partition, can be null for table-level templates
+     */
     public PartitionTemplateContainer(String partitionName) {
         this.partitionName = partitionName;
     }
 
+    /**
+     * Gets the partition name for this template.
+     *
+     * @return partition name, or null for table-level templates
+     */
     public String getPartitionName() {
         return partitionName;
     }
 
+    /**
+     * Checks if this template has any subpartition elements.
+     *
+     * @return true if template contains subpartition elements
+     */
     public boolean hasSubElements() {
         return !subElements.isEmpty();
     }

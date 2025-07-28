@@ -19,19 +19,26 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.AbstractFunction;
 
+import java.util.Objects;
+
 /**
- * Stores Postgres procedure information.
+ * PostgreSQL stored procedure implementation.
+ * Procedures are similar to functions but can manage transactions
+ * and don't return values directly (though they can have OUT parameters).
  */
 public final class PgProcedure extends AbstractPgFunction {
 
     private String returns;
 
+    /**
+     * Creates a new PostgreSQL procedure.
+     *
+     * @param name procedure name
+     */
     public PgProcedure(String name) {
         super(name);
     }

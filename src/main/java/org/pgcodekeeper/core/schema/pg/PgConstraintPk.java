@@ -15,24 +15,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.schema.AbstractConstraint;
-import org.pgcodekeeper.core.schema.IConstraintPk;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.PgStatementContainer;
-import org.pgcodekeeper.core.schema.StatementUtils;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.*;
+
+/**
+ * PostgreSQL PRIMARY KEY and UNIQUE constraint implementation.
+ * Primary key constraints uniquely identify each row and cannot contain NULL values.
+ * Unique constraints ensure no duplicate values but can contain NULLs.
+ */
 public final class PgConstraintPk extends PgConstraint implements IConstraintPk, PgIndexParamContainer {
 
     private final boolean isPrimaryKey;
@@ -43,6 +39,12 @@ public final class PgConstraintPk extends PgConstraint implements IConstraintPk,
     private final Map<String, String> params = new HashMap<>();
     private String tablespace;
 
+    /**
+     * Creates a new PostgreSQL PRIMARY KEY or UNIQUE constraint.
+     *
+     * @param name         constraint name
+     * @param isPrimaryKey true for PRIMARY KEY, false for UNIQUE
+     */
     public PgConstraintPk(String name, boolean isPrimaryKey) {
         super(name);
         this.isPrimaryKey = isPrimaryKey;
@@ -91,6 +93,11 @@ public final class PgConstraintPk extends PgConstraint implements IConstraintPk,
         return Collections.unmodifiableList(columns);
     }
 
+    /**
+     * Adds a column to this constraint.
+     *
+     * @param column column name
+     */
     public void addColumn(String column) {
         columns.add(column);
         resetHash();

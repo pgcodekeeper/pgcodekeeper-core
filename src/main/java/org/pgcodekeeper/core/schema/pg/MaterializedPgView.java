@@ -19,8 +19,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
@@ -28,6 +26,13 @@ import org.pgcodekeeper.core.schema.AbstractView;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Objects;
+
+/**
+ * PostgreSQL materialized view implementation.
+ * Materialized views are database objects that contain the results of a query
+ * and can be refreshed periodically to update the cached data.
+ */
 public final class MaterializedPgView extends AbstractPgView {
 
     private String distribution;
@@ -35,6 +40,11 @@ public final class MaterializedPgView extends AbstractPgView {
     private String tablespace;
     private boolean isWithData;
 
+    /**
+     * Creates a new materialized view.
+     *
+     * @param name view name
+     */
     public MaterializedPgView(String name) {
         super(name);
     }

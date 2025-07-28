@@ -15,25 +15,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
+import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.schema.*;
+import org.pgcodekeeper.core.script.SQLScript;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.EventType;
-import org.pgcodekeeper.core.schema.ISearchPath;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.script.SQLScript;
-
 /**
- * Stores table rule information.
- *
- * @author akifiev_an
- *
+ * PostgreSQL table rule implementation.
+ * Rules define actions to be performed when certain operations (INSERT, UPDATE, DELETE)
+ * are executed on a table, effectively implementing view-like behavior and query rewriting.
  */
 public final class PgRule extends PgStatement implements ISearchPath {
 
@@ -66,6 +61,11 @@ public final class PgRule extends PgStatement implements ISearchPath {
         resetHash();
     }
 
+    /**
+     * Adds an action command to be executed when this rule fires.
+     *
+     * @param command SQL command to execute
+     */
     public void addCommand(String command) {
         commands.add(command);
         resetHash();
@@ -76,6 +76,11 @@ public final class PgRule extends PgStatement implements ISearchPath {
         resetHash();
     }
 
+    /**
+     * Creates a new PostgreSQL rule.
+     *
+     * @param name rule name
+     */
     public PgRule(String name) {
         super(name);
     }
@@ -87,27 +92,27 @@ public final class PgRule extends PgStatement implements ISearchPath {
         sbSQL.append(PgDiffUtils.getQuotedName(name));
         sbSQL.append(" AS\n    ON ").append(event);
         sbSQL.append(" TO ").append(parent.getQualifiedName());
-        if (condition != null && !condition.isEmpty()){
+        if (condition != null && !condition.isEmpty()) {
             sbSQL.append("\n  WHERE ").append(condition);
         }
         sbSQL.append(" DO ");
-        if (instead){
+        if (instead) {
             sbSQL.append("INSTEAD ");
         }
         switch (commands.size()) {
-        case 0:
-            sbSQL.append("NOTHING");
-            break;
-        case 1:
-            // space before is defined by get_query_def
-            sbSQL.append(' ').append(commands.get(0));
-            break;
-        default:
-            sbSQL.append('(');
-            for (String command : commands) {
-                sbSQL.append(' ').append(command).append(";\n");
-            }
-            sbSQL.append(')');
+            case 0:
+                sbSQL.append("NOTHING");
+                break;
+            case 1:
+                // space before is defined by get_query_def
+                sbSQL.append(' ').append(commands.get(0));
+                break;
+            default:
+                sbSQL.append('(');
+                for (String command : commands) {
+                    sbSQL.append(' ').append(command).append(";\n");
+                }
+                sbSQL.append(')');
         }
         script.addStatement(sbSQL);
 
@@ -140,11 +145,11 @@ public final class PgRule extends PgStatement implements ISearchPath {
     private void addAlterTable(String enabledState, PgRule rule, SQLScript script) {
         StringBuilder sql = new StringBuilder();
         sql.append(ALTER_TABLE)
-        .append(parent.getQualifiedName())
-        .append(' ')
-        .append(enabledState)
-        .append(" RULE ")
-        .append(PgDiffUtils.getQuotedName(rule.name));
+                .append(parent.getQualifiedName())
+                .append(' ')
+                .append(enabledState)
+                .append(" RULE ")
+                .append(PgDiffUtils.getQuotedName(rule.name));
         script.addStatement(sql);
     }
 

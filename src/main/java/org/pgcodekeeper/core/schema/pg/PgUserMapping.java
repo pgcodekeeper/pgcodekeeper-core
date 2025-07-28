@@ -15,11 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -28,18 +23,39 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+
+/**
+ * PostgreSQL user mapping implementation.
+ * User mappings define how to authenticate as a specific user when accessing foreign servers,
+ * typically storing connection credentials and options for foreign data wrappers.
+ */
 public final class PgUserMapping extends PgStatement implements PgForeignOptionContainer {
 
     private final String user;
     private final String server;
     private final Map<String, String> options = new LinkedHashMap<>();
 
+    /**
+     * Creates a new PostgreSQL user mapping.
+     *
+     * @param user   user name for this mapping
+     * @param server foreign server name
+     */
     public PgUserMapping(String user, String server) {
         super(user + " SERVER " + server);
         this.user = user;
         this.server = server;
     }
 
+    /**
+     * Gets the foreign server name for this mapping.
+     *
+     * @return server name
+     */
     public String getServer() {
         return server;
     }

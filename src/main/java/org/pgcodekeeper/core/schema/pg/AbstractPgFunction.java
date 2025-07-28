@@ -15,24 +15,25 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractFunction;
 import org.pgcodekeeper.core.schema.ArgMode;
 import org.pgcodekeeper.core.schema.Argument;
 
-import java.util.Objects;
+import java.util.*;
+import java.util.Map.Entry;
 
+/**
+ * Base implementation of PostgreSQL functions and procedures.
+ * Provides common functionality for managing function properties such as language,
+ * volatility, security, parallelism, and other PostgreSQL-specific attributes.
+ */
 public abstract class AbstractPgFunction extends AbstractFunction {
 
+    /**
+     * Constant representing "FROM CURRENT" configuration value for function parameters
+     */
     public static final String FROM_CURRENT = "FROM CURRENT";
 
     private static final float DEFAULT_INTERNAL_PROCOST = 1.0f;
@@ -125,7 +126,7 @@ public abstract class AbstractPgFunction extends AbstractFunction {
         if (DEFAULT_PROROWS != rows) {
             sbSQL.append(" ROWS ");
             if (rows % 1 == 0) {
-                sbSQL.append((int)rows);
+                sbSQL.append((int) rows);
             } else {
                 sbSQL.append(rows);
             }
@@ -154,7 +155,7 @@ public abstract class AbstractPgFunction extends AbstractFunction {
 
     /**
      * Alias for {@link #getSignature()} which provides a unique function ID.
-     *
+     * <p>
      * Use {@link #getBareName()} to get just the function name.
      */
     @Override
@@ -171,9 +172,14 @@ public abstract class AbstractPgFunction extends AbstractFunction {
 
     /**
      * Appends signature of statement to sb.
+     *
+     * @param sb                   StringBuilder to append signature to
+     * @param includeDefaultValues whether to include default values in signature
+     * @param includeArgNames      whether to include argument names in signature
+     * @return the same StringBuilder instance for chaining
      */
     public StringBuilder appendFunctionSignature(StringBuilder sb,
-            boolean includeDefaultValues, boolean includeArgNames) {
+                                                 boolean includeDefaultValues, boolean includeArgNames) {
         boolean cache = !includeDefaultValues && !includeArgNames;
         if (cache && signatureCache != null) {
             return sb.append(signatureCache);
@@ -209,6 +215,13 @@ public abstract class AbstractPgFunction extends AbstractFunction {
         return language;
     }
 
+    /**
+     * Sets the function language and cost. Cost is only set if it differs from the default value
+     * for the given language type.
+     *
+     * @param language function language
+     * @param cost     function execution cost, null to use default
+     */
     public void setLanguageCost(String language, Float cost) {
         this.language = language;
 
@@ -266,11 +279,22 @@ public abstract class AbstractPgFunction extends AbstractFunction {
         resetHash();
     }
 
+    /**
+     * Adds a data type transform for this function.
+     *
+     * @param datatype data type to add transform for
+     */
     public void addTransform(String datatype) {
         transforms.add(datatype);
         resetHash();
     }
 
+    /**
+     * Adds a configuration parameter for this function.
+     *
+     * @param par parameter name
+     * @param val parameter value
+     */
     public void addConfiguration(String par, String val) {
         configurations.put(par, val);
         resetHash();
@@ -294,6 +318,12 @@ public abstract class AbstractPgFunction extends AbstractFunction {
         return Collections.unmodifiableMap(returnsColumns);
     }
 
+    /**
+     * Adds a column to the RETURNS TABLE definition.
+     *
+     * @param name column name
+     * @param type column type
+     */
     public void addReturnsColumn(String name, String type) {
         returnsColumns.put(name, type);
     }
@@ -419,10 +449,21 @@ public abstract class AbstractPgFunction extends AbstractFunction {
         return qualifiedName;
     }
 
+    /**
+     * PostgreSQL-specific function argument implementation.
+     * Extends the base Argument class with PostgreSQL-specific behavior.
+     */
     public class PgArgument extends Argument {
 
         private static final long serialVersionUID = -47388216522727060L;
 
+        /**
+         * Creates a new PostgreSQL function argument.
+         *
+         * @param mode     argument mode (IN, OUT, INOUT, VARIADIC)
+         * @param name     argument name
+         * @param dataType argument data type
+         */
         public PgArgument(ArgMode mode, String name, String dataType) {
             super(mode, name, dataType);
         }

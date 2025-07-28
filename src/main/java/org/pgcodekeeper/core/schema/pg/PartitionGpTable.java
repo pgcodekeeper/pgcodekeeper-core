@@ -16,32 +16,53 @@
 
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractColumn;
 import org.pgcodekeeper.core.schema.AbstractTable;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+/**
+ * Greenplum partition table implementation.
+ * Represents a partitioned table specific to Greenplum database
+ * with support for templates and Greenplum-specific partitioning features.
+ */
 public final class PartitionGpTable extends AbstractRegularTable {
 
     private String partitionGpBounds;
     private String normalizedPartitionGpBounds;
     private final Map<String, PartitionTemplateContainer> templates = new HashMap<>();
 
+    /**
+     * Creates a new Greenplum partition table.
+     *
+     * @param name table name
+     */
     public PartitionGpTable(String name) {
         super(name);
     }
 
+    /**
+     * Sets the partition bounds for this Greenplum table.
+     *
+     * @param partitionGpBounds           raw partition bounds
+     * @param normalizedPartitionGpBounds normalized partition bounds for comparison
+     */
     public void setPartitionGpBound(String partitionGpBounds, String normalizedPartitionGpBounds) {
         this.partitionGpBounds = partitionGpBounds;
         this.normalizedPartitionGpBounds = normalizedPartitionGpBounds;
         resetHash();
     }
 
+    /**
+     * Adds a partition template to this table.
+     *
+     * @param template partition template to add
+     */
     public void addTemplate(PartitionTemplateContainer template) {
         this.templates.put(template.getPartitionName(), template);
         resetHash();

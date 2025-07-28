@@ -15,6 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
+/**
+ * Enumeration of PostgreSQL trigger states.
+ * Represents the various states a trigger can be in, controlling
+ * when and how the trigger fires in relation to replication and system events.
+ */
 public enum TriggerState {
     ENABLE("ENABLE"),
     ENABLE_ALWAYS("ENABLE ALWAYS"),
@@ -23,11 +28,16 @@ public enum TriggerState {
 
     private final String value;
 
+    /**
+     * Gets the SQL string representation of this trigger state.
+     *
+     * @return SQL trigger state string
+     */
     public String getValue() {
         return value;
     }
 
-    private TriggerState(String value) {
+    TriggerState(String value) {
         this.value = value;
     }
 }

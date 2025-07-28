@@ -19,10 +19,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractStatistics;
@@ -31,14 +27,28 @@ import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.schema.StatementUtils;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * PostgreSQL extended statistics implementation.
+ * Extended statistics collect additional information about column correlations
+ * and distributions to improve query planning for multi-column predicates.
+ */
 public final class PgStatistics extends AbstractStatistics {
 
     private int statistics = -1;
-    private List<String> kinds = new ArrayList<>();
-    private List<String> expressions = new ArrayList<>();
+    private final List<String> kinds = new ArrayList<>();
+    private final List<String> expressions = new ArrayList<>();
     private String foreignSchema;
     private String foreignTable;
 
+    /**
+     * Creates a new PostgreSQL statistics object.
+     *
+     * @param name statistics object name
+     */
     public PgStatistics(String name) {
         super(name);
     }
@@ -104,11 +114,21 @@ public final class PgStatistics extends AbstractStatistics {
         resetHash();
     }
 
+    /**
+     * Adds a statistics kind (ndistinct, dependencies, mcv, etc.).
+     *
+     * @param kind statistics type to collect
+     */
     public void addKind(String kind) {
         kinds.add(kind);
         resetHash();
     }
 
+    /**
+     * Adds a column expression for statistics collection.
+     *
+     * @param expression column name or expression
+     */
     public void addExpr(String expression) {
         expressions.add(expression);
         resetHash();

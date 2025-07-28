@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractColumn;
 import org.pgcodekeeper.core.schema.AbstractTable;
@@ -24,16 +22,27 @@ import org.pgcodekeeper.core.schema.IPartitionTable;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Objects;
+
 /**
- * Partition foreign table object
+ * Partition foreign table object for PostgreSQL.
+ * Represents a partition of a foreign table, which allows partitioning
+ * of data across foreign servers while maintaining the partitioning structure.
  *
- * @since 4.1.1
  * @author galiev_mr
+ * @since 4.1.1
  */
 public final class PartitionForeignPgTable extends AbstractForeignTable implements IPartitionTable {
 
     private final String partitionBounds;
 
+    /**
+     * Creates a new partition foreign table.
+     *
+     * @param name            table name
+     * @param serverName      foreign server name
+     * @param partitionBounds partition bounds definition
+     */
     public PartitionForeignPgTable(String name, String serverName, String partitionBounds) {
         super(name, serverName);
         this.partitionBounds = partitionBounds;

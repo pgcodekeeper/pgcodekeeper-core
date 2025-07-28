@@ -19,9 +19,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Locale;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractSequence;
 import org.pgcodekeeper.core.schema.GenericColumn;
@@ -30,8 +27,13 @@ import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLActionType;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Locale;
+import java.util.Objects;
+
 /**
- * Stores sequence information.
+ * PostgreSQL sequence implementation.
+ * Sequences generate unique numeric identifiers, commonly used for auto-incrementing primary keys.
+ * Supports various data types, caching, cycling, and ownership by table columns.
  */
 public final class PgSequence extends AbstractSequence {
 
@@ -39,6 +41,11 @@ public final class PgSequence extends AbstractSequence {
     private GenericColumn ownedBy;
     private boolean isLogged = true;
 
+    /**
+     * Creates a new PostgreSQL sequence with default cache value of 1.
+     *
+     * @param name sequence name
+     */
     public PgSequence(String name) {
         super(name);
         setCache("1");
@@ -115,11 +122,10 @@ public final class PgSequence extends AbstractSequence {
         if (ownedBy == null) {
             return;
         }
-        final StringBuilder sbSQL = new StringBuilder();
 
-        sbSQL.append(ALTER_SEQUENCE).append(getQualifiedName());
-        sbSQL.append("\n\tOWNED BY ").append(ownedBy.getQualifiedName());
-        script.addStatement(sbSQL.toString(), SQLActionType.END);
+        String sbSQL = ALTER_SEQUENCE + getQualifiedName() +
+                "\n\tOWNED BY " + ownedBy.getQualifiedName();
+        script.addStatement(sbSQL, SQLActionType.END);
     }
 
     @Override
@@ -137,8 +143,8 @@ public final class PgSequence extends AbstractSequence {
         if (isLogged != newSequence.isLogged) {
             StringBuilder sql = new StringBuilder();
             sql.append(ALTER_SEQUENCE).append(newSequence.getQualifiedName())
-            .append(" SET")
-            .append(newSequence.isLogged ? " LOGGED" : " UNLOGGED");
+                    .append(" SET")
+                    .append(newSequence.isLogged ? " LOGGED" : " UNLOGGED");
             script.addStatement(sql);
         }
 
@@ -207,7 +213,7 @@ public final class PgSequence extends AbstractSequence {
             sbSQL.append("\n\tOWNED BY NONE");
         }
 
-        return sbSQL.length() > 0;
+        return !sbSQL.isEmpty();
     }
 
     @Override
@@ -228,11 +234,7 @@ public final class PgSequence extends AbstractSequence {
         }
 
         if (startWith == null) {
-            if (this.minValue != null) {
-                setStartWith(this.minValue);
-            } else {
-                setStartWith(inc < 0 ? "-1" : "1");
-            }
+            setStartWith(Objects.requireNonNullElseGet(this.minValue, () -> inc < 0 ? "-1" : "1"));
         }
         resetHash();
     }
@@ -247,6 +249,11 @@ public final class PgSequence extends AbstractSequence {
         return false;
     }
 
+    /**
+     * Gets the table column that owns this sequence.
+     *
+     * @return column reference or null if not owned
+     */
     public GenericColumn getOwnedBy() {
         return ownedBy;
     }
@@ -261,6 +268,11 @@ public final class PgSequence extends AbstractSequence {
         super.setDataType(dataType.toLowerCase(Locale.ROOT));
     }
 
+    /**
+     * Checks if this sequence is logged (written to WAL).
+     *
+     * @return true if logged, false if unlogged
+     */
     public boolean isLogged() {
         return isLogged;
     }

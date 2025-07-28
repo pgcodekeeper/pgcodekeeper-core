@@ -15,22 +15,28 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
+import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.schema.*;
+import org.pgcodekeeper.core.script.SQLScript;
+
 import java.util.Objects;
 import java.util.Set;
 
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.schema.AbstractPolicy;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.ISearchPath;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.script.SQLScript;
-
+/**
+ * PostgreSQL row security policy implementation.
+ * Policies control which rows are visible or modifiable for specific users or roles,
+ * providing fine-grained access control at the row level.
+ */
 public final class PgPolicy extends AbstractPolicy implements ISearchPath {
 
     private String check;
 
+    /**
+     * Creates a new PostgreSQL policy.
+     *
+     * @param name policy name
+     */
     public PgPolicy(String name) {
         super(name);
     }
@@ -163,7 +169,7 @@ public final class PgPolicy extends AbstractPolicy implements ISearchPath {
     }
 
     @Override
-    public final AbstractSchema getContainingSchema() {
+    public AbstractSchema getContainingSchema() {
         return (AbstractSchema) parent.getParent();
     }
 }

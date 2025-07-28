@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.List;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractTable;
@@ -26,11 +23,16 @@ import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.List;
+import java.util.Objects;
+
 /**
- * Base implementation of foreign table
+ * Base implementation of foreign table for PostgreSQL database.
+ * Foreign tables are used to access data that exists outside the database,
+ * typically in other databases or external data sources through foreign data wrappers.
  *
- * @since 4.1.1
  * @author galiev_mr
+ * @since 4.1.1
  */
 public abstract class AbstractForeignTable extends AbstractPgTable implements PgForeignOptionContainer, IForeignTable {
 
@@ -72,6 +74,7 @@ public abstract class AbstractForeignTable extends AbstractPgTable implements Pg
     public String getTypeName() {
         return "FOREIGN TABLE";
     }
+
     @Override
     public String getAlterHeader() {
         return getAlterTable(false);
@@ -122,7 +125,7 @@ public abstract class AbstractForeignTable extends AbstractPgTable implements Pg
 
     @Override
     public void appendMoveDataSql(PgStatement newCondition, SQLScript script, String tblTmpBareName,
-            List<String> identityCols) {
+                                  List<String> identityCols) {
         // no impl
     }
 }

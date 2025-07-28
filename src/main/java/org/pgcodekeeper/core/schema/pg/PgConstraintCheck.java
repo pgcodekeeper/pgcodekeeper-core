@@ -15,18 +15,28 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractConstraint;
 import org.pgcodekeeper.core.schema.PgStatement;
 
+import java.util.Objects;
+
+/**
+ * PostgreSQL CHECK constraint implementation.
+ * CHECK constraints enforce domain integrity by limiting the values
+ * that can be placed in a column based on a Boolean expression.
+ */
 public final class PgConstraintCheck extends PgConstraint {
 
     private boolean isInherit = true;
     private String expression;
 
+    /**
+     * Creates a new PostgreSQL CHECK constraint.
+     *
+     * @param name constraint name
+     */
     public PgConstraintCheck(String name) {
         super(name);
     }
@@ -36,8 +46,8 @@ public final class PgConstraintCheck extends PgConstraint {
         resetHash();
     }
 
-    public void setExpression(String expresion) {
-        this.expression = expresion;
+    public void setExpression(String expression) {
+        this.expression = expression;
         resetHash();
     }
 

@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.AbstractSchema;
@@ -25,6 +23,13 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Objects;
+
+/**
+ * PostgreSQL full-text search parser implementation.
+ * Parsers break down documents into tokens and classify them into types.
+ * Each parser consists of several functions that handle different parsing phases.
+ */
 public final class PgFtsParser extends PgStatement implements ISearchPath {
 
     private static final String NEW_LINE = ",\n\t";
@@ -35,6 +40,11 @@ public final class PgFtsParser extends PgStatement implements ISearchPath {
     private String headLineFunction;
     private String lexTypesFunction;
 
+    /**
+     * Creates a new PostgreSQL FTS parser.
+     *
+     * @param name parser name
+     */
     public PgFtsParser(String name) {
         super(name);
     }
@@ -53,10 +63,10 @@ public final class PgFtsParser extends PgStatement implements ISearchPath {
     public void getCreationSQL(SQLScript script) {
         StringBuilder sbSql = new StringBuilder();
         sbSql.append("CREATE TEXT SEARCH PARSER ")
-        .append(getQualifiedName()).append(" (\n\t")
-        .append("START = ").append(startFunction).append(NEW_LINE)
-        .append("GETTOKEN = ").append(getTokenFunction).append(NEW_LINE)
-        .append("END = ").append(endFunction).append(NEW_LINE);
+                .append(getQualifiedName()).append(" (\n\t")
+                .append("START = ").append(startFunction).append(NEW_LINE)
+                .append("GETTOKEN = ").append(getTokenFunction).append(NEW_LINE)
+                .append("END = ").append(endFunction).append(NEW_LINE);
         if (headLineFunction != null) {
             sbSql.append("HEADLINE = ").append(headLineFunction).append(NEW_LINE);
         }

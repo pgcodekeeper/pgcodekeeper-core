@@ -15,18 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.IOperator;
-import org.pgcodekeeper.core.schema.ISearchPath;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Objects;
+
+/**
+ * PostgreSQL operator implementation.
+ * Operators are symbols that represent specific operations (like +, -, *, etc.)
+ * and can be customized for user-defined types with associated functions.
+ */
 public final class PgOperator extends PgStatement implements IOperator, ISearchPath {
 
     private String procedure;
@@ -41,6 +42,11 @@ public final class PgOperator extends PgStatement implements IOperator, ISearchP
 
     private String returns;
 
+    /**
+     * Creates a new PostgreSQL operator.
+     *
+     * @param name operator symbol
+     */
     public PgOperator(String name) {
         super(name);
     }
@@ -115,17 +121,25 @@ public final class PgOperator extends PgStatement implements IOperator, ISearchP
         appendComments(script);
     }
 
+    /**
+     * Returns the operator signature including its arguments.
+     *
+     * @return operator signature in format "op(leftarg, rightarg)"
+     */
     public String getSignature() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getBareName());
-        sb.append('(');
-        sb.append(leftArg == null ? "NONE" : leftArg);
-        sb.append(", ");
-        sb.append(rightArg == null ? "NONE" : rightArg);
-        sb.append(')');
-        return sb.toString();
+        return getBareName() +
+                '(' +
+                (leftArg == null ? "NONE" : leftArg) +
+                ", " +
+                (rightArg == null ? "NONE" : rightArg) +
+                ')';
     }
 
+    /**
+     * Returns the operator arguments in parentheses format.
+     *
+     * @return arguments string in format "(leftarg, rightarg)" or "(rightarg)" for unary
+     */
     public String getArguments() {
         StringBuilder signature = new StringBuilder();
         String left = getLeftArg();
@@ -161,8 +175,8 @@ public final class PgOperator extends PgStatement implements IOperator, ISearchP
         if (restrChanged || joinChanged) {
             StringBuilder sql = new StringBuilder();
             sql.append("ALTER OPERATOR ")
-            .append(getQualifiedName())
-            .append("\n\tSET (");
+                    .append(getQualifiedName())
+                    .append("\n\tSET (");
             if (restrChanged) {
                 sql.append("RESTRICT = ").append(newOperRestr != null ? newOperRestr : "NONE");
                 if (joinChanged) {
@@ -194,7 +208,7 @@ public final class PgOperator extends PgStatement implements IOperator, ISearchP
 
     /**
      * Alias for {@link #getSignature()} which provides a unique operator ID.
-     *
+     * <p>
      * Use {@link #getBareName()} to get just the operator name.
      */
     @Override
