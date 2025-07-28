@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
-import java.util.Collection;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
@@ -27,6 +24,14 @@ import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.pg.AbstractPgFunction;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Collection;
+import java.util.Objects;
+
+/**
+ * Represents a database privilege (GRANT/REVOKE) for a database object.
+ * Handles privilege operations including creation, dropping, and SQL generation
+ * for different database types.
+ */
 public final class PgPrivilege implements IHashable {
 
     private static final String WITH_GRANT_OPTION = " WITH GRANT OPTION";
@@ -40,10 +45,25 @@ public final class PgPrivilege implements IHashable {
     private final boolean isGrantOption;
     private final DatabaseType dbType;
 
+    /**
+     * Checks if this privilege represents a REVOKE operation.
+     *
+     * @return true if this is a REVOKE privilege, false if GRANT
+     */
     public boolean isRevoke() {
         return REVOKE.equalsIgnoreCase(state);
     }
 
+    /**
+     * Creates a new privilege instance.
+     *
+     * @param state the privilege state (GRANT or REVOKE)
+     * @param permission the permission type (e.g., SELECT, INSERT, ALL)
+     * @param name the object name the privilege applies to
+     * @param role the role receiving or losing the privilege
+     * @param isGrantOption whether this privilege includes GRANT OPTION
+     * @param dbType the database type this privilege applies to
+     */
     public PgPrivilege(String state, String permission, String name, String role, boolean isGrantOption, DatabaseType dbType) {
         this.state = state;
         this.permission = permission;
@@ -53,6 +73,11 @@ public final class PgPrivilege implements IHashable {
         this.dbType = dbType;
     }
 
+    /**
+     * Generates the SQL statement for this privilege.
+     *
+     * @return the GRANT or REVOKE SQL statement
+     */
     public String getCreationSQL() {
         StringBuilder sb = new StringBuilder();
         sb.append(state).append(' ').append(permission);
@@ -60,7 +85,7 @@ public final class PgPrivilege implements IHashable {
             sb.append(" ON ").append(name);
         }
 
-        sb.append(isRevoke() ? " FROM ": " TO ").append(role);
+        sb.append(isRevoke() ? " FROM " : " TO ").append(role);
 
         if (isGrantOption) {
             String cascade = dbType == DatabaseType.CH ? "" : " CASCADE";
@@ -70,6 +95,11 @@ public final class PgPrivilege implements IHashable {
         return sb.toString();
     }
 
+    /**
+     * Generates the SQL statement to drop this privilege.
+     *
+     * @return the REVOKE SQL statement, or null if this is already a REVOKE
+     */
     public String getDropSQL() {
         if (isRevoke()) {
             return null;
@@ -78,44 +108,56 @@ public final class PgPrivilege implements IHashable {
         return new PgPrivilege(REVOKE, permission, name, role, isGrantOption, dbType).getCreationSQL();
     }
 
+    /**
+     * Appends multiple privileges to a SQL script.
+     *
+     * @param privileges the collection of privileges to append
+     * @param script the script to append to
+     */
     public static void appendPrivileges(Collection<PgPrivilege> privileges, SQLScript script) {
         for (PgPrivilege priv : privileges) {
             script.addStatement(priv.getCreationSQL());
         }
     }
 
+    /**
+     * Appends default PostgreSQL privileges for a database object.
+     *
+     * @param newObj the database object to set default privileges for
+     * @param script the script to append privileges to
+     */
     public static void appendDefaultPostgresPrivileges(PgStatement newObj, SQLScript script) {
         DbObjType type = newObj.getStatementType();
         boolean isFunctionOrTypeOrDomain = false;
         String typeName;
         switch (type) {
-        case FUNCTION:
-        case PROCEDURE:
-        case TYPE:
-        case DOMAIN:
-            isFunctionOrTypeOrDomain = true;
-            typeName = type.name();
-            break;
-        case AGGREGATE:
-            isFunctionOrTypeOrDomain = true;
-            typeName = DbObjType.FUNCTION.name();
-            break;
-        case FOREIGN_DATA_WRAPPER:
-            typeName = "FOREIGN DATA WRAPPER";
-            break;
-        case SERVER:
-            typeName = "FOREIGN SERVER";
-            break;
-        case VIEW:
-            typeName = DbObjType.TABLE.name();
-            break;
-        case SCHEMA:
-        case SEQUENCE:
-        case TABLE:
-            typeName = type.name();
-            break;
-        default:
-            return;
+            case FUNCTION:
+            case PROCEDURE:
+            case TYPE:
+            case DOMAIN:
+                isFunctionOrTypeOrDomain = true;
+                typeName = type.name();
+                break;
+            case AGGREGATE:
+                isFunctionOrTypeOrDomain = true;
+                typeName = DbObjType.FUNCTION.name();
+                break;
+            case FOREIGN_DATA_WRAPPER:
+                typeName = "FOREIGN DATA WRAPPER";
+                break;
+            case SERVER:
+                typeName = "FOREIGN SERVER";
+                break;
+            case VIEW:
+                typeName = DbObjType.TABLE.name();
+                break;
+            case SCHEMA:
+            case SEQUENCE:
+            case TABLE:
+                typeName = type.name();
+                break;
+            default:
+                return;
         }
 
         StringBuilder sbName = new StringBuilder()
@@ -123,7 +165,7 @@ public final class PgPrivilege implements IHashable {
                 .append(' ');
         if (newObj instanceof AbstractPgFunction func) {
             sbName.append(PgDiffUtils.getQuotedName(func.parent.getName()))
-            .append('.');
+                    .append('.');
             func.appendFunctionSignature(sbName, false, true);
         } else {
             sbName.append(newObj.getQualifiedName());

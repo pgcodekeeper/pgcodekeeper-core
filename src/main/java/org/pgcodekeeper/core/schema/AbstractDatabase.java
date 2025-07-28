@@ -19,16 +19,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
@@ -36,8 +26,12 @@ import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.AbstractAnalysisLauncher;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.*;
+
 /**
- * Stores database information.
+ * Abstract base class representing a database schema.
+ * Contains schemas, handles database-specific operations, and manages object references
+ * and analysis launchers for PostgreSQL, Microsoft SQL, and ClickHouse databases.
  */
 public abstract class AbstractDatabase extends PgStatement implements IDatabase {
 
@@ -61,6 +55,11 @@ public abstract class AbstractDatabase extends PgStatement implements IDatabase 
         super("DB_name_placeholder");
     }
 
+    /**
+     * Gets the list of object overrides for this database.
+     *
+     * @return the list of overrides
+     */
     public List<PgOverride> getOverrides() {
         return overrides;
     }
@@ -91,6 +90,12 @@ public abstract class AbstractDatabase extends PgStatement implements IDatabase 
         return objReferences.getOrDefault(name, Collections.emptySet());
     }
 
+    /**
+     * Adds an object reference to the specified file.
+     *
+     * @param fileName the file name to associate with the location
+     * @param loc the object location to add
+     */
     public void addReference(String fileName, PgObjLocation loc) {
         objReferences.computeIfAbsent(fileName, k -> new LinkedHashSet<>()).add(loc);
     }
@@ -99,6 +104,9 @@ public abstract class AbstractDatabase extends PgStatement implements IDatabase 
         return analysisLaunchers;
     }
 
+    /**
+     * Clears all analysis launchers and trims the internal list to size.
+     */
     public void clearAnalysisLaunchers() {
         analysisLaunchers.clear();
         analysisLaunchers.trimToSize();
@@ -107,8 +115,7 @@ public abstract class AbstractDatabase extends PgStatement implements IDatabase 
     /**
      * Add 'analysis launcher' for deferred analyze.
      *
-     * @param launcher
-     *            launcher that contains almost everything needed to analyze an statement contained in it
+     * @param launcher launcher that contains almost everything needed to analyze a statement contained in it
      */
     public void addAnalysisLauncher(AbstractAnalysisLauncher launcher) {
         analysisLaunchers.add(launcher);
@@ -132,6 +139,11 @@ public abstract class AbstractDatabase extends PgStatement implements IDatabase 
         return Collections.unmodifiableCollection(schemas.values());
     }
 
+    /**
+     * Adds a schema to this database.
+     *
+     * @param schema the schema to add
+     */
     public void addSchema(final AbstractSchema schema) {
         addUnique(schemas, schema);
     }
@@ -152,9 +164,7 @@ public abstract class AbstractDatabase extends PgStatement implements IDatabase 
      * Returns schema of given name or null if the schema has not been found. If schema name is null then default schema
      * is returned.
      *
-     * @param name
-     *            schema name or null which means default schema
-     *
+     * @param name schema name or null which means default schema
      * @return found schema or null
      */
     @Override
@@ -195,6 +205,13 @@ public abstract class AbstractDatabase extends PgStatement implements IDatabase 
         hasher.putUnordered(schemas);
     }
 
+    /**
+     * Adds a library database to this database, merging its objects and analysis launchers.
+     *
+     * @param lib the library database to add
+     * @param libName the name of the library
+     * @param owner the owner to set for owned objects
+     */
     public void addLib(AbstractDatabase lib, String libName, String owner) {
         lib.getDescendants().forEach(st -> {
             // do not override dependent library name
@@ -208,14 +225,14 @@ public abstract class AbstractDatabase extends PgStatement implements IDatabase 
         });
 
         lib.analysisLaunchers.stream()
-        .filter(st -> st.getStmt().getParent() != null)
-        .forEach(l -> {
-            l.updateStmt(this);
-            analysisLaunchers.add(l);
-        });
+                .filter(st -> st.getStmt().getParent() != null)
+                .forEach(l -> {
+                    l.updateStmt(this);
+                    analysisLaunchers.add(l);
+                });
 
         overrides.addAll(lib.overrides);
-        lib.objReferences.entrySet().forEach(e -> objReferences.putIfAbsent(e.getKey(), e.getValue()));
+        lib.objReferences.forEach(objReferences::putIfAbsent);
     }
 
     protected void addOverride(PgOverride override) {
@@ -249,13 +266,24 @@ public abstract class AbstractDatabase extends PgStatement implements IDatabase 
 
     protected abstract boolean isFirstLevelType(DbObjType type);
 
+    /**
+     * Creates a map of all database objects with their qualified names as keys.
+     *
+     * @param db the database to list objects from
+     * @return a map of qualified names to statements
+     */
     public static Map<String, PgStatement> listPgObjects(AbstractDatabase db) {
         Map<String, PgStatement> statements = new HashMap<>();
         db.getDescendants().flatMap(AbstractTable::columnAdder)
-        .forEach(st -> statements.put(st.getQualifiedName(), st));
+                .forEach(st -> statements.put(st.getQualifiedName(), st));
         return statements;
     }
 
+    /**
+     * Copies analysis launchers from another database to this one.
+     *
+     * @param db the database to copy launchers from
+     */
     public void copyLaunchers(AbstractDatabase db) {
         analysisLaunchers.addAll(db.analysisLaunchers);
     }
@@ -280,6 +308,12 @@ public abstract class AbstractDatabase extends PgStatement implements IDatabase 
 
     protected abstract AbstractDatabase getDatabaseCopy();
 
+    /**
+     * Resolves and returns a database statement based on the provided generic column specification.
+     *
+     * @param gc the generic column specification containing type and naming information
+     * @return the resolved statement, or null if not found
+     */
     public final PgStatement getStatement(GenericColumn gc) {
         DbObjType type = gc.type;
         if (type == DbObjType.DATABASE) {
@@ -295,43 +329,26 @@ public abstract class AbstractDatabase extends PgStatement implements IDatabase 
             return null;
         }
 
-        switch (type) {
-        case DOMAIN:
-        case SEQUENCE:
-        case VIEW:
-        case COLLATION:
-        case FTS_PARSER:
-        case FTS_TEMPLATE:
-        case FTS_DICTIONARY:
-        case FTS_CONFIGURATION:
-            return s.getChild(gc.table, type);
-        case STATISTICS:
-            return resolveStatistics(s, gc, type);
-        case TYPE:
-            return (PgStatement) resolveTypeCall(s, gc.table);
-        case FUNCTION:
-        case PROCEDURE:
-        case AGGREGATE:
-            return (PgStatement) resolveFunctionCall(s, gc.table);
-        case OPERATOR:
-            return (PgStatement) resolveOperatorCall(s, gc.table);
-        case TABLE:
-            return (PgStatement) s.getRelation(gc.table);
-        case INDEX:
-            return s.getIndexByName(gc.table);
+        return switch (type) {
+            case DOMAIN, SEQUENCE, VIEW, COLLATION, FTS_PARSER, FTS_TEMPLATE, FTS_DICTIONARY, FTS_CONFIGURATION ->
+                    s.getChild(gc.table, type);
+            case STATISTICS -> resolveStatistics(s, gc, type);
+            case TYPE -> (PgStatement) resolveTypeCall(s, gc.table);
+            case FUNCTION, PROCEDURE, AGGREGATE -> (PgStatement) resolveFunctionCall(s, gc.table);
+            case OPERATOR -> (PgStatement) resolveOperatorCall(s, gc.table);
+            case TABLE -> (PgStatement) s.getRelation(gc.table);
+            case INDEX -> s.getIndexByName(gc.table);
             // handled in getStatement, left here for consistency
-        case COLUMN:
-            AbstractTable t = s.getTable(gc.table);
-            return t == null ? null : t.getColumn(gc.column);
-        case CONSTRAINT:
-        case TRIGGER:
-        case RULE:
-        case POLICY:
-            PgStatementContainer sc = s.getStatementContainer(gc.table);
-            return sc == null ? null : sc.getChild(gc.column, type);
-        default:
-            throw new IllegalStateException("Unhandled DbObjType: " + type);
-        }
+            case COLUMN -> {
+                AbstractTable t = s.getTable(gc.table);
+                yield t == null ? null : t.getColumn(gc.column);
+            }
+            case CONSTRAINT, TRIGGER, RULE, POLICY -> {
+                PgStatementContainer sc = s.getStatementContainer(gc.table);
+                yield sc == null ? null : sc.getChild(gc.column, type);
+            }
+            default -> throw new IllegalStateException("Unhandled DbObjType: " + type);
+        };
     }
 
     protected PgStatement resolveStatistics(AbstractSchema s, GenericColumn gc, DbObjType type) {

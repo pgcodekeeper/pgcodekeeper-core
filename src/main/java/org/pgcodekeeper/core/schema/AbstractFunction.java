@@ -15,15 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
+import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.script.SQLScript;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.pgcodekeeper.core.DatabaseType;
-import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.script.SQLScript;
-
+/**
+ * Abstract base class for database functions, procedures, and aggregates.
+ * Provides common functionality for callable database objects across different database types.
+ */
 public abstract class AbstractFunction extends PgStatement implements IFunction, ISearchPath {
 
     protected final List<Argument> arguments = new ArrayList<>();
@@ -104,19 +108,23 @@ public abstract class AbstractFunction extends PgStatement implements IFunction,
         return Collections.unmodifiableList(arguments);
     }
 
+    /**
+     * Adds an argument to this function.
+     *
+     * @param argument the argument to add
+     */
     public void addArgument(final Argument argument) {
         arguments.add(argument);
         resetHash();
     }
 
     /**
-     * Compares two objects whether they are equal. If both objects are of the same class but they not equal just in
+     * Compares two objects whether they are equal. If both objects are of the same class, but they not equal just in
      * whitespace in function body, they are considered being equal.
      *
-     * @param func
-     *            object to be compared
+     * @param func object to be compared
      * @return true if {@code object} is PgFunction and the function code is the same when compared ignoring whitespace,
-     *         otherwise returns false
+     * otherwise returns false
      */
     protected boolean compareUnalterable(AbstractFunction func) {
         return arguments.equals(func.arguments);
@@ -135,6 +143,12 @@ public abstract class AbstractFunction extends PgStatement implements IFunction,
         return false;
     }
 
+    /**
+     * Determines whether this function needs to be dropped before creating the new version.
+     *
+     * @param newFunction the new function version to compare against
+     * @return true if the function needs to be dropped and recreated
+     */
     public abstract boolean needDrop(AbstractFunction newFunction);
 
     @Override

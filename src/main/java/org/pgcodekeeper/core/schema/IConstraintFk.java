@@ -17,8 +17,30 @@ package org.pgcodekeeper.core.schema;
 
 import java.util.Collection;
 
+/**
+ * Interface for foreign key constraints.
+ * Extends the basic constraint interface with foreign key specific functionality
+ * including references to foreign table, schema, and columns.
+ */
 public interface IConstraintFk extends IConstraint {
+    /**
+     * Gets the foreign columns referenced by this foreign key.
+     *
+     * @return a collection of foreign column names
+     */
     Collection<String> getForeignColumns();
+
+    /**
+     * Gets the foreign table referenced by this foreign key.
+     *
+     * @return the foreign table name
+     */
     String getForeignTable();
+
+    /**
+     * Gets the foreign schema containing the referenced table.
+     *
+     * @return the foreign schema name
+     */
     String getForeignSchema();
 }

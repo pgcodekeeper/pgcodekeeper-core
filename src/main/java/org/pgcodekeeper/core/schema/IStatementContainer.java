@@ -21,8 +21,25 @@ package org.pgcodekeeper.core.schema;
 
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 
+/**
+ * Interface for database objects that can contain other statements as children.
+ * Provides functionality for adding and retrieving child statements.
+ */
 public interface IStatementContainer extends IStatement {
 
+    /**
+     * Adds a child statement to this container.
+     *
+     * @param stmt the child statement to add
+     */
     void addChild(IStatement stmt);
+
+    /**
+     * Gets a child statement by name and type.
+     *
+     * @param name the name of the child to find
+     * @param type the type of the child to find
+     * @return the child statement, or null if not found
+     */
     PgStatement getChild(String name, DbObjType type);
 }

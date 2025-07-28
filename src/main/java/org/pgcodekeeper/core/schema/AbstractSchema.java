@@ -15,19 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Stream;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 
+import java.util.*;
+import java.util.stream.Stream;
+
 /**
- * Stores base schema information.
+ * Abstract base class representing a database schema.
+ * Contains tables, views, functions, sequences, types and other database objects.
+ * Provides common functionality for schemas across different database types including.
  */
 public abstract class AbstractSchema extends PgStatement implements ISchema {
 
@@ -55,7 +52,6 @@ public abstract class AbstractSchema extends PgStatement implements ISchema {
      * Finds function according to specified function {@code signature}.
      *
      * @param signature signature of the function to be searched
-     *
      * @return found function or null if no such function has been found
      */
     @Override
@@ -117,16 +113,15 @@ public abstract class AbstractSchema extends PgStatement implements ISchema {
     @Override
     public PgStatement getChild(String name, DbObjType type) {
         return switch (type) {
-        case FUNCTION, PROCEDURE, AGGREGATE -> {
-            final String signature = name;
-            AbstractFunction func = getFunction(signature);
-            yield func != null && func.getStatementType() == type ? func : null;
-        }
-        case SEQUENCE -> getSequence(name);
-        case TYPE ->  getType(name);
-        case TABLE -> getTable(name);
-        case VIEW -> getView(name);
-        default -> null;
+            case FUNCTION, PROCEDURE, AGGREGATE -> {
+                AbstractFunction func = getFunction(name);
+                yield func != null && func.getStatementType() == type ? func : null;
+            }
+            case SEQUENCE -> getSequence(name);
+            case TYPE -> getType(name);
+            case TABLE -> getTable(name);
+            case VIEW -> getView(name);
+            default -> null;
         };
     }
 
@@ -134,23 +129,23 @@ public abstract class AbstractSchema extends PgStatement implements ISchema {
     public void addChild(IStatement st) {
         DbObjType type = st.getStatementType();
         switch (type) {
-        case AGGREGATE, FUNCTION, PROCEDURE:
-            addFunction((AbstractFunction) st);
-            break;
-        case SEQUENCE:
-            addSequence((AbstractSequence) st);
-            break;
-        case TABLE:
-            addTable((AbstractTable) st);
-            break;
-        case TYPE:
-            addType((AbstractType) st);
-            break;
-        case VIEW:
-            addView((AbstractView) st);
-            break;
-        default:
-            throw new IllegalArgumentException("Unsupported child type: " + type);
+            case AGGREGATE, FUNCTION, PROCEDURE:
+                addFunction((AbstractFunction) st);
+                break;
+            case SEQUENCE:
+                addSequence((AbstractSequence) st);
+                break;
+            case TABLE:
+                addTable((AbstractTable) st);
+                break;
+            case TYPE:
+                addType((AbstractType) st);
+                break;
+            case VIEW:
+                addView((AbstractView) st);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported child type: " + type);
         }
     }
 
@@ -158,7 +153,6 @@ public abstract class AbstractSchema extends PgStatement implements ISchema {
      * Finds sequence according to specified sequence {@code name}.
      *
      * @param name name of the sequence to be searched
-     *
      * @return found sequence or null if no such sequence has been found
      */
     public AbstractSequence getSequence(final String name) {
@@ -179,7 +173,6 @@ public abstract class AbstractSchema extends PgStatement implements ISchema {
      * Finds table according to specified table {@code name}.
      *
      * @param name name of the table to be searched
-     *
      * @return found table or null if no such table has been found
      */
     public AbstractTable getTable(final String name) {
@@ -199,7 +192,6 @@ public abstract class AbstractSchema extends PgStatement implements ISchema {
      * Finds view according to specified view {@code name}.
      *
      * @param name name of the view to be searched
-     *
      * @return found view or null if no such view has been found
      */
     public AbstractView getView(final String name) {
@@ -216,58 +208,102 @@ public abstract class AbstractSchema extends PgStatement implements ISchema {
     }
 
     /**
-     * @return child-containing element with matching name (either TABLE or VIEW)
+     * Gets a statement container by name.
+     *
+     * @param name the name of the container to find
+     * @return the statement container with the given name, or null if not found
      */
     public PgStatementContainer getStatementContainer(String name) {
         PgStatementContainer container = getTable(name);
         return container == null ? getView(name) : container;
     }
 
+    /**
+     * Gets a stream of all statement containers in this schema.
+     *
+     * @return a stream of statement containers
+     */
     public Stream<PgStatementContainer> getStatementContainers() {
         return Stream.concat(tables.values().stream(), views.values().stream());
     }
 
+    /**
+     * Finds an index by name across all tables and views in this schema.
+     *
+     * @param indexName the name of the index to find
+     * @return the index with the given name, or null if not found
+     */
     public AbstractIndex getIndexByName(String indexName) {
         return getStatementContainers()
-            .map(c -> c.getIndex(indexName))
-            .filter(Objects::nonNull)
-            .findAny().orElse(null);
+                .map(c -> c.getIndex(indexName))
+                .filter(Objects::nonNull)
+                .findAny().orElse(null);
     }
 
+    /**
+     * Finds a constraint by name across all tables and views in this schema.
+     *
+     * @param constraintName the name of the constraint to find
+     * @return the constraint with the given name, or null if not found
+     */
     public AbstractConstraint getConstraintByName(String constraintName) {
         return getStatementContainers()
-            .map(c -> c.getConstraint(constraintName))
-            .filter(Objects::nonNull)
-            .findAny().orElse(null);
+                .map(c -> c.getConstraint(constraintName))
+                .filter(Objects::nonNull)
+                .findAny().orElse(null);
     }
 
     /**
      * Finds type according to specified type {@code name}.
      *
      * @param name name of the type to be searched
-     *
      * @return found type or null if no such type has been found
      */
     public AbstractType getType(final String name) {
         return getChildByName(types, name);
     }
 
+    /**
+     * Adds a function to this schema.
+     *
+     * @param function the function to add
+     */
     public void addFunction(final AbstractFunction function) {
         addUnique(functions, function);
     }
 
+    /**
+     * Adds a sequence to this schema.
+     *
+     * @param sequence the sequence to add
+     */
     public void addSequence(final AbstractSequence sequence) {
         addUnique(sequences, sequence);
     }
 
+    /**
+     * Adds a table to this schema.
+     *
+     * @param table the table to add
+     */
     public void addTable(final AbstractTable table) {
         addUnique(tables, table);
     }
 
+    /**
+     * Adds a view to this schema.
+     *
+     * @param view the table to add
+     */
     public void addView(final AbstractView view) {
         addUnique(views, view);
     }
 
+    /**
+     * Adds a type to this schema.
+     *
+     * @param type the table to add
+     */
     public void addType(final AbstractType type) {
         addUnique(types, type);
     }

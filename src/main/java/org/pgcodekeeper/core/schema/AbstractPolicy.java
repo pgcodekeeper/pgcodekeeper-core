@@ -15,13 +15,18 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
+import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.model.difftree.DbObjType;
+
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-
+/**
+ * Abstract base class for database row-level security policies.
+ * Provides common functionality for policies that control access to table rows
+ * based on events, roles, and conditions.
+ */
 public abstract class AbstractPolicy extends PgStatement {
 
     protected EventType event;
@@ -43,6 +48,11 @@ public abstract class AbstractPolicy extends PgStatement {
         resetHash();
     }
 
+    /**
+     * Adds a role to this policy.
+     *
+     * @param role the role name to add
+     */
     public void addRole(String role) {
         roles.add(role);
         resetHash();

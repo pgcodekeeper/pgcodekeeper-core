@@ -15,9 +15,36 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
+/**
+ * Interface for database operators.
+ * Defines functionality for custom operators including argument types and return type.
+ */
 public interface IOperator extends ISearchPath {
+    /**
+     * Gets the right argument type of this operator.
+     *
+     * @return the right argument type
+     */
     String getRightArg();
+
+    /**
+     * Gets the left argument type of this operator.
+     *
+     * @return the left argument type
+     */
     String getLeftArg();
+
+    /**
+     * Gets the return type of this operator.
+     *
+     * @return the return type
+     */
     String getReturns();
+
+    /**
+     * Sets the return type of this operator.
+     *
+     * @param returns the return type to set
+     */
     void setReturns(String returns);
 }

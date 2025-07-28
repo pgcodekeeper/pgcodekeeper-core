@@ -15,13 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 
+import java.util.Objects;
+
 /**
- * Stores column information.
+ * Abstract base class for database column definitions.
+ * Provides common functionality for columns across different database types.
  */
 public abstract class AbstractColumn extends PgStatement implements ISearchPath {
 
@@ -54,9 +55,9 @@ public abstract class AbstractColumn extends PgStatement implements ISearchPath 
     }
 
     /**
-     * Returns full definition of the column.
+     * Returns the complete column definition including type, constraints, and other attributes.
      *
-     * @return full definition of the column
+     * @return the full column definition as SQL string
      */
     public abstract String getFullDefinition();
 
@@ -96,11 +97,6 @@ public abstract class AbstractColumn extends PgStatement implements ISearchPath 
         return location;
     }
 
-    @Override
-    public void setLocation(PgObjLocation location) {
-        meta.setLocation(location);
-    }
-
     protected String getAlterTable(boolean only) {
         return ((AbstractTable) parent).getAlterTable(only);
     }
@@ -112,7 +108,7 @@ public abstract class AbstractColumn extends PgStatement implements ISearchPath 
         }
 
         if (obj instanceof AbstractColumn col && super.compare(obj)) {
-            return  Objects.equals(type, col.type)
+            return Objects.equals(type, col.type)
                     && Objects.equals(collation, col.collation)
                     && nullValue == col.nullValue
                     && Objects.equals(defaultValue, col.defaultValue);

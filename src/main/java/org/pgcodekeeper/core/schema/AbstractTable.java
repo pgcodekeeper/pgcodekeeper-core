@@ -15,15 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -31,8 +22,14 @@ import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
- * Stores table information.
+ * Abstract base class for database tables.
+ * Contains columns, constraints, indexes, triggers, and other table-related objects.
+ * Provides common functionality for tables across different database types.
  */
 public abstract class AbstractTable extends PgStatementContainer implements IOptionContainer {
 
@@ -58,10 +55,16 @@ public abstract class AbstractTable extends PgStatementContainer implements IOpt
         l.add(constraints.values());
     }
 
+    /**
+     * Creates a stream that includes the statement itself and its columns if it's a table.
+     *
+     * @param st the statement to process
+     * @return a stream containing the statement and its columns (if applicable)
+     */
     public static Stream<PgStatement> columnAdder(PgStatement st) {
         Stream<PgStatement> newStream = Stream.of(st);
         if (st.getStatementType() == DbObjType.TABLE) {
-            newStream = Stream.concat(newStream, ((AbstractTable)st).columns.stream());
+            newStream = Stream.concat(newStream, ((AbstractTable) st).columns.stream());
         }
 
         return newStream;
@@ -69,8 +72,8 @@ public abstract class AbstractTable extends PgStatementContainer implements IOpt
 
     /**
      * Generates beginning of alter table statement.
-     * @param only - if true, append 'only' to statement
      *
+     * @param only if true, append 'ONLY' to statement
      * @return alter table statement beginning in String format
      */
     public abstract String getAlterTable(boolean only);
@@ -79,7 +82,6 @@ public abstract class AbstractTable extends PgStatementContainer implements IOpt
      * Finds column according to specified column {@code name}.
      *
      * @param name name of the column to be searched
-     *
      * @return found column or null if no such column has been found
      */
     public AbstractColumn getColumn(final String name) {
@@ -102,7 +104,8 @@ public abstract class AbstractTable extends PgStatementContainer implements IOpt
 
     @Override
     public Stream<Pair<String, String>> getRelationColumns() {
-        return columns.stream().filter(c -> c.getType() != null)
+        return columns.stream()
+                .filter(c -> c.getType() != null)
                 .map(c -> new Pair<>(c.getName(), c.getType()));
     }
 
@@ -135,6 +138,16 @@ public abstract class AbstractTable extends PgStatementContainer implements IOpt
         }
     }
 
+    /**
+     * Compares this table with the {@code newTable} to determine if a full table recreation is required.
+     * A full recreation (DROP and CREATE) is needed when the tables differ in ways that cannot
+     * be altered using ALTER TABLE statements.
+     *
+     * @param newTable the new table definition to compare against
+     * @param settings application settings that may affect the comparison logic
+     * @return {@code true} if the table requires recreation (DROP and CREATE) rather than
+     * being alterable, {@code false} if the changes can be applied via ALTER TABLE
+     */
     public final boolean isRecreated(AbstractTable newTable, ISettings settings) {
         return isNeedRecreate(newTable) || isColumnsOrderChanged(newTable, settings);
     }
@@ -142,10 +155,16 @@ public abstract class AbstractTable extends PgStatementContainer implements IOpt
     protected abstract boolean isNeedRecreate(AbstractTable newTable);
 
     @Override
-    public Map <String, String> getOptions() {
+    public Map<String, String> getOptions() {
         return Collections.unmodifiableMap(options);
     }
 
+    /**
+     * Gets the value for the specified option.
+     *
+     * @param option the option key
+     * @return the option value, or null if not found
+     */
     public String getOption(String option) {
         return options.get(option);
     }
@@ -156,6 +175,11 @@ public abstract class AbstractTable extends PgStatementContainer implements IOpt
         resetHash();
     }
 
+    /**
+     * Adds a column to the table.
+     *
+     * @param column the column to add
+     */
     public void addColumn(final AbstractColumn column) {
         assertUnique(getColumn(column.getName()), column);
         columns.add(column);
@@ -168,6 +192,12 @@ public abstract class AbstractTable extends PgStatementContainer implements IOpt
         addUnique(constraints, constraint);
     }
 
+    /**
+     * Checks if a column with the specified name exists.
+     *
+     * @param name the column name
+     * @return true if column exists, false otherwise
+     */
     public boolean containsColumn(final String name) {
         return getColumn(name) != null;
     }
@@ -230,7 +260,7 @@ public abstract class AbstractTable extends PgStatementContainer implements IOpt
      * and a command to delete the temporary table.
      */
     public void appendMoveDataSql(PgStatement newCondition, SQLScript script, String tblTmpBareName,
-            List<String> identityCols) {
+                                  List<String> identityCols) {
         AbstractTable newTable = (AbstractTable) newCondition;
         List<String> colsForMovingData = getColsForMovingData(newTable);
         if (colsForMovingData.isEmpty()) {
@@ -246,7 +276,7 @@ public abstract class AbstractTable extends PgStatementContainer implements IOpt
     }
 
     protected abstract void writeInsert(SQLScript script, AbstractTable newTable, String tblTmpQName,
-            List<String> identityColsForMovingData, String cols);
+                                        List<String> identityColsForMovingData, String cols);
 
     /**
      * Returns the names of the columns from which data will be moved to another table, excluding calculated columns.

@@ -17,32 +17,54 @@ package org.pgcodekeeper.core.schema;
 
 import java.text.MessageFormat;
 
+/**
+ * Interface for database type cast operations.
+ * Defines functionality for casting between different data types in various contexts.
+ */
 public interface ICast extends IStatement {
 
+    /**
+     * Template for cast names in the format "source AS target".
+     */
     String CAST_NAME = "{0} AS {1}";
 
     /**
      * Indicates what contexts the cast can be invoked in.
      */
-    public enum CastContext {
-        /**
-         * explicit cast (using CAST or :: syntax)
-         */
+    enum CastContext {
         EXPLICIT,
-        /**
-         * used implicitly in assignment to a target column, as well as explicitly
-         */
         ASSIGNMENT,
-        /**
-         * used implicitly in expressions, as well as the other cases
-         */
-        IMPLICIT;
+        IMPLICIT
     }
 
+    /**
+     * Gets the source type of the cast.
+     *
+     * @return the source type name
+     */
     String getSource();
+
+    /**
+     * Gets the target type of the cast.
+     *
+     * @return the target type name
+     */
     String getTarget();
+
+    /**
+     * Gets the context in which this cast can be invoked.
+     *
+     * @return the cast context
+     */
     CastContext getContext();
 
+    /**
+     * Creates a simple name for a cast from source to target type.
+     *
+     * @param source the source type
+     * @param target the target type
+     * @return the formatted cast name
+     */
     static String getSimpleName(String source, String target) {
         return MessageFormat.format(CAST_NAME, source, target);
     }

@@ -19,14 +19,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 
+import java.util.Collection;
+import java.util.Collections;
+
 /**
- * Stores table constraint information.
+ * Abstract base class for database table constraints.
+ * Provides common functionality for constraints across different database types including
+ * primary keys, foreign keys, unique constraints, and check constraints.
  */
 public abstract class AbstractConstraint extends PgStatement implements IConstraint, ISearchPath {
 
@@ -67,11 +69,6 @@ public abstract class AbstractConstraint extends PgStatement implements IConstra
             location = parent.getLocation();
         }
         return location;
-    }
-
-    @Override
-    public void setLocation(PgObjLocation location) {
-        meta.setLocation(location);
     }
 
     @Override

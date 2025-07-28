@@ -14,7 +14,6 @@
  * limitations under the License.
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
-import java.util.Objects;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.ContextLocation;
@@ -25,10 +24,19 @@ import org.pgcodekeeper.core.parsers.antlr.CodeUnitToken;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.statements.pg.PgParserAbstract;
 
+import java.util.Objects;
+
+/**
+ * Represents the location of a database object in source code.
+ * Contains position information, object details, and context for parsing and analysis.
+ */
 public class PgObjLocation extends ContextLocation {
 
     private static final long serialVersionUID = 4428608117292420935L;
 
+    /**
+     * Enumeration of location types for database objects.
+     */
     public enum LocationType {
         DEFINITION,
         REFERENCE,
@@ -46,8 +54,8 @@ public class PgObjLocation extends ContextLocation {
     private final LocationType locationType;
 
     private PgObjLocation(String filePath, int offset, int lineNumber,
-            int charPositionInLine, GenericColumn obj, String action,
-            String sql, String alias, int length, LocationType locationType) {
+                          int charPositionInLine, GenericColumn obj, String action,
+                          String sql, String alias, int length, LocationType locationType) {
         super(filePath, offset, lineNumber, charPositionInLine);
         this.obj = obj;
         this.sql = sql;
@@ -88,6 +96,11 @@ public class PgObjLocation extends ContextLocation {
         this.danger = danger;
     }
 
+    /**
+     * Checks if this location has a danger warning.
+     *
+     * @return true if there is a danger warning
+     */
     public boolean isDanger() {
         return danger != null;
     }
@@ -116,30 +129,65 @@ public class PgObjLocation extends ContextLocation {
         return locationType;
     }
 
+    /**
+     * Checks if this location represents a global reference.
+     *
+     * @return true if the location is a definition or reference type
+     */
     public boolean isGlobal() {
         return locationType == LocationType.DEFINITION || locationType == LocationType.REFERENCE;
     }
 
+    /**
+     * Gets the object name.
+     *
+     * @return object name or empty string if no object
+     */
     public String getObjName() {
         return obj != null ? obj.getObjName() : "";
     }
 
+    /**
+     * Gets the schema name.
+     *
+     * @return schema name or null if no object
+     */
     public String getSchema() {
         return obj == null ? null : obj.schema;
     }
 
+    /**
+     * Gets the table name.
+     *
+     * @return table name or null if no object
+     */
     public String getTable() {
         return obj == null ? null : obj.table;
     }
 
+    /**
+     * Gets the column name.
+     *
+     * @return column name or null if no object
+     */
     public String getColumn() {
         return obj == null ? null : obj.column;
     }
 
+    /**
+     * Gets the database object type.
+     *
+     * @return object type or null if no object
+     */
     public DbObjType getType() {
         return obj == null ? null : obj.type;
     }
 
+    /**
+     * Gets the fully qualified name of the object.
+     *
+     * @return qualified name or null if no object
+     */
     public String getQualifiedName() {
         return obj == null ? null : obj.getQualifiedName();
     }
@@ -153,12 +201,12 @@ public class PgObjLocation extends ContextLocation {
         }
         String objName = getObjName();
         switch (obj.type) {
-        case FUNCTION:
-        case PROCEDURE:
-        case AGGREGATE:
-            break;
-        default:
-            return objName;
+            case FUNCTION:
+            case PROCEDURE:
+            case AGGREGATE:
+                break;
+            default:
+                return objName;
         }
         if (objName.indexOf('(') == -1) {
             return objName;
@@ -168,6 +216,12 @@ public class PgObjLocation extends ContextLocation {
         return QNameParser.getFirstName(ids);
     }
 
+    /**
+     * Compares this location with another location for equality.
+     *
+     * @param loc the location to compare with
+     * @return true if the locations refer to the same object
+     */
     public final boolean compare(PgObjLocation loc) {
         if (isGlobal() != loc.isGlobal() || !Objects.equals(alias, loc.alias)) {
             return false;
@@ -189,25 +243,26 @@ public class PgObjLocation extends ContextLocation {
             return true;
         }
 
-        switch (objType) {
-        case TABLE:
-        case VIEW:
-        case SEQUENCE:
-            return type.in(DbObjType.TABLE, DbObjType.VIEW, DbObjType.SEQUENCE);
-        case FUNCTION:
-        case AGGREGATE:
-        case PROCEDURE:
-            return type.in(DbObjType.FUNCTION, DbObjType.AGGREGATE, DbObjType.PROCEDURE);
-        case TYPE:
-        case DOMAIN:
-            return type.in(DbObjType.TYPE, DbObjType.DOMAIN);
-        default:
-            return false;
-        }
+        return switch (objType) {
+            case TABLE, VIEW, SEQUENCE -> type.in(DbObjType.TABLE, DbObjType.VIEW, DbObjType.SEQUENCE);
+            case FUNCTION, AGGREGATE, PROCEDURE ->
+                    type.in(DbObjType.FUNCTION, DbObjType.AGGREGATE, DbObjType.PROCEDURE);
+            case TYPE, DOMAIN -> type.in(DbObjType.TYPE, DbObjType.DOMAIN);
+            default -> false;
+        };
     }
 
+    /**
+     * Creates a copy of this location with adjusted position offsets.
+     *
+     * @param offset       the offset adjustment
+     * @param lineOffset   the line number adjustment
+     * @param inLineOffset the character position adjustment
+     * @param filePath     the new file path
+     * @return a new PgObjLocation with adjusted position
+     */
     public PgObjLocation copyWithOffset(int offset, int lineOffset,
-            int inLineOffset, String filePath) {
+                                        int inLineOffset, String filePath) {
         int newCharPosition = getLineNumber() == 1 ? getCharPositionInLine() + inLineOffset : getCharPositionInLine();
         PgObjLocation loc = new PgObjLocation(filePath,
                 getOffset() + offset,
@@ -228,6 +283,9 @@ public class PgObjLocation extends ContextLocation {
         return super.toString();
     }
 
+    /**
+     * Builder class for constructing PgObjLocation instances.
+     */
     public static final class Builder {
 
         private String filePath;
@@ -297,19 +355,24 @@ public class PgObjLocation extends ContextLocation {
             return this;
         }
 
+        /**
+         * Builds a PgObjLocation instance from the configured parameters.
+         *
+         * @return PgObjLocation object
+         */
         public PgObjLocation build() {
             if (ctx != null) {
-                CodeUnitToken start = (CodeUnitToken)ctx.getStart();
+                CodeUnitToken start = (CodeUnitToken) ctx.getStart();
                 int startOffset = start.getCodeUnitStart();
                 int line = start.getLine();
                 int position = start.getCodeUnitPositionInLine();
-                CodeUnitToken stop = (CodeUnitToken)(endCtx != null ? endCtx : ctx).getStop();
-                int length =  stop.getCodeUnitStop() - startOffset + 1;
+                CodeUnitToken stop = (CodeUnitToken) (endCtx != null ? endCtx : ctx).getStop();
+                int length = stop.getCodeUnitStop() - startOffset + 1;
                 return new PgObjLocation(filePath, startOffset, line, position,
                         object, action, sql, alias, length, locationType);
             }
 
-            int length =  object == null ? 0 : object.getObjName().length();
+            int length = object == null ? 0 : object.getObjName().length();
             return new PgObjLocation(filePath, offset, lineNumber, charPositionInLine,
                     object, action, sql, alias, length, locationType);
         }

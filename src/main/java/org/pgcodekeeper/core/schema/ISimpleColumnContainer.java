@@ -19,7 +19,22 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
+/**
+ * Interface for database objects that contain simple column references.
+ * Used primarily by indexes and similar objects that reference columns with attributes.
+ */
 public interface ISimpleColumnContainer {
+    /**
+     * Adds a column reference to this container.
+     *
+     * @param column the simple column to add
+     */
     void addColumn(SimpleColumn column);
+
+    /**
+     * Adds an included column to this container.
+     *
+     * @param column the column name to include
+     */
     void addInclude(String column);
 }

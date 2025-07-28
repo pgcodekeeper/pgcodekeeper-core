@@ -15,13 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
+import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.utils.Pair;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.utils.Pair;
-
+/**
+ * Abstract base class for database views.
+ * Provides common functionality for views across different database types including.
+ */
 public abstract class AbstractView extends PgStatementContainer {
 
     @Override

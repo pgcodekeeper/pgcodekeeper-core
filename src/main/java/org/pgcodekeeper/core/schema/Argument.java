@@ -15,17 +15,18 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
-import java.io.Serializable;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.hashers.IHashable;
 import org.pgcodekeeper.core.hashers.JavaHasher;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 /**
- * Subclass when need to reset hashes
- * (like when setting hashed fields after adding the arg to its container).
+ * Represents a function argument with its mode, name, data type, and default value.
+ * Used for storing parameter information for functions, procedures, and aggregates
+ * across different database types.
  */
 public class Argument implements Serializable, IHashable {
 
@@ -75,8 +76,15 @@ public class Argument implements Serializable, IHashable {
         return name;
     }
 
-    public StringBuilder appendDeclaration(StringBuilder sbString,
-            boolean includeDefaultValue, boolean includeArgName) {
+    /**
+     * Appends the argument declaration to a StringBuilder.
+     *
+     * @param sbString            the StringBuilder to append to
+     * @param includeDefaultValue whether to include the default value
+     * @param includeArgName      whether to include the argument name
+     */
+    public void appendDeclaration(StringBuilder sbString,
+                                  boolean includeDefaultValue, boolean includeArgName) {
         if (includeArgName) {
             if (mode != ArgMode.IN) {
                 sbString.append(mode);
@@ -97,8 +105,6 @@ public class Argument implements Serializable, IHashable {
             sbString.append(" = ");
             sbString.append(def);
         }
-
-        return sbString;
     }
 
     @Override

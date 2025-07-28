@@ -15,10 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
-import java.util.stream.Stream;
-
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.util.stream.Stream;
+
+/**
+ * Interface for database relations (tables, views, sequences).
+ * Represents objects that can be used in queries and have column information.
+ */
 public interface IRelation extends ISearchPath {
+    /**
+     * Gets the columns of this relation as name-type pairs.
+     *
+     * @return a stream of column name and type pairs
+     */
     Stream<Pair<String, String>> getRelationColumns();
 }

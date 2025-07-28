@@ -18,10 +18,19 @@ package org.pgcodekeeper.core.schema;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Contains override information for database statements including owner and privileges.
+ * Used when applying custom ownership and privilege settings to database objects.
+ */
 public class StatementOverride {
     private String owner;
     private final List<PgPrivilege> privileges = new ArrayList<>();
 
+    /**
+     * Adds a privilege override to this statement.
+     *
+     * @param privilege the privilege to add
+     */
     public void addPrivilege(PgPrivilege privilege) {
         privileges.add(privilege);
     }

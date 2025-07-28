@@ -17,6 +17,10 @@ package org.pgcodekeeper.core.schema;
 
 import java.util.Locale;
 
+/**
+ * Enumeration of function argument modes.
+ * Defines how function parameters are passed and returned across different database types.
+ */
 public enum ArgMode {
     IN,
     INOUT,
@@ -25,19 +29,30 @@ public enum ArgMode {
     // MS SQL
     OUTPUT;
 
+    /**
+     * Checks if this argument mode represents an input parameter.
+     *
+     * @return true if the mode is IN, INOUT, or VARIADIC
+     */
     public boolean isIn() {
         return this == IN || this == INOUT || this == VARIADIC;
     }
 
+    /**
+     * Converts a string representation to an ArgMode enum value.
+     *
+     * @param string the string to convert
+     * @return the corresponding ArgMode enum value
+     */
     public static ArgMode of(String string) {
         String s = string.toLowerCase(Locale.ROOT);
         return switch (s) {
-        case "in", "i" -> IN;
-        case "out", "o" -> OUT;
-        case "inout", "b" -> INOUT;
-        case "variadic", "v" -> VARIADIC;
-        case "output" -> OUTPUT;
-        default -> valueOf(string);
+            case "in", "i" -> IN;
+            case "out", "o" -> OUT;
+            case "inout", "b" -> INOUT;
+            case "variadic", "v" -> VARIADIC;
+            case "output" -> OUTPUT;
+            default -> valueOf(string);
         };
     }
 }

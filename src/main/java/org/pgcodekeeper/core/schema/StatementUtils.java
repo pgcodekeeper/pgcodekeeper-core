@@ -23,42 +23,47 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Utility class providing common functionality for database statement operations.
+ * Contains helper methods for column ordering, SQL generation, and option handling
+ * across different database types.
+ */
 public final class StatementUtils {
 
     /**
-     * Checks if the order of the table columns has changed.<br><br>
+     * Checks if the order of the table columns has changed.
      *
-     * <b>Example:</b><br><br>
+     * <b>Example:</b>
      * <p>
      * original columns : c1, c2, c3<br>
-     * new columns      : c2, c3, c1<br><br>
+     * new columns      : c2, c3, c1
      * <p>
-     * Column c1 was moved to last index and method will return true<br><br>
+     * Column c1 was moved to last index and method will return true
      *
-     * <b>Example:</b><br><br>
+     * <b>Example:</b>
      * <p>
      * original columns : c1, c2, c3<br>
-     * new columns      : c2, c3, c4<br><br>
+     * new columns      : c2, c3, c4
      * <p>
-     * Column c1 was deleted and column c4 was added. Method will return false.<br><br>
+     * Column c1 was deleted and column c4 was added. Method will return false.
      *
-     * <b>Example:</b><br><br>
+     * <b>Example:</b>
      * <p>
      * original columns : c1, c2, c3<br>
-     * new columns      : c1, c4, c2, c3<br><br>
+     * new columns      : c1, c4, c2, c3
      * <p>
-     * Column c4 was added between old columns: c1 and c2. Method will return true.<br><br>
+     * Column c4 was added between old columns: c1 and c2. Method will return true.
      *
-     * <b>Example:</b><br><br>
+     * <b>Example:</b>
      * <p>
      * original columns : c2, c3, inherit(some table)<br>
-     * new columns      : c1, c2, c3<br><br>
+     * new columns      : c1, c2, c3
      * <p>
      * Some table is no longer inherited. If table did not have a column c1,
-     * we must return true, but we cannot track this right now. Method will return false. <br><br>
+     * we must return true, but we cannot track this right now. Method will return false.
      *
-     * @param newColumns - new columns
-     * @param oldColumns - old columns
+     * @param newColumns new columns
+     * @param oldColumns old columns
      * @return true if order was changed or order is ignored
      * @since 5.1.7
      */
@@ -94,6 +99,13 @@ public final class StatementUtils {
         return false;
     }
 
+    /**
+     * Appends column names to a StringBuilder with proper quoting for the database type.
+     *
+     * @param sbSQL the StringBuilder to append to
+     * @param cols the collection of column names
+     * @param dbType the database type for proper quoting
+     */
     public static void appendCols(StringBuilder sbSQL, Collection<String> cols, DatabaseType dbType) {
         sbSQL.append('(');
         var quoter = Utils.getQuoter(dbType);
@@ -105,12 +117,27 @@ public final class StatementUtils {
         sbSQL.append(')');
     }
 
+    /**
+     * Appends options to a StringBuilder enclosed in parentheses.
+     *
+     * @param sbSQL the StringBuilder to append to
+     * @param options the map of options to append
+     * @param dbType the database type for proper formatting
+     */
     public static void appendOptionsWithParen(StringBuilder sbSQL, Map<String, String> options, DatabaseType dbType) {
         sbSQL.append(" (");
         appendOptions(sbSQL, options, dbType);
         sbSQL.append(')');
     }
 
+    /**
+     * Appends a collection of strings to a StringBuilder with a specified delimiter.
+     *
+     * @param sbSQL the StringBuilder to append to
+     * @param collection the collection of strings to append
+     * @param delimiter the delimiter to use between elements
+     * @param needParens whether to enclose the result in parentheses
+     */
     public static void appendCollection(StringBuilder sbSQL, Collection<String> collection,
                                         String delimiter, boolean needParens) {
         if (collection.isEmpty()) {
@@ -161,6 +188,14 @@ public final class StatementUtils {
         sbSQL.setLength(sbSQL.length() - 2);
     }
 
+    /**
+     * Gets the full bare name of a statement by concatenating parent names.
+     * Returns a dot-delimited path from the top-level container down to the statement,
+     * excluding the database level.
+     *
+     * @param st the statement to get the full bare name for
+     * @return the full bare name path (e.g., "schema.table.column")
+     */
     public static String getFullBareName(PgStatement st) {
         StringBuilder sb = new StringBuilder(st.getBareName());
         PgStatement par = st.getParent();

@@ -18,9 +18,36 @@ package org.pgcodekeeper.core.schema;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Interface for database functions, procedures, and aggregates.
+ * Provides access to function arguments, return types, and return columns.
+ */
 public interface IFunction extends ISearchPath {
+    /**
+     * Gets the return type of this function.
+     *
+     * @return the return type, or null if not applicable
+     */
     String getReturns();
+
+    /**
+     * Gets the return columns for table-valued functions.
+     *
+     * @return a map of column names to their types
+     */
     Map<String, String> getReturnsColumns();
+
+    /**
+     * Gets the list of function arguments.
+     *
+     * @return the list of arguments
+     */
     List<Argument> getArguments();
+
+    /**
+     * Sets the return type of this function.
+     *
+     * @param returns the return type to set
+     */
     void setReturns(String returns);
 }

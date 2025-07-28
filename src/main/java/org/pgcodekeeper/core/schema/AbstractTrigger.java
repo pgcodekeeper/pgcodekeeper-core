@@ -18,10 +18,11 @@ package org.pgcodekeeper.core.schema;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 
 /**
- * Stores trigger information.
+ * Abstract base class for database triggers.
+ * Provides common functionality for triggers across different database types including
+ * PostgreSQL, Microsoft SQL, and ClickHouse.
  */
-public abstract class AbstractTrigger extends PgStatement implements ISearchPath
-{
+public abstract class AbstractTrigger extends PgStatement implements ISearchPath {
 
     @Override
     public DbObjType getStatementType() {

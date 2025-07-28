@@ -15,6 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
+/**
+ * Metadata container for database statements.
+ * Stores additional information about statements including location, author, and library information.
+ */
 public class PgStatementMeta {
     private PgObjLocation location;
     private String author;
@@ -36,6 +40,11 @@ public class PgStatementMeta {
         this.author = author;
     }
 
+    /**
+     * Checks if this statement belongs to a library.
+     *
+     * @return true if this statement is from a library
+     */
     public boolean isLib() {
         return libName != null;
     }
@@ -48,6 +57,11 @@ public class PgStatementMeta {
         this.libName = libName;
     }
 
+    /**
+     * Copies metadata from another PgStatementMeta instance.
+     *
+     * @param meta the metadata to copy from
+     */
     public void copy(PgStatementMeta meta) {
         this.location = meta.location;
         this.author = meta.author;

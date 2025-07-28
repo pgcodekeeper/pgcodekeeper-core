@@ -17,6 +17,10 @@ package org.pgcodekeeper.core.schema;
 
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 
+/**
+ * Abstract base class for database statistics objects.
+ * Provides common functionality for extended statistics across different database types.
+ */
 public abstract class AbstractStatistics extends PgStatement implements ISearchPath {
 
     protected AbstractStatistics(String name) {

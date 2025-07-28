@@ -15,13 +15,32 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
+/**
+ * Interface for database objects that are contained within a schema and can be found via search path.
+ * Provides methods for accessing the containing schema and database.
+ */
 public interface ISearchPath extends IStatement {
+    /**
+     * Gets the schema that contains this object.
+     *
+     * @return the containing schema
+     */
     ISchema getContainingSchema();
 
+    /**
+     * Gets the name of the schema that contains this object.
+     *
+     * @return the schema name
+     */
     default String getSchemaName() {
         return getContainingSchema().getName();
     }
 
+    /**
+     * Gets the database that contains this object.
+     *
+     * @return the containing database
+     */
     @Override
     default AbstractDatabase getDatabase() {
         return (AbstractDatabase) getContainingSchema().getParent();

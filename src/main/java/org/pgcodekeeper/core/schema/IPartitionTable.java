@@ -15,7 +15,22 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
+/**
+ * Interface for partitioned tables.
+ * Defines functionality for table partitioning including partition bounds and parent table references.
+ */
 public interface IPartitionTable extends IStatement {
+    /**
+     * Gets the partition bounds specification for this partition.
+     *
+     * @return the partition bounds as SQL string
+     */
     String getPartitionBounds();
+
+    /**
+     * Gets the name of the parent table that this partition belongs to.
+     *
+     * @return the parent table name
+     */
     String getParentTable();
 }

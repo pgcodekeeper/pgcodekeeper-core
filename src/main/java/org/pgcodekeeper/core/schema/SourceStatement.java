@@ -16,27 +16,51 @@
 package org.pgcodekeeper.core.schema;
 
 /**
- * A statement that is represented only by its full source code
- * separated in two parts by CREATE ZZZZ schema.name
+ * Interface for database statements that are represented by their full source code.
+ * The source is separated into two parts by the CREATE/ALTER statement keywords,
+ * allowing for flexible SQL generation while preserving the original formatting.
  */
 public interface SourceStatement extends ISearchPath {
+    /**
+     * Gets the first part of the source statement (before CREATE/ALTER).
+     *
+     * @return the first part of the source
+     */
     String getFirstPart();
+
+    /**
+     * Sets the first part of the source statement.
+     *
+     * @param firstPart the first part to set
+     */
     void setFirstPart(String firstPart);
+
+    /**
+     * Gets the second part of the source statement (after the object name).
+     *
+     * @return the second part of the source
+     */
     String getSecondPart();
+
+    /**
+     * Sets the second part of the source statement.
+     *
+     * @param secondPart the second part to set
+     */
     void setSecondPart(String secondPart);
 
     /**
      * Assembles entire statement from source parts
+     *
      * @param isCreate do CREATE or ALTER
      */
-    default StringBuilder appendSourceStatement(boolean isCreate, StringBuilder sb) {
+    default void appendSourceStatement(boolean isCreate, StringBuilder sb) {
         sb.append(getFirstPart())
-        .append(isCreate ? "CREATE " : "ALTER ")
-        .append(getStatementType())
-        .append(' ');
+                .append(isCreate ? "CREATE " : "ALTER ")
+                .append(getStatementType())
+                .append(' ');
         appendName(sb)
-        .append(getSecondPart());
-        return sb;
+                .append(getSecondPart());
     }
 
     /**

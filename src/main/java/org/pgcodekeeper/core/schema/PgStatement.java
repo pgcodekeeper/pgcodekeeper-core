@@ -15,23 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
-
-import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.DatabaseType;
-import org.pgcodekeeper.core.MsDiffUtils;
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.*;
 import org.pgcodekeeper.core.formatter.FileFormatter;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.hashers.IHashable;
@@ -42,9 +26,14 @@ import org.pgcodekeeper.core.parsers.antlr.exception.ObjectCreationException;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.*;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
+
 /**
- * The superclass for general pgsql statement.
- * All changes to hashed fields of extending classes must be
+ * Abstract base class for all database statements and objects.
+ * Provides common functionality including naming, ownership, privileges, dependencies,
+ * and metadata management. All changes to hashed fields of extending classes must be
  * followed by a {@link #resetHash()} call.
  *
  * @author Alexander Levsha
@@ -83,19 +72,35 @@ public abstract class PgStatement implements IStatement, IHashable {
         return DatabaseType.PG;
     }
 
+    /**
+     * Checks if this statement can be dropped.
+     *
+     * @return true if the statement can be dropped
+     */
     public boolean canDrop() {
         return true;
     }
 
+    /**
+     * Checks if this statement is a sub-element of another statement.
+     *
+     * @return true if this is a sub-element
+     */
     public boolean isSubElement() {
         return false;
     }
 
+    /**
+     * Checks if this statement type supports ownership.
+     *
+     * @return true if the statement can have an owner
+     */
     public boolean isOwned() {
         return switch (getStatementType()) {
-        case FOREIGN_DATA_WRAPPER, SERVER, EVENT_TRIGGER, FTS_CONFIGURATION, FTS_DICTIONARY, TABLE, VIEW, SCHEMA,
-        FUNCTION, OPERATOR, PROCEDURE, AGGREGATE, SEQUENCE, COLLATION, TYPE, DOMAIN, ASSEMBLY, STATISTICS -> true;
-        default -> false;
+            case FOREIGN_DATA_WRAPPER, SERVER, EVENT_TRIGGER, FTS_CONFIGURATION, FTS_DICTIONARY, TABLE, VIEW, SCHEMA,
+                 FUNCTION, OPERATOR, PROCEDURE, AGGREGATE, SEQUENCE, COLLATION, TYPE, DOMAIN, ASSEMBLY, STATISTICS ->
+                    true;
+            default -> false;
         };
     }
 
@@ -108,41 +113,87 @@ public abstract class PgStatement implements IStatement, IHashable {
         return name;
     }
 
+    /**
+     * Gets the parent statement that contains this statement.
+     *
+     * @return the parent statement, or null if this is a top-level statement
+     */
     @Override
     public PgStatement getParent() {
         return parent;
     }
 
+    /**
+     * Gets the location information for this statement.
+     *
+     * @return the location where this statement is defined
+     */
     public PgObjLocation getLocation() {
         return meta.getLocation();
     }
 
+    /**
+     * Sets the location information for this statement.
+     *
+     * @param location the location where this statement is defined
+     */
     public void setLocation(PgObjLocation location) {
         meta.setLocation(location);
     }
 
+    /**
+     * Checks if this statement comes from a library.
+     *
+     * @return true if this statement is from a library
+     */
     public boolean isLib() {
         return meta.isLib();
     }
 
+    /**
+     * Gets the name of the library this statement comes from.
+     *
+     * @return the library name, or null if not from a library
+     */
     public String getLibName() {
         return meta.getLibName();
     }
 
+    /**
+     * Sets the name of the library this statement comes from.
+     *
+     * @param libName the library name to set
+     */
     public void setLibName(String libName) {
         meta.setLibName(libName);
     }
 
+    /**
+     * Gets the author of this statement.
+     *
+     * @return the author name, or null if not specified
+     */
     public String getAuthor() {
         return meta.getAuthor();
     }
 
+    /**
+     * Sets the author of this statement.
+     *
+     * @param author the author name to set
+     */
     public void setAuthor(String author) {
         meta.setAuthor(author);
     }
 
+    /**
+     * Sets the parent statement for this statement.
+     *
+     * @param parent the parent statement to set
+     * @throws IllegalStateException if this statement already has a parent
+     */
     public void setParent(PgStatement parent) {
-        if(parent != null && this.parent != null) {
+        if (parent != null && this.parent != null) {
             throw new IllegalStateException("Statement already has a parent: "
                     + this.getClass() + " Name: " + this.getName());
         }
@@ -155,11 +206,16 @@ public abstract class PgStatement implements IStatement, IHashable {
         return Collections.unmodifiableSet(deps);
     }
 
-    public void addDep(GenericColumn dep){
+    /**
+     * Adds a dependency to this statement.
+     *
+     * @param dep the dependency to add
+     */
+    public void addDep(GenericColumn dep) {
         deps.add(dep);
     }
 
-    public void addAllDeps(Collection<GenericColumn> deps){
+    public void addAllDeps(Collection<GenericColumn> deps) {
         this.deps.addAll(deps);
     }
 
@@ -173,6 +229,11 @@ public abstract class PgStatement implements IStatement, IHashable {
         resetHash();
     }
 
+    /**
+     * Gets the type name of this statement for SQL generation.
+     *
+     * @return the type name
+     */
     public String getTypeName() {
         return getStatementType().getTypeName();
     }
@@ -181,16 +242,32 @@ public abstract class PgStatement implements IStatement, IHashable {
         return sb.append(getQualifiedName());
     }
 
+    /**
+     * Appends comment SQL to the script if this statement has comments.
+     *
+     * @param script the SQL script to append comments to
+     */
     public void appendComments(SQLScript script) {
         if (checkComments()) {
             appendCommentSql(script);
         }
     }
 
+    /**
+     * Checks if this statement has non-empty comments.
+     *
+     * @return true if the statement has comments
+     */
     public boolean checkComments() {
         return comment != null && !comment.isEmpty();
     }
 
+    /**
+     * Appends ALTER comment SQL if the comment has changed.
+     *
+     * @param newObj the new statement to compare comments with
+     * @param script the SQL script to append ALTER comments to
+     */
     public void appendAlterComments(PgStatement newObj, SQLScript script) {
         if (!Objects.equals(getComment(), newObj.getComment())) {
             newObj.appendCommentSql(script);
@@ -202,7 +279,7 @@ public abstract class PgStatement implements IStatement, IHashable {
         sb.append("COMMENT ON ").append(getTypeName()).append(' ');
         appendFullName(sb);
         sb.append(" IS ")
-        .append(checkComments() ? comment : "NULL");
+                .append(checkComments() ? comment : "NULL");
         script.addCommentStatement(sb.toString());
     }
 
@@ -212,38 +289,51 @@ public abstract class PgStatement implements IStatement, IHashable {
         }
     }
 
+    /**
+     * Gets an unmodifiable set of privileges for this statement.
+     *
+     * @return unmodifiable set of privileges
+     */
     public Set<PgPrivilege> getPrivileges() {
         return Collections.unmodifiableSet(privileges);
     }
 
+    /**
+     * Adds a privilege to this statement with database-specific filtering.
+     * For PostgreSQL, applies ownership and permission filtering.
+     * For MS SQL and ClickHouse, adds privileges directly.
+     *
+     * @param privilege the privilege to add
+     * @throws IllegalArgumentException if database type is unsupported
+     */
     public void addPrivilege(PgPrivilege privilege) {
         switch (getDbType()) {
-        case PG:
-            String locOwner;
-            if (owner == null && getStatementType() == DbObjType.SCHEMA
-                    && Consts.PUBLIC.equals(getName())) {
-                locOwner = "postgres";
-            } else {
-                locOwner = owner;
-            }
+            case PG:
+                String locOwner;
+                if (owner == null && getStatementType() == DbObjType.SCHEMA
+                        && Consts.PUBLIC.equals(getName())) {
+                    locOwner = "postgres";
+                } else {
+                    locOwner = owner;
+                }
 
-            // Skip filtering if statement type is COLUMN, because of the
-            // specific relationship with table privileges.
-            // The privileges of columns for role are not set lower than for the
-            // same role in the parent table, they may be the same or higher.
-            if (DbObjType.COLUMN != getStatementType()
-                    && "ALL".equalsIgnoreCase(privilege.getPermission())) {
-                addPrivilegeFiltered(privilege, locOwner);
-            } else {
+                // Skip filtering if statement type is COLUMN, because of the
+                // specific relationship with table privileges.
+                // The privileges of columns for role are not set lower than for the
+                // same role in the parent table, they may be the same or higher.
+                if (DbObjType.COLUMN != getStatementType()
+                        && "ALL".equalsIgnoreCase(privilege.getPermission())) {
+                    addPrivilegeFiltered(privilege, locOwner);
+                } else {
+                    privileges.add(privilege);
+                }
+                break;
+            case MS:
+            case CH:
                 privileges.add(privilege);
-            }
-            break;
-        case MS:
-        case CH:
-            privileges.add(privilege);
-            break;
-        default:
-            throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + getDbType());
+                break;
+            default:
+                throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + getDbType());
         }
         resetHash();
     }
@@ -251,8 +341,8 @@ public abstract class PgStatement implements IStatement, IHashable {
     private void addPrivilegeFiltered(PgPrivilege privilege, String locOwner) {
         if ("PUBLIC".equals(privilege.getRole())) {
             boolean isFunc = switch (getStatementType()) {
-            case FUNCTION, PROCEDURE, AGGREGATE, DOMAIN, TYPE -> true;
-            default -> false;
+                case FUNCTION, PROCEDURE, AGGREGATE, DOMAIN, TYPE -> true;
+                default -> false;
             };
             if (isFunc != privilege.isRevoke()) {
                 return;
@@ -273,6 +363,9 @@ public abstract class PgStatement implements IStatement, IHashable {
         privileges.add(privilege);
     }
 
+    /**
+     * Clears all privileges from this statement and resets the hash.
+     */
     public void clearPrivileges() {
         privileges.clear();
         resetHash();
@@ -352,6 +445,12 @@ public abstract class PgStatement implements IStatement, IHashable {
         }
     }
 
+    /**
+     * Appends ALTER OWNER SQL statement to the script for this database object.
+     *
+     * @param script the SQL script to append the owner statement to
+     * @throws IllegalArgumentException if database type is unsupported
+     */
     public void appendOwnerSQL(SQLScript script) {
         if (owner == null || !isOwned()) {
             return;
@@ -360,31 +459,45 @@ public abstract class PgStatement implements IStatement, IHashable {
         sb.append("ALTER ");
 
         switch (getDbType()) {
-        case PG:
-            sb.append(getTypeName()).append(' ');
-            appendFullName(sb);
-            sb.append(" OWNER TO ")
-            .append(PgDiffUtils.getQuotedName(owner));
-            break;
-        case MS:
-            sb.append("AUTHORIZATION ON ");
-            DbObjType type = getStatementType();
-            if (DbObjType.TYPE == type || DbObjType.SCHEMA == type
-                    || DbObjType.ASSEMBLY == type) {
-                sb.append(type).append("::");
-            }
+            case PG:
+                sb.append(getTypeName()).append(' ');
+                appendFullName(sb);
+                sb.append(" OWNER TO ")
+                        .append(PgDiffUtils.getQuotedName(owner));
+                break;
+            case MS:
+                sb.append("AUTHORIZATION ON ");
+                DbObjType type = getStatementType();
+                if (DbObjType.TYPE == type || DbObjType.SCHEMA == type
+                        || DbObjType.ASSEMBLY == type) {
+                    sb.append(type).append("::");
+                }
 
-            sb.append(getQualifiedName()).append(" TO ")
-            .append(MsDiffUtils.quoteName(owner));
-            break;
-        default:
-            throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + getDbType());
+                sb.append(getQualifiedName()).append(" TO ")
+                        .append(MsDiffUtils.quoteName(owner));
+                break;
+            default:
+                throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + getDbType());
         }
         script.addStatement(sb);
     }
 
+    /**
+     * Generates the SQL statements needed to create this database object.
+     * This is an abstract method that must be implemented by subclasses
+     * to provide the specific CREATE SQL for each object type.
+     *
+     * @param script the SQL script to append creation statements to
+     */
     public abstract void getCreationSQL(SQLScript script);
 
+    /**
+     * Gets the SQL representation of this statement with optional formatting.
+     *
+     * @param isFormatted whether to apply formatting to the SQL
+     * @param settings    the settings to use for SQL generation and formatting
+     * @return the SQL string representation of this statement
+     */
     public String getSQL(boolean isFormatted, ISettings settings) {
         SQLScript script = new SQLScript(settings);
         getCreationSQL(script);
@@ -397,14 +510,31 @@ public abstract class PgStatement implements IStatement, IHashable {
         return fileForm.formatText();
     }
 
+    /**
+     * Generates DROP SQL for this statement using settings from the script.
+     *
+     * @param script the SQL script to append the DROP statement to
+     */
     public final void getDropSQL(SQLScript script) {
         getDropSQL(script, script.getSettings().isGenerateExists());
     }
 
+    /**
+     * Checks if this statement can be dropped before being recreated.
+     * Override in subclasses that support drop-before-create behavior.
+     *
+     * @return true if the statement can be dropped before recreation
+     */
     public boolean canDropBeforeCreate() {
         return false;
     }
 
+    /**
+     * Generates DROP SQL for this statement.
+     *
+     * @param script         the SQL script to append the DROP statement to
+     * @param generateExists whether to include "IF EXISTS" in the DROP statement
+     */
     public void getDropSQL(SQLScript script, boolean generateExists) {
         final StringBuilder sb = new StringBuilder();
         sb.append("DROP ").append(getTypeName()).append(' ');
@@ -422,21 +552,33 @@ public abstract class PgStatement implements IStatement, IHashable {
     }
 
     /**
-     * Fill script with object changes and return change type <br>
-     * <br>
+     * Fill script with object changes and return change type
      *
-     * @param newCondition
-     *            new object state
-     * @param script
-     *            script to collect changes
+     * @param newCondition new object state
+     * @param script       script to collect changes
      * @return object change type
      */
     public abstract ObjectState appendAlterSQL(PgStatement newCondition, SQLScript script);
 
+    /**
+     * Determines the object state based on changes made to the script.
+     *
+     * @param script    the SQL script to check for changes
+     * @param startSize the initial size of the script before changes
+     * @return the object state indicating the type of change
+     */
     public ObjectState getObjectState(SQLScript script, int startSize) {
         return getObjectState(false, script, startSize);
     }
 
+    /**
+     * Determines the object state based on changes made to the script.
+     *
+     * @param isNeedDepcies whether dependencies need to be considered
+     * @param script        the SQL script to check for changes
+     * @param startSize     the initial size of the script before changes
+     * @return the object state: NOTHING if no changes, ALTER_WITH_DEP if dependencies needed, ALTER otherwise
+     */
     public ObjectState getObjectState(boolean isNeedDepcies, SQLScript script, int startSize) {
         if (script.getSize() == startSize) {
             return ObjectState.NOTHING;
@@ -444,6 +586,7 @@ public abstract class PgStatement implements IStatement, IHashable {
 
         return isNeedDepcies ? ObjectState.ALTER_WITH_DEP : ObjectState.ALTER;
     }
+
     /**
      * Copies all object properties into a new object and leaves all its children empty.
      *
@@ -530,6 +673,11 @@ public abstract class PgStatement implements IStatement, IHashable {
         return l.stream().flatMap(Collection::stream);
     }
 
+    /**
+     * Checks if this statement has any child statements.
+     *
+     * @return true if this statement has children, false otherwise
+     */
     public boolean hasChildren() {
         return getChildren().anyMatch(e -> true);
     }
@@ -559,7 +707,7 @@ public abstract class PgStatement implements IStatement, IHashable {
      * {@inheritDoc}
      */
     @Override
-    public final boolean equals(Object obj){
+    public final boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -576,7 +724,7 @@ public abstract class PgStatement implements IStatement, IHashable {
      * Recursively compares objects' parents
      * to ensure their equal position in their object trees.
      */
-    private boolean parentNamesEquals(PgStatement st){
+    private boolean parentNamesEquals(PgStatement st) {
         PgStatement p = parent;
         PgStatement p2 = st.parent;
         while (p != null && p2 != null) {
@@ -618,14 +766,14 @@ public abstract class PgStatement implements IStatement, IHashable {
         return h;
     }
 
-    private final void computeLocalHash(Hasher hasher) {
+    private void computeLocalHash(Hasher hasher) {
         hasher.put(name);
         hasher.put(owner);
         hasher.put(comment);
         hasher.putUnordered(privileges);
     }
 
-    protected void resetHash(){
+    protected void resetHash() {
         PgStatement st = this;
         while (st != null) {
             st.hash = 0;
@@ -648,7 +796,7 @@ public abstract class PgStatement implements IStatement, IHashable {
 
     /**
      * @return fully qualified (up to schema) dot-delimited object name.
-     *          Identifiers are quoted.
+     * Identifiers are quoted.
      */
     @Override
     public String getQualifiedName() {
@@ -668,7 +816,6 @@ public abstract class PgStatement implements IStatement, IHashable {
         return qualifiedName;
     }
 
-
     @Override
     public String toString() {
         return name == null ? "Unnamed object" : name;
@@ -678,7 +825,7 @@ public abstract class PgStatement implements IStatement, IHashable {
         if (found != null) {
             PgStatement foundParent = found.parent;
             throw foundParent instanceof ISearchPath
-            ? new ObjectCreationException(newSt, foundParent)
+                    ? new ObjectCreationException(newSt, foundParent)
                     : new ObjectCreationException(newSt);
         }
     }

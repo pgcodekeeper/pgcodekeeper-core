@@ -15,11 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
+/**
+ * Abstract base class for database user-defined types.
+ * Provides common functionality for types across different database types including
+ * composite types, enums, domains, and other user-defined data types.
+ */
 public abstract class AbstractType extends PgStatement implements ISearchPath {
 
     protected AbstractType(String name) {
@@ -61,7 +66,7 @@ public abstract class AbstractType extends PgStatement implements ISearchPath {
         return getObjectState(isNeedDepcies.get(), script, startSize);
     }
 
-    private final boolean isNeedRecreate(AbstractType newType) {
+    private boolean isNeedRecreate(AbstractType newType) {
         return !getClass().equals(newType.getClass()) || !compareUnalterable(newType);
     }
 

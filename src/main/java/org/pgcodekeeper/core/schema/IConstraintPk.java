@@ -15,6 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
+/**
+ * Interface for primary key constraints.
+ * Extends the basic constraint interface with primary key specific functionality
+ * including clustering information.
+ */
 public interface IConstraintPk extends IConstraint {
+    /**
+     * Checks if this primary key constraint is clustered.
+     *
+     * @return true if the primary key is clustered
+     */
     boolean isClustered();
 }
