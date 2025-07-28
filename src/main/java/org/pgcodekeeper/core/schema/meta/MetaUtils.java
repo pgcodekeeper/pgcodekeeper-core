@@ -15,36 +15,38 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.meta;
 
+import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
+import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.schema.*;
+import org.pgcodekeeper.core.schema.PgObjLocation.LocationType;
+import org.pgcodekeeper.core.schema.pg.PgCompositeType;
+import org.pgcodekeeper.core.utils.Pair;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.pgcodekeeper.core.DatabaseType;
-import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.ICast;
-import org.pgcodekeeper.core.schema.IConstraint;
-import org.pgcodekeeper.core.schema.IFunction;
-import org.pgcodekeeper.core.schema.IOperator;
-import org.pgcodekeeper.core.schema.IRelation;
-import org.pgcodekeeper.core.schema.IStatement;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.PgObjLocation.LocationType;
-import org.pgcodekeeper.core.schema.pg.PgCompositeType;
-import org.pgcodekeeper.core.utils.Pair;
-
+/**
+ * Utility class for creating and managing database metadata objects.
+ * Provides methods for converting database statements to metadata representations
+ * and organizing them into metadata containers.
+ */
 public final class MetaUtils {
 
+    /**
+     * Creates a metadata container from a database object.
+     *
+     * @param db the database object
+     * @return the metadata container with all database objects
+     */
     public static MetaContainer createTreeFromDb(AbstractDatabase db) {
         MetaContainer tree = new MetaContainer();
         db.getDescendants()
-        .map(MetaUtils::createMetaFromStatement)
-        .forEach(tree::addStatement);
+                .map(MetaUtils::createMetaFromStatement)
+                .forEach(tree::addStatement);
 
         if (db.getDbType() == DatabaseType.PG) {
             MetaStorage.getSystemObjects(db.getVersion()).forEach(tree::addStatement);
@@ -52,8 +54,16 @@ public final class MetaUtils {
         return tree;
     }
 
+    /**
+     * Creates a metadata container from a stream of metadata definitions.
+     *
+     * @param defs    the stream of metadata statements
+     * @param dbType  the database type
+     * @param version the PostgreSQL version (used only for PG databases)
+     * @return the metadata container with all definitions
+     */
     public static MetaContainer createTreeFromDefs(Stream<MetaStatement> defs,
-            DatabaseType dbType, SupportedPgVersion version) {
+                                                   DatabaseType dbType, SupportedPgVersion version) {
         MetaContainer tree = new MetaContainer();
         defs.forEach(tree::addStatement);
 
@@ -128,61 +138,61 @@ public final class MetaUtils {
         }
         GenericColumn gc;
         switch (type) {
-        case CAST:
-        case USER_MAPPING:
-        case SCHEMA:
-        case EXTENSION:
-        case EVENT_TRIGGER:
-        case FOREIGN_DATA_WRAPPER:
-        case SERVER:
-        case ROLE:
-        case USER:
-        case ASSEMBLY:
-            gc = new GenericColumn(st.getName(), type);
-            break;
-        case COLLATION:
-        case AGGREGATE:
-        case DOMAIN:
-        case FTS_CONFIGURATION:
-        case FTS_DICTIONARY:
-        case FTS_PARSER:
-        case FTS_TEMPLATE:
-        case OPERATOR:
-        case PROCEDURE:
-        case SEQUENCE:
-        case TABLE:
-        case DICTIONARY:
-        case TYPE:
-        case VIEW:
-        case STATISTICS:
-            gc = new GenericColumn(st.getParent().getName(), st.getName(), type);
-            break;
-        case INDEX:
-            gc = new GenericColumn(st.getParent().getParent().getName(), st.getName(), type);
-            break;
-        case CONSTRAINT:
-        case RULE:
-        case TRIGGER:
-            IStatement parent = st.getParent();
-            gc = new GenericColumn(parent.getParent().getName(), parent.getName(), st.getName(), type);
-            break;
-        case POLICY:
-            if (st.getDbType() == DatabaseType.CH) {
+            case CAST:
+            case USER_MAPPING:
+            case SCHEMA:
+            case EXTENSION:
+            case EVENT_TRIGGER:
+            case FOREIGN_DATA_WRAPPER:
+            case SERVER:
+            case ROLE:
+            case USER:
+            case ASSEMBLY:
                 gc = new GenericColumn(st.getName(), type);
-            } else {
-                parent = st.getParent();
-                gc = new GenericColumn(parent.getParent().getName(), parent.getName(), st.getName(), type);
-            }
-            break;
-        case FUNCTION:
-            if (st.getDbType() == DatabaseType.CH) {
-                gc = new GenericColumn(st.getName(), type);
-            } else {
+                break;
+            case COLLATION:
+            case AGGREGATE:
+            case DOMAIN:
+            case FTS_CONFIGURATION:
+            case FTS_DICTIONARY:
+            case FTS_PARSER:
+            case FTS_TEMPLATE:
+            case OPERATOR:
+            case PROCEDURE:
+            case SEQUENCE:
+            case TABLE:
+            case DICTIONARY:
+            case TYPE:
+            case VIEW:
+            case STATISTICS:
                 gc = new GenericColumn(st.getParent().getName(), st.getName(), type);
-            }
-            break;
-        default:
-            throw new IllegalArgumentException("Unsupported type " + type);
+                break;
+            case INDEX:
+                gc = new GenericColumn(st.getParent().getParent().getName(), st.getName(), type);
+                break;
+            case CONSTRAINT:
+            case RULE:
+            case TRIGGER:
+                IStatement parent = st.getParent();
+                gc = new GenericColumn(parent.getParent().getName(), parent.getName(), st.getName(), type);
+                break;
+            case POLICY:
+                if (st.getDbType() == DatabaseType.CH) {
+                    gc = new GenericColumn(st.getName(), type);
+                } else {
+                    parent = st.getParent();
+                    gc = new GenericColumn(parent.getParent().getName(), parent.getName(), st.getName(), type);
+                }
+                break;
+            case FUNCTION:
+                if (st.getDbType() == DatabaseType.CH) {
+                    gc = new GenericColumn(st.getName(), type);
+                } else {
+                    gc = new GenericColumn(st.getParent().getName(), st.getName(), type);
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported type " + type);
         }
 
         return new PgObjLocation.Builder()
@@ -191,6 +201,12 @@ public final class MetaUtils {
                 .build();
     }
 
+    /**
+     * Returns object definitions grouped by file path.
+     *
+     * @param db the database object
+     * @return map of file paths to lists of metadata statements
+     */
     public static Map<String, List<MetaStatement>> getObjDefinitions(AbstractDatabase db) {
         Map<String, List<MetaStatement>> definitions = new HashMap<>();
 
@@ -200,7 +216,7 @@ public final class MetaUtils {
                 String filePath = loc.getFilePath();
                 if (filePath != null) {
                     definitions.computeIfAbsent(filePath, k -> new ArrayList<>())
-                    .add(MetaUtils.createMetaFromStatement(st));
+                            .add(MetaUtils.createMetaFromStatement(st));
                 }
             }
         });
@@ -208,13 +224,22 @@ public final class MetaUtils {
         return definitions;
     }
 
+    /**
+     * Initializes a view with column information in the metadata container.
+     *
+     * @param meta       the metadata container
+     * @param schemaName the schema name
+     * @param name       the view name
+     * @param columns    the list of column name-type pairs
+     */
     public static void initializeView(MetaContainer meta, String schemaName,
-            String name, List<? extends Pair<String, String>> columns) {
+                                      String name, List<? extends Pair<String, String>> columns) {
         IRelation rel = meta.findRelation(schemaName, name);
         if (rel instanceof MetaRelation metaRel) {
             metaRel.addColumns(columns);
         }
     }
 
-    private MetaUtils() {}
+    private MetaUtils() {
+    }
 }

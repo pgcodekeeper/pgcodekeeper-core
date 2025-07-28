@@ -15,33 +15,39 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ch;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import org.pgcodekeeper.core.ChDiffUtils;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.Argument;
-import org.pgcodekeeper.core.schema.IFunction;
-import org.pgcodekeeper.core.schema.ISchema;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * Represents a ClickHouse user-defined function.
+ * ClickHouse functions are lambda expressions with parameters and a body.
+ */
 public final class ChFunction extends PgStatement implements IFunction {
 
     private String body;
     private final List<Argument> arguments = new ArrayList<>();
 
+    /**
+     * Creates a new ClickHouse function with the specified name.
+     *
+     * @param name the name of the function
+     */
     public ChFunction(String name) {
         super(name);
     }
 
+    /**
+     * Returns the function body expression.
+     *
+     * @return the function body
+     */
     public String getBody() {
         return body;
     }
@@ -56,6 +62,11 @@ public final class ChFunction extends PgStatement implements IFunction {
         return Collections.unmodifiableList(arguments);
     }
 
+    /**
+     * Adds an argument to this function.
+     *
+     * @param argument the argument to add
+     */
     public void addArgument(Argument argument) {
         arguments.add(argument);
         resetHash();

@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ch;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.ChDiffUtils;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
@@ -26,12 +24,23 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Objects;
+
+/**
+ * Represents a ClickHouse table index.
+ * ClickHouse indexes are used for data skipping and include expression, type, and granularity settings.
+ */
 public final class ChIndex extends AbstractIndex {
 
     private String expr;
     private String type;
     private int granVal = 1;
 
+    /**
+     * Creates a new ClickHouse index with the specified name.
+     *
+     * @param name the name of the index
+     */
     public ChIndex(String name) {
         super(name);
     }
@@ -51,10 +60,15 @@ public final class ChIndex extends AbstractIndex {
         resetHash();
     }
 
+    /**
+     * Returns the full definition string for this index.
+     *
+     * @return the complete index definition
+     */
     public String getDefinition() {
         final StringBuilder sb = new StringBuilder();
         sb.append("INDEX ").append(name).append(' ').append(expr)
-        .append(" TYPE ").append(type);
+                .append(" TYPE ").append(type);
         if (granVal != 1) {
             sb.append(" GRANULARITY ").append(granVal);
         }

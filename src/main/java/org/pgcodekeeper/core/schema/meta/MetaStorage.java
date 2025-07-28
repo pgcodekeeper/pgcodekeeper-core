@@ -33,6 +33,11 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * Storage and management system for database metadata objects.
+ * Handles serialization, deserialization, and caching of system objects
+ * for different PostgreSQL versions.
+ */
 public final class MetaStorage implements Serializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(MetaStorage.class);
@@ -54,16 +59,30 @@ public final class MetaStorage implements Serializable {
 
     private static final ObjectInputFilter DESERIALIZATION_FILTER = ObjectInputFilter.Config.createFilter(FILTER_PATTERN);
 
+    /**
+     * Base file name for serialized system objects.
+     */
     public static final String FILE_NAME = "SYSTEM_OBJECTS_";
 
     private static final ConcurrentMap<SupportedPgVersion, MetaStorage> STORAGE_CACHE = new ConcurrentHashMap<>();
 
     private final List<MetaStatement> definitions = new ArrayList<>();
 
+    /**
+     * Adds a metadata statement to this storage.
+     *
+     * @param meta the metadata statement to add
+     */
     public void addMetaChild(MetaStatement meta) {
         definitions.add(meta);
     }
 
+    /**
+     * Returns system objects for the specified PostgreSQL version.
+     *
+     * @param version the PostgreSQL version
+     * @return list of system metadata objects
+     */
     static List<MetaStatement> getSystemObjects(SupportedPgVersion version) {
         MetaStorage storage = getObjectsFromResources(version);
         return storage != null ? storage.definitions : Collections.emptyList();
@@ -105,6 +124,14 @@ public final class MetaStorage implements Serializable {
         return null;
     }
 
+    /**
+     * Serializes system objects from a database connection to a file.
+     *
+     * @param path the output file path
+     * @param url  the database connection URL
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if the operation is interrupted
+     */
     public static void serialize(String path, String url) throws IOException, InterruptedException {
         UrlJdbcConnector jdbcConnector = new UrlJdbcConnector(url);
         Serializable storage = new JdbcSystemLoader(jdbcConnector, Consts.UTC,

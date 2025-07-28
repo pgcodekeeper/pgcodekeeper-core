@@ -15,21 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.meta;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.ArgMode;
-import org.pgcodekeeper.core.schema.Argument;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.IFunction;
-import org.pgcodekeeper.core.schema.ISchema;
-import org.pgcodekeeper.core.schema.PgObjLocation;
+import org.pgcodekeeper.core.schema.*;
 
+import java.util.*;
+
+/**
+ * Represents a database function metadata object.
+ * Stores information about function signatures, arguments, return types,
+ * and special properties like SETOF functions and aggregate order by clauses.
+ */
 public final class MetaFunction extends MetaStatement implements IFunction {
 
     private static final long serialVersionUID = 9086580570309984176L;
@@ -44,7 +40,7 @@ public final class MetaFunction extends MetaStatement implements IFunction {
     private List<Argument> orderBy;
 
     /**
-     *  Contains table's columns, if function returns table.
+     * Contains table's columns, if function returns table.
      */
     private Map<String, String> returnsColumns;
 
@@ -54,11 +50,24 @@ public final class MetaFunction extends MetaStatement implements IFunction {
     private String returns;
     private boolean setof;
 
+    /**
+     * Creates a new function metadata object with location information.
+     *
+     * @param object   the object location information
+     * @param bareName the bare function name without signature
+     */
     public MetaFunction(PgObjLocation object, String bareName) {
         super(object);
         this.bareName = bareName;
     }
 
+    /**
+     * Creates a new function metadata object.
+     *
+     * @param schemaName the schema name
+     * @param name       the function name (typically the signature)
+     * @param bareName   the bare function name without signature
+     */
     public MetaFunction(String schemaName, String name, String bareName) {
         super(new GenericColumn(schemaName, name, DbObjType.FUNCTION));
         this.bareName = bareName;
@@ -69,6 +78,12 @@ public final class MetaFunction extends MetaStatement implements IFunction {
         return returnsColumns == null ? Collections.emptyMap() : Collections.unmodifiableMap(returnsColumns);
     }
 
+    /**
+     * Adds a column to the returns table for table-returning functions.
+     *
+     * @param name the column name
+     * @param type the column type
+     */
     public void addReturnsColumn(String name, String type) {
         if (returnsColumns == null) {
             returnsColumns = new LinkedHashMap<>();
@@ -81,6 +96,11 @@ public final class MetaFunction extends MetaStatement implements IFunction {
         return arguments == null ? Collections.emptyList() : Collections.unmodifiableList(arguments);
     }
 
+    /**
+     * Adds an argument to this function.
+     *
+     * @param arg the argument to add
+     */
     public void addArgument(final Argument arg) {
         if (arguments == null) {
             arguments = new ArrayList<>();
@@ -88,6 +108,11 @@ public final class MetaFunction extends MetaStatement implements IFunction {
         arguments.add(arg);
     }
 
+    /**
+     * Returns whether this function returns a set of values.
+     *
+     * @return true if this is a SETOF function, false otherwise
+     */
     public boolean isSetof() {
         return setof;
     }
@@ -96,6 +121,11 @@ public final class MetaFunction extends MetaStatement implements IFunction {
         this.setof = setof;
     }
 
+    /**
+     * Adds an ORDER BY argument for aggregate functions.
+     *
+     * @param type the order by argument
+     */
     public void addOrderBy(final Argument type) {
         if (orderBy == null) {
             orderBy = new ArrayList<>();
@@ -115,7 +145,7 @@ public final class MetaFunction extends MetaStatement implements IFunction {
 
     /**
      * Alias for {@link #getSignature()} which provides a unique function ID.
-     *
+     * <p>
      * Use {@link #getBareName()} to get just the function name.
      */
     @Override
@@ -163,11 +193,23 @@ public final class MetaFunction extends MetaStatement implements IFunction {
         return sb.toString();
     }
 
+    /**
+     * Returns the containing schema of this function.
+     * This operation is not supported for metadata functions.
+     *
+     * @return never returns normally
+     * @throws IllegalStateException always thrown as this operation is unsupported
+     */
     @Override
     public ISchema getContainingSchema() {
         throw new IllegalStateException("Unsupported operation");
     }
 
+    /**
+     * Returns the schema name of this function.
+     *
+     * @return the schema name
+     */
     @Override
     public String getSchemaName() {
         return getObject().getSchema();

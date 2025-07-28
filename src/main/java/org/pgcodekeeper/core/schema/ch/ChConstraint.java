@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ch;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.ChDiffUtils;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
@@ -25,11 +23,22 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Objects;
+
+/**
+ * Represents a ClickHouse table constraint (CHECK or ASSUME).
+ */
 public final class ChConstraint extends AbstractConstraint {
 
     private final boolean isAssume;
     private String expr;
 
+    /**
+     * Creates a new ClickHouse constraint.
+     *
+     * @param name     the name of the constraint
+     * @param isAssume true if this is an ASSUME constraint, false for CHECK constraint
+     */
     public ChConstraint(String name, boolean isAssume) {
         super(name);
         this.isAssume = isAssume;
@@ -42,9 +51,7 @@ public final class ChConstraint extends AbstractConstraint {
 
     @Override
     public String getDefinition() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(isAssume ? "ASSUME " : "CHECK ").append(expr);
-        return sb.toString();
+        return (isAssume ? "ASSUME " : "CHECK ") + expr;
     }
 
     @Override

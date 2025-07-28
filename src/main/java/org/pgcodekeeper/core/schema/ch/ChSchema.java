@@ -15,28 +15,29 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ch;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Stream;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.IRelation;
-import org.pgcodekeeper.core.schema.IStatement;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.*;
+import java.util.stream.Stream;
+
+/**
+ * Represents a ClickHouse database schema (database in ClickHouse terms).
+ * Contains tables, views, dictionaries and has an associated engine type.
+ */
 public final class ChSchema extends AbstractSchema {
 
     private String engine = "Atomic";
-    private Map<String, ChDictionary> dictionaries = new LinkedHashMap<>();
+    private final Map<String, ChDictionary> dictionaries = new LinkedHashMap<>();
 
+    /**
+     * Creates a new ClickHouse schema with the specified name.
+     *
+     * @param name the name of the schema
+     */
     public ChSchema(String name) {
         super(name);
     }

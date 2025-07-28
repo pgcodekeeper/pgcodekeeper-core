@@ -15,34 +15,39 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ch;
 
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.IOptionContainer;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.Map.Entry;
 
+/**
+ * Represents a ClickHouse table with engine configuration and projections.
+ * Supports ClickHouse-specific features like table engines, projections, and specialized DDL operations.
+ */
 public class ChTable extends AbstractTable {
 
     protected final Map<String, String> projections = new LinkedHashMap<>();
 
     protected ChEngine engine;
 
+    /**
+     * Creates a new ClickHouse table with the specified name.
+     *
+     * @param name the name of the table
+     */
     public ChTable(String name) {
         super(name);
     }
 
+    /**
+     * Adds a projection to this table.
+     *
+     * @param key        the projection name
+     * @param expression the projection expression
+     */
     public void addProjection(String key, String expression) {
         projections.put(key, expression);
         resetHash();
@@ -154,11 +159,7 @@ public class ChTable extends AbstractTable {
         }
         StringBuilder sb = new StringBuilder();
         sb.append(getAlterTable(false)).append("\n\tMODIFY COMMENT ");
-        if (newComment == null) {
-            sb.append("''");
-        } else {
-            sb.append(newComment);
-        }
+        sb.append(Objects.requireNonNullElse(newComment, "''"));
         script.addStatement(sb);
     }
 
@@ -221,7 +222,7 @@ public class ChTable extends AbstractTable {
 
     @Override
     protected void writeInsert(SQLScript script, AbstractTable newTable, String tblTmpQName,
-            List<String> identityColsForMovingData, String cols) {
+                               List<String> identityColsForMovingData, String cols) {
         StringBuilder sbInsert = new StringBuilder();
         sbInsert.append("INSERT INTO ").append(newTable.getQualifiedName()).append('(').append(cols).append(")");
         sbInsert.append("\nSELECT ").append(cols).append(" FROM ").append(tblTmpQName);
@@ -231,8 +232,8 @@ public class ChTable extends AbstractTable {
     @Override
     protected List<String> getColsForMovingData(AbstractTable newTable) {
         return newTable.getColumns().stream()
-                .filter(c -> containsColumn(c.getName()))
                 .map(AbstractColumn::getName)
+                .filter(this::containsColumn)
                 .toList();
     }
 }

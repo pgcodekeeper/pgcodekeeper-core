@@ -15,14 +15,18 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.meta;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.pgcodekeeper.core.schema.IConstraint;
 import org.pgcodekeeper.core.schema.ISchema;
 import org.pgcodekeeper.core.schema.PgObjLocation;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * Represents a database constraint metadata object.
+ * Provides information about table constraints including primary keys and column references.
+ */
 public final class MetaConstraint extends MetaStatement implements IConstraint {
 
     private static final long serialVersionUID = 7375924980206798486L;
@@ -30,6 +34,11 @@ public final class MetaConstraint extends MetaStatement implements IConstraint {
     private boolean isPrimaryKey;
     private final Set<String> columns = new HashSet<>();
 
+    /**
+     * Creates a new constraint metadata object.
+     *
+     * @param object the object location information
+     */
     public MetaConstraint(PgObjLocation object) {
         super(object);
     }
@@ -53,25 +62,54 @@ public final class MetaConstraint extends MetaStatement implements IConstraint {
         this.isPrimaryKey = isPrimaryKey;
     }
 
+    /**
+     * Adds a column to this constraint.
+     *
+     * @param column the column name to add
+     */
     public void addColumn(String column) {
         columns.add(column);
     }
 
+    /**
+     * Returns the containing schema of this constraint.
+     * This operation is not supported for metadata constraints.
+     *
+     * @return never returns normally
+     * @throws IllegalStateException always thrown as this operation is unsupported
+     */
     @Override
     public ISchema getContainingSchema() {
         throw new IllegalStateException("Unsupported operation");
     }
 
+    /**
+     * Returns the schema name of this constraint.
+     *
+     * @return the schema name
+     */
     @Override
     public String getSchemaName() {
         return getObject().getSchema();
     }
 
+    /**
+     * Returns the table name of this constraint.
+     *
+     * @return the table name
+     */
     @Override
     public String getTableName() {
         return getObject().getTable();
     }
 
+    /**
+     * Returns the constraint definition.
+     * This operation is not supported for metadata constraints.
+     *
+     * @return never returns normally
+     * @throws IllegalStateException always thrown as this operation is unsupported
+     */
     @Override
     public String getDefinition() {
         throw new IllegalStateException("Unsupported operation");
