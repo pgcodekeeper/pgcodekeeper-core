@@ -16,12 +16,12 @@
 package org.pgcodekeeper.core.utils;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Wrapper for creation and auto deletion of a temp file.
- * Intended for try-with-resources.
+ * Wrapper for creation and automatic deletion of a temporary file.
+ * Intended for try-with-resources usage to ensure proper cleanup.
+ * Automatically deletes the file when closed.
  *
  * @author Alexander Levsha
  */
@@ -29,14 +29,34 @@ public final class TempFile implements AutoCloseable {
 
     private final Path f;
 
+    /**
+     * Creates a temporary file with specified prefix and suffix in the system temp directory.
+     *
+     * @param prefix the file name prefix
+     * @param suffix the file name suffix
+     * @throws IOException if file creation fails
+     */
     public TempFile(String prefix, String suffix) throws IOException {
         this.f = FileUtils.createTempFile(prefix, suffix);
     }
 
+    /**
+     * Creates a temporary file with specified prefix and suffix in the given directory.
+     *
+     * @param dir    the directory to create file in
+     * @param prefix the file name prefix
+     * @param suffix the file name suffix
+     * @throws IOException if file creation fails
+     */
     public TempFile(Path dir, String prefix, String suffix) throws IOException {
         this.f = FileUtils.createTempFile(dir, prefix, suffix);
     }
 
+    /**
+     * Returns the path to the temporary file.
+     *
+     * @return path to the temporary file
+     */
     public Path get() {
         return f;
     }

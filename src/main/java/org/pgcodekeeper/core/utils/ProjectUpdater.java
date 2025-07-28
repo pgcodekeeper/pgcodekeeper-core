@@ -15,20 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.utils;
 
-import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.text.MessageFormat;
-import java.util.Collection;
-
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.PgCodekeeperException;
 import org.pgcodekeeper.core.WorkDirs;
@@ -36,8 +22,22 @@ import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.exporter.ModelExporter;
 import org.pgcodekeeper.core.model.exporter.OverridesModelExporter;
+import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.text.MessageFormat;
+import java.util.Collection;
+
+/**
+ * Database project update and export management utility.
+ * Handles partial and full updates of database projects with safe backup and restore functionality.
+ * Supports overrides-only updates and manages temporary directories for safe atomic operations.
+ */
 public class ProjectUpdater {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProjectUpdater.class);
@@ -52,8 +52,20 @@ public class ProjectUpdater {
     private final boolean overridesOnly;
     private final ISettings settings;
 
+    /**
+     * Creates a new project updater with specified configuration.
+     *
+     * @param dbNew          the new database schema
+     * @param dbOld          the old database schema for comparison
+     * @param changedObjects collection of changed tree elements
+     * @param dbType         the database type
+     * @param encoding       the file encoding to use
+     * @param dirExport      the export directory path
+     * @param overridesOnly  whether to update only overrides
+     * @param settings       the application settings
+     */
     public ProjectUpdater(AbstractDatabase dbNew, AbstractDatabase dbOld, Collection<TreeElement> changedObjects,
-            DatabaseType dbType, String encoding, Path dirExport, boolean overridesOnly, ISettings settings) {
+                          DatabaseType dbType, String encoding, Path dirExport, boolean overridesOnly, ISettings settings) {
         this.dbNew = dbNew;
         this.dbOld = dbOld;
 
@@ -67,9 +79,15 @@ public class ProjectUpdater {
         this.settings = settings;
     }
 
+    /**
+     * Performs partial update of database project.
+     * Updates only changed objects with safe backup and restore on failure.
+     *
+     * @throws IOException if update operation fails
+     */
     public void updatePartial() throws IOException {
         LOG.info(Messages.ProjectUpdater_log_start_partial_update);
-        if (dbOld == null){
+        if (dbOld == null) {
             throw new IOException(Messages.ProjectUpdater_old_db_null);
         }
 
@@ -129,7 +147,7 @@ public class ProjectUpdater {
         if (Files.exists(sourcePath)) {
             final Path targetPath = dirTmp.resolve(folder);
 
-            Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(sourcePath, new SimpleFileVisitor<>() {
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                     Files.createDirectories(targetPath.resolve(sourcePath.relativize(dir)));
@@ -145,6 +163,13 @@ public class ProjectUpdater {
         }
     }
 
+    /**
+     * Performs full update of database project.
+     * Completely regenerates project structure with optional overrides preservation.
+     *
+     * @param projectOnly whether to preserve overrides directory during update
+     * @throws IOException if update operation fails
+     */
     public void updateFull(boolean projectOnly) throws IOException {
         LOG.info(Messages.ProjectUpdater_log_start_full_update);
         boolean caughtProcessingEx = false;

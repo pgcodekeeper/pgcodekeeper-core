@@ -18,8 +18,12 @@ package org.pgcodekeeper.core.utils;
 import java.io.Serializable;
 
 /**
+ * Immutable pair utility class for holding two related objects.
  * Objects of this class are unmodifiable.
  * Use {@link ModPair} and {@link #copyMod()} to get modifiable Pairs.
+ *
+ * @param <K> type of the first element
+ * @param <V> type of the second element
  */
 public class Pair<K, V> implements Serializable {
 
@@ -28,16 +32,32 @@ public class Pair<K, V> implements Serializable {
     protected K first;
     protected V second;
 
+    /**
+     * Creates a new immutable pair with specified elements.
+     *
+     * @param first  the first element
+     * @param second the second element
+     */
     public Pair(K first, V second) {
         this.first = first;
         this.second = second;
     }
 
+    /**
+     * Returns the first element of this pair.
+     *
+     * @return the first element
+     */
     public K getFirst() {
         return first;
     }
 
-    public V getSecond(){
+    /**
+     * Returns the second element of this pair.
+     *
+     * @return the second element
+     */
+    public V getSecond() {
         return second;
     }
 
@@ -70,13 +90,9 @@ public class Pair<K, V> implements Serializable {
             return false;
         }
         if (second == null) {
-            if (other.second != null) {
-                return false;
-            }
-        } else if (!second.equals(other.second)) {
-            return false;
+            return other.second == null;
         }
-        return true;
+        return second.equals(other.second);
     }
 
     @Override
@@ -84,10 +100,20 @@ public class Pair<K, V> implements Serializable {
         return "(" + first + " - " + second + ")";
     }
 
+    /**
+     * Creates an immutable copy of this pair.
+     *
+     * @return new immutable Pair with same elements
+     */
     public Pair<K, V> copy() {
         return new Pair<>(first, second);
     }
 
+    /**
+     * Creates a modifiable copy of this pair.
+     *
+     * @return new ModPair with same elements
+     */
     public ModPair<K, V> copyMod() {
         return new ModPair<>(first, second);
     }

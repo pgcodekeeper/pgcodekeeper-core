@@ -16,12 +16,12 @@
 package org.pgcodekeeper.core.utils;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Wrapper for creation and automatic recursive deletion of a temp directory.
- * Intended for try-with-resources.
+ * Wrapper for creation and automatic recursive deletion of a temporary directory.
+ * Intended for try-with-resources usage to ensure proper cleanup.
+ * Automatically deletes the directory and all its contents when closed.
  *
  * @author Alexander Levsha
  */
@@ -29,14 +29,32 @@ public final class TempDir implements AutoCloseable {
 
     private final Path dir;
 
+    /**
+     * Creates a temporary directory with specified prefix in the system temp directory.
+     *
+     * @param prefix the directory name prefix
+     * @throws IOException if directory creation fails
+     */
     public TempDir(String prefix) throws IOException {
         this.dir = FileUtils.createTempDirectory(prefix);
     }
 
+    /**
+     * Creates a temporary directory with specified prefix in the given parent directory.
+     *
+     * @param dir    the parent directory
+     * @param prefix the directory name prefix
+     * @throws IOException if directory creation fails
+     */
     public TempDir(Path dir, String prefix) throws IOException {
         this.dir = FileUtils.createTempDirectory(dir, prefix);
     }
 
+    /**
+     * Returns the path to the temporary directory.
+     *
+     * @return path to the temporary directory
+     */
     public Path get() {
         return dir;
     }
