@@ -17,6 +17,13 @@ package org.pgcodekeeper.core.localizations;
 
 import org.eclipse.osgi.util.NLS;
 
+/**
+ * Internationalization message constants for pgCodeKeeper core components.
+ * <p>
+ * This class provides externalized string constants for user-facing messages,
+ * error messages, log entries, and other text content throughout the pgCodeKeeper
+ * core library.
+ */
 public final class Messages extends NLS {
     public static final String BUNDLE_NAME = "org.pgcodekeeper.core.localizations.messages"; //$NON-NLS-1$
 
