@@ -18,7 +18,18 @@ package org.pgcodekeeper.core.utils;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * Functional interface for providing input streams.
+ * Used to abstract stream creation and allow lazy initialization or custom stream sources.
+ */
 @FunctionalInterface
 public interface InputStreamProvider {
+
+    /**
+     * Creates and returns an input stream.
+     *
+     * @return input stream instance
+     * @throws IOException if stream creation fails
+     */
     InputStream getStream() throws IOException;
 }

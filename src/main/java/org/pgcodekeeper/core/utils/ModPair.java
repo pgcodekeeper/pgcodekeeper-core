@@ -15,18 +15,42 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.utils;
 
+/**
+ * Modifiable pair class extending the immutable Pair class.
+ * Provides setter methods to modify the first and second elements after construction.
+ *
+ * @param <K> type of the first element
+ * @param <V> type of the second element
+ */
 public class ModPair<K, V> extends Pair<K, V> {
 
     private static final long serialVersionUID = 7623190777562696369L;
 
+    /**
+     * Creates a new modifiable pair with specified elements.
+     *
+     * @param first  the first element
+     * @param second the second element
+     */
     public ModPair(K first, V second) {
         super(first, second);
     }
 
+    /**
+     * Sets the first element of this pair.
+     *
+     * @param first the new first element
+     */
     public void setFirst(K first) {
         this.first = first;
     }
 
+    /**
+     * Sets the second element of this pair and returns the previous value.
+     *
+     * @param second the new second element
+     * @return the previous second element
+     */
     public V setSecond(V second) {
         V old = this.second;
         this.second = second;
