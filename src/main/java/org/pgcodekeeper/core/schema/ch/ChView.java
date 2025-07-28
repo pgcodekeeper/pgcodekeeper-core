@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ch;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractView;
@@ -26,12 +22,23 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Represents a ClickHouse view (VIEW, MATERIALIZED VIEW, or LIVE VIEW).
+ * Supports various ClickHouse-specific view features like refresh periods, engines, and security settings.
+ */
 public final class ChView extends AbstractView {
 
+    /**
+     * Enumeration of ClickHouse view types.
+     */
     public enum ChViewType {
         SIMPLE("VIEW"), MATERIALIZED("MATERIALIZED VIEW"), LIVE("LIVE VIEW");
 
-        private String sql;
+        private final String sql;
 
         ChViewType(String sql) {
             this.sql = sql;
@@ -49,6 +56,11 @@ public final class ChView extends AbstractView {
     private final List<ChColumn> columns = new ArrayList<>();
     private ChEngine engine;
 
+    /**
+     * Creates a new ClickHouse view with the specified name.
+     *
+     * @param name the name of the view
+     */
     public ChView(String name) {
         super(name);
     }
@@ -58,6 +70,12 @@ public final class ChView extends AbstractView {
         resetHash();
     }
 
+    /**
+     * Sets the query and normalized query for this view.
+     *
+     * @param query           the original query text
+     * @param normalizedQuery the normalized query text for comparison
+     */
     public void setQuery(String query, String normalizedQuery) {
         this.query = query;
         this.normalizedQuery = normalizedQuery;
@@ -74,6 +92,11 @@ public final class ChView extends AbstractView {
         resetHash();
     }
 
+    /**
+     * Adds a column definition to this view.
+     *
+     * @param column the column to add
+     */
     public void addColumn(ChColumn column) {
         columns.add(column);
         resetHash();
@@ -187,11 +210,7 @@ public final class ChView extends AbstractView {
             sb.append("INVOKER");
         }
         sb.append(" DEFINER = ");
-        if (newView.definer != null) {
-            sb.append(newView.definer);
-        } else {
-            sb.append("CURRENT_USER");
-        }
+        sb.append(Objects.requireNonNullElse(newView.definer, "CURRENT_USER"));
         sb.append(")");
         script.addStatement(sb);
     }
@@ -209,25 +228,19 @@ public final class ChView extends AbstractView {
 
         StringBuilder sb = new StringBuilder();
         sb.append(ALTER_TABLE).append(getQualifiedName()).append("\n\tMODIFY COMMENT ");
-        if (newComment == null) {
-            sb.append("''");
-        } else {
-            sb.append(newComment);
-        }
+        sb.append(Objects.requireNonNullElse(newComment, "''"));
         script.addStatement(sb);
     }
 
     /**
      * Returns true if either column names or query of the view has been modified.
      *
-     * @param newView
-     *            new view
-     *
+     * @param newView new view
      * @return true if view has been modified, otherwise false
      */
     private boolean isViewModified(final ChView newView) {
         return !columns.equals(newView.columns)
-                ||(type != ChViewType.MATERIALIZED && !normalizedQuery.equals(newView.normalizedQuery));
+                || (type != ChViewType.MATERIALIZED && !normalizedQuery.equals(newView.normalizedQuery));
     }
 
     @Override

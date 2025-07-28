@@ -20,6 +20,11 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.ICast;
 import org.pgcodekeeper.core.schema.PgObjLocation;
 
+/**
+ * Represents a database cast metadata object.
+ * Stores information about type casting operations including source and target types
+ * and the casting context (IMPLICIT, ASSIGNMENT, or EXPLICIT).
+ */
 public final class MetaCast extends MetaStatement implements ICast {
 
     private static final long serialVersionUID = 3309369936371201302L;
@@ -29,6 +34,13 @@ public final class MetaCast extends MetaStatement implements ICast {
 
     private final CastContext context;
 
+    /**
+     * Creates a new cast metadata object.
+     *
+     * @param source  the source data type
+     * @param target  the target data type
+     * @param context the casting context
+     */
     public MetaCast(String source, String target, CastContext context) {
         super(new GenericColumn(ICast.getSimpleName(source, target), DbObjType.CAST));
         this.source = source;
@@ -36,6 +48,14 @@ public final class MetaCast extends MetaStatement implements ICast {
         this.context = context;
     }
 
+    /**
+     * Creates a new cast metadata object with location information.
+     *
+     * @param source  the source data type
+     * @param target  the target data type
+     * @param context the casting context
+     * @param object  the object location information
+     */
     public MetaCast(String source, String target, CastContext context, PgObjLocation object) {
         super(object);
         this.source = source;

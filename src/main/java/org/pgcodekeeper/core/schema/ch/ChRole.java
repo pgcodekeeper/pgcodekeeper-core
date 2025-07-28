@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ch;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.ChDiffUtils;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
@@ -26,12 +24,23 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Objects;
+
+/**
+ * Represents a ClickHouse role for access control.
+ * Roles can be stored in different storage types and have associated privileges.
+ */
 public final class ChRole extends PgStatement {
 
     private static final String DEF_STORAGE = "local_directory";
 
     private String storageType = DEF_STORAGE;
 
+    /**
+     * Creates a new ClickHouse role with the specified name.
+     *
+     * @param name the name of the role
+     */
     public ChRole(String name) {
         super(name);
     }
@@ -57,8 +66,8 @@ public final class ChRole extends PgStatement {
         if (!Objects.equals(storageType, newRole.getStorageType())) {
             StringBuilder sql = new StringBuilder();
             sql.append("MOVE ROLE ")
-            .append(getQualifiedName()).append(" TO ")
-            .append(newRole.getStorageType());
+                    .append(getQualifiedName()).append(" TO ")
+                    .append(newRole.getStorageType());
             script.addStatement(sql);
         }
         alterPrivileges(newCondition, script);
@@ -106,6 +115,11 @@ public final class ChRole extends PgStatement {
         return copy;
     }
 
+    /**
+     * Returns the storage type for this role.
+     *
+     * @return the storage type
+     */
     public String getStorageType() {
         return storageType;
     }

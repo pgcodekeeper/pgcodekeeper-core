@@ -15,11 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ch;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -28,6 +23,16 @@ import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.IStatement;
 import org.pgcodekeeper.core.schema.PgStatement;
 
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Represents a ClickHouse database with its schema objects.
+ * Contains collections of ClickHouse-specific objects like functions, policies, users, and roles
+ * in addition to the standard schemas.
+ */
 public final class ChDatabase extends AbstractDatabase {
 
     private final Map<String, ChFunction> functions = new LinkedHashMap<>();
@@ -60,23 +65,23 @@ public final class ChDatabase extends AbstractDatabase {
     public void addChild(IStatement st) {
         DbObjType type = st.getStatementType();
         switch (type) {
-        case SCHEMA:
-            addSchema((AbstractSchema) st);
-            break;
-        case FUNCTION:
-            addFunction((ChFunction) st);
-            break;
-        case POLICY:
-            addPolicy((ChPolicy) st);
-            break;
-        case USER:
-            addUser((ChUser) st);
-            break;
-        case ROLE:
-            addRole((ChRole) st);
-            break;
-        default:
-            throw new IllegalArgumentException("Unsupported child type: " + type);
+            case SCHEMA:
+                addSchema((AbstractSchema) st);
+                break;
+            case FUNCTION:
+                addFunction((ChFunction) st);
+                break;
+            case POLICY:
+                addPolicy((ChPolicy) st);
+                break;
+            case USER:
+                addUser((ChUser) st);
+                break;
+            case ROLE:
+                addRole((ChRole) st);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported child type: " + type);
         }
     }
 

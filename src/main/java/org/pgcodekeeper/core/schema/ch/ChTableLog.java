@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ch;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.ChDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractConstraint;
@@ -27,10 +23,23 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Represents a ClickHouse Log family table that supports constraints.
+ * Extends ChTable with the ability to add CHECK and ASSUME constraints.
+ */
 public final class ChTableLog extends ChTable {
 
     private final List<AbstractConstraint> constrs = new ArrayList<>();
 
+    /**
+     * Creates a new ClickHouse Log table with the specified name.
+     *
+     * @param name the name of the table
+     */
     public ChTableLog(String name) {
         super(name);
     }
@@ -40,7 +49,7 @@ public final class ChTableLog extends ChTable {
         super.appendTableBody(sb);
         for (var constr : constrs) {
             sb.append("\n\tCONSTRAINT ").append(ChDiffUtils.getQuotedName(constr.getName())).append(' ')
-                .append(constr.getDefinition()).append(',');
+                    .append(constr.getDefinition()).append(',');
         }
     }
 

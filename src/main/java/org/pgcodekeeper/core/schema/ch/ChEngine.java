@@ -15,29 +15,25 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ch;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.hashers.IHashable;
 import org.pgcodekeeper.core.hashers.JavaHasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
-import java.util.Objects;
-import java.util.Set;
+import java.io.Serializable;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
- * Subclass when need to reset hashes
- * (like when setting hashed fields after adding the arg to its container).
+ * Represents a ClickHouse table engine configuration.
+ * Contains engine name, parameters, and various engine-specific settings like
+ * partition keys, order by clauses, TTL expressions, and engine options.
  */
 public final class ChEngine implements Serializable, IHashable {
 
     private static final long serialVersionUID = -2826863138724898463L;
 
-    private String name;
+    private final String name;
     private String body;
 
     private String partitionBy;
@@ -45,8 +41,13 @@ public final class ChEngine implements Serializable, IHashable {
     private String orderBy;
     private String sampleBy;
     private String ttl;
-    private Map<String, String> options = new HashMap<>();
+    private final Map<String, String> options = new HashMap<>();
 
+    /**
+     * Creates a new ClickHouse engine with the specified name.
+     *
+     * @param name the name of the engine (e.g., MergeTree, ReplacingMergeTree)
+     */
     public ChEngine(String name) {
         this.name = name;
     }
@@ -79,6 +80,12 @@ public final class ChEngine implements Serializable, IHashable {
         this.ttl = ttl;
     }
 
+    /**
+     * Adds an engine option with the specified key and value.
+     *
+     * @param option the option name
+     * @param value  the option value
+     */
     public void addOption(String option, String value) {
         options.put(option, value);
     }
@@ -183,11 +190,11 @@ public final class ChEngine implements Serializable, IHashable {
     }
 
     private void appendAlterOptions(Set<String> resetOptions, Map<String, String> modifyOptions, String prefix,
-            SQLScript script) {
+                                    SQLScript script) {
         if (!resetOptions.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             sb.append(prefix).append("\n\tRESET SETTING");
-            for(String key : resetOptions) {
+            for (String key : resetOptions) {
                 sb.append(' ').append(key).append(',');
             }
             sb.setLength(sb.length() - 1);
@@ -207,6 +214,12 @@ public final class ChEngine implements Serializable, IHashable {
         script.addStatement(sb);
     }
 
+    /**
+     * Checks if this engine contains the specified option.
+     *
+     * @param key the option key to check
+     * @return true if the option exists, false otherwise
+     */
     public boolean containsOption(String key) {
         return options.containsKey(key);
     }
@@ -247,6 +260,12 @@ public final class ChEngine implements Serializable, IHashable {
                 && Objects.equals(options, engine.options);
     }
 
+    /**
+     * Compares unalterable engine properties with another engine.
+     *
+     * @param newEngine the engine to compare with
+     * @return true if unalterable properties are equal, false otherwise
+     */
     boolean compareUnalterable(ChEngine newEngine) {
         return Objects.equals(name, newEngine.name)
                 && Objects.equals(primaryKey, newEngine.primaryKey)

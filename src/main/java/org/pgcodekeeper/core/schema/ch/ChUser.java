@@ -15,11 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ch;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.ChDiffUtils;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
@@ -29,6 +24,15 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Represents a ClickHouse user account with authentication and authorization settings.
+ * It supports hosts restrictions, role assignments, default database, and grantee configurations.
+ */
 public final class ChUser extends PgStatement {
 
     private static final String DEF_STORAGE = "local_directory";
@@ -37,13 +41,18 @@ public final class ChUser extends PgStatement {
     private static final String DELIM = "\n\t";
 
     private String storageType = DEF_STORAGE;
-    private List<String> hosts = new ArrayList<>();
-    private List<String> grantees = new ArrayList<>();
-    private List<String> exGrantees = new ArrayList<>();
-    private List<String> defRoles = new ArrayList<>();
-    private List<String> exceptRoles = new ArrayList<>();
+    private final List<String> hosts = new ArrayList<>();
+    private final List<String> grantees = new ArrayList<>();
+    private final List<String> exGrantees = new ArrayList<>();
+    private final List<String> defRoles = new ArrayList<>();
+    private final List<String> exceptRoles = new ArrayList<>();
     private String defDb;
 
+    /**
+     * Creates a new ClickHouse user with the specified name.
+     *
+     * @param name the name of the user
+     */
     public ChUser(String name) {
         super(name);
     }
@@ -91,7 +100,7 @@ public final class ChUser extends PgStatement {
     }
 
     private void appendRoles(Collection<String> roles, Collection<String> excepts, String prefix, String allText,
-            boolean isCreate, StringBuilder sbSQL) {
+                             boolean isCreate, StringBuilder sbSQL) {
         if (!roles.isEmpty()) {
             sbSQL.append(DELIM);
             sbSQL.append(prefix);
@@ -125,15 +134,15 @@ public final class ChUser extends PgStatement {
             appendRoles(newUser.grantees, newUser.exGrantees, "GRANTEES ", "ANY", false, sbSql);
         }
 
-        if (sbSql.length() > 0) {
+        if (!sbSql.isEmpty()) {
             script.addStatement(new StringBuilder("ALTER USER ").append(getQualifiedName()).append(sbSql));
         }
 
         if (!Objects.equals(storageType, newUser.storageType)) {
             StringBuilder sql = new StringBuilder();
             sql.append("MOVE ROLE ")
-            .append(getQualifiedName()).append(" TO ")
-            .append(newUser.storageType);
+                    .append(getQualifiedName()).append(" TO ")
+                    .append(newUser.storageType);
             script.addStatement(sql);
         }
         alterPrivileges(newCondition, script);
@@ -202,30 +211,60 @@ public final class ChUser extends PgStatement {
         resetHash();
     }
 
+    /**
+     * Adds a default role for this user.
+     *
+     * @param defRole the role name to add as default
+     */
     public void addDefRole(String defRole) {
         defRoles.add(defRole);
         resetHash();
     }
 
+    /**
+     * Adds a role to the EXCEPT list for default roles.
+     *
+     * @param exceptRole the role name to exclude from defaults
+     */
     public void addExceptRole(String exceptRole) {
         exceptRoles.add(exceptRole);
         resetHash();
     }
 
+    /**
+     * Adds a grantee role for this user.
+     *
+     * @param grantee the grantee role name to add
+     */
     public void addGrantee(String grantee) {
         grantees.add(grantee);
         resetHash();
     }
 
+    /**
+     * Adds a role to the EXCEPT list for grantees.
+     *
+     * @param exGrantee the grantee role name to exclude
+     */
     public void addExGrantee(String exGrantee) {
         exGrantees.add(exGrantee);
         resetHash();
     }
 
+    /**
+     * Checks if this user has host restrictions.
+     *
+     * @return true if no host restrictions are defined, false otherwise
+     */
     public boolean hasHosts() {
         return hosts.isEmpty();
     }
 
+    /**
+     * Adds a host restriction for this user.
+     *
+     * @param host the host pattern to add
+     */
     public void addHost(String host) {
         hosts.add(host);
         resetHash();

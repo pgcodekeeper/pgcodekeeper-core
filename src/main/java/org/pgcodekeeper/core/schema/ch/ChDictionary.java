@@ -15,24 +15,21 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ch;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Stream;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.IRelation;
-import org.pgcodekeeper.core.schema.ISchema;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.util.*;
+import java.util.stream.Stream;
+
+/**
+ * Represents a ClickHouse dictionary object.
+ * Dictionaries in ClickHouse are used for storing key-value data for fast lookups
+ * and can have various sources and layouts.
+ */
 public final class ChDictionary extends PgStatement implements IRelation {
 
     private String sourceType;
@@ -44,6 +41,11 @@ public final class ChDictionary extends PgStatement implements IRelation {
     private final Map<String, String> sources = new LinkedHashMap<>();
     private final Map<String, String> options = new LinkedHashMap<>();
 
+    /**
+     * Creates a new ClickHouse dictionary with the specified name.
+     *
+     * @param name the name of the dictionary
+     */
     public ChDictionary(String name) {
         super(name);
     }
@@ -73,6 +75,11 @@ public final class ChDictionary extends PgStatement implements IRelation {
         resetHash();
     }
 
+    /**
+     * Adds a column to this dictionary.
+     *
+     * @param column the column to add
+     */
     public void addColumn(final AbstractColumn column) {
         assertUnique(getColumn(column.getName()), column);
         columns.add(column);
@@ -84,7 +91,6 @@ public final class ChDictionary extends PgStatement implements IRelation {
      * Finds column according to specified column {@code name}.
      *
      * @param name name of the column to be searched
-     *
      * @return found column or null if no such column has been found
      */
     private AbstractColumn getColumn(final String name) {

@@ -15,29 +15,55 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.meta;
 
+import org.pgcodekeeper.core.schema.PgObjLocation;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import org.pgcodekeeper.core.schema.PgObjLocation;
-
+/**
+ * Represents a PostgreSQL composite type metadata object.
+ * Stores information about composite type attributes including their names and types.
+ */
 public final class MetaCompositeType extends MetaStatement {
 
     private static final long serialVersionUID = 195609665520321852L;
 
-    private Map<String, String> attrs = new HashMap<>();
+    private final Map<String, String> attrs = new HashMap<>();
 
+    /**
+     * Creates a new composite type metadata object.
+     *
+     * @param object the object location information
+     */
     public MetaCompositeType(PgObjLocation object) {
         super(object);
     }
 
+    /**
+     * Returns the schema name of this composite type.
+     *
+     * @return the schema name
+     */
     public String getSchemaName() {
         return getObject().getSchema();
     }
 
+    /**
+     * Adds an attribute to this composite type.
+     *
+     * @param name the attribute name
+     * @param type the attribute type
+     */
     public void addAttr(String name, String type) {
         attrs.put(name, type);
     }
 
+    /**
+     * Returns the type of the specified attribute.
+     *
+     * @param attrName the attribute name
+     * @return the attribute type, or null if not found
+     */
     public String getAttrType(String attrName) {
         return attrs.get(attrName);
     }

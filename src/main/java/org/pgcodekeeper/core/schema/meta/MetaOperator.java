@@ -21,6 +21,11 @@ import org.pgcodekeeper.core.schema.IOperator;
 import org.pgcodekeeper.core.schema.ISchema;
 import org.pgcodekeeper.core.schema.PgObjLocation;
 
+/**
+ * Represents a database operator metadata object.
+ * Stores information about operator signatures including left and right argument types
+ * and return type.
+ */
 public final class MetaOperator extends MetaStatement implements IOperator {
 
     private static final long serialVersionUID = 5893184839623238431L;
@@ -29,10 +34,21 @@ public final class MetaOperator extends MetaStatement implements IOperator {
     private String right;
     private String returns;
 
+    /**
+     * Creates a new operator metadata object with location information.
+     *
+     * @param object the object location information
+     */
     public MetaOperator(PgObjLocation object) {
         super(object);
     }
 
+    /**
+     * Creates a new operator metadata object.
+     *
+     * @param schemaName the schema name
+     * @param name       the operator name
+     */
     public MetaOperator(String schemaName, String name) {
         super(new GenericColumn(schemaName, name, DbObjType.OPERATOR));
     }
@@ -42,15 +58,18 @@ public final class MetaOperator extends MetaStatement implements IOperator {
         return getSignature();
     }
 
+    /**
+     * Returns the operator signature including argument types.
+     *
+     * @return the operator signature in format: name(leftType, rightType)
+     */
     public String getSignature() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getBareName());
-        sb.append('(');
-        sb.append(left == null ? "NONE" : left);
-        sb.append(", ");
-        sb.append(right == null ? "NONE" : right);
-        sb.append(')');
-        return sb.toString();
+        return getBareName() +
+                '(' +
+                (left == null ? "NONE" : left) +
+                ", " +
+                (right == null ? "NONE" : right) +
+                ')';
     }
 
     @Override
@@ -81,11 +100,23 @@ public final class MetaOperator extends MetaStatement implements IOperator {
         this.returns = returns;
     }
 
+    /**
+     * Returns the containing schema of this operator.
+     * This operation is not supported for metadata operators.
+     *
+     * @return never returns normally
+     * @throws IllegalStateException always thrown as this operation is unsupported
+     */
     @Override
     public ISchema getContainingSchema() {
         throw new IllegalStateException("Unsupported operation");
     }
 
+    /**
+     * Returns the schema name of this operator.
+     *
+     * @return the schema name
+     */
     @Override
     public String getSchemaName() {
         return getObject().getSchema();

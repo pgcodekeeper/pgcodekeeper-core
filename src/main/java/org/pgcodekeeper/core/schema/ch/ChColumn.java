@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ch;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.ChDiffUtils;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
@@ -28,6 +24,15 @@ import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Represents a ClickHouse database column with ClickHouse-specific properties.
+ * Extends the base AbstractColumn with support for ClickHouse-specific features like TTL,
+ * codecs, and different default types.
+ */
 public final class ChColumn extends AbstractColumn {
 
     private String defaultType;
@@ -36,6 +41,11 @@ public final class ChColumn extends AbstractColumn {
     private final List<String> codecs = new ArrayList<>();
     private String option;
 
+    /**
+     * Creates a new ClickHouse column with the specified name.
+     *
+     * @param name the name of the column
+     */
     public ChColumn(String name) {
         super(name);
     }

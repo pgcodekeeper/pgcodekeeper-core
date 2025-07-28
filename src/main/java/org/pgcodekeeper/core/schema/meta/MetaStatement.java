@@ -15,14 +15,18 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.meta;
 
-import java.io.Serializable;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.IStatement;
 import org.pgcodekeeper.core.schema.PgObjLocation;
 
+import java.io.Serializable;
+
+/**
+ * Base class for all database metadata statement objects.
+ * Provides common functionality for accessing object location, names, and comments.
+ */
 public class MetaStatement implements IStatement, Serializable {
 
     private static final long serialVersionUID = 5744769530265917940L;
@@ -30,10 +34,20 @@ public class MetaStatement implements IStatement, Serializable {
     private final PgObjLocation object;
     private String comment = "";
 
+    /**
+     * Creates a new metadata statement with location information.
+     *
+     * @param object the object location information
+     */
     public MetaStatement(PgObjLocation object) {
         this.object = object;
     }
 
+    /**
+     * Creates a new metadata statement from a generic column.
+     *
+     * @param column the generic column information
+     */
     public MetaStatement(GenericColumn column) {
         this(new PgObjLocation.Builder().setObject(column).build());
     }
@@ -53,10 +67,20 @@ public class MetaStatement implements IStatement, Serializable {
         return object.getType();
     }
 
+    /**
+     * Returns the generic column information for this statement.
+     *
+     * @return the generic column
+     */
     public GenericColumn getGenericColumn() {
         return object.getObj();
     }
 
+    /**
+     * Returns the object location information.
+     *
+     * @return the object location
+     */
     public PgObjLocation getObject() {
         return object;
     }
@@ -75,27 +99,61 @@ public class MetaStatement implements IStatement, Serializable {
         this.comment = comment;
     }
 
+    /**
+     * Returns the length of the object in the source file.
+     *
+     * @return the object length
+     */
     public int getObjLength() {
         return object.getObjLength();
     }
 
+    /**
+     * Returns the offset of the object in the source file.
+     *
+     * @return the object offset
+     */
     public int getOffset() {
         return object.getOffset();
     }
 
+    /**
+     * Returns the file path where this object is defined.
+     *
+     * @return the file path
+     */
     public String getFilePath() {
         return object.getFilePath();
     }
 
+    /**
+     * Returns the line number where this object is defined.
+     *
+     * @return the line number
+     */
     public int getLineNumber() {
         return object.getLineNumber();
     }
 
+    /**
+     * Returns the parent statement of this object.
+     * This operation is not supported for metadata statements.
+     *
+     * @return never returns normally
+     * @throws IllegalStateException always thrown as this operation is unsupported
+     */
     @Override
     public MetaStatement getParent() {
         throw new IllegalStateException("Unsupported operation");
     }
 
+    /**
+     * Returns the database containing this statement.
+     * This operation is not supported for metadata statements.
+     *
+     * @return never returns normally
+     * @throws IllegalStateException always thrown as this operation is unsupported
+     */
     @Override
     public AbstractDatabase getDatabase() {
         throw new IllegalStateException("Unsupported operation");

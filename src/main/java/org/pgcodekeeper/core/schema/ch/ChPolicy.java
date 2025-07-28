@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ch;
 
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
@@ -27,14 +23,32 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
+
+/**
+ * Represents a ClickHouse row-level security policy.
+ * Supports role-based access control with EXCEPT clauses for role exclusions.
+ */
 public final class ChPolicy extends AbstractPolicy {
 
     private final Set<String> excepts = new LinkedHashSet<>();
 
+    /**
+     * Creates a new ClickHouse policy with the specified name.
+     *
+     * @param name the name of the policy
+     */
     public ChPolicy(String name) {
         super(name);
     }
 
+    /**
+     * Adds a role to the EXCEPT list for this policy.
+     *
+     * @param except the role name to exclude
+     */
     public void addExcept(String except) {
         this.excepts.add(except);
         resetHash();
