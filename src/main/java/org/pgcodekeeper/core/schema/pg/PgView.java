@@ -19,11 +19,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractView;
@@ -31,12 +26,26 @@ import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 
+/**
+ * PostgreSQL view implementation.
+ * Views are virtual tables defined by queries that provide a way to present data
+ * from one or more tables in a customized format without storing the data physically.
+ */
 public final class PgView extends AbstractPgView {
 
     private final Map<String, String> defaultValues = new LinkedHashMap<>();
 
+    /**
+     * Creates a new PostgreSQL view.
+     *
+     * @param name view name
+     */
     public PgView(String name) {
         super(name);
     }
@@ -116,12 +125,20 @@ public final class PgView extends AbstractPgView {
 
     /**
      * Adds/replaces column default value specification.
+     *
+     * @param columnName   column name
+     * @param defaultValue default value expression
      */
     public void addColumnDefaultValue(final String columnName, final String defaultValue) {
         defaultValues.put(columnName, defaultValue);
         resetHash();
     }
 
+    /**
+     * Removes column default value specification.
+     *
+     * @param columnName column name to remove default from
+     */
     public void removeColumnDefaultValue(final String columnName) {
         defaultValues.remove(columnName);
         resetHash();

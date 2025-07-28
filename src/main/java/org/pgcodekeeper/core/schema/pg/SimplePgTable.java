@@ -20,14 +20,20 @@ import org.pgcodekeeper.core.schema.AbstractTable;
 import org.pgcodekeeper.core.script.SQLScript;
 
 /**
- * Simple table object
+ * PostgreSQL simple table implementation.
+ * Represents a standard PostgreSQL table with columns, constraints,
+ * and typical table features without special inheritance or typing.
  *
- * @since 4.1.1
  * @author galiev_mr
- *
+ * @since 4.1.1
  */
 public final class SimplePgTable extends AbstractRegularTable {
 
+    /**
+     * Creates a new PostgreSQL simple table.
+     *
+     * @param name table name
+     */
     public SimplePgTable(String name) {
         super(name);
     }

@@ -19,24 +19,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.AbstractType;
-import org.pgcodekeeper.core.schema.IOperator;
-import org.pgcodekeeper.core.schema.IStatement;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.*;
+
 /**
- * Postgres schema code generation.
+ * PostgreSQL schema implementation.
+ * Schemas are namespaces that contain database objects like tables, functions, types, and operators.
+ * Each schema can have its own set of permissions and provides object organization.
  */
 public final class PgSchema extends AbstractSchema {
 
@@ -49,6 +42,11 @@ public final class PgSchema extends AbstractSchema {
     private final Map<String, PgCollation> collations = new LinkedHashMap<>();
     private final Map<String, PgStatistics> statistics = new LinkedHashMap<>();
 
+    /**
+     * Creates a new PostgreSQL schema.
+     *
+     * @param name schema name
+     */
     public PgSchema(String name) {
         super(name);
     }
@@ -100,6 +98,12 @@ public final class PgSchema extends AbstractSchema {
         return getChildByName(configurations, name);
     }
 
+    /**
+     * Gets an operator by its signature.
+     *
+     * @param signature operator signature including arguments
+     * @return operator or null if not found
+     */
     public PgOperator getOperator(final String signature) {
         return getChildByName(operators, signature);
     }
@@ -108,6 +112,11 @@ public final class PgSchema extends AbstractSchema {
         return getChildByName(statistics, name);
     }
 
+    /**
+     * Gets all operators in this schema.
+     *
+     * @return unmodifiable collection of operators
+     */
     public Collection<IOperator> getOperators() {
         return Collections.unmodifiableCollection(operators.values());
     }
@@ -187,32 +196,32 @@ public final class PgSchema extends AbstractSchema {
     public void addChild(IStatement st) {
         DbObjType type = st.getStatementType();
         switch (type) {
-        case DOMAIN:
-            addDomain((PgDomain) st);
-            break;
-        case FTS_CONFIGURATION:
-            addFtsConfiguration((PgFtsConfiguration) st);
-            break;
-        case FTS_DICTIONARY:
-            addFtsDictionary((PgFtsDictionary) st);
-            break;
-        case FTS_PARSER:
-            addFtsParser((PgFtsParser) st);
-            break;
-        case FTS_TEMPLATE:
-            addFtsTemplate((PgFtsTemplate) st);
-            break;
-        case OPERATOR:
-            addOperator((PgOperator) st);
-            break;
-        case COLLATION:
-            addCollation((PgCollation) st);
-            break;
-        case STATISTICS:
-            addStatistics((PgStatistics) st);
-            break;
-        default:
-            super.addChild(st);
+            case DOMAIN:
+                addDomain((PgDomain) st);
+                break;
+            case FTS_CONFIGURATION:
+                addFtsConfiguration((PgFtsConfiguration) st);
+                break;
+            case FTS_DICTIONARY:
+                addFtsDictionary((PgFtsDictionary) st);
+                break;
+            case FTS_PARSER:
+                addFtsParser((PgFtsParser) st);
+                break;
+            case FTS_TEMPLATE:
+                addFtsTemplate((PgFtsTemplate) st);
+                break;
+            case OPERATOR:
+                addOperator((PgOperator) st);
+                break;
+            case COLLATION:
+                addCollation((PgCollation) st);
+                break;
+            case STATISTICS:
+                addStatistics((PgStatistics) st);
+                break;
+            default:
+                super.addChild(st);
         }
     }
 

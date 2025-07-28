@@ -15,8 +15,30 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
+/**
+ * Interface for PostgreSQL objects that can contain index parameters.
+ * Provides methods for adding index options, include columns, and tablespace settings.
+ */
 public interface PgIndexParamContainer {
+    /**
+     * Adds an index parameter (WITH clause option).
+     *
+     * @param key   parameter name
+     * @param value parameter value
+     */
     void addParam(String key, String value);
+
+    /**
+     * Adds a column to the INCLUDE clause of the index.
+     *
+     * @param include column name to include
+     */
     void addInclude(String include);
+
+    /**
+     * Sets the tablespace for this index.
+     *
+     * @param tablespace tablespace name
+     */
     void setTablespace(String tablespace);
 }

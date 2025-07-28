@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractColumn;
 import org.pgcodekeeper.core.schema.AbstractTable;
@@ -24,17 +22,26 @@ import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Objects;
+
 /**
- * Typed table object
+ * PostgreSQL typed table implementation.
+ * Typed tables are based on a composite type and inherit the structure
+ * of that type, allowing for type-safe table definitions.
  *
- * @since 4.1.1
  * @author galiev_mr
- *
+ * @since 4.1.1
  */
 public final class TypedPgTable extends AbstractRegularTable {
 
     private final String ofType;
 
+    /**
+     * Creates a new PostgreSQL typed table.
+     *
+     * @param name   table name
+     * @param ofType composite type name this table is based on
+     */
     public TypedPgTable(String name, String ofType) {
         super(name);
         this.ofType = ofType;
@@ -59,6 +66,11 @@ public final class TypedPgTable extends AbstractRegularTable {
         }
     }
 
+    /**
+     * Gets the composite type this table is based on.
+     *
+     * @return composite type name
+     */
     public String getOfType() {
         return ofType;
     }

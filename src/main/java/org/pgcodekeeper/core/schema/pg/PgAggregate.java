@@ -15,24 +15,38 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.AbstractFunction;
 import org.pgcodekeeper.core.schema.Argument;
 
+import java.util.Objects;
+
+/**
+ * PostgreSQL aggregate function implementation.
+ * Represents aggregate functions which operate on sets of values
+ * and return a single result, such as SUM, COUNT, AVG, etc.
+ */
 public final class PgAggregate extends AbstractPgFunction {
 
+    /**
+     * Enumeration of aggregate function kinds
+     */
     public enum AggKinds {
         NORMAL, ORDERED, HYPOTHETICAL
     }
 
+    /**
+     * Enumeration of function modification types for parallel execution
+     */
     public enum ModifyType {
         READ_ONLY, SHAREABLE, READ_WRITE
     }
 
+    /**
+     * Enumeration of aggregate function types
+     */
     public enum AggFuncs {
         SFUNC, FINALFUNC, COMBINEFUNC, SERIALFUNC, DESERIALFUNC, MSFUNC, MINVFUNC, MFINALFUNC
     }
@@ -63,6 +77,11 @@ public final class PgAggregate extends AbstractPgFunction {
     private ModifyType finalFuncModify;
     private ModifyType mFinalFuncModify;
 
+    /**
+     * Creates a new PostgreSQL aggregate function.
+     *
+     * @param name aggregate function name
+     */
     public PgAggregate(String name) {
         super(name);
     }

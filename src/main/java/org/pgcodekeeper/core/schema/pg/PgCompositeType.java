@@ -15,12 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractColumn;
@@ -29,12 +23,28 @@ import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.schema.StatementUtils;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+/**
+ * PostgreSQL composite type implementation.
+ * Represents a composite type consisting of multiple attributes (fields),
+ * similar to a table row structure but used as a data type.
+ */
 public final class PgCompositeType extends AbstractType {
 
     private static final String COLLATE = " COLLATE ";
 
     private final List<AbstractColumn> attrs = new ArrayList<>();
 
+    /**
+     * Creates a new PostgreSQL composite type.
+     *
+     * @param name type name
+     */
     public PgCompositeType(String name) {
         super(name);
     }
@@ -44,7 +54,7 @@ public final class PgCompositeType extends AbstractType {
         sb.append(" AS (");
         for (AbstractColumn attr : attrs) {
             sb.append("\n\t").append(PgDiffUtils.getQuotedName(attr.getName()))
-            .append(' ').append(attr.getType());
+                    .append(' ').append(attr.getType());
 
             if (attr.getCollation() != null) {
                 sb.append(COLLATE).append(attr.getCollation());
@@ -95,7 +105,7 @@ public final class PgCompositeType extends AbstractType {
             }
         }
 
-        if (attrSb.length() > 0) {
+        if (!attrSb.isEmpty()) {
             // remove last comma
             attrSb.setLength(attrSb.length() - 1);
             script.addStatement("ALTER TYPE " + getQualifiedName() + attrSb);
@@ -122,20 +132,26 @@ public final class PgCompositeType extends AbstractType {
     }
 
     private void appendAlterAttribute(StringBuilder attrSb, String action, String delimiter,
-            AbstractColumn attr) {
+                                      AbstractColumn attr) {
         attrSb.append("\n\t").append(action).append(" ATTRIBUTE ")
-        .append(PgDiffUtils.getQuotedName(attr.getName()))
-        .append(delimiter);
+                .append(PgDiffUtils.getQuotedName(attr.getName()))
+                .append(delimiter);
         if (!"DROP".equals(action)) {
             attrSb.append(attr.getType());
             if (attr.getCollation() != null) {
                 attrSb.append(COLLATE)
-                .append(attr.getCollation());
+                        .append(attr.getCollation());
             }
             attrSb.append(",");
         }
     }
 
+    /**
+     * Returns an attribute by name.
+     *
+     * @param name attribute name
+     * @return attribute or null if not found
+     */
     public AbstractColumn getAttr(String name) {
         for (AbstractColumn att : attrs) {
             if (att.getName().equals(name)) {
@@ -145,10 +161,20 @@ public final class PgCompositeType extends AbstractType {
         return null;
     }
 
+    /**
+     * Returns an unmodifiable list of all attributes.
+     *
+     * @return list of attributes
+     */
     public List<AbstractColumn> getAttrs() {
         return Collections.unmodifiableList(attrs);
     }
 
+    /**
+     * Adds an attribute to this composite type.
+     *
+     * @param attr attribute to add
+     */
     public void addAttr(AbstractColumn attr) {
         attrs.add(attr);
         attr.setParent(this);

@@ -19,28 +19,21 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.stream.Stream;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.schema.AbstractView;
-import org.pgcodekeeper.core.schema.ISimpleOptionContainer;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.PgStatementContainer;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
+
 /**
- * Stores view information.
+ * Base PostgreSQL view implementation.
+ * Provides common functionality for PostgreSQL views including query handling,
+ * column comments, view options, and default values management.
  *
  * @author fordfrog
  */
@@ -96,7 +89,7 @@ public abstract class AbstractPgView extends AbstractView implements ISimpleOpti
             }
         }
 
-        if (sb.length() > 0) {
+        if (!sb.isEmpty()) {
             sb.setLength(sb.length() - 2);
             sbSQL.append("\nWITH (").append(sb).append(")");
         }
@@ -186,7 +179,6 @@ public abstract class AbstractPgView extends AbstractView implements ISimpleOpti
      * modified.
      *
      * @param newView new view
-     *
      * @return true if view has been modified, otherwise false
      */
     protected boolean needDrop(final AbstractPgView newView) {
@@ -204,11 +196,22 @@ public abstract class AbstractPgView extends AbstractView implements ISimpleOpti
         return !oldColumnNames.equals(newColumnNames);
     }
 
+    /**
+     * Adds a column name to this view.
+     *
+     * @param colName column name to add
+     */
     public void addColumnName(String colName) {
         columnNames.add(colName);
         resetHash();
     }
 
+    /**
+     * Sets the view query and its normalized form.
+     *
+     * @param query           original query text
+     * @param normalizedQuery normalized query for comparison
+     */
     public void setQuery(final String query, final String normalizedQuery) {
         this.query = query;
         this.normalizedQuery = normalizedQuery;
@@ -226,6 +229,12 @@ public abstract class AbstractPgView extends AbstractView implements ISimpleOpti
         resetHash();
     }
 
+    /**
+     * Adds a comment to a view column.
+     *
+     * @param columnName column name
+     * @param comment    comment text (ignored if null or empty)
+     */
     public void addColumnComment(String columnName, String comment) {
         if (comment == null || comment.isEmpty()) {
             return;

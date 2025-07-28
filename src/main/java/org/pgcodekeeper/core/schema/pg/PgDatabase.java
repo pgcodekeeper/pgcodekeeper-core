@@ -19,22 +19,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
+import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.schema.*;
+
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.IOperator;
-import org.pgcodekeeper.core.schema.IStatement;
-import org.pgcodekeeper.core.schema.PgStatement;
-
 /**
- * Stores database information.
+ * PostgreSQL database implementation.
+ * Manages database-level objects such as schemas, extensions, event triggers,
+ * foreign data wrappers, servers, user mappings, and casts.
  *
  * @author fordfrog
  */
@@ -47,6 +45,9 @@ public final class PgDatabase extends AbstractDatabase {
     private final Map<String, PgUserMapping> userMappings = new LinkedHashMap<>();
     private final Map<String, PgCast> casts = new LinkedHashMap<>();
 
+    /**
+     * Creates a new PostgreSQL database.
+     */
     public PgDatabase() {
         super();
     }
@@ -80,38 +81,36 @@ public final class PgDatabase extends AbstractDatabase {
     public void addChild(IStatement st) {
         DbObjType type = st.getStatementType();
         switch (type) {
-        case SCHEMA:
-            addSchema((AbstractSchema) st);
-            break;
-        case EXTENSION:
-            addExtension((PgExtension) st);
-            break;
-        case EVENT_TRIGGER:
-            addEventTrigger((PgEventTrigger) st);
-            break;
-        case FOREIGN_DATA_WRAPPER:
-            addForeignDW((PgForeignDataWrapper) st);
-            break;
-        case SERVER:
-            addServer((PgServer) st);
-            break;
-        case CAST:
-            addCast((PgCast) st);
-            break;
-        case USER_MAPPING:
-            addUserMapping((PgUserMapping) st);
-            break;
-        default:
-            throw new IllegalArgumentException("Unsupported child type: " + type);
+            case SCHEMA:
+                addSchema((AbstractSchema) st);
+                break;
+            case EXTENSION:
+                addExtension((PgExtension) st);
+                break;
+            case EVENT_TRIGGER:
+                addEventTrigger((PgEventTrigger) st);
+                break;
+            case FOREIGN_DATA_WRAPPER:
+                addForeignDW((PgForeignDataWrapper) st);
+                break;
+            case SERVER:
+                addServer((PgServer) st);
+                break;
+            case CAST:
+                addCast((PgCast) st);
+                break;
+            case USER_MAPPING:
+                addUserMapping((PgUserMapping) st);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported child type: " + type);
         }
     }
 
     /**
      * Returns extension of given name or null if the extension has not been found.
      *
-     * @param name
-     *            extension name
-     *
+     * @param name extension name
      * @return found extension or null
      */
     public PgExtension getExtension(final String name) {
@@ -133,9 +132,7 @@ public final class PgDatabase extends AbstractDatabase {
     /**
      * Returns foreign data wrapper of given name or null if the foreign data wrapper has not been found.
      *
-     * @param name
-     *            foreign data wrapper name
-     *
+     * @param name foreign data wrapper name
      * @return found foreign data wrapper or null
      */
     public PgForeignDataWrapper getForeignDW(final String name) {
@@ -161,9 +158,7 @@ public final class PgDatabase extends AbstractDatabase {
     /**
      * Returns cast of given name or null if the cast has not been found.
      *
-     * @param name
-     *            cast name
-     *
+     * @param name cast name
      * @return found cast or null
      */
     public PgCast getCast(final String name) {
@@ -208,6 +203,10 @@ public final class PgDatabase extends AbstractDatabase {
         super.concat(st);
     }
 
+    /**
+     * Sorts columns in all tables within all schemas of this database.
+     * This is used to ensure consistent column ordering in inherited tables.
+     */
     public void sortColumns() {
         for (AbstractSchema schema : getSchemas()) {
             schema.getTables().forEach(t -> ((AbstractPgTable) t).sortColumns());

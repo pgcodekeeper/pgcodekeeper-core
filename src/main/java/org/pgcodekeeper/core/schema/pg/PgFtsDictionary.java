@@ -15,27 +15,32 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
+import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.schema.*;
+import org.pgcodekeeper.core.script.SQLScript;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.IOptionContainer;
-import org.pgcodekeeper.core.schema.ISearchPath;
-import org.pgcodekeeper.core.schema.ISimpleOptionContainer;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.script.SQLScript;
-
+/**
+ * PostgreSQL full-text search dictionary implementation.
+ * Dictionaries are used to process tokens during full-text search,
+ * performing operations like stemming, synonym replacement, or filtering.
+ */
 public final class PgFtsDictionary extends PgStatement
-implements ISimpleOptionContainer, ISearchPath {
+        implements ISimpleOptionContainer, ISearchPath {
 
     private String template;
     private final Map<String, String> options = new LinkedHashMap<>();
 
+    /**
+     * Creates a new PostgreSQL FTS dictionary.
+     *
+     * @param name dictionary name
+     */
     public PgFtsDictionary(String name) {
         super(name);
     }
@@ -54,10 +59,10 @@ implements ISimpleOptionContainer, ISearchPath {
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSql = new StringBuilder();
         sbSql.append("CREATE TEXT SEARCH DICTIONARY ")
-        .append(getQualifiedName());
+                .append(getQualifiedName());
         sbSql.append(" (\n\tTEMPLATE = ").append(template);
 
-        options.forEach((k,v) -> sbSql.append(",\n\t").append(k).append(" = ").append(v));
+        options.forEach((k, v) -> sbSql.append(",\n\t").append(k).append(" = ").append(v));
         sbSql.append(" )");
         script.addStatement(sbSql);
         appendOwnerSQL(script);
@@ -81,17 +86,17 @@ implements ISimpleOptionContainer, ISearchPath {
 
     @Override
     public void appendOptions(IOptionContainer newContainer, StringBuilder setOptions, StringBuilder resetOptions,
-            SQLScript script) {
+                              SQLScript script) {
         StringBuilder sb = new StringBuilder();
         sb.append("ALTER TEXT SEARCH DICTIONARY ");
         sb.append(getQualifiedName());
         sb.append("\n\t(");
 
-        if (setOptions.length() > 0) {
+        if (!setOptions.isEmpty()) {
             sb.append(setOptions);
         }
 
-        if (resetOptions.length() > 0) {
+        if (!resetOptions.isEmpty()) {
             sb.append(resetOptions);
         }
         sb.setLength(sb.length() - 2);

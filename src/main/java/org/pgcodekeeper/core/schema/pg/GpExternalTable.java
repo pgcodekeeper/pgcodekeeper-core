@@ -15,19 +15,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
+import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.schema.*;
+import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.settings.ISettings;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.IForeignTable;
-import org.pgcodekeeper.core.schema.IOptionContainer;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.script.SQLScript;
-import org.pgcodekeeper.core.settings.ISettings;
-
+/**
+ * Greenplum external table implementation.
+ * External tables allow access to data stored outside the database,
+ * such as flat files, web services, or other external data sources.
+ */
 public final class GpExternalTable extends AbstractPgTable implements PgForeignOptionContainer, IForeignTable {
 
     private boolean isWritable;
@@ -43,6 +44,11 @@ public final class GpExternalTable extends AbstractPgTable implements PgForeignO
     private boolean isRowReject = true;
     private boolean isLogErrors;
 
+    /**
+     * Creates a new Greenplum external table.
+     *
+     * @param name table name
+     */
     public GpExternalTable(String name) {
         super(name);
     }
@@ -70,7 +76,7 @@ public final class GpExternalTable extends AbstractPgTable implements PgForeignO
         sbSQL.append(" (");
         for (AbstractColumn column : columns) {
             sbSQL.append("\n\t").append(column.getName()).append(" ")
-            .append(column.getType()).append(",");
+                    .append(column.getType()).append(",");
         }
 
         if (!columns.isEmpty()) {
@@ -118,7 +124,7 @@ public final class GpExternalTable extends AbstractPgTable implements PgForeignO
             }
 
             sbSQL.append("SEGMENT REJECT LIMIT ").append(rejectLimit)
-            .append(isRowReject ? " ROWS" : " PERCENT");
+                    .append(isRowReject ? " ROWS" : " PERCENT");
         }
 
         if (isWritable && distribution != null) {
@@ -190,6 +196,11 @@ public final class GpExternalTable extends AbstractPgTable implements PgForeignO
         resetHash();
     }
 
+    /**
+     * Adds a URI location for the external table.
+     *
+     * @param location URI location to add
+     */
     public void addUrLocation(String location) {
         urLocation.add(location);
         resetHash();
@@ -291,7 +302,7 @@ public final class GpExternalTable extends AbstractPgTable implements PgForeignO
 
     @Override
     public void appendMoveDataSql(PgStatement newCondition, SQLScript script, String tblTmpBareName,
-            List<String> identityCols) {
+                                  List<String> identityCols) {
         // no impl
     }
 }

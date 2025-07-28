@@ -15,31 +15,45 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.text.MessageFormat;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.pgcodekeeper.core.schema.IOptionContainer;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.text.MessageFormat;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 
+/**
+ * Interface for PostgreSQL objects that support foreign table options.
+ * Provides common functionality for handling OPTIONS clause used in
+ * foreign tables, foreign data wrappers, and servers.
+ */
 public interface PgForeignOptionContainer extends IOptionContainer {
 
-    static final String ALTER_FOREIGN_OPTION = "{0} OPTIONS ({1} {2} {3})";
-    static final String DELIM = ",\n    ";
+    String ALTER_FOREIGN_OPTION = "{0} OPTIONS ({1} {2} {3})";
+    String DELIM = ",\n    ";
 
+    /**
+     * Returns the ALTER statement header for this object.
+     *
+     * @return ALTER statement prefix (e.g., "ALTER FOREIGN TABLE table_name")
+     */
     String getAlterHeader();
 
+    /**
+     * Appends SQL OPTIONS clause to StringBuilder.
+     *
+     * @param sb the StringBuilder to append to
+     */
     default void appendOptions(StringBuilder sb) {
         Map<String, String> options = getOptions();
         if (!options.isEmpty()) {
             sb.append("OPTIONS (\n    ");
             for (Entry<String, String> entry : options.entrySet()) {
                 sb.append(entry.getKey())
-                .append(' ')
-                .append(entry.getValue())
-                .append(DELIM);
+                        .append(' ')
+                        .append(entry.getValue())
+                        .append(DELIM);
             }
             sb.setLength(sb.length() - DELIM.length());
             sb.append("\n)");
@@ -48,8 +62,8 @@ public interface PgForeignOptionContainer extends IOptionContainer {
 
     @Override
     default void compareOptions(IOptionContainer newContainer, SQLScript script) {
-        Map <String, String> oldForeignOptions = getOptions();
-        Map <String, String> newForeignOptions = newContainer.getOptions();
+        Map<String, String> oldForeignOptions = getOptions();
+        Map<String, String> newForeignOptions = newContainer.getOptions();
 
         if (Objects.equals(oldForeignOptions, newForeignOptions)) {
             return;

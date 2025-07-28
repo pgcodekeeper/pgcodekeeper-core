@@ -19,16 +19,22 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractTrigger;
 import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
+
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
+/**
+ * PostgreSQL trigger implementation.
+ * Triggers are functions that are automatically executed in response to database events
+ * like INSERT, UPDATE, DELETE, or TRUNCATE on tables or views.
+ */
 public final class PgTrigger extends AbstractTrigger {
 
     public enum TgTypes {
@@ -70,6 +76,11 @@ public final class PgTrigger extends AbstractTrigger {
     private String newTable;
 
 
+    /**
+     * Creates a new PostgreSQL trigger.
+     *
+     * @param name trigger name
+     */
     public PgTrigger(String name) {
         super(name);
     }
@@ -132,12 +143,12 @@ public final class PgTrigger extends AbstractTrigger {
         sbSQL.append(parent.getQualifiedName());
 
         if (isConstraint) {
-            if (refTableName != null){
+            if (refTableName != null) {
                 sbSQL.append("\n\tFROM ").append(refTableName);
             }
             if (isImmediate != null) {
                 sbSQL.append("\n\tDEFERRABLE INITIALLY ")
-                    .append(isImmediate.booleanValue() ? "IMMEDIATE" : "DEFERRED");
+                        .append(isImmediate ? "IMMEDIATE" : "DEFERRED");
             } else {
                 sbSQL.append("\n\tNOT DEFERRABLE INITIALLY IMMEDIATE");
             }
@@ -198,11 +209,11 @@ public final class PgTrigger extends AbstractTrigger {
     private void addAlterTable(TriggerState enabledState, PgTrigger trigger, SQLScript script) {
         StringBuilder sql = new StringBuilder();
         sql.append(ALTER_TABLE)
-        .append(parent.getQualifiedName())
-        .append(' ')
-        .append(enabledState.getValue())
-        .append(" TRIGGER ")
-        .append(PgDiffUtils.getQuotedName(trigger.name));
+                .append(parent.getQualifiedName())
+                .append(' ')
+                .append(enabledState.getValue())
+                .append(" TRIGGER ")
+                .append(PgDiffUtils.getQuotedName(trigger.name));
         script.addStatement(sql);
     }
 
@@ -258,6 +269,11 @@ public final class PgTrigger extends AbstractTrigger {
         resetHash();
     }
 
+    /**
+     * Adds a column name to the UPDATE OF clause.
+     *
+     * @param columnName column to monitor for updates
+     */
     public void addUpdateColumn(final String columnName) {
         updateColumns.add(columnName);
         resetHash();

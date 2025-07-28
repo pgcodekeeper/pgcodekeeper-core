@@ -15,12 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.AbstractSchema;
@@ -29,16 +23,34 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+/**
+ * PostgreSQL full-text search configuration implementation.
+ * Configurations specify which text search parser to use and
+ * how to map token types to dictionaries for text processing.
+ */
 public final class PgFtsConfiguration extends PgStatement implements ISearchPath {
 
     private static final String ALTER_CONFIGURATION = "ALTER TEXT SEARCH CONFIGURATION ";
     private static final String WITH = "\n\tWITH ";
 
     private String parser;
-    /**key - fragment, value - dictionaries */
+    /**
+     * key - fragment, value - dictionaries
+     */
     private final Map<String, String> dictionariesMap = new HashMap<>();
 
 
+    /**
+     * Creates a new PostgreSQL FTS configuration.
+     *
+     * @param name configuration name
+     */
     public PgFtsConfiguration(String name) {
         super(name);
     }
@@ -57,7 +69,7 @@ public final class PgFtsConfiguration extends PgStatement implements ISearchPath
     public void getCreationSQL(SQLScript script) {
         StringBuilder sql = new StringBuilder();
         sql.append("CREATE TEXT SEARCH CONFIGURATION ")
-        .append(getQualifiedName()).append(" (\n\t");
+                .append(getQualifiedName()).append(" (\n\t");
         sql.append("PARSER = ").append(parser).append(" )");
         script.addStatement(sql);
 
@@ -65,7 +77,7 @@ public final class PgFtsConfiguration extends PgStatement implements ISearchPath
             StringBuilder sqlAction = new StringBuilder();
             sqlAction.append(ALTER_CONFIGURATION).append(getQualifiedName());
             sqlAction.append("\n\tADD MAPPING FOR ").append(fragment)
-            .append(WITH).append(dictionaries);
+                    .append(WITH).append(dictionaries);
             script.addStatement(sqlAction);
         });
 
@@ -91,8 +103,8 @@ public final class PgFtsConfiguration extends PgStatement implements ISearchPath
     }
 
     private void compareOptions(PgFtsConfiguration newConf, SQLScript script) {
-        Map <String, String> oldMap = dictionariesMap;
-        Map <String, String> newMap = newConf.dictionariesMap;
+        Map<String, String> oldMap = dictionariesMap;
+        Map<String, String> newMap = newConf.dictionariesMap;
 
         if (oldMap.isEmpty() && newMap.isEmpty()) {
             return;
@@ -101,7 +113,7 @@ public final class PgFtsConfiguration extends PgStatement implements ISearchPath
         oldMap.forEach((fragment, dictionary) -> {
             String newDictionary = newMap.get(fragment);
             if (newDictionary == null) {
-                script.addStatement(getAlterConfiguration("DROP", fragment));
+                script.addStatement(getAlterConfiguration(fragment));
             } else if (!dictionary.equals(newDictionary)) {
                 script.addStatement(getAlterConfiguration("ALTER", fragment, newDictionary));
             }
@@ -114,8 +126,8 @@ public final class PgFtsConfiguration extends PgStatement implements ISearchPath
         });
     }
 
-    private String getAlterConfiguration(String action, String fragment) {
-        return getAlterConfiguration(action, fragment, null);
+    private String getAlterConfiguration(String fragment) {
+        return getAlterConfiguration("DROP", fragment, null);
     }
 
     private String getAlterConfiguration(String action, String fragment, String dictionary) {
@@ -127,7 +139,6 @@ public final class PgFtsConfiguration extends PgStatement implements ISearchPath
         }
         return sqlAction.toString();
     }
-
 
 
     @Override
@@ -159,6 +170,11 @@ public final class PgFtsConfiguration extends PgStatement implements ISearchPath
         hasher.put(dictionariesMap);
     }
 
+    /**
+     * Gets the text search parser used by this configuration.
+     *
+     * @return parser name
+     */
     public String getParser() {
         return parser;
     }
@@ -168,6 +184,12 @@ public final class PgFtsConfiguration extends PgStatement implements ISearchPath
         resetHash();
     }
 
+    /**
+     * Adds dictionary mapping for a token fragment.
+     *
+     * @param fragment     token fragment type
+     * @param dictionaries list of dictionaries to use for this fragment
+     */
     public void addDictionary(String fragment, List<String> dictionaries) {
         dictionariesMap.put(fragment, String.join(", ", dictionaries));
         resetHash();

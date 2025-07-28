@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.AbstractSchema;
@@ -25,8 +23,19 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Objects;
+
+/**
+ * PostgreSQL collation implementation.
+ * Represents a collation object that defines how text values are sorted and compared.
+ */
 public final class PgCollation extends PgStatement implements ISearchPath {
 
+    /**
+     * Creates a new PostgreSQL collation.
+     *
+     * @param name collation name
+     */
     public PgCollation(String name) {
         super(name);
     }

@@ -15,24 +15,18 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.schema.AbstractConstraint;
-import org.pgcodekeeper.core.schema.ISimpleColumnContainer;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.SimpleColumn;
-import org.pgcodekeeper.core.schema.StatementUtils;
+import org.pgcodekeeper.core.schema.*;
 
+import java.util.*;
+
+/**
+ * PostgreSQL EXCLUDE constraint implementation.
+ * EXCLUDE constraints ensure that if any two rows are compared on specified columns
+ * using specified operators, not all comparisons will return TRUE.
+ */
 public final class PgConstraintExclude extends PgConstraint implements PgIndexParamContainer, ISimpleColumnContainer {
 
     private final Map<String, String> params = new HashMap<>();
@@ -43,6 +37,11 @@ public final class PgConstraintExclude extends PgConstraint implements PgIndexPa
     private String predicate;
     private String tablespace;
 
+    /**
+     * Creates a new PostgreSQL EXCLUDE constraint.
+     *
+     * @param name constraint name
+     */
     public PgConstraintExclude(String name) {
         super(name);
     }

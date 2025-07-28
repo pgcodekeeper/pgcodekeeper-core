@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
@@ -25,8 +23,17 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Objects;
+
+/**
+ * PostgreSQL type cast implementation.
+ * Represents a cast that specifies how to perform conversions between two data types.
+ */
 public final class PgCast extends PgStatement implements ICast {
 
+    /**
+     * Enumeration of cast methods
+     */
     public enum CastMethod {
         FUNCTION, BINARY, INOUT
     }
@@ -44,6 +51,12 @@ public final class PgCast extends PgStatement implements ICast {
         return DbObjType.CAST;
     }
 
+    /**
+     * Creates a new PostgreSQL cast.
+     *
+     * @param source source data type
+     * @param target target data type
+     */
     public PgCast(String source, String target) {
         super(ICast.getSimpleName(source, target));
         this.source = source;
@@ -99,26 +112,26 @@ public final class PgCast extends PgStatement implements ICast {
         sbSQL.append("CREATE CAST ").append(getQualifiedName());
 
         switch (method) {
-        case FUNCTION:
-            sbSQL.append(" WITH FUNCTION ").append(function);
-            break;
-        case BINARY:
-            sbSQL.append(" WITHOUT FUNCTION");
-            break;
-        case INOUT:
-            sbSQL.append(" WITH INOUT");
-            break;
+            case FUNCTION:
+                sbSQL.append(" WITH FUNCTION ").append(function);
+                break;
+            case BINARY:
+                sbSQL.append(" WITHOUT FUNCTION");
+                break;
+            case INOUT:
+                sbSQL.append(" WITH INOUT");
+                break;
         }
 
         switch (context) {
-        case IMPLICIT:
-            sbSQL.append(" AS IMPLICIT");
-            break;
-        case ASSIGNMENT:
-            sbSQL.append(" AS ASSIGNMENT");
-            break;
-        default:
-            break;
+            case IMPLICIT:
+                sbSQL.append(" AS IMPLICIT");
+                break;
+            case ASSIGNMENT:
+                sbSQL.append(" AS ASSIGNMENT");
+                break;
+            default:
+                break;
         }
 
         script.addStatement(sbSQL);

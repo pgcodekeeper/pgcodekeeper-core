@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -25,8 +23,12 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Objects;
+
 /**
- * Stores extension information.
+ * PostgreSQL extension implementation.
+ * Extensions are add-on modules that provide additional functionality
+ * to PostgreSQL databases, such as data types, functions, and operators.
  *
  * @author Alexander Levsha
  */
@@ -40,10 +42,20 @@ public final class PgExtension extends PgStatement {
         return DbObjType.EXTENSION;
     }
 
+    /**
+     * Creates a new PostgreSQL extension.
+     *
+     * @param name extension name
+     */
     public PgExtension(String name) {
         super(name);
     }
 
+    /**
+     * Gets the schema where this extension is installed.
+     *
+     * @return schema name or null if using default
+     */
     public String getSchema() {
         return schema;
     }
@@ -89,9 +101,9 @@ public final class PgExtension extends PgStatement {
             }
             StringBuilder sql = new StringBuilder();
             sql.append("ALTER EXTENSION ")
-            .append(PgDiffUtils.getQuotedName(name))
-            .append(" SET SCHEMA ")
-            .append(newExt.getSchema());
+                    .append(PgDiffUtils.getQuotedName(name))
+                    .append(" SET SCHEMA ")
+                    .append(newExt.getSchema());
             script.addStatement(sql);
             isNeedDepcies = true;
         }

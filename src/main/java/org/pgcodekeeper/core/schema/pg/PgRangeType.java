@@ -15,12 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractType;
 import org.pgcodekeeper.core.schema.PgStatement;
 
+import java.util.Objects;
+
+/**
+ * PostgreSQL range type implementation.
+ * Range types store ranges of values for a given subtype, such as int4range for integers
+ * or tsrange for timestamps. They support inclusion/exclusion bounds and various operations.
+ */
 public final class PgRangeType extends AbstractType {
 
     private String subtype;
@@ -30,6 +35,11 @@ public final class PgRangeType extends AbstractType {
     private String subtypeDiff;
     private String multirange;
 
+    /**
+     * Creates a new PostgreSQL range type.
+     *
+     * @param name range type name
+     */
     public PgRangeType(String name) {
         super(name);
     }
@@ -38,7 +48,7 @@ public final class PgRangeType extends AbstractType {
     protected void appendDef(StringBuilder sb) {
         // lowercase keywords follow pg_dump format here
         sb.append(" AS RANGE (")
-        .append("\n\tsubtype = ").append(subtype);
+                .append("\n\tsubtype = ").append(subtype);
         appendStringOption(sb, "subtype_opclass", subtypeOpClass);
         appendStringOption(sb, "collation", collation);
         appendStringOption(sb, "canonical", canonical);
@@ -47,6 +57,11 @@ public final class PgRangeType extends AbstractType {
         sb.append("\n)");
     }
 
+    /**
+     * Gets the underlying data type for this range.
+     *
+     * @return subtype name
+     */
     public String getSubtype() {
         return subtype;
     }

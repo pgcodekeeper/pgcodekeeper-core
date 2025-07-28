@@ -15,15 +15,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractType;
 import org.pgcodekeeper.core.schema.ICompressOptionContainer;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+/**
+ * PostgreSQL base type implementation.
+ * Represents user-defined base types with input/output functions,
+ * storage properties, and optional Greenplum compression options.
+ */
 public final class PgBaseType extends AbstractType implements ICompressOptionContainer {
 
     private String inputFunction;
@@ -51,6 +56,11 @@ public final class PgBaseType extends AbstractType implements ICompressOptionCon
     private int compressLevel = DEFAULT_COMPESS_LEVEL;
     private int blockSize = DEFAULT_BLOCK_SIZE;
 
+    /**
+     * Creates a new PostgreSQL base type.
+     *
+     * @param name type name
+     */
     public PgBaseType(String name) {
         super(name);
     }
@@ -58,8 +68,8 @@ public final class PgBaseType extends AbstractType implements ICompressOptionCon
     @Override
     protected void appendDef(StringBuilder sb) {
         sb.append(" (")
-        .append("\n\tINPUT = ").append(inputFunction)
-        .append(",\n\tOUTPUT = ").append(outputFunction);
+                .append("\n\tINPUT = ").append(inputFunction)
+                .append(",\n\tOUTPUT = ").append(outputFunction);
         appendStringOption(sb, "RECEIVE", receiveFunction);
         appendStringOption(sb, "SEND", sendFunction);
         appendStringOption(sb, "TYPMOD_IN", typmodInputFunction);
@@ -108,11 +118,11 @@ public final class PgBaseType extends AbstractType implements ICompressOptionCon
     private StringBuilder appendGreenplumOptions(PgBaseType type) {
         StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("ALTER TYPE ").append(getQualifiedName())
-        .append(" SET DEFAULT ENCODING (")
-        .append("COMPRESSTYPE = ").append(type.compressType).append(", ")
-        .append("COMPRESSLEVEL = ").append(type.compressLevel).append(", ")
-        .append("BLOCKSIZE = ").append(type.blockSize)
-        .append(")");
+                .append(" SET DEFAULT ENCODING (")
+                .append("COMPRESSTYPE = ").append(type.compressType).append(", ")
+                .append("COMPRESSLEVEL = ").append(type.compressLevel).append(", ")
+                .append("BLOCKSIZE = ").append(type.blockSize)
+                .append(")");
         return sbSQL;
     }
 

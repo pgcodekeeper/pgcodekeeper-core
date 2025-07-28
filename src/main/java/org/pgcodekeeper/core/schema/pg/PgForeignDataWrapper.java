@@ -15,11 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -28,12 +23,27 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+
+/**
+ * PostgreSQL foreign data wrapper implementation.
+ * Foreign data wrappers are libraries that provide access to external data sources,
+ * allowing PostgreSQL to query data from other databases or systems.
+ */
 public final class PgForeignDataWrapper extends PgStatement implements PgForeignOptionContainer {
 
     private String handler;
     private String validator;
     private final Map<String, String> options = new LinkedHashMap<>();
 
+    /**
+     * Creates a new PostgreSQL foreign data wrapper.
+     *
+     * @param name wrapper name
+     */
     public PgForeignDataWrapper(String name) {
         super(name);
     }

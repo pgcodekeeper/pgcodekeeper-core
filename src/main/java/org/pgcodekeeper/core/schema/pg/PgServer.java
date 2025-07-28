@@ -15,11 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -28,6 +23,16 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+
+/**
+ * PostgreSQL foreign server implementation.
+ * Foreign servers define connection information for external data sources
+ * that can be accessed through foreign data wrappers (FDWs).
+ */
 public final class PgServer extends PgStatement implements PgForeignOptionContainer {
 
     private String type;
@@ -35,6 +40,11 @@ public final class PgServer extends PgStatement implements PgForeignOptionContai
     private String fdw;
     private final Map<String, String> options = new LinkedHashMap<>();
 
+    /**
+     * Creates a new PostgreSQL foreign server.
+     *
+     * @param name server name
+     */
     public PgServer(String name) {
         super(name);
     }
@@ -54,6 +64,11 @@ public final class PgServer extends PgStatement implements PgForeignOptionContai
         resetHash();
     }
 
+    /**
+     * Gets the foreign data wrapper name for this server.
+     *
+     * @return FDW name
+     */
     public String getFdw() {
         return fdw;
     }

@@ -15,29 +15,33 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
+import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.schema.*;
+import org.pgcodekeeper.core.script.SQLScript;
+
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Objects;
 
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.IPartitionTable;
-import org.pgcodekeeper.core.schema.Inherits;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.script.SQLScript;
-
 /**
- * Partition regular table object
+ * Partition regular table object for PostgreSQL.
+ * Represents a table partition that is part of a larger partitioned table,
+ * implementing PostgreSQL's native table partitioning functionality.
  *
- * @since 4.1.1
  * @author galiev_mr
+ * @since 4.1.1
  */
 public final class PartitionPgTable extends AbstractRegularTable implements IPartitionTable {
 
     private final String partitionBounds;
 
+    /**
+     * Creates a new partition table.
+     *
+     * @param name            table name
+     * @param partitionBounds partition bounds definition
+     */
     public PartitionPgTable(String name, String partitionBounds) {
         super(name);
         this.partitionBounds = partitionBounds;
@@ -115,12 +119,11 @@ public final class PartitionPgTable extends AbstractRegularTable implements IPar
         super.compareTableOptions(newTable, script);
 
         if (newTable instanceof PartitionPgTable table) {
-            String newBounds = table.partitionBounds;
 
             Inherits oldInherits = inherits.get(0);
             Inherits newInherits = newTable.inherits.get(0);
 
-            if (!Objects.equals(partitionBounds, newBounds)
+            if (!Objects.equals(partitionBounds, table.partitionBounds)
                     || !Objects.equals(oldInherits, newInherits)) {
                 script.addStatement(appendTablePartiton(oldInherits.getQualifiedName(), "DETACH"));
                 StringBuilder sql = appendTablePartiton(newInherits.getQualifiedName(), "ATTACH");
@@ -157,7 +160,7 @@ public final class PartitionPgTable extends AbstractRegularTable implements IPar
 
     @Override
     public void appendMoveDataSql(PgStatement newCondition, SQLScript script, String tblTmpBareName,
-            List<String> identityCols) {
+                                  List<String> identityCols) {
         // no impl
     }
 }

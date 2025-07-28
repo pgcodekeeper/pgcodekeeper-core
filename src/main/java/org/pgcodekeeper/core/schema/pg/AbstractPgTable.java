@@ -15,26 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.stream.Stream;
-
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.AbstractSequence;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.Inherits;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLActionType;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -42,11 +27,17 @@ import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
+
 /**
- * Base PostgreSQL table class
+ * Base PostgreSQL table class providing common functionality for all PostgreSQL table types.
+ * Handles table inheritance, trigger states, column management, and various PostgreSQL-specific
+ * table features like WITH OIDS, row-level security, and storage parameters.
  *
- * @since 5.3.1.
  * @author galiev_mr
+ * @since 5.3.1.
  */
 public abstract class AbstractPgTable extends AbstractTable {
 
@@ -68,7 +59,7 @@ public abstract class AbstractPgTable extends AbstractTable {
 
     protected boolean hasOids;
     protected final List<Inherits> inherits = new ArrayList<>();
-    private Map<String, String> triggerStates = new HashMap<>();
+    private final Map<String, String> triggerStates = new HashMap<>();
 
     protected AbstractPgTable(String name) {
         super(name);
@@ -101,8 +92,8 @@ public abstract class AbstractPgTable extends AbstractTable {
         var newTriggers = newTable.triggerStates;
         if (!triggerStates.equals(newTriggers)) {
             newTriggers.entrySet().stream()
-                .filter(tr -> !Objects.equals(tr.getValue(), triggerStates.get(tr.getKey())))
-                .forEach(tr -> addTriggerToScript(tr, script));
+                    .filter(tr -> !Objects.equals(tr.getValue(), triggerStates.get(tr.getKey())))
+                    .forEach(tr -> addTriggerToScript(tr, script));
         }
     }
 
@@ -136,7 +127,7 @@ public abstract class AbstractPgTable extends AbstractTable {
      * <br><br>
      * CREATE [ [ GLOBAL | LOCAL ] { TEMPORARY | TEMP } | UNLOGGED | FOREIGN ] TABLE [ IF NOT EXISTS ] table_name
      *
-     * @param sbSQL - StringBuilder for statement
+     * @param sbSQL    - StringBuilder for statement
      * @param settings - {@link ISettings} stores settings for correct script generation
      */
     protected abstract void appendName(StringBuilder sbSQL, ISettings settings);
@@ -187,31 +178,32 @@ public abstract class AbstractPgTable extends AbstractTable {
      * <br><br>
      * ALTER TABLE table_name SET WITH OID;
      * <br>
+     *
      * @param script - SQLScript for options
      */
     protected abstract void appendAlterOptions(SQLScript script);
 
     protected void appendColumnsStatistics(SQLScript script) {
         columns.stream().map(PgColumn.class::cast).filter(c -> c.getStatistics() != null)
-        .forEach(column -> {
-            StringBuilder sql = new StringBuilder();
-            sql.append(getAlterTable(true));
-            sql.append(ALTER_COLUMN);
-            sql.append(PgDiffUtils.getQuotedName(column.getName()));
-            sql.append(" SET STATISTICS ");
-            sql.append(column.getStatistics());
-            script.addStatement(sql);
-        });
+                .forEach(column -> {
+                    StringBuilder sql = new StringBuilder();
+                    sql.append(getAlterTable(true));
+                    sql.append(ALTER_COLUMN);
+                    sql.append(PgDiffUtils.getQuotedName(column.getName()));
+                    sql.append(" SET STATISTICS ");
+                    sql.append(column.getStatistics());
+                    script.addStatement(sql);
+                });
     }
 
     protected PgSequence writeSequences(PgColumn column, StringBuilder sbOption) {
         PgSequence sequence = column.getSequence();
         sbOption.append(getAlterTable(false))
-        .append(ALTER_COLUMN)
-        .append(PgDiffUtils.getQuotedName(column.getName()))
-        .append(" ADD GENERATED ")
-        .append(column.getIdentityType())
-        .append(" AS IDENTITY (");
+                .append(ALTER_COLUMN)
+                .append(PgDiffUtils.getQuotedName(column.getName()))
+                .append(" ADD GENERATED ")
+                .append(column.getIdentityType())
+                .append(" AS IDENTITY (");
         sbOption.append("\n\tSEQUENCE NAME ").append(sequence.getQualifiedName());
         sequence.fillSequenceBody(sbOption);
         sbOption.append("\n);");
@@ -297,15 +289,15 @@ public abstract class AbstractPgTable extends AbstractTable {
      * Compare <b>TABLE</b> options by alter table statement
      *
      * @param newTable - new table
-     * @param script - script for statements
+     * @param script   - script for statements
      */
     protected void compareTableOptions(AbstractPgTable newTable, SQLScript script) {
         if (hasOids != newTable.hasOids) {
             StringBuilder sql = new StringBuilder();
             sql.append(getAlterTable(true))
-            .append(" SET ")
-            .append(newTable.hasOids ? "WITH" : "WITHOUT")
-            .append(" OIDS");
+                    .append(" SET ")
+                    .append(newTable.hasOids ? "WITH" : "WITHOUT")
+                    .append(" OIDS");
             script.addStatement(sql);
         }
     }
@@ -318,18 +310,24 @@ public abstract class AbstractPgTable extends AbstractTable {
         }
 
         inherits.stream()
-        .filter(e -> !newInherits.contains(e))
-        .forEach(e -> script.addStatement(getInheritsActions(e, "\n\tNO INHERIT ")));
+                .filter(e -> !newInherits.contains(e))
+                .forEach(e -> script.addStatement(getInheritsActions(e, "\n\tNO INHERIT ")));
 
         newInherits.stream()
-        .filter(e -> !inherits.contains(e))
-        .forEach(e -> script.addStatement(getInheritsActions(e, "\n\tINHERIT ")));
+                .filter(e -> !inherits.contains(e))
+                .forEach(e -> script.addStatement(getInheritsActions(e, "\n\tINHERIT ")));
     }
 
     private String getInheritsActions(Inherits inh, String state) {
         return getAlterTable(false) + state + inh.getQualifiedName();
     }
 
+    /**
+     * Adds a parent table to the inheritance list.
+     *
+     * @param schemaName parent table schema name.
+     * @param tableName  parent table name
+     */
     public void addInherits(final String schemaName, final String tableName) {
         inherits.add(new Inherits(schemaName, tableName));
         resetHash();
@@ -344,10 +342,21 @@ public abstract class AbstractPgTable extends AbstractTable {
         return Collections.unmodifiableList(inherits);
     }
 
+    /**
+     * Checks if this table has any inheritance relationships.
+     *
+     * @return true if table inherits from other tables
+     */
     public boolean hasInherits() {
         return !inherits.isEmpty();
     }
 
+    /**
+     * Sets the state of a specific trigger on this table.
+     *
+     * @param triggerName name of the trigger
+     * @param state       desired trigger state
+     */
     public void putTriggerState(String triggerName, TriggerState state) {
         triggerStates.put(triggerName, state.getValue());
     }
@@ -368,7 +377,7 @@ public abstract class AbstractPgTable extends AbstractTable {
             return;
         }
 
-        Collections.sort(columns, (e1, e2) ->  {
+        columns.sort((e1, e2) -> {
             boolean first = ((PgColumn) e1).isInherit();
             boolean second = ((PgColumn) e2).isInherit();
             if (first && second) {
@@ -393,10 +402,10 @@ public abstract class AbstractPgTable extends AbstractTable {
         if (column.getStorage() != null) {
             StringBuilder sql = new StringBuilder();
             sql.append(getAlterTable(isInherit))
-            .append(ALTER_COLUMN)
-            .append(PgDiffUtils.getQuotedName(column.getName()))
-            .append(" SET STORAGE ")
-            .append(column.getStorage());
+                    .append(ALTER_COLUMN)
+                    .append(PgDiffUtils.getQuotedName(column.getName()))
+                    .append(" SET STORAGE ")
+                    .append(column.getStorage());
             script.addStatement(sql);
         }
 
@@ -436,9 +445,9 @@ public abstract class AbstractPgTable extends AbstractTable {
         if (!opts.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             sb.append(getAlterTable(isInherit))
-            .append(ALTER_COLUMN)
-            .append(PgDiffUtils.getQuotedName(column.getName()))
-            .append(" SET (");
+                    .append(ALTER_COLUMN)
+                    .append(PgDiffUtils.getQuotedName(column.getName()))
+                    .append(" SET (");
 
             for (Entry<String, String> option : opts.entrySet()) {
                 sb.append(option.getKey());
@@ -455,9 +464,9 @@ public abstract class AbstractPgTable extends AbstractTable {
         if (!fOpts.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             sb.append(getAlterTable(isInherit))
-            .append(ALTER_COLUMN)
-            .append(PgDiffUtils.getQuotedName(column.getName()))
-            .append(" OPTIONS (");
+                    .append(ALTER_COLUMN)
+                    .append(PgDiffUtils.getQuotedName(column.getName()))
+                    .append(" OPTIONS (");
 
             for (Entry<String, String> option : fOpts.entrySet()) {
                 sb.append(option.getKey());
@@ -476,7 +485,7 @@ public abstract class AbstractPgTable extends AbstractTable {
      * Compare tables types and generate transform scripts for change tables type
      *
      * @param newTable - new table
-     * @param script - script for statements
+     * @param script   - script for statements
      */
     protected abstract void compareTableTypes(AbstractPgTable newTable, SQLScript script);
 
@@ -511,7 +520,7 @@ public abstract class AbstractPgTable extends AbstractTable {
 
     @Override
     protected void writeInsert(SQLScript script, AbstractTable newTable, String tblTmpQName,
-            List<String> identityColsForMovingData, String cols) {
+                               List<String> identityColsForMovingData, String cols) {
         String tblQName = newTable.getQualifiedName();
         StringBuilder sbInsert = new StringBuilder();
         sbInsert.append("INSERT INTO ").append(tblQName).append('(').append(cols).append(")");

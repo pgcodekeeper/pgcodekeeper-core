@@ -15,11 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
@@ -29,6 +24,16 @@ import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.schema.StatementUtils;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * PostgreSQL FOREIGN KEY constraint implementation.
+ * Foreign key constraints maintain referential integrity between tables
+ * by ensuring values in one table match values in a referenced table.
+ */
 public final class PgConstraintFk extends PgConstraint implements IConstraintFk {
 
     private String foreignSchema;
@@ -40,6 +45,11 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
     private String delAction;
     private String updAction;
 
+    /**
+     * Creates a new PostgreSQL FOREIGN KEY constraint.
+     *
+     * @param name constraint name
+     */
     public PgConstraintFk(String name) {
         super(name);
     }
@@ -49,6 +59,11 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
         return Collections.unmodifiableList(columns);
     }
 
+    /**
+     * Adds a column to this foreign key constraint.
+     *
+     * @param column column name
+     */
     public void addColumn(String column) {
         columns.add(column);
         resetHash();
@@ -64,6 +79,11 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
         return Collections.unmodifiableList(refs);
     }
 
+    /**
+     * Adds a referenced column in the foreign table.
+     *
+     * @param referencedColumn referenced column name
+     */
     public void addForeignColumn(String referencedColumn) {
         refs.add(referencedColumn);
         resetHash();
@@ -115,7 +135,7 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
         sbSQL.append("FOREIGN KEY ");
         StatementUtils.appendCols(sbSQL, columns, getDbType());
         sbSQL.append(" REFERENCES ").append(PgDiffUtils.getQuotedName(foreignSchema)).append('.')
-        .append(PgDiffUtils.getQuotedName(foreignTable));
+                .append(PgDiffUtils.getQuotedName(foreignTable));
         if (!refs.isEmpty()) {
             StatementUtils.appendCols(sbSQL, refs, getDbType());
         }

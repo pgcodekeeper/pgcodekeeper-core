@@ -15,20 +15,30 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractType;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
-public final class PgEnumType extends AbstractType{
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+/**
+ * PostgreSQL enum type implementation.
+ * Represents an enumerated type with a fixed set of string values
+ * that can be extended but not reordered.
+ */
+public final class PgEnumType extends AbstractType {
 
     private final List<String> enums = new ArrayList<>();
 
+    /**
+     * Creates a new PostgreSQL enum type.
+     *
+     * @param name type name
+     */
     public PgEnumType(String name) {
         super(name);
     }
@@ -82,7 +92,7 @@ public final class PgEnumType extends AbstractType{
             if (!enums.contains(value)) {
                 StringBuilder sql = new StringBuilder();
                 sql.append("ALTER TYPE ").append(getQualifiedName())
-                .append("\n\tADD VALUE ").append(value);
+                        .append("\n\tADD VALUE ").append(value);
                 if (i == 0) {
                     sql.append(" BEFORE ").append(enums.get(0));
                 } else {
@@ -93,6 +103,11 @@ public final class PgEnumType extends AbstractType{
         }
     }
 
+    /**
+     * Adds an enum value to this type.
+     *
+     * @param value enum value to add
+     */
     public void addEnum(String value) {
         enums.add(value);
         resetHash();

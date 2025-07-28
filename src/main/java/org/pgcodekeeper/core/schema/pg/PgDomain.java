@@ -15,20 +15,21 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
+import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.schema.*;
+import org.pgcodekeeper.core.script.SQLScript;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractConstraint;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.ISearchPath;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.script.SQLScript;
-
+/**
+ * PostgreSQL domain implementation.
+ * A domain is a user-defined data type that is based on another underlying type,
+ * with optional constraints, default values, and NOT NULL specifications.
+ */
 public final class PgDomain extends PgStatement implements ISearchPath {
 
     private String dataType;
@@ -57,6 +58,12 @@ public final class PgDomain extends PgStatement implements ISearchPath {
         resetHash();
     }
 
+    /**
+     * Returns a constraint by name.
+     *
+     * @param name constraint name
+     * @return constraint or null if not found
+     */
     public AbstractConstraint getConstraint(String name) {
         for (AbstractConstraint c : constraints) {
             if (c.getName().equals(name)) {
@@ -66,6 +73,11 @@ public final class PgDomain extends PgStatement implements ISearchPath {
         return null;
     }
 
+    /**
+     * Adds a constraint to this domain.
+     *
+     * @param constraint constraint to add
+     */
     public void addConstraint(AbstractConstraint constraint) {
         assertUnique(getConstraint(constraint.getName()), constraint);
         constraints.add(constraint);
@@ -73,6 +85,11 @@ public final class PgDomain extends PgStatement implements ISearchPath {
         resetHash();
     }
 
+    /**
+     * Creates a new PostgreSQL domain.
+     *
+     * @param name domain name
+     */
     public PgDomain(String name) {
         super(name);
     }
@@ -86,7 +103,7 @@ public final class PgDomain extends PgStatement implements ISearchPath {
     public void getCreationSQL(SQLScript script) {
         StringBuilder sql = new StringBuilder();
         sql.append("CREATE DOMAIN ").append(getQualifiedName())
-        .append(" AS ").append(dataType);
+                .append(" AS ").append(dataType);
         if (collation != null && !collation.isEmpty()) {
             sql.append(" COLLATE ").append(collation);
         }
@@ -103,7 +120,7 @@ public final class PgDomain extends PgStatement implements ISearchPath {
                 notValids.add(constr);
             } else {
                 sql.append("\n\tCONSTRAINT ").append(PgDiffUtils.getQuotedName(constr.getName()))
-                .append(' ').append(constr.getDefinition());
+                        .append(' ').append(constr.getDefinition());
             }
         }
         script.addStatement(sql);
