@@ -15,18 +15,30 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.stream.Collectors;
-
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.AbstractFunction;
 import org.pgcodekeeper.core.schema.ArgMode;
 import org.pgcodekeeper.core.schema.Argument;
 
+import java.util.stream.Collectors;
+
+/**
+ * Represents a Microsoft SQL CLR stored procedure.
+ * CLR procedures are implemented in managed code and executed within the SQL Server runtime.
+ */
 public final class MsClrProcedure extends AbstractMsClrFunction {
 
+    /**
+     * Creates a new Microsoft SQL CLR procedure.
+     *
+     * @param name the procedure name
+     * @param assembly the assembly name containing the implementation
+     * @param assemblyClass the class within the assembly
+     * @param assemblyMethod the method within the class
+     */
     public MsClrProcedure(String name, String assembly, String assemblyClass,
-            String assemblyMethod) {
+                          String assemblyMethod) {
         super(name, assembly, assemblyClass, assemblyMethod);
     }
 
@@ -44,7 +56,7 @@ public final class MsClrProcedure extends AbstractMsClrFunction {
         sbSQL.append(getQualifiedName()).append('\n');
 
         if (!arguments.isEmpty()) {
-            sbSQL.append(arguments.stream().map(arg -> getDeclaration(arg, true, true))
+            sbSQL.append(arguments.stream().map(this::getDeclaration)
                     .collect(Collectors.joining(",\n"))).append('\n');
         }
 
@@ -64,12 +76,11 @@ public final class MsClrProcedure extends AbstractMsClrFunction {
     }
 
     @Override
-    public String getDeclaration(Argument arg, boolean includeDefaultValue,
-            boolean includeArgName) {
+    public String getDeclaration(Argument arg) {
         final StringBuilder sbString = new StringBuilder();
 
         String name = arg.getName();
-        if (name != null && !name.isEmpty() && includeArgName) {
+        if (name != null && !name.isEmpty()) {
             sbString.append(name);
             sbString.append(' ');
         }
@@ -78,7 +89,7 @@ public final class MsClrProcedure extends AbstractMsClrFunction {
 
         String def = arg.getDefaultExpression();
 
-        if (includeDefaultValue && def != null && !def.isEmpty()) {
+        if (def != null && !def.isEmpty()) {
             sbString.append(" = ");
             sbString.append(def);
         }

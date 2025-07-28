@@ -15,15 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractFunction;
 import org.pgcodekeeper.core.schema.Argument;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Abstract base class for Microsoft SQL CLR (Common Language Runtime) functions.
+ * Represents functions implemented in .NET assemblies that can be called from SQL.
+ */
 public abstract class AbstractMsClrFunction extends AbstractFunction {
 
     protected final List<String> options = new ArrayList<>();
@@ -32,16 +36,20 @@ public abstract class AbstractMsClrFunction extends AbstractFunction {
     protected final String assemblyMethod;
 
     protected AbstractMsClrFunction(String name, String assembly, String assemblyClass,
-            String assemblyMethod) {
+                                    String assemblyMethod) {
         super(name);
         this.assembly = assembly;
         this.assemblyClass = assemblyClass;
         this.assemblyMethod = assemblyMethod;
     }
 
-    protected abstract String getDeclaration(Argument arg,
-            boolean includeDefaultValue, boolean includeArgName);
+    protected abstract String getDeclaration(Argument arg);
 
+    /**
+     * Adds a CLR function option.
+     *
+     * @param option the option to add
+     */
     public void addOption(final String option) {
         options.add(option);
         resetHash();

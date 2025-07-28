@@ -15,15 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.schema.AbstractFunction;
 import org.pgcodekeeper.core.schema.SourceStatement;
 
+import java.util.Objects;
+
+/**
+ * Abstract base class for Microsoft SQL functions.
+ * Provides common functionality for Microsoft SQL function implementations.
+ */
 public abstract class AbstractMsFunction extends AbstractFunction
-implements SourceStatement {
+        implements SourceStatement {
 
     private boolean ansiNulls;
     private boolean quotedIdentified;

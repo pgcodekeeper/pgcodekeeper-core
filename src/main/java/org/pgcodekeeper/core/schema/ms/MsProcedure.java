@@ -18,8 +18,17 @@ package org.pgcodekeeper.core.schema.ms;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.AbstractFunction;
 
+/**
+ * Represents a Microsoft SQL stored procedure.
+ * Supports execution of SQL statements and business logic within the database.
+ */
 public final class MsProcedure extends AbstractMsFunction {
 
+    /**
+     * Creates a new Microsoft SQL stored procedure.
+     *
+     * @param name the procedure name
+     */
     public MsProcedure(String name) {
         super(name);
     }

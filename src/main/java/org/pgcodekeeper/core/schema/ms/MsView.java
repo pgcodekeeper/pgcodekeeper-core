@@ -15,22 +15,18 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractView;
-import org.pgcodekeeper.core.schema.IStatement;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.SourceStatement;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.*;
+
+/**
+ * Represents a Microsoft SQL view with support for schema binding,
+ * ANSI_NULLS and QUOTED_IDENTIFIER settings, and statistics.
+ */
 public final class MsView extends AbstractView implements SourceStatement {
 
     private boolean ansiNulls;
@@ -47,6 +43,11 @@ public final class MsView extends AbstractView implements SourceStatement {
 
     private final Map<String, MsStatistics> statistics = new HashMap<>();
 
+    /**
+     * Creates a new Microsoft SQL view.
+     *
+     * @param name the view name
+     */
     public MsView(String name) {
         super(name);
     }

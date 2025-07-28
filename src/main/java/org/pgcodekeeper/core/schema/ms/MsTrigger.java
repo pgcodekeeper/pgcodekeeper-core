@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
@@ -26,6 +24,12 @@ import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.schema.SourceStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Objects;
+
+/**
+ * Represents a Microsoft SQL trigger that executes in response to specific database events.
+ * Triggers can be enabled or disabled and support ANSI_NULLS and QUOTED_IDENTIFIER settings.
+ */
 public final class MsTrigger extends AbstractTrigger implements SourceStatement {
 
     private boolean ansiNulls;
@@ -35,6 +39,11 @@ public final class MsTrigger extends AbstractTrigger implements SourceStatement 
     private String firstPart;
     private String secondPart;
 
+    /**
+     * Creates a new Microsoft SQL trigger.
+     *
+     * @param name the trigger name
+     */
     public MsTrigger(String name) {
         super(name);
     }
@@ -64,10 +73,10 @@ public final class MsTrigger extends AbstractTrigger implements SourceStatement 
     @Override
     public StringBuilder appendName(StringBuilder sb) {
         sb.append(MsDiffUtils.quoteName(getSchemaName()))
-        .append('.')
-        .append(MsDiffUtils.quoteName(name))
-        .append(" ON ")
-        .append(parent.getQualifiedName());
+                .append('.')
+                .append(MsDiffUtils.quoteName(name))
+                .append(" ON ")
+                .append(parent.getQualifiedName());
         return sb;
     }
 
@@ -98,8 +107,8 @@ public final class MsTrigger extends AbstractTrigger implements SourceStatement 
     @Override
     protected StringBuilder appendFullName(StringBuilder sb) {
         sb.append(MsDiffUtils.quoteName(getSchemaName()))
-        .append('.')
-        .append(MsDiffUtils.quoteName(name));
+                .append('.')
+                .append(MsDiffUtils.quoteName(name));
         return sb;
     }
 

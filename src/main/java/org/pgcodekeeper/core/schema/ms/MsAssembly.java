@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
@@ -29,9 +25,17 @@ import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Represents a Microsoft SQL assembly.
+ * Assemblies allow running .NET code within SQL Server.
+ */
 public final class MsAssembly extends PgStatement {
 
-    private static final int PREVIEW_LENGTH = 256*4;
+    private static final int PREVIEW_LENGTH = 256 * 4;
 
     private final List<String> binaries = new ArrayList<>();
     private String permission = "SAFE";
@@ -57,7 +61,10 @@ public final class MsAssembly extends PgStatement {
     }
 
     /**
-     * Returns assembly definition without full binaries
+     * Returns assembly definition without full binaries for preview purposes.
+     *
+     * @param settings the settings for SQL generation
+     * @return the preview SQL string with truncated binaries
      */
     public String getPreview(ISettings settings) {
         SQLScript script = new SQLScript(settings);
@@ -77,7 +84,7 @@ public final class MsAssembly extends PgStatement {
         String bin = String.join(",\n", binaries);
 
         if (isPreview && bin.length() > PREVIEW_LENGTH) {
-            sql.append(bin.substring(0, PREVIEW_LENGTH)).append("\n<... PREVIEW TRIMMED>");
+            sql.append(bin, 0, PREVIEW_LENGTH).append("\n<... PREVIEW TRIMMED>");
         } else {
             sql.append(bin);
         }
@@ -100,7 +107,7 @@ public final class MsAssembly extends PgStatement {
             dropSb.append(IF_EXISTS);
         }
         dropSb.append(MsDiffUtils.quoteName(name))
-        .append(" WITH NO DEPENDENTS");
+                .append(" WITH NO DEPENDENTS");
         script.addStatement(dropSb);
     }
 
@@ -173,6 +180,11 @@ public final class MsAssembly extends PgStatement {
         resetHash();
     }
 
+    /**
+     * Adds a binary to this assembly.
+     *
+     * @param binary the binary data or file path
+     */
     public void addBinary(final String binary) {
         binaries.add(binary);
         resetHash();

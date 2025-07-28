@@ -15,33 +15,21 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractConstraint;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.ISimpleOptionContainer;
-import org.pgcodekeeper.core.schema.IStatement;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLActionType;
 import org.pgcodekeeper.core.script.SQLScript;
 
-import java.util.Objects;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
- * Base MS SQL table class
+ * Represents a Microsoft SQL table with support for memory-optimized tables,
+ * temporal tables, filestream data, and other Microsoft SQL specific features.
  */
 public final class MsTable extends AbstractTable implements ISimpleOptionContainer {
 
@@ -65,6 +53,11 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
 
     private final Map<String, MsStatistics> statistics = new HashMap<>();
 
+    /**
+     * Creates a new Microsoft SQL table with the specified name.
+     *
+     * @param name the table name
+     */
     public MsTable(String name) {
         super(name);
     }
@@ -148,6 +141,11 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
         }
     }
 
+    /**
+     * Gets the list of primary key constraints for memory-optimized tables.
+     *
+     * @return unmodifiable list of primary key constraints
+     */
     public List<AbstractConstraint> getPkeys() {
         return pkeys == null ? Collections.emptyList() : Collections.unmodifiableList(pkeys);
     }
@@ -184,7 +182,7 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
         }
 
         StringBuilder sb = new StringBuilder();
-        for (Entry <String, String> entry : options.entrySet()) {
+        for (Entry<String, String> entry : options.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
 
@@ -195,7 +193,7 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
             sb.append(", ");
         }
 
-        if (sb.length() > 0){
+        if (!sb.isEmpty()) {
             sb.setLength(sb.length() - 2);
             sbSQL.append("\nWITH (").append(sb).append(')');
         }
@@ -212,12 +210,19 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
                     || !Objects.equals(smt.periodStartCol, periodStartCol)
                     || !Objects.equals(smt.periodEndCol, periodEndCol)
                     || (smt.textImage != null && textImage != null
-                            && !Objects.equals(smt.textImage, textImage));
+                    && !Objects.equals(smt.textImage, textImage));
         }
 
         return true;
     }
 
+    /**
+     * Compares table options between this table and the new table, generating appropriate SQL scripts
+     * for change tracking and system versioning differences.
+     *
+     * @param newTable the new table to compare against
+     * @param script the script to append SQL statements to
+     */
     public void compareTableOptions(MsTable newTable, SQLScript script) {
         compareTracked(newTable, script);
         compareSysVersioning(newTable, script);
@@ -270,9 +275,9 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
     }
 
     private String enableTracking() {
-        return new StringBuilder(getAlterTable(false))
-                .append(" ENABLE CHANGE_TRACKING WITH (TRACK_COLUMNS_UPDATED = ")
-                .append(isTracked() ? "ON" : "OFF").append(')').toString();
+        return getAlterTable(false) +
+                " ENABLE CHANGE_TRACKING WITH (TRACK_COLUMNS_UPDATED = " +
+                (isTracked() ? "ON" : "OFF") + ')';
     }
 
     private String disableSysVersioning() {
@@ -315,6 +320,11 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
         resetHash();
     }
 
+    /**
+     * Checks if change tracking is enabled for this table.
+     *
+     * @return true if change tracking is enabled
+     */
     public boolean isTracked() {
         return isTracked != null && isTracked;
     }
@@ -344,6 +354,11 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
         resetHash();
     }
 
+    /**
+     * Checks if this table is memory-optimized.
+     *
+     * @return true if the table is memory-optimized
+     */
     public boolean isMemoryOptimized() {
         return "ON".equalsIgnoreCase(options.get(MEMORY_OPTIMIZED));
     }
@@ -355,7 +370,7 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
 
     @Override
     protected void writeInsert(SQLScript script, AbstractTable newTable, String tblTmpQName,
-            List<String> identityColsForMovingData, String cols) {
+                               List<String> identityColsForMovingData, String cols) {
         String tblQName = newTable.getQualifiedName();
         boolean newHasIdentity = newTable.getColumns().stream().anyMatch(c -> ((MsColumn) c).isIdentity());
         if (newHasIdentity) {
@@ -370,7 +385,7 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
         script.addStatement(sbInsert);
 
         if (newHasIdentity) {
-         // There can only be one IDENTITY column per table in MSSQL.
+            // There can only be one IDENTITY column per table in MSSQL.
             script.addStatement(getIdentInsertText(tblQName, false));
         }
 
@@ -380,10 +395,10 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
             // use the largest numeric type to fit any possible identity value
             StringBuilder sbSql = new StringBuilder();
             sbSql.append("DECLARE @restart_var numeric(38,0) = (SELECT IDENT_CURRENT (")
-            .append(PgDiffUtils.quoteString(tblTmpQName))
-            .append("));\nDBCC CHECKIDENT (")
-            .append(PgDiffUtils.quoteString(tblQName))
-            .append(", RESEED, @restart_var);");
+                    .append(PgDiffUtils.quoteString(tblTmpQName))
+                    .append("));\nDBCC CHECKIDENT (")
+                    .append(PgDiffUtils.quoteString(tblQName))
+                    .append(", RESEED, @restart_var);");
             script.addStatement(sbSql);
         }
     }
@@ -395,10 +410,10 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
     @Override
     protected List<String> getColsForMovingData(AbstractTable newTbl) {
         return newTbl.getColumns().stream()
-            .filter(c -> containsColumn(c.getName()))
-            .map(MsColumn.class::cast)
-            .filter(msCol -> msCol.getExpression() == null && msCol.getGenerated() == null)
-            .map(AbstractColumn::getName).toList();
+                .filter(c -> containsColumn(c.getName()))
+                .map(MsColumn.class::cast)
+                .filter(msCol -> msCol.getExpression() == null && msCol.getGenerated() == null)
+                .map(AbstractColumn::getName).toList();
     }
 
     @Override

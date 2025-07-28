@@ -23,10 +23,16 @@ import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
 /**
- * MS SQL schema code generation.
+ * Represents a Microsoft SQL schema that contains database objects like tables, views, functions, and procedures.
+ * Provides SQL generation for schema creation and management.
  */
 public final class MsSchema extends AbstractSchema {
 
+    /**
+     * Creates a new Microsoft SQL schema.
+     *
+     * @param name the schema name
+     */
     public MsSchema(String name) {
         super(name);
     }

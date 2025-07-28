@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.hashers.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -26,13 +23,28 @@ import org.pgcodekeeper.core.schema.ArgMode;
 import org.pgcodekeeper.core.schema.Argument;
 import org.pgcodekeeper.core.schema.FuncTypes;
 
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+/**
+ * Represents a Microsoft SQL CLR function.
+ * CLR functions are implemented in .NET assemblies and can be called from SQL.
+ */
 public final class MsClrFunction extends AbstractMsClrFunction {
 
     private String returns;
     private FuncTypes funcType = FuncTypes.SCALAR;
 
+    /**
+     * Creates a new MS CLR function definition.
+     *
+     * @param name           the function name
+     * @param assembly       the assembly name
+     * @param assemblyClass  the class name in assembly
+     * @param assemblyMethod the method name in class
+     */
     public MsClrFunction(String name, String assembly, String assemblyClass,
-            String assemblyMethod) {
+                         String assemblyMethod) {
         super(name, assembly, assemblyClass, assemblyMethod);
     }
 
@@ -42,14 +54,13 @@ public final class MsClrFunction extends AbstractMsClrFunction {
     }
 
     @Override
-    public String getDeclaration(Argument arg, boolean includeDefaultValue,
-            boolean includeArgName) {
+    public String getDeclaration(Argument arg) {
         final StringBuilder sbString = new StringBuilder();
         sbString.append(arg.getName()).append(' ').append(arg.getDataType());
 
         String def = arg.getDefaultExpression();
 
-        if (includeDefaultValue && def != null && !def.isEmpty()) {
+        if (def != null && !def.isEmpty()) {
             sbString.append(" = ");
             sbString.append(def);
         }
@@ -69,7 +80,7 @@ public final class MsClrFunction extends AbstractMsClrFunction {
         sbSQL.append(isCreate ? "CREATE" : "ALTER");
         sbSQL.append(" FUNCTION ");
         sbSQL.append(getQualifiedName()).append('(');
-        sbSQL.append(arguments.stream().map(arg -> getDeclaration(arg, true, true))
+        sbSQL.append(arguments.stream().map(this::getDeclaration)
                 .collect(Collectors.joining(", ")));
         sbSQL.append(')');
 
@@ -90,17 +101,12 @@ public final class MsClrFunction extends AbstractMsClrFunction {
         resetHash();
     }
 
-    /**
-     * @return the returns
-     */
     @Override
     public String getReturns() {
         return returns;
     }
 
-    /**
-     * @param returns the returns to set
-     */
+
     @Override
     public void setReturns(String returns) {
         this.returns = returns;

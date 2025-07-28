@@ -15,6 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
+/**
+ * Enumeration of Microsoft SQL generated column types.
+ * Represents the different types of GENERATED ALWAYS columns.
+ */
 public enum GeneratedType {
 
     ROW_START("ROW START"),
@@ -24,9 +28,9 @@ public enum GeneratedType {
     SEQ_START("SEQUENCE_NUMBER START"),
     SEQ_END("SEQUENCE_NUMBER END");
 
-    private String value;
+    private final String value;
 
-    private GeneratedType(String value) {
+    GeneratedType(String value) {
         this.value = value;
     }
 
@@ -34,6 +38,13 @@ public enum GeneratedType {
         return value;
     }
 
+    /**
+     * Parses a database type ID to the corresponding GeneratedType.
+     *
+     * @param type the database type ID
+     * @return the corresponding GeneratedType, or null for type 0
+     * @throws IllegalStateException if the type is not supported
+     */
     public static GeneratedType parseDbType(int type) {
         return switch (type) {
             case 0 -> null;

@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.MsDiffUtils;
@@ -27,6 +25,12 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.Objects;
+
+/**
+ * Represents a Microsoft SQL database user that can be associated with a login
+ * and have specific schema, language, and encryption settings.
+ */
 public final class MsUser extends PgStatement {
 
     // TODO PASSWORD, DEFAULT_LANGUAGE, ALLOW_ENCRYPTED_VALUE_MODIFICATIONS
@@ -35,6 +39,11 @@ public final class MsUser extends PgStatement {
     private String language;
     private boolean allowEncrypted;
 
+    /**
+     * Creates a new Microsoft SQL user.
+     *
+     * @param name the username
+     */
     public MsUser(String name) {
         super(name);
     }
@@ -94,19 +103,19 @@ public final class MsUser extends PgStatement {
         }
         if (!Objects.equals(language, newUser.language)) {
             sbSql.append("DEFAULT_LANGUAGE = ")
-            .append(newUser.language == null ? "NONE" : newUser.language)
-            .append(", ");
+                    .append(newUser.language == null ? "NONE" : newUser.language)
+                    .append(", ");
         }
         if (!allowEncrypted == newUser.allowEncrypted) {
             sbSql.append("ALLOW_ENCRYPTED_VALUE_MODIFICATIONS = ").append(newUser.allowEncrypted ? "ON" : "OFF")
-            .append(", ");
+                    .append(", ");
         }
 
-        if (sbSql.length() > 0) {
+        if (!sbSql.isEmpty()) {
             sbSql.setLength(sbSql.length() - 2);
             StringBuilder sql = new StringBuilder();
             sql.append("ALTER USER ").append(MsDiffUtils.quoteName(name))
-            .append(" WITH ").append(sbSql);
+                    .append(" WITH ").append(sbSql);
             script.addStatement(sql);
         }
 
@@ -115,6 +124,11 @@ public final class MsUser extends PgStatement {
         return getObjectState(script, startSize);
     }
 
+    /**
+     * Sets the default schema for this user. If the schema is 'dbo', it is ignored.
+     *
+     * @param schema the default schema name
+     */
     public void setSchema(String schema) {
         if (Consts.DBO.equals(schema)) {
             return;
