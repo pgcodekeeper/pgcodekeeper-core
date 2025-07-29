@@ -15,15 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.script;
 
+import org.pgcodekeeper.core.settings.ISettings;
+
 import java.util.EnumMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.settings.ISettings;
-
+/**
+ * SQL script builder for database migration operations.
+ * Collects and organizes SQL statements by execution phases (PRE, BEGIN, MID, END, POST)
+ * and generates properly formatted SQL scripts with database-specific separators.
+ */
 public final class SQLScript {
 
     private final ISettings settings;
@@ -36,34 +40,80 @@ public final class SQLScript {
 
     private int count;
 
+    /**
+     * Creates a new SQL script builder with specified settings.
+     *
+     * @param settings the settings containing database type and formatting options
+     */
     public SQLScript(ISettings settings) {
         this.settings = settings;
     }
 
+    /**
+     * Adds a comment statement to the script.
+     * Comments are placed either in POST phase (if commentsToEnd is enabled) or MID phase.
+     *
+     * @param comment the comment text to add
+     */
     public void addCommentStatement(String comment) {
         addStatement(comment, settings.isCommentsToEnd() ? SQLActionType.POST : SQLActionType.MID);
     }
 
+    /**
+     * Adds a statement from StringBuilder to the MID phase.
+     *
+     * @param sb the StringBuilder containing the SQL statement
+     */
     public void addStatement(StringBuilder sb) {
         addStatement(sb.toString());
     }
 
+    /**
+     * Adds a SQL statement to the MID phase with separator.
+     *
+     * @param sql the SQL statement to add
+     */
     public void addStatement(String sql) {
         addStatement(sql, SQLActionType.MID);
     }
 
+    /**
+     * Adds a SQL statement to specified execution phase with separator.
+     *
+     * @param sql        the SQL statement to add
+     * @param actionType the execution phase for this statement
+     */
     public void addStatement(String sql, SQLActionType actionType) {
         addStatement(sql, actionType, true);
     }
 
+    /**
+     * Adds a SQL statement to the MID phase without separator.
+     *
+     * @param sql the SQL statement to add
+     */
     public void addStatementWithoutSeparator(String sql) {
         addStatementWithoutSeparator(sql, SQLActionType.MID);
     }
 
+    /**
+     * Adds a SQL statement to specified execution phase without separator.
+     *
+     * @param sql        the SQL statement to add
+     * @param actionType the execution phase for this statement
+     */
     public void addStatementWithoutSeparator(String sql, SQLActionType actionType) {
         addStatement(sql, actionType, false);
     }
 
+    /**
+     * Gets SQL statement with appropriate database-specific separator if needed.
+     * Uses ';' for PostgreSQL and ClickHouse, 'GO' for Microsoft SQL.
+     *
+     * @param sql           the SQL statement
+     * @param needSeparator whether separator should be added
+     * @return SQL statement with separator if needed
+     */
     public String getSQLWithSeparator(String sql, boolean needSeparator) {
         if (!needSeparator || sql.endsWith("*/") || sql.startsWith("--")) {
             return sql;
@@ -72,17 +122,29 @@ public final class SQLScript {
         String separator = switch (settings.getDbType()) {
             case PG, CH -> PG_SEPARATOR;
             case MS -> MS_SEPARATOR;
-            default -> throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + settings.getDbType());
         };
 
         return sql + separator;
     }
 
+    /**
+     * Adds a SQL statement to specified execution phase with optional separator.
+     *
+     * @param sql           the SQL statement to add
+     * @param actionType    the execution phase for this statement
+     * @param needSeparator whether to add database-specific separator
+     */
     public void addStatement(String sql, SQLActionType actionType, boolean needSeparator) {
         statements.computeIfAbsent(actionType, e -> new LinkedHashSet<>()).add(getSQLWithSeparator(sql, needSeparator));
         count++;
     }
 
+    /**
+     * Merges all statements from another SQL script into this one.
+     * Preserves execution phases and adds statements without additional separators.
+     *
+     * @param script the script to merge statements from
+     */
     public void addAllStatements(SQLScript script) {
         for (var type : SQLActionType.values()) {
             Set<String> s = script.statements.get(type);
@@ -93,20 +155,41 @@ public final class SQLScript {
         }
     }
 
+    /**
+     * Generates the complete SQL script with all statements in execution order.
+     * Statements are ordered by phases: PRE, BEGIN, MID, END, POST.
+     *
+     * @return complete SQL script as string with double newline delimiters
+     */
     public String getFullScript() {
         return statements.entrySet().stream()
-            .flatMap(t -> t.getValue().stream())
-            .collect(Collectors.joining(DELIMITER));
+                .flatMap(t -> t.getValue().stream())
+                .collect(Collectors.joining(DELIMITER));
     }
 
+    /**
+     * Returns the total number of statements in this script.
+     *
+     * @return total statement count across all phases
+     */
     public int getSize() {
         return count;
     }
 
+    /**
+     * Checks if this script contains any statements.
+     *
+     * @return true if script has no statements, false otherwise
+     */
     public boolean isEmpty() {
         return 0 == count;
     }
 
+    /**
+     * Returns the settings used by this script.
+     *
+     * @return the settings instance
+     */
     public ISettings getSettings() {
         return settings;
     }

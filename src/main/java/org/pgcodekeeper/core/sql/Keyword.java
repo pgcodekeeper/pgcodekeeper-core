@@ -15,23 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.sql;
 
-import static org.pgcodekeeper.core.sql.Keyword.KeywordCategory.COL_NAME_KEYWORD;
-import static org.pgcodekeeper.core.sql.Keyword.KeywordCategory.RESERVED_KEYWORD;
-import static org.pgcodekeeper.core.sql.Keyword.KeywordCategory.TYPE_FUNC_NAME_KEYWORD;
-import static org.pgcodekeeper.core.sql.Keyword.KeywordCategory.UNRESERVED_KEYWORD;
+import java.util.*;
+
+import static org.pgcodekeeper.core.sql.Keyword.KeywordCategory.*;
 import static org.pgcodekeeper.core.sql.Keyword.LabelCategory.AS_LABEL;
 import static org.pgcodekeeper.core.sql.Keyword.LabelCategory.BARE_LABEL;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-
 /**
- * {@link #KEYWORDS} list maintenance:<br><br>
+ * PostgreSQL keyword classification and management.
+ * Contains complete PostgreSQL keyword dictionary with categories and label information.
+ * <p>
+ * {@link #KEYWORDS} list maintenance:
  * <ol>
  * <li>Copy code from
  * <a href='https://github.com/postgres/postgres/blob/REL9_6_STABLE/src/include/parser/kwlist.h'>
@@ -46,7 +40,9 @@ import java.util.Map;
 public class Keyword {
 
     public static final Map<String, Keyword> KEYWORDS;
+
     /**
+     * PostgreSQL keyword categories based on parser classification.
      * <a href='https://github.com/postgres/postgres/blob/REL9_6_STABLE/src/include/common/keywords.h'>
      * keywords.h</a>
      */
@@ -54,6 +50,9 @@ public class Keyword {
         UNRESERVED_KEYWORD, COL_NAME_KEYWORD, TYPE_FUNC_NAME_KEYWORD, RESERVED_KEYWORD
     }
 
+    /**
+     * Label categories for keyword usage in different contexts.
+     */
     public enum LabelCategory {
         BARE_LABEL, AS_LABEL
     }
@@ -559,7 +558,7 @@ public class Keyword {
     }
 
     private static void addKw(Map<String, Keyword> map, String kw,
-            KeywordCategory keyword, LabelCategory label) {
+                              KeywordCategory keyword, LabelCategory label) {
         map.put(kw, new Keyword(kw, keyword, label));
     }
 
@@ -573,6 +572,13 @@ public class Keyword {
     private final KeywordCategory category;
     private final LabelCategory labelCategory;
 
+    /**
+     * Creates a new keyword with specified properties.
+     *
+     * @param keyword       the keyword string
+     * @param category      the keyword category
+     * @param labelCategory the label category
+     */
     public Keyword(String keyword, KeywordCategory category, LabelCategory labelCategory) {
         this.keyword = keyword;
         this.category = category;
@@ -591,68 +597,81 @@ public class Keyword {
         return labelCategory;
     }
 
-    /*
-     * ======== Service methods for parser maintenance ========
-     * Use only to generate lexer token lists.
-     * Do not call from project's code.
+    /**
+     * Generates a formatted string containing all SQL keywords organized by categories
+     * in token format suitable for lexer grammar files. Keywords are grouped by category
+     * with section headers and alphabetically sorted within each category.
+     *
+     * @return a formatted string with keywords in token format (e.g., "KEYWORD: 'KEYWORD';")
      */
-
-    // SONAR-OFF
-    static void getAllTokensByGroups() {
+    public static String getAllTokensByGroups() {
         KeywordCategory[] prevCat = new KeywordCategory[1];
         char[] prevFirstLetter = new char[1];
+        StringBuilder result = new StringBuilder();
 
         Arrays.stream(KeywordCategory.values())
-        .flatMap(kc -> KEYWORDS.values().stream()
-                .filter(k -> k.getCategory() == kc)
-                .sorted(Comparator.comparing(Keyword::getKeyword)))
-        .forEach(v -> {
-            var currentCat = v.getCategory();
-            if (prevCat[0] != currentCat) {
-                System.out.println();
-                System.out.println("    /*");
-                System.out.println("    ==================================================");
-                System.out.println("    " + currentCat);
-                System.out.println("    ==================================================");
-                System.out.println("    */");
-                prevCat[0] = currentCat;
-            }
-            String kUpper = v.getKeyword().toUpperCase(Locale.ROOT);
-            char firstLetter = kUpper.charAt(0);
-            if (prevFirstLetter[0] != firstLetter) {
-                System.out.println();
-                prevFirstLetter[0] = firstLetter;
-            }
-            System.out.println("    " + kUpper + ": \'" + kUpper + "\';");
-        });
+                .flatMap(kc -> KEYWORDS.values().stream()
+                        .filter(k -> k.getCategory() == kc)
+                        .sorted(Comparator.comparing(Keyword::getKeyword)))
+                .forEach(v -> {
+                    var currentCat = v.getCategory();
+                    if (prevCat[0] != currentCat) {
+                        result.append("\n");
+                        result.append("    /*\n");
+                        result.append("    ==================================================\n");
+                        result.append("    ").append(currentCat).append("\n");
+                        result.append("    ==================================================\n");
+                        result.append("    */\n");
+                        prevCat[0] = currentCat;
+                    }
+                    String kUpper = v.getKeyword().toUpperCase(Locale.ROOT);
+                    char firstLetter = kUpper.charAt(0);
+                    if (prevFirstLetter[0] != firstLetter) {
+                        result.append("\n");
+                        prevFirstLetter[0] = firstLetter;
+                    }
+                    result.append("    ").append(kUpper).append(": '").append(kUpper).append("';\n");
+                });
+
+        return result.toString();
     }
 
-    static void getAllWordsByGroups() {
+    /**
+     * Generates a formatted string containing all SQL keywords organized by categories.
+     * Keywords are grouped by category with section
+     * headers and includes a separate section for bare label keywords.
+     *
+     * @return a formatted string with keywords organized by categories in list format
+     */
+    public static String getAllWordsByGroups() {
         Map<KeywordCategory, StringBuilder> map = new EnumMap<>(KeywordCategory.class);
         StringBuilder sbBare = new StringBuilder();
+        StringBuilder result = new StringBuilder();
+
         KEYWORDS.values().stream()
-        .sorted((v1,v2) -> v1.getKeyword().compareTo(v2.getKeyword()))
-        .forEach(v -> {
-            StringBuilder sb = map.get(v.getCategory());
-            if (sb == null) {
-                sb = new StringBuilder();
-                map.put(v.getCategory(), sb);
-            }
-            sb.append("    | ").append(v.getKeyword().toUpperCase(Locale.ROOT)).append("\n");
-            if (v.getLabelCategory() == BARE_LABEL) {
-                sbBare.append("    | ").append(v.getKeyword().toUpperCase(Locale.ROOT)).append("\n");
-            }
-        });
-        System.out.println("==================================================");
-        System.out.println(BARE_LABEL);
-        System.out.println("==================================================");
-        System.out.println(sbBare);
-        map.keySet().stream().sorted().forEach(k -> {
-            System.out.println("==================================================");
-            System.out.println(k);
-            System.out.println("==================================================");
-            System.out.println(map.get(k));
-        });
+                .sorted(Comparator.comparing(Keyword::getKeyword))
+                .forEach(v -> {
+                    StringBuilder sb = map.computeIfAbsent(v.getCategory(), k -> new StringBuilder());
+                    sb.append("    | ").append(v.getKeyword().toUpperCase(Locale.ROOT)).append("\n");
+                    if (v.getLabelCategory() == BARE_LABEL) {
+                        sbBare.append("    | ").append(v.getKeyword().toUpperCase(Locale.ROOT)).append("\n");
+                    }
+                });
+
+        result.append("==================================================\n");
+        result.append(BARE_LABEL).append("\n");
+        result.append("==================================================\n");
+        result.append(sbBare).append("\n");
+
+        map.keySet().stream()
+                .sorted()
+                .forEach(k -> {
+                    result.append("==================================================\n");
+                    result.append(k).append("\n");
+                    result.append("==================================================\n");
+                    result.append(map.get(k)).append("\n");
+                });
+
+        return result.toString();
     }
-    // SONAR-ON
 }
