@@ -15,19 +15,22 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.xmlstore;
 
-import java.io.IOException;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.util.List;
-
 import org.pgcodekeeper.core.libraries.PgLibrary;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+import java.io.IOException;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.util.List;
+
 /**
- * Library XML list read/write class.<br>
+ * XML store for managing database library dependencies.
+ * Handles reading and writing of library dependency configurations including
+ * library paths, names, privilege settings, and nested loading options.
+ * <br>
  * Do not call {@link #writeObjects(List)} on this class,
  * doing that won't save additional library options.<br>
  * Call {@link #writeDependencies(List, boolean)} instead.
@@ -46,6 +49,11 @@ public class DependenciesXmlStore extends XmlStore<PgLibrary> {
 
     private final Path xmlPath;
 
+    /**
+     * Creates a new dependencies XML store for the specified path.
+     *
+     * @param path the path to the dependencies XML file
+     */
     public DependenciesXmlStore(Path path) {
         super(path.getFileName().toString(), ROOT_TAG);
         this.xmlPath = path;
@@ -56,6 +64,12 @@ public class DependenciesXmlStore extends XmlStore<PgLibrary> {
         return xmlPath;
     }
 
+    /**
+     * Reads the load nested flag from the XML file.
+     *
+     * @return true if nested loading is enabled, false if disabled or file doesn't exist
+     * @throws IOException if reading fails
+     */
     public boolean readLoadNestedFlag() throws IOException {
         try {
             return Boolean.parseBoolean(readXml(true).getDocumentElement().getAttribute(LOAD_NESTED));
@@ -68,13 +82,20 @@ public class DependenciesXmlStore extends XmlStore<PgLibrary> {
      * Do not call this method, use {@link #writeDependencies(List, boolean)}
      * instead.
      *
-     * @throws IllegalStateException this method always throws
+     * @param list the list parameter (ignored)
      */
     @Override
-    public void writeObjects(List<PgLibrary> list) throws IOException {
+    public void writeObjects(List<PgLibrary> list) {
         throw new IllegalStateException();
     }
 
+    /**
+     * Writes library dependencies to XML file with load nested flag.
+     *
+     * @param depdencies     the list of library dependencies to write
+     * @param loadNestedFlag whether to enable nested loading
+     * @throws IOException if writing fails
+     */
     public void writeDependencies(List<PgLibrary> depdencies, boolean loadNestedFlag) throws IOException {
         Document xml = createDocument(depdencies);
         xml.getDocumentElement().setAttribute(LOAD_NESTED, Boolean.toString(loadNestedFlag));

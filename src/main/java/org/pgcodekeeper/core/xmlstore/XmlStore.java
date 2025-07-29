@@ -15,6 +15,23 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.xmlstore;
 
+import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.localizations.Messages;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -26,24 +43,13 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.pgcodekeeper.core.Utils;
-import org.pgcodekeeper.core.localizations.Messages;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
+/**
+ * Abstract base class for XML-based object storage and retrieval.
+ * Provides common functionality for reading and writing collections of objects
+ * to XML files with proper validation and error handling.
+ *
+ * @param <T> the type of objects stored in this XML store
+ */
 public abstract class XmlStore<T> {
 
     protected final String fileName;
@@ -65,10 +71,16 @@ public abstract class XmlStore<T> {
 
     protected abstract Path getXmlFile();
 
+    /**
+     * Reads all objects from the XML file.
+     *
+     * @return list of objects read from XML, empty list if file doesn't exist
+     * @throws IOException if reading fails
+     */
     public List<T> readObjects() throws IOException {
         try {
             return getObjects(readXml(false));
-        } catch(NoSuchFileException ex) {
+        } catch (NoSuchFileException ex) {
             return new ArrayList<>();
         }
     }
@@ -88,6 +100,12 @@ public abstract class XmlStore<T> {
 
     protected abstract T parseElement(Node node);
 
+    /**
+     * Writes objects to the XML file.
+     *
+     * @param list the list of objects to write
+     * @throws IOException if writing fails
+     */
     public void writeObjects(List<T> list) throws IOException {
         writeDocument(createDocument(list));
     }
@@ -110,7 +128,7 @@ public abstract class XmlStore<T> {
             Path path = getXmlFile();
             Files.createDirectories(path.getParent());
             try (Writer xmlWriter = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
-                serializeXml(xml, true, xmlWriter);
+                serializeXml(xml, xmlWriter);
             }
         } catch (IOException | TransformerException ex) {
             throw new IOException(MessageFormat.format(
@@ -125,6 +143,8 @@ public abstract class XmlStore<T> {
      * root node must be <code>&lt;rootTagName&gt;</code>
      *
      * @param useCached immediately return the Document read in the previous call to this method
+     * @return the parsed XML document
+     * @throws IOException if reading or parsing fails
      */
     protected synchronized Document readXml(boolean useCached) throws IOException {
         if (useCached && cachedDocument != null) {
@@ -147,17 +167,15 @@ public abstract class XmlStore<T> {
         }
     }
 
-    private void serializeXml(Document xml, boolean formatting,
-            Writer writer) throws TransformerException {
+    private void serializeXml(Document xml,
+                              Writer writer) throws TransformerException {
         TransformerFactory factory = TransformerFactory.newInstance();
         factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
         factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
 
         Transformer tf = factory.newTransformer();
-        if (formatting) {
-            tf.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
-            tf.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4"); //$NON-NLS-1$ //$NON-NLS-2$
-        }
+        tf.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
+        tf.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4"); //$NON-NLS-1$ //$NON-NLS-2$
         tf.transform(new DOMSource(xml), new StreamResult(writer));
     }
 }

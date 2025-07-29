@@ -25,6 +25,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Core implementation of settings interface for database comparison and migration.
+ * Provides default implementations for all configuration options including database type,
+ * character encoding, file paths, and various migration behavior flags.
+ */
 public class CoreSettings implements ISettings {
     private DatabaseType dbType = DatabaseType.PG;
     private String inCharsetName = Consts.UTF_8;

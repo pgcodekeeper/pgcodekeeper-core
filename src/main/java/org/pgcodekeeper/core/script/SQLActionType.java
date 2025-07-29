@@ -15,6 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.script;
 
+/**
+ * SQL action execution phases for database migration scripts.
+ * Defines the order of SQL statement execution during schema comparison and migration.
+ */
 public enum SQLActionType {
-    PRE, BEGIN, MID, END, POST
+    PRE,
+    BEGIN,
+    MID,
+    END,
+    POST
 }
