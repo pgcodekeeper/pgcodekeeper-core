@@ -22,8 +22,15 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
@@ -93,12 +100,35 @@ public final class Utils {
         factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false); //$NON-NLS-1$
 
         // Prohibit the use of all protocols by external entities (JAXP 1.5+)
-        factory.setAttribute(javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD, ""); //$NON-NLS-1$
-        factory.setAttribute(javax.xml.XMLConstants.ACCESS_EXTERNAL_SCHEMA, ""); //$NON-NLS-1$
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, ""); //$NON-NLS-1$
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, ""); //$NON-NLS-1$
 
         Document doc = factory.newDocumentBuilder().parse(new InputSource(reader));
         doc.normalize();
         return doc;
+    }
+
+    /**
+     * Writes an XML document to the output stream
+     *
+     * @param xml - {@link Document} witch store xml document
+     * @param encrypt - if true, enables secure XML processing
+     * @param stream - The output stream to write the XML document to
+     * @throws TransformerException if an error occurred during the XML transformation
+     */
+    public static void writeXml(Document xml, boolean encrypt, StreamResult stream) throws TransformerException {
+        TransformerFactory factory = TransformerFactory.newInstance();
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, ""); //$NON-NLS-1$
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, ""); //$NON-NLS-1$
+
+        if (encrypt) {
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        }
+
+        Transformer tf = factory.newTransformer();
+        tf.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
+        tf.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4"); //$NON-NLS-1$ //$NON-NLS-2$
+        tf.transform(new DOMSource(xml), stream);
     }
 
     /**
