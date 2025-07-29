@@ -118,16 +118,17 @@ public final class AntlrParser {
      * @throws IOException if there's an error reading the stream
      */
     public static SQLParser createSQLParser(InputStream is, String charset, String parsedObjectName,
-            List<Object> errors) throws IOException {
+                                            List<Object> errors) throws IOException {
         var stream = CharStreams.fromStream(is, Charset.forName(charset));
         return createSQLParser(stream, parsedObjectName, errors, 0, 0, 0);
     }
 
     private static SQLParser createSQLParser(CharStream stream, String parsedObjectName, List<Object> errors,
-            int offset, int lineOffset, int inLineOffset) {
+                                             int offset, int lineOffset, int inLineOffset) {
         SQLLexer lexer = new SQLLexer(stream);
         SQLParser parser = new SQLParser(new CommonTokenStream(lexer));
         addErrorListener(lexer, parser, parsedObjectName, errors, offset, lineOffset, inLineOffset);
+        parser.setErrorHandler(new CustomSQLAntlrErrorStrategy());
         pgParserLastStart = System.currentTimeMillis();
         return parser;
     }
@@ -156,7 +157,7 @@ public final class AntlrParser {
      * @throws IOException if there's an error reading the stream
      */
     public static TSQLParser createTSQLParser(InputStream is, String charset, String parsedObjectName,
-            List<Object> errors) throws IOException {
+                                              List<Object> errors) throws IOException {
         var stream = CharStreams.fromStream(is, Charset.forName(charset));
         return createTSQLParser(stream, parsedObjectName, errors);
     }
@@ -165,6 +166,7 @@ public final class AntlrParser {
         TSQLLexer lexer = new TSQLLexer(stream);
         TSQLParser parser = new TSQLParser(new CommonTokenStream(lexer));
         addErrorListener(lexer, parser, parsedObjectName, errors, 0, 0, 0);
+        parser.setErrorHandler(new CustomTSQLAntlrErrorStrategy());
         msParserLastStart = System.currentTimeMillis();
         return parser;
     }
@@ -193,7 +195,7 @@ public final class AntlrParser {
      * @throws IOException if there's an error reading the stream
      */
     public static CHParser createCHParser(InputStream is, String charset, String parsedObjectName,
-            List<Object> errors) throws IOException {
+                                          List<Object> errors) throws IOException {
         var stream = CharStreams.fromStream(is, Charset.forName(charset));
         return createCHParser(stream, parsedObjectName, errors);
     }
@@ -202,12 +204,13 @@ public final class AntlrParser {
         Lexer lexer = new CHLexer(stream);
         CHParser parser = new CHParser(new CommonTokenStream(lexer));
         addErrorListener(lexer, parser, parsedObjectName, errors, 0, 0, 0);
+        parser.setErrorHandler(new CustomChSQLAntlrErrorStrategy());
         chParserLastStart = System.currentTimeMillis();
         return parser;
     }
 
     private static void addErrorListener(Lexer lexer, Parser parser, String parsedObjectName,
-            List<Object> errors, int offset, int lineOffset, int inLineOffset) {
+                                         List<Object> errors, int offset, int lineOffset, int inLineOffset) {
         var listener = new CustomAntlrErrorListener(parsedObjectName, errors, offset, lineOffset, inLineOffset);
         lexer.removeErrorListeners();
         lexer.addErrorListener(listener);
@@ -228,8 +231,8 @@ public final class AntlrParser {
      * @param antlrTasks       queue for parser tasks
      */
     public static void parseSqlStream(InputStreamProvider inputStream, String charsetName,
-            String parsedObjectName, List<Object> errors, IProgressMonitor mon, int monitoringLevel,
-            SqlContextProcessor listener, Queue<AntlrTask<?>> antlrTasks) {
+                                      String parsedObjectName, List<Object> errors, IProgressMonitor mon, int monitoringLevel,
+                                      SqlContextProcessor listener, Queue<AntlrTask<?>> antlrTasks) {
         AntlrTaskManager.submit(antlrTasks, () -> {
             PgDiffUtils.checkCancelled(mon);
             try (InputStream stream = inputStream.getStream()) {
@@ -262,8 +265,8 @@ public final class AntlrParser {
      * @param antlrTasks       queue for parser tasks
      */
     public static void parseTSqlStream(InputStreamProvider inputStream, String charsetName,
-            String parsedObjectName, List<Object> errors, IProgressMonitor mon, int monitoringLevel,
-            TSqlContextProcessor listener, Queue<AntlrTask<?>> antlrTasks) {
+                                       String parsedObjectName, List<Object> errors, IProgressMonitor mon, int monitoringLevel,
+                                       TSqlContextProcessor listener, Queue<AntlrTask<?>> antlrTasks) {
         AntlrTaskManager.submit(antlrTasks, () -> {
             PgDiffUtils.checkCancelled(mon);
             try (InputStream stream = inputStream.getStream()) {
@@ -296,8 +299,8 @@ public final class AntlrParser {
      * @param antlrTasks       queue for parser tasks
      */
     public static void parseChSqlStream(InputStreamProvider inputStream, String charsetName, String parsedObjectName,
-            List<Object> errors, IProgressMonitor mon, int monitoringLevel, ChSqlContextProcessor listener,
-            Queue<AntlrTask<?>> antlrTasks) {
+                                        List<Object> errors, IProgressMonitor mon, int monitoringLevel, ChSqlContextProcessor listener,
+                                        Queue<AntlrTask<?>> antlrTasks) {
         AntlrTaskManager.submit(antlrTasks, () -> {
             PgDiffUtils.checkCancelled(mon);
             try (InputStream stream = inputStream.getStream()) {
