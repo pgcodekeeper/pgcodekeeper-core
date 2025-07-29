@@ -15,12 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.pg;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.text.MessageFormat;
-
 import org.eclipse.core.runtime.SubMonitor;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.AbstractJdbcConnector;
@@ -34,13 +28,34 @@ import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.text.MessageFormat;
+
+/**
+ * JDBC-based database schema loader for PostgreSQL databases.
+ * Reads database schemas, functions, views, tables, types, sequences, extensions, and other objects from a PostgreSQL database.
+ * Supports timezone configuration and Greenplum database detection.
+ * Extends JdbcLoaderBase to provide PostgreSQL-specific loading functionality.
+ */
 public final class JdbcPgLoader extends JdbcLoaderBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(JdbcPgLoader.class);
     private final String timezone;
 
+    /**
+     * Creates a new PostgreSQL JDBC loader with the specified parameters.
+     *
+     * @param connector        the JDBC connector for establishing database connections
+     * @param timezone         the timezone to set for the database connection
+     * @param settings         loader settings and configuration
+     * @param monitor          progress monitor for tracking loading progress
+     * @param ignoreSchemaList list of schemas to ignore during loading
+     */
     public JdbcPgLoader(AbstractJdbcConnector connector, String timezone, ISettings settings,
-            SubMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
+                        SubMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
         super(connector, monitor, settings, ignoreSchemaList);
         this.timezone = timezone;
     }
@@ -52,7 +67,7 @@ public final class JdbcPgLoader extends JdbcLoaderBase {
         LOG.info(Messages.JdbcLoader_log_reading_db_jdbc);
         setCurrentOperation(Messages.JdbcChLoader_log_connection_db);
         try (Connection connection = connector.getConnection();
-                Statement statement = connection.createStatement()) {
+             Statement statement = connection.createStatement()) {
             this.connection = connection;
             this.statement = statement;
             connection.setAutoCommit(false);

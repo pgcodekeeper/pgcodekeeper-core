@@ -16,19 +16,26 @@
 package org.pgcodekeeper.core.loader.ms;
 
 /**
- * MS SQL Supported versions
+ * Enumeration of supported Microsoft SQL Server versions.
+ * Provides version comparison and lookup functionality for database compatibility checking.
  */
 public enum SupportedMsVersion {
-    VERSION_12 (11, "2012"),
-    VERSION_14 (12, "2014"),
-    VERSION_16 (13, "2016"),
-    VERSION_17 (14, "2017"),
-    VERSION_19 (15, "2019"),
-    VERSION_22 (16, "2022");
+    VERSION_12(11, "2012"),
+    VERSION_14(12, "2014"),
+    VERSION_16(13, "2016"),
+    VERSION_17(14, "2017"),
+    VERSION_19(15, "2019"),
+    VERSION_22(16, "2022");
 
     private final int version;
     private final String text;
 
+    /**
+     * Creates a new Microsoft SQL Server version entry.
+     *
+     * @param version the numeric version identifier
+     * @param text    the human-readable version string
+     */
     SupportedMsVersion(int version, String text) {
         this.version = version;
         this.text = text;
@@ -46,6 +53,13 @@ public enum SupportedMsVersion {
         return this.version <= version;
     }
 
+    /**
+     * Returns the highest supported version that is less than or equal to the specified version.
+     * If no matching version is found, returns VERSION_12 as the default.
+     *
+     * @param checkVersion the version to check
+     * @return the matching supported version or VERSION_12 as default
+     */
     public static SupportedMsVersion valueOf(int checkVersion) {
         SupportedMsVersion[] set = SupportedMsVersion.values();
 

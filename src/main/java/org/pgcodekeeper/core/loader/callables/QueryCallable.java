@@ -15,17 +15,33 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.callables;
 
+import org.pgcodekeeper.core.Consts;
+
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 
-import org.pgcodekeeper.core.Consts;
-
+/**
+ * Executable callable for running single SQL queries.
+ * Supports both prepared statements and regular statements with dynamic SQL scripts.
+ * Returns a success constant upon completion.
+ */
 public class QueryCallable extends StatementCallable<String> {
 
+    /**
+     * Creates a new query callable with a prepared statement.
+     *
+     * @param st the prepared statement to execute
+     */
     public QueryCallable(PreparedStatement st) {
         super(st, null);
     }
 
+    /**
+     * Creates a new query callable with a statement and SQL script.
+     *
+     * @param st     the statement to execute
+     * @param script the SQL script to execute
+     */
     public QueryCallable(Statement st, String script) {
         super(st, script);
     }

@@ -19,6 +19,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.Callable;
 
+/**
+ * Abstract base class for all statement-based callable implementations.
+ * Provides common functionality for managing SQL statements and scripts in concurrent execution.
+ *
+ * @param <T> the return type of the callable execution
+ */
 public abstract class StatementCallable<T> implements Callable<T> {
 
     protected final Statement st;
@@ -29,6 +35,11 @@ public abstract class StatementCallable<T> implements Callable<T> {
         this.script = script;
     }
 
+    /**
+     * Cancels the SQL statement execution.
+     *
+     * @throws SQLException if a database access error occurs
+     */
     public void cancel() throws SQLException {
         st.cancel();
     }

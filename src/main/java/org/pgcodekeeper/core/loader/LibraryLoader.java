@@ -20,7 +20,6 @@ import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.libraries.PgLibrary;
 import org.pgcodekeeper.core.libraries.PgLibrarySource;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.FileUtils;
 import org.pgcodekeeper.core.xmlstore.DependenciesXmlStore;
@@ -35,6 +34,11 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Stream;
 
+/**
+ * Database loader for external libraries and dependencies.
+ * Loads database schemas from library sources including JAR files, directories, and XML dependency definitions.
+ * Supports nested library loading and prevents circular dependencies.
+ */
 public final class LibraryLoader extends DatabaseLoader {
 
     private final AbstractDatabase database;
@@ -43,10 +47,25 @@ public final class LibraryLoader extends DatabaseLoader {
 
     private boolean loadNested;
 
+    /**
+     * Creates a new library loader with empty loaded paths set.
+     *
+     * @param database the target database to load libraries into
+     * @param metaPath path to metadata directory
+     * @param errors   list to collect loading errors
+     */
     public LibraryLoader(AbstractDatabase database, Path metaPath, List<Object> errors) {
         this(database, metaPath, errors, new HashSet<>());
     }
 
+    /**
+     * Creates a new library loader with specified loaded paths set.
+     *
+     * @param database    the target database to load libraries into
+     * @param metaPath    path to metadata directory
+     * @param errors      list to collect loading errors
+     * @param loadedPaths set of already loaded library paths to prevent circular dependencies
+     */
     public LibraryLoader(AbstractDatabase database, Path metaPath, List<Object> errors, Set<String> loadedPaths) {
         super(errors);
         this.database = database;
@@ -54,11 +73,25 @@ public final class LibraryLoader extends DatabaseLoader {
         this.loadedLibs = loadedPaths;
     }
 
+    /**
+     * Not supported operation for library loader.
+     *
+     * @throws IllegalStateException always, as this operation is not supported
+     */
     @Override
     public AbstractDatabase load() throws IOException, InterruptedException {
         throw new IllegalStateException("Unsupported operation for LibraryLoader");
     }
 
+    /**
+     * Loads libraries from the specified collection of paths.
+     *
+     * @param settings     loader settings and configuration
+     * @param isIgnorePriv whether to ignore privileges during loading
+     * @param paths        collection of library paths to load
+     * @throws InterruptedException if loading is interrupted
+     * @throws IOException          if library loading fails
+     */
     public void loadLibraries(ISettings settings, boolean isIgnorePriv,
                               Collection<String> paths) throws InterruptedException, IOException {
         for (String path : paths) {
@@ -66,6 +99,14 @@ public final class LibraryLoader extends DatabaseLoader {
         }
     }
 
+    /**
+     * Loads libraries from XML dependency store configuration.
+     *
+     * @param xmlStore the XML store containing dependency definitions
+     * @param settings loader settings and configuration
+     * @throws InterruptedException if loading is interrupted
+     * @throws IOException          if XML loading fails
+     */
     public void loadXml(DependenciesXmlStore xmlStore, ISettings settings)
             throws InterruptedException, IOException {
         List<PgLibrary> xmlLibs = xmlStore.readObjects();

@@ -15,18 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.IntStream;
-
 import org.eclipse.core.runtime.SubMonitor;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -42,15 +30,24 @@ import org.pgcodekeeper.core.parsers.antlr.statements.ParserAbstract;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.Argument;
 import org.pgcodekeeper.core.schema.ICast.CastContext;
-import org.pgcodekeeper.core.schema.meta.MetaCast;
-import org.pgcodekeeper.core.schema.meta.MetaFunction;
-import org.pgcodekeeper.core.schema.meta.MetaOperator;
-import org.pgcodekeeper.core.schema.meta.MetaRelation;
-import org.pgcodekeeper.core.schema.meta.MetaStorage;
+import org.pgcodekeeper.core.schema.meta.*;
 import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.sql.*;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.IntStream;
+
+/**
+ * JDBC-based system metadata loader for PostgreSQL databases.
+ * Loads system functions, relations, operators, and casts from PostgreSQL system catalogs
+ * to build metadata storage for analysis purposes.
+ */
 public final class JdbcSystemLoader extends JdbcLoaderBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(JdbcSystemLoader.class);
@@ -60,22 +57,42 @@ public final class JdbcSystemLoader extends JdbcLoaderBase {
 
     private final String timezone;
 
+    /**
+     * Creates a new system loader for the specified database connection.
+     *
+     * @param connector the JDBC connector for database connection
+     * @param timezone  the timezone to set for the database connection
+     * @param monitor   progress monitor for tracking loading progress
+     */
     public JdbcSystemLoader(AbstractJdbcConnector connector, String timezone, SubMonitor monitor) {
         super(connector, monitor, null, null);
         this.timezone = timezone;
     }
 
+    /**
+     * Not supported operation for system loader.
+     *
+     * @throws IllegalStateException always, as this operation is not supported
+     */
     @Override
     public AbstractDatabase load() throws IOException, InterruptedException {
         throw new IllegalStateException("Unsupported operation for JdbcSystemLoader");
     }
 
+    /**
+     * Loads system metadata from JDBC connection and returns metadata storage.
+     * Reads system functions, relations, operators, and casts from PostgreSQL catalogs.
+     *
+     * @return metadata storage containing system objects
+     * @throws IOException          if database access fails
+     * @throws InterruptedException if loading is interrupted
+     */
     public MetaStorage getStorageFromJdbc() throws IOException, InterruptedException {
         MetaStorage storage = new MetaStorage();
         LOG.info(Messages.JdbcLoader_log_reading_db_jdbc);
         setCurrentOperation(Messages.JdbcChLoader_log_connection_db);
         try (Connection connection = connector.getConnection();
-                Statement statement = connection.createStatement()) {
+             Statement statement = connection.createStatement()) {
             this.connection = connection;
             this.statement = statement;
             connection.setAutoCommit(false);
@@ -128,11 +145,11 @@ public final class JdbcSystemLoader extends JdbcLoaderBase {
                         String[] argNames = JdbcReader.getColArray(result, "proargnames");
 
                         IntStream.range(0, argModes.size())
-                        .filter(i -> "t".equals(argModes.get(i)))
-                        .forEach(e -> {
-                            JdbcType returnType = getCachedTypeByOid(argTypeOids[e]);
-                            function.addReturnsColumn(argNames[e], returnType.getFullName(schemaName));
-                        });
+                                .filter(i -> "t".equals(argModes.get(i)))
+                                .forEach(e -> {
+                                    JdbcType returnType = getCachedTypeByOid(argTypeOids[e]);
+                                    function.addReturnsColumn(argNames[e], returnType.getFullName(schemaName));
+                                });
                     }
                 }
                 if (function.getReturnsColumns().isEmpty()) {
@@ -192,9 +209,9 @@ public final class JdbcSystemLoader extends JdbcLoaderBase {
                 String relationName = result.getString(NAME);
 
                 DbObjType type = switch (result.getString("relkind")) {
-                case "v", "m" -> DbObjType.VIEW;
-                case "S" -> DbObjType.SEQUENCE;
-                default -> DbObjType.TABLE;
+                    case "v", "m" -> DbObjType.VIEW;
+                    case "S" -> DbObjType.SEQUENCE;
+                    default -> DbObjType.TABLE;
                 };
                 MetaRelation relation = new MetaRelation(schemaName, relationName, type);
 
@@ -254,10 +271,10 @@ public final class JdbcSystemLoader extends JdbcLoaderBase {
                 JdbcReader.checkTypeValidity(target);
                 String type = result.getString("castcontext");
                 CastContext ctx = switch (type) {
-                case "e" -> CastContext.EXPLICIT;
-                case "a" -> CastContext.ASSIGNMENT;
-                case "i" -> CastContext.IMPLICIT;
-                default -> throw new IllegalStateException("Unknown cast context: " + type);
+                    case "e" -> CastContext.EXPLICIT;
+                    case "a" -> CastContext.ASSIGNMENT;
+                    case "i" -> CastContext.IMPLICIT;
+                    default -> throw new IllegalStateException("Unknown cast context: " + type);
                 };
                 storage.addMetaChild(new MetaCast(source, target, ctx));
             }

@@ -15,12 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
-
 import org.pgcodekeeper.core.parsers.antlr.AntlrTask;
 import org.pgcodekeeper.core.parsers.antlr.AntlrTaskManager;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.AbstractAnalysisLauncher;
@@ -33,6 +27,16 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.schema.meta.MetaUtils;
 
+import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
+
+/**
+ * Performs full analysis of database objects including operators, aggregates, views, and other database elements.
+ * Manages ANTLR tasks for concurrent analysis and collects references and dependencies.
+ */
 public final class FullAnalyze {
 
     private final List<Object> errors;
@@ -47,11 +51,28 @@ public final class FullAnalyze {
         this.errors = errors;
     }
 
+    /**
+     * Performs full analysis of the database using metadata created from the database.
+     *
+     * @param db     the database to analyze
+     * @param errors list to collect analysis errors
+     * @throws InterruptedException if analysis is interrupted
+     * @throws IOException          if analysis fails
+     */
     public static void fullAnalyze(AbstractDatabase db, List<Object> errors)
             throws InterruptedException, IOException {
         fullAnalyze(db, MetaUtils.createTreeFromDb(db), errors);
     }
 
+    /**
+     * Performs full analysis of the database using the provided metadata container.
+     *
+     * @param db     the database to analyze
+     * @param metaDb metadata container for analysis context
+     * @param errors list to collect analysis errors
+     * @throws InterruptedException if analysis is interrupted
+     * @throws IOException          if analysis fails
+     */
     public static void fullAnalyze(AbstractDatabase db, MetaContainer metaDb, List<Object> errors)
             throws InterruptedException, IOException {
         new FullAnalyze(db, metaDb, errors).fullAnalyze();
@@ -80,6 +101,11 @@ public final class FullAnalyze {
         }
     }
 
+    /**
+     * Analyzes views in the database, optionally focusing on a specific relation.
+     *
+     * @param rel the specific relation to analyze, or null to analyze all views
+     */
     public void analyzeView(IRelation rel) {
         List<AbstractAnalysisLauncher> launchers = db.getAnalysisLaunchers();
         for (int i = 0; i < launchers.size(); ++i) {
@@ -87,7 +113,7 @@ public final class FullAnalyze {
             if (l instanceof ViewAnalysisLauncher v
                     && (rel == null
                     || (rel.getSchemaName().equals(l.getSchemaName())
-                            && rel.getName().equals(l.getStmt().getName())))) {
+                    && rel.getName().equals(l.getStmt().getName())))) {
                 // allow GC to reclaim context memory immediately
                 // and protects from infinite recursion
                 launchers.set(i, null);

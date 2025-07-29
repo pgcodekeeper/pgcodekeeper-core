@@ -15,6 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
+/**
+ * Utility class containing pre-built SQL queries for JDBC database operations.
+ * Provides queries for PostgreSQL metadata extraction, version checking, privilege validation,
+ * and system object enumeration.
+ */
 public class JdbcQueries {
 
     private static final String NSPNAME = "n.nspname";
@@ -30,7 +35,7 @@ public class JdbcQueries {
     public static final String QUERY_CHECK_MS_VERSION = getCheckMsVersionQuery();
     public static final String QUERY_SCHEMAS_ACCESS = getSchemasAccessQuery();
     public static final String QUERY_SEQUENCES_ACCESS = getSequencesAccessQuery();
-    public static final String QUERY_SEQUENCES_DATA =   getSequencesDataQuery();
+    public static final String QUERY_SEQUENCES_DATA = getSequencesDataQuery();
     public static final String QUERY_SYSTEM_FUNCTIONS = getSystemFunctionsQuery();
     public static final String QUERY_SYSTEM_RELATIONS = getSystemRelationsQuery();
     public static final String QUERY_SYSTEM_OPERATORS = getSystemOperatorsQuery();
@@ -193,5 +198,6 @@ public class JdbcQueries {
                 .build();
     }
 
-    private JdbcQueries() {}
+    private JdbcQueries() {
+    }
 }

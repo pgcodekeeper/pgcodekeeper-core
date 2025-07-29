@@ -15,15 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.callables;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.microsoft.sqlserver.jdbc.SQLServerError;
+import com.microsoft.sqlserver.jdbc.SQLServerException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.pgcodekeeper.core.Consts;
@@ -36,9 +29,15 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
 
-import com.microsoft.sqlserver.jdbc.SQLServerError;
-import com.microsoft.sqlserver.jdbc.SQLServerException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * Executable callable for processing batches of SQL queries with progress monitoring and error reporting.
+ * Handles database-specific batch execution for PostgreSQL, ClickHouse, and Microsoft SQL databases.
+ * Provides detailed error reporting with position information and supports both single statements and batch operations.
+ */
 public class QueriesBatchCallable extends StatementCallable<String> {
 
     private final List<PgObjLocation> batches;
@@ -49,9 +48,19 @@ public class QueriesBatchCallable extends StatementCallable<String> {
 
     private boolean isAutoCommitEnabled = true;
 
+    /**
+     * Creates a new queries batch callable with the specified parameters.
+     *
+     * @param st         the SQL statement to execute
+     * @param batches    list of SQL query locations to process in batch
+     * @param monitor    progress monitor for tracking execution progress
+     * @param reporter   progress reporter for writing execution results and errors
+     * @param connection database connection for batch operations
+     * @param dbType     database type to determine execution strategy
+     */
     public QueriesBatchCallable(Statement st, List<PgObjLocation> batches,
-            IProgressMonitor monitor, IProgressReporter reporter,
-            Connection connection, DatabaseType dbType) {
+                                IProgressMonitor monitor, IProgressReporter reporter,
+                                Connection connection, DatabaseType dbType) {
         super(st, null);
         this.batches = batches;
         this.monitor = monitor;
@@ -71,35 +80,35 @@ public class QueriesBatchCallable extends StatementCallable<String> {
                 reporter.writeDbName();
             }
             switch (dbType) {
-            case PG:
-            case CH:
-                subMonitor.setWorkRemaining(batches.size());
-                for (PgObjLocation query : batches) {
-                    PgDiffUtils.checkCancelled(monitor);
-                    currQuery = query;
-                    executeSingleStatement(query, finalModifiedQuery);
-                    subMonitor.worked(1);
-                }
-                break;
-            case MS:
-                List<List<PgObjLocation>> batchesList = getListBatchesFromSetBatches();
-                subMonitor.setWorkRemaining(batchesList.size());
-                for (List<PgObjLocation> queriesList : batchesList) {
-                    PgDiffUtils.checkCancelled(monitor);
-                    // in case we're executing a real batch after a single-statement one
-                    currQuery = null;
-                    if (queriesList.size() == 1) {
-                        currQuery = queriesList.get(0);
-                        executeSingleStatement(currQuery, finalModifiedQuery);
-                    } else {
-                        runBatch(queriesList);
+                case PG:
+                case CH:
+                    subMonitor.setWorkRemaining(batches.size());
+                    for (PgObjLocation query : batches) {
+                        PgDiffUtils.checkCancelled(monitor);
+                        currQuery = query;
+                        executeSingleStatement(query, finalModifiedQuery);
+                        subMonitor.worked(1);
                     }
-                    subMonitor.worked(1);
-                }
-                connection.commit();
-                break;
-            default:
-                throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + dbType);
+                    break;
+                case MS:
+                    List<List<PgObjLocation>> batchesList = getListBatchesFromSetBatches();
+                    subMonitor.setWorkRemaining(batchesList.size());
+                    for (List<PgObjLocation> queriesList : batchesList) {
+                        PgDiffUtils.checkCancelled(monitor);
+                        // in case we're executing a real batch after a single-statement one
+                        currQuery = null;
+                        if (queriesList.size() == 1) {
+                            currQuery = queriesList.get(0);
+                            executeSingleStatement(currQuery, finalModifiedQuery);
+                        } else {
+                            runBatch(queriesList);
+                        }
+                        subMonitor.worked(1);
+                    }
+                    connection.commit();
+                    break;
+                default:
+                    throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + dbType);
             }
 
             if (reporter != null) {

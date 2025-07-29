@@ -19,12 +19,28 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+/**
+ * Executable callable for running SQL queries that return result sets.
+ * Supports both prepared statements and regular statements with dynamic SQL scripts.
+ * Returns the ResultSet obtained from query execution.
+ */
 public class ResultSetCallable extends StatementCallable<ResultSet> {
 
+    /**
+     * Creates a new result set callable with a prepared statement.
+     *
+     * @param st the prepared statement to execute
+     */
     public ResultSetCallable(PreparedStatement st) {
         super(st, null);
     }
 
+    /**
+     * Creates a new result set callable with a statement and SQL script.
+     *
+     * @param st     the statement to execute
+     * @param script the SQL script to execute
+     */
     public ResultSetCallable(Statement st, String script) {
         super(st, script);
     }

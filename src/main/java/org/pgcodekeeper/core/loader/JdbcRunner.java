@@ -15,21 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.pgcodekeeper.core.DaemonThreadFactory;
@@ -42,6 +27,16 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.sql.*;
+import java.util.List;
+import java.util.concurrent.*;
+
+/**
+ * JDBC statement execution runner with progress monitoring and cancellation support.
+ * Provides methods for executing SQL statements, prepared statements, and batch operations
+ * with progress tracking and interrupt handling.
+ */
 public class JdbcRunner {
 
     private static final Logger LOG = LoggerFactory.getLogger(JdbcRunner.class);
@@ -57,63 +52,100 @@ public class JdbcRunner {
     private final IProgressMonitor monitor;
 
 
+    /**
+     * Creates a new JDBC runner with a null progress monitor.
+     */
     public JdbcRunner() {
         this.monitor = new NullProgressMonitor();
     }
 
+    /**
+     * Creates a new JDBC runner with the specified progress monitor.
+     *
+     * @param monitor the progress monitor for tracking execution and handling cancellation
+     */
     public JdbcRunner(IProgressMonitor monitor) {
         this.monitor = monitor;
     }
 
     /**
-     * execute prepared statement with no return value
+     * Executes a prepared statement with no return value.
+     *
+     * @param st the prepared statement to execute
+     * @throws SQLException         if a database access error occurs
+     * @throws InterruptedException if execution is interrupted
      */
     public void run(PreparedStatement st) throws SQLException, InterruptedException {
         runScript(new QueryCallable(st));
     }
 
     /**
-     * execute statement by given script with no return value
+     * Executes a statement using the given script with no return value.
+     *
+     * @param st     the statement to execute
+     * @param script the SQL script to execute
+     * @throws SQLException         if a database access error occurs
+     * @throws InterruptedException if execution is interrupted
      */
     public void run(Statement st, String script) throws SQLException, InterruptedException {
         runScript(new QueryCallable(st, script));
     }
 
+    /**
+     * Executes a script using a new connection from the connector.
+     *
+     * @param connector the JDBC connector for database connection
+     * @param script    the SQL script to execute
+     * @throws SQLException         if a database access error occurs
+     * @throws IOException          if connection creation fails
+     * @throws InterruptedException if execution is interrupted
+     */
     public void run(AbstractJdbcConnector connector, String script)
             throws SQLException, IOException, InterruptedException {
         try (Connection connection = connector.getConnection();
-                Statement st = connection.createStatement()) {
+             Statement st = connection.createStatement()) {
             run(st, script);
         }
     }
 
     /**
-     * execute statement by given batches with no return value
+     * Executes statement batches with no return value.
      *
-     * @param connector contains database connection information
-     * @param batches contains splited queries of Statements
-     * @param reporter reports result
-     * @throws SQLException
-     * @throws IOException
-     * @throws InterruptedException
+     * @param connector database connection information
+     * @param batches   list of query batches to execute
+     * @param reporter  progress and result reporter
+     * @throws SQLException         if a database access error occurs
+     * @throws IOException          if connection creation fails
+     * @throws InterruptedException if execution is interrupted
      */
     public void runBatches(AbstractJdbcConnector connector, List<PgObjLocation> batches,
-            IProgressReporter reporter) throws SQLException, IOException, InterruptedException {
+                           IProgressReporter reporter) throws SQLException, IOException, InterruptedException {
         try (Connection connection = connector.getConnection();
-                Statement st = connection.createStatement()) {
+             Statement st = connection.createStatement()) {
             runScript(new QueriesBatchCallable(st, batches, monitor, reporter, connection, connector.getType()));
         }
     }
 
     /**
-     * execute prepared statement and return result set
+     * Executes a prepared statement and returns the result set.
+     *
+     * @param st the prepared statement to execute
+     * @return the result set from the query
+     * @throws SQLException         if a database access error occurs
+     * @throws InterruptedException if execution is interrupted
      */
     public ResultSet runScript(PreparedStatement st) throws InterruptedException, SQLException {
         return runScript(new ResultSetCallable(st));
     }
 
     /**
-     * execute statement by given script and return result set
+     * Executes a statement using the given script and returns the result set.
+     *
+     * @param st     the statement to execute
+     * @param script the SQL script to execute
+     * @return the result set from the query
+     * @throws SQLException         if a database access error occurs
+     * @throws InterruptedException if execution is interrupted
      */
     public ResultSet runScript(Statement st, String script) throws InterruptedException, SQLException {
         return runScript(new ResultSetCallable(st, script));

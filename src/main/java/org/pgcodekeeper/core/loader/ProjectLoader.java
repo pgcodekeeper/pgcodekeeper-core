@@ -15,20 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.DatabaseType;
@@ -38,17 +24,25 @@ import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
 import org.pgcodekeeper.core.parsers.antlr.AntlrTaskManager;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.PgPrivilege;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.StatementOverride;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.ms.MsSchema;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+
+/**
+ * Database loader for pgCodeKeeper project directory structures.
+ * Reads database schemas from organized directory structures containing SQL files
+ * for different database types (PostgreSQL, Microsoft SQL Server, ClickHouse).
+ * Supports override loading and statement replacement functionality.
+ */
 public class ProjectLoader extends DatabaseLoader {
 
     protected ISettings settings;
@@ -59,16 +53,38 @@ public class ProjectLoader extends DatabaseLoader {
 
     protected boolean isOverrideMode;
 
+    /**
+     * Creates a new project loader with basic configuration.
+     *
+     * @param dirPath  path to the project directory
+     * @param settings loader settings and configuration
+     */
     public ProjectLoader(String dirPath, ISettings settings) {
         this(dirPath, settings, null, new ArrayList<>(), null);
     }
 
+    /**
+     * Creates a new project loader with error collection.
+     *
+     * @param dirPath  path to the project directory
+     * @param settings loader settings and configuration
+     * @param errors   list to collect loading errors
+     */
     public ProjectLoader(String dirPath, ISettings settings, List<Object> errors) {
         this(dirPath, settings, null, errors, null);
     }
 
+    /**
+     * Creates a new project loader with full configuration.
+     *
+     * @param dirPath          path to the project directory
+     * @param settings         loader settings and configuration
+     * @param monitor          progress monitor for tracking loading progress
+     * @param errors           list to collect loading errors
+     * @param ignoreSchemaList list of schemas to ignore during loading
+     */
     public ProjectLoader(String dirPath, ISettings settings,
-            IProgressMonitor monitor, List<Object> errors, IgnoreSchemaList ignoreSchemaList) {
+                         IProgressMonitor monitor, List<Object> errors, IgnoreSchemaList ignoreSchemaList) {
         super(errors);
         this.dirPath = dirPath;
         this.settings = settings;
@@ -85,6 +101,13 @@ public class ProjectLoader extends DatabaseLoader {
         return db;
     }
 
+    /**
+     * Loads statement overrides from the overrides directory and applies them to the database.
+     *
+     * @param db the database to apply overrides to
+     * @throws InterruptedException if loading is interrupted
+     * @throws IOException          if file access fails
+     */
     public void loadOverrides(AbstractDatabase db) throws InterruptedException, IOException {
         Path dir = Paths.get(dirPath, WorkDirs.OVERRIDES);
         if (settings.isIgnorePrivileges() || !Files.isDirectory(dir)) {
@@ -101,17 +124,17 @@ public class ProjectLoader extends DatabaseLoader {
 
     private void loadDbStructure(Path dir, AbstractDatabase db) throws InterruptedException, IOException {
         switch (settings.getDbType()) {
-        case MS:
-            loadMsStructure(dir, db);
-            break;
-        case PG:
-            loadPgStructure(dir, db);
-            break;
-        case CH:
-            loadChStructure(dir, db);
-            break;
-        default:
-            throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + settings.getDbType());
+            case MS:
+                loadMsStructure(dir, db);
+                break;
+            case PG:
+                loadPgStructure(dir, db);
+                break;
+            case CH:
+                loadChStructure(dir, db);
+                break;
+            default:
+                throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + settings.getDbType());
         }
         finishLoaders();
     }

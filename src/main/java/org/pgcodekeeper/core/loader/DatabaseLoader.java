@@ -15,13 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
-
-import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.parsers.antlr.AntlrTask;
 import org.pgcodekeeper.core.parsers.antlr.AntlrTaskManager;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
@@ -30,6 +23,17 @@ import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
+
+/**
+ * Abstract base class for database schema loaders.
+ * Provides common functionality for loading database schemas with ANTLR task management
+ * and error collection. Supports loading with or without full analysis.
+ */
 public abstract class DatabaseLoader {
 
     protected final List<Object> errors;
@@ -38,9 +42,11 @@ public abstract class DatabaseLoader {
     protected final Queue<DatabaseLoader> launchedLoaders = new ArrayDeque<>();
 
     /**
-     * Loads database schema with analyze.
+     * Loads database schema and performs full analysis.
      *
-     * @return database schema
+     * @return the loaded and analyzed database schema
+     * @throws IOException          if database loading fails
+     * @throws InterruptedException if the loading process is interrupted
      */
     public AbstractDatabase loadAndAnalyze() throws IOException, InterruptedException {
         AbstractDatabase d = load();
@@ -48,19 +54,26 @@ public abstract class DatabaseLoader {
         return d;
     }
 
+    /**
+     * Creates a new database instance based on the database type specified in settings.
+     *
+     * @param settings configuration settings containing the database type
+     * @return new database instance of the appropriate type
+     */
     public static AbstractDatabase createDb(ISettings settings) {
         return switch (settings.getDbType()) {
-        case CH -> new ChDatabase();
-        case MS -> new MsDatabase();
-        case PG -> new PgDatabase();
-        default -> throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + settings.getDbType());
+            case CH -> new ChDatabase();
+            case MS -> new MsDatabase();
+            case PG -> new PgDatabase();
         };
     }
 
     /**
-     * Loads database schema without analyze.
+     * Loads database schema without performing full analysis.
      *
-     * @return database schema
+     * @return the loaded database schema
+     * @throws IOException          if database loading fails
+     * @throws InterruptedException if the loading process is interrupted
      */
     public abstract AbstractDatabase load() throws IOException, InterruptedException;
 

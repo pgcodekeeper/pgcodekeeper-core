@@ -15,6 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
+/**
+ * Enumeration of parser listener modes for controlling SQL parsing behavior.
+ * Determines how the parser processes SQL statements and what information is extracted.
+ */
 public enum ParserListenerMode {
     NORMAL,
     REF,
