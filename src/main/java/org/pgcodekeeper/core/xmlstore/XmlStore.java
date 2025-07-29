@@ -23,14 +23,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.Reader;
@@ -123,16 +118,34 @@ public abstract class XmlStore<T> {
         }
     }
 
+    /**
+     * Writes an XML document to a file
+     *
+     * @param xml - {@link Document} witch store xml document
+     * @throws IOException if an I/O error occurs
+     */
     protected void writeDocument(Document xml) throws IOException {
         try {
             Path path = getXmlFile();
             Files.createDirectories(path.getParent());
-            try (Writer xmlWriter = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
-                serializeXml(xml, xmlWriter);
-            }
-        } catch (IOException | TransformerException ex) {
+            writeDocument(xml, path);
+        } catch (Exception ex) {
             throw new IOException(MessageFormat.format(
                     Messages.XmlStore_write_error, ex.getLocalizedMessage()), ex);
+        }
+    }
+
+    /**
+     * Writes an XML document to a file
+     *
+     * @param xml - {@link Document} witch store xml document
+     * @param path - Path to the file where the XML document will be written
+     * @throws IOException if an I/O error occurs
+     * @throws TransformerException if an error occurred during the XML transformation
+     */
+    protected void writeDocument(Document xml, Path path) throws IOException, TransformerException {
+        try (Writer xmlWriter = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+            Utils.writeXml(xml, false, new StreamResult(xmlWriter));
         }
     }
 
@@ -150,32 +163,30 @@ public abstract class XmlStore<T> {
         if (useCached && cachedDocument != null) {
             return cachedDocument;
         }
+        Document xml = readXml();
+        if (!xml.getDocumentElement().getNodeName().equals(rootTag)) {
+            throw new IOException(Messages.XmlStore_root_error);
+        }
+        cachedDocument = xml;
+        return xml;
+    }
+
+    /**
+     * Reads and parses an XML document from a file
+     *
+     * @return - {@link Document} witch store xml document
+     * @throws IOException if reading or parsing fails
+     */
+    protected Document readXml() throws IOException {
         try (Reader reader = Files.newBufferedReader(getXmlFile(), StandardCharsets.UTF_8)) {
-            Document xml = Utils.readXml(reader);
-
-            if (!xml.getDocumentElement().getNodeName().equals(rootTag)) {
-                throw new IOException(Messages.XmlStore_root_error);
-            }
-
-            cachedDocument = xml;
-            return xml;
+            return Utils.readXml(reader);
         } catch (NoSuchFileException ex) {
             throw ex;
         } catch (IOException | SAXException | ParserConfigurationException ex) {
             throw new IOException(MessageFormat.format(
                     Messages.XmlStore_read_error, ex.getLocalizedMessage()), ex);
+        } catch (Exception e) {
+            throw new IOException(MessageFormat.format(Messages.XmlStore_read_error, e.getLocalizedMessage()), e);
         }
-    }
-
-    private void serializeXml(Document xml,
-                              Writer writer) throws TransformerException {
-        TransformerFactory factory = TransformerFactory.newInstance();
-        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
-
-        Transformer tf = factory.newTransformer();
-        tf.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
-        tf.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4"); //$NON-NLS-1$ //$NON-NLS-2$
-        tf.transform(new DOMSource(xml), new StreamResult(writer));
     }
 }
