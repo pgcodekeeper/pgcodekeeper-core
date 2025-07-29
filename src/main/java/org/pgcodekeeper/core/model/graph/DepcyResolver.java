@@ -15,33 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.OptionalInt;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.IntStream;
-
 import org.jgrapht.graph.DefaultEdge;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractFunction;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.Argument;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.IFunction;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.SourceStatement;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.ms.AbstractMsFunction;
 import org.pgcodekeeper.core.schema.ms.MsTable;
 import org.pgcodekeeper.core.schema.ms.MsType;
@@ -51,6 +28,11 @@ import org.pgcodekeeper.core.schema.pg.PgSequence;
 import org.pgcodekeeper.core.schema.pg.TypedPgTable;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.stream.IntStream;
 
 /*
  * implementation notes:
@@ -135,10 +117,8 @@ public final class DepcyResolver {
      * Объект существует в новой базе, но не существует в старой. Мы его создаем, а также добавляем для создания все
      * объекты, которые требуются для правильной работы создаваемого объекта.
      *
-     * @param newStatement
-     *            объект в новой базе данных
-     * @param starter
-     *            объект запустивший процесс
+     * @param newStatement объект в новой базе данных
+     * @param starter      объект запустивший процесс
      */
     private void addCreateStatements(PgStatement newStatement, PgStatement starter) {
         if (!createdObjects.add(newStatement)) {
@@ -156,10 +136,8 @@ public final class DepcyResolver {
      * Объекта не существует в новой базе, но существует в старой, мы его удаляем. И удаляем из старой базы все объекты,
      * которым этот объект требуется, т.к. они будут ошибочны, при отсутсвии этого объекта.
      *
-     * @param oldStatement
-     *            объект в старой базе данных
-     * @param starter
-     *            объект запустивший процесс
+     * @param oldStatement объект в старой базе данных
+     * @param starter      объект запустивший процесс
      */
     private void addDropStatements(PgStatement oldStatement, PgStatement starter) {
         if (!droppedObjects.add(oldStatement)) {
@@ -190,15 +168,12 @@ public final class DepcyResolver {
     /**
      * Добавить выражение для изменения объекта
      *
-     * @param oldStatement
-     *            исходный объект
-     * @param newStatement
-     *            новый объект
-     * @param starter
-     *            объект запустивший процесс
+     * @param oldStatement исходный объект
+     * @param newStatement новый объект
+     * @param starter      объект запустивший процесс
      */
     private void addAlterStatements(PgStatement oldStatement, PgStatement newStatement,
-            PgStatement starter) {
+                                    PgStatement starter) {
         ObjectState state = getObjectState(oldStatement, newStatement);
         if (state.in(ObjectState.RECREATE, ObjectState.ALTER_WITH_DEP)) {
             addDropStatements(oldStatement, starter);
@@ -246,6 +221,14 @@ public final class DepcyResolver {
                 toRefresh.add(dependent);
             }
         }
+    }
+
+    private void removeAlteredFromRefreshes() {
+        toRefresh.removeIf(st ->
+                actions.stream().anyMatch(action -> action.getState() == ObjectState.ALTER
+                        && action.getOldObj() instanceof MsView
+                        && action.getOldObj().equals(st))
+        );
     }
 
     /**
@@ -420,17 +403,17 @@ public final class DepcyResolver {
         Function<IFunction, List<Argument>> argsBeforeDefaults = f -> {
             List<Argument> args = f.getArguments();
             OptionalInt firstDefault = IntStream.range(0, args.size())
-                .filter(i -> args.get(i).getDefaultExpression() != null)
-                .findFirst();
+                    .filter(i -> args.get(i).getDefaultExpression() != null)
+                    .findFirst();
             return firstDefault.isPresent() ? args.subList(0, firstDefault.getAsInt()) : args;
         };
 
         List<Argument> oldArgs = argsBeforeDefaults.apply(oldFunc);
 
         return newSchema.getFunctions().stream()
-            .filter(f -> oldFunc.getBareName().equals(f.getBareName()))
-            .map(argsBeforeDefaults)
-            .anyMatch(oldArgs::equals);
+                .filter(f -> oldFunc.getBareName().equals(f.getBareName()))
+                .map(argsBeforeDefaults)
+                .anyMatch(oldArgs::equals);
     }
 
     private boolean isColumnChangeOverlap(PgStatement oldTable, PgStatement newTable) {
@@ -470,6 +453,7 @@ public final class DepcyResolver {
 
     /**
      * Проверяет есть ли объект в списке ранее удаленных объектов
+     *
      * @param statement объект для проверки
      * @return
      */
@@ -491,17 +475,17 @@ public final class DepcyResolver {
     /**
      * Добавляет в список выражений для скрипта Выражение без зависимостей
      *
-     * @param action Какое действие нужно вызвать {@link ObjectState}
-     * @param oldObj Объект из старого состояния
+     * @param action  Какое действие нужно вызвать {@link ObjectState}
+     * @param oldObj  Объект из старого состояния
      * @param starter объект который вызвал действие
      */
     private void addToListWithoutDepcies(ObjectState action,
-            PgStatement oldObj, PgStatement starter) {
+                                         PgStatement oldObj, PgStatement starter) {
         switch (action) {
-        case CREATE, DROP -> actions.add(new ActionContainer(oldObj, oldObj, action, starter));
-        case ALTER, ALTER_WITH_DEP -> actions
-            .add(new ActionContainer(oldObj, oldObj.getTwin(newDb), ObjectState.ALTER, starter));
-        default -> throw new IllegalStateException("Not implemented action");
+            case CREATE, DROP -> actions.add(new ActionContainer(oldObj, oldObj, action, starter));
+            case ALTER, ALTER_WITH_DEP -> actions
+                    .add(new ActionContainer(oldObj, oldObj.getTwin(newDb), ObjectState.ALTER, starter));
+            default -> throw new IllegalStateException("Not implemented action");
         }
     }
 
@@ -585,15 +569,16 @@ public final class DepcyResolver {
     }
 
     public static Set<ActionContainer> resolve(AbstractDatabase oldDb, AbstractDatabase newDb,
-            List<Entry<PgStatement, PgStatement>> additionalDepciesOldDb,
-            List<Entry<PgStatement, PgStatement>> additionalDepciesNewDb,
-            Set<PgStatement> toRefresh, List<DbObject> dbObjects, ISettings settings) {
+                                               List<Entry<PgStatement, PgStatement>> additionalDepciesOldDb,
+                                               List<Entry<PgStatement, PgStatement>> additionalDepciesNewDb,
+                                               Set<PgStatement> toRefresh, List<DbObject> dbObjects, ISettings settings) {
         DepcyResolver depRes = new DepcyResolver(oldDb, newDb, settings, toRefresh);
         depRes.oldDepcyGraph.addCustomDepcies(additionalDepciesOldDb);
         depRes.newDepcyGraph.addCustomDepcies(additionalDepciesNewDb);
         depRes.fillObjects(dbObjects, null);
         depRes.recreateDrops();
         depRes.removeExtraActions();
+        depRes.removeAlteredFromRefreshes();
 
         return depRes.actions;
     }
