@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ms;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -39,8 +35,21 @@ import org.pgcodekeeper.core.schema.ms.MsTrigger;
 import org.pgcodekeeper.core.schema.ms.MsView;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+/**
+ * Reader for Microsoft SQL functions, procedures, views, and triggers.
+ * Loads function, procedure, view, and trigger definitions from sys.objects and sys.sql_modules.
+ */
 public final class MsFPVTReader extends JdbcReader {
 
+    /**
+     * Creates a new MsFPVTReader.
+     *
+     * @param loader the JDBC loader base
+     */
     public MsFPVTReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -59,10 +68,10 @@ public final class MsFPVTReader extends JdbcReader {
         // TF - SQL table-valued-function
 
         DbObjType tt = switch (type) {
-        case "TR" -> DbObjType.TRIGGER;
-        case "V " -> DbObjType.VIEW;
-        case "P " -> DbObjType.PROCEDURE;
-        default -> DbObjType.FUNCTION;
+            case "TR" -> DbObjType.TRIGGER;
+            case "V " -> DbObjType.VIEW;
+            case "P " -> DbObjType.PROCEDURE;
+            default -> DbObjType.FUNCTION;
         };
 
         loader.setCurrentObject(new GenericColumn(schema.getName(), name, tt));
@@ -128,16 +137,16 @@ public final class MsFPVTReader extends JdbcReader {
         addMsOwnerPart(builder);
 
         builder
-        .column("res.name")
-        .column("res.type")
-        .column("sm.definition")
-        .column("sm.uses_ansi_nulls AS ansi_nulls")
-        .column("sm.uses_quoted_identifier AS quoted_identifier")
-        .column("t.is_disabled")
-        .from("sys.objects res WITH (NOLOCK)")
-        .join("JOIN sys.sql_modules sm WITH (NOLOCK) ON sm.object_id=res.object_id")
-        .join("LEFT JOIN sys.triggers t WITH (NOLOCK) ON t.object_id=res.object_id")
-        .where("res.type IN (N'TR', N'V', N'IF', N'FN', N'TF', N'P')")
-        .where("definition IS NOT NULL");
+                .column("res.name")
+                .column("res.type")
+                .column("sm.definition")
+                .column("sm.uses_ansi_nulls AS ansi_nulls")
+                .column("sm.uses_quoted_identifier AS quoted_identifier")
+                .column("t.is_disabled")
+                .from("sys.objects res WITH (NOLOCK)")
+                .join("JOIN sys.sql_modules sm WITH (NOLOCK) ON sm.object_id=res.object_id")
+                .join("LEFT JOIN sys.triggers t WITH (NOLOCK) ON t.object_id=res.object_id")
+                .where("res.type IN (N'TR', N'V', N'IF', N'FN', N'TF', N'P')")
+                .where("definition IS NOT NULL");
     }
 }

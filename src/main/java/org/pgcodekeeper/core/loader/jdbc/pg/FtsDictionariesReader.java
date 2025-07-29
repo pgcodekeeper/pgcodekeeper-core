@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -27,8 +24,20 @@ import org.pgcodekeeper.core.parsers.antlr.statements.ParserAbstract;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.pg.PgFtsDictionary;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL full-text search dictionaries.
+ * Loads full-text search dictionary definitions from pg_ts_dict system catalog.
+ */
 public final class FtsDictionariesReader extends JdbcReader {
 
+    /**
+     * Constructs a new FtsDictionariesReader.
+     *
+     * @param loader the JDBC loader base instance
+     */
     public FtsDictionariesReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -75,13 +84,13 @@ public final class FtsDictionariesReader extends JdbcReader {
         addDescriptionPart(builder);
 
         builder
-        .column("res.dictname")
-        .column("res.dictowner::bigint")
-        .column("t.tmplname")
-        .column("n.nspname AS tmplnspname")
-        .column("res.dictinitoption")
-        .from("pg_catalog.pg_ts_dict res")
-        .join("LEFT JOIN pg_catalog.pg_ts_template t ON res.dicttemplate = t.oid")
-        .join("LEFT JOIN pg_catalog.pg_namespace n ON t.tmplnamespace = n.oid");
+                .column("res.dictname")
+                .column("res.dictowner::bigint")
+                .column("t.tmplname")
+                .column("n.nspname AS tmplnspname")
+                .column("res.dictinitoption")
+                .from("pg_catalog.pg_ts_dict res")
+                .join("LEFT JOIN pg_catalog.pg_ts_template t ON res.dicttemplate = t.oid")
+                .join("LEFT JOIN pg_catalog.pg_namespace n ON t.tmplnamespace = n.oid");
     }
 }

@@ -15,17 +15,26 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.pg.PgFtsTemplate;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL full-text search templates.
+ * Loads full-text search template definitions from pg_ts_template system catalog.
+ */
 public final class FtsTemplatesReader extends JdbcReader {
 
+    /**
+     * Constructs a new FtsTemplatesReader.
+     *
+     * @param loader the JDBC loader base instance
+     */
     public FtsTemplatesReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -64,9 +73,9 @@ public final class FtsTemplatesReader extends JdbcReader {
         addDescriptionPart(builder);
 
         builder
-        .column("res.tmplname")
-        .column("res.tmplinit")
-        .column("res.tmpllexize")
-        .from("pg_catalog.pg_ts_template res");
+                .column("res.tmplname")
+                .column("res.tmplinit")
+                .column("res.tmpllexize")
+                .from("pg_catalog.pg_ts_template res");
     }
 }

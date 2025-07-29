@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
@@ -29,8 +26,20 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.PgStatementContainer;
 import org.pgcodekeeper.core.schema.pg.PgRule;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL rules.
+ * Loads rule definitions from pg_rewrite and related system catalogs.
+ */
 public final class RulesReader extends JdbcReader {
 
+    /**
+     * Creates a new RulesReader.
+     *
+     * @param loader the JDBC loader instance
+     */
     public RulesReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -54,18 +63,18 @@ public final class RulesReader extends JdbcReader {
         PgRule r = new PgRule(ruleName);
 
         switch (res.getString("ev_type")) {
-        case "1":
-            r.setEvent(EventType.SELECT);
-            break;
-        case "2":
-            r.setEvent(EventType.UPDATE);
-            break;
-        case "3":
-            r.setEvent(EventType.INSERT);
-            break;
-        case "4":
-            r.setEvent(EventType.DELETE);
-            break;
+            case "1":
+                r.setEvent(EventType.SELECT);
+                break;
+            case "2":
+                r.setEvent(EventType.UPDATE);
+                break;
+            case "3":
+                r.setEvent(EventType.INSERT);
+                break;
+            case "4":
+                r.setEvent(EventType.DELETE);
+                break;
         }
 
         if (res.getBoolean("is_instead")) {
@@ -73,19 +82,19 @@ public final class RulesReader extends JdbcReader {
         }
 
         switch (res.getString("ev_enabled")) {
-        case "A":
-            r.setEnabledState("ENABLE ALWAYS");
-            break;
-        case "R":
-            r.setEnabledState("ENABLE REPLICA");
-            break;
-        case "D":
-            r.setEnabledState("DISABLE");
-            break;
+            case "A":
+                r.setEnabledState("ENABLE ALWAYS");
+                break;
+            case "R":
+                r.setEnabledState("ENABLE REPLICA");
+                break;
+            case "D":
+                r.setEnabledState("DISABLE");
+                break;
         }
 
         loader.submitAntlrTask(command, p -> p.sql().statement(0)
-                .schema_statement().schema_create().create_rewrite_statement(),
+                        .schema_statement().schema_create().create_rewrite_statement(),
                 ctx -> CreateRule.setConditionAndAddCommands(ctx, r,
                         schema.getDatabase(), loader.getCurrentLocation(), loader.getSettings()));
 
@@ -111,15 +120,15 @@ public final class RulesReader extends JdbcReader {
         addDescriptionPart(builder);
 
         builder
-        .column("ccc.relname")
-        .column("res.rulename")
-        .column("res.ev_type")
-        .column("res.is_instead")
-        .column("res.ev_enabled")
-        .column("pg_catalog.pg_get_ruledef(res.oid) AS rule_string")
-        .from("pg_catalog.pg_rewrite res")
-        .join("JOIN pg_catalog.pg_class ccc ON ccc.oid = res.ev_class")
-        // block rules that implement views
-        .where("NOT ((ccc.relkind = 'v' OR ccc.relkind = 'm') AND res.ev_type = '1' AND res.is_instead)");
+                .column("ccc.relname")
+                .column("res.rulename")
+                .column("res.ev_type")
+                .column("res.is_instead")
+                .column("res.ev_enabled")
+                .column("pg_catalog.pg_get_ruledef(res.oid) AS rule_string")
+                .from("pg_catalog.pg_rewrite res")
+                .join("JOIN pg_catalog.pg_class ccc ON ccc.oid = res.ev_class")
+                // block rules that implement views
+                .where("NOT ((ccc.relkind = 'v' OR ccc.relkind = 'm') AND res.ev_type = '1' AND res.is_instead)");
     }
 }

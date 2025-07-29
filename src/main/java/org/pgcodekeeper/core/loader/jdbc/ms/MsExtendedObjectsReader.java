@@ -15,11 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ms;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -27,18 +22,28 @@ import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.ArgMode;
-import org.pgcodekeeper.core.schema.Argument;
-import org.pgcodekeeper.core.schema.FuncTypes;
-import org.pgcodekeeper.core.schema.GenericColumn;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.ms.AbstractMsClrFunction;
 import org.pgcodekeeper.core.schema.ms.MsClrFunction;
 import org.pgcodekeeper.core.schema.ms.MsClrProcedure;
 import org.pgcodekeeper.core.schema.ms.MsColumn;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Reader for Microsoft SQL CLR functions and procedures.
+ * Loads CLR function and procedure definitions from sys.objects, sys.assembly_modules, and related system views.
+ */
 public class MsExtendedObjectsReader extends JdbcReader {
 
+    /**
+     * Creates a new MsExtendedObjectsReader.
+     *
+     * @param loader the JDBC loader base
+     */
     public MsExtendedObjectsReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -113,8 +118,8 @@ public class MsExtendedObjectsReader extends JdbcReader {
             boolean isUserDefined = arg.getBoolean("ud");
             Argument argDst = new Argument(arg.getBoolean("ou") ? ArgMode.OUTPUT : ArgMode.IN,
                     arg.getString("name"), JdbcLoaderBase.getMsType(func, arg.getString("st"),
-                            arg.getString("type"), isUserDefined, arg.getInt("size"),
-                            arg.getInt("pr"), arg.getInt("sc")));
+                    arg.getString("type"), isUserDefined, arg.getInt("size"),
+                    arg.getInt("pr"), arg.getInt("sc")));
 
             if (arg.getBoolean("hd")) {
                 String def = arg.getString("dv");
@@ -123,7 +128,7 @@ public class MsExtendedObjectsReader extends JdbcReader {
                 if (def == null) {
                     defValue = "NULL";
                 } else if ("varbinary".equals(baseType) || "nvarchar".equals(baseType)
-                        || "varchar".equals(baseType) ) {
+                        || "varchar".equals(baseType)) {
                     defValue = 'N' + PgDiffUtils.quoteString(def);
                 } else if ("bit".equals(baseType)) {
                     defValue = "1".equals(def) ? "True" : "False";
@@ -157,26 +162,26 @@ public class MsExtendedObjectsReader extends JdbcReader {
         addMsOwnerPart(builder);
 
         builder
-        .column("res.name")
-        .column("res.type")
-        .column("SCHEMA_NAME(usrt.schema_id) AS return_type_sh")
-        .column("usrt.name AS return_type")
-        .column("CASE WHEN ret_param.max_length>=0 AND usrt.name IN (N'nchar', N'nvarchar') THEN ret_param.max_length/2 ELSE ret_param.max_length END AS return_type_size")
-        .column("usrt.precision AS return_type_pr")
-        .column("usrt.scale AS return_type_sc")
-        .column("usrt.is_user_defined AS return_type_ud")
-        .column("am.null_on_null_input")
-        .column("p2.name AS execute_as")
-        .column("a.name AS assembly")
-        .column("am.assembly_class")
-        .column("am.assembly_method")
-        .from("sys.objects res WITH (NOLOCK)")
-        .join("JOIN sys.assembly_modules am WITH (NOLOCK) ON am.object_id=res.object_id")
-        .join("JOIN sys.assemblies a WITH (NOLOCK) ON a.assembly_id=am.assembly_id")
-        .join("LEFT JOIN sys.database_principals p2 WITH (NOLOCK) ON p2.principal_id=am.execute_as_principal_id")
-        .join("LEFT JOIN sys.all_parameters ret_param WITH (NOLOCK) ON ret_param.object_id = res.object_id and ret_param.parameter_id = 0")
-        .join("LEFT JOIN sys.types usrt WITH (NOLOCK) ON usrt.user_type_id = ret_param.user_type_id")
-        .where("res.type IN ('PC', 'FT', 'FS')");
+                .column("res.name")
+                .column("res.type")
+                .column("SCHEMA_NAME(usrt.schema_id) AS return_type_sh")
+                .column("usrt.name AS return_type")
+                .column("CASE WHEN ret_param.max_length>=0 AND usrt.name IN (N'nchar', N'nvarchar') THEN ret_param.max_length/2 ELSE ret_param.max_length END AS return_type_size")
+                .column("usrt.precision AS return_type_pr")
+                .column("usrt.scale AS return_type_sc")
+                .column("usrt.is_user_defined AS return_type_ud")
+                .column("am.null_on_null_input")
+                .column("p2.name AS execute_as")
+                .column("a.name AS assembly")
+                .column("am.assembly_class")
+                .column("am.assembly_method")
+                .from("sys.objects res WITH (NOLOCK)")
+                .join("JOIN sys.assembly_modules am WITH (NOLOCK) ON am.object_id=res.object_id")
+                .join("JOIN sys.assemblies a WITH (NOLOCK) ON a.assembly_id=am.assembly_id")
+                .join("LEFT JOIN sys.database_principals p2 WITH (NOLOCK) ON p2.principal_id=am.execute_as_principal_id")
+                .join("LEFT JOIN sys.all_parameters ret_param WITH (NOLOCK) ON ret_param.object_id = res.object_id and ret_param.parameter_id = 0")
+                .join("LEFT JOIN sys.types usrt WITH (NOLOCK) ON usrt.user_type_id = ret_param.user_type_id")
+                .where("res.type IN ('PC', 'FT', 'FS')");
     }
 
     private void addMsColumnsPart(QueryBuilder builder) {

@@ -15,15 +15,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc;
 
+import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.loader.QueryBuilder;
+import org.pgcodekeeper.core.localizations.Messages;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.loader.QueryBuilder;
-import org.pgcodekeeper.core.localizations.Messages;
-
+/**
+ * Abstract base class for JDBC statement readers that process database metadata.
+ * Provides common functionality for building SQL queries with extension and description support,
+ * and processing database objects from ResultSets.
+ */
 public abstract class AbstractStatementReader {
 
     private static final String PG_CATALOG = "pg_catalog.";
@@ -57,6 +62,13 @@ public abstract class AbstractStatementReader {
         this.classId = tmpClassId == null ? null : PgDiffUtils.quoteString(PG_CATALOG + tmpClassId);
     }
 
+    /**
+     * Reads database objects by executing the generated SQL query and processing results.
+     *
+     * @throws SQLException if database access fails
+     * @throws InterruptedException if reading is interrupted
+     * @throws XmlReaderException if XML processing fails
+     */
     public final void read() throws SQLException, InterruptedException, XmlReaderException {
         loader.setCurrentOperation(Messages.AbstractStatementReader_start + getClass().getSimpleName());
         QueryBuilder builder = makeQuery();
@@ -115,13 +127,13 @@ public abstract class AbstractStatementReader {
 
     protected void addMsPriviligesPart(QueryBuilder builder) {
         var subSelect = new QueryBuilder()
-            .column("*")
-            .from(formatMsPriviliges(MS_PRIVILEGES_JOIN_SUBSELECT.copy()), "aa")
-            .postAction("FOR XML RAW, ROOT");
+                .column("*")
+                .from(formatMsPriviliges(MS_PRIVILEGES_JOIN_SUBSELECT.copy()), "aa")
+                .postAction("FOR XML RAW, ROOT");
 
         builder
-            .column("aa.acl")
-            .join("CROSS APPLY", subSelect, "aa (acl)");
+                .column("aa.acl")
+                .join("CROSS APPLY", subSelect, "aa (acl)");
     }
 
     protected QueryBuilder formatMsPriviliges(QueryBuilder privileges) {

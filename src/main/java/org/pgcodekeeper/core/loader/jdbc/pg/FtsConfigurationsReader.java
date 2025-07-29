@@ -15,13 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
@@ -32,8 +25,24 @@ import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.pg.PgFtsConfiguration;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Reader for PostgreSQL full-text search configurations.
+ * Loads full-text search configuration definitions from pg_ts_config system catalog.
+ */
 public final class FtsConfigurationsReader extends JdbcReader {
 
+    /**
+     * Constructs a new FtsConfigurationsReader.
+     *
+     * @param loader the JDBC loader base instance
+     */
     public FtsConfigurationsReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -55,7 +64,7 @@ public final class FtsConfigurationsReader extends JdbcReader {
         if (fragments != null) {
             Map<String, List<String>> dictMap = new HashMap<>();
 
-            for (int i = 0; i < fragments.length; i ++) {
+            for (int i = 0; i < fragments.length; i++) {
                 String fragment = fragments[i];
                 String dictSchema = dictSchemas[i];
                 String dictName = dictionaries[i];
@@ -97,13 +106,13 @@ public final class FtsConfigurationsReader extends JdbcReader {
         addWordsPart(builder);
 
         builder
-        .column("res.cfgname")
-        .column("res.cfgowner::bigint")
-        .column("p.prsname")
-        .column("n.nspname AS prsnspname")
-        .from("pg_catalog.pg_ts_config res")
-        .join("LEFT JOIN pg_catalog.pg_ts_parser p ON p.oid = res.cfgparser")
-        .join("LEFT JOIN pg_catalog.pg_namespace n ON p.prsnamespace = n.oid");
+                .column("res.cfgname")
+                .column("res.cfgowner::bigint")
+                .column("p.prsname")
+                .column("n.nspname AS prsnspname")
+                .from("pg_catalog.pg_ts_config res")
+                .join("LEFT JOIN pg_catalog.pg_ts_parser p ON p.oid = res.cfgparser")
+                .join("LEFT JOIN pg_catalog.pg_namespace n ON p.prsnamespace = n.oid");
     }
 
     private void addWordsPart(QueryBuilder builder) {

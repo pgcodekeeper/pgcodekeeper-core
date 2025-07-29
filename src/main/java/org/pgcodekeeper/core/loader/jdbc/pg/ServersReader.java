@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
@@ -29,10 +26,23 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgServer;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL foreign servers.
+ * Loads foreign server definitions from pg_foreign_server system catalog.
+ */
 public final class ServersReader extends AbstractStatementReader {
 
     private final PgDatabase db;
 
+    /**
+     * Creates a new ServersReader.
+     *
+     * @param loader the JDBC loader base for database operations
+     * @param db     the PostgreSQL database to add servers to
+     */
     public ServersReader(JdbcLoaderBase loader, PgDatabase db) {
         super(loader);
         this.db = db;
@@ -77,14 +87,14 @@ public final class ServersReader extends AbstractStatementReader {
         addDescriptionPart(builder);
 
         builder
-        .column("res.srvname")
-        .column("res.srvtype")
-        .column("res.srvversion")
-        .column("res.srvacl")
-        .column("res.srvoptions")
-        .column("res.srvowner")
-        .column("fdw.fdwname")
-        .from("pg_catalog.pg_foreign_server res")
-        .join("LEFT JOIN pg_catalog.pg_foreign_data_wrapper fdw ON res.srvfdw = fdw.oid");
+                .column("res.srvname")
+                .column("res.srvtype")
+                .column("res.srvversion")
+                .column("res.srvacl")
+                .column("res.srvoptions")
+                .column("res.srvowner")
+                .column("fdw.fdwname")
+                .from("pg_catalog.pg_foreign_server res")
+                .join("LEFT JOIN pg_catalog.pg_foreign_data_wrapper fdw ON res.srvfdw = fdw.oid");
     }
 }

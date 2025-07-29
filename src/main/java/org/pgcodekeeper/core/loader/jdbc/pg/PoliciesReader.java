@@ -15,24 +15,29 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.VexAnalysisLauncher;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.EventType;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.PgStatementContainer;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.pg.PgPolicy;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL policies.
+ * Loads policy definitions from pg_policy and related system catalogs.
+ */
 public class PoliciesReader extends JdbcReader {
 
+    /**
+     * Creates a new PoliciesReader.
+     *
+     * @param loader the JDBC loader instance
+     */
     public PoliciesReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -52,18 +57,18 @@ public class PoliciesReader extends JdbcReader {
         PgPolicy p = new PgPolicy(policyName);
 
         switch (res.getString("polcmd")) {
-        case "r":
-            p.setEvent(EventType.SELECT);
-            break;
-        case "w":
-            p.setEvent(EventType.UPDATE);
-            break;
-        case "a":
-            p.setEvent(EventType.INSERT);
-            break;
-        case "d":
-            p.setEvent(EventType.DELETE);
-            break;
+            case "r":
+                p.setEvent(EventType.SELECT);
+                break;
+            case "w":
+                p.setEvent(EventType.UPDATE);
+                break;
+            case "a":
+                p.setEvent(EventType.INSERT);
+                break;
+            case "d":
+                p.setEvent(EventType.DELETE);
+                break;
         }
 
         String[] roles = getColArray(res, "polroles");
@@ -114,14 +119,14 @@ public class PoliciesReader extends JdbcReader {
         addDescriptionPart(builder);
 
         builder
-        .column("res.polname")
-        .column("c.relname")
-        .column("res.polcmd")
-        .column("ARRAY(SELECT pg_catalog.quote_ident(rolname) FROM pg_catalog.pg_roles WHERE oid = ANY(res.polroles)) AS polroles")
-        .column("pg_catalog.pg_get_expr(res.polqual, res.polrelid) AS polqual")
-        .column("pg_catalog.pg_get_expr(res.polwithcheck, res.polrelid) AS polwithcheck")
-        .from("pg_catalog.pg_policy res")
-        .join("JOIN pg_catalog.pg_class c ON c.oid = res.polrelid");
+                .column("res.polname")
+                .column("c.relname")
+                .column("res.polcmd")
+                .column("ARRAY(SELECT pg_catalog.quote_ident(rolname) FROM pg_catalog.pg_roles WHERE oid = ANY(res.polroles)) AS polroles")
+                .column("pg_catalog.pg_get_expr(res.polqual, res.polrelid) AS polqual")
+                .column("pg_catalog.pg_get_expr(res.polwithcheck, res.polrelid) AS polwithcheck")
+                .from("pg_catalog.pg_policy res")
+                .join("JOIN pg_catalog.pg_class c ON c.oid = res.polrelid");
 
         if (SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
             builder.column("res.polpermissive");

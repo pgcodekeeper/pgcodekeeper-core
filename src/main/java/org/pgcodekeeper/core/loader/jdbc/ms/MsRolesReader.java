@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ms;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -28,10 +25,23 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.schema.ms.MsRole;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for Microsoft SQL roles.
+ * Loads role definitions from sys.database_principals system view.
+ */
 public class MsRolesReader extends AbstractStatementReader {
 
     private final MsDatabase db;
 
+    /**
+     * Constructs a new Microsoft SQL roles reader.
+     *
+     * @param loader the JDBC loader base for database operations
+     * @param db     the Microsoft SQL database instance
+     */
     public MsRolesReader(JdbcLoaderBase loader, MsDatabase db) {
         super(loader);
         this.db = db;
@@ -61,11 +71,11 @@ public class MsRolesReader extends AbstractStatementReader {
         addMsOwnerPart("res.owning_principal_id", builder);
 
         builder
-        .column("res.name")
-        .from("sys.database_principals res WITH (NOLOCK)")
-        .where("res.type IN ('R')")
-        .where("res.is_fixed_role = 0")
-        .where("res.name != N'public'");
+                .column("res.name")
+                .from("sys.database_principals res WITH (NOLOCK)")
+                .where("res.type IN ('R')")
+                .where("res.is_fixed_role = 0")
+                .where("res.name != N'public'");
     }
 
     private void addMsGroupsPart(QueryBuilder builder) {

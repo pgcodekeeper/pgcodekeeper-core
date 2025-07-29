@@ -15,11 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc;
 
-import java.sql.Array;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.function.BiConsumer;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.Utils;
@@ -33,6 +28,15 @@ import org.pgcodekeeper.core.schema.PgStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Array;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.function.BiConsumer;
+
+/**
+ * Abstract base class for JDBC readers that process database objects within schemas.
+ * Extends AbstractStatementReader to provide schema-aware processing and dependency management.
+ */
 public abstract class JdbcReader extends AbstractStatementReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(JdbcReader.class);
@@ -85,18 +89,20 @@ public abstract class JdbcReader extends AbstractStatementReader {
         QueryBuilder builder = super.makeQuery();
         builder.column(getSchemaColumn());
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(getSchemaColumn()).append(" IN (").append(schemas).append(')');
-
-        builder.where(sb.toString());
+        builder.where(getSchemaColumn() + " IN (" + schemas + ')');
 
         return builder;
     }
 
     /**
-     * The functions that accept the oid / object name and return the set / processing of its metadata are considered unsafe.
-     * These functions can return null if the object was deleted outside the transaction block.
-     * This method checks the returned values.
+     * Checks validity of database objects that may be concurrently modified.
+     * Functions that accept OID/object name and return metadata are considered unsafe
+     * as they can return null if the object was deleted outside the transaction block.
+     *
+     * @param object the object to check for validity
+     * @param type the database object type
+     * @param name the object name
+     * @throws ConcurrentModificationException if the object is null (was deleted)
      */
     public static void checkObjectValidity(Object object, DbObjType type, String name) {
         if (object == null) {
@@ -106,8 +112,12 @@ public abstract class JdbcReader extends AbstractStatementReader {
     }
 
     /**
-     * Checks type for a match with null and unknown types that can come from
-     * functions that accept the oid / object name and return the set / processing of its metadata
+     * Checks type validity for concurrent modifications.
+     * Validates that the type is not null or unknown (???) which can occur
+     * when functions process metadata of concurrently modified objects.
+     *
+     * @param type the type string to validate
+     * @throws ConcurrentModificationException if the type is invalid
      */
     public static void checkTypeValidity(String type) {
         checkObjectValidity(type, DbObjType.TYPE, "");
@@ -116,6 +126,15 @@ public abstract class JdbcReader extends AbstractStatementReader {
         }
     }
 
+    /**
+     * Retrieves an array column from the result set.
+     *
+     * @param <T> the array element type
+     * @param rs the result set
+     * @param columnName the column name containing the array
+     * @return the array values, or null if the column is null
+     * @throws SQLException if array retrieval fails
+     */
     public static <T> T[] getColArray(ResultSet rs, String columnName) throws SQLException {
         Array arr = rs.getArray(columnName);
         if (arr != null) {
@@ -135,6 +154,16 @@ public abstract class JdbcReader extends AbstractStatementReader {
         setFunctionWithDep(setter, statement, function, null);
     }
 
+    /**
+     * Sets a function reference on a statement and adds appropriate dependencies.
+     * Parses the function name to extract schema information and adds schema and function dependencies.
+     *
+     * @param <T> the statement type
+     * @param setter the setter to apply the function value
+     * @param statement the statement to add dependencies to
+     * @param function the function name (possibly schema-qualified)
+     * @param signature the function signature, or null if not applicable
+     */
     public static <T extends PgStatement> void setFunctionWithDep(
             BiConsumer<T, String> setter, T statement, String function, String signature) {
         if (function.indexOf('.') != -1) {

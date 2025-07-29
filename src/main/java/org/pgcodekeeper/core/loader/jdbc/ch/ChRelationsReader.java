@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ch;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Locale;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -31,15 +27,24 @@ import org.pgcodekeeper.core.parsers.antlr.statements.ch.CreateChView;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
-import org.pgcodekeeper.core.schema.ch.ChDictionary;
-import org.pgcodekeeper.core.schema.ch.ChTable;
-import org.pgcodekeeper.core.schema.ch.ChTableLog;
-import org.pgcodekeeper.core.schema.ch.ChView;
+import org.pgcodekeeper.core.schema.ch.*;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Locale;
+
+/**
+ * Reader for ClickHouse relations.
+ * Loads table, view, and dictionary definitions from system.tables table.
+ */
 public final class ChRelationsReader extends JdbcReader {
 
+    /**
+     * Creates a new ChRelationsReader.
+     *
+     * @param loader the JDBC loader instance
+     */
     public ChRelationsReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -81,7 +86,7 @@ public final class ChRelationsReader extends JdbcReader {
                         (CommonTokenStream) p.getTokenStream()),
                 pair -> new CreateChView(pair.getFirst(), (ChDatabase) schema.getDatabase(), pair.getSecond(),
                         loader.getSettings())
-                .parseObject(view));
+                        .parseObject(view));
         return view;
     }
 
@@ -108,10 +113,10 @@ public final class ChRelationsReader extends JdbcReader {
     @Override
     protected void fillQueryBuilder(QueryBuilder builder) {
         builder
-        .column("res.name")
-        .column("res.create_table_query AS definition")
-        .column("res.engine")
-        .from("system.tables res")
-        .where("notLike(res.name, '.inner_id.%')");
+                .column("res.name")
+                .column("res.create_table_query AS definition")
+                .column("res.engine")
+                .from("system.tables res")
+                .where("notLike(res.name, '.inner_id.%')");
     }
 }

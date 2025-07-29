@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ms;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
@@ -28,8 +25,20 @@ import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.ms.MsConstraintFk;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for Microsoft SQL foreign key constraints.
+ * Loads foreign key constraint definitions from sys.foreign_keys and sys.foreign_key_columns.
+ */
 public class MsFKReader extends JdbcReader {
 
+    /**
+     * Creates a new MsFKReader.
+     *
+     * @param loader the JDBC loader base
+     */
     public MsFKReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -83,18 +92,18 @@ public class MsFKReader extends JdbcReader {
         addMsColsPart(builder);
 
         builder
-        .column("fs.name AS table_name")
-        .column("res.name")
-        .column("SCHEMA_NAME(rs.schema_id) AS referenced_schema_name")
-        .column("rs.name AS referenced_table_name")
-        .column("res.is_disabled")
-        .column("res.is_not_for_replication")
-        .column("res.update_referential_action")
-        .column("res.is_not_trusted AS with_no_check")
-        .column("res.delete_referential_action")
-        .from("sys.foreign_keys res WITH (NOLOCK)")
-        .join("JOIN sys.objects fs WITH (NOLOCK) ON res.parent_object_id=fs.object_id")
-        .join("JOIN sys.objects rs WITH (NOLOCK) ON res.referenced_object_id=rs.object_id");
+                .column("fs.name AS table_name")
+                .column("res.name")
+                .column("SCHEMA_NAME(rs.schema_id) AS referenced_schema_name")
+                .column("rs.name AS referenced_table_name")
+                .column("res.is_disabled")
+                .column("res.is_not_for_replication")
+                .column("res.update_referential_action")
+                .column("res.is_not_trusted AS with_no_check")
+                .column("res.delete_referential_action")
+                .from("sys.foreign_keys res WITH (NOLOCK)")
+                .join("JOIN sys.objects fs WITH (NOLOCK) ON res.parent_object_id=fs.object_id")
+                .join("JOIN sys.objects rs WITH (NOLOCK) ON res.referenced_object_id=rs.object_id");
     }
 
     protected void addMsColsPart(QueryBuilder builder) {

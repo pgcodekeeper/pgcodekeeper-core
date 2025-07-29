@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ch;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -28,10 +25,23 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.schema.ch.ChFunction;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for ClickHouse functions.
+ * Loads function definitions from system.functions table.
+ */
 public final class ChFunctionsReader extends AbstractStatementReader {
 
     private final ChDatabase db;
 
+    /**
+     * Creates a new ChFunctionsReader.
+     *
+     * @param loader the JDBC loader instance
+     * @param db     the ClickHouse database to load functions into
+     */
     public ChFunctionsReader(JdbcLoaderBase loader, ChDatabase db) {
         super(loader);
         this.db = db;
@@ -55,9 +65,9 @@ public final class ChFunctionsReader extends AbstractStatementReader {
     @Override
     protected void fillQueryBuilder(QueryBuilder builder) {
         builder
-        .column("create_query")
-        .column("name")
-        .from("system.functions")
-        .where("origin != 'System'");
+                .column("create_query")
+                .column("name")
+                .from("system.functions")
+                .where("origin != 'System'");
     }
 }

@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ms;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -29,10 +26,23 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.ms.MsAssembly;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for Microsoft SQL assemblies.
+ * Loads assembly definitions from sys.assemblies and sys.assembly_files.
+ */
 public class MsAssembliesReader extends AbstractStatementReader {
 
     private final MsDatabase db;
 
+    /**
+     * Creates a new MsAssembliesReader.
+     *
+     * @param loader the JDBC loader base
+     * @param db     the Microsoft SQL database
+     */
     public MsAssembliesReader(JdbcLoaderBase loader, MsDatabase db) {
         super(loader);
         this.db = db;
@@ -70,11 +80,11 @@ public class MsAssembliesReader extends AbstractStatementReader {
         addMsOwnerPart(builder);
 
         builder
-        .column("res.name")
-        .column("res.is_visible")
-        .column("res.permission_set")
-        .from("sys.assemblies res WITH (NOLOCK)")
-        .where("res.is_user_defined = 1");
+                .column("res.name")
+                .column("res.is_visible")
+                .column("res.permission_set")
+                .from("sys.assemblies res WITH (NOLOCK)")
+                .where("res.is_user_defined = 1");
     }
 
     private void addMsBinariesPart(QueryBuilder builder) {

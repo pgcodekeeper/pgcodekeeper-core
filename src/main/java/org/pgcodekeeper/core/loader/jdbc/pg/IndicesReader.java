@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -32,8 +29,20 @@ import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgIndex;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL indices.
+ * Loads index definitions from pg_class and related system catalogs.
+ */
 public final class IndicesReader extends JdbcReader {
 
+    /**
+     * Creates a new IndicesReader.
+     *
+     * @param loader the JDBC loader instance
+     */
     public IndicesReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -54,7 +63,7 @@ public final class IndicesReader extends JdbcReader {
         String definition = res.getString("definition");
         checkObjectValidity(definition, DbObjType.INDEX, indexName);
         loader.submitAntlrTask(definition,
-                p ->  new Pair<>(p.sql().statement(0).schema_statement().schema_create().create_index_statement().index_rest(),
+                p -> new Pair<>(p.sql().statement(0).schema_statement().schema_create().create_index_statement().index_rest(),
                         (CommonTokenStream) p.getTokenStream()),
                 pair -> CreateIndex.parseIndex(pair.getFirst(), tablespace, schemaName, tableName, i,
                         (PgDatabase) schema.getDatabase(), loader.getCurrentLocation(), pair.getSecond(),
@@ -94,26 +103,26 @@ public final class IndicesReader extends JdbcReader {
         addDescriptionPart(builder, true);
 
         builder
-        .column("res.relname")
-        .column("clsrel.relname AS table_name")
-        .column("ind.indisunique")
-        .column("ind.indisclustered")
-        .column("t.spcname")
-        .column("pg_catalog.pg_get_indexdef(res.oid) AS definition")
-        .column("inhns.nspname AS inhnspname")
-        .column("inhrel.relname AS inhrelname")
-        .from("pg_catalog.pg_class res")
-        .join("JOIN pg_catalog.pg_index ind ON res.oid = ind.indexrelid")
-        .join("JOIN pg_catalog.pg_class clsrel ON clsrel.oid = ind.indrelid")
-        .join("LEFT JOIN pg_catalog.pg_tablespace t ON res.reltablespace = t.oid")
-        .join("LEFT JOIN pg_catalog.pg_constraint cons ON cons.conindid = ind.indexrelid AND cons.contype IN ('p', 'u', 'x')")
-        .join("LEFT JOIN pg_catalog.pg_inherits inh ON (inh.inhrelid = ind.indexrelid)")
-        .join("LEFT JOIN pg_catalog.pg_class inhrel ON (inh.inhparent = inhrel.oid)")
-        .join("LEFT JOIN pg_catalog.pg_namespace inhns ON inhrel.relnamespace = inhns.oid")
-        .where("res.relkind IN ('i', 'I')")
-        .where("ind.indisprimary = FALSE")
-        .where("ind.indisexclusion = FALSE")
-        .where("cons.conindid is NULL");
+                .column("res.relname")
+                .column("clsrel.relname AS table_name")
+                .column("ind.indisunique")
+                .column("ind.indisclustered")
+                .column("t.spcname")
+                .column("pg_catalog.pg_get_indexdef(res.oid) AS definition")
+                .column("inhns.nspname AS inhnspname")
+                .column("inhrel.relname AS inhrelname")
+                .from("pg_catalog.pg_class res")
+                .join("JOIN pg_catalog.pg_index ind ON res.oid = ind.indexrelid")
+                .join("JOIN pg_catalog.pg_class clsrel ON clsrel.oid = ind.indrelid")
+                .join("LEFT JOIN pg_catalog.pg_tablespace t ON res.reltablespace = t.oid")
+                .join("LEFT JOIN pg_catalog.pg_constraint cons ON cons.conindid = ind.indexrelid AND cons.contype IN ('p', 'u', 'x')")
+                .join("LEFT JOIN pg_catalog.pg_inherits inh ON (inh.inhrelid = ind.indexrelid)")
+                .join("LEFT JOIN pg_catalog.pg_class inhrel ON (inh.inhparent = inhrel.oid)")
+                .join("LEFT JOIN pg_catalog.pg_namespace inhns ON inhrel.relnamespace = inhns.oid")
+                .where("res.relkind IN ('i', 'I')")
+                .where("ind.indisprimary = FALSE")
+                .where("ind.indisexclusion = FALSE")
+                .where("cons.conindid is NULL");
 
         if (SupportedPgVersion.VERSION_15.isLE(loader.getVersion())) {
             builder.column("ind.indnullsnotdistinct");

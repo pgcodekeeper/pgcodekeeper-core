@@ -15,22 +15,26 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ch;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.function.BiConsumer;
-
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.PgStatement;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.function.BiConsumer;
+
+/**
+ * Utility class for ClickHouse JDBC operations.
+ * Provides helper methods for processing ClickHouse-specific database metadata.
+ */
 public final class ChJdbcUtils {
 
     private ChJdbcUtils() {
     }
 
     static <T extends PgStatement> void addRoles(ResultSet res, String roleCol, String exceptCol, T statement,
-            BiConsumer<T, String> addRoleMethod, BiConsumer<T, String> addExceptMethod) throws SQLException {
+                                                 BiConsumer<T, String> addRoleMethod, BiConsumer<T, String> addExceptMethod) throws SQLException {
         String[] roles = JdbcReader.getColArray(res, roleCol);
         if (roles != null) {
             for (String role : roles) {

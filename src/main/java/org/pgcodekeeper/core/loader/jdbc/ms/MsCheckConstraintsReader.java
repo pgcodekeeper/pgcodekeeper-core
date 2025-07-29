@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ms;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
@@ -27,8 +24,20 @@ import org.pgcodekeeper.core.schema.AbstractTable;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.ms.MsConstraintCheck;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for Microsoft SQL check constraints.
+ * Loads check constraint definitions from sys.check_constraints.
+ */
 public class MsCheckConstraintsReader extends JdbcReader {
 
+    /**
+     * Creates a new MsCheckConstraintsReader.
+     *
+     * @param loader the JDBC loader base
+     */
     public MsCheckConstraintsReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -61,13 +70,13 @@ public class MsCheckConstraintsReader extends JdbcReader {
     @Override
     protected void fillQueryBuilder(QueryBuilder builder) {
         builder
-        .column("so.name AS table_name")
-        .column("res.name")
-        .column("res.is_not_for_replication")
-        .column("res.is_not_trusted AS with_no_check")
-        .column("res.is_disabled")
-        .column("res.definition")
-        .from("sys.check_constraints res WITH (NOLOCK)")
-        .join("INNER JOIN sys.objects so WITH (NOLOCK) ON so.object_id=res.parent_object_id");
+                .column("so.name AS table_name")
+                .column("res.name")
+                .column("res.is_not_for_replication")
+                .column("res.is_not_trusted AS with_no_check")
+                .column("res.is_disabled")
+                .column("res.definition")
+                .from("sys.check_constraints res WITH (NOLOCK)")
+                .join("INNER JOIN sys.objects so WITH (NOLOCK) ON so.object_id=res.parent_object_id");
     }
 }

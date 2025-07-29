@@ -15,11 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ms;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -37,8 +32,22 @@ import org.pgcodekeeper.core.schema.ms.MsColumn;
 import org.pgcodekeeper.core.schema.ms.MsTable;
 import org.pgcodekeeper.core.schema.ms.MsType;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Reader for Microsoft SQL tables.
+ * Loads table definitions from sys.tables system view.
+ */
 public class MsTablesReader extends JdbcReader {
 
+    /**
+     * Constructs a new Microsoft SQL tables reader.
+     *
+     * @param loader the JDBC loader base for database operations
+     */
     public MsTablesReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -79,7 +88,7 @@ public class MsTablesReader extends JdbcReader {
         }
 
         String cols = res.getString("cols");
-        List <XmlReader> xmlCols = XmlReader.readXML(cols);
+        List<XmlReader> xmlCols = XmlReader.readXML(cols);
         boolean isTextImage = false;
         for (XmlReader col : xmlCols) {
             isTextImage = isTextImage || col.getBoolean("ti");
@@ -141,7 +150,7 @@ public class MsTablesReader extends JdbcReader {
             var histRetPeriod = res.getString("history_retention_period_unit_desc");
             if (null != histRetPeriod && !Objects.equals("INFINITE", histRetPeriod)) {
                 sysVersioning.append(", HISTORY_RETENTION_PERIOD = ").append(res.getInt("history_retention_period"))
-                .append(' ').append(histRetPeriod);
+                        .append(' ').append(histRetPeriod);
             }
         }
         sysVersioning.append(')');
@@ -220,46 +229,46 @@ public class MsTablesReader extends JdbcReader {
         addMsOwnerPart(builder);
 
         builder
-        .column("res.name")
-        .column("c.name AS part_column")
-        .column("ds.name AS file_stream")
-        .column("dsx.name AS text_image")
-        .column("res.uses_ansi_nulls")
-        .column("sp.data_compression")
-        .column("sp.data_compression_desc")
-        .column("ctt.is_track_columns_updated_on AS is_tracked")
-        .from("sys.tables res WITH (NOLOCK)")
-        .join("JOIN sys.indexes ind WITH (NOLOCK) on ind.object_id = res.object_id")
-        .join("JOIN sys.partitions sp WITH (NOLOCK) ON sp.object_id = res.object_id AND ind.index_id = sp.index_id AND sp.index_id IN (0,1) AND sp.partition_number = 1")
-        .join("LEFT JOIN sys.data_spaces ds WITH (NOLOCK) ON res.filestream_data_space_id = ds.data_space_id")
-        .join("LEFT JOIN sys.data_spaces dsx WITH (NOLOCK) ON dsx.data_space_id=res.lob_data_space_id")
-        .join("LEFT JOIN sys.index_columns ic WITH (NOLOCK) ON ic.partition_ordinal > 0 AND ic.index_id = ind.index_id and ic.object_id = res.object_id")
-        .join("LEFT JOIN sys.columns c WITH (NOLOCK) ON c.object_id = ic.object_id AND c.column_id = ic.column_id")
-        .join("LEFT JOIN sys.change_tracking_tables ctt WITH (NOLOCK) ON ctt.object_id = res.object_id")
-        .where("res.type = 'U'");
+                .column("res.name")
+                .column("c.name AS part_column")
+                .column("ds.name AS file_stream")
+                .column("dsx.name AS text_image")
+                .column("res.uses_ansi_nulls")
+                .column("sp.data_compression")
+                .column("sp.data_compression_desc")
+                .column("ctt.is_track_columns_updated_on AS is_tracked")
+                .from("sys.tables res WITH (NOLOCK)")
+                .join("JOIN sys.indexes ind WITH (NOLOCK) on ind.object_id = res.object_id")
+                .join("JOIN sys.partitions sp WITH (NOLOCK) ON sp.object_id = res.object_id AND ind.index_id = sp.index_id AND sp.index_id IN (0,1) AND sp.partition_number = 1")
+                .join("LEFT JOIN sys.data_spaces ds WITH (NOLOCK) ON res.filestream_data_space_id = ds.data_space_id")
+                .join("LEFT JOIN sys.data_spaces dsx WITH (NOLOCK) ON dsx.data_space_id=res.lob_data_space_id")
+                .join("LEFT JOIN sys.index_columns ic WITH (NOLOCK) ON ic.partition_ordinal > 0 AND ic.index_id = ind.index_id and ic.object_id = res.object_id")
+                .join("LEFT JOIN sys.columns c WITH (NOLOCK) ON c.object_id = ic.object_id AND c.column_id = ic.column_id")
+                .join("LEFT JOIN sys.change_tracking_tables ctt WITH (NOLOCK) ON ctt.object_id = res.object_id")
+                .where("res.type = 'U'");
 
         if (SupportedMsVersion.VERSION_14.isLE(loader.getVersion())) {
             builder
-            .column("res.is_memory_optimized")
-            .column("res.durability")
-            .column("res.durability_desc");
+                    .column("res.is_memory_optimized")
+                    .column("res.durability")
+                    .column("res.durability_desc");
         }
 
         if (SupportedMsVersion.VERSION_16.isLE(loader.getVersion())) {
             builder
-            .column("per.start_column_id AS start_col_id")
-            .column("per.end_column_id AS end_col_id")
-            .column("SCHEMA_NAME(hist.schema_id) as hist_schema")
-            .column("hist.name as hist_table")
-            .column("res.temporal_type")
-            .join("LEFT JOIN sys.periods per WITH (NOLOCK) ON per.object_id = res.object_id")
-            .join("LEFT JOIN sys.objects hist WITH (NOLOCK) ON hist.object_id = res.history_table_id");
+                    .column("per.start_column_id AS start_col_id")
+                    .column("per.end_column_id AS end_col_id")
+                    .column("SCHEMA_NAME(hist.schema_id) as hist_schema")
+                    .column("hist.name as hist_table")
+                    .column("res.temporal_type")
+                    .join("LEFT JOIN sys.periods per WITH (NOLOCK) ON per.object_id = res.object_id")
+                    .join("LEFT JOIN sys.objects hist WITH (NOLOCK) ON hist.object_id = res.history_table_id");
         }
 
         if (SupportedMsVersion.VERSION_17.isLE(loader.getVersion())) {
             builder
-            .column("res.history_retention_period_unit_desc")
-            .column("res.history_retention_period");
+                    .column("res.history_retention_period_unit_desc")
+                    .column("res.history_retention_period");
         }
 
         if (SupportedMsVersion.VERSION_22.isLE(loader.getVersion())) {
@@ -304,10 +313,10 @@ public class MsTablesReader extends JdbcReader {
 
         if (SupportedMsVersion.VERSION_16.isLE(loader.getVersion())) {
             subSelect
-            .column("c.is_hidden AS hd")
-            .column("c.generated_always_type AS gen")
-            .column("mc.masking_function AS mf")
-            .join("LEFT JOIN sys.masked_columns mc WITH (NOLOCK) ON mc.object_id = c.object_id AND c.column_id = mc.column_id");
+                    .column("c.is_hidden AS hd")
+                    .column("c.generated_always_type AS gen")
+                    .column("mc.masking_function AS mf")
+                    .join("LEFT JOIN sys.masked_columns mc WITH (NOLOCK) ON mc.object_id = c.object_id AND c.column_id = mc.column_id");
         }
 
         QueryBuilder cols = new QueryBuilder()
@@ -316,8 +325,8 @@ public class MsTablesReader extends JdbcReader {
                 .postAction("FOR XML RAW, ROOT");
 
         builder
-        .column("cc.cols")
-        .join("CROSS APPLY", cols, "cc (cols)");
+                .column("cc.cols")
+                .join("CROSS APPLY", cols, "cc (cols)");
     }
 
     private void addMsTablespacePart(QueryBuilder builder) {

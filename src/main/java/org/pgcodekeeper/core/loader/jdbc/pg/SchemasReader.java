@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
@@ -28,10 +25,23 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgSchema;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL schemas.
+ * Loads schema definitions from pg_namespace system catalog.
+ */
 public class SchemasReader extends AbstractStatementReader {
 
     private final PgDatabase db;
 
+    /**
+     * Creates a new SchemasReader.
+     *
+     * @param loader the JDBC loader instance
+     * @param db     the PostgreSQL database instance
+     */
     public SchemasReader(JdbcLoaderBase loader, PgDatabase db) {
         super(loader);
         this.db = db;
@@ -73,12 +83,12 @@ public class SchemasReader extends AbstractStatementReader {
         addDescriptionPart(builder);
 
         builder
-        .column("res.oid")
-        .column("res.nspname")
-        .column("res.nspacl")
-        .column("res.nspowner")
-        .from("pg_catalog.pg_namespace res")
-        .where("res.nspname NOT LIKE 'pg\\_%'")
-        .where("res.nspname != 'information_schema'");
+                .column("res.oid")
+                .column("res.nspname")
+                .column("res.nspacl")
+                .column("res.nspowner")
+                .from("pg_catalog.pg_namespace res")
+                .where("res.nspname NOT LIKE 'pg\\_%'")
+                .where("res.nspname != 'information_schema'");
     }
 }

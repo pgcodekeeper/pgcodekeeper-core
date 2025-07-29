@@ -15,15 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc;
 
+import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.parsers.antlr.AntlrParser;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.parsers.antlr.AntlrParser;
 
 /**
  * Parser for aclItem arrays
@@ -85,6 +84,11 @@ final class JdbcPrivilege {
         return grantee;
     }
 
+    /**
+     * Returns the list of granted privileges.
+     *
+     * @return unmodifiable list of grant values
+     */
     public List<String> getGrantValues() {
         return Collections.unmodifiableList(grantValues);
     }
@@ -97,24 +101,32 @@ final class JdbcPrivilege {
         return isDefault;
     }
 
+    /**
+     * Returns whether this privilege grants all permissions to PUBLIC.
+     *
+     * @return true if this grants ALL to PUBLIC
+     */
     public boolean isGrantAllToPublic() {
         return "PUBLIC".equals(grantee) && "ALL".equals(grantValues.get(0));
     }
 
+    /**
+     * Returns a formatted grant string with column suffixes.
+     *
+     * @param column the column suffix to append to each grant
+     * @return formatted grant string
+     */
     public String getGrantString(String column) {
         return grantValues.stream().collect(Collectors.joining(column + ',', "", column));
     }
 
     /**
-     * Receives AclItem[] as String and parses it to list of Privilege objects.
+     * Parses AclItem array string into a list of privilege objects.
      *
-     * @param aclArrayAsString
-     *            String representation of AclItem array
-     * @param order
-     *            Target order for privileges inside the privilege string (not a result list sorting)
-     * @param owner
-     *            Owner name (owner's privileges go first)
-     * @return list of privilege
+     * @param aclArrayAsString string representation of AclItem array
+     * @param order            target order for privileges inside the privilege string
+     * @param owner            owner name (owner's privileges go first)
+     * @return list of parsed privileges
      */
     public static List<JdbcPrivilege> parse(String aclArrayAsString, String order, String owner) {
         List<JdbcPrivilege> privileges = new ArrayList<>();
@@ -163,11 +175,11 @@ final class JdbcPrivilege {
 
             int maxTypes = order.length();
             if (grantTypeCharsWithoutGo.size() == maxTypes) {
-                adder.accept(new JdbcPrivilege(grantee, Arrays.asList("ALL"),
+                adder.accept(new JdbcPrivilege(grantee, List.of("ALL"),
                         false, grantee.equals(owner) && grantor.equals(owner)));
 
             } else if (grantTypeCharsWithGo.size() == maxTypes) {
-                adder.accept(new JdbcPrivilege(grantee, Arrays.asList("ALL"), true, false));
+                adder.accept(new JdbcPrivilege(grantee, List.of("ALL"), true, false));
 
             } else if (grantTypeCharsWithoutGo.size() < maxTypes && grantTypeCharsWithGo.size() < maxTypes) {
                 // add all grants without grant option
@@ -181,10 +193,9 @@ final class JdbcPrivilege {
     }
 
     private static void addAllGrants(boolean isGO, List<Character> grantTypeChars,
-            String grantee, Consumer<JdbcPrivilege> adder) {
+                                     String grantee, Consumer<JdbcPrivilege> adder) {
         List<String> grantTypesParsed = new ArrayList<>();
-        for (int i = 0; i < grantTypeChars.size(); i++) {
-            char c = grantTypeChars.get(i);
+        for (char c : grantTypeChars) {
             grantTypesParsed.add(PrivilegeTypes.valueOf(c));
         }
         if (!grantTypesParsed.isEmpty()) {

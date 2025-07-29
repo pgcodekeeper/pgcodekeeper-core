@@ -15,27 +15,57 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc;
 
+/**
+ * Exception thrown when XML reading operations fail during JDBC metadata processing.
+ */
 public class XmlReaderException extends Exception {
 
     private static final long serialVersionUID = 893099268209172548L;
 
+    /**
+     * Creates a new XML reader exception with no message or cause.
+     */
     public XmlReaderException() {
     }
 
+    /**
+     * Creates a new XML reader exception with the specified message.
+     *
+     * @param message the detail message
+     */
     public XmlReaderException(String message) {
         super(message);
     }
 
+    /**
+     * Creates a new XML reader exception with the specified cause.
+     *
+     * @param cause the cause of this exception
+     */
     public XmlReaderException(Throwable cause) {
         super(cause);
     }
 
+    /**
+     * Creates a new XML reader exception with the specified message and cause.
+     *
+     * @param message the detail message
+     * @param cause   the cause of this exception
+     */
     public XmlReaderException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Creates a new XML reader exception with full configuration.
+     *
+     * @param message            the detail message
+     * @param cause              the cause of this exception
+     * @param enableSuppression  whether suppression is enabled
+     * @param writableStackTrace whether the stack trace should be writable
+     */
     public XmlReaderException(String message, Throwable cause,
-            boolean enableSuppression, boolean writableStackTrace) {
+                              boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

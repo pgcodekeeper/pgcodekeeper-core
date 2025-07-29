@@ -15,6 +15,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
+import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.loader.JdbcQueries;
+import org.pgcodekeeper.core.loader.QueryBuilder;
+import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
+import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
+import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
+import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.schema.*;
+import org.pgcodekeeper.core.schema.pg.PgColumn;
+import org.pgcodekeeper.core.schema.pg.PgSequence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,30 +38,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.loader.JdbcQueries;
-import org.pgcodekeeper.core.loader.QueryBuilder;
-import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
-import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
-import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
-import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.AbstractSequence;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.pg.PgColumn;
-import org.pgcodekeeper.core.schema.pg.PgSequence;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+/**
+ * Reader for PostgreSQL sequences.
+ * Loads sequence definitions from pg_class and related system catalogs.
+ */
 public final class SequencesReader extends JdbcReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(SequencesReader.class);
 
     private static final int DATA_SELECT_LENGTH;
 
+    /**
+     * Creates a new SequencesReader.
+     *
+     * @param loader the JDBC loader base for database operations
+     */
     public SequencesReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -122,9 +127,9 @@ public final class SequencesReader extends JdbcReader {
         DATA_SELECT_LENGTH =
                 // static part
                 JdbcQueries.QUERY_SEQUENCES_DATA.length() +
-                // dynamic part
-                (",'test_id78901234567890123456789.test_id78901234567890123456789' qname"
-                        + " FROM test_id78901234567890123456789.test_id78901234567890123456789 UNION ALL ").length();
+                        // dynamic part
+                        (",'test_id78901234567890123456789.test_id78901234567890123456789' qname"
+                                + " FROM test_id78901234567890123456789.test_id78901234567890123456789 UNION ALL ").length();
     }
 
     public static void querySequencesData(AbstractDatabase db, JdbcLoaderBase loader)
@@ -143,7 +148,7 @@ public final class SequencesReader extends JdbcReader {
                     Object hasPriv = schemaRes.getObject("has_priv");
                     JdbcReader.checkObjectValidity(hasPriv, DbObjType.SCHEMA, schema);
 
-                    if ((boolean)hasPriv) {
+                    if ((boolean) hasPriv) {
                         schemasAccess.add(schema);
                     } else {
                         loader.addError("No USAGE privileges for schema " + schema +
@@ -174,15 +179,15 @@ public final class SequencesReader extends JdbcReader {
                     Object hasPriv = res.getObject("has_priv");
                     JdbcReader.checkObjectValidity(hasPriv, DbObjType.SEQUENCE, qname);
 
-                    if ((boolean)hasPriv) {
-                        if (sbUnionQuery.length() > 0) {
+                    if ((boolean) hasPriv) {
+                        if (!sbUnionQuery.isEmpty()) {
                             sbUnionQuery.append("\nUNION ALL\n");
                         }
                         sbUnionQuery.append(JdbcQueries.QUERY_SEQUENCES_DATA)
-                        .append(',')
-                        .append(PgDiffUtils.quoteString(qname))
-                        .append(" qname FROM ")
-                        .append(qname);
+                                .append(',')
+                                .append(PgDiffUtils.quoteString(qname))
+                                .append(" qname FROM ")
+                                .append(qname);
                     } else {
                         loader.addError("No SELECT privileges for sequence " + qname +
                                 ". Its data will be missing.");
@@ -192,7 +197,7 @@ public final class SequencesReader extends JdbcReader {
                 arrSeqs.free();
             }
         }
-        if (sbUnionQuery.length() < 1) {
+        if (sbUnionQuery.isEmpty()) {
             return;
         }
 
@@ -225,29 +230,29 @@ public final class SequencesReader extends JdbcReader {
         addDescriptionPart(builder, true);
 
         builder
-        .column("res.relowner::bigint")
-        .column("res.relname")
-        .column("res.relpersistence")
-        .column("(SELECT t.relname FROM pg_catalog.pg_class t WHERE t.oid=dep.refobjid) referenced_table_name")
-        .column("a.attname AS ref_col_name")
-        .column("res.relacl::text AS aclarray")
-        .from("pg_catalog.pg_class res")
-        .join("LEFT JOIN pg_catalog.pg_depend dep ON dep.classid = res.tableoid AND dep.objid = res.oid AND dep.objsubid = 0"
-                + " AND dep.refclassid = res.tableoid AND dep.refobjsubid != 0 AND dep.deptype IN ('i', 'a')")
-        .join("LEFT JOIN pg_catalog.pg_attribute a ON a.attrelid = dep.refobjid AND a.attnum = dep.refobjsubid AND a.attisdropped IS FALSE")
-        .where("res.relkind = 'S'");
+                .column("res.relowner::bigint")
+                .column("res.relname")
+                .column("res.relpersistence")
+                .column("(SELECT t.relname FROM pg_catalog.pg_class t WHERE t.oid=dep.refobjid) referenced_table_name")
+                .column("a.attname AS ref_col_name")
+                .column("res.relacl::text AS aclarray")
+                .from("pg_catalog.pg_class res")
+                .join("LEFT JOIN pg_catalog.pg_depend dep ON dep.classid = res.tableoid AND dep.objid = res.oid AND dep.objsubid = 0"
+                        + " AND dep.refclassid = res.tableoid AND dep.refobjsubid != 0 AND dep.deptype IN ('i', 'a')")
+                .join("LEFT JOIN pg_catalog.pg_attribute a ON a.attrelid = dep.refobjid AND a.attnum = dep.refobjsubid AND a.attisdropped IS FALSE")
+                .where("res.relkind = 'S'");
 
         if (SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
             builder
-            .column("s.seqtypid::bigint AS data_type")
-            .column("s.seqstart")
-            .column("s.seqincrement")
-            .column("s.seqmax")
-            .column("s.seqmin")
-            .column("s.seqcache")
-            .column("s.seqcycle")
-            .column("a.attidentity")
-            .join("LEFT JOIN pg_catalog.pg_sequence s ON s.seqrelid = res.oid");
+                    .column("s.seqtypid::bigint AS data_type")
+                    .column("s.seqstart")
+                    .column("s.seqincrement")
+                    .column("s.seqmax")
+                    .column("s.seqmin")
+                    .column("s.seqcache")
+                    .column("s.seqcycle")
+                    .column("a.attidentity")
+                    .join("LEFT JOIN pg_catalog.pg_sequence s ON s.seqrelid = res.oid");
         }
 
     }

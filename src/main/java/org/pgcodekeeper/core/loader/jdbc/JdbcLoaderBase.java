@@ -15,20 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import org.antlr.v4.runtime.Parser;
 import org.eclipse.core.runtime.SubMonitor;
 import org.pgcodekeeper.core.Consts;
@@ -51,20 +37,30 @@ import org.pgcodekeeper.core.parsers.antlr.exception.MonitorCancelledRuntimeExce
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.ISearchPath;
-import org.pgcodekeeper.core.schema.PgPrivilege;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.pg.AbstractPgFunction;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 /**
- * Container for shared JdbcLoader state.
+ * Abstract base class for JDBC-based database loaders.
+ * Contains shared state and functionality for loading database schemas from JDBC connections
+ * including schema mapping, type caching, version detection, and progress monitoring.
  *
  * @author levsha_aa
  */
@@ -101,7 +97,7 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
     protected Statement statement;
 
     protected JdbcLoaderBase(AbstractJdbcConnector connector, SubMonitor monitor, ISettings settings,
-            IgnoreSchemaList ignoreListSchema) {
+                             IgnoreSchemaList ignoreListSchema) {
         this.connector = connector;
         this.monitor = monitor;
         this.settings = settings;
@@ -141,6 +137,12 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
         return extensionSchema;
     }
 
+    /**
+     * Associates a schema ID with a schema object.
+     *
+     * @param schemaId the schema identifier
+     * @param schema   the schema object to associate
+     */
     public void putSchema(Object schemaId, AbstractSchema schema) {
         schemaIds.put(schemaId, schema);
     }
@@ -149,6 +151,11 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
         return schemaIds.get(schemaId);
     }
 
+    /**
+     * Returns a string representation of loaded schemas.
+     *
+     * @return string containing schema information
+     */
     public String getSchemas() {
         return schemaIds.keySet().stream().map(Object::toString).collect(Collectors.joining(", "));
     }
@@ -276,14 +283,14 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
      * Currently supports privileges only on PgSequence, PgTable, PgView, PgColumn,
      * PgFunction, PgSchema, PgType, PgDomain
      *
-     * @param st    PgStatement object where privileges to be added
-     * @param stSignature   PgStatement signature (differs in different PgStatement instances)
-     * @param aclItemsArrayAsString     Input acl string in the
-     *                                  form of "{grantee=grant_chars/grantor[, ...]}"
-     * @param owner the owner of PgStatement object (why separate?)
-     * @param columnId    column name, if this aclItemsArrayAsString is column
-     *                      privilege string; otherwise null
-     * @param schemaName name of schema for 'PgStatement st'
+     * @param st                    PgStatement object where privileges to be added
+     * @param stSignature           PgStatement signature (differs in different PgStatement instances)
+     * @param aclItemsArrayAsString Input acl string in the
+     *                              form of "{grantee=grant_chars/grantor[, ...]}"
+     * @param owner                 the owner of PgStatement object (why separate?)
+     * @param columnId              column name, if this aclItemsArrayAsString is column
+     *                              privilege string; otherwise null
+     * @param schemaName            name of schema for 'PgStatement st'
      */
     /*
      * See parseAclItem() in dumputils.c
@@ -291,7 +298,7 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
      * Order of all characters (for all types of objects combined) : raxdtDXCcTUw
      */
     private void setPrivileges(PgStatement st, String stSignature,
-            String aclItemsArrayAsString, String owner, String columnId, String schemaName) {
+                               String aclItemsArrayAsString, String owner, String columnId, String schemaName) {
         if (aclItemsArrayAsString == null || settings.isIgnorePrivileges()) {
             return;
         }
@@ -300,61 +307,61 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
         boolean isFunctionOrTypeOrDomain = false;
         String order;
         switch (type) {
-        case SEQUENCE:
-            order = "rUw";
-            break;
+            case SEQUENCE:
+                order = "rUw";
+                break;
 
-        case TABLE:
-        case VIEW:
-        case COLUMN:
-            stType = "TABLE";
-            if (columnId != null) {
-                order = "raxw";
-            } else if (SupportedPgVersion.VERSION_17.isLE(version)) {
-                order = "raxdtDwm";
-            } else {
-                order = "raxdtDw";
-            }
-            break;
+            case TABLE:
+            case VIEW:
+            case COLUMN:
+                stType = "TABLE";
+                if (columnId != null) {
+                    order = "raxw";
+                } else if (SupportedPgVersion.VERSION_17.isLE(version)) {
+                    order = "raxdtDwm";
+                } else {
+                    order = "raxdtDw";
+                }
+                break;
 
-        case AGGREGATE:
-            // For grant permissions to AGGREGATE in postgres used operator 'FUNCTION'.
-            // For example grant permissions to AGGREGATE public.mode(boolean):
-            // GRANT ALL ON FUNCTION public.mode(boolean) TO test_user;
-            stType = "FUNCTION";
+            case AGGREGATE:
+                // For grant permissions to AGGREGATE in postgres used operator 'FUNCTION'.
+                // For example grant permissions to AGGREGATE public.mode(boolean):
+                // GRANT ALL ON FUNCTION public.mode(boolean) TO test_user;
+                stType = "FUNCTION";
 
-            // For grant permissions to AGGREGATE without arguments as signature
-            // used only left and right paren.
-            if (stSignature.contains("*")) {
-                stSignature = stSignature.replace("*", "");
-            }
-            // $FALL-THROUGH$
-        case FUNCTION:
-        case PROCEDURE:
-            order = "X";
-            isFunctionOrTypeOrDomain = true;
-            break;
+                // For grant permissions to AGGREGATE without arguments as signature
+                // used only left and right paren.
+                if (stSignature.contains("*")) {
+                    stSignature = stSignature.replace("*", "");
+                }
+                // $FALL-THROUGH$
+            case FUNCTION:
+            case PROCEDURE:
+                order = "X";
+                isFunctionOrTypeOrDomain = true;
+                break;
 
-        case SCHEMA:
-            order = "CU";
-            break;
+            case SCHEMA:
+                order = "CU";
+                break;
 
-        case TYPE:
-        case DOMAIN:
-            stType = "TYPE";
-            order = "U";
-            isFunctionOrTypeOrDomain = true;
-            break;
-        case SERVER:
-            stType = "FOREIGN SERVER";
-            order = "U";
-            break;
-        case FOREIGN_DATA_WRAPPER:
-            stType = "FOREIGN DATA WRAPPER";
-            order = "U";
-            break;
-        default:
-            throw new IllegalStateException(type + Messages.JdbcLoaderBase_log_not_support_privil);
+            case TYPE:
+            case DOMAIN:
+                stType = "TYPE";
+                order = "U";
+                isFunctionOrTypeOrDomain = true;
+                break;
+            case SERVER:
+                stType = "FOREIGN SERVER";
+                order = "U";
+                break;
+            case FOREIGN_DATA_WRAPPER:
+                stType = "FOREIGN DATA WRAPPER";
+                order = "U";
+                break;
+            default:
+                throw new IllegalStateException(type + Messages.JdbcLoaderBase_log_not_support_privil);
         }
         if (stType == null) {
             stType = st.getStatementType().name();
@@ -439,7 +446,7 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
                     sb.append('(').append(MsDiffUtils.quoteName(col)).append(')');
                 }
             } else {
-                sb.append(st.getStatementType() + "::" + MsDiffUtils.quoteName(st.getName()));
+                sb.append(st.getStatementType()).append("::").append(MsDiffUtils.quoteName(st.getName()));
             }
 
             PgPrivilege priv = new PgPrivilege(state, permission, sb.toString(),
@@ -454,12 +461,12 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
     }
 
     public static String getMsType(PgStatement statement, String schema, String dataType,
-            boolean isUserDefined, int size, int precision, int scale) {
+                                   boolean isUserDefined, int size, int precision, int scale) {
         return getMsType(statement, schema, dataType, isUserDefined, size, precision, scale, true);
     }
 
     public static String getMsType(PgStatement statement, String schema, String dataType,
-            boolean isUserDefined, int size, int precision, int scale, boolean quoteSysTypes) {
+                                   boolean isUserDefined, int size, int precision, int scale, boolean quoteSysTypes) {
         StringBuilder sb = new StringBuilder();
 
         if (isUserDefined) {
@@ -471,18 +478,18 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
         sb.append(quoteName ? MsDiffUtils.quoteName(dataType) : dataType);
 
         switch (dataType) {
-        case "varbinary", "nvarchar", "varchar", "nchar", "char":
-            if (size == -1) {
-                sb.append(" (max)");
-            } else {
-                sb.append(" (").append(size).append(')');
-            }
-            break;
-        case "decimal", "numeric":
-            sb.append(" (").append(precision).append(", ").append(scale).append(')');
-            break;
-        default:
-            break;
+            case "varbinary", "nvarchar", "varchar", "nchar", "char":
+                if (size == -1) {
+                    sb.append(" (max)");
+                } else {
+                    sb.append(" (").append(size).append(')');
+                }
+                break;
+            case "decimal", "numeric":
+                sb.append(" (").append(precision).append(", ").append(scale).append(')');
+                break;
+            default:
+                break;
         }
 
         return sb.toString();
@@ -585,7 +592,7 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
     }
 
     private <T, P extends Parser> void submitAntlrTask(BiFunction<List<Object>, String, P> parserCreateFunction,
-            Function<P, T> parserCtxReader, Consumer<T> finalizer) {
+                                                       Function<P, T> parserCtxReader, Consumer<T> finalizer) {
         String location = getCurrentLocation();
         GenericColumn object = this.currentObject;
         List<Object> list = new ArrayList<>();

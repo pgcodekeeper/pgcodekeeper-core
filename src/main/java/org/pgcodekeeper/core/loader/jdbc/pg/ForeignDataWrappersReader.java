@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -29,10 +26,23 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgForeignDataWrapper;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL foreign data wrappers.
+ * Loads foreign data wrapper definitions from pg_foreign_data_wrapper system catalog.
+ */
 public final class ForeignDataWrappersReader extends AbstractStatementReader {
 
     private final PgDatabase db;
 
+    /**
+     * Creates a new foreign data wrappers reader.
+     *
+     * @param loader the JDBC loader base for database operations
+     * @param db     the PostgreSQL database to load foreign data wrappers into
+     */
     public ForeignDataWrappersReader(JdbcLoaderBase loader, PgDatabase db) {
         super(loader);
         this.db = db;
@@ -76,12 +86,12 @@ public final class ForeignDataWrappersReader extends AbstractStatementReader {
         addDescriptionPart(builder);
 
         builder
-        .column("res.fdwname")
-        .column("res.fdwhandler::pg_catalog.regproc")
-        .column("res.fdwvalidator::pg_catalog.regproc")
-        .column("res.fdwoptions")
-        .column("res.fdwacl")
-        .column("res.fdwowner")
-        .from("pg_catalog.pg_foreign_data_wrapper res");
+                .column("res.fdwname")
+                .column("res.fdwhandler::pg_catalog.regproc")
+                .column("res.fdwvalidator::pg_catalog.regproc")
+                .column("res.fdwoptions")
+                .column("res.fdwacl")
+                .column("res.fdwowner")
+                .from("pg_catalog.pg_foreign_data_wrapper res");
     }
 }

@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -28,10 +25,23 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgUserMapping;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL user mappings.
+ * Loads user mapping definitions from pg_user_mapping system catalog.
+ */
 public final class UserMappingReader extends AbstractStatementReader {
 
     private final PgDatabase db;
 
+    /**
+     * Constructs a new UserMappingReader.
+     *
+     * @param loader the JDBC loader base instance
+     * @param db     the PostgreSQL database instance
+     */
     public UserMappingReader(JdbcLoaderBase loader, PgDatabase db) {
         super(loader);
         this.db = db;
@@ -39,7 +49,7 @@ public final class UserMappingReader extends AbstractStatementReader {
 
     @Override
     protected void processResult(ResultSet res) throws SQLException {
-        String user  = res.getString("username");
+        String user = res.getString("username");
         String server = res.getString("servername");
         if (user == null) {
             // https://www.postgresql.org/docs/current/catalog-pg-user-mapping.html
@@ -71,11 +81,11 @@ public final class UserMappingReader extends AbstractStatementReader {
         addExtensionDepsCte(builder);
 
         builder
-        .column("rol.rolname AS username")
-        .column("fsrv.srvname AS servername")
-        .column("res.umoptions")
-        .from("pg_catalog.pg_user_mapping res")
-        .join("LEFT JOIN pg_catalog.pg_foreign_server fsrv ON res.umserver = fsrv.oid")
-        .join("LEFT JOIN pg_catalog.pg_roles rol ON res.umuser = rol.oid");
+                .column("rol.rolname AS username")
+                .column("fsrv.srvname AS servername")
+                .column("res.umoptions")
+                .from("pg_catalog.pg_user_mapping res")
+                .join("LEFT JOIN pg_catalog.pg_foreign_server fsrv ON res.umserver = fsrv.oid")
+                .join("LEFT JOIN pg_catalog.pg_roles rol ON res.umuser = rol.oid");
     }
 }

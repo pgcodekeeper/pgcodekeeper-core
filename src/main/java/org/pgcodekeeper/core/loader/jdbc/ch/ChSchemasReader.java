@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ch;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -26,10 +23,23 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.schema.ch.ChSchema;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for ClickHouse schemas.
+ * Loads schema definitions from system.databases table.
+ */
 public class ChSchemasReader extends AbstractStatementReader {
 
     private final ChDatabase db;
 
+    /**
+     * Creates a new ChSchemasReader.
+     *
+     * @param loader the JDBC loader instance
+     * @param db     the ClickHouse database to load schemas into
+     */
     public ChSchemasReader(JdbcLoaderBase loader, ChDatabase db) {
         super(loader);
         this.db = db;
@@ -52,10 +62,10 @@ public class ChSchemasReader extends AbstractStatementReader {
     @Override
     protected void fillQueryBuilder(QueryBuilder builder) {
         builder
-        .column("name")
-        .column("engine_full")
-        .column("comment AS description")
-        .from("system.databases")
-        .where("name NOT IN ('INFORMATION_SCHEMA', 'information_schema', 'system')");
+                .column("name")
+                .column("engine_full")
+                .column("comment AS description")
+                .from("system.databases")
+                .where("name NOT IN ('INFORMATION_SCHEMA', 'information_schema', 'system')");
     }
 }

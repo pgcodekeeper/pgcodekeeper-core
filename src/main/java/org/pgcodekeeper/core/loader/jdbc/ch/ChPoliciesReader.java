@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ch;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -29,10 +26,23 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.schema.ch.ChPolicy;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for ClickHouse policies.
+ * Loads policy definitions from system.row_policies table.
+ */
 public class ChPoliciesReader extends AbstractStatementReader {
 
     private final ChDatabase db;
 
+    /**
+     * Creates a new ChPoliciesReader.
+     *
+     * @param loader the JDBC loader instance
+     * @param db     the ClickHouse database to load policies into
+     */
     public ChPoliciesReader(JdbcLoaderBase loader, ChDatabase db) {
         super(loader);
         this.db = db;
@@ -63,11 +73,11 @@ public class ChPoliciesReader extends AbstractStatementReader {
     @Override
     protected void fillQueryBuilder(QueryBuilder builder) {
         builder
-        .column("res.name")
-        .column("res.is_restrictive")
-        .column("res.select_filter")
-        .column("res.apply_to_list")
-        .column("res.apply_to_except")
-        .from("system.row_policies res");
+                .column("res.name")
+                .column("res.is_restrictive")
+                .column("res.select_filter")
+                .column("res.apply_to_list")
+                .column("res.apply_to_except")
+                .from("system.row_policies res");
     }
 }

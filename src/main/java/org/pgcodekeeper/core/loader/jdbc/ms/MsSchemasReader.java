@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ms;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
@@ -30,10 +27,23 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.schema.ms.MsSchema;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for Microsoft SQL schemas.
+ * Loads schema definitions from sys.schemas system view.
+ */
 public class MsSchemasReader extends AbstractStatementReader {
 
     private final MsDatabase db;
 
+    /**
+     * Constructs a new Microsoft SQL schemas reader.
+     *
+     * @param loader the JDBC loader base for database operations
+     * @param db     the Microsoft SQL database instance
+     */
     public MsSchemasReader(JdbcLoaderBase loader, MsDatabase db) {
         super(loader);
         this.db = db;
@@ -65,16 +75,16 @@ public class MsSchemasReader extends AbstractStatementReader {
         addMsOwnerPart(builder);
 
         builder
-        .column("res.schema_id")
-        .column("res.name")
-        .from("sys.schemas res WITH (NOLOCK)")
-        .where("p.name NOT IN ('INFORMATION_SCHEMA', 'sys')");
+                .column("res.schema_id")
+                .column("res.name")
+                .from("sys.schemas res WITH (NOLOCK)")
+                .where("p.name NOT IN ('INFORMATION_SCHEMA', 'sys')");
     }
 
     @Override
     protected QueryBuilder formatMsPriviliges(QueryBuilder privileges) {
         return privileges
-            .where("major_id = res.schema_id")
-            .where("perm.class = 3");
+                .where("major_id = res.schema_id")
+                .where("perm.class = 3");
     }
 }

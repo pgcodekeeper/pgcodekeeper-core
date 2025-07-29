@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ms;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
@@ -28,8 +25,20 @@ import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.ms.MsSequence;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for Microsoft SQL sequences.
+ * Loads sequence definitions from sys.sequences system view.
+ */
 public class MsSequencesReader extends JdbcReader {
 
+    /**
+     * Constructs a new Microsoft SQL sequences reader.
+     *
+     * @param loader the JDBC loader base for database operations
+     */
     public MsSequencesReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -71,20 +80,20 @@ public class MsSequencesReader extends JdbcReader {
         addMsOwnerPart(builder);
 
         builder
-        .column("res.name")
-        .column("SCHEMA_NAME(t.schema_id) AS type_schema")
-        .column("t.name AS data_type")
-        .column("t.is_user_defined")
-        .column("res.precision")
-        .column("CONVERT(bigint, res.start_value) AS start_value")
-        .column("CONVERT(bigint, res.increment) AS increment")
-        .column("CONVERT(bigint, res.minimum_value) AS minimum_value")
-        .column("CONVERT(bigint, res.maximum_value) AS maximum_value")
-        .column("res.is_cycling")
-        .column("res.is_cached")
-        .column("res.cache_size")
-        .from("sys.sequences res WITH (NOLOCK)")
-        .join("JOIN sys.types t WITH (NOLOCK) ON t.user_type_id = res.user_type_id");
+                .column("res.name")
+                .column("SCHEMA_NAME(t.schema_id) AS type_schema")
+                .column("t.name AS data_type")
+                .column("t.is_user_defined")
+                .column("res.precision")
+                .column("CONVERT(bigint, res.start_value) AS start_value")
+                .column("CONVERT(bigint, res.increment) AS increment")
+                .column("CONVERT(bigint, res.minimum_value) AS minimum_value")
+                .column("CONVERT(bigint, res.maximum_value) AS maximum_value")
+                .column("res.is_cycling")
+                .column("res.is_cached")
+                .column("res.cache_size")
+                .from("sys.sequences res WITH (NOLOCK)")
+                .join("JOIN sys.types t WITH (NOLOCK) ON t.user_type_id = res.user_type_id");
     }
 
     @Override

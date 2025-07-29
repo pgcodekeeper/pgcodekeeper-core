@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -29,19 +26,25 @@ import org.pgcodekeeper.core.parsers.antlr.statements.pg.AlterTable;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.PgStatementContainer;
-import org.pgcodekeeper.core.schema.pg.PgConstraint;
-import org.pgcodekeeper.core.schema.pg.PgConstraintCheck;
-import org.pgcodekeeper.core.schema.pg.PgConstraintExclude;
-import org.pgcodekeeper.core.schema.pg.PgConstraintFk;
-import org.pgcodekeeper.core.schema.pg.PgConstraintPk;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgIndexParamContainer;
+import org.pgcodekeeper.core.schema.pg.*;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL constraints.
+ * Loads constraint definitions from pg_constraint system catalog.
+ */
 public final class ConstraintsReader extends JdbcReader {
 
     private static final String ADD_CONSTRAINT = "ALTER TABLE noname ADD CONSTRAINT noname ";
 
+    /**
+     * Creates a new constraints reader.
+     *
+     * @param loader the JDBC loader base for database operations
+     */
     public ConstraintsReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -66,21 +69,21 @@ public final class ConstraintsReader extends JdbcReader {
 
         String type = res.getString("contype");
         switch (type) {
-        case "p", "u":
-            constr = new PgConstraintPk(constraintName, "p".equals(type));
-            ((PgConstraintPk) constr).setClustered(res.getBoolean("isclustered"));
-            break;
-        case "f":
-            constr = new PgConstraintFk(constraintName);
-            break;
-        case "c":
-            constr = new PgConstraintCheck(constraintName);
-            break;
-        case "x":
-            constr = new PgConstraintExclude(constraintName);
-            break;
-        default:
-            throw new IllegalArgumentException("Unsupportes constraint's type " + type);
+            case "p", "u":
+                constr = new PgConstraintPk(constraintName, "p".equals(type));
+                ((PgConstraintPk) constr).setClustered(res.getBoolean("isclustered"));
+                break;
+            case "f":
+                constr = new PgConstraintFk(constraintName);
+                break;
+            case "c":
+                constr = new PgConstraintCheck(constraintName);
+                break;
+            case "x":
+                constr = new PgConstraintExclude(constraintName);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupportes constraint's type " + type);
         }
 
         if (params != null) {
@@ -95,8 +98,8 @@ public final class ConstraintsReader extends JdbcReader {
                         .alter_table_statement().table_action(0), (CommonTokenStream) p.getTokenStream()),
                 pair -> new AlterTable(null, (PgDatabase) schema.getDatabase(), tablespace, pair.getSecond(),
                         loader.getSettings())
-                .parseAlterTableConstraint(
-                        pair.getFirst(), constr, schemaName, tableName, loader.getCurrentLocation()));
+                        .parseAlterTableConstraint(
+                                pair.getFirst(), constr, schemaName, tableName, loader.getCurrentLocation()));
         loader.setAuthor(constr, res);
         loader.setComment(constr, res);
 
@@ -119,22 +122,22 @@ public final class ConstraintsReader extends JdbcReader {
         addDescriptionPart(builder);
 
         builder
-        .column("ccc.relname")
-        .column("res.conname")
-        .column("res.contype")
-        .column("ts.spcname")
-        .column("ci.reloptions")
-        .column("pg_catalog.pg_get_constraintdef(res.oid) AS definition")
-        .column("idx.indisclustered as isclustered")
-        .from("pg_catalog.pg_constraint res")
-        .join("LEFT JOIN pg_catalog.pg_class ccc ON ccc.oid = res.conrelid")
-        .join("LEFT JOIN pg_catalog.pg_class cf ON cf.oid = res.confrelid")
-        .join("LEFT JOIN pg_catalog.pg_class ci ON ci.oid = res.conindid AND res.contype != 'f'")
-        .join("LEFT JOIN pg_catalog.pg_tablespace ts ON ts.oid = ci.reltablespace")
-        .join("LEFT JOIN pg_catalog.pg_index idx ON idx.indexrelid = ci.oid")
-        .where("ccc.relkind IN ('r', 'p', 'f')")
-        .where("res.contype != 't'")
-        .where("res.coninhcount = 0");
+                .column("ccc.relname")
+                .column("res.conname")
+                .column("res.contype")
+                .column("ts.spcname")
+                .column("ci.reloptions")
+                .column("pg_catalog.pg_get_constraintdef(res.oid) AS definition")
+                .column("idx.indisclustered as isclustered")
+                .from("pg_catalog.pg_constraint res")
+                .join("LEFT JOIN pg_catalog.pg_class ccc ON ccc.oid = res.conrelid")
+                .join("LEFT JOIN pg_catalog.pg_class cf ON cf.oid = res.confrelid")
+                .join("LEFT JOIN pg_catalog.pg_class ci ON ci.oid = res.conindid AND res.contype != 'f'")
+                .join("LEFT JOIN pg_catalog.pg_tablespace ts ON ts.oid = ci.reltablespace")
+                .join("LEFT JOIN pg_catalog.pg_index idx ON idx.indexrelid = ci.oid")
+                .where("ccc.relkind IN ('r', 'p', 'f')")
+                .where("res.contype != 't'")
+                .where("res.coninhcount = 0");
 
         if (SupportedPgVersion.VERSION_11.isLE(loader.getVersion())) {
             builder.column("res.conparentid::bigint");
