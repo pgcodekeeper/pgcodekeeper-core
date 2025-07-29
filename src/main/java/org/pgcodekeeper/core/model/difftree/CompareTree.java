@@ -15,14 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.difftree;
 
-import static org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide.BOTH;
-import static org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide.LEFT;
-import static org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide.RIGHT;
+import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
 
 import java.util.Comparator;
 
-import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
+import static org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide.*;
 
+/**
+ * Comparator for TreeElement objects that provides custom sorting logic
+ * based on element types and diff sides during schema comparison operations.
+ * Prioritizes deletions (LEFT), then creations (RIGHT), then modifications (BOTH).
+ */
 public class CompareTree implements Comparator<TreeElement> {
 
     private static final int LESS = -1;
@@ -58,7 +61,7 @@ public class CompareTree implements Comparator<TreeElement> {
     }
 
     /**
-     * Сравнивает и возвращает порядок в списке типов объектов так как нужно
+     * Compares and returns the order in the list of object types as needed
      */
     private int compareTypes(TreeElement o1, TreeElement o2) {
         return o1.getType().ordinal() - o2.getType().ordinal();

@@ -15,12 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.difftree;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.pgcodekeeper.core.PgDiffUtils;
@@ -30,23 +24,55 @@ import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.AbstractTable;
 import org.pgcodekeeper.core.schema.PgStatement;
 
+import java.util.*;
+
+/**
+ * Utility class for creating and managing diff trees that represent
+ * differences between database schemas.
+ */
 public final class DiffTree {
 
+    /**
+     * Creates a diff tree comparing two database schemas.
+     *
+     * @param left  the left (old) database schema
+     * @param right the right (new) database schema
+     * @return the root TreeElement representing the diff tree
+     * @throws InterruptedException if the operation is interrupted
+     */
     public static TreeElement create(AbstractDatabase left, AbstractDatabase right) throws InterruptedException {
         return create(left, right, null);
     }
 
+    /**
+     * Creates a diff tree comparing two database schemas with progress monitoring.
+     *
+     * @param left     the left (old) database schema
+     * @param right    the right (new) database schema
+     * @param sMonitor the progress monitor for tracking operation progress
+     * @return the root TreeElement representing the diff tree
+     * @throws InterruptedException if the operation is interrupted
+     */
     public static TreeElement create(AbstractDatabase left, AbstractDatabase right, SubMonitor sMonitor)
             throws InterruptedException {
         return new DiffTree(sMonitor).createTree(left, right);
     }
 
+    /**
+     * Adds column differences to the tree element list.
+     *
+     * @param left   the left (old) column list
+     * @param right  the right (new) column list
+     * @param parent the parent tree element
+     * @param list   the list to add column differences to
+     * @deprecated this method is deprecated
+     */
     @Deprecated
     public static void addColumns(List<AbstractColumn> left, List<AbstractColumn> right,
-            TreeElement parent, List<TreeElement> list) {
+                                  TreeElement parent, List<TreeElement> list) {
         for (AbstractColumn sLeft : left) {
             AbstractColumn foundRight = right.stream().filter(
-                    sRight -> sLeft.getName().equals(sRight.getName()))
+                            sRight -> sLeft.getName().equals(sRight.getName()))
                     .findAny().orElse(null);
 
             if (!sLeft.equals(foundRight)) {
@@ -65,6 +91,14 @@ public final class DiffTree {
         }
     }
 
+    /**
+     * Gets tables that have changed columns from the selected elements.
+     *
+     * @param oldDbFull the old database schema
+     * @param newDbFull the new database schema
+     * @param selected  the list of selected tree elements
+     * @return a set of table elements that have changed columns
+     */
     public static Set<TreeElement> getTablesWithChangedColumns(
             AbstractDatabase oldDbFull, AbstractDatabase newDbFull, List<TreeElement> selected) {
 
@@ -108,6 +142,16 @@ public final class DiffTree {
         this.monitor = monitor;
     }
 
+    /**
+     * Creates a diff tree by comparing two database schemas and building a hierarchical
+     * tree structure representing the differences between them.
+     *
+     * @param left  the left (old) database schema to compare
+     * @param right the right (new) database schema to compare
+     * @return the root TreeElement representing the complete diff tree with "Database"
+     * as the root node and all schema differences as child nodes
+     * @throws InterruptedException if the operation is cancelled via the progress monitor
+     */
     public TreeElement createTree(AbstractDatabase left, AbstractDatabase right) throws InterruptedException {
         PgDiffUtils.checkCancelled(monitor);
         TreeElement db = new TreeElement("Database", DbObjType.DATABASE, DiffSide.BOTH);
@@ -141,14 +185,14 @@ public final class DiffTree {
                 PgStatement foundRight = null;
                 if (right != null) {
                     foundRight = right.getChildren().filter(
-                            sRight -> sLeft.getName().equals(sRight.getName())
-                            && sLeft.getStatementType() == sRight.getStatementType())
+                                    sRight -> sLeft.getName().equals(sRight.getName())
+                                            && sLeft.getStatementType() == sRight.getStatementType())
                             .findAny().orElse(null);
                 }
 
                 if (foundRight == null) {
                     rv.add(new CompareResult(sLeft, null));
-                } else if(!sLeft.equals(foundRight)) {
+                } else if (!sLeft.equals(foundRight)) {
                     rv.add(new CompareResult(sLeft, foundRight));
                 }
             });
@@ -158,7 +202,7 @@ public final class DiffTree {
             right.getChildren().forEach(sRight -> {
                 if (left == null || left.getChildren().noneMatch(
                         sLeft -> sRight.getName().equals(sLeft.getName())
-                        && sLeft.getStatementType() == sRight.getStatementType())) {
+                                && sLeft.getStatementType() == sRight.getStatementType())) {
                     rv.add(new CompareResult(null, sRight));
                 }
             });
@@ -168,6 +212,11 @@ public final class DiffTree {
     }
 }
 
+/**
+ * Represents the result of comparing two database statements during diff tree creation.
+ * Contains references to the left and right statements and provides methods to
+ * determine the comparison side and retrieve statement information.
+ */
 class CompareResult {
 
     private final PgStatement left;
@@ -186,6 +235,12 @@ class CompareResult {
         this.right = right;
     }
 
+    /**
+     * Determines which side of the comparison this result represents.
+     *
+     * @return the diff side (LEFT, RIGHT, or BOTH)
+     * @throws IllegalStateException if both sides are null
+     */
     public DiffSide getSide() {
         if (left != null && right != null) {
             return DiffSide.BOTH;
@@ -199,6 +254,13 @@ class CompareResult {
         throw new IllegalStateException("Both diff sides are null!");
     }
 
+    /**
+     * Gets the statement from this comparison result.
+     * Returns the left statement if available, otherwise the right statement.
+     *
+     * @return the statement from this comparison
+     * @throws IllegalStateException if both sides are null
+     */
     public PgStatement getStatement() {
         if (left != null) {
             return left;
@@ -209,6 +271,11 @@ class CompareResult {
         throw new IllegalStateException("Both diff sides are null!");
     }
 
+    /**
+     * Checks if this comparison result has child statements.
+     *
+     * @return true if either the left or right statement has children, false otherwise
+     */
     public boolean hasChildren() {
         if (left != null && left.hasChildren()) {
             return true;

@@ -17,5 +17,12 @@ package org.pgcodekeeper.core.model.graph;
 
 import org.pgcodekeeper.core.schema.PgStatement;
 
+/**
+ * Record representing a database object pair for comparison operations.
+ * Contains both old and new versions of a database statement for diff analysis.
+ * 
+ * @param oldStatement the statement from the old database schema
+ * @param newStatement the statement from the new database schema
+ */
 public record DbObject(PgStatement oldStatement, PgStatement newStatement) {
 }

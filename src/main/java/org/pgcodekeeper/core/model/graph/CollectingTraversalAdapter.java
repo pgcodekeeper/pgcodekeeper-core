@@ -15,21 +15,29 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jgrapht.event.TraversalListenerAdapter;
 import org.jgrapht.event.VertexTraversalEvent;
 import org.jgrapht.graph.DefaultEdge;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.PgStatement;
 
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Traversal adapter that collects statements during graph traversal.
+ */
 final class CollectingTraversalAdapter extends TraversalListenerAdapter<PgStatement, DefaultEdge> {
 
     private final List<PgStatement> statements = new ArrayList<>();
 
     private final PgStatement starter;
 
+    /**
+     * Creates a new collecting traversal adapter.
+     *
+     * @param starter the starting statement to exclude from collection
+     */
     public CollectingTraversalAdapter(PgStatement starter) {
         this.starter = starter;
     }

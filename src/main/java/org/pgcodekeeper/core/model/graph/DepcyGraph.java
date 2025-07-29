@@ -15,11 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map.Entry;
-
 import org.jgrapht.Graph;
 import org.jgrapht.alg.cycle.CycleDetector;
 import org.jgrapht.graph.DefaultEdge;
@@ -28,18 +23,7 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractConstraint;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractIndex;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.IConstraintFk;
-import org.pgcodekeeper.core.schema.IConstraintPk;
-import org.pgcodekeeper.core.schema.IStatement;
-import org.pgcodekeeper.core.schema.Inherits;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.PgStatementContainer;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.pg.AbstractPgFunction;
 import org.pgcodekeeper.core.schema.pg.AbstractPgTable;
 import org.pgcodekeeper.core.schema.pg.PartitionPgTable;
@@ -48,6 +32,16 @@ import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map.Entry;
+
+/**
+ * Database dependency graph for managing object relationships and dependencies.
+ * Builds directed graph of database objects with support for cycle detection and resolution.
+ * Handles foreign key relationships, inheritance, and partitioning dependencies.
+ */
 public final class DepcyGraph {
 
     private static final Logger LOG = LoggerFactory.getLogger(DepcyGraph.class);
@@ -61,15 +55,16 @@ public final class DepcyGraph {
             new EdgeReversedGraph<>(graph);
 
     /**
-     * Направление связей в графе:<br>
-     * зависящий объект → зависимость <br>
-     * source → target
+     * Gets the dependency graph.
+     * Graph direction: dependent object → dependency (source → target)
+     *
+     * @return the dependency graph
      */
     public Graph<PgStatement, DefaultEdge> getGraph() {
         return graph;
     }
 
-    public EdgeReversedGraph<PgStatement, DefaultEdge> getReversedGraph(){
+    public EdgeReversedGraph<PgStatement, DefaultEdge> getReversedGraph() {
         return reversedGraph;
     }
 
@@ -84,12 +79,20 @@ public final class DepcyGraph {
         return db;
     }
 
+    /**
+     * Creates a dependency graph from the database schema.
+     *
+     * @param graphSrc the source database to build graph from
+     */
     public DepcyGraph(AbstractDatabase graphSrc) {
         this(graphSrc, false);
     }
 
     /**
-     * @param reduceGraph if true, merge column nodes into table nodes in the graph
+     * Creates a dependency graph with optional graph reduction.
+     *
+     * @param graphSrc    the source database to build graph from
+     * @param reduceGraph if true, merge column nodes into table nodes
      */
     public DepcyGraph(AbstractDatabase graphSrc, boolean reduceGraph) {
         db = (AbstractDatabase) graphSrc.deepCopy();
@@ -255,6 +258,11 @@ public final class DepcyGraph {
         }
     }
 
+    /**
+     * Adds custom dependencies to the graph.
+     *
+     * @param depcies list of custom dependency pairs to add
+     */
     public void addCustomDepcies(List<Entry<PgStatement, PgStatement>> depcies) {
         if (depcies == null) {
             return;

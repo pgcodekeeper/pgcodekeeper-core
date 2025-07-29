@@ -15,37 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
-
-import org.pgcodekeeper.core.ChDiffUtils;
-import org.pgcodekeeper.core.DatabaseType;
-import org.pgcodekeeper.core.MsDiffUtils;
-import org.pgcodekeeper.core.NotAllowedObjectException;
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractSequence;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.IForeignTable;
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.ms.MsColumn;
 import org.pgcodekeeper.core.schema.ms.MsConstraintPk;
 import org.pgcodekeeper.core.schema.ms.MsTable;
@@ -56,6 +30,30 @@ import org.pgcodekeeper.core.schema.pg.PgSequence;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+
+/**
+ * Converts database action containers into executable SQL script statements.
+ * Processes CREATE, ALTER, and DROP operations in proper dependency order while handling
+ * special cases like data movement, table renaming, and partition tables.
+ *
+ * <p>This class is responsible for generating the final SQL migration script from
+ * resolved database actions. It handles complex scenarios including:
+ * <ul>
+ * <li>Data movement mode with temporary table creation and renaming</li>
+ * <li>Joinable column alterations that can be combined into single ALTER TABLE statements</li>
+ * <li>Partition table hierarchies and their dependencies</li>
+ * <li>Microsoft SQL module refresh operations</li>
+ * <li>Identity column preservation during data movement</li>
+ * </ul>
+ *
+ * <p>The converter processes actions in dependency order and applies filtering
+ * based on user selections and configured object type restrictions.
+ */
 public final class ActionsToScriptConverter {
 
     private static final String REFRESH_MODULE = "EXEC sys.sp_refreshsqlmodule {0}";
@@ -95,17 +93,35 @@ public final class ActionsToScriptConverter {
 
     private List<String> partitionChildren;
 
+    /**
+     * Fills the SQL script with statements based on resolved database actions.
+     * Creates a new ActionsToScriptConverter instance and processes all actions in right order.
+     *
+     * @param script    the SQL script to populate with generated statements
+     * @param actions   set of resolved action containers representing database changes
+     * @param toRefresh set of statements that need refreshing (for Microsoft SQL modules)
+     * @param oldDbFull the complete old database schema for reference
+     * @param newDbFull the complete new database schema for reference
+     * @param selected  list of user-selected tree elements for filtering actions
+     */
     public static void fillScript(SQLScript script,
-            Set<ActionContainer> actions, Set<PgStatement> toRefresh,
-            AbstractDatabase oldDbFull, AbstractDatabase newDbFull, List<TreeElement> selected) {
+                                  Set<ActionContainer> actions, Set<PgStatement> toRefresh,
+                                  AbstractDatabase oldDbFull, AbstractDatabase newDbFull, List<TreeElement> selected) {
         new ActionsToScriptConverter(script, actions, toRefresh, oldDbFull, newDbFull).fillScript(selected);
     }
 
     /**
-     * @param toRefresh an ordered set of refreshed statements in reverse order
+     * Creates a new ActionsToScriptConverter with the specified parameters.
+     * Initializes internal structures for data movement mode if enabled in settings.
+     *
+     * @param script    the SQL script to populate with generated statements
+     * @param actions   set of resolved action containers representing database changes
+     * @param toRefresh ordered set of statements requiring refresh operations (in reverse order)
+     * @param oldDbFull the complete old database schema for reference and data movement
+     * @param newDbFull the complete new database schema for reference and data movement
      */
     public ActionsToScriptConverter(SQLScript script, Set<ActionContainer> actions,
-            Set<PgStatement> toRefresh, AbstractDatabase oldDbFull, AbstractDatabase newDbFull) {
+                                    Set<PgStatement> toRefresh, AbstractDatabase oldDbFull, AbstractDatabase newDbFull) {
         this.script = script;
         this.actions = actions;
         this.toRefresh = toRefresh;
@@ -121,10 +137,9 @@ public final class ActionsToScriptConverter {
     }
 
     /**
-     * Fills a script with objects based on their dependency order
+     * Fills the script with database objects based on their dependency order.
      *
-     * @param selected
-     *            list of selected elements
+     * @param selected list of user-selected tree elements for filtering actions
      */
     private void fillScript(List<TreeElement> selected) {
         Set<PgStatement> refreshed = new HashSet<>(toRefresh.size());
@@ -171,7 +186,7 @@ public final class ActionsToScriptConverter {
     }
 
     /**
-     * collects joinable table actions
+     * Collects joinable table actions that can be joined into single ALTER TABLE statements.
      */
     private void fillJoinableTableActions() {
         List<List<ActionContainer>> changedColumnTables = new ArrayList<>();
@@ -216,60 +231,60 @@ public final class ActionsToScriptConverter {
     private void printAction(ActionContainer action, PgStatement obj) {
         String depcy = getComment(action, obj);
         switch (action.getState()) {
-        case CREATE:
-            if (depcy != null) {
-                script.addStatementWithoutSeparator(depcy);
-            }
-
-            var oldObj = obj.getTwin(oldDbFull);
-
-            // explicitly deleting a sequence due to a name conflict
-            if (settings.isDataMovementMode() && obj instanceof PgSequence && oldObj != null) {
-                addToDropScript(obj, false);
-            }
-
-            if (settings.isDropBeforeCreate() && obj.canDropBeforeCreate()) {
-                addToDropScript(obj, true);
-            }
-
-            addToAddScript(obj);
-
-            if (settings.isDataMovementMode() && oldObj instanceof AbstractTable oldTable) {
-                moveData(oldTable, obj);
-            }
-            break;
-        case DROP:
-            if (depcy != null) {
-                script.addStatementWithoutSeparator(depcy);
-            }
-            if (settings.isDataMovementMode()
-                    && DbObjType.TABLE == obj.getStatementType()
-                    && !(obj instanceof IForeignTable)
-                    && obj.getTwin(newDbFull) != null) {
-                addCommandsForRenameTbl((AbstractTable) obj);
-            } else {
-                checkMsTableOptions(obj);
-                addToDropScript(obj, false);
-            }
-            break;
-        case ALTER:
-            var joinableActions = joinableTableActions.get(action);
-            if (joinableActions != null) {
-                getAlterTableScript(joinableActions);
-                return;
-            }
-            SQLScript temp = new SQLScript(settings);
-            ObjectState state = obj.appendAlterSQL(action.getNewObj(), temp);
-
-            if (state.in(ObjectState.ALTER, ObjectState.ALTER_WITH_DEP)) {
+            case CREATE:
                 if (depcy != null) {
                     script.addStatementWithoutSeparator(depcy);
                 }
-                script.addAllStatements(temp);
-            }
-            break;
-        default:
-            throw new IllegalStateException("Not implemented action");
+
+                var oldObj = obj.getTwin(oldDbFull);
+
+                // explicitly deleting a sequence due to a name conflict
+                if (settings.isDataMovementMode() && obj instanceof PgSequence && oldObj != null) {
+                    addToDropScript(obj, false);
+                }
+
+                if (settings.isDropBeforeCreate() && obj.canDropBeforeCreate()) {
+                    addToDropScript(obj, true);
+                }
+
+                addToAddScript(obj);
+
+                if (settings.isDataMovementMode() && oldObj instanceof AbstractTable oldTable) {
+                    moveData(oldTable, obj);
+                }
+                break;
+            case DROP:
+                if (depcy != null) {
+                    script.addStatementWithoutSeparator(depcy);
+                }
+                if (settings.isDataMovementMode()
+                        && DbObjType.TABLE == obj.getStatementType()
+                        && !(obj instanceof IForeignTable)
+                        && obj.getTwin(newDbFull) != null) {
+                    addCommandsForRenameTbl((AbstractTable) obj);
+                } else {
+                    checkMsTableOptions(obj);
+                    addToDropScript(obj, false);
+                }
+                break;
+            case ALTER:
+                var joinableActions = joinableTableActions.get(action);
+                if (joinableActions != null) {
+                    getAlterTableScript(joinableActions);
+                    return;
+                }
+                SQLScript temp = new SQLScript(settings);
+                ObjectState state = obj.appendAlterSQL(action.getNewObj(), temp);
+
+                if (state.in(ObjectState.ALTER, ObjectState.ALTER_WITH_DEP)) {
+                    if (depcy != null) {
+                        script.addStatementWithoutSeparator(depcy);
+                    }
+                    script.addAllStatements(temp);
+                }
+                break;
+            default:
+                throw new IllegalStateException("Not implemented action");
         }
     }
 
@@ -295,7 +310,9 @@ public final class ActionsToScriptConverter {
     }
 
     /**
-     * get ALTER TABLE script with all joinable changes
+     * Generates ALTER TABLE script with all joinable changes.
+     *
+     * @param actionsList list of joinable action containers for the same table
      */
     private void getAlterTableScript(List<ActionContainer> actionsList) {
         StringBuilder sb = new StringBuilder();
@@ -370,7 +387,7 @@ public final class ActionsToScriptConverter {
             UnaryOperator<String> quoter = Utils.getQuoter(settings.getDbType());
             StringBuilder sb = new StringBuilder();
             sb.append("DROP TABLE ")
-            .append(quoter.apply(table.getSchemaName())).append('.').append(quoter.apply(tblTmpName));
+                    .append(quoter.apply(table.getSchemaName())).append('.').append(quoter.apply(tblTmpName));
             script.addStatement(sb);
         }
     }
@@ -394,14 +411,20 @@ public final class ActionsToScriptConverter {
         return MessageFormat.format(
                 action.getState() == ObjectState.CREATE ?
                         CREATE_COMMENT : DROP_COMMENT,
-                        oldObj.getStatementType(),
-                        oldObj.getBareName(),
-                        objStarter.getStatementType(),
-                        objStarter.getQualifiedName());
+                oldObj.getStatementType(),
+                oldObj.getBareName(),
+                objStarter.getStatementType(),
+                objStarter.getQualifiedName());
     }
 
     /**
-     * @return true if action was hidden, false if it may be executed
+     * Determines whether an action should be hidden from the generated script.
+     * Checks various conditions including object drop capability, user selection mode,
+     * and allowed object types configuration.
+     *
+     * @param action   the action container to evaluate
+     * @param selected list of user-selected tree elements
+     * @return true if action should be hidden, false if it may be executed
      */
     private boolean hideAction(ActionContainer action, List<TreeElement> selected) {
         PgStatement obj = action.getOldObj();
@@ -441,24 +464,23 @@ public final class ActionsToScriptConverter {
     /**
      * Determines whether an action object has been selected in the diff panel.
      *
-     * @param action script action element
+     * @param action   script action element
      * @param selected collection of selected elements in diff panel
-     *
-     * @return TRUE if the action object was selected in the diff panel, otherwise FALSE
+     * @return true if the action object was selected in the diff panel, false otherwise
      */
     private boolean isSelectedAction(ActionContainer action, List<TreeElement> selected) {
         Predicate<PgStatement> isSelectedObj = obj ->
-        selected.stream()
-        .filter(e -> e.getType().equals(obj.getStatementType()))
-        .filter(e -> e.getName().equals(obj.getName()))
-        .map(e -> e.getPgStatement(obj.getDatabase()))
-        .anyMatch(obj::equals);
+                selected.stream()
+                        .filter(e -> e.getType().equals(obj.getStatementType()))
+                        .filter(e -> e.getName().equals(obj.getName()))
+                        .map(e -> e.getPgStatement(obj.getDatabase()))
+                        .anyMatch(obj::equals);
 
         return switch (action.getState()) {
-        case CREATE -> isSelectedObj.test(action.getNewObj());
-        case ALTER -> isSelectedObj.test(action.getNewObj()) && isSelectedObj.test(action.getOldObj());
-        case DROP -> isSelectedObj.test(action.getOldObj());
-        default -> throw new IllegalStateException("Not implemented action");
+            case CREATE -> isSelectedObj.test(action.getNewObj());
+            case ALTER -> isSelectedObj.test(action.getNewObj()) && isSelectedObj.test(action.getOldObj());
+            case DROP -> isSelectedObj.test(action.getOldObj());
+            default -> throw new IllegalStateException("Not implemented action");
         };
     }
 
@@ -467,6 +489,8 @@ public final class ActionsToScriptConverter {
      * temporary name, given the constraints. Fills the maps {@link #tblTmpNames}
      * and {@link #tblIdentityCols} for use them later (when adding commands to
      * move data from a temporary table to a new table).
+     *
+     * @param oldTbl the original table to be renamed to a temporary name
      */
     private void addCommandsForRenameTbl(AbstractTable oldTbl) {
         String qname = oldTbl.getQualifiedName();
@@ -479,33 +503,33 @@ public final class ActionsToScriptConverter {
         List<String> identityCols = new ArrayList<>();
         for (AbstractColumn col : oldTbl.getColumns()) {
             switch (dbtype) {
-            case PG:
-                PgColumn oldPgCol = (PgColumn) col;
-                PgColumn newPgCol = (PgColumn) oldPgCol.getTwin(newDbFull);
-                if (newPgCol != null && newPgCol.getSequence() != null) {
-                    AbstractSequence seq = oldPgCol.getSequence();
-                    if (seq != null) {
-                        script.addStatement(getRenameCommand(seq, getTempName(seq)));
+                case PG:
+                    PgColumn oldPgCol = (PgColumn) col;
+                    PgColumn newPgCol = (PgColumn) oldPgCol.getTwin(newDbFull);
+                    if (newPgCol != null && newPgCol.getSequence() != null) {
+                        AbstractSequence seq = oldPgCol.getSequence();
+                        if (seq != null) {
+                            script.addStatement(getRenameCommand(seq, getTempName(seq)));
+                        }
+                        identityCols.add(oldPgCol.getName());
                     }
-                    identityCols.add(oldPgCol.getName());
-                }
-                break;
-            case MS:
-                MsColumn msCol = (MsColumn) col;
-                if (msCol.isIdentity()) {
-                    identityCols.add(msCol.getName());
-                }
-                if (msCol.getDefaultName() != null) {
-                    script.addStatement("ALTER TABLE "
-                            + MsDiffUtils.quoteName(oldTbl.getSchemaName()) + '.'
-                            + MsDiffUtils.quoteName(tmpTblName) + " DROP CONSTRAINT "
-                            + MsDiffUtils.quoteName(msCol.getDefaultName()));
-                }
-                break;
-            case CH:
-                break;
-            default:
-                throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + dbtype);
+                    break;
+                case MS:
+                    MsColumn msCol = (MsColumn) col;
+                    if (msCol.isIdentity()) {
+                        identityCols.add(msCol.getName());
+                    }
+                    if (msCol.getDefaultName() != null) {
+                        script.addStatement("ALTER TABLE "
+                                + MsDiffUtils.quoteName(oldTbl.getSchemaName()) + '.'
+                                + MsDiffUtils.quoteName(tmpTblName) + " DROP CONSTRAINT "
+                                + MsDiffUtils.quoteName(msCol.getDefaultName()));
+                    }
+                    break;
+                case CH:
+                    break;
+                default:
+                    throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + dbtype);
             }
         }
 
@@ -527,20 +551,18 @@ public final class ActionsToScriptConverter {
     /**
      * Returns sql command to rename the given object.
      *
-     * @param st object for rename
+     * @param st      object for rename
      * @param newName the new name for given object
      * @return sql command to rename the given object
      */
     private String getRenameCommand(PgStatement st, String newName) {
         return switch (settings.getDbType()) {
-        case PG -> MessageFormat.format(RENAME_PG_OBJECT,
-                st.getStatementType(), st.getQualifiedName(), PgDiffUtils.getQuotedName(newName));
-        case MS -> MessageFormat.format(RENAME_MS_OBJECT,
-                PgDiffUtils.quoteString(st.getQualifiedName()), PgDiffUtils.quoteString(newName));
-        case CH -> MessageFormat.format(RENAME_CH_OBJECT,
-                st.getStatementType(), st.getQualifiedName(), ChDiffUtils.getQuotedName(newName));
-        default -> throw new IllegalArgumentException(
-                Messages.DatabaseType_unsupported_type + settings.getDbType());
+            case PG -> MessageFormat.format(RENAME_PG_OBJECT,
+                    st.getStatementType(), st.getQualifiedName(), PgDiffUtils.getQuotedName(newName));
+            case MS -> MessageFormat.format(RENAME_MS_OBJECT,
+                    PgDiffUtils.quoteString(st.getQualifiedName()), PgDiffUtils.quoteString(newName));
+            case CH -> MessageFormat.format(RENAME_CH_OBJECT,
+                    st.getStatementType(), st.getQualifiedName(), ChDiffUtils.getQuotedName(newName));
         };
     }
 }

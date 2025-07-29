@@ -15,18 +15,29 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.difftree;
 
+import org.pgcodekeeper.core.PgDiffUtils;
+
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.pgcodekeeper.core.PgDiffUtils;
-
+/**
+ * Represents an ignore rule for database objects during schema comparison.
+ * This class defines patterns and conditions to determine which database objects
+ * should be ignored or shown in diff operations.
+ */
 public class IgnoredObject {
 
+    /**
+     * Defines the status of how an ignored object should be handled in the diff tree.
+     */
     public enum AddStatus {
-        ADD, ADD_SUBTREE, SKIP, SKIP_SUBTREE
+        ADD,
+        ADD_SUBTREE,
+        SKIP,
+        SKIP_SUBTREE
     }
 
     private final String name;
@@ -39,13 +50,33 @@ public class IgnoredObject {
     private boolean ignoreContent;
     private boolean isQualified;
 
+    /**
+     * Creates an ignored object rule.
+     *
+     * @param name          the name pattern to match against database objects
+     * @param isRegular     true if the name should be treated as a regular expression
+     * @param ignoreContent true if the content of matching objects should be ignored
+     * @param isQualified   true if the name pattern should match against qualified names
+     * @param objTypes      the set of database object types this rule applies to
+     */
     public IgnoredObject(String name, boolean isRegular,
-            boolean ignoreContent, boolean isQualified, Set<DbObjType> objTypes) {
+                         boolean ignoreContent, boolean isQualified, Set<DbObjType> objTypes) {
         this(name, null, false, isRegular, ignoreContent, isQualified, objTypes);
     }
 
+    /**
+     * Creates an ignored object rule with database name filtering.
+     *
+     * @param name          the name pattern to match against database objects
+     * @param dbRegex       regular expression pattern to match database names
+     * @param isShow        true if matching objects should be shown, false if hidden
+     * @param isRegular     true if the name should be treated as a regular expression
+     * @param ignoreContent true if the content of matching objects should be ignored
+     * @param isQualified   true if the name pattern should match against qualified names
+     * @param objTypes      the set of database object types this rule applies to
+     */
     public IgnoredObject(String name, String dbRegex, boolean isShow, boolean isRegular,
-            boolean ignoreContent, boolean isQualified, Set<DbObjType> objTypes) {
+                         boolean ignoreContent, boolean isQualified, Set<DbObjType> objTypes) {
         this.name = name;
         this.isShow = isShow;
         this.isRegular = isRegular;
@@ -101,6 +132,12 @@ public class IgnoredObject {
         this.objTypes = objTypes;
     }
 
+    /**
+     * Creates a copy of this ignore rule with a different name pattern.
+     *
+     * @param name the new name pattern for the copied rule
+     * @return a new IgnoredObject with the same properties but different name
+     */
     public IgnoredObject copy(String name) {
         return new IgnoredObject(name, dbRegexStr, isShow, isRegular,
                 ignoreContent, isQualified, EnumSet.copyOf(objTypes));
@@ -114,6 +151,13 @@ public class IgnoredObject {
         }
     }
 
+    /**
+     * Checks if this ignore rule matches the given tree element and database names.
+     *
+     * @param el      the tree element to match against
+     * @param dbNames optional database names to match against the database regex
+     * @return true if the rule matches the element
+     */
     public boolean match(TreeElement el, String... dbNames) {
         boolean matches = match(isQualified ? el.getQualifiedName() : el.getName());
 
@@ -129,7 +173,7 @@ public class IgnoredObject {
                         break;
                     }
                 }
-                matches &= foundDbMatch;
+                matches = foundDbMatch;
             } else {
                 matches = false;
             }
@@ -143,6 +187,11 @@ public class IgnoredObject {
                 && Objects.equals(objTypes, rule.objTypes);
     }
 
+    /**
+     * Gets the add status based on the show and ignore content flags.
+     *
+     * @return the appropriate AddStatus for this rule
+     */
     public AddStatus getAddStatus() {
         if (isShow) {
             return ignoreContent ? AddStatus.ADD_SUBTREE : AddStatus.ADD;
@@ -188,6 +237,13 @@ public class IgnoredObject {
         return appendRuleCode(new StringBuilder(), true).toString();
     }
 
+    /**
+     * Appends the rule code representation to the given StringBuilder.
+     *
+     * @param sb        the StringBuilder to append to
+     * @param isAddType true if this is an add-type rule
+     * @return the StringBuilder with the rule code appended
+     */
     public StringBuilder appendRuleCode(StringBuilder sb, boolean isAddType) {
         if (isAddType) {
             sb.append(isShow ? "SHOW " : "HIDE ");
@@ -232,18 +288,10 @@ public class IgnoredObject {
     }
 
     private static boolean isKeyword(String id) {
-        switch (id) {
-        case "QUALIFIED":
-        case "HIDE":
-        case "SHOW":
-        case "ALL":
-        case "CONTENT":
-        case "REGEX":
-        case "NONE":
-            return true;
-        default:
-            return false;
-        }
+        return switch (id) {
+            case "QUALIFIED", "HIDE", "SHOW", "ALL", "CONTENT", "REGEX", "NONE" -> true;
+            default -> false;
+        };
     }
 
     private static boolean quoteWithDq(String str) {
@@ -251,9 +299,14 @@ public class IgnoredObject {
         int sq = 0;
         for (int i = 0; i < str.length(); ++i) {
             switch (str.charAt(i)) {
-            case '\'': ++sq; break;
-            case '"' : ++dq; break;
-            default : break;
+                case '\'':
+                    ++sq;
+                    break;
+                case '"':
+                    ++dq;
+                    break;
+                default:
+                    break;
             }
         }
         return sq > dq;

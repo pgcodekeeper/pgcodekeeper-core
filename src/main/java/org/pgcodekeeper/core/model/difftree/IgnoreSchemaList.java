@@ -15,15 +15,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.difftree;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.IgnoredObject.AddStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Implementation of ignore list specifically for schema filtering.
+ * Manages rules for showing or hiding database schemas based on pattern matching.
+ * Uses black list approach by default (show all, hide some).
+ */
 public class IgnoreSchemaList implements IIgnoreList {
 
     private static final Logger LOG = LoggerFactory.getLogger(IgnoreSchemaList.class);
@@ -48,6 +53,9 @@ public class IgnoreSchemaList implements IIgnoreList {
         return Collections.unmodifiableList(rules);
     }
 
+    /**
+     * Clears all ignore rules from the list.
+     */
     public void clearList() {
         rules.clear();
     }
@@ -57,22 +65,33 @@ public class IgnoreSchemaList implements IIgnoreList {
         rules.add(rule);
     }
 
+    /**
+     * Checks if a schema should be shown based on configured rules.
+     * 
+     * @param schema the schema name to check
+     * @return true if schema should be shown, false if it should be hidden
+     */
     public boolean getNameStatus(String schema) {
         for (IgnoredObject rule : rules) {
             if (rule.match(schema)) {
                 AddStatus newStatus = rule.getAddStatus();
-                switch (newStatus) {
-                case ADD, ADD_SUBTREE:
-                    return true;
-                case SKIP, SKIP_SUBTREE:
-                    LOG.debug(Messages.IgnoreSchemaList_log_ignored_schema, schema);
-                    return false;
-                }
+                return switch (newStatus) {
+                    case ADD, ADD_SUBTREE -> true;
+                    case SKIP, SKIP_SUBTREE -> {
+                        LOG.debug(Messages.IgnoreSchemaList_log_ignored_schema, schema);
+                        yield false;
+                    }
+                };
             }
         }
         return isShow;
     }
 
+    /**
+     * Generates string representation of the ignore list configuration.
+     * 
+     * @return formatted string showing all rules and default behavior
+     */
     public String getListCode() {
         StringBuilder sb = new StringBuilder();
         sb.append(isShow ? "SHOW ALL\n" : "HIDE ALL\n");

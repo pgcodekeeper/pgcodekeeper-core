@@ -17,10 +17,37 @@ package org.pgcodekeeper.core.model.difftree;
 
 import java.util.List;
 
+/**
+ * Interface for managing ignore lists used in database schema comparison.
+ * Provides basic operations for adding ignore rules and controlling visibility behavior.
+ */
 public interface IIgnoreList {
 
+    /**
+     * Gets the list of ignore rules.
+     * 
+     * @return list of ignored objects
+     */
     List<IgnoredObject> getList();
+
+    /**
+     * Adds an ignore rule to the list.
+     * 
+     * @param rule the ignore rule to add
+     */
     void add(IgnoredObject rule);
+
+    /**
+     * Sets the default show behavior for this ignore list.
+     * 
+     * @param isShow true for show-all (blacklist), false for hide-all (whitelist)
+     */
     void setShow(boolean isShow);
+
+    /**
+     * Gets the default show behavior.
+     * 
+     * @return true if default is to show objects, false if default is to hide
+     */
     boolean isShow();
 }

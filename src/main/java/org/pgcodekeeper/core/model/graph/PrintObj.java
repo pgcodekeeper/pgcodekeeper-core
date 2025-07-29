@@ -17,6 +17,11 @@ package org.pgcodekeeper.core.model.graph;
 
 import org.pgcodekeeper.core.schema.PgStatement;
 
+/**
+ * Represents a database object for printing in dependency tree output.
+ * Contains statement information along with formatting details like indentation,
+ * hidden object count, and cyclic dependency indicators.
+ */
 public class PrintObj {
 
     private final PgStatement statement;
@@ -25,6 +30,15 @@ public class PrintObj {
     private final int hiddenObj;
     private final boolean isCyclic;
 
+    /**
+     * Creates a new print object with formatting information.
+     *
+     * @param statement the database statement to print
+     * @param parentSt  the parent statement in the dependency tree
+     * @param indent    the indentation level for display
+     * @param hiddenObj count of hidden objects at this level
+     * @param isCyclic  whether this object is part of a cyclic dependency
+     */
     public PrintObj(PgStatement statement, PgStatement parentSt, int indent, int hiddenObj, boolean isCyclic) {
         this.statement = statement;
         this.parentSt = parentSt;
@@ -56,9 +70,7 @@ public class PrintObj {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < indent; i++) {
-            sb.append("\t");
-        }
+        sb.append("\t".repeat(Math.max(0, indent)));
 
         sb.append(statement.getStatementType()).append(" ").append(statement.getQualifiedName());
         if (hiddenObj > 0) {

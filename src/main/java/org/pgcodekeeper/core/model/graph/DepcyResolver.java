@@ -34,9 +34,13 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
-/*
- * implementation notes:
- *
+/**
+ * Core dependency resolution engine that determines database object changes required for schema migration.
+ * Analyzes two database schemas and generates a complete set of CREATE, ALTER, and DROP actions
+ * while respecting object dependencies and handling complex dependency chains.
+ * <p>
+ * Implementation notes:
+ * <p>
  * General idea behind this class is graph passes that collect required actions.
  * addDropStatements starts a bottom-to-top pass in the old DB graph,
  * addCreateStatements starts a top-to-bottom pass in the new DB graph.
@@ -45,22 +49,13 @@ import java.util.stream.IntStream;
  * This also allows us to treat alters as "drops" here.
  * Passes are eventually exhausted when all the actions have been collected
  * into actions set.
- *
+ * <p>
  * At the very end recreateDrops is called, which starts a "create pass"
  * for every object that was dropped but should not have been -
  * i.e. it was a dependency related drop. These passes are performed until
  * they stop generating new actions. This ensures that all dropped dependencies
  * have been recreated, and any dependency drops that may have been generated in the process
  * have also been accounted for.
- *
- * This logic and many kludges around it are consequences of having to work with two graphs,
- * two object states (old and new) and having to generate action sequences for
- * object creates, drops and alters in the same script.
- *
- * TODO the better idea is to prepare a single graph containing not objects,
- * but *actions* and dependencies between these actions.
- * Theoretically, a simple topological sort will be enough to derive an action list from such a graph.
- * Hopefully someday this kludgy mess will be replaced by a more advanced algorithm.
  */
 public final class DepcyResolver {
 
@@ -72,13 +67,13 @@ public final class DepcyResolver {
 
     private final Set<ActionContainer> actions = new LinkedHashSet<>();
     /**
-     * Хранит запущенные итерации по удалению объектов
+     * Stores objects that have been processed for drop operations
      */
     private final Set<PgStatement> droppedObjects = new HashSet<>();
     private final Set<PgStatement> triedToDrop = new HashSet<>();
 
     /**
-     * Хранит запущенные итерации по добавлению объектов
+     * Stores objects that have been processed for create operations
      */
     private final Set<PgStatement> createdObjects = new HashSet<>();
 
@@ -100,25 +95,25 @@ public final class DepcyResolver {
         this.settings = settings;
     }
 
-    private void fillObjects(List<DbObject> objects, PgStatement starter) {
+    private void fillObjects(List<DbObject> objects) {
         for (DbObject obj : objects) {
             if (obj.newStatement() == null) {
-                addDropStatements(obj.oldStatement(), starter);
+                addDropStatements(obj.oldStatement(), null);
             } else if (obj.oldStatement() == null) {
-                addCreateStatements(obj.newStatement(), starter);
+                addCreateStatements(obj.newStatement(), null);
             } else {
-                addAlterStatements(obj.oldStatement(), obj.newStatement(), starter);
+                addAlterStatements(obj.oldStatement(), obj.newStatement());
             }
         }
     }
 
     /**
-     * При создании объекта в новой базе добавляет для создания все объекты из новой базы. <br>
-     * Объект существует в новой базе, но не существует в старой. Мы его создаем, а также добавляем для создания все
-     * объекты, которые требуются для правильной работы создаваемого объекта.
+     * Processes creation of an object in the new database by adding all required dependencies.
+     * When an object exists in the new database but not in the old, this method initiates
+     * its creation along with all dependencies required for proper operation.
      *
-     * @param newStatement объект в новой базе данных
-     * @param starter      объект запустивший процесс
+     * @param newStatement the object in the new database to be created
+     * @param starter      the object that initiated this creation process
      */
     private void addCreateStatements(PgStatement newStatement, PgStatement starter) {
         if (!createdObjects.add(newStatement)) {
@@ -132,12 +127,12 @@ public final class DepcyResolver {
     }
 
     /**
-     * При удалении объекта из старой базы добавляет для удаления все объекты из старой базы. <br>
-     * Объекта не существует в новой базе, но существует в старой, мы его удаляем. И удаляем из старой базы все объекты,
-     * которым этот объект требуется, т.к. они будут ошибочны, при отсутсвии этого объекта.
+     * Processes deletion of an object from the old database by adding all dependent objects for removal.
+     * When an object exists in the old database but not in the new, this method initiates
+     * its deletion along with all objects that depend on it, as they would be invalid without it.
      *
-     * @param oldStatement объект в старой базе данных
-     * @param starter      объект запустивший процесс
+     * @param oldStatement the object in the old database to be deleted
+     * @param starter      the object that initiated this deletion process
      */
     private void addDropStatements(PgStatement oldStatement, PgStatement starter) {
         if (!droppedObjects.add(oldStatement)) {
@@ -166,25 +161,25 @@ public final class DepcyResolver {
     }
 
     /**
-     * Добавить выражение для изменения объекта
+     * Adds statements for altering a database object.
+     * Determines the appropriate action based on object state comparison
+     * and handles dependency-related recreations when necessary.
      *
-     * @param oldStatement исходный объект
-     * @param newStatement новый объект
-     * @param starter      объект запустивший процесс
+     * @param oldStatement the original object state
+     * @param newStatement the target object state
      */
-    private void addAlterStatements(PgStatement oldStatement, PgStatement newStatement,
-                                    PgStatement starter) {
+    private void addAlterStatements(PgStatement oldStatement, PgStatement newStatement) {
         ObjectState state = getObjectState(oldStatement, newStatement);
         if (state.in(ObjectState.RECREATE, ObjectState.ALTER_WITH_DEP)) {
-            addDropStatements(oldStatement, starter);
+            addDropStatements(oldStatement, null);
             return;
         }
 
-        // добавляем измененные объекты
-        // пропускаем колонки таблиц из дроп листа
+        // add altered objects
+        // skip table columns from drop list
         if (state == ObjectState.ALTER && !inDropsList(oldStatement)
                 && (oldStatement.getStatementType() != DbObjType.COLUMN || !inDropsList(oldStatement.getParent()))) {
-            addToListWithoutDepcies(ObjectState.ALTER, oldStatement, starter);
+            addToListWithoutDepcies(ObjectState.ALTER, oldStatement, null);
         }
 
         alterMsTableColumns(oldStatement, newStatement);
@@ -232,7 +227,9 @@ public final class DepcyResolver {
     }
 
     /**
-     * Пересоздает ранее удаленные объекты в новое состояние
+     * Recreates previously dropped objects into their new state.
+     * Handles cases where objects were dropped due to dependencies but should
+     * actually exist in the target schema. Continues until no new actions are generated.
      */
     private void recreateDrops() {
         int oldActionsSize = -1;
@@ -294,7 +291,7 @@ public final class DepcyResolver {
             return;
         }
 
-        // Изначально будем удалять объект
+        // Initially set action to drop the object
         ObjectState action = ObjectState.DROP;
         if (!oldObj.canDrop()) {
             addToListWithoutDepcies(action, oldObj, starter);
@@ -308,11 +305,11 @@ public final class DepcyResolver {
                 return;
             }
 
-            // в случае необходимости изменения (ALter) объекта с
-            // зависимостями нужно сначала создать объект с зависимостями,
-            // потом изменить его
+            // when altering an object with dependencies,
+            // first create the object with dependencies,
+            // then alter it
             if (action == ObjectState.ALTER_WITH_DEP) {
-                // не добавлять объект, если уже есть в списке
+                // do not add object if already in the list
                 if (!createdObjects.contains(newObj)) {
                     addCreateStatements(newObj, null);
                     addToListWithoutDepcies(action, oldObj, starter);
@@ -325,19 +322,19 @@ public final class DepcyResolver {
             }
         }
 
-        // Колонки пропускаются при удалении таблицы
+        // Columns are skipped when dropping the table
         if (oldObj.getStatementType() == DbObjType.COLUMN) {
             AbstractTable oldTable = (AbstractTable) oldObj.getParent();
             PgStatement newTable = oldObj.getParent().getTwin(newDb);
 
             if (newTable == null || getRecreatedObj(oldTable, (AbstractTable) newTable)) {
-                // случай, если дроп зависимости тянет колонку, которую мы не пишем
-                // потому что дропается таблица - дропаем таблицу
+                // case where dependency drop affects a column we don't handle
+                // because the table is being dropped - drop the table instead
                 addDropStatements(oldTable, oldObj);
                 return;
             }
 
-            // пропускаем также при recreate
+            // also skip during recreate
             ObjectState parentState = getObjectState(oldTable, newTable);
             if (parentState == ObjectState.RECREATE) {
                 return;
@@ -348,8 +345,8 @@ public final class DepcyResolver {
             }
         }
 
-        // пропускаем сиквенс, если дропается его овнедбай
-        // сиквенс дропнется неявно вместе с колонкой
+        // skip sequence if its owned-by column is being dropped
+        // sequence will be dropped implicitly with the column
         if (oldObj instanceof PgSequence seq) {
             GenericColumn ownedBy = seq.getOwnedBy();
             if (ownedBy != null && newDb.getStatement(ownedBy) == null) {
@@ -425,9 +422,7 @@ public final class DepcyResolver {
         // columns are integrated into CREATE TABLE OF TYPE
         if (newTable instanceof TypedPgTable newTypedTable) {
             TypedPgTable oldTypedTable = (TypedPgTable) oldTable;
-            if (!Objects.equals(newTypedTable.getOfType(), oldTypedTable.getOfType())) {
-                return true;
-            }
+            return !Objects.equals(newTypedTable.getOfType(), oldTypedTable.getOfType());
         }
 
         return false;
@@ -452,14 +447,14 @@ public final class DepcyResolver {
     }
 
     /**
-     * Проверяет есть ли объект в списке ранее удаленных объектов
+     * Checks if an object exists in the list of previously dropped objects.
      *
-     * @param statement объект для проверки
-     * @return
+     * @param statement the object to check
+     * @return true if the object is in the drops list, false otherwise
      */
     private boolean inDropsList(PgStatement statement) {
-        // если овнедбай колонка или таблица уже в дроплисте
-        // то сиквенс тоже неявно с ними дропнут, возвращаем true
+        // if owned-by column or table is already in drop list
+        // then sequence will also be dropped implicitly, return true
         if (statement instanceof PgSequence seq) {
             GenericColumn ownedBy = seq.getOwnedBy();
             if (ownedBy != null) {
@@ -473,11 +468,11 @@ public final class DepcyResolver {
     }
 
     /**
-     * Добавляет в список выражений для скрипта Выражение без зависимостей
+     * Adds an action to the script expressions list without processing dependencies.
      *
-     * @param action  Какое действие нужно вызвать {@link ObjectState}
-     * @param oldObj  Объект из старого состояния
-     * @param starter объект который вызвал действие
+     * @param action  the action type to perform (see {@link ObjectState})
+     * @param oldObj  the object from the old database state
+     * @param starter the object that triggered this action
      */
     private void addToListWithoutDepcies(ObjectState action,
                                          PgStatement oldObj, PgStatement starter) {
@@ -490,7 +485,7 @@ public final class DepcyResolver {
     }
 
     private void tryToCreate(PgStatement newObj, PgStatement starter) {
-        // Изначально будем создавать объект
+        // Initially set action to create the object
         ObjectState action = ObjectState.CREATE;
         // always create if droppped before
         if (inDropsList(newObj)) {
@@ -519,7 +514,7 @@ public final class DepcyResolver {
                 return;
             }
 
-            // в случае изменения объекта с зависимостями
+            // when altering object with dependencies
             if (action.in(ObjectState.RECREATE, ObjectState.ALTER_WITH_DEP)) {
                 addDropStatements(oldObj, starter);
                 if (action == ObjectState.ALTER_WITH_DEP) {
@@ -531,13 +526,13 @@ public final class DepcyResolver {
             }
         }
 
-        // если объект (таблица) создается, запускаем создание зависимостей ее колонок
-        // сами колонки создадутся неявно вместе с таблицей
+        // if object (table) is being created, initiate creation of its column dependencies
+        // columns themselves will be created implicitly with the table
         if (action == ObjectState.CREATE) {
             createColumnDependencies(newObj);
         }
 
-        // создать колонку при создании сиквенса с owned by
+        // create column when creating sequence with owned-by relationship
         if (newObj instanceof PgSequence seq) {
             GenericColumn ownedBy = seq.getOwnedBy();
             if (ownedBy != null && oldDb.getStatement(ownedBy) == null) {
@@ -575,7 +570,7 @@ public final class DepcyResolver {
         DepcyResolver depRes = new DepcyResolver(oldDb, newDb, settings, toRefresh);
         depRes.oldDepcyGraph.addCustomDepcies(additionalDepciesOldDb);
         depRes.newDepcyGraph.addCustomDepcies(additionalDepciesNewDb);
-        depRes.fillObjects(dbObjects, null);
+        depRes.fillObjects(dbObjects);
         depRes.recreateDrops();
         depRes.removeExtraActions();
         depRes.removeAlteredFromRefreshes();

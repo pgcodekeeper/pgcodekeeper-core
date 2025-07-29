@@ -15,25 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Queue;
-import java.util.Set;
-import java.util.function.Predicate;
-
 import org.jgrapht.Graph;
 import org.jgrapht.alg.cycle.CycleDetector;
 import org.jgrapht.event.TraversalListenerAdapter;
@@ -48,19 +29,26 @@ import org.pgcodekeeper.core.loader.JdbcRunner;
 import org.pgcodekeeper.core.loader.UrlJdbcConnector;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.IConstraintFk;
-import org.pgcodekeeper.core.schema.IConstraintPk;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.StatementUtils;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.ms.MsColumn;
 import org.pgcodekeeper.core.schema.pg.PgColumn;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.function.Predicate;
+
+/**
+ * Database insert script generator for data migration.
+ * Generates INSERT statements with dependency resolution, handling foreign key constraints,
+ * cycles, and database-specific data types for PostgreSQL and Microsoft SQL databases.
+ */
 public final class InsertWriter {
 
     private static final Logger LOG = LoggerFactory.getLogger(InsertWriter.class);
@@ -141,9 +129,9 @@ public final class InsertWriter {
      * @param settings - {@link ISettings}
      * @param name     - qualified table name which data need to transfer
      * @param filter   - condition of WHERE for query select
-     * @throws InterruptedException
-     * @throws IOException
-     * @throws SQLException
+     * @throws InterruptedException if operation is interrupted
+     * @throws IOException          if I/O error occurs
+     * @throws SQLException         if database error occurs
      */
     public static String write(AbstractDatabase db, ISettings settings, String name, String filter, String source)
             throws InterruptedException, IOException, SQLException {
@@ -152,14 +140,14 @@ public final class InsertWriter {
         var isTransaction = settings.isAddTransaction();
         if (isTransaction) {
             switch (dbType) {
-            case MS:
-                sb.append("BEGIN TRANSACTION;\nGO\n\n");
-                break;
-            case PG:
-                sb.append("START TRANSACTION;\n\n");
-                break;
-            default:
-                break;
+                case MS:
+                    sb.append("BEGIN TRANSACTION;\nGO\n\n");
+                    break;
+                case PG:
+                    sb.append("START TRANSACTION;\n\n");
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -168,14 +156,14 @@ public final class InsertWriter {
 
         if (isTransaction) {
             switch (dbType) {
-            case MS:
-                sb.append("COMMIT;\nGO");
-                break;
-            case PG:
-                sb.append("COMMIT TRANSACTION;");
-                break;
-            default:
-                break;
+                case MS:
+                    sb.append("COMMIT;\nGO");
+                    break;
+                case PG:
+                    sb.append("COMMIT TRANSACTION;");
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -201,7 +189,7 @@ public final class InsertWriter {
         return db.getDescendants()
                 .filter(st -> st.getStatementType() == DbObjType.TABLE)
                 .filter(qNameFilter)
-                .map(st -> st.getQualifiedName())
+                .map(PgStatement::getQualifiedName)
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("Table " + name + " not found in database"));
     }
@@ -214,9 +202,9 @@ public final class InsertWriter {
      * @param name   - qualified table name which data need to transfer
      * @param filter - condition of WHERE for query select
      * @param sb     - {@link StringBuilder} which will be store data insert script
-     * @throws InterruptedException
-     * @throws IOException
-     * @throws SQLException
+     * @throws InterruptedException if the operation is interrupted
+     * @throws IOException          if I/O error occurs during database connection
+     * @throws SQLException         if database access error occurs
      */
     private void generateScript(String source, String name, String filter, StringBuilder sb)
             throws InterruptedException, IOException, SQLException {
@@ -236,9 +224,8 @@ public final class InsertWriter {
      * @param rootName   - qualified table name which data need to transfer
      * @param rootFilter - condition of WHERE for query select
      * @param connection - connection with source-database
-     * @throws InterruptedException
-     * @throws SQLException
-     * @throws IOException
+     * @throws InterruptedException if the operation is interrupted
+     * @throws SQLException         if database access error occurs
      */
     private void fillGraph(String rootName, String rootFilter, Connection connection)
             throws InterruptedException, SQLException {
@@ -305,9 +292,9 @@ public final class InsertWriter {
     /**
      * packs the arguments into a Map
      *
-     * @param parent - the {@link RowData} which depends from some other row
-     * @param name   - qualified table name which data need to transfer
-     * @param filter - condition of WHERE for query select
+     * @param parent the {@link RowData} which depends on some other row
+     * @param name   qualified table name which data need to transfer
+     * @param filter condition of WHERE for query select
      * @return arguments packed in {@link Map}
      */
     private Map<String, Object> packData(RowData parent, String name, String filter) {
@@ -348,14 +335,14 @@ public final class InsertWriter {
     }
 
     /**
-     * This method get data from {@link ResultSet}, processing this data if need and
+     * This method get data from {@link ResultSet}, processing this data if needed and
      * return it packed in object {@link RowData}
      *
-     * @param values     - {@link ResultSet} witch contains row data
-     * @param tableName  - table name of new {@link RoWData}
-     * @param parent     - the first {@link RowData} which depends from this data
+     * @param values    {@link ResultSet} witch contains row data
+     * @param tableName table name of new {@link RowData}
+     * @param parent    the first {@link RowData} which depends on this data
      * @return new filled {@link RowData}
-     * @throws SQLException
+     * @throws SQLException if database access error occurs while reading data from ResultSet
      */
     private RowData getData(ResultSet values, String tableName, RowData parent) throws SQLException {
         Map<String, String> data = new LinkedHashMap<>();
@@ -401,11 +388,10 @@ public final class InsertWriter {
     }
 
     /**
-     * This method process data to correct format if it need
+     * This method process data to correct format if it needed
      *
-     * @param type - data type of {@link AbstractColumn}
+     * @param type     - data type of {@link AbstractColumn}
      * @param rawValue - data before processing
-     * @param colName - name of {@link AbstractColumn}
      * @return processed data
      */
     private String getValue(String type, Object rawValue) {
@@ -432,8 +418,8 @@ public final class InsertWriter {
     }
 
     /**
-     * This method find the cyclic edges in graph check which edges can be remove
-     * and processing this edges and vertices.
+     * This method find the cyclic edges in graph check which edges can be removed
+     * and processing these edges and vertices.
      *
      * @throws IllegalStateException - if tables have circular edges and are based
      *                               on foreign keys, which refer to columns with
@@ -493,7 +479,7 @@ public final class InsertWriter {
 
         // 1 step - convert graph to set
         var dfi = new DepthFirstIterator<>(graph);
-        dfi.addTraversalListener(new TraversalListenerAdapter<RowData, DefaultEdge>() {
+        dfi.addTraversalListener(new TraversalListenerAdapter<>() {
 
             @Override
             public void vertexFinished(VertexTraversalEvent<RowData> e) {

@@ -15,24 +15,28 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.difftree;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.AbstractTable;
 import org.pgcodekeeper.core.schema.IStatementContainer;
 import org.pgcodekeeper.core.schema.PgStatement;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
 /**
- * служит оберткой для объектов БД, представляет состояние объекта между старой
- * и новой БД
+ * Wrapper for database objects representing the state between old and new database schemas.
+ * Provides hierarchical tree structure for organizing database objects and their relationships
+ * during schema comparison operations.
  */
 public final class TreeElement {
 
+    /**
+     * Represents the side of difference in schema comparison.
+     */
     public enum DiffSide {
-        LEFT, RIGHT, BOTH;
+        LEFT, RIGHT, BOTH
     }
 
     private int hashcode;
@@ -43,50 +47,109 @@ public final class TreeElement {
     private TreeElement parent;
     private final List<TreeElement> children = new ArrayList<>();
 
+    /**
+     * Gets the name of this tree element.
+     *
+     * @return the element name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets the database object type of this element.
+     *
+     * @return the object type
+     */
     public DbObjType getType() {
         return type;
     }
 
+    /**
+     * Gets the diff side of this element.
+     *
+     * @return the diff side (LEFT, RIGHT, or BOTH)
+     */
     public DiffSide getSide() {
         return side;
     }
 
+    /**
+     * Gets the list of child elements.
+     *
+     * @return unmodifiable list of children
+     */
     public List<TreeElement> getChildren() {
         return Collections.unmodifiableList(children);
     }
 
+    /**
+     * Gets the parent element.
+     *
+     * @return the parent element, can be null for root
+     */
     public TreeElement getParent() {
         return parent;
     }
 
+    /**
+     * Checks if this element is selected.
+     *
+     * @return true if selected, false otherwise
+     */
     public boolean isSelected() {
         return selected;
     }
 
+    /**
+     * Sets the selection state of this element.
+     *
+     * @param selected true to select, false to deselect
+     */
     public void setSelected(boolean selected) {
         this.selected = selected;
     }
 
+    /**
+     * Creates a tree element with specified properties.
+     *
+     * @param name the element name
+     * @param type the database object type
+     * @param side the diff side
+     */
     public TreeElement(String name, DbObjType type, DiffSide side) {
         this.name = name;
         this.type = type;
         this.side = side;
     }
 
+    /**
+     * Creates a tree element from a database statement.
+     *
+     * @param statement the database statement
+     * @param side      the diff side
+     */
     public TreeElement(PgStatement statement, DiffSide side) {
         this.name = statement.getName();
         this.side = side;
         this.type = statement.getStatementType();
     }
 
+    /**
+     * Checks if this element has child elements.
+     *
+     * @return true if has children, false otherwise
+     */
     public boolean hasChildren() {
         return !children.isEmpty();
     }
 
+    /**
+     * Adds a child element to this element.
+     *
+     * @param child the child element to add
+     * @throws IllegalStateException if child already has a parent
+     */
     public void addChild(TreeElement child) {
         if (child.parent != null) {
             throw new IllegalStateException("Cannot add a child that already has a parent!");
@@ -97,6 +160,13 @@ public final class TreeElement {
         children.add(child);
     }
 
+    /**
+     * Gets a child element by name and type.
+     *
+     * @param name the child name to find
+     * @param type the child type to match, can be null to match any type
+     * @return the matching child element, or null if not found
+     */
     public TreeElement getChild(String name, DbObjType type) {
         for (TreeElement el : children) {
             if ((type == null || el.type == type) && el.name.equals(name)) {
@@ -107,14 +177,31 @@ public final class TreeElement {
         return null;
     }
 
+    /**
+     * Gets a child element by name (any type).
+     *
+     * @param name the child name to find
+     * @return the matching child element, or null if not found
+     */
     public TreeElement getChild(String name) {
         return getChild(name, null);
     }
 
+    /**
+     * Gets a child element by index.
+     *
+     * @param index the child index
+     * @return the child element at the specified index
+     */
     public TreeElement getChild(int index) {
         return children.get(index);
     }
 
+    /**
+     * Counts all descendant elements recursively.
+     *
+     * @return total number of descendants
+     */
     public int countDescendants() {
         int descendants = 0;
         for (TreeElement sub : children) {
@@ -125,12 +212,21 @@ public final class TreeElement {
         return descendants;
     }
 
+    /**
+     * Counts direct child elements.
+     *
+     * @return number of direct children
+     */
     public int countChildren() {
         return children.size();
     }
 
     /**
-     * Gets corresponding {@link PgStatement} from {@link AbstractDatabase}.
+     * Gets corresponding database statement from the specified database.
+     *
+     * @param db the database to retrieve statement from
+     * @return the corresponding database statement
+     * @throws IllegalArgumentException if no statement found for parent
      */
     public PgStatement getPgStatement(AbstractDatabase db) {
         if (type == DbObjType.DATABASE) {
@@ -151,22 +247,25 @@ public final class TreeElement {
     }
 
     /**
-     * @return Statement from the corresponding DB, based on client's side. BOTH
-     *         uses left.
+     * Gets statement from the corresponding database based on diff side.
+     * BOTH side uses left database.
+     *
+     * @param left  the left database
+     * @param right the right database
+     * @return statement from the appropriate database
      */
     public PgStatement getPgStatementSide(AbstractDatabase left, AbstractDatabase right) {
-        switch (side) {
-        case LEFT, BOTH:
-            return getPgStatement(left);
-        case RIGHT:
-            return getPgStatement(right);
-        default:
-            return null;
-        }
+        return switch (side) {
+            case LEFT, BOTH -> getPgStatement(left);
+            case RIGHT -> getPgStatement(right);
+        };
     }
 
     /**
-     * Ищет элемент в дереве
+     * Finds an element in the tree by database statement.
+     *
+     * @param st the database statement to find
+     * @return the matching tree element, or null if not found
      */
     public TreeElement findElement(PgStatement st) {
         if (st.getStatementType() == DbObjType.DATABASE) {
@@ -181,8 +280,10 @@ public final class TreeElement {
     }
 
     /**
-     * Создает копию элементов начиная с текущего, у которых стороны перевернуты:
-     * {@code left -> right, right -> left, both -> both}
+     * Creates a copy of elements starting from current with sides reverted:
+     * left -> right, right -> left, both -> both
+     *
+     * @return reverted copy of this element and its children
      */
     public TreeElement getRevertedCopy() {
         TreeElement copy = getRevertedElement();
@@ -193,28 +294,23 @@ public final class TreeElement {
     }
 
     /**
-     * возвращает копию элемента с измененными сторонами
+     * Возвращает копию элемента с измененными сторонами
      */
     private TreeElement getRevertedElement() {
-        DiffSide newSide = null;
-        switch (side) {
-        case BOTH:
-            newSide = DiffSide.BOTH;
-            break;
-        case LEFT:
-            newSide = DiffSide.RIGHT;
-            break;
-        case RIGHT:
-            newSide = DiffSide.LEFT;
-            break;
-        }
+        DiffSide newSide = switch (side) {
+            case BOTH -> DiffSide.BOTH;
+            case LEFT -> DiffSide.RIGHT;
+            case RIGHT -> DiffSide.LEFT;
+        };
         TreeElement copy = new TreeElement(name, type, newSide);
         copy.setSelected(selected);
         return copy;
     }
 
     /**
-     * Создает копию элементов начиная с текущего
+     * Creates a copy of elements starting from current element.
+     *
+     * @return copy of this element and its children
      */
     public TreeElement getCopy() {
         TreeElement copy = new TreeElement(name, type, side);
@@ -226,7 +322,7 @@ public final class TreeElement {
     }
 
     /**
-     * начиная от текущего отмечает все элементы
+     * Marks all elements as selected starting from current element.
      */
     public void setAllChecked() {
         setSelected(true);
@@ -236,8 +332,9 @@ public final class TreeElement {
     }
 
     /**
-     * @return признак наличия выбранных элементов в поддереве начиная с текущего
-     *         узла
+     * Checks if there are selected elements in subtree starting from current node.
+     *
+     * @return true if any elements in subtree are selected
      */
     public boolean isSubTreeSelected() {
         for (TreeElement child : children) {
@@ -248,10 +345,20 @@ public final class TreeElement {
         return selected;
     }
 
+    /**
+     * Checks if this element is a container type (table or view).
+     *
+     * @return true if element is a container type
+     */
     public boolean isContainer() {
         return type.in(DbObjType.TABLE, DbObjType.VIEW);
     }
 
+    /**
+     * Checks if this element is a sub-element of a container.
+     *
+     * @return true if parent is a container type
+     */
     public boolean isSubElement() {
         return parent != null && parent.isContainer();
     }
@@ -282,6 +389,11 @@ public final class TreeElement {
                 && getContainerQName().equals(other.getContainerQName());
     }
 
+    /**
+     * Gets the qualified name of the container path.
+     *
+     * @return qualified name of container hierarchy
+     */
     public String getContainerQName() {
         var qname = "";
 
@@ -298,8 +410,8 @@ public final class TreeElement {
     }
 
     /**
-     * Note: the name of the object itself is not quoted due to it including
-     * function parameters.
+     * Gets the qualified name of this element.
+     * Note: the name itself is not quoted as it may include function parameters.
      *
      * @return this element's qualified name
      */
@@ -314,8 +426,11 @@ public final class TreeElement {
     }
 
     /**
-     * устанавливает родителя, использовать только в случае с колонки, создается
-     * связь для получения объекта из базы в одну сторону
+     * Sets parent element - use only for columns to create one-way relationship
+     * for getting object from database.
+     *
+     * @param el the parent element
+     * @deprecated this method should only be used for column relationships
      */
     @Deprecated
     public void setParent(TreeElement el) {
