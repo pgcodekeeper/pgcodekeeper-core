@@ -15,6 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc;
 
+import org.pgcodekeeper.core.Utils;
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -25,60 +30,105 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.pgcodekeeper.core.Utils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
+/**
+ * XML reader for parsing Microsoft SQL Server XML query results.
+ * Provides typed access to XML attributes converted from database query results.
+ */
 public class XmlReader {
 
     private static final String ROOT = "root";
 
-    private final Map <String, String> result;
+    private final Map<String, String> result;
 
     private XmlReader(Map<String, String> result) {
         this.result = result;
     }
 
+    /**
+     * Returns the double value for the specified column name.
+     *
+     * @param columnName the column name
+     * @return the double value, or 0 if null
+     */
     public double getDouble(String columnName) {
         String val = result.get(columnName);
         return val == null ? 0 : Double.parseDouble(val);
     }
 
+    /**
+     * Returns the long value for the specified column name.
+     *
+     * @param columnName the column name
+     * @return the long value, or 0 if null
+     */
     public long getLong(String columnName) {
         String val = result.get(columnName);
         return val == null ? 0 : Long.parseLong(val);
     }
 
+    /**
+     * Returns the boolean value for the specified column name.
+     * Returns true if the value equals "1".
+     *
+     * @param columnName the column name
+     * @return true if the value is "1", false otherwise
+     */
     public boolean getBoolean(String columnName) {
         String o = result.get(columnName);
         return "1".equals(o);
     }
 
+    /**
+     * Returns the string value for the specified column name.
+     *
+     * @param columnName the column name
+     * @return the string value, or null if not found
+     */
     public String getString(String columnName) {
         return result.get(columnName);
     }
 
+    /**
+     * Returns the float value for the specified column name.
+     *
+     * @param columnName the column name
+     * @return the float value, or 0 if null
+     */
     public float getFloat(String columnName) {
         String val = result.get(columnName);
         return val == null ? 0 : Float.parseFloat(val);
     }
 
+    /**
+     * Returns the integer value for the specified column name.
+     *
+     * @param columnName the column name
+     * @return the integer value, or 0 if null
+     */
     public int getInt(String columnName) {
         String val = result.get(columnName);
         return val == null ? 0 : Integer.parseInt(val);
     }
 
+    /**
+     * Returns the short value for the specified column name.
+     *
+     * @param columnName the column name
+     * @return the short value, or 0 if null
+     */
     public short getShort(String columnName) {
         String val = result.get(columnName);
         return val == null ? 0 : Short.parseShort(val);
     }
 
+    /**
+     * Parses XML string into a list of XmlReader instances.
+     * Each child element of the root becomes an XmlReader with its attributes as accessible data.
+     *
+     * @param xml the XML string to parse
+     * @return list of XmlReader instances, one for each child element
+     * @throws XmlReaderException if XML parsing fails
+     */
     public static List<XmlReader> readXML(String xml) throws XmlReaderException {
         if (xml == null) {
             return new ArrayList<>();

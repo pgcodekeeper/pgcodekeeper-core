@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -28,8 +25,20 @@ import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.pg.PgCollation;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL collations.
+ * Loads collation definitions from pg_collation system catalog.
+ */
 public final class CollationsReader extends JdbcReader {
 
+    /**
+     * Creates a new collations reader.
+     *
+     * @param loader the JDBC loader base for database operations
+     */
     public CollationsReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -56,26 +65,26 @@ public final class CollationsReader extends JdbcReader {
         if (SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
             String provider = res.getString("collprovider");
             switch (provider) {
-            case "c":
-                coll.setProvider("libc");
-                break;
-            case "i":
-                coll.setProvider("icu");
-                String locale = null;
-                if (SupportedPgVersion.VERSION_17.isLE(loader.getVersion())) {
-                    locale = res.getString("colllocale");
-                } else if (SupportedPgVersion.VERSION_15.isLE(loader.getVersion())) {
-                    locale = res.getString("colliculocale");
-                }
-                if (locale != null) {
-                    String quotedLocale = PgDiffUtils.quoteString(locale);
-                    coll.setLcCollate(quotedLocale);
-                    coll.setLcCtype(quotedLocale);
-                }
-                break;
-            case "d":
-                coll.setProvider("default");
-                break;
+                case "c":
+                    coll.setProvider("libc");
+                    break;
+                case "i":
+                    coll.setProvider("icu");
+                    String locale = null;
+                    if (SupportedPgVersion.VERSION_17.isLE(loader.getVersion())) {
+                        locale = res.getString("colllocale");
+                    } else if (SupportedPgVersion.VERSION_15.isLE(loader.getVersion())) {
+                        locale = res.getString("colliculocale");
+                    }
+                    if (locale != null) {
+                        String quotedLocale = PgDiffUtils.quoteString(locale);
+                        coll.setLcCollate(quotedLocale);
+                        coll.setLcCtype(quotedLocale);
+                    }
+                    break;
+                case "d":
+                    coll.setProvider("default");
+                    break;
             }
         }
         if (SupportedPgVersion.VERSION_12.isLE(loader.getVersion())) {
@@ -111,11 +120,11 @@ public final class CollationsReader extends JdbcReader {
         addDescriptionPart(builder);
 
         builder
-        .column("res.collname")
-        .column("res.collcollate")
-        .column("res.collctype")
-        .column("res.collowner::bigint")
-        .from("pg_catalog.pg_collation res");
+                .column("res.collname")
+                .column("res.collcollate")
+                .column("res.collctype")
+                .column("res.collowner::bigint")
+                .from("pg_catalog.pg_collation res");
 
         if (SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
             builder.column("res.collprovider");

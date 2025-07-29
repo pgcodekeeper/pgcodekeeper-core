@@ -15,17 +15,26 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.pg.PgFtsParser;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL full-text search parsers.
+ * Loads full-text search parser definitions from pg_ts_parser system catalog.
+ */
 public final class FtsParsersReader extends JdbcReader {
 
+    /**
+     * Constructs a new FtsParsersReader.
+     *
+     * @param loader the JDBC loader base instance
+     */
     public FtsParsersReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -65,12 +74,12 @@ public final class FtsParsersReader extends JdbcReader {
         addExtensionDepsCte(builder);
 
         builder
-        .column("res.prsname")
-        .column("res.prsstart")
-        .column("res.prstoken")
-        .column("res.prsend")
-        .column("res.prsheadline")
-        .column("res.prslextype")
-        .from("pg_catalog.pg_ts_parser res");
+                .column("res.prsname")
+                .column("res.prsstart")
+                .column("res.prstoken")
+                .column("res.prsend")
+                .column("res.prsheadline")
+                .column("res.prslextype")
+                .from("pg_catalog.pg_ts_parser res");
     }
 }

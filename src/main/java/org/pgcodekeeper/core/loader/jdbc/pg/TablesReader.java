@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
@@ -33,22 +30,25 @@ import org.pgcodekeeper.core.parsers.antlr.statements.pg.AlterTable;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.ICompressOptionContainer;
-import org.pgcodekeeper.core.schema.pg.AbstractPgTable;
-import org.pgcodekeeper.core.schema.pg.AbstractRegularTable;
-import org.pgcodekeeper.core.schema.pg.GpExternalTable;
-import org.pgcodekeeper.core.schema.pg.PartitionForeignPgTable;
-import org.pgcodekeeper.core.schema.pg.PartitionGpTable;
-import org.pgcodekeeper.core.schema.pg.PartitionPgTable;
-import org.pgcodekeeper.core.schema.pg.PgColumn;
-import org.pgcodekeeper.core.schema.pg.SimpleForeignPgTable;
-import org.pgcodekeeper.core.schema.pg.SimplePgTable;
-import org.pgcodekeeper.core.schema.pg.TypedPgTable;
+import org.pgcodekeeper.core.schema.pg.*;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL tables.
+ * Loads table definitions from pg_class and related system catalogs.
+ */
 public final class TablesReader extends JdbcReader {
 
     private static final String CREATE_TABLE = "CREATE TABLE noname () ";
 
+    /**
+     * Creates a new TablesReader.
+     *
+     * @param loader the JDBC loader base for database operations
+     */
     public TablesReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -130,7 +130,7 @@ public final class TablesReader extends JdbcReader {
         }
 
         // STORAGE PARAMETERS
-        String [] opts = getColArray(res, "reloptions");
+        String[] opts = getColArray(res, "reloptions");
         if (opts != null) {
             ParserAbstract.fillOptionParams(opts, t::addOption, false, false, false);
         }
@@ -152,15 +152,14 @@ public final class TablesReader extends JdbcReader {
     }
 
     private AbstractPgTable createGpParttionTable(String tableName, String partitionGpBound,
-            String partitionGpTemplate) {
+                                                  String partitionGpTemplate) {
         PartitionGpTable table = new PartitionGpTable(tableName);
-        var partGp = partitionGpBound;
 
         loader.submitAntlrTask(CREATE_TABLE + partitionGpBound + ';',
                 p -> new Pair<>(
                         p.sql().statement(0).schema_statement().schema_create().create_table_statement().partition_gp(),
                         (CommonTokenStream) p.getTokenStream()),
-                pair -> table.setPartitionGpBound(partGp,
+                pair -> table.setPartitionGpBound(partitionGpBound,
                         AntlrUtils.normalizeWhitespaceUnquoted(pair.getFirst(), pair.getSecond())));
 
         if (partitionGpTemplate != null && !partitionGpTemplate.isEmpty()) {
@@ -168,7 +167,7 @@ public final class TablesReader extends JdbcReader {
                 loader.submitAntlrTask(template + ';',
                         p -> new Pair<>(
                                 p.sql().statement(0).schema_statement().schema_alter().alter_table_statement()
-                                .alter_partition_gp(),
+                                        .alter_partition_gp(),
                                 (CommonTokenStream) p.getTokenStream()),
                         pair -> AlterTable.parseGpPartitionTemplate(table, pair.getFirst(), pair.getSecond()));
             }
@@ -214,7 +213,7 @@ public final class TablesReader extends JdbcReader {
     }
 
     private void readColumns(ResultSet res, AbstractPgTable t, long ofTypeOid,
-            AbstractSchema schema) throws SQLException {
+                             AbstractSchema schema) throws SQLException {
         String[] colNames = getColArray(res, "col_names");
         if (colNames == null) {
             return;
@@ -291,21 +290,21 @@ public final class TablesReader extends JdbcReader {
             }
 
             if (!colStorages[i].equals(colDefaultStorages[i])) {
-                switch(colStorages[i]) {
-                case "x":
-                    column.setStorage("EXTENDED");
-                    break;
-                case "m":
-                    column.setStorage("MAIN");
-                    break;
-                case "e":
-                    column.setStorage("EXTERNAL");
-                    break;
-                case "p":
-                    column.setStorage("PLAIN");
-                    break;
-                default:
-                    break;
+                switch (colStorages[i]) {
+                    case "x":
+                        column.setStorage("EXTENDED");
+                        break;
+                    case "m":
+                        column.setStorage("MAIN");
+                        break;
+                    case "e":
+                        column.setStorage("EXTERNAL");
+                        break;
+                    case "p":
+                        column.setStorage("PLAIN");
+                        break;
+                    default:
+                        break;
                 }
             }
 
@@ -423,15 +422,15 @@ public final class TablesReader extends JdbcReader {
         }
 
         switch (res.getString("fmttype")) {
-        case "t":
-            extTable.setFormatType("'TEXT'");
-            break;
-        case "b":
-            extTable.setFormatType("'CUSTOM'");
-            break;
-        default:
-            extTable.setFormatType("'CSV'");
-            break;
+            case "t":
+                extTable.setFormatType("'TEXT'");
+                break;
+            case "b":
+                extTable.setFormatType("'CUSTOM'");
+                break;
+            default:
+                extTable.setFormatType("'CSV'");
+                break;
         }
 
         String options = PgDiffUtils.unquoteQuotedString(res.getString("options"), 1);
@@ -479,40 +478,40 @@ public final class TablesReader extends JdbcReader {
         addParentsPart(builder);
 
         builder
-        .with("nspnames", "SELECT n.oid, n.nspname FROM pg_catalog.pg_namespace n")
-        .with("collations",
-                "SELECT c.oid, c.collname, n.nspname FROM pg_catalog.pg_collation c LEFT JOIN nspnames n ON n.oid = c.collnamespace")
-        .column("res.relname")
-        .column("res.relkind")
-        .column("res.relowner::bigint")
-        .column("res.relacl::text AS aclarray")
-        .column("res.relpersistence AS persistence")
-        .column("res.reloptions")
-        .column("tc.reloptions AS toast_reloptions")
-        .column("tabsp.spcname AS table_space")
-        .column("am.amname AS access_method")
-        .column("ftbl.ftoptions")
-        .column("ser.srvname AS server_name")
-        .column("res.reloftype::bigint AS of_type")
-        .from("pg_catalog.pg_class res")
-        .join("LEFT JOIN pg_catalog.pg_foreign_table ftbl ON ftbl.ftrelid = res.oid")
-        .join("LEFT JOIN pg_catalog.pg_foreign_server ser ON ser.oid = ftbl.ftserver")
-        .join("LEFT JOIN pg_catalog.pg_tablespace tabsp ON tabsp.oid = res.reltablespace")
-        .join("LEFT JOIN pg_catalog.pg_class tc ON tc.oid = res.reltoastrelid")
-        .join("LEFT JOIN pg_catalog.pg_am am ON am.oid = res.relam")
-        .where("res.relkind IN ('f','r','p')");
+                .with("nspnames", "SELECT n.oid, n.nspname FROM pg_catalog.pg_namespace n")
+                .with("collations",
+                        "SELECT c.oid, c.collname, n.nspname FROM pg_catalog.pg_collation c LEFT JOIN nspnames n ON n.oid = c.collnamespace")
+                .column("res.relname")
+                .column("res.relkind")
+                .column("res.relowner::bigint")
+                .column("res.relacl::text AS aclarray")
+                .column("res.relpersistence AS persistence")
+                .column("res.reloptions")
+                .column("tc.reloptions AS toast_reloptions")
+                .column("tabsp.spcname AS table_space")
+                .column("am.amname AS access_method")
+                .column("ftbl.ftoptions")
+                .column("ser.srvname AS server_name")
+                .column("res.reloftype::bigint AS of_type")
+                .from("pg_catalog.pg_class res")
+                .join("LEFT JOIN pg_catalog.pg_foreign_table ftbl ON ftbl.ftrelid = res.oid")
+                .join("LEFT JOIN pg_catalog.pg_foreign_server ser ON ser.oid = ftbl.ftserver")
+                .join("LEFT JOIN pg_catalog.pg_tablespace tabsp ON tabsp.oid = res.reltablespace")
+                .join("LEFT JOIN pg_catalog.pg_class tc ON tc.oid = res.reltoastrelid")
+                .join("LEFT JOIN pg_catalog.pg_am am ON am.oid = res.relam")
+                .where("res.relkind IN ('f','r','p')");
 
         if (SupportedPgVersion.VERSION_9_5.isLE(loader.getVersion())) {
             builder
-            .column("res.relrowsecurity AS row_security")
-            .column("res.relforcerowsecurity AS force_security");
+                    .column("res.relrowsecurity AS row_security")
+                    .column("res.relforcerowsecurity AS force_security");
         }
 
         if (SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
             builder
-            .column("res.relispartition")
-            .column("pg_catalog.pg_get_partkeydef(res.oid) AS partition_by")
-            .column("pg_catalog.pg_get_expr(res.relpartbound, res.oid) AS partition_bound");
+                    .column("res.relispartition")
+                    .column("pg_catalog.pg_get_partkeydef(res.oid) AS partition_by")
+                    .column("pg_catalog.pg_get_expr(res.relpartbound, res.oid) AS partition_bound");
         }
 
         if (!SupportedPgVersion.VERSION_12.isLE(loader.getVersion())) {
@@ -521,29 +520,29 @@ public final class TablesReader extends JdbcReader {
 
         if (loader.isGreenplumDb()) {
             builder
-            .column("pg_get_table_distributedby(res.oid) AS distribution")
-            .column("x.urilocation AS urloc")
-            .column("x.execlocation AS exloc")
-            .column("x.fmttype")
-            .column("x.fmtopts")
-            .column("x.command")
-            .column("x.rejectlimit AS rejlim")
-            .column("x.rejectlimittype AS rejtyp")
-            .column("x.logerrors")
-            .column("x.options")
-            .column("pg_catalog.pg_encoding_to_char(x.encoding) AS enc")
-            .column("x.writable")
-            .join("LEFT JOIN pg_exttable x ON res.oid = x.reloid");
+                    .column("pg_get_table_distributedby(res.oid) AS distribution")
+                    .column("x.urilocation AS urloc")
+                    .column("x.execlocation AS exloc")
+                    .column("x.fmttype")
+                    .column("x.fmtopts")
+                    .column("x.command")
+                    .column("x.rejectlimit AS rejlim")
+                    .column("x.rejectlimittype AS rejtyp")
+                    .column("x.logerrors")
+                    .column("x.options")
+                    .column("pg_catalog.pg_encoding_to_char(x.encoding) AS enc")
+                    .column("x.writable")
+                    .join("LEFT JOIN pg_exttable x ON res.oid = x.reloid");
 
             if (!SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
                 builder
-                .column("CASE WHEN pl.parlevel = 0 THEN (SELECT pg_get_partition_def(res.oid, true, false)) END AS partclause")
-                .column("CASE WHEN pl.parlevel = 0 THEN (SELECT pg_get_partition_template_def(res.oid, true, false)) END as parttemplate")
-                .join("LEFT JOIN pg_partitions ps on (res.relname = ps.partitiontablename)")
-                .join("LEFT JOIN pg_partition_rule pr ON res.oid = pr.parchildrelid")
-                .join("LEFT JOIN pg_partition p ON pr.paroid = p.oid")
-                .join("LEFT JOIN pg_partition pl ON (res.oid = pl.parrelid AND pl.parlevel = 0)")
-                .where("ps.tablename IS NULL");
+                        .column("CASE WHEN pl.parlevel = 0 THEN (SELECT pg_get_partition_def(res.oid, true, false)) END AS partclause")
+                        .column("CASE WHEN pl.parlevel = 0 THEN (SELECT pg_get_partition_template_def(res.oid, true, false)) END as parttemplate")
+                        .join("LEFT JOIN pg_partitions ps on (res.relname = ps.partitiontablename)")
+                        .join("LEFT JOIN pg_partition_rule pr ON res.oid = pr.parchildrelid")
+                        .join("LEFT JOIN pg_partition p ON pr.paroid = p.oid")
+                        .join("LEFT JOIN pg_partition pl ON (res.oid = pl.parrelid AND pl.parlevel = 0)")
+                        .where("ps.tablename IS NULL");
             }
         }
     }
@@ -551,51 +550,51 @@ public final class TablesReader extends JdbcReader {
     private void addColumnsPart(QueryBuilder builder) {
         QueryBuilder inheritsCteBuilder = new QueryBuilder();
         inheritsCteBuilder
-            .column("i.inhrelid")
-            .column("attr.attname")
-            .from("pg_catalog.pg_inherits i")
-            .join("JOIN pg_catalog.pg_attribute attr ON attr.attrelid = i.inhparent")
-            .where("attr.attnotnull")
-            .where("attr.attnum > 0");
+                .column("i.inhrelid")
+                .column("attr.attname")
+                .from("pg_catalog.pg_inherits i")
+                .join("JOIN pg_catalog.pg_attribute attr ON attr.attrelid = i.inhparent")
+                .where("attr.attnotnull")
+                .where("attr.attnum > 0");
 
         builder.with("inherits", inheritsCteBuilder);
 
         QueryBuilder subQueryBuilder = new QueryBuilder();
         subQueryBuilder
-        .column("a.attrelid")
-        .column("pg_catalog.array_agg(a.attname ORDER BY a.attnum) AS col_names")
-        .column("pg_catalog.array_agg(pg_catalog.array_to_string(a.attoptions, ',') ORDER BY a.attnum) AS col_options")
-        .column("pg_catalog.array_agg(pg_catalog.array_to_string(a.attfdwoptions, ',') ORDER BY a.attnum) AS col_foptions")
-        .column("pg_catalog.array_agg(a.attstorage ORDER BY a.attnum) AS col_storages")
-        .column("pg_catalog.array_agg(t.typstorage ORDER BY a.attnum) AS col_default_storages")
-        .column("pg_catalog.array_agg(a.atthasdef ORDER BY a.attnum) AS col_has_default")
-        .column("pg_catalog.array_agg(pg_catalog.pg_get_expr(attrdef.adbin, attrdef.adrelid) ORDER BY a.attnum) AS col_defaults")
-        .column("pg_catalog.array_agg(d.description ORDER BY a.attnum) AS col_comments")
-        .column("pg_catalog.array_agg(a.atttypid::bigint ORDER BY a.attnum) AS col_type_ids")
-        .column("pg_catalog.array_agg(pg_catalog.format_type(a.atttypid, a.atttypmod) ORDER BY a.attnum) AS col_type_name")
-        // skips not null for column, if parents have not null
-        .column("""
-                  pg_catalog.array_agg(
-                    (CASE WHEN NOT a.attnotnull THEN FALSE
-                          ELSE NOT EXISTS(SELECT 1 FROM inherits inh WHERE inh.inhrelid = a.attrelid AND inh.attname = a.attname)
-                     END
-                    ) ORDER BY a.attnum
-                  ) AS col_notnull""")
-        .column("pg_catalog.array_agg(a.attstattarget ORDER BY a.attnum) AS col_statictics")
-        .column("pg_catalog.array_agg(a.attislocal ORDER BY a.attnum) AS col_local")
-        .column("pg_catalog.array_agg(a.attacl::text ORDER BY a.attnum) AS col_acl")
-        .column("pg_catalog.array_agg(a.attcollation::bigint ORDER BY a.attnum) AS col_collation")
-        .column("pg_catalog.array_agg(t.typcollation::bigint ORDER BY a.attnum) AS col_typcollation")
-        .column("pg_catalog.array_agg(cl.collname ORDER BY a.attnum) AS col_collationname")
-        .column("pg_catalog.array_agg(cl.nspname ORDER BY a.attnum) AS col_collationnspname")
-        .from("pg_catalog.pg_attribute a")
-        .join("JOIN pg_catalog.pg_class cc ON a.attrelid = cc.oid AND cc.relkind IN ('f','r','p')")
-        .join("LEFT JOIN pg_catalog.pg_attrdef attrdef ON attrdef.adnum = a.attnum AND a.attrelid = attrdef.adrelid")
-        .join("LEFT JOIN pg_catalog.pg_description d ON d.objoid = a.attrelid AND d.objsubid = a.attnum AND d.classoid = 'pg_catalog.pg_class'::pg_catalog.regclass")
-        .join("LEFT JOIN pg_catalog.pg_type t ON t.oid = a.atttypid")
-        .join("LEFT JOIN collations cl ON cl.oid =  a.attcollation")
-        .where("a.attisdropped IS FALSE")
-        .where("a.attnum > 0 GROUP BY a.attrelid")
+                .column("a.attrelid")
+                .column("pg_catalog.array_agg(a.attname ORDER BY a.attnum) AS col_names")
+                .column("pg_catalog.array_agg(pg_catalog.array_to_string(a.attoptions, ',') ORDER BY a.attnum) AS col_options")
+                .column("pg_catalog.array_agg(pg_catalog.array_to_string(a.attfdwoptions, ',') ORDER BY a.attnum) AS col_foptions")
+                .column("pg_catalog.array_agg(a.attstorage ORDER BY a.attnum) AS col_storages")
+                .column("pg_catalog.array_agg(t.typstorage ORDER BY a.attnum) AS col_default_storages")
+                .column("pg_catalog.array_agg(a.atthasdef ORDER BY a.attnum) AS col_has_default")
+                .column("pg_catalog.array_agg(pg_catalog.pg_get_expr(attrdef.adbin, attrdef.adrelid) ORDER BY a.attnum) AS col_defaults")
+                .column("pg_catalog.array_agg(d.description ORDER BY a.attnum) AS col_comments")
+                .column("pg_catalog.array_agg(a.atttypid::bigint ORDER BY a.attnum) AS col_type_ids")
+                .column("pg_catalog.array_agg(pg_catalog.format_type(a.atttypid, a.atttypmod) ORDER BY a.attnum) AS col_type_name")
+                // skips not null for column, if parents have not null
+                .column("""
+                        pg_catalog.array_agg(
+                          (CASE WHEN NOT a.attnotnull THEN FALSE
+                                ELSE NOT EXISTS(SELECT 1 FROM inherits inh WHERE inh.inhrelid = a.attrelid AND inh.attname = a.attname)
+                           END
+                          ) ORDER BY a.attnum
+                        ) AS col_notnull""")
+                .column("pg_catalog.array_agg(a.attstattarget ORDER BY a.attnum) AS col_statictics")
+                .column("pg_catalog.array_agg(a.attislocal ORDER BY a.attnum) AS col_local")
+                .column("pg_catalog.array_agg(a.attacl::text ORDER BY a.attnum) AS col_acl")
+                .column("pg_catalog.array_agg(a.attcollation::bigint ORDER BY a.attnum) AS col_collation")
+                .column("pg_catalog.array_agg(t.typcollation::bigint ORDER BY a.attnum) AS col_typcollation")
+                .column("pg_catalog.array_agg(cl.collname ORDER BY a.attnum) AS col_collationname")
+                .column("pg_catalog.array_agg(cl.nspname ORDER BY a.attnum) AS col_collationnspname")
+                .from("pg_catalog.pg_attribute a")
+                .join("JOIN pg_catalog.pg_class cc ON a.attrelid = cc.oid AND cc.relkind IN ('f','r','p')")
+                .join("LEFT JOIN pg_catalog.pg_attrdef attrdef ON attrdef.adnum = a.attnum AND a.attrelid = attrdef.adrelid")
+                .join("LEFT JOIN pg_catalog.pg_description d ON d.objoid = a.attrelid AND d.objsubid = a.attnum AND d.classoid = 'pg_catalog.pg_class'::pg_catalog.regclass")
+                .join("LEFT JOIN pg_catalog.pg_type t ON t.oid = a.atttypid")
+                .join("LEFT JOIN collations cl ON cl.oid =  a.attcollation")
+                .where("a.attisdropped IS FALSE")
+                .where("a.attnum > 0 GROUP BY a.attrelid")
         ;
 
         if (SupportedPgVersion.VERSION_12.isLE(loader.getVersion())) {
@@ -611,8 +610,8 @@ public final class TablesReader extends JdbcReader {
         if (loader.isGreenplumDb()) {
             builder.column("columns.col_enc_options");
             subQueryBuilder
-            .column("pg_catalog.array_agg(pg_catalog.array_to_string(enc_a.attoptions, ',') ORDER BY a.attnum) AS col_enc_options")
-            .join("LEFT JOIN pg_attribute_encoding enc_a ON enc_a.attnum = a.attnum AND a.attrelid = enc_a.attrelid");
+                    .column("pg_catalog.array_agg(pg_catalog.array_to_string(enc_a.attoptions, ',') ORDER BY a.attnum) AS col_enc_options")
+                    .join("LEFT JOIN pg_attribute_encoding enc_a ON enc_a.attnum = a.attnum AND a.attrelid = enc_a.attrelid");
         }
 
         String columns = "LEFT JOIN (\n" + subQueryBuilder.build() + "\n) columns ON columns.attrelid = res.oid";

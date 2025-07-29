@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ch;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -27,10 +24,23 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.schema.ch.ChRole;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for ClickHouse roles.
+ * Loads role definitions from system.roles table.
+ */
 public final class ChRolesReader extends AbstractStatementReader {
 
     private final ChDatabase db;
 
+    /**
+     * Creates a new ChRolesReader.
+     *
+     * @param loader the JDBC loader instance
+     * @param db     the ClickHouse database to load roles into
+     */
     public ChRolesReader(JdbcLoaderBase loader, ChDatabase db) {
         super(loader);
         this.db = db;
@@ -52,8 +62,8 @@ public final class ChRolesReader extends AbstractStatementReader {
     @Override
     protected void fillQueryBuilder(QueryBuilder builder) {
         builder
-        .column("name")
-        .column("storage")
-        .from("system.roles");
+                .column("name")
+                .column("storage")
+                .from("system.roles");
     }
 }

@@ -15,13 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ms;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -30,16 +23,28 @@ import org.pgcodekeeper.core.loader.jdbc.XmlReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
 import org.pgcodekeeper.core.loader.ms.SupportedMsVersion;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.ISimpleColumnContainer;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.SimpleColumn;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.ms.MsConstraintPk;
 import org.pgcodekeeper.core.schema.ms.MsIndex;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Reader for Microsoft SQL indices and primary keys.
+ * Loads index and primary key constraint definitions from sys.indexes system view.
+ */
 public class MsIndicesAndPKReader extends JdbcReader {
 
+    /**
+     * Constructs a new Microsoft SQL indices and primary keys reader.
+     *
+     * @param loader the JDBC loader base for database operations
+     */
     public MsIndicesAndPKReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -78,9 +83,9 @@ public class MsIndicesAndPKReader extends JdbcReader {
             List<XmlReader> cols = XmlReader.readXML(res.getString("cols"));
             if (isColumnstoreInd && SupportedMsVersion.VERSION_22.isLE(loader.getVersion())) {
                 cols.stream()
-                .filter(col -> col.getInt("col_order") > 0)
-                .sorted(Comparator.comparing(col -> col.getInt("col_order")))
-                .forEach(col -> index.addOrderCol(col.getString("name")));
+                        .filter(col -> col.getInt("col_order") > 0)
+                        .sorted(Comparator.comparing(col -> col.getInt("col_order")))
+                        .forEach(col -> index.addOrderCol(col.getString("name")));
             }
             fillColumns(index, cols, schema.getName(), parent, isColumnstoreInd, isClusteredColumnstoreInd);
             index.setClustered(isClustered);
@@ -93,7 +98,7 @@ public class MsIndicesAndPKReader extends JdbcReader {
     }
 
     private void fillColumns(ISimpleColumnContainer stmt, List<XmlReader> cols, String schema, String parent,
-            boolean isColumnstoreInd, boolean isClusteredColumnstoreInd) {
+                             boolean isColumnstoreInd, boolean isClusteredColumnstoreInd) {
         for (XmlReader col : cols) {
             boolean isDesc = col.getBoolean("is_desc");
             String colName = col.getString("name");
@@ -166,37 +171,37 @@ public class MsIndicesAndPKReader extends JdbcReader {
         addMsColsPart(builder);
 
         builder
-        .column("o.name AS table_name")
-        .column("res.name")
-        .column("res.is_primary_key")
-        .column("res.is_unique")
-        .column("res.type AS index_type")
-        .column("res.is_unique_constraint")
-        .column("INDEXPROPERTY(res.object_id, res.name, 'IsClustered') AS is_clustered")
-        .column("res.is_padded")
-        .column("sp.data_compression")
-        .column("sp.data_compression_desc")
-        .column("res.allow_page_locks")
-        .column("res.allow_row_locks")
-        .column("res.fill_factor")
-        .column("res.filter_definition")
-        .column("d.name AS data_space")
-        .column("res.ignore_dup_key")
-        .column("st.no_recompute")
-        .from("sys.indexes res WITH (NOLOCK)")
-        .join("LEFT JOIN sys.filegroups f WITH (NOLOCK) ON res.data_space_id = f.data_space_id")
-        .join("LEFT JOIN sys.data_spaces d WITH (NOLOCK) ON res.data_space_id = d.data_space_id")
-        .join("JOIN sys.stats st WITH (NOLOCK) ON res.name = st.name AND res.object_id = st.object_id AND res.index_id = st.stats_id")
-        .join("JOIN sys.objects o WITH (NOLOCK) ON res.object_id = o.object_id")
-        .join("JOIN sys.partitions sp WITH (NOLOCK) ON sp.object_id = res.object_id AND sp.index_id = res.index_id AND sp.partition_number = 1")
-        .where("o.type IN ('U', 'V')")
-        .where("res.type IN (1, 2, 5, 6)");
+                .column("o.name AS table_name")
+                .column("res.name")
+                .column("res.is_primary_key")
+                .column("res.is_unique")
+                .column("res.type AS index_type")
+                .column("res.is_unique_constraint")
+                .column("INDEXPROPERTY(res.object_id, res.name, 'IsClustered') AS is_clustered")
+                .column("res.is_padded")
+                .column("sp.data_compression")
+                .column("sp.data_compression_desc")
+                .column("res.allow_page_locks")
+                .column("res.allow_row_locks")
+                .column("res.fill_factor")
+                .column("res.filter_definition")
+                .column("d.name AS data_space")
+                .column("res.ignore_dup_key")
+                .column("st.no_recompute")
+                .from("sys.indexes res WITH (NOLOCK)")
+                .join("LEFT JOIN sys.filegroups f WITH (NOLOCK) ON res.data_space_id = f.data_space_id")
+                .join("LEFT JOIN sys.data_spaces d WITH (NOLOCK) ON res.data_space_id = d.data_space_id")
+                .join("JOIN sys.stats st WITH (NOLOCK) ON res.name = st.name AND res.object_id = st.object_id AND res.index_id = st.stats_id")
+                .join("JOIN sys.objects o WITH (NOLOCK) ON res.object_id = o.object_id")
+                .join("JOIN sys.partitions sp WITH (NOLOCK) ON sp.object_id = res.object_id AND sp.index_id = res.index_id AND sp.partition_number = 1")
+                .where("o.type IN ('U', 'V')")
+                .where("res.type IN (1, 2, 5, 6)");
 
         if (SupportedMsVersion.VERSION_14.isLE(loader.getVersion())) {
             builder
-            .column("st.is_incremental")
-            .column("t.is_memory_optimized")
-            .join("LEFT JOIN sys.tables t WITH (NOLOCK) ON o.object_id = t.object_id");
+                    .column("st.is_incremental")
+                    .column("t.is_memory_optimized")
+                    .join("LEFT JOIN sys.tables t WITH (NOLOCK) ON o.object_id = t.object_id");
         }
 
         if (SupportedMsVersion.VERSION_19.isLE(loader.getVersion())) {
@@ -205,8 +210,8 @@ public class MsIndicesAndPKReader extends JdbcReader {
 
         if (SupportedMsVersion.VERSION_22.isLE(loader.getVersion())) {
             builder
-            .column("sp.xml_compression")
-            .column("sp.xml_compression_desc");
+                    .column("sp.xml_compression")
+                    .column("sp.xml_compression_desc");
         }
     }
 
@@ -231,8 +236,8 @@ public class MsIndicesAndPKReader extends JdbcReader {
                 .postAction("FOR XML RAW, ROOT");
 
         builder
-        .column("cc.cols")
-        .join("CROSS APPLY", cols, "cc (cols)");
+                .column("cc.cols")
+                .join("CROSS APPLY", cols, "cc (cols)");
     }
 
     @Override

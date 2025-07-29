@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ch;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.ChDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
@@ -29,12 +26,25 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.schema.ch.ChUser;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for ClickHouse users.
+ * Loads user definitions from system.users table.
+ */
 public final class ChUsersReader extends AbstractStatementReader {
 
     private static final String LOCAL = "localhost";
     private static final String IP = "::/0";
     private final ChDatabase db;
 
+    /**
+     * Creates a new ChUsersReader.
+     *
+     * @param loader the JDBC loader instance
+     * @param db     the ClickHouse database to load users into
+     */
     public ChUsersReader(JdbcLoaderBase loader, ChDatabase db) {
         super(loader);
         this.db = db;
@@ -110,17 +120,17 @@ public final class ChUsersReader extends AbstractStatementReader {
     @Override
     protected void fillQueryBuilder(QueryBuilder builder) {
         builder
-        .column("name")
-        .column("storage")
-        .column("host_ip")
-        .column("host_names")
-        .column("host_names_regexp")
-        .column("host_names_like")
-        .column("default_roles_list")
-        .column("default_roles_except")
-        .column("default_database")
-        .column("grantees_list")
-        .column("grantees_except")
-        .from("system.users");
+                .column("name")
+                .column("storage")
+                .column("host_ip")
+                .column("host_names")
+                .column("host_names_regexp")
+                .column("host_names_like")
+                .column("default_roles_list")
+                .column("default_roles_except")
+                .column("default_database")
+                .column("grantees_list")
+                .column("grantees_except")
+                .from("system.users");
     }
 }

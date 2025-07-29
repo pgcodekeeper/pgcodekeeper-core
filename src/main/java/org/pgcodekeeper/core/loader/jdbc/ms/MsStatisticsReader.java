@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ms;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
@@ -29,8 +26,20 @@ import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.ms.MsStatistics;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for Microsoft SQL statistics.
+ * Loads statistics definitions from sys.stats system view.
+ */
 public final class MsStatisticsReader extends JdbcReader {
 
+    /**
+     * Constructs a new Microsoft SQL statistics reader.
+     *
+     * @param loader the JDBC loader base for database operations
+     */
     public MsStatisticsReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -90,15 +99,15 @@ public final class MsStatisticsReader extends JdbcReader {
                 .postAction("FOR XML RAW, ROOT");
 
         builder
-        .column("res.name")
-        .column("cont.name AS cont_name")
-        .column("cols")
-        .column("res.filter_definition")
-        .column("res.no_recompute")
-        .from("sys.stats res WITH (NOLOCK)")
-        .join("CROSS APPLY", cols, "st_col (cols)")
-        .join("LEFT JOIN sys.objects cont WITH (NOLOCK) ON cont.object_id = res.object_id")
-        .where("res.user_created = 1");
+                .column("res.name")
+                .column("cont.name AS cont_name")
+                .column("cols")
+                .column("res.filter_definition")
+                .column("res.no_recompute")
+                .from("sys.stats res WITH (NOLOCK)")
+                .join("CROSS APPLY", cols, "st_col (cols)")
+                .join("LEFT JOIN sys.objects cont WITH (NOLOCK) ON cont.object_id = res.object_id")
+                .where("res.user_created = 1");
 
         if (SupportedMsVersion.VERSION_14.isLE(loader.getVersion())) {
             builder.column("res.is_incremental");
@@ -106,9 +115,9 @@ public final class MsStatisticsReader extends JdbcReader {
 
         if (SupportedMsVersion.VERSION_22.isLE(loader.getVersion())) {
             builder
-            .column("res.auto_drop")
-            .column("st_prop.persisted_sample_percent")
-            .join("CROSS APPLY sys.dm_db_stats_properties(res.object_id, res.stats_id) st_prop");
+                    .column("res.auto_drop")
+                    .column("st_prop.persisted_sample_percent")
+                    .join("CROSS APPLY sys.dm_db_stats_properties(res.object_id, res.stats_id) st_prop");
         }
     }
 

@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -26,10 +23,23 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgExtension;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL extensions.
+ * Loads extension definitions from pg_extension system catalog.
+ */
 public final class ExtensionsReader extends AbstractStatementReader {
 
     private final PgDatabase db;
 
+    /**
+     * Creates a new extensions reader.
+     *
+     * @param loader the JDBC loader for database access
+     * @param db     the PostgreSQL database to populate with extensions
+     */
     public ExtensionsReader(JdbcLoaderBase loader, PgDatabase db) {
         super(loader);
         this.db = db;
@@ -58,9 +68,9 @@ public final class ExtensionsReader extends AbstractStatementReader {
         addDescriptionPart(builder);
 
         builder
-        .column("res.extname")
-        .column("(SELECT n.nspname FROM pg_catalog.pg_namespace n WHERE res.extnamespace = n.oid) AS namespace")
-        .column("res.extrelocatable")
-        .from("pg_catalog.pg_extension res");
+                .column("res.extname")
+                .column("(SELECT n.nspname FROM pg_catalog.pg_namespace n WHERE res.extnamespace = n.oid) AS namespace")
+                .column("res.extrelocatable")
+                .from("pg_catalog.pg_extension res");
     }
 }

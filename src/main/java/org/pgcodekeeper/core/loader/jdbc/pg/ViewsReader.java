@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
@@ -38,8 +34,21 @@ import org.pgcodekeeper.core.schema.pg.MaterializedPgView;
 import org.pgcodekeeper.core.schema.pg.PgView;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL views and materialized views.
+ * Loads view definitions from pg_class system catalog.
+ */
 public final class ViewsReader extends JdbcReader {
 
+    /**
+     * Constructs a new ViewsReader.
+     *
+     * @param loader the JDBC loader base instance
+     */
     public ViewsReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -105,7 +114,7 @@ public final class ViewsReader extends JdbcReader {
                 String colName = colNames[i];
                 String colDefault = colDefaults[i];
                 if (colDefault != null) {
-                    ((PgView)v).addColumnDefaultValue(colName, colDefault);
+                    ((PgView) v).addColumnDefaultValue(colName, colDefault);
                     loader.submitAntlrTask(colDefault, p -> p.vex_eof().vex().get(0),
                             ctx -> dataBase.addAnalysisLauncher(
                                     new VexAnalysisLauncher(v, ctx, loader.getCurrentLocation())));
@@ -158,19 +167,19 @@ public final class ViewsReader extends JdbcReader {
         addDescriptionPart(builder, true);
 
         builder
-        .column("res.relname")
-        .column("res.relkind AS kind")
-        .column("tabsp.spcname as table_space")
-        .column("res.relacl::text")
-        .column("res.relowner::bigint")
-        .column("pg_catalog.pg_get_viewdef(res.oid, ?) AS definition")
-        .column("res.reloptions")
-        .column("am.amname AS access_method")
-        .column("res.relispopulated")
-        .from("pg_catalog.pg_class res")
-        .join("LEFT JOIN pg_catalog.pg_tablespace tabsp ON tabsp.oid = res.reltablespace")
-        .join("LEFT JOIN pg_catalog.pg_am am ON am.oid = res.relam")
-        .where("res.relkind IN ('v','m')");
+                .column("res.relname")
+                .column("res.relkind AS kind")
+                .column("tabsp.spcname as table_space")
+                .column("res.relacl::text")
+                .column("res.relowner::bigint")
+                .column("pg_catalog.pg_get_viewdef(res.oid, ?) AS definition")
+                .column("res.reloptions")
+                .column("am.amname AS access_method")
+                .column("res.relispopulated")
+                .from("pg_catalog.pg_class res")
+                .join("LEFT JOIN pg_catalog.pg_tablespace tabsp ON tabsp.oid = res.reltablespace")
+                .join("LEFT JOIN pg_catalog.pg_am am ON am.oid = res.relam")
+                .where("res.relkind IN ('v','m')");
 
         if (loader.isGreenplumDb()) {
             builder.column("pg_get_table_distributedby(res.oid) AS distribution");

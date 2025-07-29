@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ms;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -29,10 +26,23 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.schema.ms.MsUser;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for Microsoft SQL users.
+ * Loads user definitions from sys.database_principals system view.
+ */
 public class MsUsersReader extends AbstractStatementReader {
 
     private final MsDatabase db;
 
+    /**
+     * Constructs a new Microsoft SQL users reader.
+     *
+     * @param loader the JDBC loader base for database operations
+     * @param db     the Microsoft SQL database instance
+     */
     public MsUsersReader(JdbcLoaderBase loader, MsDatabase db) {
         super(loader);
         this.db = db;
@@ -61,13 +71,13 @@ public class MsUsersReader extends AbstractStatementReader {
         addMsPriviligesPart(builder);
 
         builder
-        .column("res.name")
-        .column("suser_sname(res.sid) AS loginname")
-        .column("res.default_schema_name AS schema_name")
-        .column("res.default_language_lcid AS default_lang")
-        .from("sys.database_principals res WITH (NOLOCK)")
-        .where("res.type IN ('S', 'U', 'G')")
-        .where("NOT name IN ('guest', 'sys', 'INFORMATION_SCHEMA')");
+                .column("res.name")
+                .column("suser_sname(res.sid) AS loginname")
+                .column("res.default_schema_name AS schema_name")
+                .column("res.default_language_lcid AS default_lang")
+                .from("sys.database_principals res WITH (NOLOCK)")
+                .where("res.type IN ('S', 'U', 'G')")
+                .where("NOT name IN ('guest', 'sys', 'INFORMATION_SCHEMA')");
 
         if (SupportedMsVersion.VERSION_16.isLE(loader.getVersion())) {
             builder.column("res.allow_encrypted_value_modifications AS allow_encrypted");

@@ -15,23 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.ch;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.text.MessageFormat;
-import java.util.stream.Collectors;
-
 import org.eclipse.core.runtime.SubMonitor;
 import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.loader.jdbc.ch.ChFunctionsReader;
-import org.pgcodekeeper.core.loader.jdbc.ch.ChPoliciesReader;
-import org.pgcodekeeper.core.loader.jdbc.ch.ChPrivillegesReader;
-import org.pgcodekeeper.core.loader.jdbc.ch.ChRelationsReader;
-import org.pgcodekeeper.core.loader.jdbc.ch.ChRolesReader;
-import org.pgcodekeeper.core.loader.jdbc.ch.ChSchemasReader;
-import org.pgcodekeeper.core.loader.jdbc.ch.ChUsersReader;
 import org.pgcodekeeper.core.loader.AbstractJdbcConnector;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
+import org.pgcodekeeper.core.loader.jdbc.ch.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
@@ -40,12 +28,18 @@ import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.text.MessageFormat;
+import java.util.stream.Collectors;
+
 public final class JdbcChLoader extends JdbcLoaderBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(JdbcChLoader.class);
 
     public JdbcChLoader(AbstractJdbcConnector connector, ISettings settings, SubMonitor monitor,
-            IgnoreSchemaList ignoreSchemaList) {
+                        IgnoreSchemaList ignoreSchemaList) {
         super(connector, monitor, settings, ignoreSchemaList);
     }
 
@@ -56,7 +50,7 @@ public final class JdbcChLoader extends JdbcLoaderBase {
         LOG.info(Messages.JdbcLoader_log_reading_db_jdbc);
         setCurrentOperation(Messages.JdbcChLoader_log_connection_db);
         try (Connection connection = connector.getConnection();
-                Statement statement = connection.createStatement()) {
+             Statement statement = connection.createStatement()) {
             this.connection = connection;
             this.statement = statement;
 
@@ -70,7 +64,7 @@ public final class JdbcChLoader extends JdbcLoaderBase {
             new ChUsersReader(this, d).read();
             new ChRolesReader(this, d).read();
             if (!getSettings().isIgnorePrivileges()) {
-                new ChPrivillegesReader(this, d).read();
+                new ChPrivilegesReader(this, d).read();
             }
 
             finishLoaders();

@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
@@ -29,10 +26,23 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgEventTrigger;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL event triggers.
+ * Loads event trigger definitions from pg_event_trigger system catalog.
+ */
 public final class EventTriggersReader extends AbstractStatementReader {
 
     private final PgDatabase db;
 
+    /**
+     * Creates a new event triggers reader.
+     *
+     * @param loader the JDBC loader for database access
+     * @param db     the PostgreSQL database to populate with event triggers
+     */
     public EventTriggersReader(JdbcLoaderBase loader, PgDatabase db) {
         super(loader);
         this.db = db;
@@ -47,15 +57,15 @@ public final class EventTriggersReader extends AbstractStatementReader {
         evt.setEvent(res.getString("evtevent"));
 
         switch (res.getString("evtenabled")) {
-        case "D":
-            evt.setMode("DISABLE");
-            break;
-        case "R":
-            evt.setMode("ENABLE REPLICA");
-            break;
-        case "A":
-            evt.setMode("ENABLE ALWAYS");
-            break;
+            case "D":
+                evt.setMode("DISABLE");
+                break;
+            case "R":
+                evt.setMode("ENABLE REPLICA");
+                break;
+            case "A":
+                evt.setMode("ENABLE ALWAYS");
+                break;
         }
 
         String[] tags = JdbcReader.getColArray(res, "evttags");
@@ -82,16 +92,16 @@ public final class EventTriggersReader extends AbstractStatementReader {
         addExtensionDepsCte(builder);
 
         builder.column("res.evtname")
-        .column("res.evtevent")
-        .column("res.evtenabled")
-        .column("res.evttags")
-        .column("nsp.nspname")
-        .column("p.proname")
-        .column("o.rolname")
-        .from("pg_catalog.pg_event_trigger res")
-        .join("JOIN pg_catalog.pg_roles o ON o.oid = res.evtowner")
-        .join("JOIN pg_catalog.pg_proc p ON p.oid = res.evtfoid")
-        .join("JOIN pg_catalog.pg_namespace nsp ON p.pronamespace = nsp.oid");
+                .column("res.evtevent")
+                .column("res.evtenabled")
+                .column("res.evttags")
+                .column("nsp.nspname")
+                .column("p.proname")
+                .column("o.rolname")
+                .from("pg_catalog.pg_event_trigger res")
+                .join("JOIN pg_catalog.pg_roles o ON o.oid = res.evtowner")
+                .join("JOIN pg_catalog.pg_proc p ON p.oid = res.evtfoid")
+                .join("JOIN pg_catalog.pg_namespace nsp ON p.pronamespace = nsp.oid");
     }
 
     @Override

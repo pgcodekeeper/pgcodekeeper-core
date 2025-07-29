@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -31,8 +28,20 @@ import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgStatistics;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL extended statistics.
+ * Loads extended statistics definitions from pg_statistic_ext system catalog.
+ */
 public final class StatisticsReader extends JdbcReader {
 
+    /**
+     * Creates a new StatisticsReader.
+     *
+     * @param loader the JDBC loader base for database operations
+     */
     public StatisticsReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -52,7 +61,7 @@ public final class StatisticsReader extends JdbcReader {
                         .create_statistics_statement(), (CommonTokenStream) p.getTokenStream()),
                 pair -> new CreateStatistics(pair.getFirst(), (PgDatabase) schema.getDatabase(), pair.getSecond(),
                         loader.getSettings())
-                .parseStatistics(stat));
+                        .parseStatistics(stat));
 
         if (SupportedPgVersion.VERSION_13.isLE(loader.getVersion())) {
             stat.setStatistics(res.getInt("stxstattarget"));
@@ -81,10 +90,10 @@ public final class StatisticsReader extends JdbcReader {
         addDescriptionPart(builder);
 
         builder
-        .column("res.stxname")
-        .column("res.stxowner")
-        .column("pg_catalog.pg_get_statisticsobjdef(res.oid::pg_catalog.oid) AS def")
-        .from("pg_catalog.pg_statistic_ext res");
+                .column("res.stxname")
+                .column("res.stxowner")
+                .column("pg_catalog.pg_get_statisticsobjdef(res.oid::pg_catalog.oid) AS def")
+                .from("pg_catalog.pg_statistic_ext res");
 
         if (SupportedPgVersion.VERSION_13.isLE(loader.getVersion())) {
             builder.column("res.stxstattarget");

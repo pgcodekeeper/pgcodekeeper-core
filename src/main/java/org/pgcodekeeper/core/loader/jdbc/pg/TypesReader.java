@@ -15,12 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.MessageFormat;
-
-import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.Consts.FUNC_SIGN;
+import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
@@ -29,27 +25,28 @@ import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.VexAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.statements.pg.CreateDomain;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.AbstractType;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.ICompressOptionContainer;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.pg.PgBaseType;
-import org.pgcodekeeper.core.schema.pg.PgColumn;
-import org.pgcodekeeper.core.schema.pg.PgCompositeType;
-import org.pgcodekeeper.core.schema.pg.PgConstraintCheck;
-import org.pgcodekeeper.core.schema.pg.PgDomain;
-import org.pgcodekeeper.core.schema.pg.PgEnumType;
-import org.pgcodekeeper.core.schema.pg.PgRangeType;
+import org.pgcodekeeper.core.schema.*;
+import org.pgcodekeeper.core.schema.pg.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.MessageFormat;
+
+/**
+ * Reader for PostgreSQL types and domains.
+ * Loads type and domain definitions from pg_type system catalog.
+ */
 public final class TypesReader extends JdbcReader {
 
     private static final String EMPTY_FUNCTION = "-";
     private static final String ADD_CONSTRAINT = "ALTER DOMAIN noname ADD CONSTRAINT noname ";
 
+    /**
+     * Constructs a new TypesReader.
+     *
+     * @param loader the JDBC loader base instance
+     */
     public TypesReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -127,7 +124,7 @@ public final class TypesReader extends JdbcReader {
                 checkObjectValidity(definition, DbObjType.CONSTRAINT, conName);
                 loader.submitAntlrTask(ADD_CONSTRAINT + definition + ';',
                         p -> p.sql().statement(0).schema_statement().schema_alter()
-                        .alter_domain_statement().dom_constraint,
+                                .alter_domain_statement().dom_constraint,
                         ctx -> CreateDomain.parseDomainConstraint(d, constrCheck, ctx, dataBase,
                                 loader.getCurrentLocation(), settings));
 
@@ -204,20 +201,38 @@ public final class TypesReader extends JdbcReader {
 
         String align = res.getString("typalign");
         switch (align) {
-        case "c": t.setAlignment("char"); break;
-        case "s": t.setAlignment("int2"); break;
-        case "i": t.setAlignment("int4"); break;
-        case "d": t.setAlignment("double"); break;
-        default : t.setAlignment(align);
+            case "c":
+                t.setAlignment("char");
+                break;
+            case "s":
+                t.setAlignment("int2");
+                break;
+            case "i":
+                t.setAlignment("int4");
+                break;
+            case "d":
+                t.setAlignment("double");
+                break;
+            default:
+                t.setAlignment(align);
         }
 
         String storage = res.getString("typstorage");
         switch (storage) {
-        case "p": t.setStorage("plain"); break;
-        case "e": t.setStorage("external"); break;
-        case "x": t.setStorage("extended"); break;
-        case "m": t.setStorage("main"); break;
-        default : t.setStorage(storage);
+            case "p":
+                t.setStorage("plain");
+                break;
+            case "e":
+                t.setStorage("external");
+                break;
+            case "x":
+                t.setStorage("extended");
+                break;
+            case "m":
+                t.setStorage("main");
+                break;
+            default:
+                t.setStorage(storage);
         }
 
         String cat = res.getString("typcategory");
@@ -369,25 +384,25 @@ public final class TypesReader extends JdbcReader {
         addDescriptionPart(builder);
 
         builder
-        // common part
-        .with("nspnames", "SELECT n.oid, n.nspname FROM pg_catalog.pg_namespace n")
-        .with("collations",
-                "SELECT c.oid, c.collname, n.nspname FROM pg_catalog.pg_collation c LEFT JOIN nspnames n ON n.oid = c.collnamespace")
-        .column("res.typname")
-        .column("res.typowner::bigint")
-        .column("res.typacl::text")
-        .column("res.typtype")
-        .from("pg_catalog.pg_type res")
-        .where("res.typisdefined = TRUE")
-        .where("(res.typrelid = 0 OR (SELECT c.relkind FROM pg_catalog.pg_class c WHERE c.oid = res.typrelid) = 'c')")
-        .where("NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type el WHERE el.oid = res.typelem AND el.typarray = res.oid)")
+                // common part
+                .with("nspnames", "SELECT n.oid, n.nspname FROM pg_catalog.pg_namespace n")
+                .with("collations",
+                        "SELECT c.oid, c.collname, n.nspname FROM pg_catalog.pg_collation c LEFT JOIN nspnames n ON n.oid = c.collnamespace")
+                .column("res.typname")
+                .column("res.typowner::bigint")
+                .column("res.typacl::text")
+                .column("res.typtype")
+                .from("pg_catalog.pg_type res")
+                .where("res.typisdefined = TRUE")
+                .where("(res.typrelid = 0 OR (SELECT c.relkind FROM pg_catalog.pg_class c WHERE c.oid = res.typrelid) = 'c')")
+                .where("NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type el WHERE el.oid = res.typelem AND el.typarray = res.oid)")
 
-        // for base and domain
-        .column("res.typdefault")
-        .column("res.typcollation::bigint")
+                // for base and domain
+                .column("res.typdefault")
+                .column("res.typcollation::bigint")
 
-        // for enum
-        .column("(SELECT pg_catalog.array_agg(en.enumlabel ORDER BY en.enumsortorder) FROM pg_catalog.pg_enum en WHERE en.enumtypid = res.oid GROUP BY en.enumtypid) AS enums");
+                // for enum
+                .column("(SELECT pg_catalog.array_agg(en.enumlabel ORDER BY en.enumsortorder) FROM pg_catalog.pg_enum en WHERE en.enumtypid = res.oid GROUP BY en.enumtypid) AS enums");
 
         addRangePart(builder);
         addBasePart(builder);
@@ -397,20 +412,20 @@ public final class TypesReader extends JdbcReader {
 
     private void addRangePart(QueryBuilder builder) {
         builder
-        .column("r.rngsubtype::bigint")
-        .column("opc.opcname")
-        .column("(SELECT n.nspname FROM nspnames n WHERE n.oid = opc.opcnamespace) AS opcnspname")
-        .column("opc.opcdefault")
-        .column("r.rngcollation::bigint")
-        .column("(SELECT tsub.typcollation::bigint FROM pg_catalog.pg_type tsub WHERE tsub.oid = r.rngsubtype) AS rngsubtypcollation")
-        .column("(SELECT cl.collname FROM collations cl WHERE cl.oid = r.rngcollation) AS rngcollationname")
-        .column("(SELECT cl.nspname FROM collations cl WHERE cl.oid = r.rngcollation) AS rngcollationnspname")
-        .column("r.rngcanonical")
-        .column("r.rngsubdiff")
-        .column("r.rngcanonical != 0 AS rngcanonicalset")
-        .column("r.rngsubdiff != 0 AS rngsubdiffset")
-        .join("LEFT JOIN pg_catalog.pg_range r ON r.rngtypid = res.oid")
-        .join("LEFT JOIN pg_catalog.pg_opclass opc ON opc.oid = r.rngsubopc");
+                .column("r.rngsubtype::bigint")
+                .column("opc.opcname")
+                .column("(SELECT n.nspname FROM nspnames n WHERE n.oid = opc.opcnamespace) AS opcnspname")
+                .column("opc.opcdefault")
+                .column("r.rngcollation::bigint")
+                .column("(SELECT tsub.typcollation::bigint FROM pg_catalog.pg_type tsub WHERE tsub.oid = r.rngsubtype) AS rngsubtypcollation")
+                .column("(SELECT cl.collname FROM collations cl WHERE cl.oid = r.rngcollation) AS rngcollationname")
+                .column("(SELECT cl.nspname FROM collations cl WHERE cl.oid = r.rngcollation) AS rngcollationnspname")
+                .column("r.rngcanonical")
+                .column("r.rngsubdiff")
+                .column("r.rngcanonical != 0 AS rngcanonicalset")
+                .column("r.rngsubdiff != 0 AS rngsubdiffset")
+                .join("LEFT JOIN pg_catalog.pg_range r ON r.rngtypid = res.oid")
+                .join("LEFT JOIN pg_catalog.pg_opclass opc ON opc.oid = r.rngsubopc");
 
         if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
             builder.column("r.rngmultitypid::bigint AS rngmultirange");
@@ -419,22 +434,22 @@ public final class TypesReader extends JdbcReader {
 
     private void addBasePart(QueryBuilder builder) {
         builder
-        .column("res.typinput")
-        .column("res.typoutput")
-        .column("res.typreceive")
-        .column("res.typsend")
-        .column("res.typmodin")
-        .column("res.typmodout")
-        .column("res.typanalyze")
-        .column("res.typlen")
-        .column("res.typbyval")
-        .column("res.typalign")
-        .column("res.typstorage")
-        .column("res.typcategory")
-        .column("res.typispreferred")
-        .column("pg_catalog.pg_get_expr(res.typdefaultbin, 0) AS typdefaultbin")
-        .column("res.typelem::bigint")
-        .column("res.typdelim");
+                .column("res.typinput")
+                .column("res.typoutput")
+                .column("res.typreceive")
+                .column("res.typsend")
+                .column("res.typmodin")
+                .column("res.typmodout")
+                .column("res.typanalyze")
+                .column("res.typlen")
+                .column("res.typbyval")
+                .column("res.typalign")
+                .column("res.typstorage")
+                .column("res.typcategory")
+                .column("res.typispreferred")
+                .column("pg_catalog.pg_get_expr(res.typdefaultbin, 0) AS typdefaultbin")
+                .column("res.typelem::bigint")
+                .column("res.typdelim");
 
         if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
             builder.column("res.typsubscript");
@@ -442,8 +457,8 @@ public final class TypesReader extends JdbcReader {
 
         if (loader.isGreenplumDb()) {
             builder
-            .column("coalesce(array_to_string(e.typoptions, ', '), '') AS typoptions")
-            .join("LEFT JOIN pg_type_encoding e ON res.oid = e.typid");
+                    .column("coalesce(array_to_string(e.typoptions, ', '), '') AS typoptions")
+                    .join("LEFT JOIN pg_type_encoding e ON res.oid = e.typid");
         }
     }
 
@@ -486,21 +501,21 @@ public final class TypesReader extends JdbcReader {
                 .groupBy("a.attrelid");
 
         builder
-        .column("pg_catalog.format_type(res.typbasetype, res.typtypmod) AS dom_basetypefmt")
-        .column("res.typbasetype::bigint AS dom_basetype")
-        .column("(SELECT tbase.typcollation::bigint FROM pg_catalog.pg_type tbase WHERE tbase.oid = res.typbasetype) AS dom_basecollation")
-        .column("(SELECT cl.collname FROM collations cl WHERE cl.oid = res.typcollation) AS dom_collationname")
-        .column("(SELECT cl.nspname FROM collations cl WHERE cl.oid = res.typcollation) AS dom_collationnspname")
-        .column("pg_catalog.pg_get_expr(res.typdefaultbin, 'pg_catalog.pg_type'::pg_catalog.regclass) AS dom_defaultbin")
-        .column("res.typnotnull AS dom_notnull")
-        .column("comp_attrs.attnames AS comp_attnames")
-        .column("comp_attrs.atttypdefns AS comp_atttypdefns")
-        .column("comp_attrs.atttypids AS comp_atttypids")
-        .column("comp_attrs.attcollations AS comp_attcollations")
-        .column("comp_attrs.atttypcollations AS comp_atttypcollations")
-        .column("comp_attrs.attcollationnames AS comp_attcollationnames")
-        .column("comp_attrs.attcollationnspnames AS comp_attcollationnspnames")
-        .column("comp_attrs.attcomments AS comp_attcomments")
-        .join("LEFT JOIN", columns, "comp_attrs ON comp_attrs.attrelid = res.typrelid");
+                .column("pg_catalog.format_type(res.typbasetype, res.typtypmod) AS dom_basetypefmt")
+                .column("res.typbasetype::bigint AS dom_basetype")
+                .column("(SELECT tbase.typcollation::bigint FROM pg_catalog.pg_type tbase WHERE tbase.oid = res.typbasetype) AS dom_basecollation")
+                .column("(SELECT cl.collname FROM collations cl WHERE cl.oid = res.typcollation) AS dom_collationname")
+                .column("(SELECT cl.nspname FROM collations cl WHERE cl.oid = res.typcollation) AS dom_collationnspname")
+                .column("pg_catalog.pg_get_expr(res.typdefaultbin, 'pg_catalog.pg_type'::pg_catalog.regclass) AS dom_defaultbin")
+                .column("res.typnotnull AS dom_notnull")
+                .column("comp_attrs.attnames AS comp_attnames")
+                .column("comp_attrs.atttypdefns AS comp_atttypdefns")
+                .column("comp_attrs.atttypids AS comp_atttypids")
+                .column("comp_attrs.attcollations AS comp_attcollations")
+                .column("comp_attrs.atttypcollations AS comp_atttypcollations")
+                .column("comp_attrs.attcollationnames AS comp_attcollationnames")
+                .column("comp_attrs.attcollationnspnames AS comp_attcollationnspnames")
+                .column("comp_attrs.attcomments AS comp_attcomments")
+                .join("LEFT JOIN", columns, "comp_attrs ON comp_attrs.attrelid = res.typrelid");
     }
 }

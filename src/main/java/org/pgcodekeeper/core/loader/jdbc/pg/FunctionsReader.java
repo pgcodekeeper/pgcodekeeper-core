@@ -15,15 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
-
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.Consts.FUNC_SIGN;
+import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
@@ -36,27 +30,34 @@ import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser;
 import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.VexContext;
 import org.pgcodekeeper.core.parsers.antlr.statements.ParserAbstract;
 import org.pgcodekeeper.core.parsers.antlr.statements.pg.CreateAggregate;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractFunction;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.ArgMode;
-import org.pgcodekeeper.core.schema.Argument;
-import org.pgcodekeeper.core.schema.GenericColumn;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.pg.AbstractPgFunction;
 import org.pgcodekeeper.core.schema.pg.PgAggregate;
-import org.pgcodekeeper.core.schema.pg.PgFunction;
-import org.pgcodekeeper.core.schema.pg.PgProcedure;
 import org.pgcodekeeper.core.schema.pg.PgAggregate.AggFuncs;
 import org.pgcodekeeper.core.schema.pg.PgAggregate.AggKinds;
 import org.pgcodekeeper.core.schema.pg.PgAggregate.ModifyType;
+import org.pgcodekeeper.core.schema.pg.PgFunction;
+import org.pgcodekeeper.core.schema.pg.PgProcedure;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Pair;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
+
 /**
- * Reads FUNCTIONs, PROCEDUREs and AGGREGATEs from JDBC.
+ * Reader for PostgreSQL functions, procedures and aggregates.
+ * Loads function, procedure and aggregate definitions from pg_proc system catalog.
  */
 public final class FunctionsReader extends JdbcReader {
 
+    /**
+     * Creates a new functions reader.
+     *
+     * @param loader the JDBC loader base for database operations
+     */
     public FunctionsReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -96,20 +97,20 @@ public final class FunctionsReader extends JdbcReader {
 
         if (loader.isGreenplumDb()) {
             switch (res.getString("executeOn")) {
-            case "m":
-                function.setExecuteOn("MASTER");
-                break;
-            case "c":
-                function.setExecuteOn("COORDINATOR");
-                break;
-            case "s":
-                function.setExecuteOn("ALL SEGMENTS");
-                break;
-            case "i":
-                function.setExecuteOn("INITPLAN");
-                break;
-            default:
-                break;
+                case "m":
+                    function.setExecuteOn("MASTER");
+                    break;
+                case "c":
+                    function.setExecuteOn("COORDINATOR");
+                    break;
+                case "s":
+                    function.setExecuteOn("ALL SEGMENTS");
+                    break;
+                case "i":
+                    function.setExecuteOn("INITPLAN");
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -117,14 +118,14 @@ public final class FunctionsReader extends JdbcReader {
 
         // VOLATILE is default
         switch (res.getString("provolatile")) {
-        case "i":
-            function.setVolatileType("IMMUTABLE");
-            break;
-        case "s":
-            function.setVolatileType("STABLE");
-            break;
-        default:
-            break;
+            case "i":
+                function.setVolatileType("IMMUTABLE");
+                break;
+            case "s":
+                function.setVolatileType("STABLE");
+                break;
+            default:
+                break;
         }
 
         function.setStrict(res.getBoolean("proisstrict"));
@@ -136,14 +137,14 @@ public final class FunctionsReader extends JdbcReader {
         if (SupportedPgVersion.VERSION_9_6.isLE(loader.getVersion())) {
             String parMode = res.getString("proparallel");
             switch (parMode) {
-            case "s":
-                function.setParallel("SAFE");
-                break;
-            case "r":
-                function.setParallel("RESTRICTED");
-                break;
-            default:
-                break;
+                case "s":
+                    function.setParallel("SAFE");
+                    break;
+                case "r":
+                    function.setParallel("RESTRICTED");
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -210,27 +211,27 @@ public final class FunctionsReader extends JdbcReader {
             String val = param.substring(eq + 1);
 
             switch (par) {
-            case "temp_tablespaces":
-            case "session_preload_libraries":
-            case "shared_preload_libraries":
-            case "local_preload_libraries":
-            case "search_path":
-                function.addConfiguration(par, null);
-                loader.submitAntlrTask(val, SQLParser::vex_eof,
-                        ctx -> {
-                            StringBuilder sb = new StringBuilder();
-                            for (VexContext vex : ctx.vex()) {
-                                sb.append(PgDiffUtils.quoteString(vex.getText()));
-                                sb.append(", ");
-                            }
-                            sb.setLength(sb.length() - 2);
-                            function.addConfiguration(par, sb.toString());
-                        });
-                break;
-            default:
-                val = PgDiffUtils.quoteString(val);
-                function.addConfiguration(PgDiffUtils.getQuotedName(par), val);
-                break;
+                case "temp_tablespaces":
+                case "session_preload_libraries":
+                case "shared_preload_libraries":
+                case "local_preload_libraries":
+                case "search_path":
+                    function.addConfiguration(par, null);
+                    loader.submitAntlrTask(val, SQLParser::vex_eof,
+                            ctx -> {
+                                StringBuilder sb = new StringBuilder();
+                                for (VexContext vex : ctx.vex()) {
+                                    sb.append(PgDiffUtils.quoteString(vex.getText()));
+                                    sb.append(", ");
+                                }
+                                sb.setLength(sb.length() - 2);
+                                function.addConfiguration(par, sb.toString());
+                            });
+                    break;
+                default:
+                    val = PgDiffUtils.quoteString(val);
+                    function.addConfiguration(PgDiffUtils.getQuotedName(par), val);
+                    break;
             }
         }
     }
@@ -283,19 +284,19 @@ public final class FunctionsReader extends JdbcReader {
     }
 
     private AbstractFunction getAgg(ResultSet res, String schemaName,
-            String funcName) throws SQLException {
+                                    String funcName) throws SQLException {
         loader.setCurrentObject(new GenericColumn(schemaName, funcName, DbObjType.AGGREGATE));
         PgAggregate aggregate = new PgAggregate(funcName);
 
         switch (res.getString("aggkind")) {
-        case "o":
-            aggregate.setKind(AggKinds.ORDERED);
-            break;
-        case "h":
-            aggregate.setKind(AggKinds.HYPOTHETICAL);
-            break;
-        default:
-            break;
+            case "o":
+                aggregate.setKind(AggKinds.ORDERED);
+                break;
+            case "h":
+                aggregate.setKind(AggKinds.HYPOTHETICAL);
+                break;
+            default:
+                break;
         }
 
         //// The order is important for adding dependencies. Two steps.
@@ -346,14 +347,14 @@ public final class FunctionsReader extends JdbcReader {
         if (SupportedPgVersion.VERSION_9_6.isLE(loader.getVersion())) {
             String parMode = res.getString("proparallel");
             switch (parMode) {
-            case "s":
-                aggregate.setParallel("SAFE");
-                break;
-            case "r":
-                aggregate.setParallel("RESTRICTED");
-                break;
-            default:
-                break;
+                case "s":
+                    aggregate.setParallel("SAFE");
+                    break;
+                case "r":
+                    aggregate.setParallel("RESTRICTED");
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -448,7 +449,8 @@ public final class FunctionsReader extends JdbcReader {
             case "r" -> AggKinds.NORMAL == kind ? null : ModifyType.READ_ONLY;
             case "s" -> ModifyType.SHAREABLE;
             case "w" -> AggKinds.NORMAL != kind ? null : ModifyType.READ_WRITE;
-            default -> throw new IllegalStateException("FinalFuncModifier '" + modifier + "' doesn't support by AGGREGATE!");
+            default ->
+                    throw new IllegalStateException("FinalFuncModifier '" + modifier + "' doesn't support by AGGREGATE!");
         };
     }
 
@@ -457,7 +459,7 @@ public final class FunctionsReader extends JdbcReader {
      * object (typeSchema, typeName, DbObjType.TYPE).
      */
     private List<Pair<String, GenericColumn>> fillArguments(AbstractPgFunction f,
-            ResultSet res) throws SQLException {
+                                                            ResultSet res) throws SQLException {
         StringBuilder sb = new StringBuilder();
         String[] argModes = getColArray(res, "proargmodes");
         String[] argNames = getColArray(res, "proargnames");
@@ -533,69 +535,69 @@ public final class FunctionsReader extends JdbcReader {
         addDescriptionPart(builder);
 
         builder
-        // common part (functions/procedures/aggregates)
-        .column("res.proname")
-        .column("res.proowner::bigint")
-        .column("res.prorettype::bigint")
-        .column("res.proallargtypes::bigint[]")
-        .column("res.proargmodes")
-        .column("res.proargnames")
-        .column("res.proacl::text AS aclarray")
-        .column("res.proretset")
-        .column("array(select pg_catalog.unnest(res.proargtypes))::bigint[] as argtypes")
-        .from("pg_catalog.pg_proc res")
+                // common part (functions/procedures/aggregates)
+                .column("res.proname")
+                .column("res.proowner::bigint")
+                .column("res.prorettype::bigint")
+                .column("res.proallargtypes::bigint[]")
+                .column("res.proargmodes")
+                .column("res.proargnames")
+                .column("res.proacl::text AS aclarray")
+                .column("res.proretset")
+                .column("array(select pg_catalog.unnest(res.proargtypes))::bigint[] as argtypes")
+                .from("pg_catalog.pg_proc res")
 
-        // for functions/procedures
-        .column("l.lanname AS lang_name")
-        .column("res.prosrc")
-        .column("res.provolatile")
-        .column("res.proleakproof")
-        .column("res.proisstrict")
-        .column("res.prosecdef")
-        .column("res.procost::real")
-        .column("res.prorows::real")
-        .column("res.proconfig")
-        .column("res.probin")
-        .column("pg_catalog.pg_get_expr(res.proargdefaults, 0) AS default_values_as_string")
-        .column("res.pronargs")
-        .join("LEFT JOIN pg_catalog.pg_language l ON l.oid = res.prolang")
+                // for functions/procedures
+                .column("l.lanname AS lang_name")
+                .column("res.prosrc")
+                .column("res.provolatile")
+                .column("res.proleakproof")
+                .column("res.proisstrict")
+                .column("res.prosecdef")
+                .column("res.procost::real")
+                .column("res.prorows::real")
+                .column("res.proconfig")
+                .column("res.probin")
+                .column("pg_catalog.pg_get_expr(res.proargdefaults, 0) AS default_values_as_string")
+                .column("res.pronargs")
+                .join("LEFT JOIN pg_catalog.pg_language l ON l.oid = res.prolang")
 
-        // for aggregates
-        .column("sfunc.proname AS sfunc")
-        .column("sfunc_n.nspname AS sfunc_nsp")
-        .column("a.aggtranstype AS stype")
-        .column("a.aggtransspace AS sspace")
-        .column("finalfn.proname AS finalfunc")
-        .column("finalfn_n.nspname AS finalfunc_nsp")
-        .column("a.aggfinalextra AS is_finalfunc_extra")
-        .column("a.agginitval AS initcond")
-        .column("msfunc.proname AS msfunc")
-        .column("msfunc_n.nspname AS msfunc_nsp")
-        .column("minvfunc.proname AS minvfunc")
-        .column("minvfunc_n.nspname AS minvfunc_nsp")
-        .column("a.aggmtranstype AS mstype")
-        .column("a.aggmtransspace AS msspace")
-        .column("mfinalfn.proname AS mfinalfunc")
-        .column("mfinalfn_n.nspname AS mfinalfunc_nsp")
-        .column("a.aggmfinalextra AS is_mfinalfunc_extra")
-        .column("a.aggminitval AS minitcond")
-        .column("sortop.oprname AS sortop")
-        .column("sortop_n.nspname AS sortop_nsp")
-        .column("a.aggkind")
-        .column("a.aggnumdirectargs")
-        .join("LEFT JOIN pg_catalog.pg_aggregate a ON a.aggfnoid = res.oid")
-        .join("LEFT JOIN pg_catalog.pg_proc sfunc ON a.aggtransfn = sfunc.oid")
-        .join("LEFT JOIN pg_catalog.pg_namespace sfunc_n ON sfunc.pronamespace = sfunc_n.oid")
-        .join("LEFT JOIN pg_catalog.pg_proc finalfn ON a.aggfinalfn = finalfn.oid")
-        .join("LEFT JOIN pg_catalog.pg_namespace finalfn_n ON finalfn.pronamespace = finalfn_n.oid")
-        .join("LEFT JOIN pg_catalog.pg_proc msfunc ON a.aggmtransfn = msfunc.oid")
-        .join("LEFT JOIN pg_catalog.pg_namespace msfunc_n ON msfunc.pronamespace = msfunc_n.oid")
-        .join("LEFT JOIN pg_catalog.pg_proc minvfunc ON a.aggminvtransfn = minvfunc.oid")
-        .join("LEFT JOIN pg_catalog.pg_namespace minvfunc_n ON minvfunc.pronamespace = minvfunc_n.oid")
-        .join("LEFT JOIN pg_catalog.pg_proc mfinalfn ON a.aggmfinalfn = mfinalfn.oid")
-        .join("LEFT JOIN pg_catalog.pg_namespace mfinalfn_n ON mfinalfn.pronamespace = mfinalfn_n.oid")
-        .join("LEFT JOIN pg_catalog.pg_operator sortop ON a.aggsortop = sortop.oid")
-        .join("LEFT JOIN pg_catalog.pg_namespace sortop_n ON sortop.oprnamespace = sortop_n.oid");
+                // for aggregates
+                .column("sfunc.proname AS sfunc")
+                .column("sfunc_n.nspname AS sfunc_nsp")
+                .column("a.aggtranstype AS stype")
+                .column("a.aggtransspace AS sspace")
+                .column("finalfn.proname AS finalfunc")
+                .column("finalfn_n.nspname AS finalfunc_nsp")
+                .column("a.aggfinalextra AS is_finalfunc_extra")
+                .column("a.agginitval AS initcond")
+                .column("msfunc.proname AS msfunc")
+                .column("msfunc_n.nspname AS msfunc_nsp")
+                .column("minvfunc.proname AS minvfunc")
+                .column("minvfunc_n.nspname AS minvfunc_nsp")
+                .column("a.aggmtranstype AS mstype")
+                .column("a.aggmtransspace AS msspace")
+                .column("mfinalfn.proname AS mfinalfunc")
+                .column("mfinalfn_n.nspname AS mfinalfunc_nsp")
+                .column("a.aggmfinalextra AS is_mfinalfunc_extra")
+                .column("a.aggminitval AS minitcond")
+                .column("sortop.oprname AS sortop")
+                .column("sortop_n.nspname AS sortop_nsp")
+                .column("a.aggkind")
+                .column("a.aggnumdirectargs")
+                .join("LEFT JOIN pg_catalog.pg_aggregate a ON a.aggfnoid = res.oid")
+                .join("LEFT JOIN pg_catalog.pg_proc sfunc ON a.aggtransfn = sfunc.oid")
+                .join("LEFT JOIN pg_catalog.pg_namespace sfunc_n ON sfunc.pronamespace = sfunc_n.oid")
+                .join("LEFT JOIN pg_catalog.pg_proc finalfn ON a.aggfinalfn = finalfn.oid")
+                .join("LEFT JOIN pg_catalog.pg_namespace finalfn_n ON finalfn.pronamespace = finalfn_n.oid")
+                .join("LEFT JOIN pg_catalog.pg_proc msfunc ON a.aggmtransfn = msfunc.oid")
+                .join("LEFT JOIN pg_catalog.pg_namespace msfunc_n ON msfunc.pronamespace = msfunc_n.oid")
+                .join("LEFT JOIN pg_catalog.pg_proc minvfunc ON a.aggminvtransfn = minvfunc.oid")
+                .join("LEFT JOIN pg_catalog.pg_namespace minvfunc_n ON minvfunc.pronamespace = minvfunc_n.oid")
+                .join("LEFT JOIN pg_catalog.pg_proc mfinalfn ON a.aggmfinalfn = mfinalfn.oid")
+                .join("LEFT JOIN pg_catalog.pg_namespace mfinalfn_n ON mfinalfn.pronamespace = mfinalfn_n.oid")
+                .join("LEFT JOIN pg_catalog.pg_operator sortop ON a.aggsortop = sortop.oid")
+                .join("LEFT JOIN pg_catalog.pg_namespace sortop_n ON sortop.oprnamespace = sortop_n.oid");
 
         if (SupportedPgVersion.VERSION_9_5.isLE(loader.getVersion())) {
             builder.column("res.protrftypes::bigint[]");
@@ -607,31 +609,31 @@ public final class FunctionsReader extends JdbcReader {
 
         if (SupportedPgVersion.VERSION_9_6.isLE(loader.getVersion()) || loader.isGreenplumDb()) {
             builder
-            .column("combinefn.proname AS combinefunc")
-            .column("combinefn_n.nspname AS combinefunc_nsp")
-            .column("serialfn.proname AS serialfunc")
-            .column("serialfn_n.nspname AS serialfunc_nsp")
-            .column("deserialfn.proname AS deserialfunc")
-            .column("deserialfn_n.nspname AS deserialfunc_nsp")
-            .join("LEFT JOIN pg_catalog.pg_proc combinefn ON a.aggcombinefn = combinefn.oid")
-            .join("LEFT JOIN pg_catalog.pg_namespace combinefn_n ON combinefn.pronamespace = combinefn_n.oid")
-            .join("LEFT JOIN pg_catalog.pg_proc serialfn ON a.aggserialfn = serialfn.oid")
-            .join("LEFT JOIN pg_catalog.pg_namespace serialfn_n ON serialfn.pronamespace = serialfn_n.oid")
-            .join("LEFT JOIN pg_catalog.pg_proc deserialfn ON a.aggdeserialfn = deserialfn.oid")
-            .join("LEFT JOIN pg_catalog.pg_namespace deserialfn_n ON deserialfn.pronamespace = deserialfn_n.oid");
+                    .column("combinefn.proname AS combinefunc")
+                    .column("combinefn_n.nspname AS combinefunc_nsp")
+                    .column("serialfn.proname AS serialfunc")
+                    .column("serialfn_n.nspname AS serialfunc_nsp")
+                    .column("deserialfn.proname AS deserialfunc")
+                    .column("deserialfn_n.nspname AS deserialfunc_nsp")
+                    .join("LEFT JOIN pg_catalog.pg_proc combinefn ON a.aggcombinefn = combinefn.oid")
+                    .join("LEFT JOIN pg_catalog.pg_namespace combinefn_n ON combinefn.pronamespace = combinefn_n.oid")
+                    .join("LEFT JOIN pg_catalog.pg_proc serialfn ON a.aggserialfn = serialfn.oid")
+                    .join("LEFT JOIN pg_catalog.pg_namespace serialfn_n ON serialfn.pronamespace = serialfn_n.oid")
+                    .join("LEFT JOIN pg_catalog.pg_proc deserialfn ON a.aggdeserialfn = deserialfn.oid")
+                    .join("LEFT JOIN pg_catalog.pg_namespace deserialfn_n ON deserialfn.pronamespace = deserialfn_n.oid");
         }
 
         if (SupportedPgVersion.VERSION_11.isLE(loader.getVersion())) {
             builder
-            .column("res.prokind = 'a' AS proisagg")
-            .column("res.prokind = 'w' AS proiswindow")
-            .column("res.prokind = 'p' AS proisproc")
-            .column("a.aggfinalmodify AS finalfunc_modify")
-            .column("a.aggmfinalmodify AS mfinalfunc_modify");
+                    .column("res.prokind = 'a' AS proisagg")
+                    .column("res.prokind = 'w' AS proiswindow")
+                    .column("res.prokind = 'p' AS proisproc")
+                    .column("a.aggfinalmodify AS finalfunc_modify")
+                    .column("a.aggmfinalmodify AS mfinalfunc_modify");
         } else {
             builder
-            .column("res.proisagg")
-            .column("res.proiswindow");
+                    .column("res.proisagg")
+                    .column("res.proiswindow");
         }
 
         if (SupportedPgVersion.VERSION_12.isLE(loader.getVersion())) {
@@ -640,8 +642,8 @@ public final class FunctionsReader extends JdbcReader {
 
         if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
             builder.column("""
-                case when (res.prosrc is null or res.prosrc='') and l.lanname = 'sql'
-                    then pg_get_function_sqlbody(res.oid) end as prosqlbody""");
+                    case when (res.prosrc is null or res.prosrc='') and l.lanname = 'sql'
+                        then pg_get_function_sqlbody(res.oid) end as prosqlbody""");
         }
 
         if (loader.isGreenplumDb()) {

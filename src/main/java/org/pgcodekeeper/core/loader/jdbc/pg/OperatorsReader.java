@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
@@ -29,8 +26,20 @@ import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.pg.PgOperator;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL operators.
+ * Loads operator definitions from pg_operator and related system catalogs.
+ */
 public final class OperatorsReader extends JdbcReader {
 
+    /**
+     * Creates a new OperatorsReader.
+     *
+     * @param loader the JDBC loader instance
+     */
     public OperatorsReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -68,18 +77,18 @@ public final class OperatorsReader extends JdbcReader {
 
         String commutator = res.getString("commutator");
         if (commutator != null) {
-            StringBuilder sb = new StringBuilder().append("OPERATOR(")
-                    .append(PgDiffUtils.getQuotedName(res.getString("commutator_nsp")))
-                    .append('.').append(commutator).append(')');
-            oper.setCommutator(sb.toString());
+            String sb = "OPERATOR(" +
+                    PgDiffUtils.getQuotedName(res.getString("commutator_nsp")) +
+                    '.' + commutator + ')';
+            oper.setCommutator(sb);
         }
 
         String negator = res.getString("negator");
         if (negator != null) {
-            StringBuilder sb = new StringBuilder().append("OPERATOR(")
-                    .append(PgDiffUtils.getQuotedName(res.getString("negator_nsp")))
-                    .append('.').append(negator).append(')');
-            oper.setNegator(sb.toString());
+            String sb = "OPERATOR(" +
+                    PgDiffUtils.getQuotedName(res.getString("negator_nsp")) +
+                    '.' + negator + ')';
+            oper.setNegator(sb);
         }
 
         if (res.getBoolean("is_merges")) {
@@ -130,33 +139,33 @@ public final class OperatorsReader extends JdbcReader {
         addDescriptionPart(builder);
 
         builder
-        .column("res.oprname AS name")
-        .column("prc.proname AS procedure")
-        .column("prc_n.nspname AS procedure_nsp")
-        .column("res.oprleft::bigint AS leftArg")
-        .column("res.oprright::bigint AS rightArg")
-        .column("res.oprresult::bigint AS result")
-        .column("com.oprname AS commutator")
-        .column("com_n.nspname AS commutator_nsp")
-        .column("neg.oprname AS negator")
-        .column("neg_n.nspname AS negator_nsp")
-        .column("res.oprcanmerge AS is_merges")
-        .column("res.oprcanhash AS is_hashes")
-        .column("prc_r.proname AS restrict")
-        .column("prc_r_n.nspname AS restrict_nsp")
-        .column("prc_j.proname AS join")
-        .column("prc_j_n.nspname AS join_nsp")
-        .column("res.oprowner AS owner")
-        .from("pg_catalog.pg_operator res")
-        .join("JOIN pg_catalog.pg_proc prc ON res.oprcode = prc.oid")
-        .join("LEFT JOIN pg_catalog.pg_namespace prc_n ON prc.pronamespace = prc_n.oid")
-        .join("LEFT JOIN pg_catalog.pg_operator com ON res.oprcom = com.oid")
-        .join("LEFT JOIN pg_catalog.pg_namespace com_n ON com.oprnamespace = com_n.oid")
-        .join("LEFT JOIN pg_catalog.pg_operator neg ON res.oprnegate = neg.oid")
-        .join("LEFT JOIN pg_catalog.pg_namespace neg_n ON neg.oprnamespace = neg_n.oid")
-        .join("LEFT JOIN pg_catalog.pg_proc prc_r ON res.oprrest = prc_r.oid")
-        .join("LEFT JOIN pg_catalog.pg_namespace prc_r_n ON prc_r.pronamespace = prc_r_n.oid")
-        .join("LEFT JOIN pg_catalog.pg_proc prc_j ON res.oprjoin = prc_j.oid")
-        .join("LEFT JOIN pg_catalog.pg_namespace prc_j_n ON prc_j.pronamespace = prc_j_n.oid");
+                .column("res.oprname AS name")
+                .column("prc.proname AS procedure")
+                .column("prc_n.nspname AS procedure_nsp")
+                .column("res.oprleft::bigint AS leftArg")
+                .column("res.oprright::bigint AS rightArg")
+                .column("res.oprresult::bigint AS result")
+                .column("com.oprname AS commutator")
+                .column("com_n.nspname AS commutator_nsp")
+                .column("neg.oprname AS negator")
+                .column("neg_n.nspname AS negator_nsp")
+                .column("res.oprcanmerge AS is_merges")
+                .column("res.oprcanhash AS is_hashes")
+                .column("prc_r.proname AS restrict")
+                .column("prc_r_n.nspname AS restrict_nsp")
+                .column("prc_j.proname AS join")
+                .column("prc_j_n.nspname AS join_nsp")
+                .column("res.oprowner AS owner")
+                .from("pg_catalog.pg_operator res")
+                .join("JOIN pg_catalog.pg_proc prc ON res.oprcode = prc.oid")
+                .join("LEFT JOIN pg_catalog.pg_namespace prc_n ON prc.pronamespace = prc_n.oid")
+                .join("LEFT JOIN pg_catalog.pg_operator com ON res.oprcom = com.oid")
+                .join("LEFT JOIN pg_catalog.pg_namespace com_n ON com.oprnamespace = com_n.oid")
+                .join("LEFT JOIN pg_catalog.pg_operator neg ON res.oprnegate = neg.oid")
+                .join("LEFT JOIN pg_catalog.pg_namespace neg_n ON neg.oprnamespace = neg_n.oid")
+                .join("LEFT JOIN pg_catalog.pg_proc prc_r ON res.oprrest = prc_r.oid")
+                .join("LEFT JOIN pg_catalog.pg_namespace prc_r_n ON prc_r.pronamespace = prc_r_n.oid")
+                .join("LEFT JOIN pg_catalog.pg_proc prc_j ON res.oprjoin = prc_j.oid")
+                .join("LEFT JOIN pg_catalog.pg_namespace prc_j_n ON prc_j.pronamespace = prc_j_n.oid");
     }
 }

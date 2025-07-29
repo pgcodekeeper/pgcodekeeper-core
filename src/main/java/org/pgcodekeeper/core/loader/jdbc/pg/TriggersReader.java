@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
-import java.nio.charset.StandardCharsets;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -31,24 +27,37 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.PgStatementContainer;
 import org.pgcodekeeper.core.schema.pg.AbstractPgTable;
 import org.pgcodekeeper.core.schema.pg.PgTrigger;
-import org.pgcodekeeper.core.schema.pg.TriggerState;
 import org.pgcodekeeper.core.schema.pg.PgTrigger.TgTypes;
+import org.pgcodekeeper.core.schema.pg.TriggerState;
 
+import java.nio.charset.StandardCharsets;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * Reader for PostgreSQL triggers.
+ * Loads trigger definitions from pg_trigger system catalog.
+ */
 public final class TriggersReader extends JdbcReader {
 
     // SONAR-OFF
     // pg_trigger.h
-    private static final int TRIGGER_TYPE_ROW       = 1 << 0;
-    private static final int TRIGGER_TYPE_BEFORE    = 1 << 1;
-    private static final int TRIGGER_TYPE_INSERT    = 1 << 2;
-    private static final int TRIGGER_TYPE_DELETE    = 1 << 3;
-    private static final int TRIGGER_TYPE_UPDATE    = 1 << 4;
-    private static final int TRIGGER_TYPE_TRUNCATE  = 1 << 5;
-    private static final int TRIGGER_TYPE_INSTEAD   = 1 << 6;
+    private static final int TRIGGER_TYPE_ROW = 1 << 0;
+    private static final int TRIGGER_TYPE_BEFORE = 1 << 1;
+    private static final int TRIGGER_TYPE_INSERT = 1 << 2;
+    private static final int TRIGGER_TYPE_DELETE = 1 << 3;
+    private static final int TRIGGER_TYPE_UPDATE = 1 << 4;
+    private static final int TRIGGER_TYPE_TRUNCATE = 1 << 5;
+    private static final int TRIGGER_TYPE_INSTEAD = 1 << 6;
     // SONAR-ON
 
     private static final String NO_PARENT = "0";
 
+    /**
+     * Creates a new TriggersReader.
+     *
+     * @param loader the JDBC loader base for database operations
+     */
     public TriggersReader(JdbcLoaderBase loader) {
         super(loader);
     }
@@ -104,7 +113,7 @@ public final class TriggersReader extends JdbcReader {
 
         StringBuilder functionCall = new StringBuilder(funcName.length() + 2);
         functionCall.append(PgDiffUtils.getQuotedName(funcSchema)).append('.')
-        .append(PgDiffUtils.getQuotedName(funcName)).append('(');
+                .append(PgDiffUtils.getQuotedName(funcName)).append('(');
         t.setTriggerState(readEnabledState(tgEnabled, false));
 
         byte[] args = res.getBytes("tgargs");
@@ -135,11 +144,10 @@ public final class TriggersReader extends JdbcReader {
             String refRelName = res.getString("refrelname");
             if (refRelName != null) {
                 String refSchemaName = res.getString("refnspname");
-                StringBuilder sb = new StringBuilder();
-                sb.append(PgDiffUtils.getQuotedName(refSchemaName)).append('.');
-                sb.append(PgDiffUtils.getQuotedName(refRelName));
+                String sb = PgDiffUtils.getQuotedName(refSchemaName) + '.' +
+                        PgDiffUtils.getQuotedName(refRelName);
 
-                t.setRefTableName(sb.toString());
+                t.setRefTableName(sb);
                 addDep(t, refSchemaName, refRelName, DbObjType.TABLE);
             }
 
@@ -166,7 +174,7 @@ public final class TriggersReader extends JdbcReader {
         String definition = res.getString("definition");
         checkObjectValidity(definition, DbObjType.TRIGGER, triggerName);
         loader.submitAntlrTask(definition, p -> p.sql().statement(0).schema_statement()
-                .schema_create().create_trigger_statement().when_trigger(),
+                        .schema_create().create_trigger_statement().when_trigger(),
                 ctx -> CreateTrigger.parseWhen(ctx, t, schema.getDatabase(), loader.getCurrentLocation()));
 
         loader.setAuthor(t, res);
@@ -206,40 +214,40 @@ public final class TriggersReader extends JdbcReader {
                 .where("a.attnum = ANY(res.tgattr)");
 
         builder
-        .column("cls.relname")
-        .column("p.proname")
-        .column("nsp.nspname")
-        .column("res.tgname")
-        .column("res.tgtype")
-        .column("res.tgenabled")
-        .column("res.tgargs")
-        .column("res.tgconstraint::bigint")
-        .column("res.tgdeferrable")
-        .column("res.tginitdeferred")
-        .column("relcon.relname as refrelname")
-        .column("refnsp.nspname as refnspname")
-        .column("", subselect, "AS cols")
-        .column("pg_catalog.pg_get_triggerdef(res.oid,false) AS definition")
-        .from("pg_catalog.pg_trigger res")
-        .join("LEFT JOIN pg_catalog.pg_class cls ON cls.oid = res.tgrelid")
-        .join("LEFT JOIN pg_catalog.pg_class relcon ON relcon.oid = res.tgconstrrelid")
-        .join("LEFT JOIN pg_catalog.pg_namespace refnsp ON refnsp.oid = relcon.relnamespace")
-        .join("JOIN pg_catalog.pg_proc p ON p.oid = res.tgfoid")
-        .join("JOIN pg_catalog.pg_namespace nsp ON p.pronamespace = nsp.oid")
-        .where("cls.relkind IN ('r', 'f', 'p', 'm', 'v')")
-        .where("res.tgisinternal = FALSE");
+                .column("cls.relname")
+                .column("p.proname")
+                .column("nsp.nspname")
+                .column("res.tgname")
+                .column("res.tgtype")
+                .column("res.tgenabled")
+                .column("res.tgargs")
+                .column("res.tgconstraint::bigint")
+                .column("res.tgdeferrable")
+                .column("res.tginitdeferred")
+                .column("relcon.relname as refrelname")
+                .column("refnsp.nspname as refnspname")
+                .column("", subselect, "AS cols")
+                .column("pg_catalog.pg_get_triggerdef(res.oid,false) AS definition")
+                .from("pg_catalog.pg_trigger res")
+                .join("LEFT JOIN pg_catalog.pg_class cls ON cls.oid = res.tgrelid")
+                .join("LEFT JOIN pg_catalog.pg_class relcon ON relcon.oid = res.tgconstrrelid")
+                .join("LEFT JOIN pg_catalog.pg_namespace refnsp ON refnsp.oid = relcon.relnamespace")
+                .join("JOIN pg_catalog.pg_proc p ON p.oid = res.tgfoid")
+                .join("JOIN pg_catalog.pg_namespace nsp ON p.pronamespace = nsp.oid")
+                .where("cls.relkind IN ('r', 'f', 'p', 'm', 'v')")
+                .where("res.tgisinternal = FALSE");
 
         if (SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
             builder
-            .column("res.tgoldtable")
-            .column("res.tgnewtable");
+                    .column("res.tgoldtable")
+                    .column("res.tgnewtable");
         }
 
         if (SupportedPgVersion.VERSION_15.isLE(loader.getVersion())) {
             builder
-            .column("res.tgparentid")
-            .column("res.tgenabled")
-            .join("LEFT JOIN pg_catalog.pg_trigger u ON u.oid = res.tgparentid");
+                    .column("res.tgparentid")
+                    .column("res.tgenabled")
+                    .join("LEFT JOIN pg_catalog.pg_trigger u ON u.oid = res.tgparentid");
         }
     }
 }
