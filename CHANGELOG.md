@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Fixed parser rule for PostgreSQL.
+- Fixed code generation error when changing views in MS SQL
 - Fixed bug with ignoring column order in PostgreSQL and MS SQL constraints.
 - Fixed a bug with the settings when saving objects to a project.
 
@@ -705,7 +706,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- Fixed an error when printing query error message. 
+- Fixed an error when printing query error message.
 - Fixed a bug with data migration code generation for partition tables.
 - Fixed a bug when recreating a sequence when pouring data from a table.
 
@@ -1799,8 +1800,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- Fixed an error when getting time zone from database when creating a new project. 
-- Fixed UI blocking when using feedback dialog. 
+- Fixed an error when getting time zone from database when creating a new project.
+- Fixed UI blocking when using feedback dialog.
 
 ## [5.0.2] - 2018-08-01
 
