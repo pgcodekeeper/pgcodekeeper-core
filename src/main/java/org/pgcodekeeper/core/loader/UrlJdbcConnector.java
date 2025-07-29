@@ -15,17 +15,26 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import java.util.Properties;
-
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.DatabaseType;
 
+import java.util.Properties;
+
+/**
+ * JDBC connector implementation that uses a JDBC URL for database connections.
+ * Automatically detects database type from the URL and provides SSL certificate trust configuration.
+ */
 public final class UrlJdbcConnector extends AbstractJdbcConnector {
 
     private static final String MESSAGE_UNKNOWN_URL_SCHEMA = "Unknown url schema, supported schemas are 'postgresql', 'sqlserver', 'ch', 'clickhouse'";
 
     private final String url;
 
+    /**
+     * Creates a new URL-based JDBC connector.
+     *
+     * @param url the JDBC URL for database connection
+     */
     public UrlJdbcConnector(String url) {
         super(getDatabaseTypeFromUrl(url));
         this.url = url;
@@ -46,6 +55,13 @@ public final class UrlJdbcConnector extends AbstractJdbcConnector {
         return url;
     }
 
+    /**
+     * Determines the database type from a JDBC URL.
+     *
+     * @param url the JDBC URL to analyze
+     * @return the database type (PostgreSQL, Microsoft SQL Server, or ClickHouse)
+     * @throws IllegalArgumentException if the URL schema is not supported
+     */
     public static DatabaseType getDatabaseTypeFromUrl(String url) {
         if (url.startsWith(URL_START_MS)) {
             return DatabaseType.MS;

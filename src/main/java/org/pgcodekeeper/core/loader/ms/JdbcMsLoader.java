@@ -15,27 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.ms;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.text.MessageFormat;
-
 import org.eclipse.core.runtime.SubMonitor;
 import org.pgcodekeeper.core.loader.AbstractJdbcConnector;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
-import org.pgcodekeeper.core.loader.jdbc.ms.MsAssembliesReader;
-import org.pgcodekeeper.core.loader.jdbc.ms.MsCheckConstraintsReader;
-import org.pgcodekeeper.core.loader.jdbc.ms.MsExtendedObjectsReader;
-import org.pgcodekeeper.core.loader.jdbc.ms.MsFKReader;
-import org.pgcodekeeper.core.loader.jdbc.ms.MsFPVTReader;
-import org.pgcodekeeper.core.loader.jdbc.ms.MsIndicesAndPKReader;
-import org.pgcodekeeper.core.loader.jdbc.ms.MsRolesReader;
-import org.pgcodekeeper.core.loader.jdbc.ms.MsSchemasReader;
-import org.pgcodekeeper.core.loader.jdbc.ms.MsSequencesReader;
-import org.pgcodekeeper.core.loader.jdbc.ms.MsStatisticsReader;
-import org.pgcodekeeper.core.loader.jdbc.ms.MsTablesReader;
-import org.pgcodekeeper.core.loader.jdbc.ms.MsTypesReader;
-import org.pgcodekeeper.core.loader.jdbc.ms.MsUsersReader;
+import org.pgcodekeeper.core.loader.jdbc.ms.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
@@ -44,12 +27,30 @@ import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.text.MessageFormat;
+
+/**
+ * JDBC-based database schema loader for Microsoft SQL Server databases.
+ * Reads database schemas, tables, functions, procedures, views, types, assemblies, roles, users and other objects from a Microsoft SQL Server database.
+ * Extends JdbcLoaderBase to provide Microsoft SQL Server-specific loading functionality.
+ */
 public final class JdbcMsLoader extends JdbcLoaderBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(JdbcMsLoader.class);
 
+    /**
+     * Creates a new Microsoft SQL Server JDBC loader with the specified parameters.
+     *
+     * @param connector        the JDBC connector for establishing database connections
+     * @param settings         loader settings and configuration
+     * @param monitor          progress monitor for tracking loading progress
+     * @param ignoreSchemaList list of schemas to ignore during loading
+     */
     public JdbcMsLoader(AbstractJdbcConnector connector, ISettings settings,
-            SubMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
+                        SubMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
         super(connector, monitor, settings, ignoreSchemaList);
     }
 
@@ -60,7 +61,7 @@ public final class JdbcMsLoader extends JdbcLoaderBase {
         LOG.info(Messages.JdbcLoader_log_reading_db_jdbc);
         setCurrentOperation(Messages.JdbcChLoader_log_connection_db);
         try (Connection connection = connector.getConnection();
-                Statement statement = connection.createStatement()) {
+             Statement statement = connection.createStatement()) {
             this.connection = connection;
             this.statement = statement;
 

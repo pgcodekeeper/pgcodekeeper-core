@@ -15,6 +15,18 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.SqlContextProcessor;
+import org.pgcodekeeper.core.parsers.antlr.AntlrParser;
+import org.pgcodekeeper.core.parsers.antlr.verification.VerificationParserListener;
+import org.pgcodekeeper.core.parsers.antlr.verification.VerificationProperties;
+import org.pgcodekeeper.core.schema.pg.PgDatabase;
+import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.InputStreamProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -24,39 +36,63 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.parsers.antlr.AntlrParser;
-import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.SqlContextProcessor;
-import org.pgcodekeeper.core.parsers.antlr.verification.VerificationParserListener;
-import org.pgcodekeeper.core.parsers.antlr.verification.VerificationProperties;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.InputStreamProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+/**
+ * Database loader for SQL token verification and validation.
+ * Processes SQL files and directories to verify compliance with specified verification rules
+ * using ANTLR parsing and custom verification listeners.
+ */
 public final class TokenLoader extends DatabaseLoader {
 
     private final ISettings settings;
     private final VerificationProperties rules;
     private static final Logger LOG = LoggerFactory.getLogger(TokenLoader.class);
 
+    /**
+     * Creates a new token loader with specified settings and verification rules.
+     *
+     * @param settings loader settings and configuration
+     * @param rules    verification rules for token validation
+     */
     private TokenLoader(ISettings settings, VerificationProperties rules) {
         this.settings = settings;
         this.rules = rules;
     }
 
+    /**
+     * Not supported operation for token loader.
+     *
+     * @throws IllegalStateException always, as this operation is not supported
+     */
     @Override
     public PgDatabase load() throws IOException, InterruptedException {
         throw new IllegalStateException("Unsupported operation");
     }
 
+    /**
+     * Verifies SQL sources using verification properties from the specified path.
+     *
+     * @param settings loader settings and configuration
+     * @param path     path to verification properties file
+     * @param sources  collection of source paths to verify
+     * @return list of verification errors found
+     * @throws InterruptedException if verification is interrupted
+     * @throws IOException          if file access fails
+     */
     public static List<Object> verify(ISettings settings, Path path, Collection<String> sources)
             throws InterruptedException, IOException {
         return verify(settings, VerificationProperties.readProperties(path), sources);
     }
 
+    /**
+     * Verifies SQL sources using the specified verification rules.
+     *
+     * @param args    loader settings and configuration
+     * @param rules   verification rules for token validation
+     * @param sources collection of source paths to verify
+     * @return list of verification errors found
+     * @throws InterruptedException if verification is interrupted
+     * @throws IOException          if file access fails
+     */
     public static List<Object> verify(ISettings args, VerificationProperties rules, Collection<String> sources)
             throws InterruptedException, IOException {
         TokenLoader loader = new TokenLoader(args, rules);

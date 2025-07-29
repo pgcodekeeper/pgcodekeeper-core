@@ -15,18 +15,22 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
+import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import org.pgcodekeeper.core.DatabaseType;
-import org.pgcodekeeper.core.Utils;
-import org.pgcodekeeper.core.localizations.Messages;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+/**
+ * Abstract base class for JDBC database connectors.
+ * Provides common functionality for establishing database connections across different database types
+ * including PostgreSQL, Microsoft SQL Server, and ClickHouse.
+ */
 public abstract class AbstractJdbcConnector {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractJdbcConnector.class);
@@ -47,12 +51,11 @@ public abstract class AbstractJdbcConnector {
     }
 
     /**
-     * Creates new connection instance with params specified in constructor.<br>
-     * It is the caller responsibility to close connection.
+     * Creates a new database connection using the parameters specified in the constructor.
+     * The caller is responsible for closing the connection.
      *
-     * @return new connection
-     * @throws IOException
-     *             If driver not found or a database access error occurs
+     * @return new database connection
+     * @throws IOException if the driver is not found or a database access error occurs
      */
     public Connection getConnection() throws IOException {
         try {
@@ -74,10 +77,9 @@ public abstract class AbstractJdbcConnector {
 
     protected String getDriverName() {
         return switch (dbType) {
-        case PG -> PG_DRIVER_NAME;
-        case MS -> MS_DRIVER_NAME;
-        case CH -> CH_DRIVER_NAME;
-        default -> throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + dbType);
+            case PG -> PG_DRIVER_NAME;
+            case MS -> MS_DRIVER_NAME;
+            case CH -> CH_DRIVER_NAME;
         };
     }
 

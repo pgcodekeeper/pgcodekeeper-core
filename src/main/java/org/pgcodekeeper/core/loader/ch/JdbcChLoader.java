@@ -34,10 +34,23 @@ import java.sql.Statement;
 import java.text.MessageFormat;
 import java.util.stream.Collectors;
 
+/**
+ * JDBC-based database schema loader for ClickHouse databases.
+ * Reads database schemas, functions, relations, policies, users, roles, and privileges from a ClickHouse database.
+ * Extends JdbcLoaderBase to provide ClickHouse-specific loading functionality.
+ */
 public final class JdbcChLoader extends JdbcLoaderBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(JdbcChLoader.class);
 
+    /**
+     * Creates a new ClickHouse JDBC loader with the specified parameters.
+     *
+     * @param connector        the JDBC connector for establishing database connections
+     * @param settings         loader settings and configuration
+     * @param monitor          progress monitor for tracking loading progress
+     * @param ignoreSchemaList list of schemas to ignore during loading
+     */
     public JdbcChLoader(AbstractJdbcConnector connector, ISettings settings, SubMonitor monitor,
                         IgnoreSchemaList ignoreSchemaList) {
         super(connector, monitor, settings, ignoreSchemaList);
