@@ -15,15 +15,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.PgStatement;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * Simple dependency resolver for database objects.
+ * Provides methods to find create and drop dependencies for database statements
+ * using dependency graphs built from old and new database schemas.
+ */
 public class SimpleDepcyResolver {
 
     private final AbstractDatabase oldDb;
@@ -31,10 +36,23 @@ public class SimpleDepcyResolver {
     private final DepcyGraph oldDepcyGraph;
     private final DepcyGraph newDepcyGraph;
 
+    /**
+     * Creates a dependency resolver with old database only.
+     *
+     * @param oldDatabase   the old database schema
+     * @param isShowColumns whether to show column dependencies
+     */
     public SimpleDepcyResolver(AbstractDatabase oldDatabase, boolean isShowColumns) {
         this(oldDatabase, null, isShowColumns);
     }
 
+    /**
+     * Creates a dependency resolver with both old and new database schemas.
+     *
+     * @param oldDatabase   the old database schema
+     * @param newDatabase   the new database schema, can be null
+     * @param isShowColumns whether to show column dependencies
+     */
     public SimpleDepcyResolver(AbstractDatabase oldDatabase, AbstractDatabase newDatabase, boolean isShowColumns) {
         this.oldDb = oldDatabase;
         this.newDb = newDatabase;
@@ -42,6 +60,14 @@ public class SimpleDepcyResolver {
         this.newDepcyGraph = newDatabase == null ? null : new DepcyGraph(newDatabase, !isShowColumns);
     }
 
+    /**
+     * Gets dependencies required for creating a statement.
+     * Returns forward dependencies from the new database schema.
+     *
+     * @param toCreate the statement to create
+     * @return collection of statements that must be created before the target statement
+     * @throws IllegalStateException if new database is not defined
+     */
     public Collection<PgStatement> getCreateDepcies(PgStatement toCreate) {
         if (newDb == null) {
             throw new IllegalStateException("New database not defined");
@@ -53,6 +79,13 @@ public class SimpleDepcyResolver {
         return dependencies;
     }
 
+    /**
+     * Gets dependencies that must be dropped when dropping a statement.
+     * Returns reverse dependencies from the old database schema.
+     *
+     * @param toDrop the statement to drop
+     * @return collection of statements that depend on the target statement and must be dropped first
+     */
     public Collection<PgStatement> getDropDepcies(PgStatement toDrop) {
         PgStatement statement = toDrop.getTwin(oldDb);
         var dependents = GraphUtils.reverse(oldDepcyGraph, statement);
@@ -60,6 +93,13 @@ public class SimpleDepcyResolver {
         return dependents;
     }
 
+    /**
+     * Gets statements that the given entity is directly connected to.
+     * Returns outgoing edges from the entity in the old database dependency graph.
+     *
+     * @param entity the statement to find connections for
+     * @return set of statements that the entity depends on
+     */
     public Set<PgStatement> getConnectedTo(PgStatement entity) {
         Set<PgStatement> connected = new HashSet<>();
         Graph<PgStatement, DefaultEdge> currentGraph = oldDepcyGraph.getGraph();

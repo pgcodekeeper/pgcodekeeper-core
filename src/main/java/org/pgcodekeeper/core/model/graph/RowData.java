@@ -15,20 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
 import org.pgcodekeeper.core.DatabaseType;
 
+import java.util.*;
+
 /**
- * stores database rows data
+ * Stores database row data for INSERT script generation.
+ * Manages row information including table name, column data, foreign key relationships,
+ * and handles cyclic dependency resolution through null value replacements.
  *
  * @author shamsutdinov_er
- *
  */
 public final class RowData {
 
@@ -51,8 +47,17 @@ public final class RowData {
     private final Collection<String> idCols;
     private final Set<String> replacements = new HashSet<>();
 
+    /**
+     * Creates a new row data instance.
+     *
+     * @param tableName qualified name of the table
+     * @param parent    parent row data for dependency tracking
+     * @param data      map of column names to values
+     * @param fkCols    list of foreign key column names with NOT NULL constraint
+     * @param idCols    collection of identity/primary key column names
+     */
     public RowData(String tableName, RowData parent, Map<String, String> data, List<String> fkCols,
-            Collection<String> idCols) {
+                   Collection<String> idCols) {
         this.tableName = tableName;
         this.parent = parent;
         this.data = data;
@@ -68,14 +73,31 @@ public final class RowData {
         return parent;
     }
 
+    /**
+     * Checks if this row has foreign key constraints with NOT NULL columns.
+     *
+     * @return true if has foreign key constraints, false otherwise
+     */
     public boolean hasFk() {
         return !fkCols.isEmpty();
     }
 
+    /**
+     * Checks if this row contains all specified foreign key columns.
+     *
+     * @param columns collection of column names to check
+     * @return true if all columns are present in foreign key columns
+     */
     public boolean containsAllFkCols(Collection<String> columns) {
-        return fkCols.containsAll(columns);
+        return new HashSet<>(fkCols).containsAll(columns);
     }
 
+    /**
+     * Adds a column for null replacement to resolve cyclic dependencies.
+     * Only adds columns that have non-null values in the original data.
+     *
+     * @param colName the column name to replace with null
+     */
     public void addReplacement(String colName) {
         // add only columns with not null values
         if (data.containsKey(colName)) {
@@ -83,6 +105,13 @@ public final class RowData {
         }
     }
 
+    /**
+     * Generates WHERE clause filter for foreign key relationship.
+     *
+     * @param foreignColumns array of foreign table column names
+     * @param columns        array of local table column names
+     * @return generated filter string, or null if any column value is null
+     */
     public String generateFilter(Object[] foreignColumns, Object[] columns) {
         if (columns.length == 1 && data.get(columns[0]) == null) {
             return null;
@@ -98,16 +127,24 @@ public final class RowData {
         return sb.toString();
     }
 
+    /**
+     * Appends INSERT statement to the script builder.
+     * Handles database-specific syntax for PostgreSQL and Microsoft SQL.
+     *
+     * @param dbType       the database type
+     * @param haveIdentity whether table has identity columns
+     * @param sb           the script builder to append to
+     */
     public void appendInsert(DatabaseType dbType, boolean haveIdentity, StringBuilder sb) {
         switch (dbType) {
-        case PG:
-            appendPgInsert(haveIdentity, sb);
-            break;
-        case MS:
-            appendMsInsert(haveIdentity, sb);
-            break;
-        default:
-            break;
+            case PG:
+                appendPgInsert(haveIdentity, sb);
+                break;
+            case MS:
+                appendMsInsert(haveIdentity, sb);
+                break;
+            default:
+                break;
         }
     }
 
@@ -154,6 +191,13 @@ public final class RowData {
         sb.setLength(sb.length() - 2);
     }
 
+    /**
+     * Appends UPDATE statement to fix cyclic dependency null replacements.
+     * Only generates UPDATE if there are replacement columns.
+     *
+     * @param dbType the database type
+     * @param sb     the script builder to append to
+     */
     public void appendUpdate(DatabaseType dbType, StringBuilder sb) {
         if (replacements.isEmpty()) {
             return;
@@ -201,10 +245,9 @@ public final class RowData {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof RowData)) {
+        if (!(obj instanceof RowData rd)) {
             return false;
         }
-        var rd = (RowData) obj;
         return Objects.equals(tableName, rd.tableName)
                 && Objects.equals(data, rd.data);
     }

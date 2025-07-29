@@ -18,7 +18,8 @@ package org.pgcodekeeper.core.model.exporter;
 import java.io.IOException;
 
 /**
- * Exception while working with directory.
+ * Exception thrown when encountering directory-related errors during export operations.
+ * Extends IOException to provide specific handling for directory manipulation failures.
  *
  * @author Alexander Levsha
  */
@@ -26,17 +27,36 @@ public class DirectoryException extends IOException {
 
     private static final long serialVersionUID = 2339456504336693884L;
 
+    /**
+     * Creates a new DirectoryException with no detail message.
+     */
     public DirectoryException() {
     }
 
+    /**
+     * Creates a new DirectoryException with the specified detail message.
+     * 
+     * @param message the detail message
+     */
     public DirectoryException(String message) {
         super(message);
     }
 
+    /**
+     * Creates a new DirectoryException with the specified cause.
+     * 
+     * @param cause the cause of this exception
+     */
     public DirectoryException(Throwable cause) {
         super(cause);
     }
 
+    /**
+     * Creates a new DirectoryException with the specified detail message and cause.
+     * 
+     * @param message the detail message
+     * @param cause the cause of this exception
+     */
     public DirectoryException(String message, Throwable cause) {
         super(message, cause);
     }

@@ -15,14 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 
+import java.util.Objects;
+
 /**
- * Класс используется как контейнер для объединения дейсвий с объектом БД
- * (CREATE ALTER DROP) Также хранит объект, инициировавший действие
+ * Container class used to combine actions with database objects (CREATE ALTER DROP).
+ * Also stores the object that initiated the action.
  */
 public class ActionContainer {
     private final PgStatement oldObj;
@@ -30,8 +30,16 @@ public class ActionContainer {
     private final ObjectState state;
     private final PgStatement starter;
 
+    /**
+     * Creates an action container with the specified objects and action.
+     *
+     * @param oldObj  the old version of the database object
+     * @param newObj  the new version of the database object
+     * @param action  the action to be performed (CREATE, ALTER, DROP)
+     * @param starter the object that initiated this action
+     */
     public ActionContainer(PgStatement oldObj, PgStatement newObj,
-            ObjectState action, PgStatement starter) {
+                           ObjectState action, PgStatement starter) {
         this.oldObj = oldObj;
         this.newObj = newObj;
         this.state = action;
@@ -76,8 +84,9 @@ public class ActionContainer {
         }
         return false;
     }
+
     @Override
     public String toString() {
-        return state + " " + (oldObj == null? " " : oldObj.getName());
+        return state + " " + (oldObj == null ? " " : oldObj.getName());
     }
 }

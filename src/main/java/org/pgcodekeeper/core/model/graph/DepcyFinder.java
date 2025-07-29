@@ -15,17 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
-
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.pgcodekeeper.core.Utils;
@@ -35,6 +24,14 @@ import org.pgcodekeeper.core.schema.AbstractTable;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.schema.StatementUtils;
 
+import java.util.*;
+import java.util.regex.Pattern;
+
+/**
+ * Database dependency finder for analyzing object dependencies.
+ * Provides methods to find dependencies by patterns or specific statements
+ * with support for filtering by object types and depth control.
+ */
 public class DepcyFinder {
 
     private static final int START_LEVEL = 0;
@@ -47,7 +44,7 @@ public class DepcyFinder {
     private final List<PrintObj> printObjects = new ArrayList<>();
 
     private DepcyFinder(AbstractDatabase db, int depth, boolean isReverse,
-            Collection<DbObjType> filterObjTypes, boolean isInvertFilter) {
+                        Collection<DbObjType> filterObjTypes, boolean isInvertFilter) {
         this.db = db;
         DepcyGraph dg = new DepcyGraph(db);
         this.graph = isReverse ? dg.getGraph() : dg.getReversedGraph();
@@ -60,15 +57,35 @@ public class DepcyFinder {
         this.isInvertFilter = isInvertFilter;
     }
 
-    public static final List<String> byPatterns(int depth, boolean isReverse, Collection<DbObjType> filterObjTypes,
-            boolean isInvertFilter, AbstractDatabase db, Collection<String> names) {
+    /**
+     * Finds dependencies by matching object name patterns.
+     * 
+     * @param depth maximum depth to search
+     * @param isReverse whether to search reverse dependencies
+     * @param filterObjTypes object types to filter by
+     * @param isInvertFilter whether to invert the filter
+     * @param db the database to search in
+     * @param names collection of name patterns to match
+     * @return list of formatted dependency strings
+     */
+    public static List<String> byPatterns(int depth, boolean isReverse, Collection<DbObjType> filterObjTypes,
+                                          boolean isInvertFilter, AbstractDatabase db, Collection<String> names) {
         DepcyFinder depcyFinder = new DepcyFinder(db, depth, isReverse, filterObjTypes, isInvertFilter);
         depcyFinder.searchDeps(names);
         return depcyFinder.getResult();
     }
 
-    public static final List<String> byStatement(int depth, boolean isReverse, Collection<DbObjType> filterObjTypes,
-            PgStatement st) {
+    /**
+     * Finds dependencies for a specific database statement.
+     * 
+     * @param depth maximum depth to search
+     * @param isReverse whether to search reverse dependencies
+     * @param filterObjTypes object types to filter by
+     * @param st the statement to find dependencies for
+     * @return list of formatted dependency strings
+     */
+    public static List<String> byStatement(int depth, boolean isReverse, Collection<DbObjType> filterObjTypes,
+                                           PgStatement st) {
         DepcyFinder depcyFinder = new DepcyFinder(st.getDatabase(), depth, isReverse, filterObjTypes, false);
         depcyFinder.fillTree(st, START_LEVEL, new HashSet<>(), null, 0);
         return depcyFinder.getResult();
@@ -86,8 +103,8 @@ public class DepcyFinder {
             }
 
             db.getDescendants().flatMap(AbstractTable::columnAdder)
-            .filter(st -> find(patterns, st))
-            .forEach(st -> fillTree(st, START_LEVEL, new HashSet<>(), null, 0));
+                    .filter(st -> find(patterns, st))
+                    .forEach(st -> fillTree(st, START_LEVEL, new HashSet<>(), null, 0));
         } else {
             fillTree(db, START_LEVEL, new HashSet<>(), null, 0);
         }
@@ -136,8 +153,8 @@ public class DepcyFinder {
             final int finalHiddenObj = hiddenObj;
 
             graph.outgoingEdgesOf(st).stream().map(graph::getEdgeTarget)
-            .sorted(Comparator.comparing(PgStatement::getStatementType))
-            .forEach(pgSt -> fillTree(pgSt, finalLevel, new HashSet<>(added), finalParentSt, finalHiddenObj));
+                    .sorted(Comparator.comparing(PgStatement::getStatementType))
+                    .forEach(pgSt -> fillTree(pgSt, finalLevel, new HashSet<>(added), finalParentSt, finalHiddenObj));
         }
     }
 

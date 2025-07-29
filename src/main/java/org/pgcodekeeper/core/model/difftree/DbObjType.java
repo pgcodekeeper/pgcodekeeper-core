@@ -16,10 +16,11 @@
 package org.pgcodekeeper.core.model.difftree;
 
 /**
- * Типы объектов в базе <br>
- * ! Внимание, порядок обозначенный здесь используется при построении списка
- * объектов для наката
- * {@link CompareTree}
+ * Enumeration of database object types.
+ * The order defined here is used when building the list of objects for deployment.
+ * Covers all major database object types across PostgreSQL, Microsoft SQL, and ClickHouse.
+ *
+ * @see CompareTree
  */
 public enum DbObjType {
     DATABASE("DATABASE"),
@@ -62,10 +63,21 @@ public enum DbObjType {
         this.typeName = typeName;
     }
 
+    /**
+     * Gets the display name for this database object type.
+     * 
+     * @return the type name as used in SQL statements
+     */
     public String getTypeName() {
         return typeName;
     }
 
+    /**
+     * Checks if this database object type is one of the specified types.
+     *
+     * @param types the types to check against
+     * @return true if this type matches any of the specified types, false otherwise
+     */
     public boolean in(DbObjType... types) {
         for (DbObjType type : types) {
             if (this == type) {

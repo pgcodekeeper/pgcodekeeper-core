@@ -15,44 +15,58 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.exporter;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NotDirectoryException;
-import java.nio.file.Path;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.PgCodekeeperException;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.PgPrivilege;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NotDirectoryException;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
+/**
+ * Model exporter for database object overrides.
+ * Exports only ownership and privileges information for changed objects,
+ * used for partial exports that focus on access control modifications.
+ */
 public final class OverridesModelExporter extends ModelExporter {
 
+    /**
+     * Creates a new overrides model exporter.
+     *
+     * @param outDir         output directory for export
+     * @param newDb          new database schema
+     * @param oldDb          old database schema
+     * @param changedObjects collection of changed tree elements
+     * @param sqlEncoding    SQL file encoding
+     * @param dbType         database type
+     * @param settings       export settings
+     */
     public OverridesModelExporter(Path outDir, AbstractDatabase newDb, AbstractDatabase oldDb,
-            Collection<TreeElement> changedObjects, String sqlEncoding, DatabaseType dbType, ISettings settings) {
+                                  Collection<TreeElement> changedObjects, String sqlEncoding, DatabaseType dbType, ISettings settings) {
         super(outDir, newDb, oldDb, dbType, changedObjects, sqlEncoding, settings);
     }
 
     @Override
-    public void exportFull() throws IOException {
+    public void exportFull() {
         throw new IllegalStateException();
     }
 
+    /**
+     * Exports ownership and privileges for partial object changes.
+     * Only processes objects with BOTH side differences, ignoring structural changes.
+     *
+     * @throws IOException           if export operation fails
+     * @throws PgCodekeeperException if old database is null
+     */
     @Override
     public void exportPartial() throws IOException, PgCodekeeperException {
         if (oldDb == null) {
@@ -70,23 +84,23 @@ public final class OverridesModelExporter extends ModelExporter {
         for (TreeElement el : changeList) {
             if (el.getSide() == DiffSide.BOTH) {
                 switch (el.getType()) {
-                case CONSTRAINT, DATABASE, INDEX, TRIGGER, RULE, POLICY, EXTENSION, EVENT_TRIGGER, CAST, COLUMN,
-                STATISTICS:
-                    break;
-                default:
-                    PgStatement stInNew = el.getPgStatement(newDb);
-                    PgStatement stInOld = el.getPgStatement(oldDb);
-                    list.set(list.indexOf(stInOld), stInNew);
-                    paths.add(getRelativeFilePath(stInNew));
-                    deleteStatementIfExists(stInNew);
+                    case CONSTRAINT, DATABASE, INDEX, TRIGGER, RULE, POLICY, EXTENSION, EVENT_TRIGGER, CAST, COLUMN,
+                         STATISTICS:
+                        break;
+                    default:
+                        PgStatement stInNew = el.getPgStatement(newDb);
+                        PgStatement stInOld = el.getPgStatement(oldDb);
+                        list.set(list.indexOf(stInOld), stInNew);
+                        paths.add(getRelativeFilePath(stInNew));
+                        deleteStatementIfExists(stInNew);
                 }
             }
         }
 
         Map<Path, StringBuilder> dumps = new HashMap<>();
         list.stream()
-        .filter(st -> paths.contains(getRelativeFilePath(st)))
-        .forEach(st -> dumpStatement(st, dumps));
+                .filter(st -> paths.contains(getRelativeFilePath(st)))
+                .forEach(st -> dumpStatement(st, dumps));
 
         for (Entry<Path, StringBuilder> dump : dumps.entrySet()) {
             dumpSQL(dump.getValue(), dump.getKey());
@@ -104,7 +118,7 @@ public final class OverridesModelExporter extends ModelExporter {
         }
 
         if (DbObjType.TABLE == st.getStatementType()) {
-            for (AbstractColumn col : ((AbstractTable)st).getColumns()) {
+            for (AbstractColumn col : ((AbstractTable) st).getColumns()) {
                 PgPrivilege.appendPrivileges(col.getPrivileges(), script);
             }
         }

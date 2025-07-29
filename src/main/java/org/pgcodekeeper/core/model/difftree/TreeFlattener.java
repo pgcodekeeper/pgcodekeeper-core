@@ -15,12 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.difftree;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.List;
-
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.IgnoredObject.AddStatus;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
@@ -28,6 +22,13 @@ import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.*;
+
+/**
+ * Utility class for flattening tree structures with filtering capabilities.
+ * Provides methods to filter tree elements based on selection status, edit state,
+ * ignore lists, and object types while maintaining proper hierarchy traversal.
+ */
 public final class TreeFlattener {
 
     private static final Logger LOG = LoggerFactory.getLogger(TreeFlattener.class);
@@ -44,18 +45,33 @@ public final class TreeFlattener {
     private final Deque<TreeElement> addSubtreeRoots = new ArrayDeque<>();
 
     /**
-     * Sets {@link #onlySelected} setting true.
+     * Configures the flattener to include only selected elements.
+     * 
+     * @return this TreeFlattener for method chaining
      */
     public TreeFlattener onlySelected() {
         onlySelected = true;
         return this;
     }
 
+    /**
+     * Configures whether to include only selected elements.
+     * 
+     * @param onlySelected true to include only selected elements
+     * @return this TreeFlattener for method chaining
+     */
     public TreeFlattener onlySelected(boolean onlySelected) {
         this.onlySelected = onlySelected;
         return this;
     }
 
+    /**
+     * Configures the flattener to include only edited elements.
+     * 
+     * @param dbSource source database for comparison
+     * @param dbTarget target database for comparison
+     * @return this TreeFlattener for method chaining
+     */
     public TreeFlattener onlyEdits(AbstractDatabase dbSource, AbstractDatabase dbTarget) {
         onlyEdits = dbSource != null && dbTarget != null;
         this.dbSource = dbSource;
@@ -63,21 +79,46 @@ public final class TreeFlattener {
         return this;
     }
 
+    /**
+     * Configures the flattener to use an ignore list for filtering.
+     * 
+     * @param ignoreList the ignore list to apply
+     * @return this TreeFlattener for method chaining
+     */
     public TreeFlattener useIgnoreList(IgnoreList ignoreList) {
         return useIgnoreList(ignoreList, (String[]) null);
     }
 
+    /**
+     * Configures the flattener to use an ignore list with database name filtering.
+     * 
+     * @param ignoreList the ignore list to apply
+     * @param dbNames database names for rule matching
+     * @return this TreeFlattener for method chaining
+     */
     public TreeFlattener useIgnoreList(IgnoreList ignoreList, String... dbNames) {
         this.ignoreList = ignoreList;
         this.dbNames = dbNames;
         return this;
     }
 
+    /**
+     * Configures the flattener to include only specific object types.
+     * 
+     * @param onlyTypes collection of object types to include
+     * @return this TreeFlattener for method chaining
+     */
     public TreeFlattener onlyTypes(Collection<DbObjType> onlyTypes) {
         this.onlyTypes = onlyTypes;
         return this;
     }
 
+    /**
+     * Flattens the tree structure applying all configured filters.
+     * 
+     * @param root the root element to start flattening from
+     * @return list of filtered tree elements
+     */
     public List<TreeElement> flatten(TreeElement root) {
         result.clear();
         addSubtreeRoots.clear();
@@ -123,7 +164,7 @@ public final class TreeFlattener {
                 && (!onlySelected || el.isSelected())
                 && (onlyTypes == null || onlyTypes.isEmpty() || onlyTypes.contains(el.getType()))
                 && (!onlyEdits || el.getSide() != DiffSide.BOTH
-                        || !el.getPgStatement(dbSource).compare(el.getPgStatement(dbTarget)))) {
+                || !el.getPgStatement(dbSource).compare(el.getPgStatement(dbTarget)))) {
             result.add(el);
         }
     }

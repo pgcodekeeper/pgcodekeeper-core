@@ -15,25 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
-import org.pgcodekeeper.core.model.difftree.TreeFlattener;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
+import org.pgcodekeeper.core.model.difftree.TreeFlattener;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.PgStatement;
 
+import java.util.*;
+
 /**
- * По выбранным элементам в дереве, находит зависимые элементы в дереве,
- * используя мех-м поиска зависимостей
+ * Finds dependent elements in tree based on user selection using dependency resolution mechanism.
  *
  * @author botov_av
- *
  */
 public final class DepcyTreeExtender {
 
@@ -42,18 +36,25 @@ public final class DepcyTreeExtender {
     private final SimpleDepcyResolver depRes;
     private final TreeElement root;
     /**
-     * Элементы выбранные пользователем для наката на Проект
+     * Elements selected by user for deployment to Project
      */
     private final List<TreeElement> userSelection;
     /**
-     * Зависимые элементы от создаваемых(содержат выбор пользователя)
+     * Dependent elements from created/edited objects (contain user selection)
      */
     private final List<TreeElement> treeDepcyNewEdit = new ArrayList<>();
     /**
-     * Зависимые элементы от удаляемых(содержат выбор пользователя)
+     * Dependent elements from deleted objects (contain user selection)
      */
     private final List<TreeElement> treeDepcyDelete = new ArrayList<>();
 
+    /**
+     * Creates a new dependency tree extender.
+     *
+     * @param dbSource source database schema
+     * @param dbTarget target database schema
+     * @param root     root element of the tree to analyze
+     */
     public DepcyTreeExtender(AbstractDatabase dbSource, AbstractDatabase dbTarget, TreeElement root) {
         this.dbSource = dbSource;
         this.dbTarget = dbTarget;
@@ -63,15 +64,15 @@ public final class DepcyTreeExtender {
     }
 
     /**
-     * При редактированном состоянии или создаваемом объекте тянет зависимости
-     * сверху, для создания,изменения объекта
+     * For edited state or created object, pulls dependencies from above
+     * for creating or modifying the object
      */
     private void fillDepcyOfNewEdit() {
         PgStatement markedToCreate;
         Set<PgStatement> newEditDepcy = new HashSet<>();
         for (TreeElement sel : userSelection) {
             if (sel.getSide() != DiffSide.LEFT
-                    && (markedToCreate = sel.getPgStatement(dbTarget)) != null){
+                    && (markedToCreate = sel.getPgStatement(dbTarget)) != null) {
                 newEditDepcy.addAll(depRes.getCreateDepcies(markedToCreate));
             }
         }
@@ -79,7 +80,7 @@ public final class DepcyTreeExtender {
     }
 
     /**
-     * При удалении объекта тянет зависимости снизу
+     * When deleting an object, pulls dependencies from below
      */
     private void fillDepcyOfDeleted() {
         PgStatement markedToDelete;
@@ -95,9 +96,10 @@ public final class DepcyTreeExtender {
     }
 
     /**
-     * вытаскивает из дерева объект для зависимости
-     * @param treeDepcy
-     * @param pgDecies
+     * Extracts objects from tree for dependencies
+     *
+     * @param treeDepcy list to add dependent tree elements to
+     * @param pgDecies  collection of database statement dependencies
      */
     private void fillTreeDepcies(List<TreeElement> treeDepcy, Collection<PgStatement> pgDecies) {
         for (PgStatement depcy : pgDecies) {
@@ -113,9 +115,12 @@ public final class DepcyTreeExtender {
             }
         }
     }
+
     /**
-     * Возвращает все зависимые элементы для показа в нижней части таблицы
-     * @return зависимые элементы от выбора
+     * Returns all dependent elements based on user selection.
+     * Analyzes both create/edit and delete dependencies.
+     *
+     * @return set of dependent elements excluding user-selected objects
      */
     public Set<TreeElement> getDepcies() {
         Set<TreeElement> res = new HashSet<>();
@@ -123,8 +128,8 @@ public final class DepcyTreeExtender {
         fillDepcyOfDeleted();
         res.addAll(treeDepcyNewEdit);
         res.addAll(treeDepcyDelete);
-        // удалить все объекты которые выбрал пользователь
-        res.removeAll(userSelection);
+        // remove all objects selected by user
+        userSelection.forEach(res::remove);
         return res;
     }
 }
