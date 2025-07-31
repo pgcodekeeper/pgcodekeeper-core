@@ -88,7 +88,7 @@ public class IgnoreList implements IIgnoreList {
     /**
      * Adds all ignore rules from the collection to this list.
      * Each rule is processed through the standard add logic to handle merging.
-     * 
+     *
      * @param collection collection of ignore rules to add
      */
     public void addAll(Collection<IgnoredObject> collection) {
@@ -100,10 +100,10 @@ public class IgnoreList implements IIgnoreList {
     /**
      * Determines the add status for a tree element based on ignore rules.
      * Evaluates all matching rules and applies precedence logic.
-     * 
-     * @param el the tree element to evaluate
+     *
+     * @param el           the tree element to evaluate
      * @param inAddSubtree whether currently in an add subtree context
-     * @param dbNames optional database names for rule matching
+     * @param dbNames      optional database names for rule matching
      * @return the final add status for the element
      */
     public AddStatus getNameStatus(TreeElement el, boolean inAddSubtree, String... dbNames) {
@@ -134,7 +134,7 @@ public class IgnoreList implements IIgnoreList {
 
     /**
      * Generates string representation of the ignore list configuration.
-     * 
+     *
      * @return formatted string showing all rules and default behavior
      */
     public String getListCode() {

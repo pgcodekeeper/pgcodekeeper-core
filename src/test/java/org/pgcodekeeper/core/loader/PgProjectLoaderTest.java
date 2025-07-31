@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import org.eclipse.core.runtime.SubMonitor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.pgcodekeeper.core.Consts;
@@ -27,6 +26,7 @@ import org.pgcodekeeper.core.model.exporter.ModelExporter;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.utils.NullMonitor;
 import org.pgcodekeeper.core.utils.TempDir;
 
 import java.io.IOException;
@@ -53,7 +53,7 @@ class PgProjectLoaderTest {
             IgnoreParser ignoreParser = new IgnoreParser(ignoreSchemaList);
             ignoreParser.parse(listFile);
 
-            AbstractDatabase loader = new ProjectLoader(dir.toString(), settings, SubMonitor.convert(null), null,
+            AbstractDatabase loader = new ProjectLoader(dir.toString(), settings, new NullMonitor(), null,
                     ignoreSchemaList).load();
 
             for (AbstractSchema dbSchema : loader.getSchemas()) {

@@ -16,7 +16,6 @@
 package org.pgcodekeeper.core.loader.jdbc;
 
 import org.antlr.v4.runtime.Parser;
-import org.eclipse.core.runtime.SubMonitor;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.PgDiffUtils;
@@ -40,6 +39,7 @@ import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.pg.AbstractPgFunction;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.IMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +77,7 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
      */
     private static final int FIRST_NORMAL_OBJECT_ID = 16384;
 
-    private final SubMonitor monitor;
+    private final IMonitor monitor;
     private final ISettings settings;
     private final IgnoreSchemaList ignorelistSchema;
     protected final Map<Object, AbstractSchema> schemaIds = new HashMap<>();
@@ -96,7 +96,7 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
     protected Connection connection;
     protected Statement statement;
 
-    protected JdbcLoaderBase(AbstractJdbcConnector connector, SubMonitor monitor, ISettings settings,
+    protected JdbcLoaderBase(AbstractJdbcConnector connector, IMonitor monitor, ISettings settings,
                              IgnoreSchemaList ignoreListSchema) {
         this.connector = connector;
         this.monitor = monitor;
@@ -129,7 +129,7 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
         return statement;
     }
 
-    public SubMonitor getMonitor() {
+    public IMonitor getMonitor() {
         return monitor;
     }
 

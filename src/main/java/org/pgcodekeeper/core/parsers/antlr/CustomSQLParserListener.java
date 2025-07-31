@@ -17,7 +17,6 @@ package org.pgcodekeeper.core.parsers.antlr;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.SqlContextProcessor;
@@ -26,6 +25,7 @@ import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.statements.pg.*;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.IMonitor;
 
 import java.util.List;
 import java.util.Locale;
@@ -36,7 +36,7 @@ import java.util.Queue;
  * Processes CREATE, ALTER, DROP statements and builds database schema model.
  */
 public final class CustomSQLParserListener extends CustomParserListener<PgDatabase>
-implements SqlContextProcessor {
+        implements SqlContextProcessor {
 
     private String tablespace;
     private String accessMethod;
@@ -55,7 +55,7 @@ implements SqlContextProcessor {
      * @param settings   application settings
      */
     public CustomSQLParserListener(PgDatabase database, String filename, ParserListenerMode mode,
-            List<Object> errors, Queue<AntlrTask<?>> antlrTasks, IProgressMonitor monitor, ISettings settings) {
+                                   List<Object> errors, Queue<AntlrTask<?>> antlrTasks, IMonitor monitor, ISettings settings) {
         super(database, filename, mode, errors, monitor, settings);
         this.antlrTasks = antlrTasks;
     }
@@ -272,32 +272,32 @@ implements SqlContextProcessor {
         String confValue = vex.get(0).getText();
 
         switch (confParam.toLowerCase(Locale.ROOT)) {
-        case "search_path":
-            if (ParserListenerMode.NORMAL == mode
-            && (vex.size() != 1 || !Consts.PG_CATALOG.equals(confValue))) {
-                throw new UnresolvedReferenceException("Unsupported search_path", ctx.start);
-            }
-            break;
-        case "default_with_oids":
-            oids = confValue;
-            if ("false".equals(oids)) {
-                oids = null;
-            }
-            break;
-        case "default_tablespace":
-            tablespace = confValue;
-            if (tablespace.isEmpty()
-                    // special case for pg_dump's unset default_tablespace
-                    // remove after good unquoting mechanism would be introduced
-                    || "''".equals(tablespace)) {
-                tablespace = null;
-            }
-            break;
-        case "default_table_access_method":
-            accessMethod = confValue;
-            break;
-        default:
-            break;
+            case "search_path":
+                if (ParserListenerMode.NORMAL == mode
+                        && (vex.size() != 1 || !Consts.PG_CATALOG.equals(confValue))) {
+                    throw new UnresolvedReferenceException("Unsupported search_path", ctx.start);
+                }
+                break;
+            case "default_with_oids":
+                oids = confValue;
+                if ("false".equals(oids)) {
+                    oids = null;
+                }
+                break;
+            case "default_tablespace":
+                tablespace = confValue;
+                if (tablespace.isEmpty()
+                        // special case for pg_dump's unset default_tablespace
+                        // remove after good unquoting mechanism would be introduced
+                        || "''".equals(tablespace)) {
+                    tablespace = null;
+                }
+                break;
+            case "default_table_access_method":
+                accessMethod = confValue;
+                break;
+            default:
+                break;
         }
     }
 

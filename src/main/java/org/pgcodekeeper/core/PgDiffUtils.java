@@ -19,9 +19,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.pgcodekeeper.core.sql.Keyword;
 import org.pgcodekeeper.core.sql.Keyword.KeywordCategory;
+import org.pgcodekeeper.core.utils.IMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,7 +132,6 @@ public final class PgDiffUtils {
      * quoted.
      *
      * @param name name
-     *
      * @return quoted string if needed, otherwise not quoted string
      */
     public static String getQuotedName(final String name) {
@@ -163,6 +162,7 @@ public final class PgDiffUtils {
      * Quotes string using dollar-quoting ($$) syntax.
      * <p>
      * Function equivalent to appendStringLiteralDQ in pgdump's dumputils.c
+     *
      * @param contents the string to quote
      * @return dollar-quoted string
      */
@@ -222,7 +222,7 @@ public final class PgDiffUtils {
      * @param instance the hash algorithm to use
      * @return hexadecimal hash string
      */
-    public static String hash (String s, String instance) {
+    public static String hash(String s, String instance) {
         try {
             byte[] hash = getHash(s, instance);
             StringBuilder sb = new StringBuilder(2 * hash.length);
@@ -233,12 +233,13 @@ public final class PgDiffUtils {
             return sb.toString();
         } catch (NoSuchAlgorithmException e) {
             LOG.error(e.getLocalizedMessage(), e);
-            return instance +"_ERROR_" + RANDOM.nextInt();
+            return instance + "_ERROR_" + RANDOM.nextInt();
         }
     }
 
     /**
      * Returns MD5 hash of string as hexadecimal.
+     *
      * @param s the string to hash
      * @return lowercase hex MD5 for UTF-8 representation of given string
      */
@@ -248,6 +249,7 @@ public final class PgDiffUtils {
 
     /**
      * Returns SHA-256 hash of string as hexadecimal.
+     *
      * @param s the string to hash
      * @return lowercase hex SHA-256 for UTF-8 representation of given string
      */
@@ -297,7 +299,7 @@ public final class PgDiffUtils {
      * @param monitor the progress monitor to check
      * @throws InterruptedException if monitor is cancelled
      */
-    public static void checkCancelled(IProgressMonitor monitor)
+    public static void checkCancelled(IMonitor monitor)
             throws InterruptedException {
         if (monitor != null && monitor.isCanceled()) {
             throw new InterruptedException();
@@ -311,7 +313,7 @@ public final class PgDiffUtils {
      * <code>List.containsAll()</code> O(N^2) call here. In general, duplicate elimination is an undesired side-effect
      * of comparison using {@link Set}s, so this solution is overall better and only *slightly* slower.<br>
      * <br>
-     *
+     * <p>
      * Performance: best case O(1), worst case O(N) + new {@link HashMap} (in case N1 == N2), assuming size() takes
      * constant time.
      *
@@ -331,7 +333,7 @@ public final class PgDiffUtils {
         // mimic HashSet(Collection) constructor
         final float loadFactor = 0.75f;
         final Map<Object, Integer> map =
-                new HashMap<>(Math.max((int) (s1/loadFactor) + 1, 16), loadFactor);
+                new HashMap<>(Math.max((int) (s1 / loadFactor) + 1, 16), loadFactor);
         for (Object el1 : c1) {
             map.compute(el1, (k, i) -> i == null ? 1 : (i + 1));
         }
@@ -414,17 +416,17 @@ public final class PgDiffUtils {
         String body = sbSQL.toString().replace("\n", "\n\t");
 
         sbResult
-        .append("DO $$")
-        .append("\nBEGIN")
-        .append("\n\t").append(body)
-        .append("\nEXCEPTION WHEN OTHERS THEN")
-        .append("\n\tIF (SQLSTATE = ").append(expectedErrCode).append(") THEN")
-        .append("\n\t\tRAISE NOTICE '%, skip', SQLERRM;")
-        .append("\n\tELSE")
-        .append("\n\t\tRAISE;")
-        .append("\n\tEND IF;")
-        .append("\nEND; $$")
-        .append("\nLANGUAGE 'plpgsql'");
+                .append("DO $$")
+                .append("\nBEGIN")
+                .append("\n\t").append(body)
+                .append("\nEXCEPTION WHEN OTHERS THEN")
+                .append("\n\tIF (SQLSTATE = ").append(expectedErrCode).append(") THEN")
+                .append("\n\t\tRAISE NOTICE '%, skip', SQLERRM;")
+                .append("\n\tELSE")
+                .append("\n\t\tRAISE;")
+                .append("\n\tEND IF;")
+                .append("\nEND; $$")
+                .append("\nLANGUAGE 'plpgsql'");
     }
 
     private PgDiffUtils() {

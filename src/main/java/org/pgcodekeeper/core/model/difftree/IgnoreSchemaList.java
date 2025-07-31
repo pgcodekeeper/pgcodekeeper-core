@@ -67,7 +67,7 @@ public class IgnoreSchemaList implements IIgnoreList {
 
     /**
      * Checks if a schema should be shown based on configured rules.
-     * 
+     *
      * @param schema the schema name to check
      * @return true if schema should be shown, false if it should be hidden
      */
@@ -89,7 +89,7 @@ public class IgnoreSchemaList implements IIgnoreList {
 
     /**
      * Generates string representation of the ignore list configuration.
-     * 
+     *
      * @return formatted string showing all rules and default behavior
      */
     public String getListCode() {

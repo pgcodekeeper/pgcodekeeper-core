@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.pgcodekeeper.core.DaemonThreadFactory;
 import org.pgcodekeeper.core.IProgressReporter;
 import org.pgcodekeeper.core.loader.callables.QueriesBatchCallable;
@@ -24,6 +22,8 @@ import org.pgcodekeeper.core.loader.callables.QueryCallable;
 import org.pgcodekeeper.core.loader.callables.ResultSetCallable;
 import org.pgcodekeeper.core.loader.callables.StatementCallable;
 import org.pgcodekeeper.core.schema.PgObjLocation;
+import org.pgcodekeeper.core.utils.IMonitor;
+import org.pgcodekeeper.core.utils.NullMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,14 +49,14 @@ public class JdbcRunner {
 
     private static final String MESSAGE = "Script execution interrupted by user";
 
-    private final IProgressMonitor monitor;
+    private final IMonitor monitor;
 
 
     /**
      * Creates a new JDBC runner with a null progress monitor.
      */
     public JdbcRunner() {
-        this.monitor = new NullProgressMonitor();
+        this(new NullMonitor());
     }
 
     /**
@@ -64,7 +64,7 @@ public class JdbcRunner {
      *
      * @param monitor the progress monitor for tracking execution and handling cancellation
      */
-    public JdbcRunner(IProgressMonitor monitor) {
+    public JdbcRunner(IMonitor monitor) {
         this.monitor = monitor;
     }
 

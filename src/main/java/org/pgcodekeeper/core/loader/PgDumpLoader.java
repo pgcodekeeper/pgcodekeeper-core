@@ -19,8 +19,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.localizations.Messages;
@@ -37,7 +35,9 @@ import org.pgcodekeeper.core.schema.ms.MsSchema;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgSchema;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.IMonitor;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
+import org.pgcodekeeper.core.utils.NullMonitor;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -58,7 +58,7 @@ public class PgDumpLoader extends DatabaseLoader {
     private final String inputObjectName;
     private final ISettings settings;
 
-    private final IProgressMonitor monitor;
+    private final IMonitor monitor;
     private final int monitoringLevel;
 
     private ParserListenerMode mode = ParserListenerMode.NORMAL;
@@ -92,7 +92,7 @@ public class PgDumpLoader extends DatabaseLoader {
      * @param monitoringLevel level of progress monitoring detail
      */
     public PgDumpLoader(InputStreamProvider input, String inputObjectName,
-                        ISettings settings, IProgressMonitor monitor, int monitoringLevel) {
+                        ISettings settings, IMonitor monitor, int monitoringLevel) {
         this.input = input;
         this.inputObjectName = inputObjectName;
         this.settings = settings;
@@ -109,7 +109,7 @@ public class PgDumpLoader extends DatabaseLoader {
      * @param monitor         progress monitor for tracking parsing progress
      */
     public PgDumpLoader(InputStreamProvider input, String inputObjectName,
-                        ISettings settings, IProgressMonitor monitor) {
+                        ISettings settings, IMonitor monitor) {
         this(input, inputObjectName, settings, monitor, 1);
     }
 
@@ -121,13 +121,13 @@ public class PgDumpLoader extends DatabaseLoader {
      * @param settings        loader settings and configuration
      */
     public PgDumpLoader(InputStreamProvider input, String inputObjectName, ISettings settings) {
-        this(input, inputObjectName, settings, new NullProgressMonitor(), 0);
+        this(input, inputObjectName, settings, new NullMonitor(), 0);
     }
 
     /**
      * This constructor creates {@link InputStreamProvider} using inputFile parameter.
      */
-    public PgDumpLoader(Path inputFile, ISettings settings, IProgressMonitor monitor, int monitoringLevel) {
+    public PgDumpLoader(Path inputFile, ISettings settings, IMonitor monitor, int monitoringLevel) {
         this(() -> Files.newInputStream(inputFile), inputFile.toString(), settings, monitor, monitoringLevel);
     }
 
@@ -135,10 +135,10 @@ public class PgDumpLoader extends DatabaseLoader {
      * Creates a new dump loader for a file path with default monitoring level of 1.
      *
      * @param inputFile the path to the SQL dump file
-     * @param settings loader settings and configuration
-     * @param monitor progress monitor for tracking parsing progress
+     * @param settings  loader settings and configuration
+     * @param monitor   progress monitor for tracking parsing progress
      */
-    public PgDumpLoader(Path inputFile, ISettings settings, IProgressMonitor monitor) {
+    public PgDumpLoader(Path inputFile, ISettings settings, IMonitor monitor) {
         this(inputFile, settings, monitor, 1);
     }
 
@@ -146,10 +146,10 @@ public class PgDumpLoader extends DatabaseLoader {
      * Creates a new dump loader for a file path with null progress monitor and no monitoring.
      *
      * @param inputFile the path to the SQL dump file
-     * @param settings loader settings and configuration
+     * @param settings  loader settings and configuration
      */
     public PgDumpLoader(Path inputFile, ISettings settings) {
-        this(inputFile, settings, new NullProgressMonitor(), 0);
+        this(inputFile, settings, new NullMonitor(), 0);
     }
 
     @Override
@@ -164,7 +164,7 @@ public class PgDumpLoader extends DatabaseLoader {
      * Loads SQL dump asynchronously into the provided database with default schema setup.
      * Creates and adds a default schema based on database type, then delegates to loadDatabase.
      *
-     * @param d the target database to load into
+     * @param d          the target database to load into
      * @param antlrTasks queue for managing ANTLR parsing tasks
      * @return the loaded database with parsed SQL objects
      * @throws InterruptedException if parsing is interrupted
@@ -192,7 +192,7 @@ public class PgDumpLoader extends DatabaseLoader {
      * Selects appropriate parser listener based on database type and override configuration.
      * Supports PostgreSQL, Microsoft SQL Server, and ClickHouse databases.
      *
-     * @param intoDb the target database to load parsed objects into
+     * @param intoDb     the target database to load parsed objects into
      * @param antlrTasks queue for managing ANTLR parsing tasks
      * @return the database with loaded SQL objects
      * @throws InterruptedException if parsing is interrupted

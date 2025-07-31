@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.SqlContextProcessor;
 import org.pgcodekeeper.core.parsers.antlr.AntlrParser;
@@ -24,6 +23,7 @@ import org.pgcodekeeper.core.parsers.antlr.verification.VerificationProperties;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
+import org.pgcodekeeper.core.utils.NullMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,7 +140,7 @@ public final class TokenLoader extends DatabaseLoader {
 
         InputStreamProvider input = () -> Files.newInputStream(inputFile);
         AntlrParser.parseSqlStream(input, settings.getInCharsetName(), inputFile.toString(), errors,
-                new NullProgressMonitor(), 0, listener, antlrTasks);
+                new NullMonitor(), 0, listener, antlrTasks);
         finishLoaders();
     }
 }

@@ -17,8 +17,6 @@ package org.pgcodekeeper.core.loader.callables;
 
 import com.microsoft.sqlserver.jdbc.SQLServerError;
 import com.microsoft.sqlserver.jdbc.SQLServerException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubMonitor;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.IProgressReporter;
@@ -26,6 +24,7 @@ import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.jdbc.JdbcType;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.schema.PgObjLocation;
+import org.pgcodekeeper.core.utils.IMonitor;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
 
@@ -41,7 +40,7 @@ import java.util.List;
 public class QueriesBatchCallable extends StatementCallable<String> {
 
     private final List<PgObjLocation> batches;
-    private final IProgressMonitor monitor;
+    private final IMonitor monitor;
     private final Connection connection;
     private final IProgressReporter reporter;
     private final DatabaseType dbType;
@@ -59,7 +58,7 @@ public class QueriesBatchCallable extends StatementCallable<String> {
      * @param dbType     database type to determine execution strategy
      */
     public QueriesBatchCallable(Statement st, List<PgObjLocation> batches,
-                                IProgressMonitor monitor, IProgressReporter reporter,
+                                IMonitor monitor, IProgressReporter reporter,
                                 Connection connection, DatabaseType dbType) {
         super(st, null);
         this.batches = batches;
@@ -71,7 +70,7 @@ public class QueriesBatchCallable extends StatementCallable<String> {
 
     @Override
     public String call() throws Exception {
-        SubMonitor subMonitor = SubMonitor.convert(monitor);
+        IMonitor subMonitor = monitor.createSubMonitor();
         PgObjLocation currQuery = null;
         String[] finalModifiedQuery = new String[1];
 

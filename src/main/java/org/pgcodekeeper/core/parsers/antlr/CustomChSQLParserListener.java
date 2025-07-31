@@ -17,13 +17,13 @@ package org.pgcodekeeper.core.parsers.antlr;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.ChSqlContextProcessor;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.*;
 import org.pgcodekeeper.core.parsers.antlr.statements.ch.*;
 import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.IMonitor;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ public final class CustomChSQLParserListener extends CustomParserListener<ChData
      * @param settings application settings
      */
     public CustomChSQLParserListener(ChDatabase database, String filename, ParserListenerMode mode,
-            List<Object> errors, IProgressMonitor monitor, ISettings settings) {
+                                     List<Object> errors, IMonitor monitor, ISettings settings) {
         super(database, filename, mode, errors, monitor, settings);
     }
 

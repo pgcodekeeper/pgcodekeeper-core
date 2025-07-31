@@ -16,7 +16,6 @@
 package org.pgcodekeeper.core.parsers.antlr;
 
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.ChSqlContextProcessor;
 import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Ch_fileContext;
@@ -27,6 +26,7 @@ import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.schema.StatementOverride;
 import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.IMonitor;
 
 import java.util.List;
 import java.util.Map;
@@ -51,7 +51,7 @@ public final class ChSQLOverridesListener extends CustomParserListener<ChDatabas
      * @param settings  application settings
      */
     public ChSQLOverridesListener(ChDatabase database, String filename, ParserListenerMode mode, List<Object> errors,
-            IProgressMonitor monitor, Map<PgStatement, StatementOverride> overrides, ISettings settings) {
+                                  IMonitor monitor, Map<PgStatement, StatementOverride> overrides, ISettings settings) {
         super(database, filename, mode, errors, monitor, settings);
         this.overrides = overrides;
     }

@@ -236,6 +236,8 @@ public final class Messages extends NLS {
 
     public static String XmlStore_write_error;
 
+    public static String DatabaseFactory_errors_found_while_parsing;
+
     // SONAR-ON
 
     static {

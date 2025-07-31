@@ -15,14 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.meta;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubMonitor;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.loader.JdbcSystemLoader;
 import org.pgcodekeeper.core.loader.UrlJdbcConnector;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
 import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.utils.NullMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,7 +134,7 @@ public final class MetaStorage implements Serializable {
     public static void serialize(String path, String url) throws IOException, InterruptedException {
         UrlJdbcConnector jdbcConnector = new UrlJdbcConnector(url);
         Serializable storage = new JdbcSystemLoader(jdbcConnector, Consts.UTC,
-                SubMonitor.convert(new NullProgressMonitor())).getStorageFromJdbc();
+                new NullMonitor()).getStorageFromJdbc();
         Utils.serialize(path, storage);
     }
 }
