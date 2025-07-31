@@ -17,7 +17,6 @@ package org.pgcodekeeper.core.parsers.antlr;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.TSqlContextProcessor;
@@ -26,6 +25,7 @@ import org.pgcodekeeper.core.parsers.antlr.statements.ms.*;
 import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.IMonitor;
 
 import java.util.List;
 import java.util.Locale;
@@ -35,7 +35,7 @@ import java.util.Locale;
  * Processes CREATE, ALTER, DROP statements and builds database schema model.
  */
 public final class CustomTSQLParserListener extends CustomParserListener<MsDatabase>
-implements TSqlContextProcessor {
+        implements TSqlContextProcessor {
 
     private boolean ansiNulls = true;
     private boolean quotedIdentifier = true;
@@ -51,7 +51,7 @@ implements TSqlContextProcessor {
      * @param settings application settings
      */
     public CustomTSQLParserListener(MsDatabase database, String filename, ParserListenerMode mode, List<Object> errors,
-            IProgressMonitor monitor, ISettings settings) {
+                                    IMonitor monitor, ISettings settings) {
         super(database, filename, mode, errors, monitor, settings);
     }
 

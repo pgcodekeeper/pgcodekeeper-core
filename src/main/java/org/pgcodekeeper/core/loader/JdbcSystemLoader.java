@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import org.eclipse.core.runtime.SubMonitor;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
@@ -31,6 +30,7 @@ import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.Argument;
 import org.pgcodekeeper.core.schema.ICast.CastContext;
 import org.pgcodekeeper.core.schema.meta.*;
+import org.pgcodekeeper.core.utils.IMonitor;
 import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +64,7 @@ public final class JdbcSystemLoader extends JdbcLoaderBase {
      * @param timezone  the timezone to set for the database connection
      * @param monitor   progress monitor for tracking loading progress
      */
-    public JdbcSystemLoader(AbstractJdbcConnector connector, String timezone, SubMonitor monitor) {
+    public JdbcSystemLoader(AbstractJdbcConnector connector, String timezone, IMonitor monitor) {
         super(connector, monitor, null, null);
         this.timezone = timezone;
     }

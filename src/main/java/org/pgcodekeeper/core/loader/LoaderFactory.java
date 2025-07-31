@@ -15,13 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import org.eclipse.core.runtime.SubMonitor;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.loader.ch.JdbcChLoader;
 import org.pgcodekeeper.core.loader.ms.JdbcMsLoader;
 import org.pgcodekeeper.core.loader.pg.JdbcPgLoader;
 import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.IMonitor;
+import org.pgcodekeeper.core.utils.NullMonitor;
 
 /**
  * Factory class for creating database loaders based on database type.
@@ -38,8 +39,22 @@ public final class LoaderFactory {
      */
     public static DatabaseLoader createJdbcLoader(ISettings settings, String url,
                                                   IgnoreSchemaList ignoreSchemaList) {
+        return createJdbcLoader(settings, url, ignoreSchemaList, new NullMonitor());
+    }
+
+    /**
+     * Creates a JDBC database loader using URL-based connection and monitoring.
+     *
+     * @param settings         loader settings and configuration
+     * @param url              the JDBC URL for database connection
+     * @param ignoreSchemaList list of schemas to ignore during loading
+     * @param monitor          progress monitor for tracking the operation
+     * @return database loader for the specified database type
+     */
+    public static DatabaseLoader createJdbcLoader(ISettings settings, String url,
+                                                  IgnoreSchemaList ignoreSchemaList, IMonitor monitor) {
         String timezone = settings.getTimeZone() == null ? Consts.UTC : settings.getTimeZone();
-        return createJdbcLoader(settings, timezone, new UrlJdbcConnector(url), SubMonitor.convert(null),
+        return createJdbcLoader(settings, timezone, new UrlJdbcConnector(url), monitor,
                 ignoreSchemaList);
     }
 
@@ -48,17 +63,17 @@ public final class LoaderFactory {
      *
      * @param settings         settings file
      * @param timezone         timezone setting for PostgreSQL connections
-     * @param connnector       the JDBC connector for database connection
+     * @param connector        the JDBC connector for database connection
      * @param monitor          progress monitor for tracking loading progress
      * @param ignoreSchemaList list of schemas to ignore during loading
      * @return database loader for the specified database type
      */
     public static DatabaseLoader createJdbcLoader(ISettings settings, String timezone,
-                                                  AbstractJdbcConnector connnector, SubMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
+                                                  AbstractJdbcConnector connector, IMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
         return switch (settings.getDbType()) {
-            case MS -> new JdbcMsLoader(connnector, settings, monitor, ignoreSchemaList);
-            case PG -> new JdbcPgLoader(connnector, timezone, settings, monitor, ignoreSchemaList);
-            case CH -> new JdbcChLoader(connnector, settings, monitor, ignoreSchemaList);
+            case MS -> new JdbcMsLoader(connector, settings, monitor, ignoreSchemaList);
+            case PG -> new JdbcPgLoader(connector, timezone, settings, monitor, ignoreSchemaList);
+            case CH -> new JdbcChLoader(connector, settings, monitor, ignoreSchemaList);
         };
     }
 

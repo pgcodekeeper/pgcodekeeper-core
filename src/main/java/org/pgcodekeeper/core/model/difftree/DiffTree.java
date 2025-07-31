@@ -15,14 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.difftree;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubMonitor;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
 import org.pgcodekeeper.core.schema.AbstractColumn;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.AbstractTable;
 import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.utils.IMonitor;
 
 import java.util.*;
 
@@ -47,15 +46,15 @@ public final class DiffTree {
     /**
      * Creates a diff tree comparing two database schemas with progress monitoring.
      *
-     * @param left     the left (old) database schema
-     * @param right    the right (new) database schema
-     * @param sMonitor the progress monitor for tracking operation progress
+     * @param left    the left (old) database schema
+     * @param right   the right (new) database schema
+     * @param monitor the progress monitor for tracking operation progress
      * @return the root TreeElement representing the diff tree
      * @throws InterruptedException if the operation is interrupted
      */
-    public static TreeElement create(AbstractDatabase left, AbstractDatabase right, SubMonitor sMonitor)
+    public static TreeElement create(AbstractDatabase left, AbstractDatabase right, IMonitor monitor)
             throws InterruptedException {
-        return new DiffTree(sMonitor).createTree(left, right);
+        return new DiffTree(monitor).createTree(left, right);
     }
 
     /**
@@ -136,9 +135,9 @@ public final class DiffTree {
         return tables;
     }
 
-    private final IProgressMonitor monitor;
+    private final IMonitor monitor;
 
-    private DiffTree(IProgressMonitor monitor) {
+    private DiffTree(IMonitor monitor) {
         this.monitor = monitor;
     }
 

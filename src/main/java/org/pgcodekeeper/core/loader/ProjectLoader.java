@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.PgDiffUtils;
@@ -27,6 +26,7 @@ import org.pgcodekeeper.core.parsers.antlr.AntlrTaskManager;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.ms.MsSchema;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.IMonitor;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -47,7 +47,7 @@ public class ProjectLoader extends DatabaseLoader {
 
     protected ISettings settings;
     private final String dirPath;
-    protected final IProgressMonitor monitor;
+    protected final IMonitor monitor;
     private final IgnoreSchemaList ignoreSchemaList;
     protected final Map<PgStatement, StatementOverride> overrides = new LinkedHashMap<>();
 
@@ -84,7 +84,7 @@ public class ProjectLoader extends DatabaseLoader {
      * @param ignoreSchemaList list of schemas to ignore during loading
      */
     public ProjectLoader(String dirPath, ISettings settings,
-                         IProgressMonitor monitor, List<Object> errors, IgnoreSchemaList ignoreSchemaList) {
+                         IMonitor monitor, List<Object> errors, IgnoreSchemaList ignoreSchemaList) {
         super(errors);
         this.dirPath = dirPath;
         this.settings = settings;

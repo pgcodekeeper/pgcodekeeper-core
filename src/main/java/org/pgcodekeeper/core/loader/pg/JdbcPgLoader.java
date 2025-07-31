@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.pg;
 
-import org.eclipse.core.runtime.SubMonitor;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.AbstractJdbcConnector;
 import org.pgcodekeeper.core.loader.JdbcQueries;
@@ -25,6 +24,7 @@ import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.IMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +55,7 @@ public final class JdbcPgLoader extends JdbcLoaderBase {
      * @param ignoreSchemaList list of schemas to ignore during loading
      */
     public JdbcPgLoader(AbstractJdbcConnector connector, String timezone, ISettings settings,
-                        SubMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
+                        IMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
         super(connector, monitor, settings, ignoreSchemaList);
         this.timezone = timezone;
     }

@@ -16,8 +16,6 @@
 package org.pgcodekeeper.core.parsers.antlr;
 
 import org.antlr.v4.runtime.*;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.ChSqlContextProcessor;
@@ -26,7 +24,9 @@ import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.TSqlContextProc
 import org.pgcodekeeper.core.parsers.antlr.exception.MonitorCancelledRuntimeException;
 import org.pgcodekeeper.core.parsers.antlr.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.parsers.antlr.generated.*;
+import org.pgcodekeeper.core.utils.IMonitor;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
+import org.pgcodekeeper.core.utils.NullMonitor;
 import org.pgcodekeeper.core.utils.Pair;
 
 import java.io.IOException;
@@ -231,14 +231,14 @@ public final class AntlrParser {
      * @param antlrTasks       queue for parser tasks
      */
     public static void parseSqlStream(InputStreamProvider inputStream, String charsetName,
-                                      String parsedObjectName, List<Object> errors, IProgressMonitor mon, int monitoringLevel,
+                                      String parsedObjectName, List<Object> errors, IMonitor mon, int monitoringLevel,
                                       SqlContextProcessor listener, Queue<AntlrTask<?>> antlrTasks) {
         AntlrTaskManager.submit(antlrTasks, () -> {
             PgDiffUtils.checkCancelled(mon);
             try (InputStream stream = inputStream.getStream()) {
                 var parser = createSQLParser(stream, charsetName, parsedObjectName, errors);
                 parser.addParseListener(new CustomParseTreeListener(
-                        monitoringLevel, mon == null ? new NullProgressMonitor() : mon));
+                        monitoringLevel, mon == null ? new NullMonitor() : mon));
                 return new Pair<>(parser.sql(), (CommonTokenStream) parser.getTokenStream());
             } catch (MonitorCancelledRuntimeException mcre) {
                 throw new InterruptedException();
@@ -265,14 +265,14 @@ public final class AntlrParser {
      * @param antlrTasks       queue for parser tasks
      */
     public static void parseTSqlStream(InputStreamProvider inputStream, String charsetName,
-                                       String parsedObjectName, List<Object> errors, IProgressMonitor mon, int monitoringLevel,
+                                       String parsedObjectName, List<Object> errors, IMonitor mon, int monitoringLevel,
                                        TSqlContextProcessor listener, Queue<AntlrTask<?>> antlrTasks) {
         AntlrTaskManager.submit(antlrTasks, () -> {
             PgDiffUtils.checkCancelled(mon);
             try (InputStream stream = inputStream.getStream()) {
                 var parser = createTSQLParser(stream, charsetName, parsedObjectName, errors);
                 parser.addParseListener(new CustomParseTreeListener(
-                        monitoringLevel, mon == null ? new NullProgressMonitor() : mon));
+                        monitoringLevel, mon == null ? new NullMonitor() : mon));
                 return new Pair<>((CommonTokenStream) parser.getInputStream(), parser.tsql_file());
             } catch (MonitorCancelledRuntimeException mcre) {
                 throw new InterruptedException();
@@ -299,14 +299,14 @@ public final class AntlrParser {
      * @param antlrTasks       queue for parser tasks
      */
     public static void parseChSqlStream(InputStreamProvider inputStream, String charsetName, String parsedObjectName,
-                                        List<Object> errors, IProgressMonitor mon, int monitoringLevel, ChSqlContextProcessor listener,
+                                        List<Object> errors, IMonitor mon, int monitoringLevel, ChSqlContextProcessor listener,
                                         Queue<AntlrTask<?>> antlrTasks) {
         AntlrTaskManager.submit(antlrTasks, () -> {
             PgDiffUtils.checkCancelled(mon);
             try (InputStream stream = inputStream.getStream()) {
                 var parser = createCHParser(stream, charsetName, parsedObjectName, errors);
                 parser.addParseListener(new CustomParseTreeListener(
-                        monitoringLevel, mon == null ? new NullProgressMonitor() : mon));
+                        monitoringLevel, mon == null ? new NullMonitor() : mon));
                 return new Pair<>((CommonTokenStream) parser.getInputStream(), parser.ch_file());
             } catch (MonitorCancelledRuntimeException mcre) {
                 throw new InterruptedException();

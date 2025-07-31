@@ -17,7 +17,6 @@ package org.pgcodekeeper.core.parsers.antlr;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.SqlContextProcessor;
@@ -29,6 +28,7 @@ import org.pgcodekeeper.core.parsers.antlr.statements.pg.PgParserAbstract;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.IMonitor;
 
 import java.util.List;
 import java.util.Map;
@@ -39,7 +39,7 @@ import java.util.function.BiFunction;
  * Handles schema and ownership changes while applying statement overrides.
  */
 public final class SQLOverridesListener extends CustomParserListener<PgDatabase>
-implements SqlContextProcessor {
+        implements SqlContextProcessor {
 
     private final Map<PgStatement, StatementOverride> overrides;
 
@@ -55,7 +55,7 @@ implements SqlContextProcessor {
      * @param settings  application settings
      */
     public SQLOverridesListener(PgDatabase db, String filename, ParserListenerMode mode, List<Object> errors,
-            IProgressMonitor mon, Map<PgStatement, StatementOverride> overrides, ISettings settings) {
+                                IMonitor mon, Map<PgStatement, StatementOverride> overrides, ISettings settings) {
         super(db, filename, mode, errors, mon, settings);
         this.overrides = overrides;
     }
@@ -98,7 +98,7 @@ implements SqlContextProcessor {
         Alter_table_statementContext ats;
         if (owner != null) {
             safeParseStatement(new AlterOwner(owner, db, overrides, settings), ctx);
-        } else if ((ats  = ctx.alter_table_statement()) != null) {
+        } else if ((ats = ctx.alter_table_statement()) != null) {
             safeParseStatement(() -> alterTable(ats), ctx);
         }
     }
@@ -122,7 +122,7 @@ implements SqlContextProcessor {
         List<ParserRuleContext> ids = PgParserAbstract.getIdentifiers(ctx.name);
         ParserRuleContext schemaCtx = QNameParser.getSchemaNameCtx(ids);
         AbstractSchema schema = schemaCtx == null ? db.getDefaultSchema() :
-            getSafe(AbstractDatabase::getSchema, db, schemaCtx);
+                getSafe(AbstractDatabase::getSchema, db, schemaCtx);
 
         ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
 

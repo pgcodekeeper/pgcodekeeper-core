@@ -16,7 +16,6 @@
 package org.pgcodekeeper.core.parsers.antlr;
 
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.TSqlContextProcessor;
 import org.pgcodekeeper.core.parsers.antlr.exception.UnresolvedReferenceException;
@@ -27,6 +26,7 @@ import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.schema.StatementOverride;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.IMonitor;
 
 import java.util.List;
 import java.util.Map;
@@ -53,7 +53,7 @@ public final class TSQLOverridesListener extends CustomParserListener<MsDatabase
      * @param settings  application settings
      */
     public TSQLOverridesListener(MsDatabase db, String filename, ParserListenerMode mode, List<Object> errors,
-            IProgressMonitor mon, Map<PgStatement, StatementOverride> overrides, ISettings settings) {
+                                 IMonitor mon, Map<PgStatement, StatementOverride> overrides, ISettings settings) {
         super(db, filename, mode, errors, mon, settings);
         this.overrides = overrides;
     }
@@ -101,7 +101,7 @@ public final class TSQLOverridesListener extends CustomParserListener<MsDatabase
 
     private void create(Schema_createContext ctx) {
         Create_assemblyContext ass = ctx.create_assembly();
-        if (ass!= null && ass.owner_name != null) {
+        if (ass != null && ass.owner_name != null) {
             computeOverride(MsDatabase::getAssembly, ass.assembly_name, ass.owner_name);
         }
     }

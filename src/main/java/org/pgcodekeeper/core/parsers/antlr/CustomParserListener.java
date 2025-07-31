@@ -19,7 +19,6 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.parsers.antlr.exception.MisplacedObjectException;
@@ -30,6 +29,7 @@ import org.pgcodekeeper.core.parsers.antlr.statements.ParserAbstract;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.IMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,7 @@ public class CustomParserListener<T extends AbstractDatabase> {
     protected final String filename;
     protected final List<Object> errors;
     protected final ISettings settings;
-    private final IProgressMonitor monitor;
+    private final IMonitor monitor;
 
     /**
      * Creates a new parser listener for building database schemas.
@@ -64,7 +64,7 @@ public class CustomParserListener<T extends AbstractDatabase> {
      * @param settings application settings
      */
     public CustomParserListener(T database, String filename,
-            ParserListenerMode mode, List<Object> errors, IProgressMonitor monitor, ISettings settings) {
+                                ParserListenerMode mode, List<Object> errors, IMonitor monitor, ISettings settings) {
         this.db = database;
         this.errors = errors;
         this.monitor = monitor;
@@ -105,7 +105,7 @@ public class CustomParserListener<T extends AbstractDatabase> {
      * @return error object containing details about the failure
      */
     public static AntlrError handleUnresolvedReference(UnresolvedReferenceException ex,
-            String filename) {
+                                                       String filename) {
         Token t = ex.getErrorToken();
         ErrorTypes errorType = ex instanceof MisplacedObjectException ? ErrorTypes.MISPLACEERROR : ErrorTypes.OTHER;
         AntlrError err = new AntlrError(t, filename, t.getLine(),
@@ -146,16 +146,16 @@ public class CustomParserListener<T extends AbstractDatabase> {
     }
 
     /**
-     *  Returns only the first 'descrWordsCount' words from a query in 'ctx'.
+     * Returns only the first 'descrWordsCount' words from a query in 'ctx'.
      */
     protected String getActionDescription(ParserRuleContext ctx, int descrWordsCount) {
         StringBuilder descr = new StringBuilder();
-        fillActionDescription(ctx, new int[] {descrWordsCount}, descr);
+        fillActionDescription(ctx, new int[]{descrWordsCount}, descr);
         return descr.toString();
     }
 
     private void fillActionDescription(ParserRuleContext ctx, int[] descrWordsCount,
-            StringBuilder descr) {
+                                       StringBuilder descr) {
         List<ParseTree> children = ctx.children;
         if (children == null) {
             return;

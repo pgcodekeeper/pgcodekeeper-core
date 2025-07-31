@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.ms;
 
-import org.eclipse.core.runtime.SubMonitor;
 import org.pgcodekeeper.core.loader.AbstractJdbcConnector;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.ms.*;
@@ -24,6 +23,7 @@ import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.IMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +50,7 @@ public final class JdbcMsLoader extends JdbcLoaderBase {
      * @param ignoreSchemaList list of schemas to ignore during loading
      */
     public JdbcMsLoader(AbstractJdbcConnector connector, ISettings settings,
-                        SubMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
+                        IMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
         super(connector, monitor, settings, ignoreSchemaList);
     }
 
