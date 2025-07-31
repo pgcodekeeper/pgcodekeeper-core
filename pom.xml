@@ -61,16 +61,6 @@
             <version>2.0.17</version>
         </dependency>
         <dependency>
-            <groupId>args4j</groupId>
-            <artifactId>args4j</artifactId>
-            <version>2.37</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.platform</groupId>
-            <artifactId>org.eclipse.core.runtime</artifactId>
-            <version>3.33.100</version>
-        </dependency>
-        <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
             <version>${antlr.version}</version>
@@ -94,13 +84,13 @@
         <dependency>
             <groupId>com.clickhouse</groupId>
             <artifactId>clickhouse-jdbc</artifactId>
-            <version>0.4.2</version>
+            <version>0.4.6</version>
         </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.11.3</version>
+            <version>5.13.4</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -193,6 +183,34 @@
                             <publishingServerId>central</publishingServerId>
                             <tokenAuth>true</tokenAuth>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>jenkins</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.8.13</version>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>

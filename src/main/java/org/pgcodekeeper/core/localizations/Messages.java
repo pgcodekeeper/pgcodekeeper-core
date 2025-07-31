@@ -15,7 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.localizations;
 
-import org.eclipse.osgi.util.NLS;
+import java.lang.reflect.Field;
+import java.util.ResourceBundle;
 
 /**
  * Internationalization message constants for pgCodeKeeper core components.
@@ -24,10 +25,10 @@ import org.eclipse.osgi.util.NLS;
  * error messages, log entries, and other text content throughout the pgCodeKeeper
  * core library.
  */
-public final class Messages extends NLS {
+public final class Messages {
+
     public static final String BUNDLE_NAME = "org.pgcodekeeper.core.localizations.messages"; //$NON-NLS-1$
 
-    // SONAR-OFF
     public static String Version;
 
     public static String AbstractAnalysisLauncher_error_prefix;
@@ -238,11 +239,19 @@ public final class Messages extends NLS {
 
     public static String DatabaseFactory_errors_found_while_parsing;
 
-    // SONAR-ON
-
     static {
-        // initialize resource bundle
-        NLS.initializeMessages(BUNDLE_NAME, Messages.class);
+        // TODO replace with ENUM
+        ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_NAME);
+        for (String key : bundle.keySet()) {
+            try {
+                Field field = Messages.class.getField(key);
+                if (field.getType().equals(String.class)) {
+                    field.set(null, bundle.getString(key));
+                }
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                // ignore
+            }
+        }
     }
 
     private Messages() {
