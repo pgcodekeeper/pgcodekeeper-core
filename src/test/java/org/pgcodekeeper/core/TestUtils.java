@@ -15,12 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.URIUtil;
 import org.junit.jupiter.api.Assertions;
 import org.pgcodekeeper.core.loader.DatabaseLoader;
 import org.pgcodekeeper.core.loader.PgDumpLoader;
-import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
@@ -80,7 +77,6 @@ public final class TestUtils {
             case PG -> new PgSchema(Consts.PUBLIC);
             case MS -> new MsSchema(Consts.DBO);
             case CH -> new ChSchema(Consts.CH_DEFAULT_DB);
-            default -> throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + dbType);
         };
         db.addSchema(schema);
         db.setDefaultSchema(schema.getName());
@@ -126,9 +122,9 @@ public final class TestUtils {
         Files.writeString(dir.resolve(".pgcodekeeperignore"), rule);
     }
 
-    public static Path getPathToResource(String resourceName, Class<?> clazz) throws URISyntaxException, IOException {
+    public static Path getPathToResource(String resourceName, Class<?> clazz) throws URISyntaxException {
         URL url = clazz.getResource(resourceName);
-        return Paths.get(URIUtil.toURI("file".equals(url.getProtocol()) ? url : FileLocator.toFileURL(url)));
+        return Paths.get(url.toURI());
     }
 
     static void runDiff(String fileNameTemplate, DatabaseType dbType, Class<?> clazz) throws IOException, InterruptedException {
@@ -173,24 +169,22 @@ public final class TestUtils {
 
     /**
      * In this method we simulate user behavior where he selected some objects, all
-     * or noone.
+     * or none.
      *
-     * @param selectedObjs - {@link Map} selected objects, where key - name of
-     *                     object, value - {@link DbObjType} of object. If is null
-     *                     user select all objects
-     * @param tree         - {@link TreeElement} after diff old and new database
-     *                     state
-     * @param oldDbFull    - old state of {@link AbstractDatabase}
-     * @param newDbFull    - new state of {@link AbstractDatabase}
+     * @param selectedObjects - {@link Map} selected objects, where key - name of object, value - {@link DbObjType} of
+     *                        object. If is null user select all objects
+     * @param tree            - {@link TreeElement} after diff old and new database state
+     * @param oldDbFull       - old state of {@link AbstractDatabase}
+     * @param newDbFull       - new state of {@link AbstractDatabase}
      */
-    private static void setSelected(Map<String, DbObjType> selectedObjs, TreeElement tree, AbstractDatabase oldDbFull,
+    private static void setSelected(Map<String, DbObjType> selectedObjects, TreeElement tree, AbstractDatabase oldDbFull,
                                     AbstractDatabase newDbFull) {
-        if (null == selectedObjs) {
+        if (null == selectedObjects) {
             tree.setAllChecked();
             return;
         }
 
-        for (var sel : selectedObjs.entrySet()) {
+        for (var sel : selectedObjects.entrySet()) {
             String[] arr = Arrays.copyOf(sel.getKey().split("-"), 3);
             var col = new GenericColumn(arr[0], arr[1], arr[2], sel.getValue());
             var stmt = newDbFull.getStatement(col);
