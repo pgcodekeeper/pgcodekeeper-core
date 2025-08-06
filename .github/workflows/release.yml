@@ -1,0 +1,40 @@
+name: Release Workflow
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Import GPG key
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" > private.key
+          gpg --batch --pinentry-mode loopback --import private.key
+          rm -f private.key
+
+      - name: Remove default Maven settings
+        run: rm -f ~/.m2/settings.xml
+
+      - name: Setup Maven settings
+        uses: 1arp/create-a-file-action@0.4.5
+        with:
+          path: /home/runnner/.m2
+          isAbsolutePath: true
+          file: settings.xml
+          content: ${{ secrets.MAVEN_SETTINGS_XML }}
+
+      - name: Build and deploy
+        run: mvn -B clean deploy -DskipTests -Prelease
