@@ -1,3 +1,4 @@
+[![Maven Central](https://maven-badges.sml.io/maven-central/org.pgcodekeeper/pgcodekeeper-core/badge.svg)](https://maven-badges.sml.io/maven-central/org.pgcodekeeper/pgcodekeeper-core)
 [![Apache 2.0](https://img.shields.io/github/license/pgcodekeeper/pgcodekeeper-core.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
 # pgCodeKeeper
@@ -7,64 +8,56 @@ A tool for easier PostgreSQL, GreenPlum, MS SQL, ClickHouse development.
 * Comparing database code is very easy now. Compare live DB instances, pg_dump output, as well as pgCodeKeeper projects.
 * Generate migration scripts via a user-friendly interface. You can use both live DB instances and DB dumps as initial data. You can also compare pgCodeKeeper projects — useful when working with versions control systems.
 
+# Maven Repository
+
+You can pull pgcodekeeper-core from the central maven repository, just add these to your pom.xml file:
+
+```
+<dependency>
+    <groupId>org.pgcodekeeper</groupId>
+    <artifactId>pgcodekeeper-core</artifactId>
+    <version>11.0.0-rc.1</version>
+</dependency>
+```
+
 # Usage
 
 API is simple. Currently static methods are available:
 
 ```java
-import org.pgcodekeeper.core.DatabaseType;
-import org.pgcodekeeper.core.PgCodekeeperException;
-import org.pgcodekeeper.core.api.DatabaseFactory;
-import org.pgcodekeeper.core.api.PgCodeKeeperApi;
-import org.pgcodekeeper.core.utils.IMonitor;
-import org.pgcodekeeper.core.utils.NullMonitor;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.ISettings;
+// Example 1: Compare two databases from JDBC connections and generate migration script
+ISettings settings = new CoreSettings(DatabaseType.PG);
 
-import java.io.IOException;
+// settings init...
 
-public class Main {
-  public static void main(String[] args) {
-    try {
-         // Example 1: Compare two databases from JDBC connections and generate migration script
-         ISettings settings = new CoreSettings(DatabaseType.PG);
-         // settings init...
-         AbstractDatabase oldDb = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/old_db");
-         AbstractDatabase newDb = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/new_db");
-         String migrationScript = PgCodeKeeperApi.diff(settings, oldDb, newDb);
-   
-         // Example 2: Load database from project and compare with JDBC database
-         AbstractDatabase projectDb = DatabaseFactory.loadFromProject(settings, "/path/to/project");
-         AbstractDatabase liveDb = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/live_db");
-         String script = PgCodeKeeperApi.diff(settings, projectDb, liveDb);
-   
-         // Example 3: Compare databases with object filtering using ignore list
-         AbstractDatabase db1 = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/db1");
-         AbstractDatabase db2 = DatabaseFactory.loadFromProject(settings, "/path/to/project");
-         String diff = PgCodeKeeperApi.diff(settings, db1, db2, "/path/to/object_ignore_list.txt");
-   
-         // Example 4: Export database to project with filtering and progress monitoring
-         IMonitor monitor = new NullMonitor(); // or implement custom progress monitoring
-         AbstractDatabase db = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/db");
-         PgCodeKeeperApi.export(settings, db, "/path/to/export", "/path/to/ignore_list.txt", monitor);
+AbstractDatabase oldDb = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/old_db");
+AbstractDatabase newDb = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/new_db");
+String migrationScript = PgCodeKeeperApi.diff(settings, oldDb, newDb);
 
-         // Example 5: Update project with changes from database
-         AbstractDatabase updatedDb = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/updated_db");
-         PgCodeKeeperApi.update(settings, updatedDb, "/path/to/project");
+// Example 2: Load database from project and compare with JDBC database
+AbstractDatabase projectDb = DatabaseFactory.loadFromProject(settings, "/path/to/project");
+AbstractDatabase liveDb = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/live_db");
+String script = PgCodeKeeperApi.diff(settings, projectDb, liveDb);
 
-         // Example 6: Update project with filtering and progress monitoring
-         PgCodeKeeperApi.update(settings, updatedDb, "/path/to/project", 
-                              "/path/to/object_ignore_list.txt", 
-                              "/path/to/schema_ignore_list.txt", 
-                              monitor);
+// Example 3: Compare databases with object filtering using ignore list
+AbstractDatabase db1 = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/db1");
+AbstractDatabase db2 = DatabaseFactory.loadFromProject(settings, "/path/to/project");
+String diff = PgCodeKeeperApi.diff(settings, db1, db2, "/path/to/object_ignore_list.txt");
 
-    } catch (PgCodekeeperException | IOException | InterruptedException e) {
-         System.err.println("Operation failed: " + e.getMessage());
-         e.printStackTrace();
-    }
-  }
-}
+// Example 4: Export database to project with filtering and progress monitoring
+IMonitor monitor = new NullMonitor(); // or implement custom progress monitoring
+AbstractDatabase db = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/db");
+PgCodeKeeperApi.export(settings, db, "/path/to/export", "/path/to/ignore_list.txt", monitor);
+
+// Example 5: Update project with changes from database
+AbstractDatabase updatedDb = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/updated_db");
+PgCodeKeeperApi.update(settings, updatedDb, "/path/to/project");
+
+// Example 6: Update project with filtering and progress monitoring
+PgCodeKeeperApi.update(settings, updatedDb, "/path/to/project", 
+                     "/path/to/object_ignore_list.txt", 
+                     "/path/to/schema_ignore_list.txt", 
+                     monitor);
 ```
 
 ## Documentation
