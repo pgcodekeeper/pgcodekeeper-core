@@ -103,7 +103,7 @@ public final class FileUtils {
 
     /**
      * Sanitizes filename by removing invalid characters.
-     * Removes characters: \ / : * ? " < > |
+     * Removes characters: {@code \ / : * ? " < > |}
      *
      * @param name the filename to sanitize
      * @return sanitized filename with invalid characters removed
@@ -114,7 +114,7 @@ public final class FileUtils {
 
     /**
      * Gets valid filename by replacing invalid characters with underscores.
-     * Replaces characters: \ / : * ? " < > | with '_'
+     * Replaces characters: {@code \ / : * ? " < > | with '_'}
      *
      * @param name the filename to validate
      * @return valid filename with invalid characters replaced by underscores
