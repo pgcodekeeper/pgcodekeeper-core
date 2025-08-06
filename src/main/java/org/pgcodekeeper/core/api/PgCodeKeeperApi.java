@@ -32,15 +32,6 @@ import java.util.List;
 
 /**
  * Main API class for pgCodeKeeper database operations.
- * <p>
- * This class provides static methods for the three core operations:
- * <ul>
- * <li>diff - comparing two databases and generating migration scripts</li>
- * <li>export - exporting database schema to project files</li>
- * <li>update - updating project with changes from database</li>
- * </ul>
- * Each operation supports optional filtering through ignore lists.
- * </p>
  */
 public final class PgCodeKeeperApi {
 

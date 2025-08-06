@@ -137,6 +137,7 @@
                         <version>${maven.javadoc.version}</version>
                         <configuration>
                             <show>public</show>
+                            <doclint>all,-missing</doclint>
                         </configuration>
                         <executions>
                             <execution>

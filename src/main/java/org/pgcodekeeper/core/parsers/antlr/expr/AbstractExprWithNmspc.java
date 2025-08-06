@@ -380,13 +380,13 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
      */
     protected boolean addCteSignature(With_queryContext withQuery, List<ModPair<String, String>> resultTypes) {
         String withName = withQuery.query_name.getText();
-        List<IdentifierContext> paramNamesIdentifers = withQuery.column_name;
-        for (int i = 0; i < paramNamesIdentifers.size(); ++i) {
+        List<IdentifierContext> paramNamesIdentifiers = withQuery.column_name;
+        for (int i = 0; i < paramNamesIdentifiers.size(); ++i) {
             if (i >= resultTypes.size()) {
                 LOG.warn(Messages.AbstractExprWithNmspc_log_cte_contains_cols, withName);
                 break;
             }
-            resultTypes.get(i).setFirst(paramNamesIdentifers.get(i).getText());
+            resultTypes.get(i).setFirst(paramNamesIdentifiers.get(i).getText());
         }
         List<Pair<String, String>> unmodifiable = resultTypes.stream()
                 .map(Pair::copy)
