@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -54,7 +55,7 @@ public class PgCodeKeeperApiTest {
         var newDb = loadDatabaseFromDump(testName + NEW);
         var expectedDiff = getExpectedDiff(testName);
 
-        String actual = PgCodeKeeperApi.diff(settings, oldDb, newDb, null);
+        String actual = PgCodeKeeperApi.diff(settings, oldDb, newDb);
 
         assertEquals(expectedDiff, actual);
     }
@@ -67,7 +68,7 @@ public class PgCodeKeeperApiTest {
         var ignoreListPath = getFilePath("ignore.pgcodekeeperignore");
         var expectedDiff = getExpectedDiff(testName);
 
-        String actual = PgCodeKeeperApi.diff(settings, oldDb, newDb, ignoreListPath);
+        String actual = PgCodeKeeperApi.diff(settings, oldDb, newDb, List.of(ignoreListPath));
 
         assertEquals(expectedDiff, actual);
     }
@@ -79,7 +80,7 @@ public class PgCodeKeeperApiTest {
         var exportedTableFile = tempDir.resolve(TABLES_DIRECTORY + "test_table.sql");
         var expectedContent = getFileContent(dumpFileName);
 
-        PgCodeKeeperApi.export(settings, db, tempDir.toString(), null, new NullMonitor());
+        PgCodeKeeperApi.export(settings, db, tempDir.toString());
 
         assertFileContent(exportedTableFile, expectedContent);
     }
@@ -92,7 +93,7 @@ public class PgCodeKeeperApiTest {
         var expectedContent = getFileContent("test_export_with_ignore_list_exported.sql");
         var ignoreListPath = getFilePath("test_export_with_ignore_list.pgcodekeeperignore");
 
-        PgCodeKeeperApi.export(settings, db, tempDir.toString(), ignoreListPath, new NullMonitor());
+        PgCodeKeeperApi.export(settings, db, tempDir.toString(), List.of(ignoreListPath), new NullMonitor());
 
         assertFileContent(exportedTableFile, expectedContent);
         assertFalse(Files.exists(ignoredTableFile));
@@ -102,6 +103,7 @@ public class PgCodeKeeperApiTest {
     void testUpdateProject(@TempDir Path tempDir) throws PgCodekeeperException, IOException, InterruptedException {
         // Setup project structure with initial tables
         setupUpdateProjectStructure(tempDir);
+        var oldDb = DatabaseFactory.loadFromProject(settings, tempDir.toString());
         var newDb = loadDatabaseFromDump("test_update_project_new_dump.sql");
         var expectedContent = getFileContent("test_update_project_new_dump.sql");
 
@@ -109,7 +111,7 @@ public class PgCodeKeeperApiTest {
         Path firstTableFile = tablesDir.resolve("first_table.sql");
         Path secondTableFile = tablesDir.resolve("second_table.sql");
 
-        PgCodeKeeperApi.update(settings, newDb, tempDir.toString(), null, null, new NullMonitor());
+        PgCodeKeeperApi.update(settings, oldDb, newDb, tempDir.toString());
 
         // Verify first table was removed and second table was updated
         assertFalse(Files.exists(firstTableFile));
@@ -120,6 +122,7 @@ public class PgCodeKeeperApiTest {
     void testUpdateProjectWithIgnoreList(@TempDir Path tempDir) throws PgCodekeeperException, IOException, InterruptedException {
         // Setup project structure with initial tables
         setupUpdateProjectStructure(tempDir);
+        var oldDb = DatabaseFactory.loadFromProject(settings, tempDir.toString(), null, null);
         var newDb = loadDatabaseFromDump("test_update_project_new_dump.sql");
         var ignoreListPath = getFilePath("test_update_project_ignore_list.pgcodekeeperignore");
 
@@ -130,7 +133,7 @@ public class PgCodeKeeperApiTest {
         Path firstTableFile = tablesDir.resolve("first_table.sql");
         Path secondTableFile = tablesDir.resolve("second_table.sql");
 
-        PgCodeKeeperApi.update(settings, newDb, tempDir.toString(), ignoreListPath, null, new NullMonitor());
+        PgCodeKeeperApi.update(settings, oldDb, newDb, tempDir.toString(), List.of(ignoreListPath), new NullMonitor());
 
         // Verify both tables exist and have correct content
         assertFileContent(firstTableFile, expectedFirstTableContent);
