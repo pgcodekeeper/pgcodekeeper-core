@@ -1,7 +1,7 @@
-[![Maven Central](https://maven-badges.sml.io/maven-central/org.pgcodekeeper/pgcodekeeper-core/badge.svg)](https://maven-badges.sml.io/maven-central/org.pgcodekeeper/pgcodekeeper-core)
+[![Maven Central](https://maven-badges.sml.io/sonatype-central/org.pgcodekeeper/pgcodekeeper-core/badge.svg)](https://maven-badges.sml.io/sonatype-central/org.pgcodekeeper/pgcodekeeper-core)
 [![Apache 2.0](https://img.shields.io/github/license/pgcodekeeper/pgcodekeeper-core.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
-# pgCodeKeeper
+# pgCodeKeeper-core
 
 A tool for easier PostgreSQL, GreenPlum, MS SQL, ClickHouse development.
 
@@ -22,7 +22,7 @@ You can pull pgcodekeeper-core from the central maven repository, just add these
 
 # Usage
 
-API is simple. Currently static methods are available:
+Currently static methods are available:
 
 ```java
 // Example 1: Compare two databases from JDBC connections and generate migration script
@@ -42,22 +42,22 @@ String script = PgCodeKeeperApi.diff(settings, projectDb, liveDb);
 // Example 3: Compare databases with object filtering using ignore list
 AbstractDatabase db1 = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/db1");
 AbstractDatabase db2 = DatabaseFactory.loadFromProject(settings, "/path/to/project");
-String diff = PgCodeKeeperApi.diff(settings, db1, db2, "/path/to/object_ignore_list.txt");
+String diff = PgCodeKeeperApi.diff(settings, db1, db2, List.of("/path/to/object_ignore_list.txt"));
 
 // Example 4: Export database to project with filtering and progress monitoring
 IMonitor monitor = new NullMonitor(); // or implement custom progress monitoring
 AbstractDatabase db = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/db");
-PgCodeKeeperApi.export(settings, db, "/path/to/export", "/path/to/ignore_list.txt", monitor);
+PgCodeKeeperApi.export(settings, db, "/path/to/export", List.of("/path/to/object_ignore_list.txt"), monitor);
 
 // Example 5: Update project with changes from database
+AbstractDatabase projectDb = DatabaseFactory.loadFromProject(settings, "/path/to/project");
 AbstractDatabase updatedDb = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/updated_db");
-PgCodeKeeperApi.update(settings, updatedDb, "/path/to/project");
+PgCodeKeeperApi.update(settings, projectDb, updatedDb, "/path/to/project");
 
 // Example 6: Update project with filtering and progress monitoring
-PgCodeKeeperApi.update(settings, updatedDb, "/path/to/project", 
-                     "/path/to/object_ignore_list.txt", 
-                     "/path/to/schema_ignore_list.txt", 
-                     monitor);
+PgCodeKeeperApi.update(settings, projectDb, updatedDb, "/path/to/project",
+                       List.of("/path/to/object_ignore_list.txt"), 
+                       monitor);
 ```
 
 ## Documentation

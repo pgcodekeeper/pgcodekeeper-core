@@ -19,6 +19,7 @@ import org.antlr.v4.runtime.RuleContext;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.difftree.IIgnoreList;
+import org.pgcodekeeper.core.model.difftree.IgnoreList;
 import org.pgcodekeeper.core.model.difftree.IgnoredObject;
 import org.pgcodekeeper.core.parsers.antlr.AntlrParser;
 import org.pgcodekeeper.core.parsers.antlr.generated.IgnoreListParser;
@@ -28,6 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -122,5 +125,21 @@ public final class IgnoreParser {
 
         list.add(new IgnoredObject(ruleRest.obj.getText(), dbRegex,
                 isShow, isRegular, ignoreContent, isQualified, objTypes));
+    }
+
+    /**
+     * Parses an ignore list configuration files and adds the rules to the ignore list.
+     *
+     * @param ignoreLists - collection of paths to files containing objects to ignore
+     * @return ignore list with merged rules
+     * @throws IOException if there's an error reading the configuration files
+     */
+    public static IgnoreList parseLists(Collection<String> ignoreLists) throws IOException {
+        IgnoreList ignoreList = new IgnoreList();
+        IgnoreParser ignoreParser = new IgnoreParser(ignoreList);
+        for (String ignoreListPath : ignoreLists) {
+            ignoreParser.parse(Paths.get(ignoreListPath));
+        }
+        return ignoreList;
     }
 }
