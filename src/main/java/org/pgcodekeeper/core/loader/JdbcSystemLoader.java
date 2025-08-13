@@ -30,7 +30,7 @@ import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.Argument;
 import org.pgcodekeeper.core.schema.ICast.CastContext;
 import org.pgcodekeeper.core.schema.meta.*;
-import org.pgcodekeeper.core.utils.IMonitor;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,7 +127,7 @@ public final class JdbcSystemLoader extends JdbcLoaderBase {
             throws InterruptedException, SQLException {
         try (ResultSet result = getStatement().executeQuery(JdbcQueries.QUERY_SYSTEM_FUNCTIONS)) {
             while (result.next()) {
-                PgDiffUtils.checkCancelled(getMonitor());
+                IMonitor.checkCancelled(getMonitor());
                 String functionName = result.getString(NAME);
                 String schemaName = result.getString(NAMESPACE_NAME);
 
@@ -204,7 +204,7 @@ public final class JdbcSystemLoader extends JdbcLoaderBase {
             throws InterruptedException, SQLException {
         try (ResultSet result = getStatement().executeQuery(JdbcQueries.QUERY_SYSTEM_RELATIONS)) {
             while (result.next()) {
-                PgDiffUtils.checkCancelled(getMonitor());
+                IMonitor.checkCancelled(getMonitor());
                 String schemaName = result.getString(NAMESPACE_NAME);
                 String relationName = result.getString(NAME);
 
@@ -235,7 +235,7 @@ public final class JdbcSystemLoader extends JdbcLoaderBase {
     private void readOperators(MetaStorage storage) throws InterruptedException, SQLException {
         try (ResultSet result = getStatement().executeQuery(JdbcQueries.QUERY_SYSTEM_OPERATORS)) {
             while (result.next()) {
-                PgDiffUtils.checkCancelled(getMonitor());
+                IMonitor.checkCancelled(getMonitor());
                 String name = result.getString(NAME);
                 String schemaName = result.getString(NAMESPACE_NAME);
                 long leftType = result.getLong("left");
@@ -264,7 +264,7 @@ public final class JdbcSystemLoader extends JdbcLoaderBase {
             statement.setLong(1, getLastSysOid());
             ResultSet result = getRunner().runScript(statement);
             while (result.next()) {
-                PgDiffUtils.checkCancelled(getMonitor());
+                IMonitor.checkCancelled(getMonitor());
                 String source = result.getString("source");
                 JdbcReader.checkTypeValidity(source);
                 String target = result.getString("target");

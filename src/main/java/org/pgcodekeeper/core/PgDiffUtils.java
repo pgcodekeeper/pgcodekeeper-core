@@ -21,44 +21,15 @@ package org.pgcodekeeper.core;
 
 import org.pgcodekeeper.core.sql.Keyword;
 import org.pgcodekeeper.core.sql.Keyword.KeywordCategory;
-import org.pgcodekeeper.core.utils.IMonitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
- * A utility class providing various helper methods.
- *
- * <p>This class contains methods for:
- * <ul>
- *   <li>PostgreSQL identifier validation and quoting</li>
- *   <li>String manipulation and quoting for SQL</li>
- *   <li>Hashing functions (MD5, SHA-256)</li>
- *   <li>Collection comparison utilities</li>
- *   <li>Error handling and string processing</li>
- *   <li>PostgreSQL-specific language validation</li>
- *   <li>SQL statement wrapping</li>
- * </ul>
+ * Utility class for handling quoting and unquoting of identifiers and literals in PostgreSQL.
  *
  * @author fordfrog
  */
 public final class PgDiffUtils {
-
-    private static final Logger LOG = LoggerFactory.getLogger(PgDiffUtils.class);
-    private static final int ERROR_SUBSTRING_LENGTH = 20;
-    private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
-
-    /**
-     * Secure random number generator instance.
-     */
-    public static final Random RANDOM = new SecureRandom();
 
     /**
      * Checks if string is a valid PostgreSQL identifier.
@@ -202,161 +173,6 @@ public final class PgDiffUtils {
     }
 
     /**
-     * Computes hash of string using specified algorithm.
-     *
-     * @param s        the string to hash
-     * @param instance the hash algorithm to use
-     * @return the hash bytes
-     * @throws NoSuchAlgorithmException if algorithm is not available
-     */
-    public static byte[] getHash(String s, String instance) throws NoSuchAlgorithmException {
-        return MessageDigest.getInstance(instance)
-                .digest(s.getBytes(StandardCharsets.UTF_8));
-    }
-
-
-    /**
-     * Returns hexadecimal string representation of hash.
-     *
-     * @param s        the string to hash
-     * @param instance the hash algorithm to use
-     * @return hexadecimal hash string
-     */
-    public static String hash(String s, String instance) {
-        try {
-            byte[] hash = getHash(s, instance);
-            StringBuilder sb = new StringBuilder(2 * hash.length);
-            for (byte b : hash) {
-                sb.append(HEX_CHARS[(b & 0xff) >> 4]);
-                sb.append(HEX_CHARS[(b & 0x0f)]);
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            LOG.error(e.getLocalizedMessage(), e);
-            return instance + "_ERROR_" + RANDOM.nextInt();
-        }
-    }
-
-    /**
-     * Returns MD5 hash of string as hexadecimal.
-     *
-     * @param s the string to hash
-     * @return lowercase hex MD5 for UTF-8 representation of given string
-     */
-    public static String md5(String s) {
-        return hash(s, "MD5");
-    }
-
-    /**
-     * Returns SHA-256 hash of string as hexadecimal.
-     *
-     * @param s the string to hash
-     * @return lowercase hex SHA-256 for UTF-8 representation of given string
-     */
-    public static String sha(String s) {
-        return hash(s, "SHA-256");
-    }
-
-    /**
-     * URL-encodes string using UTF-8 encoding.
-     *
-     * @param string the string to encode
-     * @return URL-encoded string
-     */
-    public static String checkedEncodeUtf8(String string) {
-        return URLEncoder.encode(string, StandardCharsets.UTF_8);
-    }
-
-    /**
-     * Gets error substring from specified position with default length.
-     *
-     * @param s   the string to extract from
-     * @param pos the starting position
-     * @return substring of error text
-     */
-    public static String getErrorSubstr(String s, int pos) {
-        return getErrorSubstr(s, pos, ERROR_SUBSTRING_LENGTH);
-    }
-
-    /**
-     * Gets error substring from specified position with custom length.
-     *
-     * @param s   the string to extract from
-     * @param pos the starting position
-     * @param len the maximum length of substring
-     * @return substring of error text
-     */
-    public static String getErrorSubstr(String s, int pos, int len) {
-        if (pos >= s.length()) {
-            return "";
-        }
-        return pos + len < s.length() ? s.substring(pos, pos + len) : s.substring(pos);
-    }
-
-    /**
-     * Checks if progress monitor has been cancelled.
-     *
-     * @param monitor the progress monitor to check
-     * @throws InterruptedException if monitor is cancelled
-     */
-    public static void checkCancelled(IMonitor monitor)
-            throws InterruptedException {
-        if (monitor != null && monitor.isCanceled()) {
-            throw new InterruptedException();
-        }
-    }
-
-    /**
-     * Compares 2 collections for equality unorderedly as if they were {@link Set}s.<br>
-     * Does not eliminate duplicate elements as sets do and counts them instead. Thus it achieves complementarity with
-     * setlikeHashcode while not requiring it to eliminate duplicates, nor does it require a
-     * <code>List.containsAll()</code> O(N^2) call here. In general, duplicate elimination is an undesired side-effect
-     * of comparison using {@link Set}s, so this solution is overall better and only *slightly* slower.<br>
-     * <br>
-     * <p>
-     * Performance: best case O(1), worst case O(N) + new {@link HashMap} (in case N1 == N2), assuming size() takes
-     * constant time.
-     *
-     * @param c1 first collection
-     * @param c2 second collection
-     * @return true if collections contain same elements in any order, false otherwise
-     */
-    public static boolean setlikeEquals(Collection<?> c1, Collection<?> c2) {
-        final int s1 = c1.size();
-        if (s1 != c2.size()) {
-            return false;
-        }
-        if (0 == s1) {
-            // both are empty
-            return true;
-        }
-        // mimic HashSet(Collection) constructor
-        final float loadFactor = 0.75f;
-        final Map<Object, Integer> map =
-                new HashMap<>(Math.max((int) (s1 / loadFactor) + 1, 16), loadFactor);
-        for (Object el1 : c1) {
-            map.compute(el1, (k, i) -> i == null ? 1 : (i + 1));
-        }
-        for (Object el2 : c2) {
-            Integer i = map.get(el2);
-            if (i == null) {
-                // c1.count(el2) < c2.count(el2)
-                return false;
-            }
-            if (i == 1) {
-                // the last or the only instance of el2 in c1
-                map.remove(el2);
-            } else {
-                // counted one duplicate
-                map.put(el2, i - 1);
-            }
-        }
-        // if the map is not empty at the end it means that
-        // not all duplicates in c1 were matched by those in c2
-        return map.isEmpty();
-    }
-
-    /**
      * Checks if text starts with identifier at specified offset.
      *
      * @param text   the text to check
@@ -374,25 +190,6 @@ public final class PgDiffUtils {
         }
 
         return text.startsWith(id, offset);
-    }
-
-    /**
-     * Checks if string ends with suffix (case-insensitive).
-     *
-     * @param str    the string to check
-     * @param suffix the suffix to look for
-     * @return true if string ends with suffix (case-insensitive), false otherwise
-     */
-    public static boolean endsWithIgnoreCase(String str, String suffix) {
-        int suffixLength = suffix.length();
-        return str.regionMatches(true, str.length() - suffixLength, suffix, 0, suffixLength);
-    }
-
-    /**
-     * Casts a Stream into Iterable. Stream is consumed after Iterable.iterator() is called.
-     */
-    public static <T> Iterable<T> sIter(Stream<T> stream) {
-        return stream::iterator;
     }
 
     /**

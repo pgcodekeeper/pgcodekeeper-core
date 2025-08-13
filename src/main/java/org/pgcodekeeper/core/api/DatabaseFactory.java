@@ -25,8 +25,8 @@ import org.pgcodekeeper.core.model.difftree.IIgnoreList;
 import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.IMonitor;
-import org.pgcodekeeper.core.utils.NullMonitor;
+import org.pgcodekeeper.core.monitor.IMonitor;
+import org.pgcodekeeper.core.monitor.NullMonitor;
 
 import java.io.IOException;
 import java.nio.file.Path;

@@ -26,6 +26,7 @@ import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.pg.PgColumn;
 import org.pgcodekeeper.core.schema.pg.PgSequence;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -203,7 +204,7 @@ public final class SequencesReader extends JdbcReader {
 
         try (ResultSet res = loader.getRunner().runScript(loader.getStatement(), sbUnionQuery.toString())) {
             while (res.next()) {
-                PgDiffUtils.checkCancelled(loader.getMonitor());
+                IMonitor.checkCancelled(loader.getMonitor());
                 AbstractSequence seq = seqs.get(res.getString("qname"));
                 seq.setStartWith(res.getString("start_value"));
                 seq.setMinMaxInc(res.getLong("increment_by"), res.getLong("max_value"),

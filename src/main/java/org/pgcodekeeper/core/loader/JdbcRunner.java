@@ -15,15 +15,15 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import org.pgcodekeeper.core.DaemonThreadFactory;
-import org.pgcodekeeper.core.IProgressReporter;
+import org.pgcodekeeper.core.utils.DaemonThreadFactory;
+import org.pgcodekeeper.core.reporter.IProgressReporter;
 import org.pgcodekeeper.core.loader.callables.QueriesBatchCallable;
 import org.pgcodekeeper.core.loader.callables.QueryCallable;
 import org.pgcodekeeper.core.loader.callables.ResultSetCallable;
 import org.pgcodekeeper.core.loader.callables.StatementCallable;
 import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.utils.IMonitor;
-import org.pgcodekeeper.core.utils.NullMonitor;
+import org.pgcodekeeper.core.monitor.IMonitor;
+import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

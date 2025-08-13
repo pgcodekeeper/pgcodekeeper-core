@@ -20,7 +20,7 @@
 package org.pgcodekeeper.core.schema;
 
 import org.pgcodekeeper.core.DatabaseType;
-import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.expr.launcher.AbstractAnalysisLauncher;

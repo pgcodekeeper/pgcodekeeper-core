@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
-import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.Utils;
 
 public class PartialExportTestFileVisitor extends SimpleFileVisitor<Path> {
 
@@ -87,11 +86,11 @@ public class PartialExportTestFileVisitor extends SimpleFileVisitor<Path> {
             }
             String hash = modifiedFiles.remove(relativeFilePath);
             File file = isInSource ? file2 : file1.toFile();
-            String partialFile = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+            String partialFile = Files.readString(file.toPath());
 
             Assertions.assertEquals(
                     hash,
-                    PgDiffUtils.md5(partialFile), "Files differ, and partial file has unexpected hash"
+                    Utils.md5(partialFile), "Files differ, and partial file has unexpected hash"
                             + "\nPartial file:\n" + partialFile);
         }
         return FileVisitResult.CONTINUE;

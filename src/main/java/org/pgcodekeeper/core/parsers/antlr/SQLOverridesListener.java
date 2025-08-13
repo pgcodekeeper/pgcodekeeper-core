@@ -28,7 +28,7 @@ import org.pgcodekeeper.core.parsers.antlr.statements.pg.PgParserAbstract;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.IMonitor;
+import org.pgcodekeeper.core.monitor.IMonitor;
 
 import java.util.List;
 import java.util.Map;

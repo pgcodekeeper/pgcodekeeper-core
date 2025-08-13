@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.schema.pg;
 
 import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.schema.AbstractFunction;
 import org.pgcodekeeper.core.schema.ArgMode;
 import org.pgcodekeeper.core.schema.Argument;

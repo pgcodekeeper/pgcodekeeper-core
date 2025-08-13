@@ -25,7 +25,7 @@ import java.util.stream.Stream;
  * PostgreSQL-specific error strategy that provides enhanced error reporting for
  * PostgreSQL SQL parsing.
  */
-class CustomSQLAntlrErrorStrategy extends CustomAntlrErrorStrategy {
+public class CustomSQLAntlrErrorStrategy extends CustomAntlrErrorStrategy {
 
     @Override
     protected Stream<Integer> getTokenStream(IntervalSet tokens) {

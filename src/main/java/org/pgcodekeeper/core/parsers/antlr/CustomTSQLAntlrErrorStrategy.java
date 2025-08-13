@@ -25,7 +25,7 @@ import java.util.stream.Stream;
  * Microsoft SQL-specific error strategy that provides enhanced error reporting for
  * T-SQL parsing.
  */
-class CustomTSQLAntlrErrorStrategy extends CustomAntlrErrorStrategy {
+public class CustomTSQLAntlrErrorStrategy extends CustomAntlrErrorStrategy {
 
     @Override
     protected Stream<Integer> getTokenStream(IntervalSet tokens) {

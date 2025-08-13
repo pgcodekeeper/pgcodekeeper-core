@@ -20,7 +20,6 @@
 package org.pgcodekeeper.core.loader;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.ChSqlContextProcessor;
@@ -35,9 +34,9 @@ import org.pgcodekeeper.core.schema.ms.MsSchema;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgSchema;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.IMonitor;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
-import org.pgcodekeeper.core.utils.NullMonitor;
+import org.pgcodekeeper.core.monitor.NullMonitor;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -199,7 +198,7 @@ public class PgDumpLoader extends DatabaseLoader {
      */
     public AbstractDatabase loadDatabase(AbstractDatabase intoDb, Queue<AntlrTask<?>> antlrTasks)
             throws InterruptedException {
-        PgDiffUtils.checkCancelled(monitor);
+        IMonitor.checkCancelled(monitor);
         switch (settings.getDbType()) {
             case PG:
                 SqlContextProcessor sqlListener;

@@ -26,7 +26,7 @@ import org.pgcodekeeper.core.model.exporter.ModelExporter;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.utils.NullMonitor;
+import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.utils.TempDir;
 
 import java.io.IOException;

@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.ms;
 
-import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.schema.AbstractConstraint;
 import org.pgcodekeeper.core.schema.PgStatement;
 

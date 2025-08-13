@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.hashers;
+package org.pgcodekeeper.core.hasher;
 
 /**
- * Contains constants used for hashing operations.
- * This class cannot be instantiated.
+ * Interface for objects that can compute their own hash value using a {@link Hasher}.
  */
-public class HashConstant {
-    static final short TRUE = 1231;
-    static final short FALSE = 1237;
-
-    private HashConstant() {
-    }
+public interface IHashable {
+    /**
+     * Computes the hash of the implementing object using the provided hasher.
+     * The implementation should call appropriate {@code put} methods on the hasher
+     * for all fields that should contribute to the hash value.
+     *
+     * @param hasher the hasher instance to use for hash computation
+     */
+    void computeHash(Hasher hasher);
 }

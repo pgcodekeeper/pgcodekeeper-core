@@ -18,7 +18,8 @@ package org.pgcodekeeper.core.schema.ms;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLActionType;
@@ -204,7 +205,7 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
         if (newTable instanceof MsTable smt) {
             return !Objects.equals(smt.tablespace, tablespace)
                     || ansiNulls != smt.ansiNulls
-                    || !PgDiffUtils.setlikeEquals(smt.getPkeys(), getPkeys())
+                    || !Utils.setLikeEquals(smt.getPkeys(), getPkeys())
                     || !Objects.equals(smt.options, options)
                     || !Objects.equals(smt.fileStream, fileStream)
                     || !Objects.equals(smt.periodStartCol, periodStartCol)
@@ -431,7 +432,7 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
                 && Objects.equals(periodStartCol, table.periodStartCol)
                 && Objects.equals(periodEndCol, table.periodEndCol)
                 && Objects.equals(sysVersioning, table.sysVersioning)
-                && PgDiffUtils.setlikeEquals(getPkeys(), table.getPkeys());
+                && Utils.setLikeEquals(getPkeys(), table.getPkeys());
     }
 
     @Override

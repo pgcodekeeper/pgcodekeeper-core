@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.xmlstore;
 
-import org.pgcodekeeper.core.libraries.PgLibrary;
+import org.pgcodekeeper.core.library.PgLibrary;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -92,12 +92,12 @@ public class DependenciesXmlStore extends XmlStore<PgLibrary> {
     /**
      * Writes library dependencies to XML file with load nested flag.
      *
-     * @param depdencies     the list of library dependencies to write
+     * @param dependencies   the list of library dependencies to write
      * @param loadNestedFlag whether to enable nested loading
      * @throws IOException if writing fails
      */
-    public void writeDependencies(List<PgLibrary> depdencies, boolean loadNestedFlag) throws IOException {
-        Document xml = createDocument(depdencies);
+    public void writeDependencies(List<PgLibrary> dependencies, boolean loadNestedFlag) throws IOException {
+        Document xml = createDocument(dependencies);
         xml.getDocumentElement().setAttribute(LOAD_NESTED, Boolean.toString(loadNestedFlag));
         writeDocument(xml);
     }
@@ -117,14 +117,14 @@ public class DependenciesXmlStore extends XmlStore<PgLibrary> {
     protected void appendChildren(Document xml, Element root, List<PgLibrary> list) {
         for (PgLibrary lib : list) {
             Element newElement = xml.createElement(ENTRY);
-            String name = lib.getName();
+            String name = lib.name();
             if (!name.isBlank()) {
                 newElement.setAttribute(NAME, name);
             }
 
-            newElement.setAttribute(IGNORE_PRIV, Boolean.toString(lib.isIgnorePriv()));
-            newElement.setAttribute(PATH, lib.getPath());
-            newElement.setAttribute(OWNER, lib.getOwner());
+            newElement.setAttribute(IGNORE_PRIV, Boolean.toString(lib.isIgnorePrivileges()));
+            newElement.setAttribute(PATH, lib.path());
+            newElement.setAttribute(OWNER, lib.owner());
 
             root.appendChild(newElement);
         }

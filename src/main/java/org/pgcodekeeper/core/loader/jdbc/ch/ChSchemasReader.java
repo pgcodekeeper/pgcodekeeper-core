@@ -48,7 +48,7 @@ public class ChSchemasReader extends AbstractStatementReader {
     @Override
     protected void processResult(ResultSet result) throws SQLException {
         String schemaName = result.getString("name");
-        if (!loader.checkIgnoreSchemaList(schemaName)) {
+        if (loader.isIgnoredSchema(schemaName)) {
             return;
         }
         loader.setCurrentObject(new GenericColumn(schemaName, DbObjType.SCHEMA));

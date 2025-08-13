@@ -21,7 +21,7 @@ import org.pgcodekeeper.core.loader.JdbcSystemLoader;
 import org.pgcodekeeper.core.loader.UrlJdbcConnector;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.utils.NullMonitor;
+import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,17 +44,28 @@ public final class MetaStorage implements Serializable {
     private static final long serialVersionUID = 8194906497159326596L;
 
     private static final String FILTER_PATTERN = """
-            maxdepth=7;\
-            org.pgcodekeeper.core.schema.meta.*;\
-            org.pgcodekeeper.core.schema.*;\
-            org.pgcodekeeper.core.DangerStatement;\
-            org.pgcodekeeper.core.model.difftree.DbObjType;\
-            org.pgcodekeeper.core.ContextLocation;\
-            org.pgcodekeeper.core.utils.Pair;\
-            java.util.ArrayList;\
-            java.lang.Object;\
-            java.lang.Enum;\
-            !*""";
+        maxdepth=7;\
+        org.pgcodekeeper.core.schema.meta.MetaStorage;\
+        org.pgcodekeeper.core.schema.meta.MetaCast;\
+        org.pgcodekeeper.core.schema.meta.MetaContainer;\
+        org.pgcodekeeper.core.schema.meta.MetaFunction;\
+        org.pgcodekeeper.core.schema.meta.MetaOperator;\
+        org.pgcodekeeper.core.schema.meta.MetaRelation;\
+        org.pgcodekeeper.core.schema.meta.MetaStatement;\
+        org.pgcodekeeper.core.schema.PgObjLocation;\
+        org.pgcodekeeper.core.schema.PgObjLocation$LocationType;\
+        org.pgcodekeeper.core.schema.Argument;\
+        org.pgcodekeeper.core.schema.ArgMode;\
+        org.pgcodekeeper.core.schema.GenericColumn;\
+        org.pgcodekeeper.core.schema.ICast$CastContext;\
+        org.pgcodekeeper.core.DangerStatement;\
+        org.pgcodekeeper.core.model.difftree.DbObjType;\
+        org.pgcodekeeper.core.ContextLocation;\
+        org.pgcodekeeper.core.utils.Pair;\
+        java.util.ArrayList;\
+        java.lang.Object;\
+        java.lang.Enum;\
+        !*""";
 
     private static final ObjectInputFilter DESERIALIZATION_FILTER = ObjectInputFilter.Config.createFilter(FILTER_PATTERN);
 

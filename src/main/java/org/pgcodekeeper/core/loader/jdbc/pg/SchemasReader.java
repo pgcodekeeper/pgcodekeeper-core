@@ -51,7 +51,7 @@ public class SchemasReader extends AbstractStatementReader {
     protected void processResult(ResultSet res) throws SQLException {
         String schemaName = res.getString("nspname");
         loader.setCurrentObject(new GenericColumn(schemaName, DbObjType.SCHEMA));
-        if (!loader.checkIgnoreSchemaList(schemaName)) {
+        if (loader.isIgnoredSchema(schemaName)) {
             return;
         }
 

@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema;
 
-import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;

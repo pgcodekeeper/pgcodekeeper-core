@@ -24,7 +24,7 @@ import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.IMonitor;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

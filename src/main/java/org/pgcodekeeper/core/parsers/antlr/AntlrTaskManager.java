@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.parsers.antlr;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.DaemonThreadFactory;
+import org.pgcodekeeper.core.utils.DaemonThreadFactory;
 import org.pgcodekeeper.core.parsers.antlr.exception.MonitorCancelledRuntimeException;
 
 import java.io.IOException;
