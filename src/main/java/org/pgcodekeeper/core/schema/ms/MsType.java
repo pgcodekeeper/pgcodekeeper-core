@@ -17,8 +17,8 @@ package org.pgcodekeeper.core.schema.ms;
 
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.MsDiffUtils;
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.*;
 
@@ -106,8 +106,8 @@ public final class MsType extends AbstractType implements IStatementContainer {
                 && Objects.equals(assemblyName, type.assemblyName)
                 && Objects.equals(assemblyClass, type.assemblyClass)
                 && columns.equals(type.columns)
-                && PgDiffUtils.setlikeEquals(indices, type.indices)
-                && PgDiffUtils.setlikeEquals(constraints, type.constraints);
+                && Utils.setLikeEquals(indices, type.indices)
+                && Utils.setLikeEquals(constraints, type.constraints);
     }
 
     @Override

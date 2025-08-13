@@ -20,7 +20,7 @@
 package org.pgcodekeeper.core.schema.pg;
 
 import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.*;

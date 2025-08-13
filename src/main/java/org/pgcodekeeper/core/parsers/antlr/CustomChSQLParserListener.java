@@ -23,7 +23,7 @@ import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.*;
 import org.pgcodekeeper.core.parsers.antlr.statements.ch.*;
 import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.IMonitor;
+import org.pgcodekeeper.core.monitor.IMonitor;
 
 import java.util.List;
 

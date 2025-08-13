@@ -17,6 +17,7 @@ package org.pgcodekeeper.core.parsers.antlr.msexpr;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.As_table_aliasContext;
 import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser.Common_table_expressionContext;
@@ -131,7 +132,7 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
             }
 
             Stream<Pair<String, String>> columns = rel.getRelationColumns();
-            for (Pair<String, String> col : PgDiffUtils.sIter(columns)) {
+            for (Pair<String, String> col : Utils.streamIterator(columns)) {
                 if (col.getFirst().equals(name)) {
                     return new Pair<>(rel, col);
                 }

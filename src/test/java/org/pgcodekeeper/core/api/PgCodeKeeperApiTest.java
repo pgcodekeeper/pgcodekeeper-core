@@ -21,7 +21,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.pgcodekeeper.core.PgCodekeeperException;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.utils.NullMonitor;
+import org.pgcodekeeper.core.monitor.NullMonitor;
 
 import java.io.IOException;
 import java.nio.file.Files;

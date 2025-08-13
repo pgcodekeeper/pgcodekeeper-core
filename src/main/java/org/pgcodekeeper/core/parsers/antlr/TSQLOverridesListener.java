@@ -26,7 +26,7 @@ import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.schema.StatementOverride;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.IMonitor;
+import org.pgcodekeeper.core.monitor.IMonitor;
 
 import java.util.List;
 import java.util.Map;

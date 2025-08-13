@@ -19,12 +19,11 @@ import com.microsoft.sqlserver.jdbc.SQLServerError;
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.DatabaseType;
-import org.pgcodekeeper.core.IProgressReporter;
-import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.reporter.IProgressReporter;
 import org.pgcodekeeper.core.loader.jdbc.JdbcType;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.utils.IMonitor;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
 
@@ -83,7 +82,7 @@ public class QueriesBatchCallable extends StatementCallable<String> {
                 case CH:
                     subMonitor.setWorkRemaining(batches.size());
                     for (PgObjLocation query : batches) {
-                        PgDiffUtils.checkCancelled(monitor);
+                        IMonitor.checkCancelled(monitor);
                         currQuery = query;
                         executeSingleStatement(query, finalModifiedQuery);
                         subMonitor.worked(1);
@@ -93,7 +92,7 @@ public class QueriesBatchCallable extends StatementCallable<String> {
                     List<List<PgObjLocation>> batchesList = getListBatchesFromSetBatches();
                     subMonitor.setWorkRemaining(batchesList.size());
                     for (List<PgObjLocation> queriesList : batchesList) {
-                        PgDiffUtils.checkCancelled(monitor);
+                        IMonitor.checkCancelled(monitor);
                         // in case we're executing a real batch after a single-statement one
                         currQuery = null;
                         if (queriesList.size() == 1) {
@@ -240,7 +239,7 @@ public class QueriesBatchCallable extends StatementCallable<String> {
 
             // add other rows
             while (res.next()) {
-                PgDiffUtils.checkCancelled(monitor);
+                IMonitor.checkCancelled(monitor);
                 List<Object> row = new ArrayList<>(count);
                 results.add(row);
                 for (int i = 1; i <= count; i++) {

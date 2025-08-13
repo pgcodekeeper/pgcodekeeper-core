@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.libraries;
+package org.pgcodekeeper.core.library;
 
 import java.util.Objects;
 
@@ -21,44 +21,13 @@ import java.util.Objects;
  * Represents a database library with its metadata and properties.
  * This class encapsulates information about a library including its name,
  * file system path, privilege ignore flag, and owner information.
+ *
+ * @param name               the name of the library
+ * @param path               the file system path to the library
+ * @param isIgnorePrivileges whether to ignore privileges for this library
+ * @param owner              the owner of the library
  */
-public class PgLibrary {
-
-    private final String name;
-    private final String path;
-    private final boolean isIgnorePriv;
-    private final String owner;
-
-    /**
-     * Constructs a new PgLibrary instance.
-     *
-     * @param name         the name of the library
-     * @param path         the file system path to the library
-     * @param isIgnorePriv whether to ignore privileges for this library
-     * @param owner        the owner of the library
-     */
-    public PgLibrary(String name, String path, boolean isIgnorePriv, String owner) {
-        this.name = name;
-        this.path = path;
-        this.isIgnorePriv = isIgnorePriv;
-        this.owner = owner;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public boolean isIgnorePriv() {
-        return isIgnorePriv;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
+public record PgLibrary(String name, String path, boolean isIgnorePrivileges, String owner) {
 
     /**
      * Gets the display title for the library.

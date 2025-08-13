@@ -21,8 +21,8 @@ import org.pgcodekeeper.core.loader.ms.JdbcMsLoader;
 import org.pgcodekeeper.core.loader.pg.JdbcPgLoader;
 import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.IMonitor;
-import org.pgcodekeeper.core.utils.NullMonitor;
+import org.pgcodekeeper.core.monitor.IMonitor;
+import org.pgcodekeeper.core.monitor.NullMonitor;
 
 /**
  * Factory class for creating database loaders based on database type.

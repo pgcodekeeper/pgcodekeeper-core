@@ -15,10 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.DatabaseType;
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.WorkDirs;
+import org.pgcodekeeper.core.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
@@ -26,7 +23,7 @@ import org.pgcodekeeper.core.parsers.antlr.AntlrTaskManager;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.ms.MsSchema;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.IMonitor;
+import org.pgcodekeeper.core.monitor.IMonitor;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -172,7 +169,7 @@ public class ProjectLoader extends DatabaseLoader {
         // step 2
         // read out schemas names, and work in loop on each
         try (Stream<Path> schemas = Files.list(schemasCommonDir)) {
-            for (Path schemaDir : PgDiffUtils.sIter(schemas)) {
+            for (Path schemaDir : Utils.streamIterator(schemas)) {
                 if (Files.isDirectory(schemaDir) && checkIgnoreSchemaList(schemaDir.getFileName().toString())) {
                     loadSubdir(schemasCommonDir, schemaDir.getFileName().toString(), db);
                     for (DbObjType dirSub : WorkDirs.getDirLoadOrder()) {
@@ -233,7 +230,7 @@ public class ProjectLoader extends DatabaseLoader {
         try (Stream<Path> files = Files.list(subDir)
                 .filter(f -> filterFile(f, checkFilename))
                 .sorted()) {
-            for (Path f : PgDiffUtils.sIter(files)) {
+            for (Path f : Utils.streamIterator(files)) {
                 PgDumpLoader loader = new PgDumpLoader(f, settings, monitor);
                 if (isOverrideMode) {
                     loader.setOverridesMap(overrides);

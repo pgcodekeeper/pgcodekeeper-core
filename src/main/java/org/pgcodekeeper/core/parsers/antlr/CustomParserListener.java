@@ -19,7 +19,6 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.parsers.antlr.exception.MisplacedObjectException;
 import org.pgcodekeeper.core.parsers.antlr.exception.MonitorCancelledRuntimeException;
@@ -29,7 +28,7 @@ import org.pgcodekeeper.core.parsers.antlr.statements.ParserAbstract;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.IMonitor;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +81,7 @@ public class CustomParserListener<T extends AbstractDatabase> {
 
     protected void safeParseStatement(Runnable r, ParserRuleContext ctx) {
         try {
-            PgDiffUtils.checkCancelled(monitor);
+            IMonitor.checkCancelled(monitor);
             r.run();
         } catch (UnresolvedReferenceException ex) {
             errors.add(handleUnresolvedReference(ex, filename));

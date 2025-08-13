@@ -25,6 +25,7 @@ import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.FileUtils;
+import org.pgcodekeeper.core.utils.UnixPrintWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -190,7 +191,7 @@ public class ModelExporter {
                 case LEFT:
                     PgStatement stInOld = el.getPgStatement(oldDb);
                     list.remove(stInOld);
-                    for (PgStatement child : PgDiffUtils.sIter(stInOld.getChildren())) {
+                    for (PgStatement child : Utils.streamIterator(stInOld.getChildren())) {
                         list.remove(child);
                         deleteStatementIfExists(child);
                     }

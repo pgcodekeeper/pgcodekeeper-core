@@ -15,10 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.hashers.IHashable;
-import org.pgcodekeeper.core.hashers.JavaHasher;
+import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.hasher.IHashable;
+import org.pgcodekeeper.core.hasher.JavaHasher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,7 +121,7 @@ public final class PartitionTemplateContainer implements IHashable {
 
         if (obj instanceof PartitionTemplateContainer template) {
             return Objects.equals(partitionName, template.partitionName)
-                    && PgDiffUtils.setlikeEquals(normalizedSubElements, template.normalizedSubElements);
+                    && Utils.setLikeEquals(normalizedSubElements, template.normalizedSubElements);
         }
 
         return false;

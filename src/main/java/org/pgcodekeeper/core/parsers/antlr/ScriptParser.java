@@ -21,7 +21,7 @@ import org.pgcodekeeper.core.loader.PgDumpLoader;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.NullMonitor;
+import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

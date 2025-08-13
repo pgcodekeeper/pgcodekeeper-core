@@ -20,7 +20,7 @@
 package org.pgcodekeeper.core.schema.pg;
 
 import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.schema.AbstractTrigger;
 import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;

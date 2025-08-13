@@ -53,7 +53,7 @@ public class MsSchemasReader extends AbstractStatementReader {
     protected void processResult(ResultSet res) throws SQLException, XmlReaderException {
         String schemaName = res.getString("name");
         loader.setCurrentObject(new GenericColumn(schemaName, DbObjType.SCHEMA));
-        if (!loader.checkIgnoreSchemaList(schemaName)) {
+        if (loader.isIgnoredSchema(schemaName)) {
             return;
         }
 

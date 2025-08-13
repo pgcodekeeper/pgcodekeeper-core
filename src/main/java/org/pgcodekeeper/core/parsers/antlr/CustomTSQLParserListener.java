@@ -25,7 +25,7 @@ import org.pgcodekeeper.core.parsers.antlr.statements.ms.*;
 import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.IMonitor;
+import org.pgcodekeeper.core.monitor.IMonitor;
 
 import java.util.List;
 import java.util.Locale;

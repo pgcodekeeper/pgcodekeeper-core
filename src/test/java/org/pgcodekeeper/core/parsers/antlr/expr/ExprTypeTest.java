@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
-import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.loader.FullAnalyze;
@@ -118,15 +117,15 @@ class ExprTypeTest {
                 }
 
                 if (isFirstView) {
-                    cols.append("\n\nSchema: " + schemaName);
+                    cols.append("\n\nSchema: ").append(schemaName);
                     isFirstView = false;
                 }
 
-                cols.append("\n\n  View: " + rel.getName());
+                cols.append("\n\n  View: ").append(rel.getName());
                 cols.append("\n    RelationColumns : ");
 
-                for (Pair<String, String> col : PgDiffUtils.sIter(rel.getRelationColumns())) {
-                    cols.append("\n     " + col.getFirst() + " - " + col.getSecond());
+                for (Pair<String, String> col : Utils.streamIterator(rel.getRelationColumns())) {
+                    cols.append("\n     ").append(col.getFirst()).append(" - ").append(col.getSecond());
                 }
             }
         }

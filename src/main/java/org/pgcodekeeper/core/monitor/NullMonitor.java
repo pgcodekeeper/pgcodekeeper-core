@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.utils;
+package org.pgcodekeeper.core.monitor;
 
 /**
  * A null object implementation of {@link IMonitor} that provides no-op behavior

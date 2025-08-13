@@ -22,7 +22,8 @@ package org.pgcodekeeper.core.schema.pg;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -161,7 +162,7 @@ public final class PgIndex extends AbstractIndex {
         if (!compareUnalterable(newIndex)) {
             if (script.getSettings().isConcurrentlyMode()) {
                 // generate optimized command sequence for concurrent index creation
-                String tmpName = "tmp" + PgDiffUtils.RANDOM.nextInt(Integer.MAX_VALUE) + "_" + name;
+                String tmpName = "tmp" + Utils.getRandom().nextInt(Integer.MAX_VALUE) + "_" + name;
                 newIndex.getCreationSQL(script, tmpName);
                 script.addStatement("BEGIN TRANSACTION");
                 getDropSQL(script);

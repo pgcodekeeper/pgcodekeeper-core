@@ -25,7 +25,7 @@ import java.util.stream.Stream;
  * ClickHouse-specific error strategy that provides enhanced error reporting for
  * ClickHouse SQL parsing.
  */
-class CustomChSQLAntlrErrorStrategy extends CustomAntlrErrorStrategy {
+public class CustomChSQLAntlrErrorStrategy extends CustomAntlrErrorStrategy {
 
     @Override
     protected Stream<Integer> getTokenStream(IntervalSet tokens) {

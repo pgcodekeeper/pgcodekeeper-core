@@ -281,7 +281,7 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
         }
 
         String filePath = ModelExporter.getRelativeFilePath(statement).toString();
-        if (!PgDiffUtils.endsWithIgnoreCase(fileName, filePath)
+        if (!Utils.endsWithIgnoreCase(fileName, filePath)
                 && isInProject(statement.getDbType())) {
             throw new MisplacedObjectException(MessageFormat.format(LOCATION_ERROR,
                     statement.getBareName(), filePath), errToken);

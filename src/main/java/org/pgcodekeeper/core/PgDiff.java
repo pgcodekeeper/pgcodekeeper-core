@@ -173,7 +173,7 @@ public class PgDiff {
             return;
         }
         Stream<Path> stream = Files.list(path).sorted();
-        for (Path child : PgDiffUtils.sIter(stream)) {
+        for (Path child : Utils.streamIterator(stream)) {
             addPrePostPath(script, child, actionType);
         }
     }

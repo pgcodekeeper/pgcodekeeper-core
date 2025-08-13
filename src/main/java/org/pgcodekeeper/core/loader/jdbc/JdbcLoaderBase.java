@@ -39,7 +39,7 @@ import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.pg.AbstractPgFunction;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.IMonitor;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +79,7 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
 
     private final IMonitor monitor;
     private final ISettings settings;
-    private final IgnoreSchemaList ignorelistSchema;
+    private final IgnoreSchemaList ignoreSchemaList;
     protected final Map<Object, AbstractSchema> schemaIds = new HashMap<>();
     protected final AbstractJdbcConnector connector;
 
@@ -97,12 +97,12 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
     protected Statement statement;
 
     protected JdbcLoaderBase(AbstractJdbcConnector connector, IMonitor monitor, ISettings settings,
-                             IgnoreSchemaList ignoreListSchema) {
+                             IgnoreSchemaList ignoreSchemaList) {
         this.connector = connector;
         this.monitor = monitor;
         this.settings = settings;
         this.runner = new JdbcRunner(monitor);
-        this.ignorelistSchema = ignoreListSchema;
+        this.ignoreSchemaList = ignoreSchemaList;
     }
 
     public int getVersion() {
@@ -171,8 +171,8 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
         debug("{}", currentOperation);
     }
 
-    public boolean checkIgnoreSchemaList(String schemaName) {
-        return ignorelistSchema == null || ignorelistSchema.getNameStatus(schemaName);
+    public boolean isIgnoredSchema(String schemaName) {
+        return ignoreSchemaList != null && !ignoreSchemaList.getNameStatus(schemaName);
     }
 
     public JdbcType getCachedTypeByOid(Long oid) {
@@ -597,7 +597,7 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
         GenericColumn object = this.currentObject;
         List<Object> list = new ArrayList<>();
         AntlrTaskManager.submit(antlrTasks, () -> {
-            PgDiffUtils.checkCancelled(monitor);
+            IMonitor.checkCancelled(monitor);
             P p = parserCreateFunction.apply(list, location);
             return parserCtxReader.apply(p);
         }, t -> {

@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.schema.ch;
 
 import org.pgcodekeeper.core.DatabaseType;
-import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 

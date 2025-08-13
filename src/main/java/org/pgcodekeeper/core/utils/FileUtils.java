@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.utils;
 
-import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +69,7 @@ public final class FileUtils {
     public static void deleteRecursive(Path f) throws IOException {
         if (Files.isDirectory(f, LinkOption.NOFOLLOW_LINKS)) {
             try (Stream<Path> stream = Files.list(f)) {
-                for (Path sub : PgDiffUtils.sIter(stream)) {
+                for (Path sub : Utils.streamIterator(stream)) {
                     deleteRecursive(sub);
                 }
             } catch (UncheckedIOException wrapEx) {
@@ -168,7 +168,7 @@ public final class FileUtils {
             hash = path.toString();
         }
 
-        String name = path.getFileName().toString() + '_' + PgDiffUtils.md5(hash).substring(0, 10);
+        String name = path.getFileName().toString() + '_' + Utils.md5(hash).substring(0, 10);
 
         return metaPath.resolve(name);
     }
@@ -184,7 +184,7 @@ public final class FileUtils {
     public static Path getLoadedFilePath(Path metaPath, URI uri) {
         String path = uri.getPath();
         String fileName = FileUtils.getValidFilename(Paths.get(path).getFileName().toString());
-        String name = fileName + '_' + PgDiffUtils.md5(path).substring(0, 10);
+        String name = fileName + '_' + Utils.md5(path).substring(0, 10);
         return metaPath.resolve(name);
     }
 

@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.schema.ch;
 
 import org.pgcodekeeper.core.ChDiffUtils;
 import org.pgcodekeeper.core.DatabaseType;
-import org.pgcodekeeper.core.hashers.Hasher;
+import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.schema.AbstractIndex;
 import org.pgcodekeeper.core.schema.AbstractTable;
 import org.pgcodekeeper.core.schema.ObjectState;

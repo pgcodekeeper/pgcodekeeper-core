@@ -17,9 +17,9 @@ package org.pgcodekeeper.core.schema;
 
 import org.pgcodekeeper.core.*;
 import org.pgcodekeeper.core.formatter.FileFormatter;
-import org.pgcodekeeper.core.hashers.Hasher;
-import org.pgcodekeeper.core.hashers.IHashable;
-import org.pgcodekeeper.core.hashers.JavaHasher;
+import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.hasher.IHashable;
+import org.pgcodekeeper.core.hasher.JavaHasher;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.exception.ObjectCreationException;

@@ -23,7 +23,7 @@ import org.pgcodekeeper.core.model.difftree.*;
 import org.pgcodekeeper.core.model.exporter.ModelExporter;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.IMonitor;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.utils.ProjectUpdater;
 
 import java.io.IOException;

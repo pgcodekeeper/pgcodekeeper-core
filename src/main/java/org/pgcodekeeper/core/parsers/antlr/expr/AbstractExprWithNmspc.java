@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.parsers.antlr.expr;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.QNameParser;
@@ -191,7 +191,7 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
                 }
             }
 
-            for (Pair<String, String> col : PgDiffUtils.sIter(columns)) {
+            for (Pair<String, String> col : Utils.streamIterator(columns)) {
                 if (col.getFirst().equals(name)) {
                     return new Pair<>(rel, col);
                 }

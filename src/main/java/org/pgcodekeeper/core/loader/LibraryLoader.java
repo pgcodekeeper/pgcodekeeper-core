@@ -16,9 +16,9 @@
 package org.pgcodekeeper.core.loader;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.libraries.PgLibrary;
-import org.pgcodekeeper.core.libraries.PgLibrarySource;
+import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.library.PgLibrary;
+import org.pgcodekeeper.core.library.PgLibrarySource;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.FileUtils;
@@ -86,16 +86,16 @@ public final class LibraryLoader extends DatabaseLoader {
     /**
      * Loads libraries from the specified collection of paths.
      *
-     * @param settings     loader settings and configuration
-     * @param isIgnorePriv whether to ignore privileges during loading
-     * @param paths        collection of library paths to load
+     * @param settings           loader settings and configuration
+     * @param isIgnorePrivileges whether to ignore privileges during loading
+     * @param paths              collection of library paths to load
      * @throws InterruptedException if loading is interrupted
      * @throws IOException          if library loading fails
      */
-    public void loadLibraries(ISettings settings, boolean isIgnorePriv,
+    public void loadLibraries(ISettings settings, boolean isIgnorePrivileges,
                               Collection<String> paths) throws InterruptedException, IOException {
         for (String path : paths) {
-            database.addLib(getLibrary(path, settings, isIgnorePriv), path, null);
+            database.addLib(getLibrary(path, settings, isIgnorePrivileges), path, null);
         }
     }
 
@@ -115,21 +115,21 @@ public final class LibraryLoader extends DatabaseLoader {
         try {
             loadNested = xmlStore.readLoadNestedFlag();
             for (PgLibrary lib : xmlLibs) {
-                String path = lib.getPath();
-                AbstractDatabase l = getLibrary(path, settings, lib.isIgnorePriv(), xmlPath);
-                database.addLib(l, path, lib.getOwner());
+                String path = lib.path();
+                AbstractDatabase l = getLibrary(path, settings, lib.isIgnorePrivileges(), xmlPath);
+                database.addLib(l, path, lib.owner());
             }
         } finally {
             loadNested = oldLoadNested;
         }
     }
 
-    private AbstractDatabase getLibrary(String path, ISettings settings, boolean isIgnorePriv)
+    private AbstractDatabase getLibrary(String path, ISettings settings, boolean isIgnorePrivileges)
             throws InterruptedException, IOException {
-        return getLibrary(path, settings, isIgnorePriv, null);
+        return getLibrary(path, settings, isIgnorePrivileges, null);
     }
 
-    private AbstractDatabase getLibrary(String path, ISettings settings, boolean isIgnorePriv, Path xmlPath)
+    private AbstractDatabase getLibrary(String path, ISettings settings, boolean isIgnorePrivileges, Path xmlPath)
             throws InterruptedException, IOException {
         if (!loadedLibs.add(path)) {
             return createDb(settings);
@@ -138,7 +138,7 @@ public final class LibraryLoader extends DatabaseLoader {
         ISettings copySettings;
         if (!settings.isIgnorePrivileges()) {
             copySettings = settings.copy();
-            copySettings.setIgnorePrivileges(isIgnorePriv);
+            copySettings.setIgnorePrivileges(isIgnorePrivileges);
         } else {
             copySettings = settings;
         }
@@ -148,7 +148,7 @@ public final class LibraryLoader extends DatabaseLoader {
                 return loadJdbc(copySettings, path);
             case URL:
                 try {
-                    return loadURI(new URI(path), copySettings, isIgnorePriv);
+                    return loadURI(new URI(path), copySettings, isIgnorePrivileges);
                 } catch (URISyntaxException ex) {
                     // shouldn't happen, already checked by getSource
                     // not URI, try to folder or file
@@ -186,21 +186,21 @@ public final class LibraryLoader extends DatabaseLoader {
         }
 
         if (FileUtils.isZipFile(p)) {
-            return loadZip(p, copySettings, isIgnorePriv);
+            return loadZip(p, copySettings, isIgnorePrivileges);
         }
 
         AbstractDatabase db = createDb(copySettings);
-        PgDumpLoader loader = new PgDumpLoader(Paths.get(path), copySettings);
+        PgDumpLoader loader = new PgDumpLoader(p, copySettings);
         loader.loadAsync(db, antlrTasks);
         launchedLoaders.add(loader);
         finishLoaders();
         return db;
     }
 
-    private AbstractDatabase loadZip(Path path, ISettings settings, boolean isIgnorePriv)
+    private AbstractDatabase loadZip(Path path, ISettings settings, boolean isIgnorePrivileges)
             throws InterruptedException, IOException {
         Path dir = FileUtils.getUnzippedFilePath(metaPath, path);
-        return getLibrary(FileUtils.unzip(path, dir), settings, isIgnorePriv);
+        return getLibrary(FileUtils.unzip(path, dir), settings, isIgnorePrivileges);
     }
 
     private AbstractDatabase loadJdbc(ISettings settings, String path) throws IOException, InterruptedException {
@@ -215,17 +215,17 @@ public final class LibraryLoader extends DatabaseLoader {
         return db;
     }
 
-    private AbstractDatabase loadURI(URI uri, ISettings settings, boolean isIgnorePriv)
+    private AbstractDatabase loadURI(URI uri, ISettings settings, boolean isIgnorePrivileges)
             throws InterruptedException, IOException {
         String path = uri.getPath();
         String fileName = FileUtils.getValidFilename(Paths.get(path).getFileName().toString());
-        String name = fileName + '_' + PgDiffUtils.md5(path).substring(0, 10);
+        String name = fileName + '_' + Utils.md5(path).substring(0, 10);
 
         Path dir = metaPath.resolve(name);
 
         FileUtils.loadURI(uri, fileName, dir);
 
-        return getLibrary(dir.toString(), settings, isIgnorePriv);
+        return getLibrary(dir.toString(), settings, isIgnorePrivileges);
     }
 
     private void readStatementsFromDirectory(Path f, AbstractDatabase db, ISettings settings)

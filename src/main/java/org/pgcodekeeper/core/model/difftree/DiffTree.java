@@ -15,13 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.difftree;
 
-import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
 import org.pgcodekeeper.core.schema.AbstractColumn;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.AbstractTable;
 import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.utils.IMonitor;
+import org.pgcodekeeper.core.monitor.IMonitor;
 
 import java.util.*;
 
@@ -152,7 +151,7 @@ public final class DiffTree {
      * @throws InterruptedException if the operation is cancelled via the progress monitor
      */
     public TreeElement createTree(AbstractDatabase left, AbstractDatabase right) throws InterruptedException {
-        PgDiffUtils.checkCancelled(monitor);
+        IMonitor.checkCancelled(monitor);
         TreeElement db = new TreeElement("Database", DbObjType.DATABASE, DiffSide.BOTH);
         addChildren(left, right, db);
 
@@ -161,12 +160,12 @@ public final class DiffTree {
 
     private void addChildren(PgStatement left, PgStatement right, TreeElement parent) throws InterruptedException {
         for (CompareResult res : compareStatements(left, right)) {
-            PgDiffUtils.checkCancelled(monitor);
+            IMonitor.checkCancelled(monitor);
             TreeElement child = new TreeElement(res.getStatement(), res.getSide());
             parent.addChild(child);
 
             if (res.hasChildren()) {
-                addChildren(res.getLeft(), res.getRight(), child);
+                addChildren(res.left(), res.right(), child);
             }
         }
     }
@@ -216,23 +215,7 @@ public final class DiffTree {
  * Contains references to the left and right statements and provides methods to
  * determine the comparison side and retrieve statement information.
  */
-class CompareResult {
-
-    private final PgStatement left;
-    private final PgStatement right;
-
-    public PgStatement getLeft() {
-        return left;
-    }
-
-    public PgStatement getRight() {
-        return right;
-    }
-
-    public CompareResult(PgStatement left, PgStatement right) {
-        this.left = left;
-        this.right = right;
-    }
+record CompareResult(PgStatement left, PgStatement right) {
 
     /**
      * Determines which side of the comparison this result represents.

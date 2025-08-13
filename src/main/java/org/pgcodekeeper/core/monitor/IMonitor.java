@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.utils;
+package org.pgcodekeeper.core.monitor;
 
 /**
  * Interface for monitoring progress and cancellation of long-running operations.
@@ -55,4 +55,17 @@ public interface IMonitor {
      * @param size the number of work units remaining
      */
     void setWorkRemaining(int size);
+
+    /**
+     * Checks if progress monitor has been cancelled.
+     *
+     * @param monitor the progress monitor to check
+     * @throws InterruptedException if monitor is cancelled
+     */
+    static void checkCancelled(IMonitor monitor)
+            throws InterruptedException {
+        if (monitor != null && monitor.isCanceled()) {
+            throw new InterruptedException();
+        }
+    }
 }

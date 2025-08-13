@@ -18,6 +18,7 @@ package org.pgcodekeeper.core.loader.jdbc;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.monitor.IMonitor;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -81,7 +82,7 @@ public abstract class AbstractStatementReader {
             setParams(statement);
             ResultSet result = loader.getRunner().runScript(statement);
             while (result.next()) {
-                PgDiffUtils.checkCancelled(loader.getMonitor());
+                IMonitor.checkCancelled(loader.getMonitor());
                 loader.getMonitor().worked(1);
                 processResult(result);
             }
