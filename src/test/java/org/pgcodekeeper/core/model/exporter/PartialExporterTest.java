@@ -115,15 +115,12 @@ public class PartialExporterTest {
     @ParameterizedTest
     @MethodSource("generator")
     void testExportPartial(PartialExportInfo info) throws Exception {
-        TreeElement tree = DiffTree.create(dbSource, dbTarget);
-        Path exportDirFull = null;
-        Path exportDirPartial = null;
+        var settings = new CoreSettings();
+        TreeElement tree = DiffTree.create(settings, dbSource, dbTarget);
         try (TempDir dirFull = new TempDir("pgCodekeeper-test-files");
              TempDir dirPartial = new TempDir("pgCodekeeper-test-export-partial")) {
-            exportDirFull = dirFull.get();
-            exportDirPartial = dirPartial.get();
-
-            var settings = new CoreSettings();
+            Path exportDirFull = dirFull.get();
+            Path exportDirPartial = dirPartial.get();
 
             // full export of source
             new ModelExporter(exportDirFull, dbSource, DatabaseType.PG, Consts.UTF_8, settings).exportFull();
@@ -140,7 +137,7 @@ public class PartialExporterTest {
             new ModelExporter(exportDirPartial, dbTarget, dbSource, DatabaseType.PG, list, Consts.UTF_8, settings)
                     .exportPartial();
 
-            walkAndComare(exportDirFull, exportDirPartial, info);
+            walkAndCompare(exportDirFull, exportDirPartial, info);
         }
     }
 
@@ -169,7 +166,7 @@ public class PartialExporterTest {
                 Arguments.of(new PartialExportInfoImpl21()));
     }
 
-    private void walkAndComare(Path exportDirFull, Path exportDirPartial, PartialExportInfo info) throws IOException {
+    private void walkAndCompare(Path exportDirFull, Path exportDirPartial, PartialExportInfo info) throws IOException {
         // first compare full export to partial
         Map<String, String> modifiedFiles = info.modifiedFiles();
         List<String> newFiles = info.newFiles();
@@ -253,7 +250,7 @@ class PartialExportInfoImpl2 extends PartialExportInfo {
 
     @Override
     public List<String> deletedFiles() {
-        return new LinkedList<>(Arrays.asList("SCHEMA/public/TABLE/t2.sql"));
+        return new LinkedList<>(List.of("SCHEMA/public/TABLE/t2.sql"));
     }
 }
 
@@ -287,7 +284,7 @@ class PartialExportInfoImpl4 extends PartialExportInfo {
 
     @Override
     public List<String> deletedFiles() {
-        return new LinkedList<>(Arrays.asList("SCHEMA/public/FUNCTION/fun2.sql"));
+        return new LinkedList<>(List.of("SCHEMA/public/FUNCTION/fun2.sql"));
     }
 }
 
@@ -339,7 +336,7 @@ class PartialExportInfoImpl7 extends PartialExportInfo {
 
     @Override
     public List<String> newFiles() {
-        return new LinkedList<>(Arrays.asList("SCHEMA/public/FUNCTION/fun3.sql"));
+        return new LinkedList<>(List.of("SCHEMA/public/FUNCTION/fun3.sql"));
     }
 }
 
@@ -357,7 +354,7 @@ class PartialExportInfoImpl8 extends PartialExportInfo {
 
     @Override
     public List<String> newFiles() {
-        return new LinkedList<>(Arrays.asList("SCHEMA/public/FUNCTION/fun3.sql"));
+        return new LinkedList<>(List.of("SCHEMA/public/FUNCTION/fun3.sql"));
     }
 }
 
@@ -373,7 +370,7 @@ class PartialExportInfoImpl9 extends PartialExportInfo {
 
     @Override
     public List<String> newFiles() {
-        return new LinkedList<>(Arrays.asList("SCHEMA/public/VIEW/v1.sql"));
+        return new LinkedList<>(List.of("SCHEMA/public/VIEW/v1.sql"));
     }
 }
 
@@ -408,7 +405,7 @@ class PartialExportInfoImpl11 extends PartialExportInfo {
 
     @Override
     public List<String> newFiles() {
-        return new LinkedList<>(Arrays.asList("SCHEMA/newschema/newschema.sql"));
+        return new LinkedList<>(List.of("SCHEMA/newschema/newschema.sql"));
     }
 }
 
@@ -424,7 +421,7 @@ class PartialExportInfoImpl12 extends PartialExportInfo {
 
     @Override
     public List<String> deletedFiles() {
-        return new LinkedList<>(Arrays.asList("SCHEMA/test/TABLE/test_table.sql"));
+        return new LinkedList<>(List.of("SCHEMA/test/TABLE/test_table.sql"));
     }
 }
 
@@ -476,7 +473,7 @@ class PartialExportInfoImpl15 extends PartialExportInfo {
 
     @Override
     public List<String> deletedFiles() {
-        return new LinkedList<>(Arrays.asList("SCHEMA/public/FUNCTION/proc.sql"));
+        return new LinkedList<>(List.of("SCHEMA/public/FUNCTION/proc.sql"));
     }
 }
 
@@ -570,7 +567,7 @@ class PartialExportInfoImpl20 extends PartialExportInfo {
 
     @Override
     public List<String> deletedFiles() {
-        return new LinkedList<>(Arrays.asList("SCHEMA/public/TABLE/t2.sql"));
+        return new LinkedList<>(List.of("SCHEMA/public/TABLE/t2.sql"));
     }
 }
 
@@ -589,6 +586,6 @@ class PartialExportInfoImpl21 extends PartialExportInfo {
 
     @Override
     public List<String> newFiles() {
-        return new LinkedList<>(Arrays.asList("SCHEMA/public/TABLE/t_1.sql"));
+        return new LinkedList<>(List.of("SCHEMA/public/TABLE/t_1.sql"));
     }
 }

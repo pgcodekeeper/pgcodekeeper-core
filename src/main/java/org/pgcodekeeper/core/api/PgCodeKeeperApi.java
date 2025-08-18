@@ -102,7 +102,7 @@ public final class PgCodeKeeperApi {
             throws IOException, InterruptedException {
         IgnoreList ignoreList = IgnoreParser.parseLists(ignoreLists);
         TreeElement root;
-        root = DiffTree.create(dbToExport, null, monitor);
+        root = DiffTree.create(settings, dbToExport, null, monitor);
         root.setAllChecked();
 
         List<TreeElement> selected = getSelectedElements(settings, root, ignoreList);
@@ -144,7 +144,7 @@ public final class PgCodeKeeperApi {
                               String projectToUpdate, Collection<String> ignoreLists, IMonitor monitor)
             throws PgCodekeeperException, IOException, InterruptedException {
         IgnoreList ignoreList = IgnoreParser.parseLists(ignoreLists);
-        TreeElement root = DiffTree.create(oldDb, newDb, monitor);
+        TreeElement root = DiffTree.create(settings, oldDb, newDb, monitor);
         root.setAllChecked();
         List<TreeElement> selected = getSelectedElements(settings, root, ignoreList);
 

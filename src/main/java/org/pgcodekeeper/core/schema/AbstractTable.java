@@ -204,17 +204,39 @@ public abstract class AbstractTable extends PgStatementContainer implements IOpt
 
     @Override
     public boolean compare(PgStatement obj) {
+        return compare(obj, true);
+    }
+
+    private boolean compare(PgStatement obj, boolean checkColumnOrder) {
         if (this == obj) {
             return true;
         }
 
         if (obj instanceof AbstractTable table && super.compare(obj)) {
-            return columns.equals(table.columns)
+            boolean isColumnsEqual;
+            if (checkColumnOrder) {
+                isColumnsEqual = columns.equals(table.columns);
+            } else {
+                isColumnsEqual = Utils.setLikeEquals(columns, table.columns);
+            }
+
+            return isColumnsEqual
                     && getClass().equals(table.getClass())
                     && options.equals(table.options);
         }
 
         return false;
+    }
+
+    /**
+     * Checks that tables are equal regardless of column order.
+     *
+     * @param oldTable old state of the table
+     * @param newTable new state of the table
+     * @return true if the tables are identical
+     */
+    public static boolean compareIgnoringColumnOrder(AbstractTable oldTable, AbstractTable newTable) {
+        return oldTable.compare(newTable, false);
     }
 
     @Override
@@ -233,7 +255,7 @@ public abstract class AbstractTable extends PgStatementContainer implements IOpt
 
     @Override
     public void computeHash(Hasher hasher) {
-        hasher.putUnordered(columns);
+        hasher.putOrdered(columns);
         hasher.put(options);
     }
 

@@ -40,17 +40,9 @@ public class ModelExporterTest {
             "test_settings_in_pg, public.t1.constr, CONSTRAINT"
     })
     void settingsTest(String template, String stmtName, DbObjType type) throws IOException, InterruptedException {
-        var settings = new CoreSettings() {
-            @Override
-            public boolean isGenerateExists() {
-                return true;
-            }
-
-            @Override
-            public boolean isConstraintNotValid() {
-                return true;
-            }
-        };
+        var settings = new CoreSettings();
+        settings.setGenerateConstraintNotValid(true);
+        settings.setGenerateExists(true);
 
         AbstractDatabase db = TestUtils.loadTestDump(template + FILES_POSTFIX.SQL, getClass(), settings);
 

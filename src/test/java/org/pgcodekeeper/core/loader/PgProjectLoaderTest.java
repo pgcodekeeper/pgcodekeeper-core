@@ -74,7 +74,7 @@ class PgProjectLoaderTest {
             var settings = new CoreSettings();
 
             AbstractDatabase dbDump = TestUtils.loadTestDump(TestUtils.RESOURCE_DUMP, TestUtils.class, settings);
-            TreeElement root = DiffTree.create(dbDump, null, null);
+            TreeElement root = DiffTree.create(settings, dbDump, null, null);
             root.setAllChecked();
 
             TestUtils.createIgnoreListFile(dir);
