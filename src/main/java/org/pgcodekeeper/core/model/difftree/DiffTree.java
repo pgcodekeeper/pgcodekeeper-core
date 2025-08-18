@@ -15,12 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.difftree;
 
+import org.pgcodekeeper.core.diff.Comparison;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
 import org.pgcodekeeper.core.schema.AbstractColumn;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.AbstractTable;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.monitor.IMonitor;
+import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.*;
 
@@ -33,27 +35,30 @@ public final class DiffTree {
     /**
      * Creates a diff tree comparing two database schemas.
      *
-     * @param left  the left (old) database schema
-     * @param right the right (new) database schema
+     * @param settings the compare settings
+     * @param left     the left (old) database schema
+     * @param right    the right (new) database schema
      * @return the root TreeElement representing the diff tree
      * @throws InterruptedException if the operation is interrupted
      */
-    public static TreeElement create(AbstractDatabase left, AbstractDatabase right) throws InterruptedException {
-        return create(left, right, null);
+    public static TreeElement create(ISettings settings, AbstractDatabase left, AbstractDatabase right)
+            throws InterruptedException {
+        return create(settings, left, right, null);
     }
 
     /**
      * Creates a diff tree comparing two database schemas with progress monitoring.
      *
-     * @param left    the left (old) database schema
-     * @param right   the right (new) database schema
-     * @param monitor the progress monitor for tracking operation progress
+     * @param settings the compare settings
+     * @param left     the left (old) database schema
+     * @param right    the right (new) database schema
+     * @param monitor  the progress monitor for tracking operation progress
      * @return the root TreeElement representing the diff tree
      * @throws InterruptedException if the operation is interrupted
      */
-    public static TreeElement create(AbstractDatabase left, AbstractDatabase right, IMonitor monitor)
+    public static TreeElement create(ISettings settings, AbstractDatabase left, AbstractDatabase right, IMonitor monitor)
             throws InterruptedException {
-        return new DiffTree(monitor).createTree(left, right);
+        return new DiffTree(settings, monitor).createTree(left, right);
     }
 
     /**
@@ -135,8 +140,10 @@ public final class DiffTree {
     }
 
     private final IMonitor monitor;
+    private final ISettings settings;
 
-    private DiffTree(IMonitor monitor) {
+    private DiffTree(ISettings settings, IMonitor monitor) {
+        this.settings = settings;
         this.monitor = monitor;
     }
 
@@ -190,7 +197,7 @@ public final class DiffTree {
 
                 if (foundRight == null) {
                     rv.add(new CompareResult(sLeft, null));
-                } else if (!sLeft.equals(foundRight)) {
+                } else if (!Comparison.compare(settings, sLeft, foundRight)) {
                     rv.add(new CompareResult(sLeft, foundRight));
                 }
             });

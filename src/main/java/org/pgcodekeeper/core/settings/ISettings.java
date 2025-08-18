@@ -61,7 +61,7 @@ public interface ISettings {
      *
      * @return true if NOT VALID constraints are enabled
      */
-    boolean isConstraintNotValid();
+    boolean isGenerateConstraintNotValid();
 
     /**
      * Checks if existence check DO blocks should be generated.

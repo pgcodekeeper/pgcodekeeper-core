@@ -159,7 +159,7 @@ public final class TestUtils {
         TestUtils.runDiffSame(oldDbFull, dbTemplate, settings);
         TestUtils.runDiffSame(newDbFull, dbTemplate, settings);
 
-        TreeElement tree = DiffTree.create(oldDbFull, newDbFull, null);
+        TreeElement tree = DiffTree.create(settings, oldDbFull, newDbFull, null);
 
         setSelected(selectedObjs, tree, oldDbFull, newDbFull);
         String script = new PgDiff(settings).diff(tree, oldDbFull, newDbFull, null, null, null);

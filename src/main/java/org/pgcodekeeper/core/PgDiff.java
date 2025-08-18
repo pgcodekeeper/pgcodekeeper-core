@@ -86,7 +86,7 @@ public class PgDiff {
      */
     public String diff(AbstractDatabase oldDb, AbstractDatabase newDb, IgnoreList ignoreList)
             throws InterruptedException, IOException {
-        TreeElement root = DiffTree.create(oldDb, newDb);
+        TreeElement root = DiffTree.create(settings, oldDb, newDb);
         root.setAllChecked();
 
         return diff(root, oldDb, newDb, null, null, ignoreList);

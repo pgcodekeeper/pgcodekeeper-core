@@ -105,7 +105,7 @@ public abstract class PgConstraint extends AbstractConstraint {
     }
 
     protected boolean isGenerateNotValid(ISettings settings) {
-        if (!settings.isConstraintNotValid()) {
+        if (!settings.isGenerateConstraintNotValid()) {
             return false;
         }
         if (parent instanceof PartitionPgTable) {

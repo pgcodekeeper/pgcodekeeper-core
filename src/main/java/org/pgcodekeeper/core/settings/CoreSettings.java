@@ -70,6 +70,10 @@ public class CoreSettings implements ISettings {
         return concurrentlyMode;
     }
 
+    public void setConcurrentlyMode(boolean concurrentlyMode) {
+        this.concurrentlyMode = concurrentlyMode;
+    }
+
     @Override
     public boolean isAddTransaction() {
         return addTransaction;
@@ -84,9 +88,17 @@ public class CoreSettings implements ISettings {
         return generateExists;
     }
 
+    public void setGenerateExists(boolean generateExists) {
+        this.generateExists = generateExists;
+    }
+
     @Override
-    public boolean isConstraintNotValid() {
+    public boolean isGenerateConstraintNotValid() {
         return generateConstraintNotValid;
+    }
+
+    public void setGenerateConstraintNotValid(boolean generateConstraintNotValid) {
+        this.generateConstraintNotValid = generateConstraintNotValid;
     }
 
     @Override
@@ -145,6 +157,10 @@ public class CoreSettings implements ISettings {
         return ignoreColumnOrder;
     }
 
+    public void setIgnoreColumnOrder(boolean ignoreColumnOrder) {
+        this.ignoreColumnOrder = ignoreColumnOrder;
+    }
+
     @Override
     public boolean isEnableFunctionBodiesDependencies() {
         return enableFunctionBodiesDependencies;
@@ -168,9 +184,17 @@ public class CoreSettings implements ISettings {
         return dropBeforeCreate;
     }
 
+    public void setDropBeforeCreate(boolean dropBeforeCreate) {
+        this.dropBeforeCreate = dropBeforeCreate;
+    }
+
     @Override
     public boolean isStopNotAllowed() {
         return stopNotAllowed;
+    }
+
+    public void setStopNotAllowed(boolean stopNotAllowed) {
+        this.stopNotAllowed = stopNotAllowed;
     }
 
     @Override
@@ -178,9 +202,17 @@ public class CoreSettings implements ISettings {
         return selectedOnly;
     }
 
+    public void setSelectedOnly(boolean selectedOnly) {
+        this.selectedOnly = selectedOnly;
+    }
+
     @Override
     public boolean isIgnoreConcurrentModification() {
         return ignoreConcurrentModification;
+    }
+
+    public void setIgnoreConcurrentModification(boolean ignoreConcurrentModification) {
+        this.ignoreConcurrentModification = ignoreConcurrentModification;
     }
 
     @Override
@@ -188,9 +220,17 @@ public class CoreSettings implements ISettings {
         return simplifyView;
     }
 
+    public void setSimplifyView(boolean simplifyView) {
+        this.simplifyView = simplifyView;
+    }
+
     @Override
     public boolean isDisableCheckFunctionBodies() {
         return disableCheckFunctionBodies;
+    }
+
+    public void setDisableCheckFunctionBodies(boolean disableCheckFunctionBodies) {
+        this.disableCheckFunctionBodies = disableCheckFunctionBodies;
     }
 
     @Override
@@ -207,6 +247,10 @@ public class CoreSettings implements ISettings {
         return timeZone;
     }
 
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
+    }
+
     @Override
     public FormatConfiguration getFormatConfiguration() {
         return null;
@@ -217,14 +261,26 @@ public class CoreSettings implements ISettings {
         return Collections.unmodifiableCollection(allowedTypes);
     }
 
+    public void setAllowedTypes(List<DbObjType> allowedTypes) {
+        this.allowedTypes = allowedTypes;
+    }
+
     @Override
     public Collection<String> getPreFilePath() {
         return Collections.unmodifiableCollection(preFilePath);
     }
 
+    public void setPreFilePath(List<String> preFilePath) {
+        this.preFilePath = preFilePath;
+    }
+
     @Override
     public Collection<String> getPostFilePath() {
         return Collections.unmodifiableCollection(postFilePath);
+    }
+
+    public void setPostFilePath(List<String> postFilePath) {
+        this.postFilePath = postFilePath;
     }
 
     @Override
