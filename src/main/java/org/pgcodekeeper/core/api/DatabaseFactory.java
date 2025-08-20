@@ -16,10 +16,7 @@
 package org.pgcodekeeper.core.api;
 
 import org.pgcodekeeper.core.PgCodekeeperException;
-import org.pgcodekeeper.core.loader.DatabaseLoader;
-import org.pgcodekeeper.core.loader.LoaderFactory;
-import org.pgcodekeeper.core.loader.PgDumpLoader;
-import org.pgcodekeeper.core.loader.ProjectLoader;
+import org.pgcodekeeper.core.loader.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.IIgnoreList;
 import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
@@ -37,40 +34,75 @@ import java.util.stream.Collectors;
 /**
  * Factory class for loading database schemas from various sources.
  * <p>
- * This class provides static methods to create {@link AbstractDatabase} instances
+ * This class provides methods to create {@link AbstractDatabase} instances
  * from different sources: JDBC connections, project directories, and database dumps.
  * Some loading method supports optional schema filtering through ignore lists.
  * </p>
  */
 public final class DatabaseFactory {
 
+    private final ISettings settings;
+    private final boolean ignoreErrors;
+    private final boolean needAnalyze;
+    private final IMonitor monitor;
+
+    /**
+     * Constructor with default arguments
+     *
+     * @param settings configuration settings
+     */
+    public DatabaseFactory(ISettings settings) {
+        this(settings, false, true);
+    }
+
+    /**
+     * Constructor with default progress monitor
+     *
+     * @param settings     configuration settings
+     * @param ignoreErrors behavior on parsing errors
+     * @param needAnalyze  if true, then after loading all database objects, an analysis will be run to find dependencies
+     */
+    public DatabaseFactory(ISettings settings, boolean ignoreErrors, boolean needAnalyze) {
+        this(settings, ignoreErrors, needAnalyze, new NullMonitor());
+    }
+
+    /**
+     * @param settings     configuration settings
+     * @param ignoreErrors behavior on parsing errors
+     * @param needAnalyze  if true, then after loading all database objects, an analysis will be run to find dependencies
+     * @param monitor      progress monitor for tracking the operation
+     */
+    public DatabaseFactory(ISettings settings, boolean ignoreErrors, boolean needAnalyze, IMonitor monitor) {
+        this.settings = settings;
+        this.ignoreErrors = ignoreErrors;
+        this.needAnalyze = needAnalyze;
+        this.monitor = monitor;
+    }
+
     /**
      * Loads database from a JDBC connection.
-     *
-     * @param settings ISettings object
      * @param url      the JDBC connection URL
      * @return the loaded database
      * @throws IOException           if I/O operations fail
-     * @throws PgCodekeeperException if database loading is interrupted or parsing errors occur
+     * @throws PgCodekeeperException if parsing errors occur
+     * @throws InterruptedException  if operation is cancelled
      */
-    public static AbstractDatabase loadFromJdbc(ISettings settings, String url)
+    public AbstractDatabase loadFromJdbc(String url)
             throws IOException, PgCodekeeperException, InterruptedException {
-        return loadFromJdbc(settings, url, null, new NullMonitor());
+        return loadFromJdbc(url, null);
     }
 
     /**
      * Loads database from a JDBC connection with schema filtering and monitoring.
      *
-     * @param settings             ISettings object
      * @param url                  the JDBC connection URL
      * @param ignoreSchemaListPath path to file containing schemas to ignore, or null for no filtering
-     * @param monitor              progress monitor for tracking the operation
      * @return the loaded database
      * @throws IOException           if I/O operations fail
-     * @throws PgCodekeeperException if database loading is interrupted or parsing errors occur
+     * @throws PgCodekeeperException if parsing errors occur
+     * @throws InterruptedException  if operation is cancelled
      */
-    public static AbstractDatabase loadFromJdbc(ISettings settings, String url, String ignoreSchemaListPath,
-                                                IMonitor monitor)
+    public AbstractDatabase loadFromJdbc(String url, String ignoreSchemaListPath)
             throws IOException, PgCodekeeperException, InterruptedException {
         var ignoreSchemaList = IIgnoreList.parseIgnoreList(ignoreSchemaListPath, new IgnoreSchemaList());
         var loader = LoaderFactory.createJdbcLoader(settings, url, ignoreSchemaList, monitor);
@@ -80,30 +112,28 @@ public final class DatabaseFactory {
     /**
      * Loads database from a project directory with schema filtering.
      *
-     * @param settings    ISettings object
      * @param projectPath path to the project directory containing SQL files
      * @return the loaded database
-     * @throws PgCodekeeperException if database loading is interrupted or parsing errors occur
+     * @throws PgCodekeeperException if parsing errors occur
      * @throws IOException           if I/O operations fail
+     * @throws InterruptedException  if operation is cancelled
      */
-    public static AbstractDatabase loadFromProject(ISettings settings, String projectPath)
+    public AbstractDatabase loadFromProject(String projectPath)
             throws PgCodekeeperException, IOException, InterruptedException {
-        return loadFromProject(settings, projectPath, null, new NullMonitor());
+        return loadFromProject(projectPath, null);
     }
 
     /**
      * Loads database from a project directory with schema filtering and monitoring.
      *
-     * @param settings             ISettings object
      * @param projectPath          path to the project directory containing SQL files
      * @param ignoreSchemaListPath path to file containing schemas to ignore, or null for no filtering
-     * @param monitor              progress monitor for tracking the operation
      * @return the loaded database
-     * @throws PgCodekeeperException if database loading is interrupted or parsing errors occur
+     * @throws PgCodekeeperException if parsing errors occur
      * @throws IOException           if I/O operations fail
+     * @throws InterruptedException  if operation is cancelled
      */
-    public static AbstractDatabase loadFromProject(ISettings settings, String projectPath, String ignoreSchemaListPath,
-                                                   IMonitor monitor)
+    public AbstractDatabase loadFromProject(String projectPath, String ignoreSchemaListPath)
             throws PgCodekeeperException, IOException, InterruptedException {
         var ignoreSchemaList = IIgnoreList.parseIgnoreList(ignoreSchemaListPath, new IgnoreSchemaList());
         var loader = new ProjectLoader(projectPath, settings, monitor, new ArrayList<>(), ignoreSchemaList);
@@ -113,25 +143,23 @@ public final class DatabaseFactory {
     /**
      * Loads database from a database dump file and monitoring.
      *
-     * @param settings ISettings object
      * @param dumpPath path to the database dump file
-     * @param monitor  progress monitor for tracking the operation
      * @return the loaded database
      * @throws IOException           if I/O operations fail
-     * @throws PgCodekeeperException if database loading is interrupted or parsing errors occur
+     * @throws PgCodekeeperException if parsing errors occur
+     * @throws InterruptedException  if operation is cancelled
      */
-    public static AbstractDatabase loadFromDump(ISettings settings, String dumpPath, IMonitor monitor)
+    public AbstractDatabase loadFromDump(String dumpPath)
             throws IOException, PgCodekeeperException, InterruptedException {
-        var loader = new PgDumpLoader(Path.of(dumpPath), settings, monitor);
+        var loader = new PgDumpLoader(Path.of(dumpPath), settings);
         return loadDatabaseFromLoader(loader);
     }
 
-    private static AbstractDatabase loadDatabaseFromLoader(DatabaseLoader loader) throws IOException,
+    private AbstractDatabase loadDatabaseFromLoader(DatabaseLoader loader) throws IOException,
             PgCodekeeperException, InterruptedException {
-        AbstractDatabase db;
-        db = loader.loadAndAnalyze();
+        AbstractDatabase db = needAnalyze ? loader.loadAndAnalyze() : loader.load();
 
-        if (!loader.getErrors().isEmpty()) {
+        if (!ignoreErrors && !loader.getErrors().isEmpty()) {
             var errors = loader.getErrors().stream()
                     .map(Object::toString)
                     .collect(Collectors.joining());

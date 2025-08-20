@@ -18,8 +18,9 @@ package org.pgcodekeeper.core.api;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.PgCodekeeperException;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 
@@ -48,11 +49,14 @@ public class PgCodeKeeperApiTest {
         settings = new CoreSettings();
     }
 
-    @Test
-    void testDiff() throws PgCodekeeperException, IOException, InterruptedException {
-        var testName = "test_diff";
-        var oldDb = loadDatabaseFromDump(testName + ORIGINAL);
-        var newDb = loadDatabaseFromDump(testName + NEW);
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "test_diff"
+    })
+    void diffTest(String testName) throws PgCodekeeperException, IOException, InterruptedException {
+        var df = new DatabaseFactory(settings);
+        var oldDb = df.loadFromDump(getFilePath(testName + ORIGINAL));
+        var newDb = df.loadFromDump(getFilePath(testName + NEW));
         var expectedDiff = getExpectedDiff(testName);
 
         String actual = PgCodeKeeperApi.diff(settings, oldDb, newDb);
@@ -60,11 +64,14 @@ public class PgCodeKeeperApiTest {
         assertEquals(expectedDiff, actual);
     }
 
-    @Test
-    void testDiffWithIgnoreList() throws PgCodekeeperException, IOException, InterruptedException {
-        var testName = "test_ignore";
-        var oldDb = loadDatabaseFromDump(testName + ORIGINAL);
-        var newDb = loadDatabaseFromDump(testName + NEW);
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "test_ignore"
+    })
+    void diffWithIgnoreListTest(String testName) throws PgCodekeeperException, IOException, InterruptedException {
+        var df = new DatabaseFactory(settings);
+        var oldDb = df.loadFromDump(getFilePath(testName + ORIGINAL));
+        var newDb = df.loadFromDump(getFilePath(testName + NEW));
         var ignoreListPath = getFilePath("ignore.pgcodekeeperignore");
         var expectedDiff = getExpectedDiff(testName);
 
@@ -74,9 +81,10 @@ public class PgCodeKeeperApiTest {
     }
 
     @Test
-    void testExport(@TempDir Path tempDir) throws PgCodekeeperException, IOException, InterruptedException {
+    void exportTest(@TempDir Path tempDir) throws PgCodekeeperException, IOException, InterruptedException {
         var dumpFileName = "test_export.sql";
-        var db = loadDatabaseFromDump(dumpFileName);
+        var df = new DatabaseFactory(settings);
+        var db = df.loadFromDump(getFilePath(dumpFileName));
         var exportedTableFile = tempDir.resolve(TABLES_DIRECTORY + "test_table.sql");
         var expectedContent = getFileContent(dumpFileName);
 
@@ -86,8 +94,9 @@ public class PgCodeKeeperApiTest {
     }
 
     @Test
-    void testExportWithIgnoreList(@TempDir Path tempDir) throws PgCodekeeperException, IOException, InterruptedException {
-        var db = loadDatabaseFromDump("test_export_with_ignore_list.sql");
+    void exportWithIgnoreListTest(@TempDir Path tempDir) throws PgCodekeeperException, IOException, InterruptedException {
+        var df = new DatabaseFactory(settings);
+        var db = df.loadFromDump(getFilePath("test_export_with_ignore_list.sql"));
         var exportedTableFile = tempDir.resolve(TABLES_DIRECTORY + "test_table.sql");
         var ignoredTableFile = tempDir.resolve(TABLES_DIRECTORY + "ignored_table.sql");
         var expectedContent = getFileContent("test_export_with_ignore_list_exported.sql");
@@ -100,11 +109,12 @@ public class PgCodeKeeperApiTest {
     }
 
     @Test
-    void testUpdateProject(@TempDir Path tempDir) throws PgCodekeeperException, IOException, InterruptedException {
+    void updateProjectTest(@TempDir Path tempDir) throws PgCodekeeperException, IOException, InterruptedException {
         // Setup project structure with initial tables
         setupUpdateProjectStructure(tempDir);
-        var oldDb = DatabaseFactory.loadFromProject(settings, tempDir.toString());
-        var newDb = loadDatabaseFromDump("test_update_project_new_dump.sql");
+        var df = new DatabaseFactory(settings);
+        var oldDb = df.loadFromProject(tempDir.toString());
+        var newDb = df.loadFromDump(getFilePath("test_update_project_new_dump.sql"));
         var expectedContent = getFileContent("test_update_project_new_dump.sql");
 
         Path tablesDir = tempDir.resolve(TABLES_DIRECTORY);
@@ -119,11 +129,12 @@ public class PgCodeKeeperApiTest {
     }
 
     @Test
-    void testUpdateProjectWithIgnoreList(@TempDir Path tempDir) throws PgCodekeeperException, IOException, InterruptedException {
+    void updateProjectWithIgnoreListTest(@TempDir Path tempDir) throws PgCodekeeperException, IOException, InterruptedException {
         // Setup project structure with initial tables
         setupUpdateProjectStructure(tempDir);
-        var oldDb = DatabaseFactory.loadFromProject(settings, tempDir.toString(), null, null);
-        var newDb = loadDatabaseFromDump("test_update_project_new_dump.sql");
+        var df = new DatabaseFactory(settings);
+        var oldDb = df.loadFromProject(tempDir.toString());
+        var newDb = df.loadFromDump(getFilePath("test_update_project_new_dump.sql"));
         var ignoreListPath = getFilePath("test_update_project_ignore_list.pgcodekeeperignore");
 
         var expectedFirstTableContent = getFileContent("test_update_project_old_first_table.sql");
@@ -168,10 +179,6 @@ public class PgCodeKeeperApiTest {
         return Files.readString(path);
     }
 
-    private AbstractDatabase loadDatabaseFromDump(String fileName) throws PgCodekeeperException, IOException, InterruptedException {
-        return DatabaseFactory.loadFromDump(settings, getFilePath(fileName), new NullMonitor());
-    }
-
     private String getExpectedDiff(String baseName) throws IOException {
         return getFileContent(baseName + DIFF);
     }
@@ -181,6 +188,4 @@ public class PgCodeKeeperApiTest {
         var actualContent = Files.readString(filePath);
         assertEquals(expectedContent, actualContent);
     }
-
-
 }
