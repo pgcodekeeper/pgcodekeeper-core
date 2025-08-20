@@ -11,9 +11,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- Added checks when deserializing objects.
-- Improved work with created temporary files.
-- Increased version of JDBC driver for PostgreSQL.
+### Fixed
+
+## [11.0.0] - 2025-08-20
+
+### Changed
+
+- Core logic is moved to a separate library. Allocated the main API.
 
 ### Fixed
 
@@ -23,7 +27,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed a bug with the settings when saving objects to a project.
 - Fixed false differences when ignoring table column order.
 
-### Removed
+### Security
+
+- Added checks when deserializing objects.
+- Fixed work with created temporary files.
+- Increased version of JDBC driver for PostgreSQL due to CVE-2025-49146.
 
 ## [10.14.2] - 2025-05-28
 
@@ -2297,7 +2305,8 @@ We increment major version in this release due to decision to shift our developm
 
 - ORDER BY parsing has been added to the aggregate functions.
 
-[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.14.2...HEAD
+[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v11.0.0...HEAD
+[11.0.0]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.14.2...v11.0.0
 [10.14.2]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.14.1...v10.14.2
 [10.14.1]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.14.0...v10.14.1
 [10.14.0]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.13.0...v10.14.0
