@@ -16,7 +16,7 @@ You can pull pgcodekeeper-core from the central maven repository, just add these
 <dependency>
     <groupId>org.pgcodekeeper</groupId>
     <artifactId>pgcodekeeper-core</artifactId>
-    <version>11.0.0-rc.1</version>
+    <version>{version}</version>
 </dependency>
 ```
 
@@ -30,28 +30,30 @@ ISettings settings = new CoreSettings(DatabaseType.PG);
 
 // settings init...
 
-AbstractDatabase oldDb = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/old_db");
-AbstractDatabase newDb = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/new_db");
+DatabaseFactory factory = new DatabaseFactory(settings);
+
+AbstractDatabase oldDb = factory.loadFromJdbc("jdbc:postgresql://localhost/old_db");
+AbstractDatabase newDb = factory.loadFromJdbc("jdbc:postgresql://localhost/new_db");
 String migrationScript = PgCodeKeeperApi.diff(settings, oldDb, newDb);
 
 // Example 2: Load database from project and compare with JDBC database
-AbstractDatabase projectDb = DatabaseFactory.loadFromProject(settings, "/path/to/project");
-AbstractDatabase liveDb = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/live_db");
+AbstractDatabase projectDb = factory.loadFromProject("/path/to/project");
+AbstractDatabase liveDb = factory.loadFromJdbc("jdbc:postgresql://localhost/live_db");
 String script = PgCodeKeeperApi.diff(settings, projectDb, liveDb);
 
 // Example 3: Compare databases with object filtering using ignore list
-AbstractDatabase db1 = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/db1");
-AbstractDatabase db2 = DatabaseFactory.loadFromProject(settings, "/path/to/project");
+AbstractDatabase db1 = factory.loadFromJdbc("jdbc:postgresql://localhost/db1");
+AbstractDatabase db2 = factory.loadFromProject("/path/to/project");
 String diff = PgCodeKeeperApi.diff(settings, db1, db2, List.of("/path/to/object_ignore_list.txt"));
 
 // Example 4: Export database to project with filtering and progress monitoring
 IMonitor monitor = new NullMonitor(); // or implement custom progress monitoring
-AbstractDatabase db = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/db");
+AbstractDatabase db = factory.loadFromJdbc("jdbc:postgresql://localhost/db");
 PgCodeKeeperApi.export(settings, db, "/path/to/export", List.of("/path/to/object_ignore_list.txt"), monitor);
 
 // Example 5: Update project with changes from database
-AbstractDatabase projectDb = DatabaseFactory.loadFromProject(settings, "/path/to/project");
-AbstractDatabase updatedDb = DatabaseFactory.loadFromJdbc(settings, "jdbc:postgresql://localhost/updated_db");
+AbstractDatabase projectDb = factory.loadFromProject("/path/to/project");
+AbstractDatabase updatedDb = factory.loadFromJdbc("jdbc:postgresql://localhost/updated_db");
 PgCodeKeeperApi.update(settings, projectDb, updatedDb, "/path/to/project");
 
 // Example 6: Update project with filtering and progress monitoring
