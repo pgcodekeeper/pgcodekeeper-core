@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.schema.meta;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.Utils;
-import org.pgcodekeeper.core.loader.JdbcSystemLoader;
+import org.pgcodekeeper.core.loader.pg.JdbcSystemLoader;
 import org.pgcodekeeper.core.loader.UrlJdbcConnector;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
 import org.pgcodekeeper.core.localizations.Messages;

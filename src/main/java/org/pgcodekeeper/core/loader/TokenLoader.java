@@ -16,10 +16,10 @@
 package org.pgcodekeeper.core.loader;
 
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.parsers.antlr.AntlrContextProcessor.SqlContextProcessor;
-import org.pgcodekeeper.core.parsers.antlr.AntlrParser;
-import org.pgcodekeeper.core.parsers.antlr.verification.VerificationParserListener;
-import org.pgcodekeeper.core.parsers.antlr.verification.VerificationProperties;
+import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
+import org.pgcodekeeper.core.parsers.antlr.pg.verification.VerificationParserListener;
+import org.pgcodekeeper.core.parsers.antlr.base.verification.VerificationProperties;
+import org.pgcodekeeper.core.parsers.antlr.pg.SqlContextProcessor;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;

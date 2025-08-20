@@ -26,9 +26,8 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.pgcodekeeper.core.DatabaseType;
-import org.pgcodekeeper.core.model.graph.RowData;
 
-public class RowDataTest {
+class RowDataTest {
 
     @Test
     void compareInsertScriptPG() {
@@ -217,7 +216,7 @@ public class RowDataTest {
     }
 
     @Test
-    void compareUpdateScriptMSWhitoutFkCol() {
+    void compareUpdateScriptMSWithoutFkCol() {
         var rowData = createRowData(Collections.emptyList());
 
         var sb = new StringBuilder();

@@ -24,11 +24,11 @@ import org.pgcodekeeper.core.formatter.AbstractFormatter;
 import org.pgcodekeeper.core.formatter.FormatConfiguration;
 import org.pgcodekeeper.core.formatter.FormatItem;
 import org.pgcodekeeper.core.formatter.StatementFormatter;
-import org.pgcodekeeper.core.parsers.antlr.CodeUnitToken;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLLexer;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
-import org.pgcodekeeper.core.parsers.antlr.statements.pg.PgParserAbstract;
+import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
+import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLLexer;
+import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
+import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
+import org.pgcodekeeper.core.parsers.antlr.pg.statement.PgParserAbstract;
 import org.pgcodekeeper.core.utils.Pair;
 
 import java.util.ArrayList;

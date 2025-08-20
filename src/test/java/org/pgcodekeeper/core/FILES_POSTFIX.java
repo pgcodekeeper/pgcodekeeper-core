@@ -28,7 +28,7 @@ public enum FILES_POSTFIX {
 
     private final String value;
 
-    private FILES_POSTFIX(String value) {
+    FILES_POSTFIX(String value) {
         this.value = value;
     }
     @Override

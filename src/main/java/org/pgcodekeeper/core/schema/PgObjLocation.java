@@ -19,10 +19,10 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.ContextLocation;
 import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.AntlrParser;
-import org.pgcodekeeper.core.parsers.antlr.CodeUnitToken;
-import org.pgcodekeeper.core.parsers.antlr.QNameParser;
-import org.pgcodekeeper.core.parsers.antlr.statements.pg.PgParserAbstract;
+import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
+import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
+import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
+import org.pgcodekeeper.core.parsers.antlr.pg.statement.PgParserAbstract;
 
 import java.util.Objects;
 

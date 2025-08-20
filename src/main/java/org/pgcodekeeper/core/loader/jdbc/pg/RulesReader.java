@@ -19,7 +19,7 @@ import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.statements.pg.CreateRule;
+import org.pgcodekeeper.core.parsers.antlr.pg.statement.CreateRule;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.EventType;
 import org.pgcodekeeper.core.schema.GenericColumn;

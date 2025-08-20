@@ -22,7 +22,7 @@ import org.pgcodekeeper.core.hasher.IHashable;
 import org.pgcodekeeper.core.hasher.JavaHasher;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.exception.ObjectCreationException;
+import org.pgcodekeeper.core.exception.ObjectCreationException;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 

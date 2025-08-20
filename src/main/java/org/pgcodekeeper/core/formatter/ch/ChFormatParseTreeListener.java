@@ -21,9 +21,9 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pgcodekeeper.core.formatter.FormatParseTreeListener;
 import org.pgcodekeeper.core.formatter.IndentDirection;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHLexer;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.*;
-import org.pgcodekeeper.core.parsers.antlr.rulectx.ChSelectOps;
+import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHLexer;
+import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.*;
+import org.pgcodekeeper.core.parsers.antlr.ch.rulectx.ChSelectOps;
 import org.pgcodekeeper.core.utils.Pair;
 
 import java.util.Map;

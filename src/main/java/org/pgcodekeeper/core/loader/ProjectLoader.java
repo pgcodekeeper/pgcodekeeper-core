@@ -19,7 +19,7 @@ import org.pgcodekeeper.core.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
-import org.pgcodekeeper.core.parsers.antlr.AntlrTaskManager;
+import org.pgcodekeeper.core.parsers.antlr.base.AntlrTaskManager;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.ms.MsSchema;
 import org.pgcodekeeper.core.settings.ISettings;

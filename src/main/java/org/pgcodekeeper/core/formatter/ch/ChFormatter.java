@@ -22,12 +22,12 @@ import org.pgcodekeeper.core.formatter.AbstractFormatter;
 import org.pgcodekeeper.core.formatter.FormatConfiguration;
 import org.pgcodekeeper.core.formatter.FormatItem;
 import org.pgcodekeeper.core.formatter.StatementFormatter;
-import org.pgcodekeeper.core.parsers.antlr.CodeUnitToken;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHLexer;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Ddl_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.QueryContext;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.StmtContext;
+import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
+import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHLexer;
+import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser;
+import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Ddl_stmtContext;
+import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.QueryContext;
+import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.StmtContext;
 
 import java.util.ArrayList;
 import java.util.List;

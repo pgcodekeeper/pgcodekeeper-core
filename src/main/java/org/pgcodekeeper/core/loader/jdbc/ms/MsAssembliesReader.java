@@ -21,7 +21,7 @@ import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.XmlReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.statements.ms.CreateMsAssembly;
+import org.pgcodekeeper.core.parsers.antlr.ms.statement.CreateMsAssembly;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.ms.MsAssembly;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;

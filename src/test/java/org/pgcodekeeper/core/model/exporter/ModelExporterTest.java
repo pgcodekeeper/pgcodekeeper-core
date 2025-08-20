@@ -21,7 +21,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.FILES_POSTFIX;
-import org.pgcodekeeper.core.TestUtils;
+import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.GenericColumn;
@@ -32,7 +32,7 @@ import org.pgcodekeeper.core.settings.CoreSettings;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class ModelExporterTest {
+class ModelExporterTest {
 
     @ParameterizedTest
     @CsvSource({
@@ -44,7 +44,7 @@ public class ModelExporterTest {
         settings.setGenerateConstraintNotValid(true);
         settings.setGenerateExists(true);
 
-        AbstractDatabase db = TestUtils.loadTestDump(template + FILES_POSTFIX.SQL, getClass(), settings);
+        AbstractDatabase db = IntegrationTestUtils.loadTestDump(template + FILES_POSTFIX.SQL, getClass(), settings);
 
         var exporter = new ModelExporter(null, db, DatabaseType.PG, Consts.UTF_8, settings);
         var stmt = getStatement(db, stmtName, type);
@@ -56,7 +56,7 @@ public class ModelExporterTest {
         var script = new SQLScript(settings);
         stmt.getCreationSQL(script);
 
-        // check that exporter generate script is not equals generated script with user settings
+        // check that exporter generates script is not equals generated script with user settings
         Assertions.assertNotEquals(script.getFullScript(), actual, "this should be not equals");
     }
 
