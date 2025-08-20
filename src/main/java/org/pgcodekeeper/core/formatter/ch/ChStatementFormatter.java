@@ -21,9 +21,9 @@ import org.pgcodekeeper.core.formatter.FormatConfiguration;
 import org.pgcodekeeper.core.formatter.FormatParseTreeListener;
 import org.pgcodekeeper.core.formatter.IndentDirection;
 import org.pgcodekeeper.core.formatter.StatementFormatter;
-import org.pgcodekeeper.core.parsers.antlr.CodeUnitToken;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHLexer;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser.Select_stmtContext;
+import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
+import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHLexer;
+import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Select_stmtContext;
 import org.pgcodekeeper.core.utils.Pair;
 
 import java.util.List;

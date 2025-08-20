@@ -91,10 +91,10 @@ Primary packages of this module are:
 - `org.pgcodekeeper.core.loader` - database schema loaders: project, SQL file, JDBC, library.
 - `org.pgcodekeeper.core.loader` (resources) - SQL queries for JdbcLoaders, used by Java code via `JdbcQueries`.
 - `org.pgcodekeeper.core.loader.jdbc` - classes that create schema objects based on JDBC ResultSets.
-- `org.pgcodekeeper.core.parsers.antlr` - generated ANTLR4 parser code, plus utility parser classes.
-- `org.pgcodekeeper.core.parsers.antlr.statements` - processor classes that create schema objects based on parser-read data.
-- `org.pgcodekeeper.core.parsers.antlr.expr` - expression analysis classes: find dependencies in expressions and infer expression types for overloaded function call resolution.
-- `org.pgcodekeeper.core.parsers.antlr.expr.launcher` - support for parallel expression analysis.
+- `org.pgcodekeeper.core.parsers.antlr.*` - generated ANTLR4 parser code, plus utility parser classes.
+- `org.pgcodekeeper.core.parsers.antlr.*.statements` - processor classes that create schema objects based on parser-read data.
+- `org.pgcodekeeper.core.parsers.antlr.*.expr` - expression analysis classes: find dependencies in expressions and infer expression types for overloaded function call resolution.
+- `org.pgcodekeeper.core.parsers.antlr.*.expr.launcher` - support for parallel expression analysis.
 - `org.pgcodekeeper.core.formatter` - SQL and pl/pgsql code formatters.
 - `org.pgcodekeeper.core.model.difftree` - classes representing and creating an object diff tree.
 - `org.pgcodekeeper.core.model.graph` - object dependency graph classes, built using JGraphT library.
@@ -103,7 +103,7 @@ Primary packages of this module are:
 - `org.pgcodekeeper.core.ignoreparser` - builder for `IgnoreList`s.
 - `org.pgcodekeeper.core` - main package containing general stuff: e.g. string constants, utils and general-purpose classes.
 - `src.main.antlr4.org.pgcodekeeper.core.parsers.antlr.generated` - sources for ANTLR4 parsers. We maintain parsers for PostgreSQL, pl/pgsql, T-SQL, and also our custom Ignore Lists and PostgreSQL ACLs syntax.  
-These need to be built using your preferred ANTLR4 builder into `ru.taximaxim.codekeeper.core.parsers.antlr` package.
+These need to be built using your preferred ANTLR4 builder into `org.pgcodekeeper.core.parsers.antlr.*` package.
 
 Majority of tests are here.
 

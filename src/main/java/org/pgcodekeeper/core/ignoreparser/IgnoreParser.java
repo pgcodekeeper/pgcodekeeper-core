@@ -21,9 +21,9 @@ import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.difftree.IIgnoreList;
 import org.pgcodekeeper.core.model.difftree.IgnoreList;
 import org.pgcodekeeper.core.model.difftree.IgnoredObject;
-import org.pgcodekeeper.core.parsers.antlr.AntlrParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.IgnoreListParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.IgnoreListParser.*;
+import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
+import org.pgcodekeeper.core.parsers.antlr.base.generated.IgnoreListParser;
+import org.pgcodekeeper.core.parsers.antlr.base.generated.IgnoreListParser.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

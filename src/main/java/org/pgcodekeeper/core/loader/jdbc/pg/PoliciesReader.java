@@ -20,7 +20,7 @@ import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.expr.launcher.VexAnalysisLauncher;
+import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.pg.PgPolicy;
 

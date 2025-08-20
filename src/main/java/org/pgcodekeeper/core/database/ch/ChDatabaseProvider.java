@@ -18,9 +18,9 @@ package org.pgcodekeeper.core.database.ch;
 import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.base.IDatabaseProvider;
-import org.pgcodekeeper.core.parsers.antlr.CustomChSQLAntlrErrorStrategy;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHLexer;
-import org.pgcodekeeper.core.parsers.antlr.generated.CHParser;
+import org.pgcodekeeper.core.parsers.antlr.ch.CustomChSQLAntlrErrorStrategy;
+import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHLexer;
+import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser;
 
 public class ChDatabaseProvider implements IDatabaseProvider {
 

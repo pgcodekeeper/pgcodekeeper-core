@@ -23,7 +23,7 @@ import org.pgcodekeeper.core.loader.jdbc.XmlReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
 import org.pgcodekeeper.core.loader.ms.SupportedMsVersion;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.expr.launcher.MsExpressionAnalysisLauncher;
+import org.pgcodekeeper.core.parsers.antlr.ms.launcher.MsExpressionAnalysisLauncher;
 import org.pgcodekeeper.core.schema.AbstractColumn;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.GenericColumn;

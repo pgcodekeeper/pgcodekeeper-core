@@ -21,7 +21,7 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.pgcodekeeper.core.formatter.FormatConfiguration.IndentType;
-import org.pgcodekeeper.core.parsers.antlr.CodeUnitToken;
+import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
 import org.pgcodekeeper.core.utils.Pair;
 
 import java.util.*;

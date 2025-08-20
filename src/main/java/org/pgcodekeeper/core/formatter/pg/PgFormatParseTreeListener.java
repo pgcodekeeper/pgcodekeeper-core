@@ -22,11 +22,11 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pgcodekeeper.core.formatter.FormatParseTreeListener;
 import org.pgcodekeeper.core.formatter.IndentDirection;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLLexer;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.*;
-import org.pgcodekeeper.core.parsers.antlr.rulectx.SelectOps;
-import org.pgcodekeeper.core.parsers.antlr.rulectx.SelectStmt;
-import org.pgcodekeeper.core.parsers.antlr.rulectx.Vex;
+import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLLexer;
+import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
+import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.SelectOps;
+import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.SelectStmt;
+import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.Vex;
 import org.pgcodekeeper.core.utils.Pair;
 
 import java.util.List;

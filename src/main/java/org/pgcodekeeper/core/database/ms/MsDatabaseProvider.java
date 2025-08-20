@@ -18,9 +18,9 @@ package org.pgcodekeeper.core.database.ms;
 import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.base.IDatabaseProvider;
-import org.pgcodekeeper.core.parsers.antlr.CustomTSQLAntlrErrorStrategy;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLLexer;
-import org.pgcodekeeper.core.parsers.antlr.generated.TSQLParser;
+import org.pgcodekeeper.core.parsers.antlr.ms.CustomTSQLAntlrErrorStrategy;
+import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLLexer;
+import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser;
 
 public class MsDatabaseProvider implements IDatabaseProvider {
 

@@ -1,0 +1,50 @@
+/*******************************************************************************
+ * Copyright 2017-2025 TAXTELECOM, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+package org.pgcodekeeper.core.parsers.antlr.ch;
+
+import org.antlr.v4.runtime.Vocabulary;
+import org.antlr.v4.runtime.misc.IntervalSet;
+import org.pgcodekeeper.core.parsers.antlr.base.CustomAntlrErrorStrategy;
+import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHLexer;
+
+import java.util.stream.Stream;
+
+/**
+ * ClickHouse-specific error strategy that provides enhanced error reporting for
+ * ClickHouse SQL parsing.
+ */
+public class CustomChSQLAntlrErrorStrategy extends CustomAntlrErrorStrategy {
+
+    @Override
+    protected Stream<Integer> getTokenStream(IntervalSet tokens) {
+        Stream<Integer> stream = tokens.toList().stream();
+
+        if (tokens.contains(CHLexer.IDENTIFIER)) {
+            stream = stream.filter(e -> e < CHLexer.ACCESS || CHLexer.YEAR < e);
+        }
+        return stream;
+    }
+
+    @Override
+    protected String getTokenName(Integer token, Vocabulary vocabulary) {
+        return switch (token) {
+            case CHLexer.IDENTIFIER, CHLexer.DOUBLE_QUOTED_IDENTIFIER, CHLexer.BACK_QUOTED_IDENTIFIER -> IDENTIFIER;
+            case CHLexer.STRING_LITERAL -> STRING;
+            case CHLexer.FLOATING_LITERAL, CHLexer.NUMBER, CHLexer.INF, CHLexer.NAN -> NUMBER;
+            default -> vocabulary.getDisplayName(token);
+        };
+    }
+}

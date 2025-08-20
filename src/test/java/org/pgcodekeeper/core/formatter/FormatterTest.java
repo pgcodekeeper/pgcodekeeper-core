@@ -152,8 +152,8 @@ class FormatterTest {
             throws IOException {
         String newFile = getFileContent(newFileName + FILES_POSTFIX.SQL);
         String oldFile = getFileContent(oldFileName + FILES_POSTFIX.SQL);
-        FileFormatter fileform = new FileFormatter(oldFile, 0, oldFile.length(), config, dbType);
-        Assertions.assertEquals(newFile, fileform.formatText(), "Formatted files are different");
+        FileFormatter fileFormatter = new FileFormatter(oldFile, 0, oldFile.length(), config, dbType);
+        Assertions.assertEquals(newFile, fileFormatter.formatText(), "Formatted files are different");
     }
 
     private String getFileContent(String fileName) throws IOException {

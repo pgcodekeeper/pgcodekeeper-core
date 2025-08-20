@@ -22,7 +22,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.DatabaseType;
-import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeFlattener;
@@ -36,6 +35,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
+
+import static org.pgcodekeeper.core.it.IntegrationTestUtils.*;
 
 /**
  * Test for partial export
@@ -105,8 +106,8 @@ public class PartialExporterTest {
         String targetFilename = "TestPartialExportTarget.sql";
         var settings = new CoreSettings();
         settings.setInCharsetName(Consts.UTF_8);
-        dbSource = TestUtils.loadTestDump(sourceFilename, PartialExporterTest.class, settings, false);
-        dbTarget = TestUtils.loadTestDump(targetFilename, PartialExporterTest.class, settings, false);
+        dbSource = loadTestDump(sourceFilename, PartialExporterTest.class, settings, false);
+        dbTarget = loadTestDump(targetFilename, PartialExporterTest.class, settings, false);
 
         Assertions.assertNotNull(dbSource);
         Assertions.assertNotNull(dbTarget);

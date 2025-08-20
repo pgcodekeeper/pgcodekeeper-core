@@ -20,7 +20,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
@@ -32,6 +31,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import static org.pgcodekeeper.core.it.IntegrationTestUtils.loadTestDump;
 
 /**
  * An 'factory' that creates 'artificial' predefined objects
@@ -75,10 +76,8 @@ class DepcyTreeExtenderTest {
         String fileName = "depcy_schema_" + fileIndex + ".sql";
         String targetFileName = "depcy_schema_new_" + fileIndex + ".sql";
 
-        AbstractDatabase dbSource = TestUtils.loadTestDump(
-                fileName, DepcyTreeExtenderTest.class, settings);
-        AbstractDatabase dbTarget = TestUtils.loadTestDump(
-                targetFileName, DepcyTreeExtenderTest.class, settings);
+        AbstractDatabase dbSource = loadTestDump(fileName, DepcyTreeExtenderTest.class, settings);
+        AbstractDatabase dbTarget = loadTestDump(targetFileName, DepcyTreeExtenderTest.class, settings);
 
         TreeElement tree = new TreeElement("Database", DbObjType.DATABASE, DiffSide.BOTH);
         predefined.setUserSelection(tree);

@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.formatter.pg;
 
 import org.antlr.v4.runtime.Token;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLLexer;
+import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLLexer;
 
 import java.util.List;
 

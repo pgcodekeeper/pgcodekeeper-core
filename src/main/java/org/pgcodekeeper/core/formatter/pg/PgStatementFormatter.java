@@ -17,11 +17,11 @@ package org.pgcodekeeper.core.formatter.pg;
 
 import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.formatter.*;
-import org.pgcodekeeper.core.parsers.antlr.AntlrUtils;
-import org.pgcodekeeper.core.parsers.antlr.CodeUnitToken;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLLexer;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser;
-import org.pgcodekeeper.core.parsers.antlr.generated.SQLParser.Function_bodyContext;
+import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
+import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
+import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLLexer;
+import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
+import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Function_bodyContext;
 import org.pgcodekeeper.core.utils.Pair;
 
 import java.util.List;

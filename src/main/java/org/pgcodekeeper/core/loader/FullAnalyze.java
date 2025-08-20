@@ -15,12 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import org.pgcodekeeper.core.parsers.antlr.AntlrTask;
-import org.pgcodekeeper.core.parsers.antlr.AntlrTaskManager;
-import org.pgcodekeeper.core.parsers.antlr.expr.launcher.AbstractAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.expr.launcher.AggregateAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.expr.launcher.OperatorAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.expr.launcher.ViewAnalysisLauncher;
+import org.pgcodekeeper.core.parsers.antlr.base.AntlrTask;
+import org.pgcodekeeper.core.parsers.antlr.base.AntlrTaskManager;
+import org.pgcodekeeper.core.parsers.antlr.base.launcher.AbstractAnalysisLauncher;
+import org.pgcodekeeper.core.parsers.antlr.pg.launcher.AggregateAnalysisLauncher;
+import org.pgcodekeeper.core.parsers.antlr.pg.launcher.OperatorAnalysisLauncher;
+import org.pgcodekeeper.core.parsers.antlr.pg.launcher.ViewAnalysisLauncher;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.IRelation;
 import org.pgcodekeeper.core.schema.PgObjLocation;
