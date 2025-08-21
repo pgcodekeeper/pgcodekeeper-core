@@ -22,7 +22,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 import java.io.IOException;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -71,11 +70,7 @@ public class DependenciesXmlStore extends XmlStore<PgLibrary> {
      * @throws IOException if reading fails
      */
     public boolean readLoadNestedFlag() throws IOException {
-        try {
-            return Boolean.parseBoolean(readXml(true).getDocumentElement().getAttribute(LOAD_NESTED));
-        } catch (NoSuchFileException ex) {
-            return false;
-        }
+        return Boolean.parseBoolean(readXml(true).getDocumentElement().getAttribute(LOAD_NESTED));
     }
 
     /**
