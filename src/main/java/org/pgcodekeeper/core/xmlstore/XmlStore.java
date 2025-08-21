@@ -21,7 +21,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -32,10 +31,10 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -73,11 +72,7 @@ public abstract class XmlStore<T> {
      * @throws IOException if reading fails
      */
     public List<T> readObjects() throws IOException {
-        try {
-            return getObjects(readXml(false));
-        } catch (NoSuchFileException ex) {
-            return new ArrayList<>();
-        }
+        return getObjects(readXml(false));
     }
 
     protected List<T> getObjects(Document xml) {
@@ -138,9 +133,9 @@ public abstract class XmlStore<T> {
     /**
      * Writes an XML document to a file
      *
-     * @param xml - {@link Document} witch store xml document
+     * @param xml  - {@link Document} witch store xml document
      * @param path - Path to the file where the XML document will be written
-     * @throws IOException if an I/O error occurs
+     * @throws IOException          if an I/O error occurs
      * @throws TransformerException if an error occurred during the XML transformation
      */
     protected void writeDocument(Document xml, Path path) throws IOException, TransformerException {
@@ -178,13 +173,12 @@ public abstract class XmlStore<T> {
      * @throws IOException if reading or parsing fails
      */
     protected Document readXml() throws IOException {
-        try (Reader reader = Files.newBufferedReader(getXmlFile(), StandardCharsets.UTF_8)) {
+        var xmlPath = getXmlFile();
+        if (!Files.exists(xmlPath)) {
+            return createDocument(Collections.emptyList());
+        }
+        try (Reader reader = Files.newBufferedReader(xmlPath, StandardCharsets.UTF_8)) {
             return Utils.readXml(reader);
-        } catch (NoSuchFileException ex) {
-            throw ex;
-        } catch (IOException | SAXException | ParserConfigurationException ex) {
-            throw new IOException(MessageFormat.format(
-                    Messages.XmlStore_read_error, ex.getLocalizedMessage()), ex);
         } catch (Exception e) {
             throw new IOException(MessageFormat.format(Messages.XmlStore_read_error, e.getLocalizedMessage()), e);
         }
