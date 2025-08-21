@@ -22,9 +22,9 @@ import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.pg.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.monitor.IMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,8 +75,8 @@ public final class JdbcPgLoader extends JdbcLoaderBase {
             getRunner().run(statement, "SET search_path TO pg_catalog;");
             getRunner().run(statement, "SET timezone = " + PgDiffUtils.quoteString(timezone));
 
-            queryCheckPgVersion();
             queryCheckGreenplumDb();
+            queryCheckPgVersion();
             queryCheckLastSysOid();
             queryTypesForCache();
             queryRoles();
@@ -92,14 +92,14 @@ public final class JdbcPgLoader extends JdbcLoaderBase {
             new ViewsReader(this).read();
             new TablesReader(this).read();
             new RulesReader(this).read();
-            if (SupportedPgVersion.VERSION_9_5.isLE(getVersion())) {
+            if (SupportedPgVersion.GP_VERSION_7.isLE(getVersion())) {
                 new PoliciesReader(this).read();
             }
             new TriggersReader(this).read();
             new IndicesReader(this).read();
             new ConstraintsReader(this).read();
             new TypesReader(this).read();
-            if (SupportedPgVersion.VERSION_10.isLE(getVersion())) {
+            if (SupportedPgVersion.GP_VERSION_7.isLE(getVersion())) {
                 new StatisticsReader(this).read();
             }
 
@@ -123,7 +123,7 @@ public final class JdbcPgLoader extends JdbcLoaderBase {
             }
             new CollationsReader(this).read();
 
-            if (!SupportedPgVersion.VERSION_10.isLE(getVersion())) {
+            if (!SupportedPgVersion.GP_VERSION_7.isLE(getVersion())) {
                 SequencesReader.querySequencesData(d, this);
             }
             connection.commit();

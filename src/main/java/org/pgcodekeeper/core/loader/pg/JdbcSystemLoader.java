@@ -102,6 +102,7 @@ public final class JdbcSystemLoader extends JdbcLoaderBase {
             getRunner().run(statement, "SET search_path TO pg_catalog;");
             getRunner().run(statement, "SET timezone = " + PgDiffUtils.quoteString(timezone));
 
+            queryCheckGreenplumDb();
             queryCheckPgVersion();
             queryCheckLastSysOid();
             queryTypesForCache();

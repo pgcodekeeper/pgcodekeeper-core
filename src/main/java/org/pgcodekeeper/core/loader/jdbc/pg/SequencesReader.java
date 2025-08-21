@@ -23,10 +23,10 @@ import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.pg.PgColumn;
 import org.pgcodekeeper.core.schema.pg.PgSequence;
-import org.pgcodekeeper.core.monitor.IMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,12 +72,20 @@ public final class SequencesReader extends JdbcReader {
         }
 
         String identityType = null;
-        if (SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
+        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             identityType = res.getString("attidentity");
             if (identityType != null && identityType.isEmpty()) {
                 // treat lack of table dependency and no identityType as a single case
                 identityType = null;
             }
+
+            s.setStartWith(Long.toString(res.getLong("seqstart")));
+            String dataType = loader.getCachedTypeByOid(res.getLong("data_type")).getFullName();
+            s.setMinMaxInc(res.getLong("seqincrement"), res.getLong("seqmax"),
+                    res.getLong("seqmin"), dataType, 0L);
+            s.setCache(Long.toString(res.getLong("seqcache")));
+            s.setCycle(res.getBoolean("seqcycle"));
+            s.setDataType(dataType);
         }
 
         if (refTable != null && identityType == null) {
@@ -91,16 +99,6 @@ public final class SequencesReader extends JdbcReader {
         }
 
         loader.setComment(s, res);
-
-        if (SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
-            s.setStartWith(Long.toString(res.getLong("seqstart")));
-            String dataType = loader.getCachedTypeByOid(res.getLong("data_type")).getFullName();
-            s.setMinMaxInc(res.getLong("seqincrement"), res.getLong("seqmax"),
-                    res.getLong("seqmin"), dataType, 0L);
-            s.setCache(Long.toString(res.getLong("seqcache")));
-            s.setCycle(res.getBoolean("seqcycle"));
-            s.setDataType(dataType);
-        }
 
         var isDefault = "d".equals(identityType);
         if (isDefault || "a".equals(identityType)) {
@@ -243,7 +241,7 @@ public final class SequencesReader extends JdbcReader {
                 .join("LEFT JOIN pg_catalog.pg_attribute a ON a.attrelid = dep.refobjid AND a.attnum = dep.refobjsubid AND a.attisdropped IS FALSE")
                 .where("res.relkind = 'S'");
 
-        if (SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
+        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             builder
                     .column("s.seqtypid::bigint AS data_type")
                     .column("s.seqstart")

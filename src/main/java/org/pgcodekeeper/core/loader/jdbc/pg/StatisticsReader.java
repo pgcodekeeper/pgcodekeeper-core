@@ -63,7 +63,7 @@ public final class StatisticsReader extends JdbcReader {
                         loader.getSettings())
                         .parseStatistics(stat));
 
-        if (SupportedPgVersion.VERSION_13.isLE(loader.getVersion())) {
+        if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
             stat.setStatistics(res.getInt("stxstattarget"));
         }
 
@@ -95,7 +95,7 @@ public final class StatisticsReader extends JdbcReader {
                 .column("pg_catalog.pg_get_statisticsobjdef(res.oid::pg_catalog.oid) AS def")
                 .from("pg_catalog.pg_statistic_ext res");
 
-        if (SupportedPgVersion.VERSION_13.isLE(loader.getVersion())) {
+        if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
             builder.column("res.stxstattarget");
         }
     }

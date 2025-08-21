@@ -62,7 +62,7 @@ public final class CollationsReader extends JdbcReader {
 
         loader.setComment(coll, res);
 
-        if (SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
+        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             String provider = res.getString("collprovider");
             switch (provider) {
                 case "c":
@@ -86,8 +86,7 @@ public final class CollationsReader extends JdbcReader {
                     coll.setProvider("default");
                     break;
             }
-        }
-        if (SupportedPgVersion.VERSION_12.isLE(loader.getVersion())) {
+
             coll.setDeterministic(res.getBoolean("collisdeterministic"));
         }
 
@@ -126,12 +125,10 @@ public final class CollationsReader extends JdbcReader {
                 .column("res.collowner::bigint")
                 .from("pg_catalog.pg_collation res");
 
-        if (SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
-            builder.column("res.collprovider");
-        }
-
-        if (SupportedPgVersion.VERSION_12.isLE(loader.getVersion())) {
-            builder.column("res.collisdeterministic");
+        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+            builder
+                    .column("res.collprovider")
+                    .column("res.collisdeterministic");
         }
 
         if (SupportedPgVersion.VERSION_17.isLE(loader.getVersion())) {

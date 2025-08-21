@@ -158,7 +158,7 @@ public final class TriggersReader extends JdbcReader {
         }
 
         // after Postgresql 10
-        if (SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
+        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             t.setOldTable(res.getString("tgoldtable"));
             t.setNewTable(res.getString("tgnewtable"));
         }
@@ -237,7 +237,7 @@ public final class TriggersReader extends JdbcReader {
                 .where("cls.relkind IN ('r', 'f', 'p', 'm', 'v')")
                 .where("res.tgisinternal = FALSE");
 
-        if (SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
+        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             builder
                     .column("res.tgoldtable")
                     .column("res.tgnewtable");

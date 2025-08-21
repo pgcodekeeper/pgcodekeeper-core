@@ -155,6 +155,10 @@ public final class Messages {
 
     public static String JdbcLoaderBase_log_reading_pg_version;
 
+    public static String JdbcLoaderBase_unsupported_pg_version;
+
+    public static String JdbcLoaderBase_unsupported_gp_version;
+
     public static String JdbcLoaderBase_log_waiting_antlr_tasks;
 
     public static String ModelExporter_log_create_dirs;
