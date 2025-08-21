@@ -115,7 +115,7 @@ public class MsIndicesAndPKReader extends JdbcReader {
     }
 
     private Map<String, String> readOption(ResultSet res) throws SQLException {
-        boolean isMemoryOptimized = SupportedMsVersion.VERSION_14.isLE(loader.getVersion()) && res.getBoolean("is_memory_optimized");
+        boolean isMemoryOptimized = res.getBoolean("is_memory_optimized");
 
         // cannot be used in memory_optimized tables
         boolean allowRowLocks = isMemoryOptimized || res.getBoolean("allow_row_locks");
@@ -151,7 +151,7 @@ public class MsIndicesAndPKReader extends JdbcReader {
             options.put("STATISTICS_NORECOMPUTE", "ON");
         }
 
-        if (SupportedMsVersion.VERSION_14.isLE(loader.getVersion()) && res.getBoolean("is_incremental")) {
+        if (res.getBoolean("is_incremental")) {
             options.put("STATISTICS_INCREMENTAL", "ON");
         }
 
@@ -188,21 +188,17 @@ public class MsIndicesAndPKReader extends JdbcReader {
                 .column("d.name AS data_space")
                 .column("res.ignore_dup_key")
                 .column("st.no_recompute")
+                .column("st.is_incremental")
+                .column("t.is_memory_optimized")
                 .from("sys.indexes res WITH (NOLOCK)")
                 .join("LEFT JOIN sys.filegroups f WITH (NOLOCK) ON res.data_space_id = f.data_space_id")
                 .join("LEFT JOIN sys.data_spaces d WITH (NOLOCK) ON res.data_space_id = d.data_space_id")
                 .join("JOIN sys.stats st WITH (NOLOCK) ON res.name = st.name AND res.object_id = st.object_id AND res.index_id = st.stats_id")
                 .join("JOIN sys.objects o WITH (NOLOCK) ON res.object_id = o.object_id")
                 .join("JOIN sys.partitions sp WITH (NOLOCK) ON sp.object_id = res.object_id AND sp.index_id = res.index_id AND sp.partition_number = 1")
+                .join("LEFT JOIN sys.tables t WITH (NOLOCK) ON o.object_id = t.object_id")
                 .where("o.type IN ('U', 'V')")
                 .where("res.type IN (1, 2, 5, 6)");
-
-        if (SupportedMsVersion.VERSION_14.isLE(loader.getVersion())) {
-            builder
-                    .column("st.is_incremental")
-                    .column("t.is_memory_optimized")
-                    .join("LEFT JOIN sys.tables t WITH (NOLOCK) ON o.object_id = t.object_id");
-        }
 
         if (SupportedMsVersion.VERSION_19.isLE(loader.getVersion())) {
             builder.column("res.optimize_for_sequential_key");

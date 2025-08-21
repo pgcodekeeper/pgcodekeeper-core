@@ -520,7 +520,11 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
     protected void queryCheckMsVersion() throws SQLException, InterruptedException {
         setCurrentOperation(Messages.JdbcLoaderBase_log_reading_ms_version);
         try (ResultSet res = runner.runScript(statement, JdbcQueries.QUERY_CHECK_MS_VERSION)) {
-            version = res.next() ? res.getInt(1) : SupportedMsVersion.VERSION_12.getVersion();
+            version = res.next() ? res.getInt(1) : SupportedMsVersion.VERSION_17.getVersion();
+            if (!SupportedMsVersion.VERSION_17.isLE(version)) {
+                throw new IllegalStateException(Messages.JdbcLoaderBase_unsupported_ms_sql_version);
+            }
+
             debug(Messages.JdbcLoaderBase_log_load_version, version);
         }
     }
