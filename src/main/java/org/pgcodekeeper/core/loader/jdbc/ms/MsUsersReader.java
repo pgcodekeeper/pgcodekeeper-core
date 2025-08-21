@@ -20,7 +20,6 @@ import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.XmlReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
-import org.pgcodekeeper.core.loader.ms.SupportedMsVersion;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.ms.MsDatabase;
@@ -58,9 +57,7 @@ public class MsUsersReader extends AbstractStatementReader {
 
         user.setSchema(res.getString("schema_name"));
         user.setLanguage(res.getString("default_lang"));
-        if (SupportedMsVersion.VERSION_16.isLE(loader.getVersion())) {
-            user.setAllowEncrypted(res.getBoolean("allow_encrypted"));
-        }
+        user.setAllowEncrypted(res.getBoolean("allow_encrypted"));
 
         loader.setPrivileges(user, XmlReader.readXML(res.getString("acl")));
         db.addUser(user);
@@ -75,13 +72,10 @@ public class MsUsersReader extends AbstractStatementReader {
                 .column("suser_sname(res.sid) AS loginname")
                 .column("res.default_schema_name AS schema_name")
                 .column("res.default_language_lcid AS default_lang")
+                .column("res.allow_encrypted_value_modifications AS allow_encrypted")
                 .from("sys.database_principals res WITH (NOLOCK)")
                 .where("res.type IN ('S', 'U', 'G')")
                 .where("NOT name IN ('guest', 'sys', 'INFORMATION_SCHEMA')");
-
-        if (SupportedMsVersion.VERSION_16.isLE(loader.getVersion())) {
-            builder.column("res.allow_encrypted_value_modifications AS allow_encrypted");
-        }
     }
 
     @Override

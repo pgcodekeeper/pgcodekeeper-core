@@ -66,7 +66,7 @@ public final class MsStatisticsReader extends JdbcReader {
             stat.putOption("NORECOMPUTE", "NORECOMPUTE");
         }
 
-        if (SupportedMsVersion.VERSION_14.isLE(loader.getVersion()) && res.getBoolean("is_incremental")) {
+        if (res.getBoolean("is_incremental")) {
             stat.putOption("INCREMENTAL", "ON");
         }
 
@@ -104,14 +104,11 @@ public final class MsStatisticsReader extends JdbcReader {
                 .column("cols")
                 .column("res.filter_definition")
                 .column("res.no_recompute")
+                .column("res.is_incremental")
                 .from("sys.stats res WITH (NOLOCK)")
                 .join("CROSS APPLY", cols, "st_col (cols)")
                 .join("LEFT JOIN sys.objects cont WITH (NOLOCK) ON cont.object_id = res.object_id")
                 .where("res.user_created = 1");
-
-        if (SupportedMsVersion.VERSION_14.isLE(loader.getVersion())) {
-            builder.column("res.is_incremental");
-        }
 
         if (SupportedMsVersion.VERSION_22.isLE(loader.getVersion())) {
             builder

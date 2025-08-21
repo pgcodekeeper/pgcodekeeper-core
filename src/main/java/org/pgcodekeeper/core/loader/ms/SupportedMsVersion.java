@@ -20,9 +20,6 @@ package org.pgcodekeeper.core.loader.ms;
  * Provides version comparison and lookup functionality for database compatibility checking.
  */
 public enum SupportedMsVersion {
-    VERSION_12(11, "2012"),
-    VERSION_14(12, "2014"),
-    VERSION_16(13, "2016"),
     VERSION_17(14, "2017"),
     VERSION_19(15, "2019"),
     VERSION_22(16, "2022");
@@ -49,6 +46,12 @@ public enum SupportedMsVersion {
         return text;
     }
 
+    /**
+     * Checks if this version is less than or equal to the specified version.
+     *
+     * @param version the version to compare against
+     * @return true if this version is less than or equal to the specified version
+     */
     public boolean isLE(int version) {
         return this.version <= version;
     }
@@ -70,6 +73,6 @@ public enum SupportedMsVersion {
             }
         }
 
-        return SupportedMsVersion.VERSION_12;
+        return SupportedMsVersion.VERSION_17;
     }
 }

@@ -87,6 +87,8 @@ public final class Messages {
 
     public static String DbObjType_unsupported_type;
 
+    public static String JdbcLoaderBase_unsupported_ms_sql_version;
+
     public static String DepcyGraph_log_col_is_missed;
 
     public static String DepcyGraph_log_no_such_table;
