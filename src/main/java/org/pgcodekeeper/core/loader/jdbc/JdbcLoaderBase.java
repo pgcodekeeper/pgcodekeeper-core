@@ -512,8 +512,14 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
     protected void queryCheckPgVersion() throws SQLException, InterruptedException {
         setCurrentOperation(Messages.JdbcLoaderBase_log_reading_pg_version);
         try (ResultSet res = runner.runScript(statement, JdbcQueries.QUERY_CHECK_PG_VERSION)) {
-            version = res.next() ? res.getInt(1) : SupportedPgVersion.VERSION_9_4.getVersion();
+            version = res.next() ? res.getInt(1) : SupportedPgVersion.GP_VERSION_6.getVersion();
             debug(Messages.JdbcLoaderBase_log_load_version, version);
+        }
+        if (!isGreenplumDb() && !SupportedPgVersion.VERSION_14.isLE(version)) {
+            throw new IllegalStateException(Messages.JdbcLoaderBase_unsupported_pg_version);
+        }
+        if (isGreenplumDb() && !SupportedPgVersion.GP_VERSION_6.isLE(version)) {
+            throw new IllegalStateException(Messages.JdbcLoaderBase_unsupported_gp_version);
         }
     }
 

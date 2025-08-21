@@ -78,7 +78,7 @@ public class PoliciesReader extends JdbcReader {
             }
         }
 
-        if (SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
+        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             p.setPermissive(res.getBoolean("polpermissive"));
         }
         AbstractDatabase db = schema.getDatabase();
@@ -128,7 +128,7 @@ public class PoliciesReader extends JdbcReader {
                 .from("pg_catalog.pg_policy res")
                 .join("JOIN pg_catalog.pg_class c ON c.oid = res.polrelid");
 
-        if (SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
+        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             builder.column("res.polpermissive");
         }
     }
