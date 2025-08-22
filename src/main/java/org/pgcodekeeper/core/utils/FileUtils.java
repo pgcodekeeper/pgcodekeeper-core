@@ -333,10 +333,11 @@ public final class FileUtils {
             });
         }
 
-        // data racing
-        if (!Files.exists(dir)) {
-            // rename to expected name
+        try {
             Files.move(tempDir, dir, StandardCopyOption.REPLACE_EXISTING);
+        } catch (FileSystemException e) {
+            // another thread already created the directory
+            deleteRecursive(tempDir);
         }
 
         return dir.toRealPath().toString();
