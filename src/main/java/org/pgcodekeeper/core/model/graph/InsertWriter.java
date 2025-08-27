@@ -40,7 +40,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -53,8 +52,8 @@ public final class InsertWriter {
 
     private static final Logger LOG = LoggerFactory.getLogger(InsertWriter.class);
 
-    private static final String GEOM_FROM_TEXT_MS_FUNC = "{0}::STGeomFromText(''{1}'', 4326)";
-    private static final String GEOM_FROM_TEXT_PG_FUNC = "ST_GeomFromText(''{0}'', 4326)";
+    private static final String GEOM_FROM_TEXT_MS_FUNC = "%s::STGeomFromText(''%s'', 4326)";
+    private static final String GEOM_FROM_TEXT_PG_FUNC = "ST_GeomFromText(''%s'', 4326)";
 
     private static final String BIT_TYPE = "bit";
     private static final String GEOMETRY_TYPE = "[geometry]";
@@ -264,7 +263,8 @@ public final class InsertWriter {
             if (1_000 == rowCount) {
                 throw new IllegalArgumentException(Messages.InsertWriter_select_size_error_message);
             }
-            LOG.info(Messages.InsertWriter_select_size_info_message, rowCount);
+            var msg = Messages.InsertWriter_select_size_info_message.formatted(rowCount);
+            LOG.info(msg);
 
             // store data to cache
             selects.put(select, tempData);
@@ -399,10 +399,10 @@ public final class InsertWriter {
             return rawValue.equals(true) ? "'1'" : "'0'";
         }
         if (GEOMETRY_TYPE.equals(type) || GEOGRAPHY_TYPE.equals(type)) {
-            return MessageFormat.format(GEOM_FROM_TEXT_MS_FUNC, type, rawValue.toString());
+            return GEOM_FROM_TEXT_MS_FUNC.formatted(type, rawValue.toString());
         }
         if (POSTGIS_GEOMETRY_TYPE.equals(type)) {
-            return MessageFormat.format(GEOM_FROM_TEXT_PG_FUNC, rawValue.toString());
+            return GEOM_FROM_TEXT_PG_FUNC.formatted(rawValue.toString());
         }
         return isNeedQuotting(rawValue, type) ? PgDiffUtils.quoteString(rawValue.toString()) : rawValue.toString();
     }

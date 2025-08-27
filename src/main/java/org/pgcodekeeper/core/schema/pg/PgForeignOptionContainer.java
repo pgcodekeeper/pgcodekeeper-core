@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.schema.pg;
 import org.pgcodekeeper.core.schema.IOptionContainer;
 import org.pgcodekeeper.core.script.SQLScript;
 
-import java.text.MessageFormat;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -30,7 +29,7 @@ import java.util.Objects;
  */
 public interface PgForeignOptionContainer extends IOptionContainer {
 
-    String ALTER_FOREIGN_OPTION = "{0} OPTIONS ({1} {2} {3})";
+    String ALTER_FOREIGN_OPTION = "%s OPTIONS (%s %s %s)";
     String DELIM = ",\n    ";
 
     /**
@@ -90,6 +89,6 @@ public interface PgForeignOptionContainer extends IOptionContainer {
     }
 
     private String getAlterOption(String action, String key, String value) {
-        return MessageFormat.format(ALTER_FOREIGN_OPTION, getAlterHeader(), action, key, value);
+        return ALTER_FOREIGN_OPTION.formatted(getAlterHeader(), action, key, value);
     }
 }

@@ -17,16 +17,14 @@ package org.pgcodekeeper.core.exception;
 
 import org.pgcodekeeper.core.schema.PgStatement;
 
-import java.text.MessageFormat;
-
 /**
  * Exception thrown when attempting to create a database object that already exists.
  * Used for cases when object creation fails due to naming conflicts.
  */
 public class ObjectCreationException extends RuntimeException {
 
-    private static final String WITHOUT_PARENT = "{0} {1} already exists"; //$NON-NLS-1$
-    private static final String WITH_PARENT = "{0} {1} already exists for {2} {3}"; //$NON-NLS-1$
+    private static final String WITHOUT_PARENT = "%s %s already exists"; //$NON-NLS-1$
+    private static final String WITH_PARENT = "%s %s already exists for %s %s"; //$NON-NLS-1$
 
     private static final long serialVersionUID = -8514537124804597343L;
 
@@ -74,7 +72,7 @@ public class ObjectCreationException extends RuntimeException {
      * @param writableStackTrace whether stack trace is writable
      */
     public ObjectCreationException(String message, Throwable cause,
-            boolean enableSuppression, boolean writableStackTrace) {
+                                   boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
@@ -84,9 +82,9 @@ public class ObjectCreationException extends RuntimeException {
      * @param st the statement that already exists
      */
     public ObjectCreationException(PgStatement st) {
-        super(MessageFormat.format(WITHOUT_PARENT, st.getStatementType(), st.getName()));
+        super(WITHOUT_PARENT.formatted(st.getStatementType(), st.getName()));
     }
-    
+
     /**
      * Constructs exception for existing database statement with parent context.
      *
@@ -94,7 +92,7 @@ public class ObjectCreationException extends RuntimeException {
      * @param parent the parent statement context
      */
     public ObjectCreationException(PgStatement st, PgStatement parent) {
-        super(MessageFormat.format(WITH_PARENT, st.getStatementType(), st.getName(),
+        super(WITH_PARENT.formatted(st.getStatementType(), st.getName(),
                 parent.getStatementType(), parent.getName()));
     }
 }

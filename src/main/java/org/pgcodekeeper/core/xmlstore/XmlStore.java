@@ -32,7 +32,6 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -108,8 +107,7 @@ public abstract class XmlStore<T> {
             appendChildren(xml, root, list);
             return xml;
         } catch (ParserConfigurationException ex) {
-            throw new IOException(MessageFormat.format(
-                    Messages.XmlStore_write_error, ex.getLocalizedMessage()), ex);
+            throw new IOException(Messages.XmlStore_write_error.formatted(ex.getLocalizedMessage()), ex);
         }
     }
 
@@ -125,8 +123,7 @@ public abstract class XmlStore<T> {
             Files.createDirectories(path.getParent());
             writeDocument(xml, path);
         } catch (Exception ex) {
-            throw new IOException(MessageFormat.format(
-                    Messages.XmlStore_write_error, ex.getLocalizedMessage()), ex);
+            throw new IOException(Messages.XmlStore_write_error.formatted(ex.getLocalizedMessage()), ex);
         }
     }
 
@@ -180,7 +177,7 @@ public abstract class XmlStore<T> {
         try (Reader reader = Files.newBufferedReader(xmlPath, StandardCharsets.UTF_8)) {
             return Utils.readXml(reader);
         } catch (Exception e) {
-            throw new IOException(MessageFormat.format(Messages.XmlStore_read_error, e.getLocalizedMessage()), e);
+            throw new IOException(Messages.XmlStore_read_error.formatted(e.getLocalizedMessage()), e);
         }
     }
 }

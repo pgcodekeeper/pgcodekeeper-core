@@ -48,7 +48,7 @@ final class CustomAntlrErrorListener extends BaseErrorListener {
      * @param inLineOffset     in-line character position offset to apply
      */
     CustomAntlrErrorListener(String parsedObjectName, List<Object> errors,
-            int offset, int lineOffset, int inLineOffset) {
+                             int offset, int lineOffset, int inLineOffset) {
         this.parsedObjectName = parsedObjectName;
         this.errors = errors;
         this.offset = offset;
@@ -69,12 +69,13 @@ final class CustomAntlrErrorListener extends BaseErrorListener {
      */
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol,
-            int line, int charPositionInLine, String msg, RecognitionException e) {
+                            int line, int charPositionInLine, String msg, RecognitionException e) {
         Token token = offendingSymbol instanceof Token t ? t : null;
         AntlrError error = new AntlrError(token, parsedObjectName, line, charPositionInLine, msg)
-            .copyWithOffset(offset, lineOffset, inLineOffset);
+                .copyWithOffset(offset, lineOffset, inLineOffset);
 
-        LOG.warn("ANTLR Error:\n{}", error);
+        var warningMsg = "ANTLR Error:\n%s".formatted(error);
+        LOG.warn(warningMsg);
         if (errors != null) {
             errors.add(error);
         }

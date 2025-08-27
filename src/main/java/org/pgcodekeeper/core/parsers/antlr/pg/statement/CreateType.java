@@ -29,7 +29,6 @@ import org.pgcodekeeper.core.schema.AbstractType;
 import org.pgcodekeeper.core.schema.pg.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
-import java.text.MessageFormat;
 import java.util.List;
 
 /**
@@ -113,12 +112,12 @@ public final class CreateType extends PgParserAbstract {
         if (ctx.canonical_function != null) {
             type.setCanonical(getFullCtxText(ctx.canonical_function));
             addDepSafe(type, getIdentifiers(ctx.canonical_function), DbObjType.FUNCTION,
-                    MessageFormat.format(FUNC_SIGN.TYPE_NAME.getName(), schema, name));
+                    FUNC_SIGN.TYPE_NAME.getName().formatted(schema, name));
         }
         if (ctx.subtype_diff_function != null) {
             type.setSubtypeDiff(getFullCtxText(ctx.subtype_diff_function));
             addDepSafe(type, getIdentifiers(ctx.subtype_diff_function), DbObjType.FUNCTION,
-                    MessageFormat.format(FUNC_SIGN.SUBTYPE_DIFF.getName(), type.getSubtype()));
+                    FUNC_SIGN.SUBTYPE_DIFF.getName().formatted(type.getSubtype()));
         }
         if (ctx.multirange_name != null) {
             type.setMultirange(ctx.multirange_name.getText());
@@ -153,7 +152,7 @@ public final class CreateType extends PgParserAbstract {
         if (ctx.send_function != null) {
             type.setSendFunction(getFullCtxText(ctx.send_function));
             addDepSafe(type, getIdentifiers(ctx.send_function), DbObjType.FUNCTION,
-                    MessageFormat.format(FUNC_SIGN.TYPE_NAME.getName(), schema, name));
+                    FUNC_SIGN.TYPE_NAME.getName().formatted(schema, name));
         }
         if (ctx.receive_function != null) {
             type.setReceiveFunction(getFullCtxText(ctx.receive_function));
@@ -165,7 +164,7 @@ public final class CreateType extends PgParserAbstract {
 
         type.setOutputFunction(getFullCtxText(ctx.output_function));
         addDepSafe(type, getIdentifiers(ctx.output_function), DbObjType.FUNCTION,
-                MessageFormat.format(FUNC_SIGN.TYPE_NAME.getName(), schema, name));
+                FUNC_SIGN.TYPE_NAME.getName().formatted(schema, name));
 
         type.setInputFunction(getFullCtxText(ctx.input_function));
         // added dependency two times because can be one of two types signature

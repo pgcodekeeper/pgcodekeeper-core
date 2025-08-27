@@ -200,11 +200,12 @@ public abstract class MsAbstractExpr {
                         columnName, DbObjType.COLUMN), columnCtx);
             }
         } else {
-            log("Unknown column reference: {} {} {}", schemaName, relationName, columnName);
+            log("Unknown column reference: %s %s %s", schemaName, relationName, columnName);
         }
     }
 
     protected void log(String msg, Object... args) {
-        LOG.trace(msg, args);
+        var traceMsg = msg.formatted(args);
+        LOG.trace(traceMsg);
     }
 }

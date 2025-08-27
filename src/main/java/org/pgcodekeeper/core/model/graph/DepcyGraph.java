@@ -180,11 +180,13 @@ public final class DepcyGraph {
             for (PgStatement vertex : detector.findCyclesContainingVertex(st)) {
                 if (vertex.getStatementType() == DbObjType.COLUMN) {
                     graph.removeEdge(st, vertex);
-                    LOG.info(REMOVE_DEP, st.getQualifiedName(), vertex.getQualifiedName());
+                    var msg = REMOVE_DEP.formatted(st.getQualifiedName(), vertex.getQualifiedName());
+                    LOG.info(msg);
 
                     PgStatement table = vertex.getParent();
                     if (graph.removeEdge(st, table) != null) {
-                        LOG.info(REMOVE_DEP, st.getQualifiedName(), table.getQualifiedName());
+                        msg = REMOVE_DEP.formatted(st.getQualifiedName(), table.getQualifiedName());
+                        LOG.info(msg);
                     }
                 }
             }
@@ -239,7 +241,8 @@ public final class DepcyGraph {
         for (Inherits in : tbl.getInherits()) {
             IStatement parentTbl = db.getStatement(new GenericColumn(in.getKey(), in.getValue(), DbObjType.TABLE));
             if (parentTbl == null) {
-                LOG.error(Messages.DepcyGraph_log_no_such_table, in.getQualifiedName());
+                var msg = Messages.DepcyGraph_log_no_such_table.formatted(in.getQualifiedName());
+                LOG.error(msg);
                 continue;
             }
 
@@ -251,8 +254,10 @@ public final class DepcyGraph {
                 if (parentCol != null) {
                     graph.addEdge(col, parentCol);
                 } else {
-                    LOG.error(Messages.DepcyGraph_log_col_is_missed,
-                            in.getQualifiedName(), colName, col.getSchemaName(), col.getParent().getName(), colName);
+                    var msg = Messages.DepcyGraph_log_col_is_missed.formatted(
+                            in.getQualifiedName(), colName, col.getSchemaName(), col.getParent().getName(), colName
+                    );
+                    LOG.error(msg);
                 }
             }
         }

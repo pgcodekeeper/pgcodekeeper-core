@@ -33,7 +33,6 @@ import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Function_bodyContext;
 import org.pgcodekeeper.core.utils.Pair;
 
-import java.text.MessageFormat;
 import java.util.*;
 
 /**
@@ -207,7 +206,7 @@ public class VerificationIndents implements IVerification {
                     currentIndent += indent.getSecond() - 1;
                     int cyclomaticComplexCount = rules.getMaxCyclomaticComplexity();
                     if (cyclomaticComplexCount > 0 && currentIndent > cyclomaticComplexCount) {
-                        String msg = MessageFormat.format(Messages.VerificationIndents_cyclomatic_complexy,
+                        String msg = Messages.VerificationIndents_cyclomatic_complexy.formatted(
                                 currentIndent, cyclomaticComplexCount);
                         addError(t, msg);
                     }
@@ -234,7 +233,7 @@ public class VerificationIndents implements IVerification {
                 return;
             }
             if (isCheckIndents) {
-                addError(t, MessageFormat.format(Messages.VerificationIndents_eol_before_stat, t.getText()));
+                addError(t, Messages.VerificationIndents_eol_before_stat.formatted(t.getText()));
                 return;
             }
         }
@@ -242,7 +241,7 @@ public class VerificationIndents implements IVerification {
         int expectedIndent = indent * rules.getIndentSize();
         int spaceSize = tokenStart - lastTokenOffset;
         if (isCheckIndents && spaceSize != expectedIndent) {
-            addError(t, MessageFormat.format(Messages.VerificationIndents_indent_size, expectedIndent, spaceSize));
+            addError(t, Messages.VerificationIndents_indent_size.formatted(expectedIndent, spaceSize));
         }
     }
 

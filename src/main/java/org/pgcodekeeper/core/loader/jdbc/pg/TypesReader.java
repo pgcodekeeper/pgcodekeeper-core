@@ -31,7 +31,6 @@ import org.pgcodekeeper.core.settings.ISettings;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 
 /**
  * Reader for PostgreSQL types and domains.
@@ -158,7 +157,7 @@ public final class TypesReader extends JdbcReader {
         setFunctionWithDep(PgBaseType::setInputFunction, t, typinput, FUNC_SIGN.IN_ADVANCED.getName());
 
         setFunctionWithDep(PgBaseType::setOutputFunction, t, res.getString("typoutput"),
-                MessageFormat.format(FUNC_SIGN.TYPE_NAME.getName(), schemaName, name));
+                FUNC_SIGN.TYPE_NAME.getName().formatted(schemaName, name));
         String typreceive = res.getString("typreceive");
         if (!EMPTY_FUNCTION.equals(typreceive)) {
             // added dependency two times because can be one of two types signature
@@ -169,7 +168,7 @@ public final class TypesReader extends JdbcReader {
         String typsend = res.getString("typsend");
         if (!EMPTY_FUNCTION.equals(typsend)) {
             setFunctionWithDep(PgBaseType::setSendFunction, t, typsend,
-                    MessageFormat.format(FUNC_SIGN.TYPE_NAME.getName(), schemaName, name));
+                    FUNC_SIGN.TYPE_NAME.getName().formatted(schemaName, name));
         }
 
         String typmodin = res.getString("typmodin");
@@ -350,11 +349,11 @@ public final class TypesReader extends JdbcReader {
 
         if (res.getBoolean("rngcanonicalset")) {
             setFunctionWithDep(PgRangeType::setCanonical, t, res.getString("rngcanonical"),
-                    MessageFormat.format(FUNC_SIGN.TYPE_NAME.getName(), schemaName, name));
+                    FUNC_SIGN.TYPE_NAME.getName().formatted(schemaName, name));
         }
         if (res.getBoolean("rngsubdiffset")) {
             setFunctionWithDep(PgRangeType::setSubtypeDiff, t, res.getString("rngsubdiff"),
-                    MessageFormat.format(FUNC_SIGN.SUBTYPE_DIFF.getName(), t.getSubtype()));
+                    FUNC_SIGN.SUBTYPE_DIFF.getName().formatted(t.getSubtype()));
         }
 
         if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {

@@ -265,10 +265,12 @@ public abstract class AbstractPgTable extends AbstractTable {
                 if (inhtTable != null) {
                     inhColumns = Stream.concat(inhColumns, inhtTable.getRelationColumns());
                 } else {
-                    LOG.warn(Messages.AbstractPgTable_log_inherits_not_found, schemaName, tableName);
+                    var msg = Messages.AbstractPgTable_log_inherits_not_found.formatted(schemaName, tableName);
+                    LOG.warn(msg);
                 }
             } else {
-                LOG.warn(Messages.AbstractPgTable_log_schemas_not_found, schemaName);
+                var msg = Messages.AbstractPgTable_log_schemas_not_found.formatted(schemaName);
+                LOG.warn(msg);
             }
         }
         return Stream.concat(inhColumns, localColumns);

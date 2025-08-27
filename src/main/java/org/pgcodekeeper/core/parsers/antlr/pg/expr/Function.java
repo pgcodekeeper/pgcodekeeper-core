@@ -140,7 +140,8 @@ public final class Function extends AbstractExprWithNmspc<Plpgsql_functionContex
                 type = pair.getSecond();
             } else {
                 type = TypesSetManually.UNKNOWN;
-                LOG.warn(Messages.Function_log_variable_not_found, variable);
+                var msg = Messages.Function_log_variable_not_found.formatted(variable);
+                LOG.warn(msg);
             }
 
             addNamespaceVariable(new Pair<>(alias, type));
@@ -299,9 +300,9 @@ public final class Function extends AbstractExprWithNmspc<Plpgsql_functionContex
         if (vexCtx != null) {
             ValueExpr vex = new ValueExpr(this);
             vex.analyze(new Vex(vexCtx));
-        } else if ((query = returnStmt.plpgsql_query())!= null) {
+        } else if ((query = returnStmt.plpgsql_query()) != null) {
             query(query);
-        } else if ((perform = returnStmt.perform_stmt())!= null) {
+        } else if ((perform = returnStmt.perform_stmt()) != null) {
             new Select(this).analyze(perform);
         }
     }
