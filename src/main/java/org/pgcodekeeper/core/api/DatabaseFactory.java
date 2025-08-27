@@ -16,18 +16,20 @@
 package org.pgcodekeeper.core.api;
 
 import org.pgcodekeeper.core.PgCodekeeperException;
-import org.pgcodekeeper.core.loader.*;
+import org.pgcodekeeper.core.loader.DatabaseLoader;
+import org.pgcodekeeper.core.loader.LoaderFactory;
+import org.pgcodekeeper.core.loader.PgDumpLoader;
+import org.pgcodekeeper.core.loader.ProjectLoader;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.IIgnoreList;
 import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.monitor.NullMonitor;
+import org.pgcodekeeper.core.schema.AbstractDatabase;
+import org.pgcodekeeper.core.settings.ISettings;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -81,7 +83,8 @@ public final class DatabaseFactory {
 
     /**
      * Loads database from a JDBC connection.
-     * @param url      the JDBC connection URL
+     *
+     * @param url the JDBC connection URL
      * @return the loaded database
      * @throws IOException           if I/O operations fail
      * @throws PgCodekeeperException if parsing errors occur
@@ -164,9 +167,7 @@ public final class DatabaseFactory {
                     .map(Object::toString)
                     .collect(Collectors.joining());
 
-            throw new PgCodekeeperException(MessageFormat.format(
-                    Messages.DatabaseFactory_errors_found_while_parsing, errors)
-            );
+            throw new PgCodekeeperException(Messages.DatabaseFactory_errors_found_while_parsing.formatted(errors));
         }
 
         return db;

@@ -20,6 +20,7 @@ import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.exception.MonitorCancelledRuntimeException;
 import org.pgcodekeeper.core.loader.AbstractJdbcConnector;
 import org.pgcodekeeper.core.loader.DatabaseLoader;
 import org.pgcodekeeper.core.loader.JdbcQueries;
@@ -29,17 +30,16 @@ import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrTaskManager;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
-import org.pgcodekeeper.core.exception.MonitorCancelledRuntimeException;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser;
+import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.pg.AbstractPgFunction;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.monitor.IMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,7 +168,7 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
     public void setCurrentOperation(String operation) {
         currentObject = null;
         currentOperation = operation;
-        debug("{}", currentOperation);
+        debug("%s", currentOperation);
     }
 
     public boolean isIgnoredSchema(String schemaName) {
@@ -552,8 +552,9 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
             while (res.next()) {
                 String extVersion = res.getString("extversion");
                 if (!extVersion.startsWith(Consts.EXTENSION_VERSION)) {
-                    LOG.info(Messages.JdbcLoaderBase_log_old_version_used,
-                            extVersion, Consts.EXTENSION_VERSION);
+                    var msg = Messages.JdbcLoaderBase_log_old_version_used.formatted(extVersion,
+                            Consts.EXTENSION_VERSION);
+                    LOG.info(msg);
                 } else if (res.getBoolean("disabled")) {
                     LOG.info(Messages.JdbcLoaderBase_log_event_trigger_disabled);
                 } else {
@@ -628,7 +629,8 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
 
     private void debug(String message, Object argument) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug(message, argument);
+            var msg = message.formatted(argument);
+            LOG.debug(msg);
         }
     }
 }

@@ -86,14 +86,12 @@ public abstract class ChAbstractExpr {
     }
 
     /**
-     * @param schema
-     *            optional schema qualification of name, may be null
-     * @param name
-     *            alias of the referenced object, lower-case for case-insensitive search call
-     *            {@link #findReference(String, String)} to lower-case automatically
+     * @param schema optional schema qualification of name, may be null
+     * @param name   alias of the referenced object, lower-case for case-insensitive search call
+     *               {@link #findReference(String, String)} to lower-case automatically
      * @return a pair of (Alias, Dealiased name) where Alias is the given name. Dealiased name can be null if the name
-     *         is internal to the query and is not a reference to external table.<br>
-     *         null if the name is not found
+     * is internal to the query and is not a reference to external table.<br>
+     * null if the name is not found
      */
     protected Entry<String, GenericColumn> findReferenceRecursive(String schema, String name) {
         return !hasParent() ? null : parent.findReferenceRecursive(schema, name);
@@ -155,6 +153,7 @@ public abstract class ChAbstractExpr {
     }
 
     protected final void log(String msg, Object... args) {
-        LOG.trace(msg, args);
+        var traceMsg = msg.formatted(args);
+        LOG.trace(traceMsg);
     }
 }

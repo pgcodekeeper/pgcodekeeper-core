@@ -64,7 +64,8 @@ public abstract class JdbcReader extends AbstractStatementReader {
         var schemaId = result.getObject(schemaColumn.substring(schemaColumn.indexOf('.') + 1));
         AbstractSchema schema = loader.getSchema(schemaId);
         if (schema == null) {
-            LOG.warn("No schema found for id {}", schemaId);
+            var msg = "No schema found for id %s".formatted(schemaId);
+            LOG.warn(msg);
             return;
         }
 
@@ -99,8 +100,8 @@ public abstract class JdbcReader extends AbstractStatementReader {
      * as they can return null if the object was deleted outside the transaction block.
      *
      * @param object the object to check for validity
-     * @param type the database object type
-     * @param name the object name
+     * @param type   the database object type
+     * @param name   the object name
      * @throws ConcurrentModificationException if the object is null (was deleted)
      */
     public static void checkObjectValidity(Object object, DbObjType type, String name) {
@@ -128,8 +129,8 @@ public abstract class JdbcReader extends AbstractStatementReader {
     /**
      * Retrieves an array column from the result set.
      *
-     * @param <T> the array element type
-     * @param rs the result set
+     * @param <T>        the array element type
+     * @param rs         the result set
      * @param columnName the column name containing the array
      * @return the array values, or null if the column is null
      * @throws SQLException if array retrieval fails
@@ -157,10 +158,10 @@ public abstract class JdbcReader extends AbstractStatementReader {
      * Sets a function reference on a statement and adds appropriate dependencies.
      * Parses the function name to extract schema information and adds schema and function dependencies.
      *
-     * @param <T> the statement type
-     * @param setter the setter to apply the function value
+     * @param <T>       the statement type
+     * @param setter    the setter to apply the function value
      * @param statement the statement to add dependencies to
-     * @param function the function name (possibly schema-qualified)
+     * @param function  the function name (possibly schema-qualified)
      * @param signature the function signature, or null if not applicable
      */
     public static <T extends PgStatement> void setFunctionWithDep(

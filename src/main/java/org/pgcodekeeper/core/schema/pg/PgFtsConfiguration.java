@@ -23,7 +23,6 @@ import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,7 +131,7 @@ public final class PgFtsConfiguration extends PgStatement implements ISearchPath
 
     private String getAlterConfiguration(String action, String fragment, String dictionary) {
         StringBuilder sqlAction = new StringBuilder(ALTER_CONFIGURATION).append(getQualifiedName())
-                .append(MessageFormat.format("\n\t{0} MAPPING FOR ", action))
+                .append("\n\t%s MAPPING FOR ".formatted(action))
                 .append(fragment);
         if (null != dictionary) {
             sqlAction.append(WITH).append(dictionary);

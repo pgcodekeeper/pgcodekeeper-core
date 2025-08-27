@@ -20,7 +20,6 @@ import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Objects;
 
@@ -108,7 +107,7 @@ public final class PartitionPgTable extends AbstractRegularTable implements IPar
 
     private StringBuilder appendTablePartiton(String tableName, String state) {
         return new StringBuilder(ALTER_TABLE).append(tableName)
-                .append(MessageFormat.format("\n\t{0} PARTITION ", state))
+                .append("\n\t%s PARTITION ".formatted(state))
                 .append(PgDiffUtils.getQuotedName(parent.getName()))
                 .append('.')
                 .append(PgDiffUtils.getQuotedName(getName()));

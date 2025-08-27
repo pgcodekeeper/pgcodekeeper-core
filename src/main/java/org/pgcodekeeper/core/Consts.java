@@ -73,17 +73,17 @@ public interface Consts {
     /**
      * Log message when in the SELECT part aliases is duplicate
      */
-    String DUPLICATE_ALIASES = "Duplicate aliases entry: {}";
+    String DUPLICATE_ALIASES = "Duplicate aliases entry: %s";
 
     enum FUNC_SIGN {
         IN("(cstring)"),
         IN_ADVANCED("(cstring, oid, integer)"),
         INTERNAL("(internal)"),
-        TYPMOD_IN ("(cstring[])"),
-        TYPMOD_OUT ("(integer)"),
+        TYPMOD_IN("(cstring[])"),
+        TYPMOD_OUT("(integer)"),
         REC_ADVANCED("(internal, oid, integer)"),
-        SUBTYPE_DIFF("({0}, {0})"),
-        TYPE_NAME("({0}.{1})");
+        SUBTYPE_DIFF("(%1$s, %1$s)"),
+        TYPE_NAME("(%s.%s)");
 
         private final String name;
 
@@ -187,5 +187,5 @@ public interface Consts {
             "void", //$NON-NLS-1$
             "xid", //$NON-NLS-1$
             "xml" //$NON-NLS-1$
-            );
+    );
 }

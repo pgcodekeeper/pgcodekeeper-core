@@ -23,7 +23,6 @@ import org.pgcodekeeper.core.monitor.IMonitor;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 
 /**
  * Abstract base class for JDBC statement readers that process database metadata.
@@ -48,11 +47,11 @@ public abstract class AbstractStatementReader {
 
     // join extension data with a left join
     private static final String EXTENSION_JOIN =
-            "LEFT JOIN {0}.dbots_event_data time ON time.objid = res.oid AND time.classid = {1}::pg_catalog.regclass";
+            "LEFT JOIN %s.dbots_event_data time ON time.objid = res.oid AND time.classid = %s::pg_catalog.regclass";
 
     // join description data with a left join
     private static final String DESCRIPTION_JOIN =
-            "LEFT JOIN pg_catalog.pg_description d ON d.objoid = res.oid AND d.classoid = {0}::pg_catalog.regclass {1}";
+            "LEFT JOIN pg_catalog.pg_description d ON d.objoid = res.oid AND d.classoid = %s::pg_catalog.regclass %s";
 
     protected final JdbcLoaderBase loader;
     private final String classId;
@@ -66,9 +65,9 @@ public abstract class AbstractStatementReader {
     /**
      * Reads database objects by executing the generated SQL query and processing results.
      *
-     * @throws SQLException if database access fails
+     * @throws SQLException         if database access fails
      * @throws InterruptedException if reading is interrupted
-     * @throws XmlReaderException if XML processing fails
+     * @throws XmlReaderException   if XML processing fails
      */
     public final void read() throws SQLException, InterruptedException, XmlReaderException {
         loader.setCurrentOperation(Messages.AbstractStatementReader_start + getClass().getSimpleName());
@@ -100,8 +99,7 @@ public abstract class AbstractStatementReader {
         String extensionSchema = loader.getExtensionSchema();
         if (extensionSchema != null) {
             builder.column("time.ses_user");
-            builder.join(MessageFormat.format(EXTENSION_JOIN,
-                    PgDiffUtils.getQuotedName(extensionSchema), classId));
+            builder.join(EXTENSION_JOIN.formatted(PgDiffUtils.getQuotedName(extensionSchema), classId));
         }
     }
 
@@ -122,8 +120,7 @@ public abstract class AbstractStatementReader {
 
     protected void addDescriptionPart(QueryBuilder builder, boolean checkColumn) {
         builder.column("d.description");
-        builder.join(MessageFormat.format(DESCRIPTION_JOIN, classId,
-                checkColumn ? "AND d.objsubid = 0" : ""));
+        builder.join(DESCRIPTION_JOIN.formatted(classId, checkColumn ? "AND d.objsubid = 0" : ""));
     }
 
     protected void addMsPriviligesPart(QueryBuilder builder) {

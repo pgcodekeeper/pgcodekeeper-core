@@ -22,15 +22,14 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.parsers.antlr.base.*;
+import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
 import org.pgcodekeeper.core.parsers.antlr.base.verification.IVerification;
 import org.pgcodekeeper.core.parsers.antlr.base.verification.VerificationProperties;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
-import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.PgParserAbstract;
 import org.pgcodekeeper.core.schema.ArgMode;
 import org.pgcodekeeper.core.utils.Pair;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
 
@@ -85,7 +84,7 @@ public class VerificationFunction implements IVerification {
         var ruleLength = rules.getMaxFunctionLenght();
         var funcLength = ctx.getStop().getLine();
         if (ruleLength > 0 && funcLength > ruleLength) {
-            addError(MessageFormat.format(Messages.VerificationFunction_function_length, funcLength, ruleLength));
+            addError(Messages.VerificationFunction_function_length.formatted(funcLength, ruleLength));
         }
     }
 
@@ -95,7 +94,7 @@ public class VerificationFunction implements IVerification {
     private void verifyMethodCount() {
         int ruleMethodCount = rules.getMethodCount();
         if (ruleMethodCount > 0 && methodCount > ruleMethodCount) {
-            addError(MessageFormat.format(Messages.VerificationFunction_ncss, methodCount, ruleMethodCount));
+            addError(Messages.VerificationFunction_ncss.formatted(methodCount, ruleMethodCount));
         }
     }
 
@@ -111,7 +110,7 @@ public class VerificationFunction implements IVerification {
         var countParams = ctx.function_parameters().function_args().function_arguments().stream().
                 filter(arg -> ParserAbstract.parseArgMode(arg.argmode()) != ArgMode.OUT).count();
         if (countParams > limitParams) {
-            addError(MessageFormat.format(Messages.VerificationFunction_function_params, countParams, limitParams));
+            addError(Messages.VerificationFunction_function_params.formatted(countParams, limitParams));
         }
     }
 
@@ -174,7 +173,7 @@ public class VerificationFunction implements IVerification {
 
         var beginToken = definitionCtx.getStart();
         if (!allowedFunctionStart.contains(beginToken.getText().toLowerCase(Locale.ROOT))) {
-            addError(MessageFormat.format(Messages.VerificationFunction_body_start, allowedFunctionStart), beginToken);
+            addError(Messages.VerificationFunction_body_start.formatted(allowedFunctionStart), beginToken);
         }
     }
 

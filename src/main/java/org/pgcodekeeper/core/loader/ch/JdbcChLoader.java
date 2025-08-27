@@ -21,17 +21,16 @@ import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.ch.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.monitor.IMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Statement;
-import java.text.MessageFormat;
 import java.util.stream.Collectors;
 
 /**
@@ -88,8 +87,8 @@ public final class JdbcChLoader extends JdbcLoaderBase {
             throw ex;
         } catch (Exception e) {
             // connection is closed at this point
-            throw new IOException(MessageFormat.format(Messages.Connection_DatabaseJdbcAccessError,
-                    e.getLocalizedMessage(), getCurrentLocation()), e);
+            throw new IOException(Messages.Connection_DatabaseJdbcAccessError.formatted(getCurrentLocation(),
+                    e.getLocalizedMessage()), e);
         }
         return d;
     }

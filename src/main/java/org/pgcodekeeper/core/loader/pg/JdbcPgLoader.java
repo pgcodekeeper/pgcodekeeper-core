@@ -22,9 +22,9 @@ import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.pg.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.monitor.IMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.text.MessageFormat;
 
 /**
  * JDBC-based database schema loader for PostgreSQL databases.
@@ -137,8 +136,8 @@ public final class JdbcPgLoader extends JdbcLoaderBase {
             throw ex;
         } catch (Exception e) {
             // connection is closed at this point, trust Postgres to rollback it; we're a read-only xact anyway
-            throw new IOException(MessageFormat.format(Messages.Connection_DatabaseJdbcAccessError,
-                    e.getLocalizedMessage(), getCurrentLocation()), e);
+            throw new IOException(Messages.Connection_DatabaseJdbcAccessError.formatted(getCurrentLocation(),
+                    e.getLocalizedMessage()), e);
         }
         return d;
     }

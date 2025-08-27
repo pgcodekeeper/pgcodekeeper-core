@@ -353,7 +353,8 @@ public final class FileUtils {
      * @throws IOException if file creation fails
      */
     public static Path createTempFile(String prefix, String suffix) throws IOException {
-        LOG.info(Messages.FileUtils_creating_temp_file, prefix);
+        var msg = Messages.FileUtils_creating_temp_file.formatted(prefix);
+        LOG.info(msg);
         if (IS_POSIX) {
             return Files.createTempFile(prefix, suffix, POSIX_PERMISSIONS);
         }
@@ -374,7 +375,8 @@ public final class FileUtils {
      * @throws IOException if file creation fails
      */
     public static Path createTempFile(Path dir, String prefix, String suffix) throws IOException {
-        LOG.info(Messages.FileUtils_creating_temp_file, prefix);
+        var msg = Messages.FileUtils_creating_temp_file.formatted(prefix);
+        LOG.info(msg);
         return Files.createTempFile(dir, prefix, suffix);
     }
 
@@ -387,7 +389,8 @@ public final class FileUtils {
      * @throws IOException if directory creation fails
      */
     public static Path createTempDirectory(String prefix) throws IOException {
-        LOG.info(Messages.FileUtils_creating_temp_directory, prefix);
+        var msg = Messages.FileUtils_creating_temp_directory.formatted(prefix);
+        LOG.info(msg);
 
         if (IS_POSIX) {
             return Files.createTempDirectory(prefix, POSIX_PERMISSIONS);
@@ -408,7 +411,8 @@ public final class FileUtils {
      * @throws IOException if directory creation fails
      */
     public static Path createTempDirectory(Path dir, String prefix) throws IOException {
-        LOG.info(Messages.FileUtils_creating_temp_directory, prefix);
+        var msg = Messages.FileUtils_creating_temp_directory.formatted(prefix);
+        LOG.info(msg);
         return Files.createTempDirectory(dir, prefix);
     }
 

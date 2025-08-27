@@ -78,7 +78,8 @@ public class IgnoreSchemaList implements IIgnoreList {
                 return switch (newStatus) {
                     case ADD, ADD_SUBTREE -> true;
                     case SKIP, SKIP_SUBTREE -> {
-                        LOG.debug(Messages.IgnoreSchemaList_log_ignored_schema, schema);
+                        var msg = Messages.IgnoreSchemaList_log_ignored_schema.formatted(schema);
+                        LOG.debug(msg);
                         yield false;
                     }
                 };

@@ -22,11 +22,11 @@ import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.pgcodekeeper.core.*;
 import org.pgcodekeeper.core.exception.MisplacedObjectException;
+import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.exporter.ModelExporter;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
-import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.PgObjLocation.LocationType;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -34,7 +34,6 @@ import org.pgcodekeeper.core.settings.ISettings;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.BiConsumer;
@@ -48,7 +47,7 @@ import java.util.stream.Collectors;
 public abstract class ParserAbstract<S extends AbstractDatabase> {
 
     private static final String SCHEMA_ERROR = "Object must be schema qualified: ";
-    private static final String LOCATION_ERROR = "The object {0} must be defined in the file: {1}";
+    private static final String LOCATION_ERROR = "The object %s must be defined in the file: %s";
 
     protected static final String ACTION_CREATE = "CREATE";
     protected static final String ACTION_ALTER = "ALTER";
@@ -283,7 +282,7 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
         String filePath = ModelExporter.getRelativeFilePath(statement).toString();
         if (!Utils.endsWithIgnoreCase(fileName, filePath)
                 && isInProject(statement.getDbType())) {
-            throw new MisplacedObjectException(MessageFormat.format(LOCATION_ERROR,
+            throw new MisplacedObjectException(LOCATION_ERROR.formatted(
                     statement.getBareName(), filePath), errToken);
         }
     }

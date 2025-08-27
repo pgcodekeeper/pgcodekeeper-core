@@ -21,10 +21,10 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
+import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.Vex;
-import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.PgParserAbstract;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
@@ -190,7 +190,7 @@ public final class ValueExpr extends AbstractExpr {
     }
 
     private ModPair<String, String> op(Vex vex, List<ModPair<String, String>> operandsList,
-            String operator, OpContext op) {
+                                       String operator, OpContext op) {
         String schema = Consts.PG_CATALOG;
         ParserRuleContext ctx = null;
         if (op != null) {
@@ -223,7 +223,7 @@ public final class ValueExpr extends AbstractExpr {
             addDepcy(new GenericColumn(resultOperFunction.getSchemaName(),
                     resultOperFunction.getName(), DbObjType.OPERATOR), ctx);
 
-            String returns =  resultOperFunction.getReturns();
+            String returns = resultOperFunction.getReturns();
             if (returns == null) {
                 returns = TypesSetManually.FUNCTION_COLUMN;
             }
@@ -407,8 +407,8 @@ public final class ValueExpr extends AbstractExpr {
 
     /**
      * @param left signature of the expression on which the indirection is executed <br>
-     *              modified by each step in indirection analysis <br>
-     *              may be null if indirection result is not interesting (e.g. predetermined)
+     *             modified by each step in indirection analysis <br>
+     *             may be null if indirection result is not interesting (e.g. predetermined)
      */
     private void indirection(List<IndirectionContext> indirection, ModPair<String, String> left) {
         for (IndirectionContext ind : indirection) {
@@ -503,7 +503,8 @@ public final class ValueExpr extends AbstractExpr {
             if (argnameCtx != null) {
                 String argname = argnameCtx.getText();
                 if (argsName.put(argname, argType) != null) {
-                    LOG.warn("Duplicate values for function named arg: {}", argname);
+                    var msg = "Duplicate values for function named arg: %s".formatted(argname);
+                    LOG.warn(msg);
                 }
             } else {
                 argsType.add(argType);
@@ -753,15 +754,15 @@ public final class ValueExpr extends AbstractExpr {
     }
 
     /**
-     * @param functionName called function bare name
-     * @param sourceTypes call sequential argument types
-     * @param sourceNames call named argument types (Name => Type map)
+     * @param functionName       called function bare name
+     * @param sourceTypes        call sequential argument types
+     * @param sourceNames        call named argument types (Name => Type map)
      * @param availableFunctions functions from applicable schemas
      * @return most suitable function to call or null,
-     *      if none were found or an ambiguity was detected
+     * if none were found or an ambiguity was detected
      */
     private IFunction resolveCall(String functionName, List<String> sourceTypes,
-            Map<String, String> sourceNames, Collection<? extends IFunction> availableFunctions) {
+                                  Map<String, String> sourceNames, Collection<? extends IFunction> availableFunctions) {
         // save each applicable function with the number of exact type matches
         // between input args and function parameters
         // function that has more exact matches (less casts) wins
@@ -835,7 +836,7 @@ public final class ValueExpr extends AbstractExpr {
     }
 
     private IOperator resolveOperatorsCall(String operatorName, String left, String right,
-            Collection<IOperator> availableOperators) {
+                                           Collection<IOperator> availableOperators) {
         // save each applicable operators with the number of exact type matches
         // between input args and operator parameters
         // function that has more exact matches (less casts) wins
@@ -979,37 +980,37 @@ public final class ValueExpr extends AbstractExpr {
         Token start = pair.getSecond();
 
         switch (regcast) {
-        case "regproc":
-            // In this case, the function is not overloaded.
-            addFunctionDepcyNotOverloaded(QNameParser.parsePg(s).getIds(), start, DbObjType.FUNCTION);
-            break;
-        case "regclass":
-            addDepcy(QNameParser.parsePg(s).getIds(), DbObjType.TABLE, start);
-            break;
-        case "regtype":
-            addDepcy(QNameParser.parsePg(s).getIds(), DbObjType.TYPE, start);
-            break;
-        case "regnamespace":
-            addSchemaDepcy(QNameParser.parsePg(s).getIds(), start);
-            break;
-        case "regprocedure":
-            addFunctionSigDepcy(s, start, DbObjType.FUNCTION);
-            break;
-        case "regoper":
-            // In this case, the operator is not overloaded.
-            addFunctionDepcyNotOverloaded(QNameParser.parsePgOperator(s).getIds(), start, DbObjType.OPERATOR);
-            break;
-        case "regoperator":
-            addFunctionSigDepcy(s, start, DbObjType.OPERATOR);
-            break;
-        case "regconfig":
-            addDepcy(QNameParser.parsePg(s).getIds(), DbObjType.FTS_CONFIGURATION, start);
-            break;
-        case "regdictionary":
-            addDepcy(QNameParser.parsePg(s).getIds(), DbObjType.FTS_DICTIONARY, start);
-            break;
-        default:
-            break;
+            case "regproc":
+                // In this case, the function is not overloaded.
+                addFunctionDepcyNotOverloaded(QNameParser.parsePg(s).getIds(), start, DbObjType.FUNCTION);
+                break;
+            case "regclass":
+                addDepcy(QNameParser.parsePg(s).getIds(), DbObjType.TABLE, start);
+                break;
+            case "regtype":
+                addDepcy(QNameParser.parsePg(s).getIds(), DbObjType.TYPE, start);
+                break;
+            case "regnamespace":
+                addSchemaDepcy(QNameParser.parsePg(s).getIds(), start);
+                break;
+            case "regprocedure":
+                addFunctionSigDepcy(s, start, DbObjType.FUNCTION);
+                break;
+            case "regoper":
+                // In this case, the operator is not overloaded.
+                addFunctionDepcyNotOverloaded(QNameParser.parsePgOperator(s).getIds(), start, DbObjType.OPERATOR);
+                break;
+            case "regoperator":
+                addFunctionSigDepcy(s, start, DbObjType.OPERATOR);
+                break;
+            case "regconfig":
+                addDepcy(QNameParser.parsePg(s).getIds(), DbObjType.FTS_CONFIGURATION, start);
+                break;
+            case "regdictionary":
+                addDepcy(QNameParser.parsePg(s).getIds(), DbObjType.FTS_DICTIONARY, start);
+                break;
+            default:
+                break;
         }
     }
 

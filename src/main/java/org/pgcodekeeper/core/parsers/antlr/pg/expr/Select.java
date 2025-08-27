@@ -350,18 +350,18 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
 
         List<IndirectionContext> ind = indList.indirection();
         switch (ind.size()) {
-        case 0:
-            return qualAster(Collections.singletonList(id), cols);
-        case 1:
-            IndirectionContext second = ind.get(0);
-            if (second.LEFT_BRACKET() == null) {
-                return qualAster(Arrays.asList(id, second.col_label()), cols);
-            }
-            // cannot handle asterisk indirection from an array element
-            //$FALL-THROUGH$
-        default:
-            // long indirections are unsupported
-            return false;
+            case 0:
+                return qualAster(Collections.singletonList(id), cols);
+            case 1:
+                IndirectionContext second = ind.get(0);
+                if (second.LEFT_BRACKET() == null) {
+                    return qualAster(Arrays.asList(id, second.col_label()), cols);
+                }
+                // cannot handle asterisk indirection from an array element
+                //$FALL-THROUGH$
+            default:
+                // long indirections are unsupported
+                return false;
         }
     }
 
@@ -442,12 +442,13 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
 
         Entry<String, GenericColumn> ref = findReference(schema, relation, null);
         if (ref == null) {
-            LOG.warn(Messages.Select_log_aster_qual_not_found, schema, relation);
+            var msg = Messages.Select_log_aster_qual_not_found.formatted(schema, relation);
+            LOG.warn(msg);
             return false;
         }
         GenericColumn relationGc = ref.getValue();
         if (relationGc != null) {
-            if  (schemaCtx != null) {
+            if (schemaCtx != null) {
                 addDepcy(new GenericColumn(relationGc.schema, DbObjType.SCHEMA), schemaCtx);
             }
 
@@ -469,7 +470,8 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
                     .forEach(cols::add);
             return true;
         }
-        LOG.warn(Messages.Select_log_complex_not_found, relation);
+        var msg = Messages.Select_log_complex_not_found.formatted(relation);
+        LOG.warn(msg);
         return false;
     }
 
@@ -576,7 +578,7 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
             ValueExpr vexFunc = new ValueExpr(this);
             Pair<String, String> func = vexFunc.function(function);
             if (func.getFirst() != null) {
-                String funcAlias = alias == null ? func.getFirst(): alias.getText();
+                String funcAlias = alias == null ? func.getFirst() : alias.getText();
                 addReference(funcAlias, null);
                 complexNamespace.put(funcAlias,
                         List.of(new Pair<>(funcAlias, func.getSecond())));
