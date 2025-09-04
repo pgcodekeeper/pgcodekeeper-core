@@ -776,6 +776,7 @@ private final Deque<String> _tags = new ArrayDeque<String>();
     READABLE: 'READABLE';
     RECEIVE: 'RECEIVE';
     REJECT: 'REJECT';
+    REJECT_LIMIT: 'REJECT_LIMIT';
     REMAINDER: 'REMAINDER';
     REORGANIZE: 'REORGANIZE';
     REPLICATED: 'REPLICATED';

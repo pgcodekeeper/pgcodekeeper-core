@@ -19,13 +19,12 @@ import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.Vex;
 import org.pgcodekeeper.core.utils.ModPair;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
  * Parser for MERGE statements with namespace support.
  */
-public class Merge extends AbstractExprWithNmspc<Merge_stmt_for_psqlContext>  {
+public class Merge extends AbstractExprWithNmspc<Merge_stmt_for_psqlContext> {
 
     /**
      * Creates a Merge parser with parent expression context.
@@ -46,7 +45,7 @@ public class Merge extends AbstractExprWithNmspc<Merge_stmt_for_psqlContext>  {
             select.analyzeCte(with);
         }
 
-        select.addNameReference(merge.merge_table_name, merge.alias, null);
+        var table = select.addNameReference(merge.merge_table_name, merge.alias, null);
         select.from(List.of(merge.from_item()));
 
         ValueExpr vexOn = new ValueExpr(select);
@@ -75,10 +74,6 @@ public class Merge extends AbstractExprWithNmspc<Merge_stmt_for_psqlContext>  {
             }
         }
 
-        if (merge.RETURNING() != null) {
-            return select.sublist(merge.select_list().select_sublist(), new ValueExpr(select));
-        }
-
-        return Collections.emptyList();
+        return analyzeReturningSelectList(select, merge.returning_select_list_with_alias(), table);
     }
 }

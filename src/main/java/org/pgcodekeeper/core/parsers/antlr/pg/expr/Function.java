@@ -299,9 +299,9 @@ public final class Function extends AbstractExprWithNmspc<Plpgsql_functionContex
         if (vexCtx != null) {
             ValueExpr vex = new ValueExpr(this);
             vex.analyze(new Vex(vexCtx));
-        } else if ((query = returnStmt.plpgsql_query())!= null) {
+        } else if ((query = returnStmt.plpgsql_query()) != null) {
             query(query);
-        } else if ((perform = returnStmt.perform_stmt())!= null) {
+        } else if ((perform = returnStmt.perform_stmt()) != null) {
             new Select(this).analyze(perform);
         }
     }
@@ -395,11 +395,14 @@ public final class Function extends AbstractExprWithNmspc<Plpgsql_functionContex
                 addTypeDepcy(type);
             }
         } else if ((col = additional.table_cols_list()) != null) {
-            for (Table_colsContext tabl : col.table_cols()) {
+            for (Inheritance_specified_table_colsContext tabl : col.inheritance_specified_table_cols()) {
                 List<ParserRuleContext> ids = PgParserAbstract.getIdentifiers(tabl.schema_qualified_name());
                 GenericColumn rel = addRelationDepcy(ids);
-                for (IdentifierContext id : tabl.identifier()) {
-                    addFilteredColumnDepcy(rel.schema, rel.table, id.getText());
+                var columns = tabl.columns();
+                if (columns != null) {
+                    for (IdentifierContext id : columns.identifier()) {
+                        addFilteredColumnDepcy(rel.schema, rel.table, id.getText());
+                    }
                 }
             }
         } else if ((truncate = additional.truncate_stmt()) != null) {

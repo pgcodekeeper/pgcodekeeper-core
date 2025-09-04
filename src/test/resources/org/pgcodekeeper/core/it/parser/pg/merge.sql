@@ -465,3 +465,17 @@ ON j.oid = c.oid
 WHEN MATCHED THEN
 	UPDATE SET reltuples = reltuples + 1
 RETURNING j.oid;
+
+MERGE INTO pg_class c
+USING (SELECT 'pg_depend'::regclass AS oid) AS j
+ON j.oid = c.oid
+WHEN MATCHED THEN
+	UPDATE SET reltuples = reltuples + 1
+RETURNING OLD.oid, NEW.oid;
+
+MERGE INTO pg_class c
+USING (SELECT 'pg_depend'::regclass AS oid) AS j
+ON j.oid = c.oid
+WHEN MATCHED THEN
+	UPDATE SET reltuples = reltuples + 1
+RETURNING WITH (OLD AS o, NEW AS n) o.oid, n.oid;

@@ -216,8 +216,8 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
      * Declares a variable in the current namespace.
      * Variables of relation types are declared as references, rest are treated as primitives.
      *
-     * @param alias var alias (required)
-     * @param name var name (optional, may be null)
+     * @param alias   var alias (required)
+     * @param name    var name (optional, may be null)
      * @param argType var type
      */
     public void declareNamespaceVar(String alias, String name, GenericColumn argType) {
@@ -306,8 +306,8 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
         }
     }
 
-    protected void addNameReference(Schema_qualified_nameContext name, IdentifierContext alias,
-            List<IdentifierContext> columnAliases) {
+    protected GenericColumn addNameReference(Schema_qualified_nameContext name, IdentifierContext alias,
+                                             List<IdentifierContext> columnAliases) {
         List<ParserRuleContext> ids = PgParserAbstract.getIdentifiers(name);
         String firstName = QNameParser.getFirstName(ids);
 
@@ -340,6 +340,8 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
         } else {
             addRawTableReference(depcy);
         }
+
+        return depcy;
     }
 
     protected void analyzeCte(With_clauseContext with) {
@@ -392,6 +394,31 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
                 .map(Pair::copy)
                 .toList();
         return cte.put(withName, unmodifiable) != null;
+    }
+
+    protected List<ModPair<String, String>> analyzeReturningSelectList(
+            Select select, Returning_select_list_with_aliasContext ctx, GenericColumn implicitTable) {
+        if (ctx == null) {
+            return Collections.emptyList();
+        }
+
+        var outputAliases = new HashMap<>(Map.of("old", "old", "new", "new"));
+        var outputAliasesCtx = ctx.with_output_alias();
+        if (outputAliasesCtx != null) {
+            for (var alias : outputAliasesCtx.output_alias()) {
+                var aliasName = alias.identifier().getText();
+                if (alias.OLD() != null) {
+                    outputAliases.put("old", aliasName);
+                } else {
+                    outputAliases.put("new", aliasName);
+                }
+            }
+        }
+
+        select.addReference(outputAliases.get("old"), implicitTable);
+        select.addReference(outputAliases.get("new"), implicitTable);
+
+        return select.sublist(ctx.select_list().select_sublist(), new ValueExpr(select));
     }
 
     /**

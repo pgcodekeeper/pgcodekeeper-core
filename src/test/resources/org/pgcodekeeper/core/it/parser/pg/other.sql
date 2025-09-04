@@ -28,6 +28,9 @@ ANALYZE vacparted(a,b,b);
 ANALYSE vacparted(a,b,b);
 ANALYZE VERBOSE q.t1 (c1, c2), public.t2 (c1, c2);
 ANALYSE VERBOSE q.t1 (c1, c2), public.t2 (c1, c2);
+ANALYSE VERBOSE q.t1 (c1, c2), public.t2 (c1, c2);
+ANALYZE VERBOSE only q.t1 (c1, c2), public.t2 * (c1, c2);
+ANALYSE VERBOSE only q.t1 (c1, c2), public.t2 * (c1, c2);
 begin isolation level repeatable read;
 begin;
 CHECKPOINT;
@@ -187,5 +190,7 @@ VACUUM FULL FREEZE VERBOSE ANALYZE vaccluster;
 VACUUM FULL FREEZE VERBOSE ANALYSE vaccluster;
 VACUUM FULL vactst, vacparted (a, b), vaccluster (i);
 VACUUM FULL vactst;
+VACUUM (ANALYZE, FULL) ONLY vactst;
+VACUUM (ANALYZE, FULL) vactst *;
 VACUUM;
 /* a /* b /* c */ d /* e */ f */ g /* h */ i */ -- nested comments
