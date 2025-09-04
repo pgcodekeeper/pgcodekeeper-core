@@ -47,14 +47,38 @@ public class Keyword {
      * keywords.h</a>
      */
     public enum KeywordCategory {
-        UNRESERVED_KEYWORD, COL_NAME_KEYWORD, TYPE_FUNC_NAME_KEYWORD, RESERVED_KEYWORD
+        UNRESERVED_KEYWORD("tokens_nonreserved"),
+        COL_NAME_KEYWORD("tokens_nonreserved_except_function_type"),
+        TYPE_FUNC_NAME_KEYWORD("tokens_reserved_except_function_type"),
+        RESERVED_KEYWORD("tokens_reserved");
+
+        private final String parserRule;
+
+        KeywordCategory(String parserRule) {
+            this.parserRule = parserRule;
+        }
+
+        String getParserRule() {
+            return parserRule;
+        }
     }
 
     /**
      * Label categories for keyword usage in different contexts.
      */
     public enum LabelCategory {
-        BARE_LABEL, AS_LABEL
+        BARE_LABEL("bare_label_keyword"),
+        AS_LABEL("");
+
+        private final String parserRule;
+
+        LabelCategory(String parserRule) {
+            this.parserRule = parserRule;
+        }
+
+        String getParserRule() {
+            return parserRule;
+        }
     }
 
     /*
@@ -192,6 +216,7 @@ public class Keyword {
         addKw(map, "encoding", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "encrypted", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "end", RESERVED_KEYWORD, BARE_LABEL);
+        addKw(map, "enforced", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "enum", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "error", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "escape", UNRESERVED_KEYWORD, BARE_LABEL);
@@ -346,6 +371,7 @@ public class Keyword {
         addKw(map, "nulls", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "numeric", COL_NAME_KEYWORD, BARE_LABEL);
         addKw(map, "object", UNRESERVED_KEYWORD, BARE_LABEL);
+        addKw(map, "objects", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "of", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "off", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "offset", RESERVED_KEYWORD, AS_LABEL);
@@ -377,6 +403,7 @@ public class Keyword {
         addKw(map, "passing", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "password", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "path", UNRESERVED_KEYWORD, BARE_LABEL);
+        addKw(map, "period", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "placing", RESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "plan", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "plans", UNRESERVED_KEYWORD, BARE_LABEL);
@@ -401,7 +428,6 @@ public class Keyword {
         addKw(map, "read", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "real", COL_NAME_KEYWORD, BARE_LABEL);
         addKw(map, "reassign", UNRESERVED_KEYWORD, BARE_LABEL);
-        addKw(map, "recheck", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "recursive", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "ref", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "references", RESERVED_KEYWORD, BARE_LABEL);
@@ -452,7 +478,7 @@ public class Keyword {
         addKw(map, "show", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "similar", TYPE_FUNC_NAME_KEYWORD, BARE_LABEL);
         addKw(map, "simple", UNRESERVED_KEYWORD, BARE_LABEL);
-        addKw(map, "skip", UNRESERVED_KEYWORD, BARE_LABEL);
+        addKw(map, "skip_", UNRESERVED_KEYWORD, BARE_LABEL);  // skip is reserved by ANTLR
         addKw(map, "smallint", COL_NAME_KEYWORD, BARE_LABEL);
         addKw(map, "snapshot", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "some", RESERVED_KEYWORD, BARE_LABEL);
@@ -529,6 +555,7 @@ public class Keyword {
         addKw(map, "version", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "view", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "views", UNRESERVED_KEYWORD, BARE_LABEL);
+        addKw(map, "virtual", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "volatile", UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "when", RESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "where", RESERVED_KEYWORD, AS_LABEL);
@@ -658,18 +685,14 @@ public class Keyword {
                     }
                 });
 
-        result.append("==================================================\n");
-        result.append(BARE_LABEL).append("\n");
-        result.append("==================================================\n");
-        result.append(sbBare).append("\n");
+        result.append(BARE_LABEL.getParserRule()).append("\n");
+        result.append(sbBare.replace(4, 5, ":")).append("    ;\n\n");
 
         map.keySet().stream()
                 .sorted()
                 .forEach(k -> {
-                    result.append("==================================================\n");
-                    result.append(k).append("\n");
-                    result.append("==================================================\n");
-                    result.append(map.get(k)).append("\n");
+                    result.append(k.getParserRule()).append("\n");
+                    result.append(map.get(k).replace(4, 5, ":")).append("    ;\n\n");
                 });
 
         return result.toString();

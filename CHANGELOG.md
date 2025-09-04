@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Added connection test with databases.
+- Added support for PostgreSQL 18.
 
 ### Changed
 
