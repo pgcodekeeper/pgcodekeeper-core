@@ -2326,6 +2326,7 @@ bare_label_keyword
     | ENCODING
     | ENCRYPTED
     | END
+    | ENFORCED
     | ENUM
     | ERROR
     | ESCAPE
@@ -2464,6 +2465,7 @@ bare_label_keyword
     | NULLS
     | NUMERIC
     | OBJECT
+    | OBJECTS
     | OF
     | OFF
     | OIDS
@@ -2490,6 +2492,7 @@ bare_label_keyword
     | PASSING
     | PASSWORD
     | PATH
+    | PERIOD
     | PLACING
     | PLAN
     | PLANS
@@ -2513,7 +2516,6 @@ bare_label_keyword
     | READ
     | REAL
     | REASSIGN
-    | RECHECK
     | RECURSIVE
     | REF
     | REFERENCES
@@ -2636,6 +2638,7 @@ bare_label_keyword
     | VERSION
     | VIEW
     | VIEWS
+    | VIRTUAL
     | VOLATILE
     | WHEN
     | WHITESPACE
@@ -2742,6 +2745,7 @@ tokens_nonreserved
     | ENABLE
     | ENCODING
     | ENCRYPTED
+    | ENFORCED
     | ENUM
     | ERROR
     | ESCAPE
@@ -2838,6 +2842,7 @@ tokens_nonreserved
     | NOWAIT
     | NULLS
     | OBJECT
+    | OBJECTS
     | OF
     | OFF
     | OIDS
@@ -2860,6 +2865,7 @@ tokens_nonreserved
     | PASSING
     | PASSWORD
     | PATH
+    | PERIOD
     | PLAN
     | PLANS
     | POLICY
@@ -2879,7 +2885,6 @@ tokens_nonreserved
     | RANGE
     | READ
     | REASSIGN
-    | RECHECK
     | RECURSIVE
     | REF
     | REFERENCING
@@ -2976,6 +2981,7 @@ tokens_nonreserved
     | VERSION
     | VIEW
     | VIEWS
+    | VIRTUAL
     | VOLATILE
     | WHITESPACE
     | WITHIN
