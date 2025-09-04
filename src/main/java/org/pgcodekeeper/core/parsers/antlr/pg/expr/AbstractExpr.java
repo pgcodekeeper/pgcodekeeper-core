@@ -93,12 +93,12 @@ public abstract class AbstractExpr {
 
     /**
      * @param schema optional schema qualification of name, may be null
-     * @param name alias of the referenced object
+     * @param name   alias of the referenced object
      * @param column optional referenced column alias, may be null
      * @return a pair of (Alias, Dealiased name) where Alias is the given name.
-     *          Dealiased name can be null if the name is internal to the query
-     *          and is not a reference to external table.<br>
-     *          null if the name is not found
+     * Dealiased name can be null if the name is internal to the query
+     * and is not a reference to external table.<br>
+     * null if the name is not found
      */
     protected Entry<String, GenericColumn> findReference(String schema, String name, String column) {
         return parent == null ? null : parent.findReference(schema, name, column);
@@ -107,7 +107,7 @@ public abstract class AbstractExpr {
     /**
      * @param name alias of the referenced object
      * @return a pair of (Alias, ColumnsList) where Alias is the given name.
-     *          ColumnsList list of columns as pair 'columnName-columnType' of the internal query.<br>
+     * ColumnsList list of columns as pair 'columnName-columnType' of the internal query.<br>
      */
     protected List<Pair<String, String>> findReferenceComplex(String name) {
         return parent == null ? null : parent.findReferenceComplex(name);
@@ -234,14 +234,14 @@ public abstract class AbstractExpr {
                         .map(Pair::getSecond)
                         .findAny()
                         .orElseGet(() -> {
-                            log("Column {} not found in complex {}", columnName, columnParent);
+                            log("Column %s not found in complex %s", columnName, columnParent);
                             return TypesSetManually.COLUMN;
                         });
             } else {
-                log("Complex not found: {}", columnParent);
+                log("Complex not found: %s", columnParent);
             }
         } else {
-            log("Unknown column reference: {} {} {}", schemaName, columnParent, columnName);
+            log("Unknown column reference: %s %s %s", schemaName, columnParent, columnName);
         }
 
         return new ModPair<>(columnName, columnType);
@@ -250,12 +250,9 @@ public abstract class AbstractExpr {
     /**
      * Add a dependency only from the column of the user object. Always return its type.
      *
-     * @param schemaName
-     *            object schema
-     * @param relationName
-     *            user or system object which contains column 'colName'
-     * @param colName
-     *            dependency from this column will be added
+     * @param schemaName   object schema
+     * @param relationName user or system object which contains column 'colName'
+     * @param colName      dependency from this column will be added
      * @return column type
      */
     protected String addFilteredColumnDepcy(String schemaName, String relationName, String colName) {
@@ -269,7 +266,7 @@ public abstract class AbstractExpr {
             case "cmin", "cmax" -> "cid";
             case "ctid" -> "tid";
             default -> columns.findAny().map(Pair::getSecond).orElseGet(() -> {
-                log("Column {} not found in relation {}", colName, relationName);
+                log("Column %s not found in relation %s", colName, relationName);
                 return TypesSetManually.COLUMN;
             });
         };
@@ -292,14 +289,13 @@ public abstract class AbstractExpr {
      * <li>and/or other performance/allocation inefficiencies</li>
      * </ul>
      *
-     *
      * @return column stream with attached depcy-addition peek-step; empty stream if no relation found
      */
     protected Stream<Pair<String, String>> addFilteredRelationColumnsDepcies(String schemaName,
-            String relationName, Predicate<String> colNamePredicate) {
+                                                                             String relationName, Predicate<String> colNamePredicate) {
         IRelation relation = findRelation(schemaName, relationName);
         if (relation == null) {
-            log("Relation not found: {}.{}", schemaName, relationName);
+            log("Relation not found: %s.%s", schemaName, relationName);
             return Stream.empty();
         }
 
@@ -338,7 +334,7 @@ public abstract class AbstractExpr {
         if (col == null) {
             Pair<IRelation, Pair<String, String>> relCol = findColumn(name);
             if (relCol == null) {
-                log("Tableless column not resolved: {}", name);
+                log("Tableless column not resolved: %s", name);
                 return new ModPair<>(name, TypesSetManually.COLUMN);
             }
             IRelation rel = relCol.getFirst();
@@ -350,7 +346,7 @@ public abstract class AbstractExpr {
     }
 
     protected void addColumnsDepcies(Schema_qualified_nameContext table,
-            List<Indirection_identifierContext> columns) {
+                                     List<Indirection_identifierContext> columns) {
         List<ParserRuleContext> ids = PgParserAbstract.getIdentifiers(table);
         String schemaName = QNameParser.getSchemaName(ids);
         String tableName = QNameParser.getFirstName(ids);
@@ -454,6 +450,7 @@ public abstract class AbstractExpr {
     }
 
     protected void log(String msg, Object... args) {
-        LOG.trace(msg, args);
+        var traceMsg = msg.formatted(args);
+        LOG.trace(traceMsg);
     }
 }

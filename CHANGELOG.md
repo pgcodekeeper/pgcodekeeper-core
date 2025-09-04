@@ -9,9 +9,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Added connection test with databases.
+
 ### Changed
 
+- All localized messages have been brought into a unified style.
+
 ### Fixed
+
+- Fixed reading logic when xml file is missing.
+- Fixed a race condition when loading a library from an archive.
 
 ### Removed
 

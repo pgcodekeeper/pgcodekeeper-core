@@ -25,7 +25,6 @@ import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.utils.Pair;
 
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
@@ -39,7 +38,7 @@ import java.util.stream.Stream;
  */
 public abstract class AbstractPgView extends AbstractView implements ISimpleOptionContainer {
 
-    private static final String COLUMN_COMMENT = "COMMENT ON COLUMN {0}.{1} IS {2}";
+    private static final String COLUMN_COMMENT = "COMMENT ON COLUMN %s.%s IS %s";
     public static final String CHECK_OPTION = "check_option";
     protected static final String ALTER_COLUMN = " ALTER COLUMN ";
 
@@ -101,7 +100,7 @@ public abstract class AbstractPgView extends AbstractView implements ISimpleOpti
 
     private void appendChildrenComments(SQLScript script) {
         for (final Entry<String, String> columnComment : columnComments.entrySet()) {
-            script.addCommentStatement(MessageFormat.format(COLUMN_COMMENT, getQualifiedName(),
+            script.addCommentStatement(COLUMN_COMMENT.formatted(getQualifiedName(),
                     PgDiffUtils.getQuotedName(columnComment.getKey()), columnComment.getValue()));
         }
     }
@@ -154,7 +153,7 @@ public abstract class AbstractPgView extends AbstractView implements ISimpleOpti
 
             String oldValue = columnComments.get(newColumn);
             if (!Objects.equals(oldValue, newValue)) {
-                script.addCommentStatement(MessageFormat.format(COLUMN_COMMENT, getQualifiedName(),
+                script.addCommentStatement(COLUMN_COMMENT.formatted(getQualifiedName(),
                         PgDiffUtils.getQuotedName(newColumn), newValue));
             }
         }
@@ -163,7 +162,7 @@ public abstract class AbstractPgView extends AbstractView implements ISimpleOpti
             String oldColumn = columnComment.getKey();
 
             if (!newView.columnComments.containsKey(oldColumn)) {
-                script.addCommentStatement(MessageFormat.format(COLUMN_COMMENT, getQualifiedName(),
+                script.addCommentStatement(COLUMN_COMMENT.formatted(getQualifiedName(),
                         PgDiffUtils.getQuotedName(oldColumn), "NULL"));
             }
         }

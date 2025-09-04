@@ -29,7 +29,6 @@ import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -46,7 +45,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
 
     private static final Logger LOG = LoggerFactory.getLogger(PgColumn.class);
 
-    private static final String ALTER_FOREIGN_OPTION = "{0} OPTIONS ({1} {2} {3})";
+    private static final String ALTER_FOREIGN_OPTION = "%s OPTIONS (%s %s %s)";
     private static final String COMPRESSION = " COMPRESSION ";
 
     private Integer statistics;
@@ -429,7 +428,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
                         .append("::").append(newType);
             }
             sb.append(isLastColumn ? ";" : ",");
-            sb.append(" /* ").append(MessageFormat.format(Messages.Table_TypeParameterChange,
+            sb.append(" /* ").append(Messages.Table_TypeParameterChange.formatted(
                     newColumn.parent.getParent().getName() + '.' + newColumn.parent.getName(),
                     oldType, newType)).append(" */");
         }
@@ -465,7 +464,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
     }
 
     private String getAlterOption(String action, String key, String value) {
-        return MessageFormat.format(ALTER_FOREIGN_OPTION, getAlterTableColumn(false, name), action, key, value);
+        return ALTER_FOREIGN_OPTION.formatted(getAlterTableColumn(false, name), action, key, value);
     }
 
     /**
@@ -552,8 +551,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
         StringBuilder sql;
         if (newStorage == null && oldStorage != null) {
             sql = new StringBuilder();
-            sql.append(MessageFormat.format(
-                    Messages.Storage_WarningUnableToDetermineStorageType,
+            sql.append(Messages.Storage_WarningUnableToDetermineStorageType.formatted(
                     parent.getName(), name));
             script.addStatement(sql);
         } else if (newStorage != null && !newStorage.equalsIgnoreCase(oldStorage)) {
@@ -584,7 +582,8 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
             IStatement parent = getDatabase().getStatement(new GenericColumn(in.getKey(), in.getValue(),
                     DbObjType.TABLE));
             if (parent == null) {
-                LOG.error("There is no such object of inheritance as table: {}", in.getQualifiedName());
+                var msg = "There is no such object of inheritance as table: %s".formatted(in.getQualifiedName());
+                LOG.error(msg);
                 continue;
             }
 

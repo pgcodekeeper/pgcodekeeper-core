@@ -66,14 +66,15 @@ public final class IgnoreParser {
      */
     public IgnoreParser parse(Path listFile) throws IOException {
         String parsedObjectName = listFile.toString();
-        LOG.info(Messages.IgnoreParser_log_load_ignored_list, parsedObjectName);
+        var msg = Messages.IgnoreParser_log_load_ignored_list.formatted(parsedObjectName);
+        LOG.info(msg);
         var parser = AntlrParser.createIgnoreListParser(listFile);
 
         try {
             parse(parser);
         } catch (Exception ex) {
-            LOG.error(Messages.IgnoreParser_log_ignor_list_analyzing_err,
-                    parsedObjectName, ex);
+            var errorMsg = Messages.IgnoreParser_log_ignor_list_analyzing_err.formatted(parsedObjectName);
+            LOG.error(errorMsg, ex);
         }
         return this;
     }

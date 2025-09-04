@@ -104,7 +104,8 @@ public final class SequencesReader extends JdbcReader {
         if (isDefault || "a".equals(identityType)) {
             AbstractTable table = schema.getTable(refTable);
             if (table == null) {
-                LOG.error(Messages.SequencesReader_log_not_found_table, table, s);
+                var msg = Messages.SequencesReader_log_not_found_table.formatted(table, s);
+                LOG.error(msg);
                 return;
             }
             PgColumn column = (PgColumn) table.getColumn(refColumn);

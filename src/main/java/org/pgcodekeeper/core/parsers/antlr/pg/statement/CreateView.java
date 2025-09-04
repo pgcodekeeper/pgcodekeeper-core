@@ -21,15 +21,14 @@ import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
-import org.pgcodekeeper.core.parsers.antlr.pg.launcher.ViewAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
+import org.pgcodekeeper.core.parsers.antlr.pg.launcher.ViewAnalysisLauncher;
 import org.pgcodekeeper.core.schema.pg.AbstractPgView;
 import org.pgcodekeeper.core.schema.pg.MaterializedPgView;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.schema.pg.PgView;
 import org.pgcodekeeper.core.settings.ISettings;
 
-import java.text.MessageFormat;
 import java.util.List;
 
 /**
@@ -45,12 +44,12 @@ public final class CreateView extends PgParserAbstract {
      * Pattern for transforming recursive view definitions into standard form.
      */
     public static final String RECURSIVE_PATTERN = """
-            CREATE VIEW {0}
-            AS WITH RECURSIVE {0}({1}) AS (
-            {2}
+            CREATE VIEW %1$s
+            AS WITH RECURSIVE %1$s(%2$s) AS (
+            %3$s
             )
-            SELECT {1}
-            FROM {0};""";
+            SELECT %2$s
+            FROM %1$s;""";
 
     private final Create_view_statementContext context;
     private final String tablespace;
@@ -101,7 +100,7 @@ public final class CreateView extends PgParserAbstract {
             }
             view = matV;
         } else if (ctx.RECURSIVE() != null) {
-            String sql = MessageFormat.format(RECURSIVE_PATTERN,
+            String sql = RECURSIVE_PATTERN.formatted(
                     getFullCtxText(name), getFullCtxText(ctx.column_names.identifier()), getFullCtxText(ctx.v_query));
 
             var parser = AntlrParser.createSQLParser(sql, "recursive view", null);

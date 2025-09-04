@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -145,15 +144,16 @@ public class ModelExporter {
         LOG.info(Messages.ModelExporter_log_create_dirs);
         if (Files.exists(outDir)) {
             if (!Files.isDirectory(outDir)) {
-                LOG.error(Messages.ModelExporter_log_create_dir_err_no_dir, outDir);
+                var msg = Messages.ModelExporter_log_create_dir_err_no_dir.formatted(outDir);
+                LOG.error(msg);
                 throw new NotDirectoryException(outDir.toString());
             }
 
             for (String subdirName : WorkDirs.getDirectoryNames(databaseType)) {
                 if (Files.exists(outDir.resolve(subdirName))) {
-                    String msg = Messages.ModelExporter_log_create_dir_err_contains_dir;
-                    LOG.error(msg, subdirName);
-                    throw new DirectoryException(MessageFormat.format(msg, subdirName));
+                    String msg = Messages.ModelExporter_log_create_dir_err_contains_dir.formatted(subdirName);
+                    LOG.error(msg);
+                    throw new DirectoryException(msg);
                 }
             }
         } else {
@@ -175,8 +175,7 @@ public class ModelExporter {
             throw new PgCodekeeperException(msg);
         }
         if (Files.notExists(outDir) || !Files.isDirectory(outDir)) {
-            throw new DirectoryException(MessageFormat.format(
-                    Messages.ModelExporter_log_output_dir_no_exist_err,
+            throw new DirectoryException(Messages.ModelExporter_log_output_dir_no_exist_err.formatted(
                     outDir.toAbsolutePath()));
         }
 
@@ -289,7 +288,8 @@ public class ModelExporter {
         Path toDelete = outDir.resolve(getRelativeFilePath(st));
 
         if (Files.deleteIfExists(toDelete)) {
-            LOG.info(Messages.ModelExporter_log_delete_file, toDelete, st.getStatementType(), st.getName());
+            var msg = Messages.ModelExporter_log_delete_file.formatted(toDelete, st.getStatementType(), st.getName());
+            LOG.info(msg);
         }
     }
 

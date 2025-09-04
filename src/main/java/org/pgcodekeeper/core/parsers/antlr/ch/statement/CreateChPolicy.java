@@ -15,15 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.ch.statement;
 
-import org.pgcodekeeper.core.parsers.antlr.ch.launcher.ChExpressionAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Create_policy_stmtContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.ExprContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Policy_actionContext;
+import org.pgcodekeeper.core.parsers.antlr.ch.launcher.ChExpressionAnalysisLauncher;
 import org.pgcodekeeper.core.schema.ch.ChDatabase;
 import org.pgcodekeeper.core.schema.ch.ChPolicy;
 import org.pgcodekeeper.core.settings.ISettings;
 
-import java.text.MessageFormat;
 import java.util.Arrays;
 
 /**
@@ -33,7 +32,7 @@ import java.util.Arrays;
  */
 public final class CreateChPolicy extends ChParserAbstract {
 
-    private static final String POLICY_NAME = "{0} ON {1}";
+    private static final String POLICY_NAME = "%s ON %s";
 
     private final Create_policy_stmtContext ctx;
 
@@ -56,7 +55,7 @@ public final class CreateChPolicy extends ChParserAbstract {
                 String parentName = getFullCtxText(tableNameCtx);
                 for (var policyNameCtx : fullNameCtx.identifier()) {
                     String shortName = getFullCtxText(policyNameCtx);
-                    ChPolicy policy = new ChPolicy(MessageFormat.format(POLICY_NAME, shortName, parentName));
+                    ChPolicy policy = new ChPolicy(POLICY_NAME.formatted(shortName, parentName));
                     ctx.policy_action().forEach(e -> parsePolicyOption(policy, e));
                     addSafe(db, policy, Arrays.asList(tableNameCtx, policyNameCtx));
                 }

@@ -46,7 +46,7 @@ public final class TreeFlattener {
 
     /**
      * Configures the flattener to include only selected elements.
-     * 
+     *
      * @return this TreeFlattener for method chaining
      */
     public TreeFlattener onlySelected() {
@@ -56,7 +56,7 @@ public final class TreeFlattener {
 
     /**
      * Configures whether to include only selected elements.
-     * 
+     *
      * @param onlySelected true to include only selected elements
      * @return this TreeFlattener for method chaining
      */
@@ -67,7 +67,7 @@ public final class TreeFlattener {
 
     /**
      * Configures the flattener to include only edited elements.
-     * 
+     *
      * @param dbSource source database for comparison
      * @param dbTarget target database for comparison
      * @return this TreeFlattener for method chaining
@@ -81,7 +81,7 @@ public final class TreeFlattener {
 
     /**
      * Configures the flattener to use an ignore list for filtering.
-     * 
+     *
      * @param ignoreList the ignore list to apply
      * @return this TreeFlattener for method chaining
      */
@@ -91,9 +91,9 @@ public final class TreeFlattener {
 
     /**
      * Configures the flattener to use an ignore list with database name filtering.
-     * 
+     *
      * @param ignoreList the ignore list to apply
-     * @param dbNames database names for rule matching
+     * @param dbNames    database names for rule matching
      * @return this TreeFlattener for method chaining
      */
     public TreeFlattener useIgnoreList(IgnoreList ignoreList, String... dbNames) {
@@ -104,7 +104,7 @@ public final class TreeFlattener {
 
     /**
      * Configures the flattener to include only specific object types.
-     * 
+     *
      * @param onlyTypes collection of object types to include
      * @return this TreeFlattener for method chaining
      */
@@ -115,7 +115,7 @@ public final class TreeFlattener {
 
     /**
      * Flattens the tree structure applying all configured filters.
-     * 
+     *
      * @param root the root element to start flattening from
      * @return list of filtered tree elements
      */
@@ -136,11 +136,13 @@ public final class TreeFlattener {
         }
 
         if (status == AddStatus.SKIP) {
-            LOG.debug(Messages.TreeFlattener_log_ignore_obj, el.getName());
+            var msg = Messages.TreeFlattener_log_ignore_obj.formatted(el.getName());
+            LOG.debug(msg);
         }
         if (status == AddStatus.SKIP_SUBTREE) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug(Messages.TreeFlattener_log_ignore_obj, el.getName());
+                var msg = Messages.TreeFlattener_log_ignore_obj.formatted(el.getName());
+                LOG.debug(msg);
                 writeChildrenInLog(el);
             }
             return;
@@ -171,7 +173,8 @@ public final class TreeFlattener {
 
     private void writeChildrenInLog(TreeElement el) {
         for (TreeElement sub : el.getChildren()) {
-            LOG.debug(Messages.TreeFlattener_log_ignore_children, sub.getName());
+            var msg = Messages.TreeFlattener_log_ignore_children.formatted(sub.getName());
+            LOG.debug(msg);
             if (!sub.getChildren().isEmpty()) {
                 writeChildrenInLog(sub);
             }

@@ -99,7 +99,7 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
                             break;
                         }
                     } else {
-                        log("Ambiguous reference: {}", name);
+                        log("Ambiguous reference: %s", name);
                     }
                 }
             }
@@ -149,7 +149,7 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
     public void addRawTableReference(GenericColumn qualifiedTable) {
         boolean exists = !unaliasedNamespace.add(qualifiedTable);
         if (exists) {
-            log("Duplicate unaliased table: {} {}", qualifiedTable.schema, qualifiedTable.table);
+            log("Duplicate unaliased table: %s %s", qualifiedTable.schema, qualifiedTable.table);
         }
     }
 

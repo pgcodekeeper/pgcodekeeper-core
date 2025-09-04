@@ -30,7 +30,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -163,8 +162,7 @@ public final class LibraryLoader extends DatabaseLoader {
         }
 
         if (!Files.exists(p)) {
-            throw new IOException(MessageFormat.format(
-                    "Error while read library : {0} - File not found", path));
+            throw new IOException("Error while read library : %s - File not found".formatted(path));
         }
 
         if (Files.isDirectory(p)) {

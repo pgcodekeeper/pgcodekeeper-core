@@ -30,7 +30,6 @@ import org.pgcodekeeper.core.schema.pg.PgSequence;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
@@ -56,15 +55,15 @@ import java.util.function.UnaryOperator;
  */
 public final class ActionsToScriptConverter {
 
-    private static final String REFRESH_MODULE = "EXEC sys.sp_refreshsqlmodule {0}";
+    private static final String REFRESH_MODULE = "EXEC sys.sp_refreshsqlmodule %s";
 
-    private static final String DROP_COMMENT = "-- DEPCY: This {0} {1} depends on the {2}: {3}";
-    private static final String CREATE_COMMENT = "-- DEPCY: This {0} {1} is a dependency of {2}: {3}";
-    private static final String HIDDEN_OBJECT = "-- HIDDEN: Object {0} of type {1} (action: {2}, reason: {3})";
+    private static final String DROP_COMMENT = "-- DEPCY: This %s %s depends on the %s: %s";
+    private static final String CREATE_COMMENT = "-- DEPCY: This %s %s is a dependency of %s: %s";
+    private static final String HIDDEN_OBJECT = "-- HIDDEN: Object %s of type %s (action: %s, reason: %s)";
 
-    private static final String RENAME_PG_OBJECT = "ALTER {0} {1} RENAME TO {2}";
-    private static final String RENAME_MS_OBJECT = "EXEC sp_rename {0}, {1}";
-    private static final String RENAME_CH_OBJECT = "RENAME {0} {1} TO {2};";
+    private static final String RENAME_PG_OBJECT = "ALTER %s %s RENAME TO %s";
+    private static final String RENAME_MS_OBJECT = "EXEC sp_rename %s, %s";
+    private static final String RENAME_CH_OBJECT = "RENAME %s %s TO %s;";
 
     private final SQLScript script;
     private final ISettings settings;
@@ -160,7 +159,7 @@ public final class ActionsToScriptConverter {
                     // emit refreshes for views only
                     // refreshes for other objects serve as markers
                     // that allow us to skip unmodified drop+create pairs
-                    script.addStatement(MessageFormat.format(REFRESH_MODULE,
+                    script.addStatement(REFRESH_MODULE.formatted(
                             PgDiffUtils.quoteString(obj.getQualifiedName())));
                     refreshed.add(obj);
                 }
@@ -180,7 +179,7 @@ public final class ActionsToScriptConverter {
                 .filter(r -> r instanceof MsView && !refreshed.contains(r))
                 .toArray(PgStatement[]::new);
         for (int i = orphanRefreshes.length - 1; i >= 0; --i) {
-            script.addStatement(MessageFormat.format(REFRESH_MODULE,
+            script.addStatement(REFRESH_MODULE.formatted(
                     PgDiffUtils.quoteString(orphanRefreshes[i].getQualifiedName())));
         }
     }
@@ -408,9 +407,8 @@ public final class ActionsToScriptConverter {
             return null;
         }
 
-        return MessageFormat.format(
-                action.getState() == ObjectState.CREATE ?
-                        CREATE_COMMENT : DROP_COMMENT,
+        return (action.getState() == ObjectState.CREATE ?
+                CREATE_COMMENT : DROP_COMMENT).formatted(
                 oldObj.getStatementType(),
                 oldObj.getBareName(),
                 objStarter.getStatementType(),
@@ -456,7 +454,7 @@ public final class ActionsToScriptConverter {
 
     private void addHiddenObj(ActionContainer action, String reason) {
         PgStatement old = action.getOldObj();
-        String message = MessageFormat.format(HIDDEN_OBJECT,
+        String message = HIDDEN_OBJECT.formatted(
                 old.getQualifiedName(), old.getStatementType(), action.getState(), reason);
         script.addStatement(message);
     }
@@ -557,11 +555,11 @@ public final class ActionsToScriptConverter {
      */
     private String getRenameCommand(PgStatement st, String newName) {
         return switch (settings.getDbType()) {
-            case PG -> MessageFormat.format(RENAME_PG_OBJECT,
+            case PG -> RENAME_PG_OBJECT.formatted(
                     st.getStatementType(), st.getQualifiedName(), PgDiffUtils.getQuotedName(newName));
-            case MS -> MessageFormat.format(RENAME_MS_OBJECT,
+            case MS -> RENAME_MS_OBJECT.formatted(
                     PgDiffUtils.quoteString(st.getQualifiedName()), PgDiffUtils.quoteString(newName));
-            case CH -> MessageFormat.format(RENAME_CH_OBJECT,
+            case CH -> RENAME_CH_OBJECT.formatted(
                     st.getStatementType(), st.getQualifiedName(), ChDiffUtils.getQuotedName(newName));
         };
     }

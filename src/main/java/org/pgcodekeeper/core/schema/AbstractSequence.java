@@ -97,7 +97,8 @@ public abstract class AbstractSequence extends PgStatement implements IRelation,
                 yield needMaxVal ? boundaryTypeVal : -boundaryTypeVal;
             }
             default -> {
-                LOG.warn("Unsupported sequence type: {}", type);
+                var msg = "Unsupported sequence type: %s".formatted(type);
+                LOG.warn(msg);
                 yield needMaxVal ? Long.MAX_VALUE : Long.MIN_VALUE;
             }
         };

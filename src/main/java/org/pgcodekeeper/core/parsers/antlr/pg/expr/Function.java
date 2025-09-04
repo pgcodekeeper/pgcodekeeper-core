@@ -140,7 +140,8 @@ public final class Function extends AbstractExprWithNmspc<Plpgsql_functionContex
                 type = pair.getSecond();
             } else {
                 type = TypesSetManually.UNKNOWN;
-                LOG.warn(Messages.Function_log_variable_not_found, variable);
+                var msg = Messages.Function_log_variable_not_found.formatted(variable);
+                LOG.warn(msg);
             }
 
             addNamespaceVariable(new Pair<>(alias, type));

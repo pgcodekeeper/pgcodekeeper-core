@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.text.MessageFormat;
 import java.util.Collection;
 
 /**
@@ -101,7 +100,7 @@ public class ProjectUpdater {
                 caughtProcessingEx = true;
                 tryToRestore(dirTmp, ex);
                 throw new IOException(
-                        MessageFormat.format(Messages.ProjectUpdater_error_update, ex.getLocalizedMessage()), ex);
+                        Messages.ProjectUpdater_error_update.formatted(ex.getLocalizedMessage()), ex);
             }
         } catch (IOException ex) {
             if (caughtProcessingEx) {
@@ -109,7 +108,7 @@ public class ProjectUpdater {
                 throw ex;
             }
             throw new IOException(
-                    MessageFormat.format(Messages.ProjectUpdater_error_no_tempdir, ex.getLocalizedMessage()), ex);
+                    Messages.ProjectUpdater_error_no_tempdir.formatted(ex.getLocalizedMessage()), ex);
         }
     }
 
@@ -187,7 +186,7 @@ public class ProjectUpdater {
 
                 tryToRestore(dirTmp, ex);
                 throw new IOException(
-                        MessageFormat.format(Messages.ProjectUpdater_error_update, ex.getLocalizedMessage()), ex);
+                        Messages.ProjectUpdater_error_update.formatted(ex.getLocalizedMessage()), ex);
             }
         } catch (IOException ex) {
             if (caughtProcessingEx) {
@@ -195,7 +194,7 @@ public class ProjectUpdater {
                 throw ex;
             }
             throw new IOException(
-                    MessageFormat.format(Messages.ProjectUpdater_error_no_tempdir, ex.getLocalizedMessage()), ex);
+                    Messages.ProjectUpdater_error_no_tempdir.formatted(ex.getLocalizedMessage()), ex);
         }
     }
 
