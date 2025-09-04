@@ -9,3 +9,5 @@ Reference: Object = gist_point_tbl (TABLE), action = DELETE, offset = 328, line 
 Reference: Object = f (TABLE), action = DELETE, offset = 373, line number = 9, charPositionInLine = 12
 Reference: Object = f (TABLE), action = DELETE, offset = 436, line number = 10, charPositionInLine = 12
 Reference: Object = f (TABLE), action = DELETE, offset = 541, line number = 11, charPositionInLine = 12
+Reference: Object = r1 (TABLE), action = DELETE, offset = 624, line number = 12, charPositionInLine = 12
+Reference: Object = r1 (TABLE), action = DELETE, offset = 694, line number = 13, charPositionInLine = 12

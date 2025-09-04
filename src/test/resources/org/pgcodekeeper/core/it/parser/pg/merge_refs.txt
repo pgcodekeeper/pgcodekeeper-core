@@ -127,3 +127,5 @@ Reference: action = SELECT, offset = 11020, line number = 435, charPositionInLin
 Reference: action = COPY, offset = 11106, line number = 438, charPositionInLine = 0
 Reference: Object = pa_target (TABLE), action = MERGE, offset = 11475, line number = 452, charPositionInLine = 11
 Reference: Object = pg_class (TABLE), action = MERGE, offset = 11842, line number = 462, charPositionInLine = 11
+Reference: Object = pg_class (TABLE), action = MERGE, offset = 12004, line number = 469, charPositionInLine = 11
+Reference: Object = pg_class (TABLE), action = MERGE, offset = 12177, line number = 476, charPositionInLine = 11

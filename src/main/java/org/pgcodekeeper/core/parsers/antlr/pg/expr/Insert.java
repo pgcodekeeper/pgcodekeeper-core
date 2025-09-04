@@ -22,7 +22,6 @@ import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.With_clauseCon
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -52,7 +51,7 @@ public class Insert extends AbstractExprWithNmspc<Insert_stmt_for_psqlContext> {
             select.analyzeCte(with);
         }
 
-        select.addNameReference(insert.insert_table_name, null, null);
+        var table = select.addNameReference(insert.insert_table_name, null, null);
 
         Insert_columnsContext columns = insert.insert_columns();
         if (columns != null) {
@@ -64,10 +63,6 @@ public class Insert extends AbstractExprWithNmspc<Insert_stmt_for_psqlContext> {
             new Select(select).analyze(selectCtx);
         }
 
-        if (insert.RETURNING() != null) {
-            return select.sublist(insert.select_list().select_sublist(), new ValueExpr(select));
-        }
-
-        return Collections.emptyList();
+        return analyzeReturningSelectList(select, insert.returning_select_list_with_alias(), table);
     }
 }

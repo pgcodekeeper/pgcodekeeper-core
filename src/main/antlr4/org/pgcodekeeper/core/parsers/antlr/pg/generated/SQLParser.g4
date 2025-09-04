@@ -166,11 +166,15 @@ user_name
     ;
 
 table_cols_list
-    : table_cols (COMMA table_cols)*
+    : inheritance_specified_table_cols (COMMA inheritance_specified_table_cols)*
+    ;
+
+inheritance_specified_table_cols
+    : ONLY? schema_qualified_name MULTIPLY? columns?
     ;
 
 table_cols
-    : schema_qualified_name (LEFT_PAREN identifier (COMMA identifier)* RIGHT_PAREN)?
+    : schema_qualified_name columns?
     ;
 
 vacuum_mode
@@ -1619,6 +1623,7 @@ copy_option
     | FORCE_NULL (MULTIPLY | identifier_list_in_paren)
     | ON_ERROR (STOP | IGNORE)
     | LOG_VERBOSITY (DEFAULT | VERBOSE)
+    | REJECT_LIMIT iconst
     ;
 
 identifier_list_in_paren
@@ -1627,7 +1632,7 @@ identifier_list_in_paren
 
 create_view_statement
     : (OR REPLACE)? (TEMP | TEMPORARY)? RECURSIVE? MATERIALIZED? VIEW 
-    if_not_exists? name=schema_qualified_name column_names=view_columns?
+    if_not_exists? name=schema_qualified_name column_names=columns?
     (USING identifier)?
     (WITH storage_parameters)?
     table_space?
@@ -1645,7 +1650,7 @@ if_not_exists
     : IF NOT EXISTS
     ;
 
-view_columns
+columns
     : LEFT_PAREN identifier (COMMA identifier)* RIGHT_PAREN
     ;
 
@@ -3273,6 +3278,7 @@ tokens_nonkeyword
     | READABLE
     | RECEIVE
     | REJECT
+    | REJECT_LIMIT
     | REMAINDER
     | REORGANIZE
     | REPLICATED
@@ -3908,7 +3914,7 @@ merge_stmt_for_psql
     MERGE INTO merge_table_name=schema_qualified_name (AS? alias=identifier)?
     USING from_item ON vex
     when_condition+
-    (RETURNING select_list)?
+    returning_select_list_with_alias?
     ;
 
 when_condition
@@ -3940,7 +3946,7 @@ insert_stmt_for_psql
     (OVERRIDING (SYSTEM | USER) VALUE)?
     (select_stmt | DEFAULT VALUES)
     (ON CONFLICT conflict_object? conflict_action)?
-    (RETURNING select_list)?
+    returning_select_list_with_alias?
     ;
 
 insert_columns
@@ -3965,7 +3971,7 @@ delete_stmt_for_psql
     : with_clause? DELETE FROM ONLY? delete_table_name=schema_qualified_name MULTIPLY? (AS? alias=identifier)?
     (USING from_item (COMMA from_item)*)?
     (WHERE (vex | CURRENT OF cursor=identifier))?
-    (RETURNING select_list)?
+    returning_select_list_with_alias?
     ;
 
 update_stmt_for_psql
@@ -3973,9 +3979,21 @@ update_stmt_for_psql
     SET update_set (COMMA update_set)*
     (FROM from_item (COMMA from_item)*)?
     (WHERE (vex | CURRENT OF cursor=identifier))?
-    (RETURNING select_list)?
+    returning_select_list_with_alias?
     ;
 
+returning_select_list_with_alias
+    : RETURNING with_output_alias? select_list
+    ;
+
+with_output_alias
+    : WITH LEFT_PAREN output_alias (COMMA output_alias)* RIGHT_PAREN
+    ;
+
+output_alias
+    : (OLD | NEW) AS identifier
+    ;
+    
 update_set
     : column+=indirection_identifier EQUAL (value+=vex | DEFAULT)
     | LEFT_PAREN column+=indirection_identifier (COMMA column+=indirection_identifier)* RIGHT_PAREN EQUAL ROW?

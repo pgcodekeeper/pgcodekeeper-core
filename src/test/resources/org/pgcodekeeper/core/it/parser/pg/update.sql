@@ -582,3 +582,11 @@ UPDATE f SET f3 = f3*2 FROM tbl i WHERE foo.f1 + 15 = i.f1 RETURNING foo.*, i.f1
 UPDATE f SET f3 = f3*2 WHERE f1 > 1 RETURNING *, f1+1 IN (SELECT q1 FROM t) AS sp, EXISTS(SELECT * FROM t) AS ip;
 UPDATE f SET f3 = f3*2 FROM tbl i WHERE foo.f1 = i.q2 RETURNING *;
 UPDATE f SET f1 = f1+1 WHERE f3 = 7 RETURNING *, other + 1;
+
+UPDATE weather SET temp_lo = temp_lo+1, temp_hi = temp_lo+15, prcp = DEFAULT
+  WHERE city = 'San Francisco' AND date = '2003-07-03'
+  RETURNING OLD.*, NEW.*;
+
+UPDATE weather SET temp_lo = temp_lo+1, temp_hi = temp_lo+15, prcp = DEFAULT
+  WHERE city = 'San Francisco' AND date = '2003-07-03'
+  RETURNING WITH (OLD AS o, NEW AS n) o.*, n.*;
