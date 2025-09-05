@@ -580,7 +580,7 @@ alter_default_privileges_statement
 abbreviated_grant_or_revoke
     : (GRANT | REVOKE grant_option_for?) (
         table_column_privilege (COMMA table_column_privilege)* ON TABLES
-        | (usage_select_update (COMMA usage_select_update)* | ALL PRIVILEGES?) ON SEQUENCES
+        | (usage_select_update (COMMA usage_select_update)* | ALL PRIVILEGES?) ON (SEQUENCES | LARGE OBJECTS)
         | (EXECUTE | ALL PRIVILEGES?) ON FUNCTIONS
         | (USAGE | CREATE | ALL PRIVILEGES?) ON SCHEMAS
         | (USAGE | ALL PRIVILEGES?) ON TYPES)
