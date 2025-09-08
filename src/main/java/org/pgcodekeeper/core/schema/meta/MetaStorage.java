@@ -17,8 +17,8 @@ package org.pgcodekeeper.core.schema.meta;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
 import org.pgcodekeeper.core.loader.pg.JdbcSystemLoader;
-import org.pgcodekeeper.core.loader.UrlJdbcConnector;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.NullMonitor;
@@ -146,7 +146,7 @@ public final class MetaStorage implements Serializable {
      * @throws InterruptedException if the operation is interrupted
      */
     public static void serialize(String path, String url) throws IOException, InterruptedException {
-        UrlJdbcConnector jdbcConnector = new UrlJdbcConnector(url);
+        var jdbcConnector = new PgJdbcConnector(url);
         Serializable storage = new JdbcSystemLoader(jdbcConnector, Consts.UTC,
                 new NullMonitor()).getStorageFromJdbc();
         Utils.serialize(path, storage);

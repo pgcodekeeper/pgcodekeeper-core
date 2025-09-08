@@ -15,6 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
+import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
+import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;
+import org.pgcodekeeper.core.database.ms.jdbc.MsJdbcConnector;
+import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -180,6 +184,21 @@ public final class Utils {
             case PG -> PgDiffUtils::getQuotedName;
             case MS -> MsDiffUtils::quoteName;
             case CH -> ChDiffUtils::getQuotedName;
+        };
+    }
+
+    /**
+     * Returns JdbcConnector for the given database type. Temporary solution until the new API is finished.
+     *
+     * @param dbType the database type
+     * @param url full jdbc connection string
+     * @return JdbcConnector for the given database type.
+     */
+    public static AbstractJdbcConnector getJdbcConnectorByType(DatabaseType dbType, String url) {
+        return switch (dbType) {
+            case PG -> new PgJdbcConnector(url);
+            case MS -> new MsJdbcConnector(url);
+            case CH -> new ChJdbcConnector(url);
         };
     }
 
