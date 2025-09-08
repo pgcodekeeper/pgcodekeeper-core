@@ -18,6 +18,8 @@ package org.pgcodekeeper.core.database.pg;
 import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.base.IDatabaseProvider;
+import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
+import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
 import org.pgcodekeeper.core.parsers.antlr.pg.CustomSQLAntlrErrorStrategy;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLLexer;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
@@ -32,11 +34,6 @@ public class PgDatabaseProvider implements IDatabaseProvider {
     @Override
     public String getDefaultPort() {
         return "5432";
-    }
-
-    @Override
-    public String getDriverName() {
-        return "org.postgresql.Driver";
     }
 
     @Override
@@ -58,5 +55,10 @@ public class PgDatabaseProvider implements IDatabaseProvider {
     public boolean isSystemSchema(String schema) {
         return Consts.PG_CATALOG.equalsIgnoreCase(schema)
                 || Consts.INFORMATION_SCHEMA.equalsIgnoreCase(schema);
+    }
+
+    @Override
+    public AbstractJdbcConnector getJdbcConnector(String url) {
+        return new PgJdbcConnector(url);
     }
 }

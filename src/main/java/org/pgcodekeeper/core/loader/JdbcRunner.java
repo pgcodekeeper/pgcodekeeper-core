@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
+import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
 import org.pgcodekeeper.core.utils.DaemonThreadFactory;
 import org.pgcodekeeper.core.reporter.IProgressReporter;
 import org.pgcodekeeper.core.loader.callables.QueriesBatchCallable;
@@ -122,7 +123,7 @@ public class JdbcRunner {
                            IProgressReporter reporter) throws SQLException, IOException, InterruptedException {
         try (Connection connection = connector.getConnection();
              Statement st = connection.createStatement()) {
-            runScript(new QueriesBatchCallable(st, batches, monitor, reporter, connection, connector.getType()));
+            runScript(new QueriesBatchCallable(st, batches, monitor, reporter, connection, connector.getBatchDelimiter()));
         }
     }
 

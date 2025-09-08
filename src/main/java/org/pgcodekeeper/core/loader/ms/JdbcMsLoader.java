@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.ms;
 
-import org.pgcodekeeper.core.loader.AbstractJdbcConnector;
+import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.ms.*;
 import org.pgcodekeeper.core.localizations.Messages;
