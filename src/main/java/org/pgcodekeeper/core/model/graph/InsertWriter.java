@@ -237,7 +237,7 @@ public final class InsertWriter {
             var filter = map.get(FILTER_KEY).toString();
 
             var select = generateSelect(name, filter);
-            LOG.info(select);
+            LOG.debug(select);
 
             // check this select was queried
             if (selects.containsKey(select)) {
@@ -264,7 +264,7 @@ public final class InsertWriter {
                 throw new IllegalArgumentException(Messages.InsertWriter_select_size_error_message);
             }
             var msg = Messages.InsertWriter_select_size_info_message.formatted(rowCount);
-            LOG.info(msg);
+            LOG.debug(msg);
 
             // store data to cache
             selects.put(select, tempData);

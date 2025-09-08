@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - All localized messages have been brought into a unified style.
+- Lowered logging level in InsertWriter class.
 
 ### Fixed
 
