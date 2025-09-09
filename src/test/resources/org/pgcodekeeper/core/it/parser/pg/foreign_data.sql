@@ -835,3 +835,42 @@ CREATE FOREIGN DATA WRAPPER mywrapper OPTIONS (
 ALTER FOREIGN DATA WRAPPER mywrapper OPTIONS (SET mpp_execute 'any');
 ALTER FOREIGN DATA WRAPPER mywrapper OPTIONS (DROP mpp_execute );
 ALTER FOREIGN DATA WRAPPER mywrapper OPTIONS (ADD mpp_execute 'master');
+
+-- create FOREIGN TABLE with LIKE option
+CREATE FOREIGN TABLE IF NOT EXISTS employees_foreign (
+    LIKE employees INCLUDING ALL,
+    department_code VARCHAR(10)
+)
+SERVER foreign_server
+OPTIONS (
+    schema_name 'public',
+    table_name 'employees_remote',
+    encoding 'UTF8'
+);
+
+CREATE FOREIGN TABLE IF NOT EXISTS customers_foreign (
+    LIKE customers INCLUDING DEFAULTS INCLUDING CONSTRAINTS EXCLUDING COMMENTS,
+    region_code VARCHAR(5),
+    sales_territory VARCHAR(50)
+)
+SERVER foreign_server
+OPTIONS (
+    schema_name 'sales',
+    table_name 'customers',
+    fetch_size '1000'
+);
+
+CREATE FOREIGN TABLE IF NOT EXISTS employees_foreign (
+    LIKE employees_local 
+        INCLUDING STATISTICS 
+        INCLUDING COMMENTS 
+        EXCLUDING GENERATED,
+    remote_worker BOOLEAN NOT NULL DEFAULT false,
+    timezone VARCHAR(50)
+)
+INHERITS (personnel_base)
+SERVER foreign_server
+OPTIONS (
+    table_name 'employees',
+    statistics_enabled 'true'
+);

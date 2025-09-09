@@ -581,3 +581,9 @@ Reference: Object = mywrapper (FOREIGN_DATA_WRAPPER), action = CREATE, offset = 
 Reference: Object = mywrapper (FOREIGN_DATA_WRAPPER), action = ALTER, offset = 32927, line number = 835, charPositionInLine = 27
 Reference: Object = mywrapper (FOREIGN_DATA_WRAPPER), action = ALTER, offset = 32997, line number = 836, charPositionInLine = 27
 Reference: Object = mywrapper (FOREIGN_DATA_WRAPPER), action = ALTER, offset = 33063, line number = 837, charPositionInLine = 27
+Reference: Object = employees_foreign (TABLE), action = CREATE, offset = 33186, line number = 840, charPositionInLine = 35
+Reference: Object = foreign_server (SERVER), action = null, offset = 33281, line number = 844, charPositionInLine = 7
+Reference: Object = customers_foreign (TABLE), action = CREATE, offset = 33426, line number = 851, charPositionInLine = 35
+Reference: Object = foreign_server (SERVER), action = null, offset = 33595, line number = 856, charPositionInLine = 7
+Reference: Object = employees_foreign (TABLE), action = CREATE, offset = 33734, line number = 863, charPositionInLine = 35
+Reference: Object = foreign_server (SERVER), action = null, offset = 33977, line number = 872, charPositionInLine = 7
