@@ -74,49 +74,33 @@ public class PgDiff {
     }
 
     /**
-     * Selects all objects for diff, compares them between source and target
-     * and generates a migration script.
-     *
-     * @param oldDb      the source database schema
-     * @param newDb      the target database schema
-     * @param ignoreList list of objects to ignore during comparison
-     * @return SQL migration script
-     * @throws InterruptedException if the operation is interrupted
-     * @throws IOException          if an I/O error occurs
-     */
-    public String diff(AbstractDatabase oldDb, AbstractDatabase newDb, IgnoreList ignoreList)
-            throws InterruptedException, IOException {
-        TreeElement root = DiffTree.create(settings, oldDb, newDb);
-        root.setAllChecked();
-
-        return diff(root, oldDb, newDb, null, null, ignoreList);
-    }
-
-    /**
      * Gets selected elements from root, compares them between source and target
      * and generates a migration script.
      *
-     * @param root                   the root of the diff tree
-     * @param oldDb                  the source database schema
-     * @param newDb                  the target database schema
-     * @param additionalDepciesOldDb additional dependencies in old database
-     * @param additionalDepciesNewDb additional dependencies in new database
-     * @param ignoreList             list of objects to ignore during comparison
+     * @param root                        the root of the diff tree
+     * @param oldDb                       the source database schema
+     * @param newDb                       the target database schema
+     * @param additionalDependenciesOldDb additional dependencies in old database
+     * @param additionalDependenciesNewDb additional dependencies in new database
+     * @param ignoreList                  list of objects to ignore during comparison
      * @return SQL migration script
      * @throws IOException if an I/O error occurs
      */
     public String diff(TreeElement root,
-            AbstractDatabase oldDb, AbstractDatabase newDb,
-            List<Entry<PgStatement, PgStatement>> additionalDepciesOldDb,
-            List<Entry<PgStatement, PgStatement>> additionalDepciesNewDb, IgnoreList ignoreList) throws IOException {
+                       AbstractDatabase oldDb,
+                       AbstractDatabase newDb,
+                       List<Entry<PgStatement, PgStatement>> additionalDependenciesOldDb,
+                       List<Entry<PgStatement, PgStatement>> additionalDependenciesNewDb,
+                       IgnoreList ignoreList)
+            throws IOException {
         List<TreeElement> selected = getSelectedElements(root, ignoreList);
         if (selected.isEmpty()) {
             return EMPTY_SCRIPT;
         }
 
         Set<PgStatement> toRefresh = new LinkedHashSet<>();
-        var actions = resolveDependencies(selected, oldDb, newDb, additionalDepciesOldDb,
-                additionalDepciesNewDb, toRefresh);
+        var actions = resolveDependencies(selected, oldDb, newDb, additionalDependenciesOldDb,
+                additionalDependenciesNewDb, toRefresh);
         if (actions.isEmpty()) {
             return EMPTY_SCRIPT;
         }
@@ -220,9 +204,11 @@ public class PgDiff {
     }
 
     private Set<ActionContainer> resolveDependencies(List<TreeElement> selected,
-            AbstractDatabase oldDb, AbstractDatabase newDb,
-            List<Entry<PgStatement, PgStatement>> additionalDepciesOldDb,
-            List<Entry<PgStatement, PgStatement>> additionalDepciesNewDb, Set<PgStatement> toRefresh) {
+                                                     AbstractDatabase oldDb,
+                                                     AbstractDatabase newDb,
+                                                     List<Entry<PgStatement, PgStatement>> additionalDependenciesOldDb,
+                                                     List<Entry<PgStatement, PgStatement>> additionalDependenciesNewDb,
+                                                     Set<PgStatement> toRefresh) {
         addColumnsAsElements(oldDb, newDb, selected);
 
         selected.sort(new CompareTree());
@@ -246,7 +232,7 @@ public class PgDiff {
             objects.add(new DbObject(oldStatement, newStatement));
         }
         return DepcyResolver.resolve(oldDb, newDb,
-                additionalDepciesOldDb, additionalDepciesNewDb, toRefresh, objects, settings);
+                additionalDependenciesOldDb, additionalDependenciesNewDb, toRefresh, objects, settings);
     }
 
     @Deprecated

@@ -19,7 +19,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.FILES_POSTFIX;
-import org.pgcodekeeper.core.PgDiff;
+import org.pgcodekeeper.core.api.PgCodeKeeperApi;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
@@ -58,7 +58,7 @@ class MsMoveDataDiffTest {
         assertDiffSame(dbOld, fileNameTemplate, settings);
         assertDiffSame(dbNew, fileNameTemplate, settings);
 
-        String script = new PgDiff(settings).diff(dbOld, dbNew, null);
+        String script = PgCodeKeeperApi.diff(settings, dbOld, dbNew);
         String content = script.replaceAll("([0-9a-fA-F]{32})", "randomly_generated_part");
 
         assertResult(content, fileNameTemplate, MsMoveDataDiffTest.class);

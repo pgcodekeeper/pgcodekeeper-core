@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Added connection test with databases.
+- Added new overloads of the diff method to PgCodeKeeperApi.
 
 ### Changed
 

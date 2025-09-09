@@ -138,8 +138,10 @@ public final class IgnoreParser {
     public static IgnoreList parseLists(Collection<String> ignoreLists) throws IOException {
         IgnoreList ignoreList = new IgnoreList();
         IgnoreParser ignoreParser = new IgnoreParser(ignoreList);
-        for (String ignoreListPath : ignoreLists) {
-            ignoreParser.parse(Paths.get(ignoreListPath));
+        if (ignoreLists != null) {
+            for (String ignoreListPath : ignoreLists) {
+                ignoreParser.parse(Paths.get(ignoreListPath));
+            }
         }
         return ignoreList;
     }
