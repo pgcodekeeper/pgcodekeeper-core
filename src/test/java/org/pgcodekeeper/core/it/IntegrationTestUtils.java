@@ -17,6 +17,7 @@ package org.pgcodekeeper.core.it;
 
 import org.junit.jupiter.api.Assertions;
 import org.pgcodekeeper.core.*;
+import org.pgcodekeeper.core.api.PgCodeKeeperApi;
 import org.pgcodekeeper.core.loader.DatabaseLoader;
 import org.pgcodekeeper.core.loader.PgDumpLoader;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
@@ -87,7 +88,7 @@ public final class IntegrationTestUtils {
 
     public static void assertDiff(AbstractDatabase oldDb, AbstractDatabase newDb, ISettings settings, String errorMessage)
             throws IOException, InterruptedException {
-        String script = new PgDiff(settings).diff(oldDb, newDb, null);
+        String script = PgCodeKeeperApi.diff(settings, oldDb, newDb);
         Assertions.assertEquals("", script.trim(), errorMessage);
     }
 
@@ -129,7 +130,7 @@ public final class IntegrationTestUtils {
         AbstractDatabase dbNew = loadTestDump(fileNameTemplate + FILES_POSTFIX.NEW_SQL, clazz, settings);
         assertDiffSame(dbNew, fileNameTemplate, settings);
 
-        return new PgDiff(settings).diff(dbOld, dbNew, null);
+        return PgCodeKeeperApi.diff(settings, dbOld, dbNew);
     }
 
     public static void assertEqualsDependencies(String dbTemplate, String userTemplateName,
@@ -144,7 +145,7 @@ public final class IntegrationTestUtils {
         TreeElement tree = DiffTree.create(settings, oldDbFull, newDbFull, null);
 
         setSelected(selected, tree, oldDbFull, newDbFull);
-        String script = new PgDiff(settings).diff(tree, oldDbFull, newDbFull, null, null, null);
+        String script = PgCodeKeeperApi.diff(settings, tree, oldDbFull, newDbFull, null, null, null);
         var userSelTemplate = null == userTemplateName ? dbTemplate : dbTemplate + "_" + userTemplateName;
         assertResult(script, userSelTemplate, clazz);
     }

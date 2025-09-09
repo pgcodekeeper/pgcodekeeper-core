@@ -22,6 +22,7 @@ import org.pgcodekeeper.core.ignoreparser.IgnoreParser;
 import org.pgcodekeeper.core.model.difftree.*;
 import org.pgcodekeeper.core.model.exporter.ModelExporter;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
+import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.utils.ProjectUpdater;
@@ -31,6 +32,7 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Main API class for pgCodeKeeper database operations.
@@ -48,7 +50,7 @@ public final class PgCodeKeeperApi {
      * @throws InterruptedException if the thread is interrupted during the operation
      */
     public static String diff(ISettings settings, AbstractDatabase oldDb, AbstractDatabase newDb)
-            throws PgCodekeeperException, IOException, InterruptedException {
+            throws IOException, InterruptedException {
         return diff(settings, oldDb, newDb, Collections.emptyList());
     }
 
@@ -63,10 +65,63 @@ public final class PgCodeKeeperApi {
      * @throws IOException          if I/O operations fail or ignore list file cannot be read
      * @throws InterruptedException if the thread is interrupted during the operation
      */
-    public static String diff(ISettings settings, AbstractDatabase oldDb, AbstractDatabase newDb,
-                              Collection<String> ignoreLists) throws IOException, InterruptedException {
+    public static String diff(ISettings settings,
+                              AbstractDatabase oldDb,
+                              AbstractDatabase newDb,
+                              Collection<String> ignoreLists)
+            throws IOException, InterruptedException {
+        return diff(settings, oldDb, newDb, null, null, ignoreLists);
+    }
+
+    /**
+     * Compares two databases and generates a migration script with filtering and additional dependencies.
+     *
+     * @param settings                    ISettings object
+     * @param oldDb                       the old database version to compare from
+     * @param newDb                       the new database version to compare to
+     * @param additionalDependenciesOldDb additional dependencies in old database
+     * @param additionalDependenciesNewDb additional dependencies in new database
+     * @param ignoreLists                 collection of paths to files containing objects to ignore
+     * @return the generated migration script as a string
+     * @throws IOException          if I/O operations fail or ignore list file cannot be read
+     * @throws InterruptedException if the thread is interrupted during the operation
+     */
+    public static String diff(ISettings settings,
+                              AbstractDatabase oldDb,
+                              AbstractDatabase newDb,
+                              List<Map.Entry<PgStatement, PgStatement>> additionalDependenciesOldDb,
+                              List<Map.Entry<PgStatement, PgStatement>> additionalDependenciesNewDb,
+                              Collection<String> ignoreLists)
+            throws IOException, InterruptedException {
+        TreeElement root = DiffTree.create(settings, oldDb, newDb);
+        root.setAllChecked();
+        return diff(settings, root, oldDb, newDb, additionalDependenciesOldDb, additionalDependenciesNewDb, ignoreLists);
+    }
+
+    /**
+     * Compares two databases and generates a migration script with filtering and additional dependencies.
+     *
+     * @param settings                    ISettings object
+     * @param root                        root element of tree
+     * @param oldDb                       the old database version to compare from
+     * @param newDb                       the new database version to compare to
+     * @param additionalDependenciesOldDb additional dependencies in old database
+     * @param additionalDependenciesNewDb additional dependencies in new database
+     * @param ignoreLists                 collection of paths to files containing objects to ignore
+     * @return the generated migration script as a string
+     * @throws IOException if I/O operations fail or ignore list file cannot be read
+     */
+    public static String diff(ISettings settings,
+                              TreeElement root,
+                              AbstractDatabase oldDb,
+                              AbstractDatabase newDb,
+                              List<Map.Entry<PgStatement, PgStatement>> additionalDependenciesOldDb,
+                              List<Map.Entry<PgStatement, PgStatement>> additionalDependenciesNewDb,
+                              Collection<String> ignoreLists)
+            throws IOException {
         IgnoreList ignoreList = IgnoreParser.parseLists(ignoreLists);
-        return new PgDiff(settings).diff(oldDb, newDb, ignoreList);
+        return new PgDiff(settings)
+                .diff(root, oldDb, newDb, additionalDependenciesOldDb, additionalDependenciesNewDb, ignoreList);
     }
 
     /**
@@ -101,8 +156,7 @@ public final class PgCodeKeeperApi {
                               Collection<String> ignoreLists, IMonitor monitor)
             throws IOException, InterruptedException {
         IgnoreList ignoreList = IgnoreParser.parseLists(ignoreLists);
-        TreeElement root;
-        root = DiffTree.create(settings, dbToExport, null, monitor);
+        TreeElement root = DiffTree.create(settings, dbToExport, null, monitor);
         root.setAllChecked();
 
         List<TreeElement> selected = getSelectedElements(settings, root, ignoreList);

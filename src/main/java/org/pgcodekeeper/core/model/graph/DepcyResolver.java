@@ -563,13 +563,16 @@ public final class DepcyResolver {
         return recreatedObjs.computeIfAbsent(oldTable.getQualifiedName(), x -> oldTable.isRecreated(newTable, settings));
     }
 
-    public static Set<ActionContainer> resolve(AbstractDatabase oldDb, AbstractDatabase newDb,
-                                               List<Entry<PgStatement, PgStatement>> additionalDepciesOldDb,
-                                               List<Entry<PgStatement, PgStatement>> additionalDepciesNewDb,
-                                               Set<PgStatement> toRefresh, List<DbObject> dbObjects, ISettings settings) {
+    public static Set<ActionContainer> resolve(AbstractDatabase oldDb,
+                                               AbstractDatabase newDb,
+                                               List<Entry<PgStatement, PgStatement>> additionalDependenciesOldDb,
+                                               List<Entry<PgStatement, PgStatement>> additionalDependenciesNewDb,
+                                               Set<PgStatement> toRefresh,
+                                               List<DbObject> dbObjects,
+                                               ISettings settings) {
         DepcyResolver depRes = new DepcyResolver(oldDb, newDb, settings, toRefresh);
-        depRes.oldDepcyGraph.addCustomDepcies(additionalDepciesOldDb);
-        depRes.newDepcyGraph.addCustomDepcies(additionalDepciesNewDb);
+        depRes.oldDepcyGraph.addCustomDepcies(additionalDependenciesOldDb);
+        depRes.newDepcyGraph.addCustomDepcies(additionalDependenciesNewDb);
         depRes.fillObjects(dbObjects);
         depRes.recreateDrops();
         depRes.removeExtraActions();
