@@ -1426,3 +1426,7 @@ FORMAT 'TEXT' ( delimiter '|' null '\N' escape '\' )
 ENCODING 'UTF8';
 
 create table nv_parent (d date, check (false) no inherit not valid);
+
+CREATE TABLE test_gen_stored (a int generated always as (5) STORED);
+CREATE TABLE test_gen_virtual (a int generated always as (func()) virtual);
+CREATE TABLE test_gen_implicit (a int generated always as (func()));

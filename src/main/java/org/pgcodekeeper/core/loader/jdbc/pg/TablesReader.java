@@ -24,8 +24,8 @@ import org.pgcodekeeper.core.loader.jdbc.JdbcType;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
-import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
+import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.AlterTable;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.GenericColumn;
@@ -339,8 +339,12 @@ public final class TablesReader extends JdbcReader {
                 column.setStatistics(statistics);
             }
 
-            if (colGenerated != null && "s".equals(colGenerated[i])) {
-                column.setGenerated(true);
+            if (colGenerated != null && !colGenerated[i].isEmpty()) {
+                if ("s".equals(colGenerated[i])) {
+                    column.setGenerationOption("STORED");
+                } else {
+                    column.setGenerationOption("VIRTUAL");
+                }
             }
 
             if (colCompression != null) {
