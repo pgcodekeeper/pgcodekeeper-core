@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [11.1.0] - 2025-09-10
+
+### Added
+
 - Added connection test with databases.
 - Added new overloads of the diff method to PgCodeKeeperApi.
 
@@ -2314,8 +2322,9 @@ We increment major version in this release due to decision to shift our developm
 
 - ORDER BY parsing has been added to the aggregate functions.
 
-[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v11.0.0...HEAD
-[11.0.0]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.14.2...v11.0.0
+[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.1.0...HEAD
+[11.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.0.0...v11.1.0
+[11.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/releases/tag/v11.0.0
 [10.14.2]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.14.1...v10.14.2
 [10.14.1]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.14.0...v10.14.1
 [10.14.0]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.13.0...v10.14.0
