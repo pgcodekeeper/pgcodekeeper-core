@@ -1949,7 +1949,7 @@ constr_body
     | PRIMARY KEY col=names_in_parens? index_parameters
     | DEFAULT default_expr=vex
     | identity_body
-    | GENERATED ALWAYS AS LEFT_PAREN vex RIGHT_PAREN STORED
+    | GENERATED ALWAYS AS LEFT_PAREN vex RIGHT_PAREN (STORED | VIRTUAL)?
     ;
 
 all_op

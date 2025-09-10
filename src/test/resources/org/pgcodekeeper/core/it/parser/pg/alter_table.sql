@@ -2673,3 +2673,7 @@ ALTER TABLE part_b DROP CONSTRAINT check_b;
 ALTER TABLE parted DROP CONSTRAINT check_a, DROP CONSTRAINT check_b;
 
 alter table nv_parent add constraint c check(c1 > 0) no inherit not valid;
+
+ALTER TABLE test_gen_stored ADD COLUMN a int constraint generated_constraint GENERATED ALWAYS AS (func()) STORED;
+ALTER TABLE test_gen_virtual ADD COLUMN a int GENERATED ALWAYS AS (5) VIRTUAL;
+ALTER TABLE test_gen_implicit ADD COLUMN a int GENERATED ALWAYS AS (5);

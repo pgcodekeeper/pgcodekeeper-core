@@ -17,12 +17,12 @@ package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
-import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
+import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.ConstraintAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.schema.AbstractTable;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.PgObjLocation;
@@ -133,7 +133,7 @@ public abstract class TableAbstract extends PgParserAbstract {
             col.setSequence(sequence);
             col.setIdentityType(identity.ALWAYS() != null ? "ALWAYS" : "BY DEFAULT");
         } else if (body.GENERATED() != null) {
-            col.setGenerated(true);
+            col.setGenerationOption(body.STORED() != null ? "STORED" : "VIRTUAL");
             VexContext genExpr = body.vex();
             col.setDefaultValue(getExpressionText(genExpr, stream));
             db.addAnalysisLauncher(new VexAnalysisLauncher(col, genExpr, fileName));

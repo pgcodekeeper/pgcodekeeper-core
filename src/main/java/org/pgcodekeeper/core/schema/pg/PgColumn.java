@@ -56,7 +56,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
     private String identityType;
     private String compression;
     private boolean isInherit;
-    private boolean isGenerated;
+    private String generationOption;
 
     // greenplum type fields
     private String compressType;
@@ -94,16 +94,17 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
 
         definitionDefaultNotNull(sbDefinition);
 
-        generatedAlwaysAsStored(sbDefinition);
+        generatedAlways(sbDefinition);
 
         appendCompressOptions(sbDefinition);
         return sbDefinition.toString();
     }
 
     private void definitionDefaultNotNull(StringBuilder sbDefinition) {
-        if (defaultValue != null && !isGenerated) {
-            sbDefinition.append(" DEFAULT ");
-            sbDefinition.append(defaultValue);
+        if (defaultValue != null && generationOption == null) {
+            sbDefinition
+                    .append(" DEFAULT ")
+                    .append(defaultValue);
         }
 
         if (!nullValue) {
@@ -112,11 +113,15 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
 
     }
 
-    private void generatedAlwaysAsStored(StringBuilder sbDefinition) {
-        if (isGenerated) {
+    private void generatedAlways(StringBuilder sbDefinition) {
+        if (generationOption != null) {
             sbDefinition.append(" GENERATED ALWAYS AS (")
                     .append(defaultValue)
-                    .append(") STORED");
+                    .append(")");
+            if (!"VIRTUAL".equals(generationOption)) {
+                sbDefinition.append(" ")
+                        .append(generationOption);
+            }
         }
     }
 
@@ -147,7 +152,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
                 definitionDefaultNotNull(sb);
             }
 
-            generatedAlwaysAsStored(sb);
+            generatedAlways(sb);
             appendCompressOptions(sb);
 
             script.addStatement(sb);
@@ -155,7 +160,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
 
         // column may have a default expression or a generation expression
         // (https://www.postgresql.org/docs/12/catalog-pg-attribute.html) (param - 'atthasdef')
-        if (!mergeDefaultNotNull && !isGenerated) {
+        if (!mergeDefaultNotNull && generationOption == null) {
             compareDefaults(null, defaultValue, new AtomicBoolean(), script);
             compareNullValues(true, nullValue, defaultValue != null, script);
         }
@@ -247,8 +252,8 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
         int startSize = script.getSize();
         PgColumn newColumn = (PgColumn) newCondition;
 
-        if (isGenerated != newColumn.isGenerated
-                || (isGenerated && !Objects.equals(defaultValue, newColumn.defaultValue))
+        if (!Objects.equals(generationOption, newColumn.generationOption)
+                || (generationOption != null && !Objects.equals(defaultValue, newColumn.defaultValue))
                 || !compareCompressOptions(newColumn)) {
             return ObjectState.RECREATE;
         }
@@ -655,11 +660,11 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
     }
 
     public boolean isGenerated() {
-        return isGenerated;
+        return generationOption != null;
     }
 
-    public void setGenerated(boolean isGenerated) {
-        this.isGenerated = isGenerated;
+    public void setGenerationOption(String generationOption) {
+        this.generationOption = generationOption;
         resetHash();
     }
 
@@ -718,12 +723,12 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
                 && Objects.equals(storage, col.storage)
                 && Objects.equals(identityType, col.identityType)
                 && isInherit == col.isInherit
-                && isGenerated == col.isGenerated
                 && options.equals(col.options)
                 && fOptions.equals(col.fOptions)
                 && compareCompressOptions(col)
                 && Objects.equals(sequence, col.sequence)
-                && Objects.equals(compression, col.compression);
+                && Objects.equals(compression, col.compression)
+                && Objects.equals(generationOption, col.generationOption);
     }
 
     @Override
@@ -740,7 +745,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
         hasher.put(compression);
         hasher.put(identityType);
         hasher.put(isInherit);
-        hasher.put(isGenerated);
+        hasher.put(generationOption);
     }
 
     @Override
@@ -757,7 +762,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
         copy.setSequence(sequence);
         copy.setCompression(compression);
         copy.setInherit(isInherit);
-        copy.setGenerated(isGenerated);
+        copy.setGenerationOption(generationOption);
         return copy;
     }
 }
