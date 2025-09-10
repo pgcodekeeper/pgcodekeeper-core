@@ -9,6 +9,14 @@
 
 ### Добавлено
 
+### Изменено
+
+### Исправлено
+
+## [11.1.0] - 2025-09-10
+
+### Добавлено
+
 - Добавлены тесты соединения с базами данных.
 - Добавлены новые перегрузки метода diff в PgCodeKeeperApi.
 
@@ -2315,8 +2323,9 @@
 
 - Добавлен парсинг ORDER BY для агрегатных функции.
 
-[Новое]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v11.00.0...HEAD
-[11.0.0]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.14.2...v11.0.0
+[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.1.0...HEAD
+[11.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.0.0...v11.1.0
+[11.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/releases/tag/v11.0.0
 [10.14.2]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.14.1...v10.14.2
 [10.14.1]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.14.0...v10.14.1
 [10.14.0]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.13.0...v10.14.0
