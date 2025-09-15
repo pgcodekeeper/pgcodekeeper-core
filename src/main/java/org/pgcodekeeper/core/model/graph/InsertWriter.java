@@ -52,8 +52,8 @@ public final class InsertWriter {
 
     private static final Logger LOG = LoggerFactory.getLogger(InsertWriter.class);
 
-    private static final String GEOM_FROM_TEXT_MS_FUNC = "%s::STGeomFromText(''%s'', 4326)";
-    private static final String GEOM_FROM_TEXT_PG_FUNC = "ST_GeomFromText(''%s'', 4326)";
+    private static final String GEOM_FROM_TEXT_MS_FUNC = "%s::STGeomFromText('%s', 4326)";
+    private static final String GEOM_FROM_TEXT_PG_FUNC = "ST_GeomFromText('%s', 4326)";
 
     private static final String BIT_TYPE = "bit";
     private static final String GEOMETRY_TYPE = "[geometry]";
