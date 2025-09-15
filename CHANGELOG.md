@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Fixed messages with double quotes.
+
 ## [11.1.0] - 2025-09-10
 
 ### Added
