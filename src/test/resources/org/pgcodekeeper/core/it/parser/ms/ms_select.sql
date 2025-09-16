@@ -1599,3 +1599,20 @@ ORDER BY ProductName ASC;
 GO
 
 SELECT SERVERPROPERTY('😎 🤙 😎 🤙!! 🙈 🙉 🙊');
+
+--parse floating point constants
+SELECT 1.0;
+SELECT 0.5;
+SELECT 12345.6789;
+
+SELECT 1e0;
+SELECT 1.0e10;
+SELECT 2.5E+5;
+SELECT 3.14e-2;
+SELECT 0.0E0;
+SELECT 123E3;
+
+SELECT 1e;
+SELECT 1.0e;
+SELECT 2e+;
+SELECT 3e-;

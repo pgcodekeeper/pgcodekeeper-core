@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Fixed messages with double quotes.
+- Fixed parser rule for floating point constants for MS SQL.
 
 ## [11.1.0] - 2025-09-10
 

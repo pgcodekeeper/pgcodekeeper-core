@@ -960,7 +960,7 @@ STRING:              'N'? '\'' (~'\'' | '\'\'')* '\''
     };
 BINARY:              '0' 'X' (HEX_DIGIT | BACKSLASH [\r]? [\n])*;
 FLOAT:               DEC_DOT_DEC;
-REAL:                (DECIMAL | DEC_DOT_DEC) ('E' [+-]? DEC_DIGIT+);
+REAL:                (DECIMAL | DEC_DOT_DEC) ('E' [+-]? DEC_DIGIT*);
 
 IPV4_ADDR:           IPV4_OCTECT DOT IPV4_OCTECT DOT IPV4_OCTECT DOT IPV4_OCTECT;
 // TODO doesn't support IPV6 zero compression
