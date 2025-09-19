@@ -1389,3 +1389,9 @@ alter table fkpart2.fk_part_1 drop constraint fkey;	-- ok
 alter table fkpart2.fk_part_1_1 drop constraint my_fkey;	-- doesn't exist
 
 drop schema fkpart0, fkpart1, fkpart2 cascade;
+
+create table fktable3(f1 int references pktable2 deferrable initially deferred enforced);
+create table fktable4(f1 int references pktable2 not enforced);
+
+alter table test_table add constraint fk_test foreign KEY (c1, c2, period c3) 
+references test_table2 (a1, a2, period a3);

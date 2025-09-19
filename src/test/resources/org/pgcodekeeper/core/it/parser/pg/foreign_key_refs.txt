@@ -841,3 +841,8 @@ Reference: Object = fkpart2.fk_part_1_1.my_fkey (CONSTRAINT), action = DROP, off
 Reference: Object = fkpart0 (SCHEMA), action = DROP, offset = 49050, line number = 1391, charPositionInLine = 12
 Reference: Object = fkpart1 (SCHEMA), action = DROP, offset = 49059, line number = 1391, charPositionInLine = 21
 Reference: Object = fkpart2 (SCHEMA), action = DROP, offset = 49068, line number = 1391, charPositionInLine = 30
+Reference: Object = fktable3 (TABLE), action = CREATE, offset = 49099, line number = 1393, charPositionInLine = 13
+Reference: Object = fktable4 (TABLE), action = CREATE, offset = 49189, line number = 1394, charPositionInLine = 13
+Reference: Object = test_table (TABLE), action = ALTER, offset = 49253, line number = 1396, charPositionInLine = 12
+Reference: Object = test_table.fk_test (CONSTRAINT), action = CREATE, offset = 49279, line number = 1396, charPositionInLine = 38
+Reference: Object = test_table2 (TABLE), action = null, offset = 49331, line number = 1397, charPositionInLine = 11

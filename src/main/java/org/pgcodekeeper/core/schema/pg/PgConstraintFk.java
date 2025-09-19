@@ -16,7 +16,9 @@
 package org.pgcodekeeper.core.schema.pg;
 
 import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.schema.AbstractConstraint;
 import org.pgcodekeeper.core.schema.IConstraintFk;
@@ -44,6 +46,8 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
     private String match;
     private String delAction;
     private String updAction;
+    private String periodColumn;
+    private String periodRefcolumn;
 
     /**
      * Creates a new PostgreSQL FOREIGN KEY constraint.
@@ -124,6 +128,16 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
         resetHash();
     }
 
+    public void setPeriodRefColumn(String periodRefColumn) {
+        this.periodRefcolumn = periodRefColumn;
+        resetHash();
+    }
+
+    public void setPeriodColumn(String periodColumn) {
+        this.periodColumn = periodColumn;
+        resetHash();
+    }
+
     @Override
     public String getErrorCode() {
         return Consts.DUPLICATE_OBJECT;
@@ -134,10 +148,12 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
         var sbSQL = new StringBuilder();
         sbSQL.append("FOREIGN KEY ");
         StatementUtils.appendCols(sbSQL, columns, getDbType());
+        appendPeriod(sbSQL, periodColumn);
         sbSQL.append(" REFERENCES ").append(PgDiffUtils.getQuotedName(foreignSchema)).append('.')
                 .append(PgDiffUtils.getQuotedName(foreignTable));
         if (!refs.isEmpty()) {
             StatementUtils.appendCols(sbSQL, refs, getDbType());
+            appendPeriod(sbSQL, periodRefcolumn);
         }
         if (match != null) {
             sbSQL.append(" MATCH ").append(match);
@@ -154,18 +170,33 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
         return sbSQL.toString();
     }
 
+
+    private void appendPeriod(StringBuilder sbSQL, String periodColumn) {
+        if (periodColumn != null) {
+            sbSQL.setLength(sbSQL.length() - 1);
+            sbSQL
+                    .append(", PERIOD ")
+                    .append(Utils.getQuotedName(periodColumn, DatabaseType.PG))
+                    .append(")");
+        }
+    }
+
     @Override
     protected void compareExtraOptions(PgConstraint newConstr, SQLScript script) {
         if (!compareCommonFields(newConstr)) {
             StringBuilder sb = new StringBuilder();
             appendAlterTable(sb);
             sb.append("\n\tALTER CONSTRAINT ").append(PgDiffUtils.getQuotedName(name));
+
             if (deferrable != newConstr.deferrable && !newConstr.deferrable) {
                 sb.append(" NOT DEFERRABLE");
                 script.addStatement(sb);
-                return;
+            } else {
+                sb.append(" DEFERRABLE INITIALLY ").append(newConstr.initially ? "DEFERRED" : "IMMEDIATE");
             }
-            sb.append(" DEFERRABLE INITIALLY ").append(newConstr.initially ? "DEFERRED" : "IMMEDIATE");
+            if (notEnforced != newConstr.notEnforced) {
+                sb.append(newConstr.notEnforced ? " NOT " : " ").append("ENFORCED");
+            }
             script.addStatement(sb);
         }
     }
@@ -190,7 +221,9 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
                 && Objects.equals(refs, con.refs)
                 && Objects.equals(match, con.match)
                 && Objects.equals(delAction, con.delAction)
-                && Objects.equals(updAction, con.updAction);
+                && Objects.equals(updAction, con.updAction)
+                && Objects.equals(periodColumn, con.periodColumn)
+                && Objects.equals(periodRefcolumn, con.periodRefcolumn);
     }
 
     @Override
@@ -204,6 +237,8 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
         hasher.put(match);
         hasher.put(delAction);
         hasher.put(updAction);
+        hasher.put(periodColumn);
+        hasher.put(periodRefcolumn);
     }
 
     @Override
@@ -217,6 +252,8 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
         con.setMatch(match);
         con.setDelAction(delAction);
         con.setUpdAction(updAction);
+        con.setPeriodColumn(periodColumn);
+        con.setPeriodRefColumn(periodRefcolumn);
         return con;
     }
 }
