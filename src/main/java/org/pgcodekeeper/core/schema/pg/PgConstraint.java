@@ -37,6 +37,7 @@ public abstract class PgConstraint extends AbstractConstraint {
 
     protected boolean deferrable;
     protected boolean initially;
+    protected boolean notEnforced;
 
     /**
      * Creates a new PostgreSQL constraint.
@@ -57,6 +58,11 @@ public abstract class PgConstraint extends AbstractConstraint {
         resetHash();
     }
 
+    public void setNotEnforced(boolean notEnforced) {
+        this.notEnforced = notEnforced;
+        resetHash();
+    }
+
     protected abstract String getErrorCode();
 
     @Override
@@ -74,6 +80,9 @@ public abstract class PgConstraint extends AbstractConstraint {
         }
         if (initially) {
             sbSQL.append(" INITIALLY DEFERRED");
+        }
+        if (notEnforced) {
+            sbSQL.append(" NOT ENFORCED");
         }
 
         boolean generateNotValid = isGenerateNotValid(script.getSettings());
@@ -176,6 +185,7 @@ public abstract class PgConstraint extends AbstractConstraint {
         super.computeHash(hasher);
         hasher.put(deferrable);
         hasher.put(initially);
+        hasher.put(notEnforced);
     }
 
     @Override
@@ -183,6 +193,7 @@ public abstract class PgConstraint extends AbstractConstraint {
         var con = (PgConstraint) super.shallowCopy();
         con.setDeferrable(deferrable);
         con.setInitially(initially);
+        con.setNotEnforced(notEnforced);
         return con;
     }
 
@@ -192,6 +203,8 @@ public abstract class PgConstraint extends AbstractConstraint {
     }
 
     protected boolean compareCommonFields(PgConstraint con) {
-        return deferrable == con.deferrable && initially == con.initially;
+        return deferrable == con.deferrable
+                && initially == con.initially
+                && notEnforced == con.notEnforced;
     }
 }

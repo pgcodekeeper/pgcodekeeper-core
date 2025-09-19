@@ -17,6 +17,7 @@ package org.pgcodekeeper.core.schema.pg;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
@@ -38,6 +39,7 @@ public final class PgConstraintPk extends PgConstraint implements IConstraintPk,
     private final List<String> includes = new ArrayList<>();
     private final Map<String, String> params = new HashMap<>();
     private String tablespace;
+    private String withoutOverlapsColumn;
 
     /**
      * Creates a new PostgreSQL PRIMARY KEY or UNIQUE constraint.
@@ -88,6 +90,11 @@ public final class PgConstraintPk extends PgConstraint implements IConstraintPk,
         resetHash();
     }
 
+    public void setWithoutOverlapsColumn(String withoutOverlapsColumn) {
+        this.withoutOverlapsColumn = withoutOverlapsColumn;
+        resetHash();
+    }
+
     @Override
     public List<String> getColumns() {
         return Collections.unmodifiableList(columns);
@@ -120,6 +127,13 @@ public final class PgConstraintPk extends PgConstraint implements IConstraintPk,
             }
         }
         StatementUtils.appendCols(sbSQL, columns, getDbType());
+        if (withoutOverlapsColumn != null) {
+            sbSQL.setLength(sbSQL.length() - 1);
+            sbSQL
+                    .append(", ")
+                    .append(Utils.getQuotedName(withoutOverlapsColumn, DatabaseType.PG))
+                    .append(" WITHOUT OVERLAPS)");
+        }
         appendIndexParam(sbSQL);
         return sbSQL.toString();
     }
@@ -188,7 +202,8 @@ public final class PgConstraintPk extends PgConstraint implements IConstraintPk,
                 && Objects.equals(columns, con.columns)
                 && Objects.equals(includes, con.includes)
                 && Objects.equals(params, con.params)
-                && Objects.equals(tablespace, con.tablespace);
+                && Objects.equals(tablespace, con.tablespace)
+                && Objects.equals(withoutOverlapsColumn, con.withoutOverlapsColumn);
     }
 
     @Override
@@ -201,6 +216,7 @@ public final class PgConstraintPk extends PgConstraint implements IConstraintPk,
         hasher.put(includes);
         hasher.put(params);
         hasher.put(tablespace);
+        hasher.put(withoutOverlapsColumn);
     }
 
     @Override
@@ -212,6 +228,7 @@ public final class PgConstraintPk extends PgConstraint implements IConstraintPk,
         con.includes.addAll(includes);
         con.params.putAll(params);
         con.setTablespace(tablespace);
+        con.setWithoutOverlapsColumn(withoutOverlapsColumn);
         return con;
     }
 }

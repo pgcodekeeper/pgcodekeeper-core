@@ -529,6 +529,10 @@ table_initialy_immed
     : INITIALLY (DEFERRED | IMMEDIATE)
     ;
 
+table_enforced
+    : NOT? ENFORCED
+    ;
+
 function_actions_common
     : (CALLED | RETURNS NULL) ON NULL INPUT
     | (NO | CONTAINS | MODIFIES) SQL
@@ -1934,22 +1938,40 @@ like_option
 * EXCLUDE, FOREIGN KEY - table_constraint
 */
 constraint_common
-    : (CONSTRAINT identifier)? constr_body (NOT VALID)? table_deferrable? table_initialy_immed?
+    : (CONSTRAINT identifier)? constr_body (NOT VALID)? table_deferrable? table_initialy_immed? table_enforced?
     ;
 
 constr_body
     : EXCLUDE (USING index_method=identifier)?
             LEFT_PAREN index_column WITH all_op (COMMA index_column WITH all_op)* RIGHT_PAREN
             index_parameters (where=WHERE exp=vex)?
-    | (FOREIGN KEY col=names_in_parens)? REFERENCES schema_qualified_name ref=names_in_parens?
+    | (FOREIGN KEY col_period=names_with_period)? REFERENCES schema_qualified_name ref_period=names_with_period?
         (MATCH (FULL | PARTIAL | SIMPLE))? changed_action*
     | CHECK LEFT_PAREN expression=vex RIGHT_PAREN (NO INHERIT)?
     | NOT? NULL
-    | UNIQUE nulls_distinction? col=names_in_parens? index_parameters
-    | PRIMARY KEY col=names_in_parens? index_parameters
+    | UNIQUE nulls_distinction? col_overlaps=names_without_overlaps? index_parameters
+    | PRIMARY KEY col_overlaps=names_without_overlaps? index_parameters
     | DEFAULT default_expr=vex
     | identity_body
     | GENERATED ALWAYS AS LEFT_PAREN vex RIGHT_PAREN (STORED | VIRTUAL)?
+    ;
+
+names_without_overlaps
+    : LEFT_PAREN schema_qualified_name (COMMA schema_qualified_name)* 
+    (COMMA name_without_overlaps)? RIGHT_PAREN
+    ;
+
+name_without_overlaps
+    : schema_qualified_name WITHOUT OVERLAPS
+    ;
+    
+names_with_period
+    : LEFT_PAREN schema_qualified_name (COMMA schema_qualified_name)* 
+    (COMMA name_with_period)? RIGHT_PAREN
+    ;
+
+name_with_period
+    : PERIOD schema_qualified_name
     ;
 
 all_op

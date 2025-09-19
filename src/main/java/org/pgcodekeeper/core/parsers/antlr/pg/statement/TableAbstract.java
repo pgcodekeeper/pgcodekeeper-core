@@ -313,20 +313,27 @@ public abstract class TableAbstract extends PgParserAbstract {
         constrFk.setForeignTable(refTableName);
         constrFk.addDep(fTable);
 
+        var cols = body.col_period;
         if (columnName != null) {
             constrFk.addColumn(columnName);
             constrFk.addDep(new GenericColumn(schemaName, tableName, columnName, DbObjType.COLUMN));
-        } else if (body.col != null) {
-            for (Schema_qualified_nameContext name : body.col.names_references().schema_qualified_name()) {
+        } else if (cols != null) {
+            for (Schema_qualified_nameContext name : cols.schema_qualified_name()) {
                 String colName = QNameParser.getFirstName(getIdentifiers(name));
                 constrFk.addDep(new GenericColumn(schemaName, tableName, colName, DbObjType.COLUMN));
                 constrFk.addColumn(colName);
             }
+            if (cols.name_with_period() != null) {
+                String colName = QNameParser.getFirstName(
+                        getIdentifiers(cols.name_with_period().schema_qualified_name()));
+                constrFk.addDep(new GenericColumn(schemaName, tableName, colName, DbObjType.COLUMN));
+                constrFk.setPeriodColumn(colName);
+            }
         }
 
-        Names_in_parensContext refs = body.ref;
+        var refs = body.ref_period;
         if (refs != null) {
-            List<Schema_qualified_nameContext> columns = refs.names_references().schema_qualified_name();
+            List<Schema_qualified_nameContext> columns = refs.schema_qualified_name();
             if (columnName != null && columns.size() != 1) {
                 throw new UnresolvedReferenceException(
                         "The number of columns in the source and the key assignment does not match", tblRef.start);
@@ -336,6 +343,12 @@ public abstract class TableAbstract extends PgParserAbstract {
                 var fColumn = QNameParser.getFirstName(getIdentifiers(column));
                 constrFk.addForeignColumn(fColumn);
                 constrFk.addDep(new GenericColumn(refSchemaName, refTableName, fColumn, DbObjType.COLUMN));
+            }
+            if (refs.name_with_period() != null) {
+                var periodColName = QNameParser.getFirstName(
+                        getIdentifiers(refs.name_with_period().schema_qualified_name()));
+                constrFk.setPeriodRefColumn(periodColName);
+                constrFk.addDep(new GenericColumn(refSchemaName, refTableName, periodColName, DbObjType.COLUMN));
             }
         }
 
@@ -376,10 +389,17 @@ public abstract class TableAbstract extends PgParserAbstract {
             constrPk.addColumn(colName);
             constrPk.addDep(new GenericColumn(schemaName, tableName, colName, DbObjType.COLUMN));
         } else {
-            for (Schema_qualified_nameContext name : body.col.names_references().schema_qualified_name()) {
+            var cols = body.col_overlaps;
+            for (Schema_qualified_nameContext name : cols.schema_qualified_name()) {
                 String columnName = QNameParser.getFirstName(getIdentifiers(name));
                 constrPk.addDep(new GenericColumn(schemaName, tableName, columnName, DbObjType.COLUMN));
                 constrPk.addColumn(columnName);
+            }
+            if (cols.name_without_overlaps() != null) {
+                String withoutOverlaps = QNameParser.getFirstName(getIdentifiers(cols.name_without_overlaps()
+                        .schema_qualified_name()));
+                constrPk.addDep(new GenericColumn(schemaName, tableName, withoutOverlaps, DbObjType.COLUMN));
+                constrPk.setWithoutOverlapsColumn(withoutOverlaps);
             }
         }
 
@@ -443,5 +463,7 @@ public abstract class TableAbstract extends PgParserAbstract {
         constr.setDeferrable(defer != null && defer.NOT() == null);
         Table_initialy_immedContext init = ctx.table_initialy_immed();
         constr.setInitially(init != null && init.IMMEDIATE() == null);
+        Table_enforcedContext enf = ctx.table_enforced();
+        constr.setNotEnforced(enf != null && enf.NOT() != null);
     }
 }
