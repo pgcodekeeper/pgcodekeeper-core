@@ -26,8 +26,7 @@ import java.util.List;
 
 /**
  * Merging wrapper for vex/vex_b.
- * Provides a unified interface for working with PostgreSQL value expressions
- * that can be either regular expressions (vex) or boolean expressions (vex_b).
+ * Provides a unified interface for working with PostgreSQL value expressions.
  *
  * @author levsha_aa
  */
