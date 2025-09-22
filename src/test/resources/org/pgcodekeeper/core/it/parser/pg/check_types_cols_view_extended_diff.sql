@@ -90,3 +90,34 @@ Schema: public
      c3 - public.test_composite
      c4 - public.complex
      c5 - double precision
+
+  View: test_record_view1
+    RelationColumns : 
+     id - INT
+     desc - TEXT
+     data - NUMERIC
+     id_test - INT
+     description - TEXT
+     value - NUMERIC
+
+  View: test_record_view2
+    RelationColumns : 
+     id_test - INT
+     description_test - TEXT
+     value_test - NUMERIC
+     id - INT
+
+  View: test_record_view3
+    RelationColumns : 
+     id - INT
+     new_id - INT
+     new_description - TEXT
+     new_value - NUMERIC
+
+  View: test_record_view4
+    RelationColumns : 
+     id - INT
+     descr - TEXT
+     new_id - INT
+     new_description - TEXT
+     new_value - NUMERIC
