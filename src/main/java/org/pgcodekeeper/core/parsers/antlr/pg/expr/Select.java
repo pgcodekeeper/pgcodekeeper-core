@@ -530,13 +530,11 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
             }
         } else if ((primary = fromItem.from_primary()) != null) {
             Alias_clauseContext alias = primary.alias_clause();
-            List<Function_callContext> functions = primary.function_call();
             Schema_qualified_nameContext table;
             Table_subqueryContext subquery;
 
-            if (!functions.isEmpty()) {
-                functions.forEach(e -> function(e, primary.alias));
-            } else if ((table = primary.schema_qualified_name()) != null) {
+            fromFunctionCommon(primary);
+            if ((table = primary.schema_qualified_name()) != null) {
                 addNameReference(table, alias);
                 if (primary.TABLESAMPLE() != null) {
                     ValueExpr vex = new ValueExpr(this);
@@ -571,20 +569,62 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
         }
     }
 
-    private void function(Function_callContext function, IdentifierContext alias) {
+    private void fromFunctionCommon(From_primaryContext from) {
         boolean oldLateral = lateralAllowed;
         try {
-            lateralAllowed = true;
-            ValueExpr vexFunc = new ValueExpr(this);
-            Pair<String, String> func = vexFunc.function(function);
-            if (func.getFirst() != null) {
-                String funcAlias = alias == null ? func.getFirst() : alias.getText();
-                addReference(funcAlias, null);
-                complexNamespace.put(funcAlias,
-                        List.of(new Pair<>(funcAlias, func.getSecond())));
+            if (from.function_call() != null) {
+                function(from.function_call(), from.alias, from.from_function_column_def());
+            } else if (from.from_rows_with_alias() != null) {
+                fromRowsFunction(from.from_rows_with_alias());
             }
         } finally {
             lateralAllowed = oldLateral;
+        }
+    }
+
+    private void fromRowsFunction(From_rows_with_aliasContext fromRows) {
+        for (var function : fromRows.function_call()) {
+            ValueExpr vexFunc = new ValueExpr(this);
+            Pair<String, String> func = vexFunc.function(function);
+            if (func.getFirst() != null) {
+                String funcName = func.getFirst();
+                addReference(funcName, null);
+            }
+        }
+
+        List<Pair<String, String>> colPairs = new ArrayList<>();
+        fromRows.column_alias
+                .forEach(identifier -> colPairs.add(new ModPair<>(identifier.getText(), TypesSetManually.COLUMN)));
+
+        if (!fromRows.from_function_column_def().isEmpty()) {
+            // safe to take any since they all must have the same types
+            var cols = fromRows.from_function_column_def(0);
+            for (int i = 0; i < cols.column_alias.size() && i < colPairs.size(); i++) {
+                colPairs.set(i, new Pair<>(colPairs.get(i).getFirst(), cols.data_type().get(i).getText()));
+            }
+        }
+
+        var alias = fromRows.alias.getText();
+        addReference(alias, null);
+        complexNamespace.put(alias, colPairs);
+    }
+
+    private void function(Function_callContext function, IdentifierContext alias,
+                          From_function_column_defContext definition) {
+        ValueExpr vexFunc = new ValueExpr(this);
+        Pair<String, String> func = vexFunc.function(function);
+        if (func.getFirst() != null) {
+            String funcAlias = alias == null ? func.getFirst() : alias.getText();
+            addReference(funcAlias, null);
+            List<Pair<String, String>> colPairs = new ArrayList<>();
+            if (definition != null) {
+                for (int i = 0; i < definition.column_alias.size(); i++) {
+                    colPairs.add(new Pair<>(definition.column_alias.get(i).getText(), definition.data_type().get(i).getText()));
+                }
+            } else {
+                colPairs.add(new Pair<>(funcAlias, func.getSecond()));
+            }
+            complexNamespace.put(funcAlias, colPairs);
         }
     }
 }

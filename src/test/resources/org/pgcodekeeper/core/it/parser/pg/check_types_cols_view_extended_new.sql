@@ -51,6 +51,30 @@ CREATE FUNCTION tester.f2(p double precision) RETURNS real
 CREATE FUNCTION tester.f2(p text) RETURNS integer
     LANGUAGE plpgsql
     AS $$begin return 'text'; end;$$;
+    
+CREATE FUNCTION public.get_simple_record() RETURNS RECORD 
+    LANGUAGE plpgsql
+    AS $$
+declare
+    result RECORD;
+begin
+    result.id := 1;
+    result.name := 'Test User';
+    result.score := 100.5;
+    return result;
+end;$$;
+
+CREATE FUNCTION public.get_another_record() RETURNS RECORD 
+    LANGUAGE plpgsql
+    AS $$
+declare
+    rec RECORD;
+begin
+    result.intt := 25;
+    result.str := 'str';
+    result.numm := 100.5;
+    return rec;
+end;$$;
 
 CREATE TABLE public.mytable (
     col1 integer,
@@ -242,3 +266,26 @@ CREATE VIEW public.testview AS
    (item).test.t.r as c4,
    (item).test.t.r.r AS c5
    FROM public.on_hand;
+   
+CREATE VIEW public.test_record_view1 AS
+ SELECT simple_data.id_test as id,
+   simple_data.description as desc,
+   simple_data.value as data,
+   *
+   FROM public.get_simple_record() AS simple_data(id_test INT, description TEXT, value NUMERIC);
+   
+CREATE VIEW public.test_record_view2 AS
+ SELECT *, get_simple_record.id_test as id
+   FROM public.get_simple_record() AS (id_test INT, description_test TEXT, value_test NUMERIC);
+
+CREATE VIEW public.test_record_view3 AS
+SELECT t.new_id as id, * FROM ROWS FROM (
+    public.get_simple_record() AS (id_test INT, description_test TEXT, value_test NUMERIC),
+    public.get_another_record() AS (id INT, description TEXT, value NUMERIC)
+) AS t(new_id, new_description, new_value);
+
+CREATE VIEW public.test_record_view4 AS
+SELECT t.new_id as id, t.new_description as descr, t.* FROM ROWS FROM (
+    public.get_simple_record() AS (id_test INT, description_test TEXT, value_test NUMERIC),
+    public.get_another_record() AS (id INT, description TEXT, value NUMERIC)
+) AS t(new_id, new_description, new_value);

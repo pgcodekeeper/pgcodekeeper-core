@@ -19,8 +19,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
-import org.pgcodekeeper.core.PgDiff;
 import org.pgcodekeeper.core.TestUtils;
+import org.pgcodekeeper.core.api.PgCodeKeeperApi;
+import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.loader.DatabaseLoader;
 import org.pgcodekeeper.core.loader.LibraryLoader;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
@@ -30,8 +31,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.pgcodekeeper.core.it.IntegrationTestUtils.*;
 
 class LibDiffTest {
 
@@ -70,13 +69,13 @@ class LibDiffTest {
             libs.add(TestUtils.getPathToResource(lib, getClass()).toString());
         }
         AbstractDatabase dbOld = DatabaseLoader.createDb(settings);
-        AbstractDatabase dbNew = loadTestDump(fileNameTemplate + FILES_POSTFIX.NEW_SQL, getClass(), settings);
+        AbstractDatabase dbNew = IntegrationTestUtils.loadTestDump(fileNameTemplate + FILES_POSTFIX.NEW_SQL, getClass(), settings);
         LibraryLoader loader = new LibraryLoader(dbNew, null, null);
 
         loader.loadLibraries(settings, isIgnorePrivileges, libs);
 
-        String script = new PgDiff(settings).diff(dbOld, dbNew, null);
+        String script = PgCodeKeeperApi.diff(settings, dbOld, dbNew);
 
-        assertResult(script, fileNameTemplate, getClass());
+        IntegrationTestUtils.assertResult(script, fileNameTemplate, getClass());
     }
 }

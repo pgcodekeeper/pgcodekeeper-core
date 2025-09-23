@@ -9,22 +9,45 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- Added connection test with databases.
 - Added support for PostgreSQL 18.
 
 ### Changed
 
-- All localized messages have been brought into a unified style.
-
 ### Fixed
-
-- Fixed reading logic when xml file is missing.
-- Fixed a race condition when loading a library from an archive.
 
 ### Removed
 
 - Removed support for MS SQL versions below 2017.
 - Removed support for PostgreSQL versions below 14.
+
+## [11.2.0] - 2025-09-23
+
+### Added
+
+- Added analysis of functions returning the RECORD type.
+- Added OSGI manifest generation.
+
+### Fixed
+
+- Fixed messages with double quotes.
+- Fixed parser rule for floating point constants for MS SQL.
+
+## [11.1.0] - 2025-09-10
+
+### Added
+
+- Added connection test with databases.
+- Added new overloads of the diff method to PgCodeKeeperApi.
+
+### Changed
+
+- All localized messages have been brought into a unified style.
+- Lowered logging level in InsertWriter class.
+
+### Fixed
+
+- Fixed reading logic when xml file is missing.
+- Fixed a race condition when loading a library from an archive.
 
 ## [11.0.0] - 2025-08-20
 
@@ -2318,8 +2341,10 @@ We increment major version in this release due to decision to shift our developm
 
 - ORDER BY parsing has been added to the aggregate functions.
 
-[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v11.0.0...HEAD
-[11.0.0]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.14.2...v11.0.0
+[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.2.0...HEAD
+[11.2.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.1.0...v11.2.0
+[11.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.0.0...v11.1.0
+[11.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/releases/tag/v11.0.0
 [10.14.2]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.14.1...v10.14.2
 [10.14.1]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.14.0...v10.14.1
 [10.14.0]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.13.0...v10.14.0
