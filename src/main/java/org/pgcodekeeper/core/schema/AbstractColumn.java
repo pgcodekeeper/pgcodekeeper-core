@@ -33,7 +33,7 @@ public abstract class AbstractColumn extends PgStatement implements ISearchPath 
 
     protected String type;
     protected String collation;
-    protected boolean nullValue = true;
+    protected boolean notNull;
     protected String defaultValue;
 
     @Override
@@ -61,13 +61,13 @@ public abstract class AbstractColumn extends PgStatement implements ISearchPath 
      */
     public abstract String getFullDefinition();
 
-    public void setNullValue(final boolean nullValue) {
-        this.nullValue = nullValue;
+    public void setNotNull(final boolean notNull) {
+        this.notNull = notNull;
         resetHash();
     }
 
-    public boolean getNullValue() {
-        return nullValue;
+    public boolean isNotNull() {
+        return notNull;
     }
 
     public void setType(final String type) {
@@ -110,7 +110,7 @@ public abstract class AbstractColumn extends PgStatement implements ISearchPath 
         if (obj instanceof AbstractColumn col && super.compare(obj)) {
             return Objects.equals(type, col.type)
                     && Objects.equals(collation, col.collation)
-                    && nullValue == col.nullValue
+                    && notNull == col.notNull
                     && Objects.equals(defaultValue, col.defaultValue);
         }
 
@@ -121,7 +121,7 @@ public abstract class AbstractColumn extends PgStatement implements ISearchPath 
     public void computeHash(Hasher hasher) {
         hasher.put(type);
         hasher.put(collation);
-        hasher.put(nullValue);
+        hasher.put(notNull);
         hasher.put(defaultValue);
     }
 
@@ -131,7 +131,7 @@ public abstract class AbstractColumn extends PgStatement implements ISearchPath 
         copyBaseFields(colDst);
         colDst.setType(type);
         colDst.setCollation(collation);
-        colDst.setNullValue(nullValue);
+        colDst.setNotNull(notNull);
         colDst.setDefaultValue(defaultValue);
         return colDst;
     }

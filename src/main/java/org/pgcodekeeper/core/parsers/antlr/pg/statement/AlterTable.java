@@ -18,13 +18,13 @@ package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
+import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
-import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
-import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
+import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.pg.*;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -91,9 +91,14 @@ public final class AlterTable extends TableAbstract {
             tabl = (AbstractPgTable) getSafe(AbstractSchema::getTable, schema, nameCtx);
 
             if (tablAction.tabl_constraint != null) {
-                IdentifierContext conNameCtx = tablAction.tabl_constraint.identifier();
+                var tableConstraint = tablAction.tabl_constraint;
+                if (tableConstraint.constr_body().NULL() != null) {
+                    addNotNullTableConstraint(tableConstraint, tabl);
+                    return;
+                }
+                IdentifierContext conNameCtx = tableConstraint.identifier();
                 AbstractConstraint constr = parseAlterTableConstraint(tablAction,
-                        createTableConstraintBlank(tablAction.tabl_constraint),
+                        createTableConstraintBlank(tableConstraint),
                         getSchemaNameSafe(ids), nameCtx.getText(), fileName);
 
                 if (!constr.getName().isEmpty()) {
@@ -233,7 +238,7 @@ public final class AlterTable extends TableAbstract {
 
         // column not null constraint
         if (colAction.set != null) {
-            col.setNullValue(false);
+            col.setNotNull(true);
         }
 
         // column default

@@ -356,7 +356,7 @@ public final class InsertWriter {
                 continue;
             }
 
-            if (!col.getNullValue()) {
+            if (col.isNotNull()) {
                 notNullCols.add(colName);
             }
 

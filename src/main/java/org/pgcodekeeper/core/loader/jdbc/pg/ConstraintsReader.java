@@ -83,7 +83,7 @@ public final class ConstraintsReader extends JdbcReader {
                 constr = new PgConstraintExclude(constraintName);
                 break;
             default:
-                throw new IllegalArgumentException("Unsupportes constraint's type " + type);
+                throw new IllegalArgumentException("Unsupported constraint's type " + type);
         }
 
         if (params != null) {
@@ -136,7 +136,7 @@ public final class ConstraintsReader extends JdbcReader {
                 .join("LEFT JOIN pg_catalog.pg_tablespace ts ON ts.oid = ci.reltablespace")
                 .join("LEFT JOIN pg_catalog.pg_index idx ON idx.indexrelid = ci.oid")
                 .where("ccc.relkind IN ('r', 'p', 'f')")
-                .where("res.contype != 't'")
+                .where("res.contype NOT IN ('t', 'n')")
                 .where("res.coninhcount = 0");
 
         if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {

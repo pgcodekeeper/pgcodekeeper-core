@@ -2677,3 +2677,6 @@ alter table nv_parent add constraint c check(c1 > 0) no inherit not valid;
 ALTER TABLE test_gen_stored ADD COLUMN a int constraint generated_constraint GENERATED ALWAYS AS (func()) STORED;
 ALTER TABLE test_gen_virtual ADD COLUMN a int GENERATED ALWAYS AS (5) VIRTUAL;
 ALTER TABLE test_gen_implicit ADD COLUMN a int GENERATED ALWAYS AS (5);
+
+alter table nv_parent add NOT NULL c1;
+alter table nv_parent add constraint test_not_null NOT NULL c1 NO INHERIT;

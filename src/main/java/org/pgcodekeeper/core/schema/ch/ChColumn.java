@@ -77,7 +77,7 @@ public final class ChColumn extends AbstractColumn {
 
         if (type != null) {
             sb.append(' ').append(type);
-            if (!nullValue) {
+            if (notNull) {
                 sb.append(" NOT NULL");
             }
         }

@@ -97,7 +97,7 @@ public final class MsColumn extends AbstractColumn {
         }
 
         if (expression == null) {
-            sbDefinition.append(nullValue ? NULL : NOT_NULL);
+            sbDefinition.append(notNull ? NOT_NULL : NULL);
         }
 
         if (isIdentity) {
@@ -149,7 +149,7 @@ public final class MsColumn extends AbstractColumn {
             appendGenerated(sql);
         }
 
-        boolean isJoinNotNull = expression == null && defaultValue == null && !nullValue;
+        boolean isJoinNotNull = expression == null && defaultValue == null && notNull;
         if (isJoinNotNull) {
             sql.append(NOT_NULL);
         }
@@ -158,7 +158,7 @@ public final class MsColumn extends AbstractColumn {
 
         compareDefaults(null, null, defaultName, defaultValue, script);
 
-        if (!isJoinNotNull && expression == null && !nullValue) {
+        if (!isJoinNotNull && expression == null && notNull) {
             if (defaultValue != null) {
                 addUpdateStatement(script);
             }
@@ -289,19 +289,19 @@ public final class MsColumn extends AbstractColumn {
         if (newCollation != null) {
             sb.append(COLLATE).append(newCollation);
         }
-        if (nullValue == newColumn.nullValue) {
-            sb.append(newColumn.nullValue ? NULL : NOT_NULL);
+        if (notNull == newColumn.notNull) {
+            sb.append(newColumn.notNull ? NOT_NULL : NULL);
         }
         script.addStatement(sb);
         isNeedDepcies.set(true);
     }
 
     private void compareNullValues(MsColumn newColumn, AtomicBoolean isNeedDepcies, SQLScript script) {
-        if (newColumn.nullValue == nullValue) {
+        if (newColumn.notNull == notNull) {
             return;
         }
 
-        if (newColumn.defaultValue != null && nullValue) {
+        if (newColumn.defaultValue != null && !notNull) {
             addUpdateStatement(script);
         }
 
@@ -310,7 +310,7 @@ public final class MsColumn extends AbstractColumn {
         if (newColumn.collation != null) {
             sb.append(COLLATE).append(newColumn.collation);
         }
-        sb.append(newColumn.nullValue ? NULL : NOT_NULL);
+        sb.append(newColumn.notNull ? NOT_NULL : NULL);
         script.addStatement(sb);
         isNeedDepcies.set(true);
     }

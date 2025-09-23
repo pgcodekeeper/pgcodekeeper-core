@@ -18,6 +18,8 @@ package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.parsers.antlr.base.AntlrTask;
+import org.pgcodekeeper.core.parsers.antlr.base.AntlrTaskManager;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
@@ -28,6 +30,7 @@ import org.pgcodekeeper.core.schema.pg.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.List;
+import java.util.Queue;
 
 /**
  * Parser for PostgreSQL CREATE TABLE statements.
@@ -43,6 +46,7 @@ public final class CreateTable extends TableAbstract {
     private final String accessMethod;
     private final String oids;
     private final CommonTokenStream stream;
+    private final Queue<AntlrTask<?>> antlrTasks;
 
     /**
      * Constructs a new CreateTable parser.
@@ -56,13 +60,15 @@ public final class CreateTable extends TableAbstract {
      * @param settings     the ISettings object
      */
     public CreateTable(Create_table_statementContext ctx, PgDatabase db,
-                       String tablespace, String accessMethod, String oids, CommonTokenStream stream, ISettings settings) {
+                       String tablespace, String accessMethod, String oids,
+                       CommonTokenStream stream, ISettings settings, Queue<AntlrTask<?>> antlrTasks) {
         super(db, stream, settings);
         this.ctx = ctx;
         this.tablespace = tablespace;
         this.accessMethod = accessMethod;
         this.oids = oids;
         this.stream = stream;
+        this.antlrTasks = antlrTasks;
     }
 
     @Override
@@ -197,6 +203,16 @@ public final class CreateTable extends TableAbstract {
                 fillOptionParams(value, optionText, false, table::addOption);
             }
         }
+    }
+
+    @Override
+    protected void fillColNotNull(AbstractTable table, Constraint_commonContext tblConstrCtx, Schema_qualified_nameContext colNameCtx) {
+        AntlrTaskManager.submit(antlrTasks, () -> colNameCtx, colCtx -> {
+            var col = (PgColumn) getSafe(AbstractTable::getColumn, table, colNameCtx);
+            if (col != null) {
+                fillColNotNull(col, tblConstrCtx);
+            }
+        });
     }
 
     @Override
