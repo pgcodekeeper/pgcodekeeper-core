@@ -8,7 +8,7 @@
     <groupId>org.pgcodekeeper</groupId>
     <artifactId>pgcodekeeper-core</artifactId>
     <version>11.1.0</version>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
 
     <name>pgcodekeeper-core</name>
     <description>A tool for easier PostgreSQL, GreenPlum, MS SQL, ClickHouse development.</description>
@@ -183,6 +183,31 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>5.1.8</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Export-Package>
+                            !org.pgcodekeeper.core.localizations.*,
+                            org.pgcodekeeper.core.*
+                        </Export-Package>
+                    <Import-Package>
+                        org.slf4j.*;resolution:=optional,
+                    </Import-Package>
+                    <Require-Bundle>
+                        wrapped.com.github.technology16.pgpass;bundle-version="[2.0.1,3.0.0)",
+                        org.postgresql.jdbc;bundle-version="[42.7.3,43.0.0)",
+                        com.microsoft.sqlserver.mssql-jdbc;bundle-version="[12.4.2,13.0.0)",
+                        org.antlr.antlr4-runtime;bundle-version="[4.13.1,5.0.0)",
+                        org.jgrapht.core;bundle-version="[1.5.1,2.0.0)",
+                        lz4-java;bundle-version="[1.8.0,2.0.0)"
+                    </Require-Bundle>
+                    </instructions>
+                </configuration>
             </plugin>
         </plugins>
     </build>
