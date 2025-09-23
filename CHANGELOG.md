@@ -9,10 +9,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [11.2.0] - 2025-09-23
+
+### Added
+
 - Added analysis of functions returning the RECORD type.
 - Added OSGI manifest generation.
-
-### Changed
 
 ### Fixed
 
@@ -2328,7 +2334,8 @@ We increment major version in this release due to decision to shift our developm
 
 - ORDER BY parsing has been added to the aggregate functions.
 
-[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.1.0...HEAD
+[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.2.0...HEAD
+[11.2.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.1.0...v11.2.0
 [11.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.0.0...v11.1.0
 [11.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/releases/tag/v11.0.0
 [10.14.2]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.14.1...v10.14.2

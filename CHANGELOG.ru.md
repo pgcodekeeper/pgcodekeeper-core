@@ -9,10 +9,16 @@
 
 ### Добавлено
 
+### Изменено
+
+### Исправлено
+
+## [11.2.0] - 2025-09-23
+
+### Добавлено
+
 - Добавлен анализ функций, возвращающих тип RECORD.
 - Добавлена генерация OSGI манифеста.
-
-### Изменено
 
 ### Исправлено
 
@@ -2329,7 +2335,8 @@
 
 - Добавлен парсинг ORDER BY для агрегатных функции.
 
-[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.1.0...HEAD
+[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.2.0...HEAD
+[11.2.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.1.0...v11.2.0
 [11.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.0.0...v11.1.0
 [11.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/releases/tag/v11.0.0
 [10.14.2]: https://github.com/pgcodekeeper/pgcodekeeper/compare/v10.14.1...v10.14.2
