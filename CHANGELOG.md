@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Added analysis of functions returning the RECORD type.
+- Added OSGI manifest generation.
 
 ### Changed
 
