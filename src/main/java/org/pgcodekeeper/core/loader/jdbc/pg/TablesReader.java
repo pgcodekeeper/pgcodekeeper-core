@@ -224,6 +224,12 @@ public final class TablesReader extends JdbcReader {
         String[] colDefaults = getColArray(res, "col_defaults");
         String[] colComments = getColArray(res, "col_comments");
         Boolean[] colNotNull = getColArray(res, "col_notnull");
+        String[] colNotNullConName = null;
+        Boolean[] colNotNullNoInherit = null;
+        if (SupportedPgVersion.VERSION_18.isLE(loader.getVersion())) {
+            colNotNullConName = getColArray(res, "col_notnull_con_name");
+            colNotNullNoInherit = getColArray(res, "col_notnull_no_inherit");
+        }
 
         Integer[] colStatictics;
         if (SupportedPgVersion.VERSION_16.isLE(loader.getVersion())) {
@@ -329,7 +335,11 @@ public final class TablesReader extends JdbcReader {
             }
 
             if (colNotNull[i]) {
-                column.setNullValue(false);
+                column.setNotNull(true);
+                if (SupportedPgVersion.VERSION_18.isLE(loader.getVersion())) {
+                    column.setNotNullNoInherit(colNotNullNoInherit[i]);
+                    column.setNotNullConName(colNotNullConName[i]);
+                }
             }
 
             int statistics = colStatictics[i];
@@ -367,14 +377,14 @@ public final class TablesReader extends JdbcReader {
                 loader.setPrivileges(column, t, columnPrivileges, schema.getName());
             }
 
-            if (ofTypeOid != 0 && column.getNullValue()
+            if (ofTypeOid != 0 && !column.isNotNull()
                     && column.getDefaultValue() == null) {
                 column.setInherit(true);
             }
 
             if (ofTypeOid != 0 || column.isInherit()) {
                 boolean isNotDumpable = column.getDefaultValue() == null
-                        && column.getNullValue()
+                        && !column.isNotNull()
                         && column.getStatistics() == null
                         && column.getCollation() == null
                         && column.getComment() == null
@@ -602,6 +612,15 @@ public final class TablesReader extends JdbcReader {
         if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
             builder.column("columns.col_compression");
             subQueryBuilder.column("pg_catalog.array_agg(a.attcompression ORDER BY a.attnum) AS col_compression");
+        }
+
+        if (SupportedPgVersion.VERSION_18.isLE(loader.getVersion())) {
+            builder.column("columns.col_notnull_no_inherit");
+            builder.column("columns.col_notnull_con_name");
+            subQueryBuilder
+                    .column("pg_catalog.array_agg(con.conname ORDER BY a.attnum) AS col_notnull_con_name")
+                    .column("pg_catalog.array_agg(con.connoinherit ORDER BY a.attnum) AS col_notnull_no_inherit")
+                    .join("LEFT JOIN pg_catalog.pg_constraint con ON con.contype = 'n' AND con.conkey[1] = a.attnum AND con.conrelid = a.attrelid");
         }
 
         if (loader.isGreenplumDb()) {

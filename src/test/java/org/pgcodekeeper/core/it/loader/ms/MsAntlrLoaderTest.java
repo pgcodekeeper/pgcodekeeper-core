@@ -107,7 +107,7 @@ class MsAntlrLoaderTest {
 
         MsColumn col = new MsColumn("fax_box_id");
         col.setType(INT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("name");
@@ -128,7 +128,7 @@ class MsAntlrLoaderTest {
 
         col = new MsColumn("fax_id");
         col.setType(INT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("fax_box_id");
@@ -192,7 +192,7 @@ class MsAntlrLoaderTest {
 
         col = new MsColumn("id");
         col.setType(INT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         constraintFk = new MsConstraintFk("FK_extensions_fax_box_id");
@@ -210,7 +210,7 @@ class MsAntlrLoaderTest {
 
         col = new MsColumn("id");
         col.setType(INT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         constraintFk = new MsConstraintFk("FK_table1_fax_box_id");
@@ -274,7 +274,7 @@ class MsAntlrLoaderTest {
 
         MsColumn col = new MsColumn("aid");
         col.setType(INT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         col.setDefaultName("DF_admins_aid");
         col.setDefaultValue("(NEXT VALUE FOR [dbo].[admins_aid_seq])");
         table.addColumn(col);
@@ -289,31 +289,31 @@ class MsAntlrLoaderTest {
         col.setType(INT);
         col.setDefaultName("DF_admins_companyid");
         col.setDefaultValue("0");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("groupid");
         col.setType(INT);
         col.setDefaultName("DF_admins_groupid");
         col.setDefaultValue("0");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("username");
         col.setType("[nvarchar](max)");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("password");
         col.setType(NVARCHAR_40);
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("superuser");
         col.setType(BIT);
         col.setDefaultName("DF_admins_superuser");
         col.setDefaultValue("0");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("name");
@@ -326,7 +326,7 @@ class MsAntlrLoaderTest {
 
         col = new MsColumn("email");
         col.setType("[nvarchar](100)");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("tel");
@@ -341,14 +341,14 @@ class MsAntlrLoaderTest {
         col.setType(BIT);
         col.setDefaultName("DF_admins_enabled");
         col.setDefaultValue("1");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("lastlogints");
         col.setType("[datetimeoffset]");
         col.setDefaultName("DF_admins_lastlogints");
         col.setDefaultValue("(getdate())");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("expirienced");
@@ -378,7 +378,7 @@ class MsAntlrLoaderTest {
 
         MsColumn col = new MsColumn("id");
         col.setType(BIGINT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         col.setDefaultName("DF_call_logs_id");
         col.setDefaultValue("(NEXT VALUE FOR [dbo].[call_logs_id_seq])");
         table.addColumn(col);
@@ -397,12 +397,12 @@ class MsAntlrLoaderTest {
 
         MsColumn col = new MsColumn("id");
         col.setType(INT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("entityId");
         col.setType(INT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         MsFunction func = new MsFunction("gtsq_in");
@@ -593,14 +593,14 @@ class MsAntlrLoaderTest {
 
         MsColumn col = new MsColumn("id");
         col.setType(BIGINT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         col.setDefaultName("DF_user_data_id");
         col.setDefaultValue("(NEXT VALUE FOR [dbo].[user_id_seq])");
         table.addColumn(col);
 
         col = new MsColumn("email");
         col.setType("[nvarchar](128)");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("created");
@@ -707,7 +707,7 @@ class MsAntlrLoaderTest {
 
         MsColumn col = new MsColumn("id");
         col.setType(BIGINT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         MsConstraintPk constriaintPk = new MsConstraintPk("PK_acl_role", true);
@@ -724,55 +724,55 @@ class MsAntlrLoaderTest {
 
         col = new MsColumn("id");
         col.setType(BIGINT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("email");
         col.setType("[nvarchar](255)");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("name");
         col.setType("[nvarchar](255)");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("password");
         col.setType(NVARCHAR_40);
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("is_active");
         col.setType(BIT);
         col.setDefaultName("DF_admin_is_active");
         col.setDefaultValue("0");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("updated");
         col.setType(DATETIME);
         col.setDefaultName("DF_admin_updated");
         col.setDefaultValue("(getdate())");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("created");
         col.setType(DATETIME);
         col.setDefaultName("DF_admin_created");
         col.setDefaultValue("(getdate())");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("role_id");
         col.setType(BIGINT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new MsColumn("last_visit");
         col.setType(DATETIME);
         col.setDefaultName("DF_admin_last_visit");
         col.setDefaultValue("(getdate())");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         MsIndex idx = new MsIndex("IX_user_role_id");
@@ -826,7 +826,7 @@ class MsAntlrLoaderTest {
 
         MsColumn col = new MsColumn("ID");
         col.setType(INT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         col.setIdentity("1", "1");
         table.addColumn(col);
 
@@ -980,14 +980,14 @@ class MsAntlrLoaderTest {
 
         MsColumn col = new MsColumn("id");
         col.setType(INT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         col.setDefaultName("DF_test_id");
         col.setDefaultValue("(NEXT VALUE FOR [dbo].[test_id_seq])");
         table.addColumn(col);
 
         col = new MsColumn("text");
         col.setType("[nvarchar](20)");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         var constraintCheck = new MsConstraintCheck("text_check");

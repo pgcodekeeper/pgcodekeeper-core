@@ -60,7 +60,7 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
         Data_type_exprContext typeExpr = column.data_type_expr();
         if (typeExpr.data_type() != null) {
             col.setType(getFullCtxText(typeExpr.data_type()));
-            col.setNullValue(!isColumnNotNullable(typeExpr));
+            col.setNotNull(isColumnNotNullable(typeExpr));
 
             var defType = typeExpr.table_column_property_expr();
             if (defType != null) {
@@ -79,7 +79,7 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
             }
         }
         if (column.not_null() != null) {
-            col.setNullValue(column.not_null().NOT() != null);
+            col.setNotNull(column.not_null().NOT() != null);
         }
         if (column.comment_expr() != null) {
             col.setComment(column.comment_expr().STRING_LITERAL().getText());

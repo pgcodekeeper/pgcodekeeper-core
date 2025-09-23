@@ -71,10 +71,43 @@ public abstract class TableAbstract extends PgParserAbstract {
 
     protected void addTableConstraint(Constraint_commonContext tblConstrCtx,
                                       AbstractTable table, String schemaName, String tablespace) {
+        if (tblConstrCtx.constr_body().NULL() != null) {
+            addNotNullTableConstraint(tblConstrCtx, table);
+            return;
+        }
         PgConstraint constrBlank = createTableConstraintBlank(tblConstrCtx);
         processTableConstraintBlank(tblConstrCtx, constrBlank, schemaName,
                 table.getName(), tablespace, fileName);
         doSafe(AbstractTable::addConstraint, table, constrBlank);
+    }
+
+    protected void addNotNullTableConstraint(Constraint_commonContext tblConstrCtx, AbstractTable table) {
+        var body = tblConstrCtx.constr_body();
+        if (body.NOT() != null) {
+            var colNameCtx = body.col_name;
+            fillColNotNull(table, tblConstrCtx, colNameCtx);
+        } else {
+            throw new IllegalArgumentException("Unsupported constraint's type");
+        }
+    }
+
+    protected void fillColNotNull(AbstractTable table, Constraint_commonContext tblConstrCtx,
+                                  Schema_qualified_nameContext colNameCtx) {
+        var col = (PgColumn) getSafe(AbstractTable::getColumn, table, colNameCtx);
+        if (col != null) {
+            fillColNotNull(col, tblConstrCtx);
+        }
+    }
+
+    protected static void fillColNotNull(PgColumn col, Constraint_commonContext constraint) {
+        var body = constraint.constr_body();
+        var constraintName = constraint.identifier();
+
+        col.setNotNull(body.NOT() != null);
+        if (constraintName != null) {
+            col.setNotNullConName(constraintName.getText());
+        }
+        col.setNotNullNoInherit(body.inherit_option() != null);
     }
 
     private void addTableConstraint(Constraint_commonContext ctx, PgColumn col,
@@ -88,7 +121,7 @@ public abstract class TableAbstract extends PgParserAbstract {
             col.setDefaultValue(getExpressionText(def, stream));
             db.addAnalysisLauncher(new VexAnalysisLauncher(col, def, fileName));
         } else if (body.NULL() != null) {
-            col.setNullValue(body.NOT() == null);
+            fillColNotNull(col, ctx);
         } else if (body.REFERENCES() != null) {
             IdentifierContext id = ctx.identifier();
             String constrName = id == null ? table.getName() + '_' + colName + "_fkey" : id.getText();
@@ -252,7 +285,7 @@ public abstract class TableAbstract extends PgParserAbstract {
             return new PgConstraintCheck(constrName);
         }
 
-        throw new IllegalArgumentException("Unsupportes constraint's type");
+        throw new IllegalArgumentException("Unsupported constraint's type");
     }
 
     protected void processTableConstraintBlank(Constraint_commonContext ctx,
@@ -378,7 +411,7 @@ public abstract class TableAbstract extends PgParserAbstract {
                               String schemaName, String tableName) {
         if (body.PRIMARY() != null) {
             if (col != null) {
-                col.setNullValue(false);
+                col.setNotNull(true);
             }
         } else {
             Nulls_distinctionContext dist = body.nulls_distinction();
@@ -411,7 +444,7 @@ public abstract class TableAbstract extends PgParserAbstract {
                 getFullCtxText(constrBody.expression) +
                 (isNeedParens ? ")" : "");
         constrCheck.setExpression(expr);
-        constrCheck.setInherit(constrBody.INHERIT() == null);
+        constrCheck.setInherit(constrBody.inherit_option() == null);
     }
 
     private void fillConstrExcl(PgConstraintExclude constrExcl, Constr_bodyContext body, String schemaName,

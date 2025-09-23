@@ -467,14 +467,13 @@ table_action
     | SET storage_parameters
     | RESET names_in_parens
     | define_foreign_options
-    | INHERIT parent_table=schema_qualified_name
-    | NO INHERIT parent_table=schema_qualified_name
+    | inherit_option parent_table=schema_qualified_name
     | OF type_name=schema_qualified_name
     | NOT OF
     | owner_to
     | set_tablespace
     | REPLICA IDENTITY (DEFAULT | FULL | NOTHING | USING INDEX identifier)
-    | ALTER CONSTRAINT identifier table_deferrable? table_initialy_immed?
+    | ALTER CONSTRAINT identifier table_deferrable? table_initialy_immed? inherit_option?
     ;
 
 column_action
@@ -1947,8 +1946,8 @@ constr_body
             index_parameters (where=WHERE exp=vex)?
     | (FOREIGN KEY col_period=names_with_period)? REFERENCES schema_qualified_name ref_period=names_with_period?
         (MATCH (FULL | PARTIAL | SIMPLE))? changed_action*
-    | CHECK LEFT_PAREN expression=vex RIGHT_PAREN (NO INHERIT)?
-    | NOT? NULL
+    | CHECK LEFT_PAREN expression=vex RIGHT_PAREN inherit_option?
+    | NOT? NULL col_name=schema_qualified_name? inherit_option?
     | UNIQUE nulls_distinction? col_overlaps=names_without_overlaps? index_parameters
     | PRIMARY KEY col_overlaps=names_without_overlaps? index_parameters
     | DEFAULT default_expr=vex
@@ -1974,6 +1973,10 @@ name_with_period
     : PERIOD schema_qualified_name
     ;
 
+inherit_option
+    : NO? INHERIT
+    ;
+    
 all_op
     : op
     | EQUAL | NOT_EQUAL | LTH | LEQ | GTH | GEQ

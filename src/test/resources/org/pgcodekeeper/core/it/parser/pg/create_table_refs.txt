@@ -426,3 +426,4 @@ Reference: Object = nv_parent (TABLE), action = CREATE, offset = 52159, line num
 Reference: Object = test_gen_stored (TABLE), action = CREATE, offset = 52229, line number = 1430, charPositionInLine = 13
 Reference: Object = test_gen_virtual (TABLE), action = CREATE, offset = 52298, line number = 1431, charPositionInLine = 13
 Reference: Object = test_gen_implicit (TABLE), action = CREATE, offset = 52374, line number = 1432, charPositionInLine = 13
+Reference: Object = test_not_null (TABLE), action = CREATE, offset = 52444, line number = 1434, charPositionInLine = 13

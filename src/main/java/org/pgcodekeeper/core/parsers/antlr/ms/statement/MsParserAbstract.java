@@ -242,7 +242,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
         } else if (option.MASKED() != null) {
             col.setMaskingFunction(option.STRING().getText());
         } else if (option.NULL() != null) {
-            col.setNullValue(option.NOT() == null);
+            col.setNotNull(option.NOT() != null);
         } else if (option.column_constraint_body() != null) {
             fillColumnConstraint(option, col, stmt);
         } else if (option.INDEX() != null) {

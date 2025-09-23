@@ -18,15 +18,15 @@ package org.pgcodekeeper.core.parsers.antlr.pg;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.loader.ParserListenerMode;
-import org.pgcodekeeper.core.parsers.antlr.base.CustomParserListener;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrTask;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
+import org.pgcodekeeper.core.loader.ParserListenerMode;
+import org.pgcodekeeper.core.monitor.IMonitor;
+import org.pgcodekeeper.core.parsers.antlr.base.AntlrTask;
+import org.pgcodekeeper.core.parsers.antlr.base.CustomParserListener;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.*;
 import org.pgcodekeeper.core.schema.pg.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.monitor.IMonitor;
 
 import java.util.List;
 import java.util.Locale;
@@ -109,7 +109,8 @@ public final class CustomSQLParserListener extends CustomParserListener<PgDataba
     private void create(Schema_createContext ctx, CommonTokenStream stream) {
         PgParserAbstract p;
         if (ctx.create_table_statement() != null) {
-            p = new CreateTable(ctx.create_table_statement(), db, tablespace, accessMethod, oids, stream, settings);
+            p = new CreateTable(ctx.create_table_statement(), db, tablespace, accessMethod, oids, stream, settings,
+                    antlrTasks);
         } else if (ctx.create_foreign_table_statement() != null) {
             p = new CreateForeignTable(ctx.create_foreign_table_statement(), db, stream, settings);
         } else if (ctx.create_table_external_statement() != null) {

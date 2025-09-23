@@ -167,7 +167,9 @@ public class MsTablesReader extends JdbcReader {
 
             column.setType(JdbcLoaderBase.getMsType(column, col.getString("st"), col.getString("type"),
                     isUserDefined, col.getInt("size"), col.getInt("pr"), col.getInt("sc")));
-            column.setNullValue(col.getBoolean("nl"));
+            if (!col.getBoolean("nl")) {
+                column.setNotNull(true);
+            }
         } else {
             column.setExpression(exp);
             loader.submitMsAntlrTask(exp, p -> p.expression_eof().expression().get(0),

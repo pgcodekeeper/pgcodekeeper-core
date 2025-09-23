@@ -428,7 +428,7 @@ public abstract class AbstractPgTable extends AbstractTable {
     }
 
     private void fillInheritOptions(AbstractColumn column, SQLScript script) {
-        if (!column.getNullValue()) {
+        if (column.isNotNull()) {
             script.addStatement(getAlterColumn(column) + " SET NOT NULL");
         }
         if (column.getDefaultValue() != null) {
