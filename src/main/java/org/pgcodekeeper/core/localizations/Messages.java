@@ -87,6 +87,8 @@ public final class Messages {
 
     public static String DbObjType_unsupported_type;
 
+    public static String JdbcLoaderBase_unsupported_ms_sql_version;
+
     public static String DepcyGraph_log_col_is_missed;
 
     public static String DepcyGraph_log_no_such_table;
@@ -152,6 +154,10 @@ public final class Messages {
     public static String JdbcLoaderBase_log_reading_ms_version;
 
     public static String JdbcLoaderBase_log_reading_pg_version;
+
+    public static String JdbcLoaderBase_unsupported_pg_version;
+
+    public static String JdbcLoaderBase_unsupported_gp_version;
 
     public static String JdbcLoaderBase_log_waiting_antlr_tasks;
 

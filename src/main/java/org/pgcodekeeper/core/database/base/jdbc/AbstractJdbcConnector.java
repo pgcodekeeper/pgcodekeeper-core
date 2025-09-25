@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.loader;
+package org.pgcodekeeper.core.database.base.jdbc;
 
-import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -28,27 +25,9 @@ import java.util.Properties;
 
 /**
  * Abstract base class for JDBC database connectors.
- * Provides common functionality for establishing database connections across different database types
- * including PostgreSQL, Microsoft SQL Server, and ClickHouse.
+ * Provides common functionality for establishing database connections.
  */
 public abstract class AbstractJdbcConnector {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractJdbcConnector.class);
-
-    private static final String PG_DRIVER_NAME = "org.postgresql.Driver";
-    private static final String MS_DRIVER_NAME = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-    private static final String CH_DRIVER_NAME = "com.clickhouse.jdbc.ClickHouseDriver";
-
-    protected static final String URL_START_MS = "jdbc:sqlserver:";
-    protected static final String URL_START_PG = "jdbc:postgresql:";
-    protected static final String URL_START_CH = "jdbc:clickhouse:";
-    protected static final String URL_START_CH_SHORT = "jdbc:ch:";
-
-    protected DatabaseType dbType;
-
-    protected AbstractJdbcConnector(DatabaseType dbType) {
-        this.dbType = dbType;
-    }
 
     /**
      * Creates a new database connection using the parameters specified in the constructor.
@@ -59,37 +38,47 @@ public abstract class AbstractJdbcConnector {
      */
     public Connection getConnection() throws IOException {
         try {
-            Class.forName(getDriverName());
+            loadDriver();
             return DriverManager.getConnection(getUrl(), makeProperties());
         } catch (SQLException | ClassNotFoundException e) {
             throw new IOException(e.getLocalizedMessage(), e);
         }
     }
 
+    /**
+     * Loads driver classes
+     *
+     * @throws ClassNotFoundException if driver classes are not found in classpath
+     */
+    protected void loadDriver() throws ClassNotFoundException {
+        Class.forName(getDriverName());
+    }
+
+    /**
+     * @return full connection string
+     */
     protected abstract String getUrl();
 
+    /**
+     * @return connection properties
+     */
     protected Properties makeProperties() {
         Properties props = new Properties();
-        var coreVer = Utils.getVersion();
-        props.setProperty("ApplicationName", "pgCodeKeeper, version: " + coreVer);
+        props.setProperty("ApplicationName", "pgCodeKeeper, version: " + Utils.getVersion());
         return props;
     }
 
-    protected String getDriverName() {
-        return switch (dbType) {
-            case PG -> PG_DRIVER_NAME;
-            case MS -> MS_DRIVER_NAME;
-            case CH -> CH_DRIVER_NAME;
-        };
-    }
+    /**
+     * @return driver name
+     */
+    protected abstract String getDriverName();
 
-    public DatabaseType getType() {
-        return dbType;
-    }
-
-    protected void log(String message) {
-        if (message != null) {
-            LOG.info(message);
-        }
+    /**
+     * Returns batch delimiter. If the value is null, each statement will be executed separately in autocommit mode.
+     *
+     * @return batch delimiter
+     */
+    public String getBatchDelimiter() {
+        return null;
     }
 }

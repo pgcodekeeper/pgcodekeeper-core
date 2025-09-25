@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.loader.pg;
 
 import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.loader.AbstractJdbcConnector;
+import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
 import org.pgcodekeeper.core.loader.JdbcQueries;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
@@ -101,6 +101,7 @@ public final class JdbcSystemLoader extends JdbcLoaderBase {
             getRunner().run(statement, "SET search_path TO pg_catalog;");
             getRunner().run(statement, "SET timezone = " + PgDiffUtils.quoteString(timezone));
 
+            queryCheckGreenplumDb();
             queryCheckPgVersion();
             queryCheckLastSysOid();
             queryTypesForCache();

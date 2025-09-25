@@ -16,6 +16,8 @@
 package org.pgcodekeeper.core.loader;
 
 import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
 import org.pgcodekeeper.core.loader.ch.JdbcChLoader;
 import org.pgcodekeeper.core.loader.ms.JdbcMsLoader;
 import org.pgcodekeeper.core.loader.pg.JdbcPgLoader;
@@ -54,7 +56,7 @@ public final class LoaderFactory {
     public static DatabaseLoader createJdbcLoader(ISettings settings, String url,
                                                   IgnoreSchemaList ignoreSchemaList, IMonitor monitor) {
         String timezone = settings.getTimeZone() == null ? Consts.UTC : settings.getTimeZone();
-        return createJdbcLoader(settings, timezone, new UrlJdbcConnector(url), monitor,
+        return createJdbcLoader(settings, timezone, Utils.getJdbcConnectorByType(settings.getDbType(), url), monitor,
                 ignoreSchemaList);
     }
 

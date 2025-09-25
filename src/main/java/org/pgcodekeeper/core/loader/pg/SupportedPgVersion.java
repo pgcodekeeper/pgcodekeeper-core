@@ -16,21 +16,17 @@
 package org.pgcodekeeper.core.loader.pg;
 
 /**
- * Enumeration of supported PostgreSQL versions.
+ * Enumeration of supported PostgreSQL and Greenplum versions.
  * Provides version comparison and lookup functionality for database compatibility checking.
  */
 public enum SupportedPgVersion {
-    VERSION_9_4(90400, "9.4"),
-    VERSION_9_5(90500, "9.5"),
-    VERSION_9_6(90600, "9.6"),
-    VERSION_10(100000, "10.0"),
-    VERSION_11(110000, "11.0"),
-    VERSION_12(120000, "12.0"),
-    VERSION_13(130000, "13.0"),
+    GP_VERSION_6(90400, "9.4"),
+    GP_VERSION_7(120012, "12.12"),
     VERSION_14(140000, "14.0"),
     VERSION_15(150000, "15.0"),
     VERSION_16(160000, "16.0"),
-    VERSION_17(170000, "17.0");
+    VERSION_17(170000, "17.0"),
+    VERSION_18(180000, "18.0");
 
     private final int version;
     private final String text;
@@ -81,6 +77,6 @@ public enum SupportedPgVersion {
             }
         }
 
-        return SupportedPgVersion.VERSION_9_4;
+        return SupportedPgVersion.GP_VERSION_6;
     }
 }

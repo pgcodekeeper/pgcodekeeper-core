@@ -69,7 +69,7 @@ public final class ViewsReader extends JdbcReader {
             if (tableSpace != null && !tableSpace.isEmpty()) {
                 matV.setTablespace(tableSpace);
             }
-            if (SupportedPgVersion.VERSION_12.isLE(loader.getVersion())) {
+            if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
                 matV.setMethod(res.getString("access_method"));
             }
             if (loader.isGreenplumDb()) {

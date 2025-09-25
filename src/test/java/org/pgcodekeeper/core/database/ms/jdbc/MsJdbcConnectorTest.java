@@ -13,45 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.loader;
+package org.pgcodekeeper.core.database.ms.jdbc;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.pgcodekeeper.core.loader.TestContainer;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
-class JdbcUrlConnectorTest {
+class MsJdbcConnectorTest {
 
     @Test
-    void failedConnectionTest() {
-        var connector = new UrlJdbcConnector("jdbc:postgresql://localhost:5432/broken");
-        Assertions.assertThrows(IOException.class, connector::getConnection);
-    }
-
-    @Test
-    void pgConnectionTest() {
-        var connector = new UrlJdbcConnector(TestContainer.PG_URL);
-        Assertions.assertDoesNotThrow(() -> testConnector(connector));
-    }
-
-    @Test
-    void msConnectionTest() {
-        var connector = new UrlJdbcConnector(TestContainer.MS_URL);
-        Assertions.assertDoesNotThrow(() -> testConnector(connector));
-    }
-
-    @Test
-    void chConnectionTest() {
-        var connector = new UrlJdbcConnector(TestContainer.CH_URL);
-        Assertions.assertDoesNotThrow(() -> testConnector(connector));
-    }
-
-    void testConnector(AbstractJdbcConnector connector) throws IOException, SQLException {
+    void msConnectionTest() throws IOException, SQLException {
+        var connector = new MsJdbcConnector(TestContainer.MS_URL);
         try (var connection = connector.getConnection();
              var statement = connection.createStatement();
-             var rs = statement.executeQuery("SELECT 1")) {
+             var rs = statement.executeQuery("SELECT TOP 1 1")) {
             Assertions.assertTrue(rs.next());
         }
+    }
+
+    @Test
+    void wrongUrlConnectionTest() {
+        var connector = new MsJdbcConnector("jdbc:postgresql://localhost:5432/broken");
+        Assertions.assertThrows(IOException.class, connector::getConnection);
     }
 }

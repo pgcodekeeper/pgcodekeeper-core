@@ -9,9 +9,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Added support for PostgreSQL 18.
+
 ### Changed
 
 ### Fixed
+
+### Removed
+
+- Removed support for MS SQL versions below 2017.
+- Removed support for PostgreSQL versions below 14.
 
 ## [11.2.0] - 2025-09-23
 
@@ -51,7 +58,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Fixed parser rule for PostgreSQL.
-- Fixed code generation error when changing views in MS SQL
+- Fixed code generation error when changing views in MS SQL.
 - Fixed bug with ignoring column order in PostgreSQL and MS SQL constraints.
 - Fixed a bug with the settings when saving objects to a project.
 - Fixed false differences when ignoring table column order.

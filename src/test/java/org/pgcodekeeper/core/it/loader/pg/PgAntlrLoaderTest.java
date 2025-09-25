@@ -101,7 +101,7 @@ class PgAntlrLoaderTest {
 
         AbstractColumn col = new PgColumn("fax_box_id");
         col.setType("serial");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("name");
@@ -120,7 +120,7 @@ class PgAntlrLoaderTest {
 
         col = new PgColumn("fax_id");
         col.setType("serial");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("fax_box_id");
@@ -180,7 +180,7 @@ class PgAntlrLoaderTest {
 
         col = new PgColumn("id");
         col.setType("serial");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         constraintFk = new PgConstraintFk("extensions_fax_box_id_fkey");
@@ -247,35 +247,35 @@ class PgAntlrLoaderTest {
         AbstractColumn col = new PgColumn("aid");
         col.setType(INTEGER);
         col.setDefaultValue("nextval('\"admins_aid_seq\"'::regclass)");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("companyid");
         col.setType(INTEGER);
         col.setDefaultValue("0");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("groupid");
         col.setType(INTEGER);
         col.setDefaultValue("0");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("username");
         col.setType("character varying");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("password");
         col.setType(CHARACTER_VARYING_40);
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("superuser");
         col.setType(BOOLEAN);
         col.setDefaultValue("'f'::bool");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("name");
@@ -288,7 +288,7 @@ class PgAntlrLoaderTest {
 
         col = new PgColumn("email");
         col.setType("character varying(100)");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("tel");
@@ -302,13 +302,13 @@ class PgAntlrLoaderTest {
         col = new PgColumn("enabled");
         col.setType(BOOLEAN);
         col.setDefaultValue("'t'::bool");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("lastlogints");
         col.setType("timestamp with time zone");
         col.setDefaultValue("now()");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("expirienced");
@@ -333,7 +333,7 @@ class PgAntlrLoaderTest {
 
         AbstractColumn col = new PgColumn("id");
         col.setType(BIGINT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         col.setDefaultValue("nextval('public.call_logs_id_seq'::regclass)");
         table.addColumn(col);
 
@@ -546,13 +546,13 @@ class PgAntlrLoaderTest {
 
         AbstractColumn col = new PgColumn("id");
         col.setType(BIGINT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         col.setDefaultValue("nextval('public.user_id_seq'::regclass)");
         table.addColumn(col);
 
         col = new PgColumn("email");
         col.setType("character varying(128)");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("created");
@@ -629,7 +629,7 @@ class PgAntlrLoaderTest {
 
         AbstractColumn col = new PgColumn("id");
         col.setType(BIGINT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         var constraintPK = new PgConstraintPk("acl_role_pkey", true);
@@ -643,51 +643,51 @@ class PgAntlrLoaderTest {
 
         col = new PgColumn("id");
         col.setType(BIGINT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("email");
         col.setType("character varying(255)");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("name");
         col.setType("character varying(255)");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("password");
         col.setType(CHARACTER_VARYING_40);
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("is_active");
         col.setType(BOOLEAN);
         col.setDefaultValue("false");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("updated");
         col.setType("timestamp without time zone");
         col.setDefaultValue("now()");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("created");
         col.setType("timestamp without time zone");
         col.setDefaultValue("now()");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("role_id");
         col.setType(BIGINT);
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         col = new PgColumn("last_visit");
         col.setType("timestamp without time zone");
         col.setDefaultValue("now()");
-        col.setNullValue(false);
+        col.setNotNull(true);
         table.addColumn(col);
 
         PgIndex idx = new PgIndex("fki_user_role_id_fkey");
@@ -789,14 +789,14 @@ class PgAntlrLoaderTest {
 
         AbstractColumn col = new PgColumn("id");
         col.setType(INTEGER);
-        col.setNullValue(false);
+        col.setNotNull(true);
         col.setComment("'id column'");
         col.setDefaultValue("nextval('public.test_id_seq'::regclass)");
         table.addColumn(col);
 
         col = new PgColumn("text");
         col.setType("character varying(20)");
-        col.setNullValue(false);
+        col.setNotNull(true);
         col.setComment("'text column'");
         table.addColumn(col);
 

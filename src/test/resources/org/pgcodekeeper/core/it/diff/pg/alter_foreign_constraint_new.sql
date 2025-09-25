@@ -12,17 +12,17 @@ CREATE TABLE public.t3 (
 
 ALTER TABLE public.t3
     ADD CONSTRAINT t3_fk_1 FOREIGN KEY (id) REFERENCES public.t1 DEFERRABLE INITIALLY DEFERRED;
-    
+
 CREATE TABLE public.t4 (
     id bigint REFERENCES public.t1(id) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE public.t5 (
-    id bigint REFERENCES public.t1(id) DEFERRABLE
+    id bigint REFERENCES public.t1(id) DEFERRABLE NOT ENFORCED
 );
 
 CREATE TABLE public.t6 (
-    id bigint REFERENCES public.t1(id) DEFERRABLE INITIALLY DEFERRED
+    id bigint REFERENCES public.t1(id) DEFERRABLE INITIALLY DEFERRED ENFORCED
 );
 
 COMMENT ON CONSTRAINT t6_id_fkey ON public.t6 IS 'test';

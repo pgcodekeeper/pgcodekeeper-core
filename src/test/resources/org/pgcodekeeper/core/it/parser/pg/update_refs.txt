@@ -278,3 +278,5 @@ Reference: Object = f (TABLE), action = UPDATE, offset = 23399, line number = 58
 Reference: Object = f (TABLE), action = UPDATE, offset = 23491, line number = 582, charPositionInLine = 7
 Reference: Object = f (TABLE), action = UPDATE, offset = 23605, line number = 583, charPositionInLine = 7
 Reference: Object = f (TABLE), action = UPDATE, offset = 23672, line number = 584, charPositionInLine = 7
+Reference: Object = weather (TABLE), action = UPDATE, offset = 23733, line number = 586, charPositionInLine = 7
+Reference: Object = weather (TABLE), action = UPDATE, offset = 23892, line number = 590, charPositionInLine = 7

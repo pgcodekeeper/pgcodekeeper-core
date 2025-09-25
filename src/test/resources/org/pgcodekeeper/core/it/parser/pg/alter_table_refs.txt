@@ -1678,3 +1678,8 @@ Reference: Object = parted.check_a (CONSTRAINT), action = DROP, offset = 101343,
 Reference: Object = parted.check_b (CONSTRAINT), action = DROP, offset = 101368, line number = 2673, charPositionInLine = 60
 Reference: Object = nv_parent (TABLE), action = ALTER, offset = 101390, line number = 2675, charPositionInLine = 12
 Reference: Object = nv_parent.c (CONSTRAINT), action = CREATE, offset = 101415, line number = 2675, charPositionInLine = 37
+Reference: Object = test_gen_stored (TABLE), action = ALTER, offset = 101466, line number = 2677, charPositionInLine = 12
+Reference: Object = test_gen_virtual (TABLE), action = ALTER, offset = 101580, line number = 2678, charPositionInLine = 12
+Reference: Object = test_gen_implicit (TABLE), action = ALTER, offset = 101659, line number = 2679, charPositionInLine = 12
+Reference: Object = nv_parent (TABLE), action = ALTER, offset = 101732, line number = 2681, charPositionInLine = 12
+Reference: Object = nv_parent (TABLE), action = ALTER, offset = 101771, line number = 2682, charPositionInLine = 12

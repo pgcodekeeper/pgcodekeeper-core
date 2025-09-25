@@ -790,3 +790,7 @@ Reference: Object = brtrigpartcon (TABLE), action = GRANT, offset = 45659, line 
 Reference: Object = brtrigpartcon (TABLE), action = REVOKE, offset = 45715, line number = 1249, charPositionInLine = 17
 Reference: Object = atest2 (TABLE), action = GRANT, offset = 45787, line number = 1252, charPositionInLine = 16
 Reference: Object = atest2 (TABLE), action = GRANT, offset = 45859, line number = 1253, charPositionInLine = 18
+Reference: action = CREATE ROLE, offset = 45931, line number = 1256, charPositionInLine = 0
+Reference: action = ALTER DEFAULT PRIVILEGES, offset = 45964, line number = 1258, charPositionInLine = 0
+Reference: action = ALTER DEFAULT PRIVILEGES, offset = 46040, line number = 1260, charPositionInLine = 0
+Reference: action = ALTER DEFAULT PRIVILEGES, offset = 46122, line number = 1262, charPositionInLine = 0

@@ -93,6 +93,7 @@ Schema: public
 
   View: asterisk13
     RelationColumns : 
+     oid - oid
      castsource - oid
      casttarget - oid
      castfunc - oid

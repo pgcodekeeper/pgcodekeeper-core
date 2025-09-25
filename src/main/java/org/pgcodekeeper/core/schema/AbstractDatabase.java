@@ -75,7 +75,7 @@ public abstract class AbstractDatabase extends PgStatement implements IDatabase 
     }
 
     public SupportedPgVersion getVersion() {
-        return version != null ? version : SupportedPgVersion.VERSION_10;
+        return version != null ? version : SupportedPgVersion.VERSION_14;
     }
 
     public void setVersion(SupportedPgVersion version) {
@@ -94,7 +94,7 @@ public abstract class AbstractDatabase extends PgStatement implements IDatabase 
      * Adds an object reference to the specified file.
      *
      * @param fileName the file name to associate with the location
-     * @param loc the object location to add
+     * @param loc      the object location to add
      */
     public void addReference(String fileName, PgObjLocation loc) {
         objReferences.computeIfAbsent(fileName, k -> new LinkedHashSet<>()).add(loc);
@@ -208,9 +208,9 @@ public abstract class AbstractDatabase extends PgStatement implements IDatabase 
     /**
      * Adds a library database to this database, merging its objects and analysis launchers.
      *
-     * @param lib the library database to add
+     * @param lib     the library database to add
      * @param libName the name of the library
-     * @param owner the owner to set for owned objects
+     * @param owner   the owner to set for owned objects
      */
     public void addLib(AbstractDatabase lib, String libName, String owner) {
         lib.getDescendants().forEach(st -> {

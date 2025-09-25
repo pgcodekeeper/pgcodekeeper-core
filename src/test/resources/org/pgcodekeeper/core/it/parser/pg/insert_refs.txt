@@ -179,3 +179,5 @@ Reference: Object = fewmore (TABLE), action = INSERT, offset = 11311, line numbe
 Reference: Object = foo (TABLE), action = INSERT, offset = 11373, line number = 236, charPositionInLine = 12
 Reference: Object = foo (TABLE), action = INSERT, offset = 11476, line number = 237, charPositionInLine = 12
 Reference: Object = foo (TABLE), action = INSERT, offset = 11594, line number = 238, charPositionInLine = 12
+Reference: Object = r1 (TABLE), action = INSERT, offset = 11650, line number = 239, charPositionInLine = 12
+Reference: Object = r1 (TABLE), action = INSERT, offset = 11738, line number = 240, charPositionInLine = 12

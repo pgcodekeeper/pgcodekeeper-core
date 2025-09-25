@@ -17,8 +17,8 @@ package org.pgcodekeeper.core.schema.meta;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
 import org.pgcodekeeper.core.loader.pg.JdbcSystemLoader;
-import org.pgcodekeeper.core.loader.UrlJdbcConnector;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.NullMonitor;
@@ -44,28 +44,31 @@ public final class MetaStorage implements Serializable {
     private static final long serialVersionUID = 8194906497159326596L;
 
     private static final String FILTER_PATTERN = """
-        maxdepth=7;\
-        org.pgcodekeeper.core.schema.meta.MetaStorage;\
-        org.pgcodekeeper.core.schema.meta.MetaCast;\
-        org.pgcodekeeper.core.schema.meta.MetaContainer;\
-        org.pgcodekeeper.core.schema.meta.MetaFunction;\
-        org.pgcodekeeper.core.schema.meta.MetaOperator;\
-        org.pgcodekeeper.core.schema.meta.MetaRelation;\
-        org.pgcodekeeper.core.schema.meta.MetaStatement;\
-        org.pgcodekeeper.core.schema.PgObjLocation;\
-        org.pgcodekeeper.core.schema.PgObjLocation$LocationType;\
-        org.pgcodekeeper.core.schema.Argument;\
-        org.pgcodekeeper.core.schema.ArgMode;\
-        org.pgcodekeeper.core.schema.GenericColumn;\
-        org.pgcodekeeper.core.schema.ICast$CastContext;\
-        org.pgcodekeeper.core.DangerStatement;\
-        org.pgcodekeeper.core.model.difftree.DbObjType;\
-        org.pgcodekeeper.core.ContextLocation;\
-        org.pgcodekeeper.core.utils.Pair;\
-        java.util.ArrayList;\
-        java.lang.Object;\
-        java.lang.Enum;\
-        !*""";
+            maxdepth=7;\
+            org.pgcodekeeper.core.schema.meta.MetaStorage;\
+            org.pgcodekeeper.core.schema.meta.MetaCast;\
+            org.pgcodekeeper.core.schema.meta.MetaContainer;\
+            org.pgcodekeeper.core.schema.meta.MetaFunction;\
+            org.pgcodekeeper.core.schema.meta.MetaOperator;\
+            org.pgcodekeeper.core.schema.meta.MetaRelation;\
+            org.pgcodekeeper.core.schema.meta.MetaStatement;\
+            org.pgcodekeeper.core.schema.PgObjLocation;\
+            org.pgcodekeeper.core.schema.PgObjLocation$LocationType;\
+            org.pgcodekeeper.core.schema.Argument;\
+            org.pgcodekeeper.core.schema.ArgMode;\
+            org.pgcodekeeper.core.schema.GenericColumn;\
+            org.pgcodekeeper.core.schema.ICast$CastContext;\
+            org.pgcodekeeper.core.DangerStatement;\
+            org.pgcodekeeper.core.model.difftree.DbObjType;\
+            org.pgcodekeeper.core.ContextLocation;\
+            org.pgcodekeeper.core.utils.Pair;\
+            java.util.ArrayList;\
+            java.util.Map$Entry;\
+            java.util.HashMap;\
+            java.util.LinkedHashMap;\
+            java.lang.Object;\
+            java.lang.Enum;\
+            !*""";
 
     private static final ObjectInputFilter DESERIALIZATION_FILTER = ObjectInputFilter.Config.createFilter(FILTER_PATTERN);
 
@@ -143,7 +146,7 @@ public final class MetaStorage implements Serializable {
      * @throws InterruptedException if the operation is interrupted
      */
     public static void serialize(String path, String url) throws IOException, InterruptedException {
-        UrlJdbcConnector jdbcConnector = new UrlJdbcConnector(url);
+        var jdbcConnector = new PgJdbcConnector(url);
         Serializable storage = new JdbcSystemLoader(jdbcConnector, Consts.UTC,
                 new NullMonitor()).getStorageFromJdbc();
         Utils.serialize(path, storage);

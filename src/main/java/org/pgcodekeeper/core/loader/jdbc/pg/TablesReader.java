@@ -24,8 +24,8 @@ import org.pgcodekeeper.core.loader.jdbc.JdbcType;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
-import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
+import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.AlterTable;
 import org.pgcodekeeper.core.schema.AbstractSchema;
 import org.pgcodekeeper.core.schema.GenericColumn;
@@ -62,12 +62,12 @@ public final class TablesReader extends JdbcReader {
         String partitionGpBound = null;
         String partitionGpTemplate = null;
 
-        if (SupportedPgVersion.VERSION_10.isLE(loader.getVersion()) &&
+        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion()) &&
                 res.getBoolean("relispartition")) {
             partitionBound = res.getString("partition_bound");
             checkObjectValidity(partitionBound, DbObjType.TABLE, tableName);
         }
-        if (loader.isGreenplumDb() && !SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
+        if (loader.isGreenplumDb() && !SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             partitionGpBound = res.getString("partclause");
             partitionGpTemplate = res.getString("parttemplate");
         }
@@ -98,7 +98,7 @@ public final class TablesReader extends JdbcReader {
             t = new SimplePgTable(tableName);
         }
 
-        if (SupportedPgVersion.VERSION_12.isLE(loader.getVersion()) && t instanceof AbstractRegularTable regTable) {
+        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion()) && t instanceof AbstractRegularTable regTable) {
             String accessMethod = res.getString("access_method");
             if (accessMethod != null) {
                 regTable.setMethod(accessMethod);
@@ -140,7 +140,7 @@ public final class TablesReader extends JdbcReader {
             ParserAbstract.fillOptionParams(toast, t::addOption, true, false, false);
         }
 
-        if (!SupportedPgVersion.VERSION_12.isLE(loader.getVersion()) && res.getBoolean("has_oids")) {
+        if (!SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion()) && res.getBoolean("has_oids")) {
             t.setHasOids(true);
         }
 
@@ -193,17 +193,16 @@ public final class TablesReader extends JdbcReader {
         }
 
         // since 9.5 PostgreSQL
-        if (SupportedPgVersion.VERSION_9_5.isLE(loader.getVersion())) {
+        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             regTable.setRowSecurity(res.getBoolean("row_security"));
             regTable.setForceSecurity(res.getBoolean("force_security"));
-        }
 
-        // since 10 PostgreSQL
-        if (SupportedPgVersion.VERSION_10.isLE(loader.getVersion()) &&
-                "p".equals(res.getString("relkind"))) {
-            String partitionBy = res.getString("partition_by");
-            checkObjectValidity(partitionBy, DbObjType.TABLE, t.getBareName());
-            regTable.setPartitionBy(partitionBy);
+            // since 10 PostgreSQL
+            if ("p".equals(res.getString("relkind"))) {
+                String partitionBy = res.getString("partition_by");
+                checkObjectValidity(partitionBy, DbObjType.TABLE, t.getBareName());
+                regTable.setPartitionBy(partitionBy);
+            }
         }
 
         // persistence: U - unlogged, P - permanent, T - temporary
@@ -225,6 +224,12 @@ public final class TablesReader extends JdbcReader {
         String[] colDefaults = getColArray(res, "col_defaults");
         String[] colComments = getColArray(res, "col_comments");
         Boolean[] colNotNull = getColArray(res, "col_notnull");
+        String[] colNotNullConName = null;
+        Boolean[] colNotNullNoInherit = null;
+        if (SupportedPgVersion.VERSION_18.isLE(loader.getVersion())) {
+            colNotNullConName = getColArray(res, "col_notnull_con_name");
+            colNotNullNoInherit = getColArray(res, "col_notnull_no_inherit");
+        }
 
         Integer[] colStatictics;
         if (SupportedPgVersion.VERSION_16.isLE(loader.getVersion())) {
@@ -255,7 +260,7 @@ public final class TablesReader extends JdbcReader {
         String[] colDefaultStorages = getColArray(res, "col_default_storages");
 
         String[] colGenerated = null;
-        if (SupportedPgVersion.VERSION_12.isLE(loader.getVersion())) {
+        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             colGenerated = getColArray(res, "col_generated");
         }
         String[] colCompression = null;
@@ -330,7 +335,11 @@ public final class TablesReader extends JdbcReader {
             }
 
             if (colNotNull[i]) {
-                column.setNullValue(false);
+                column.setNotNull(true);
+                if (SupportedPgVersion.VERSION_18.isLE(loader.getVersion())) {
+                    column.setNotNullNoInherit(colNotNullNoInherit[i]);
+                    column.setNotNullConName(colNotNullConName[i]);
+                }
             }
 
             int statistics = colStatictics[i];
@@ -340,8 +349,12 @@ public final class TablesReader extends JdbcReader {
                 column.setStatistics(statistics);
             }
 
-            if (colGenerated != null && "s".equals(colGenerated[i])) {
-                column.setGenerated(true);
+            if (colGenerated != null && !colGenerated[i].isEmpty()) {
+                if ("s".equals(colGenerated[i])) {
+                    column.setGenerationOption("STORED");
+                } else {
+                    column.setGenerationOption("VIRTUAL");
+                }
             }
 
             if (colCompression != null) {
@@ -364,14 +377,14 @@ public final class TablesReader extends JdbcReader {
                 loader.setPrivileges(column, t, columnPrivileges, schema.getName());
             }
 
-            if (ofTypeOid != 0 && column.getNullValue()
+            if (ofTypeOid != 0 && !column.isNotNull()
                     && column.getDefaultValue() == null) {
                 column.setInherit(true);
             }
 
             if (ofTypeOid != 0 || column.isInherit()) {
                 boolean isNotDumpable = column.getDefaultValue() == null
-                        && column.getNullValue()
+                        && !column.isNotNull()
                         && column.getStatistics() == null
                         && column.getCollation() == null
                         && column.getComment() == null
@@ -501,20 +514,14 @@ public final class TablesReader extends JdbcReader {
                 .join("LEFT JOIN pg_catalog.pg_am am ON am.oid = res.relam")
                 .where("res.relkind IN ('f','r','p')");
 
-        if (SupportedPgVersion.VERSION_9_5.isLE(loader.getVersion())) {
+        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             builder
                     .column("res.relrowsecurity AS row_security")
-                    .column("res.relforcerowsecurity AS force_security");
-        }
-
-        if (SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
-            builder
+                    .column("res.relforcerowsecurity AS force_security")
                     .column("res.relispartition")
                     .column("pg_catalog.pg_get_partkeydef(res.oid) AS partition_by")
                     .column("pg_catalog.pg_get_expr(res.relpartbound, res.oid) AS partition_bound");
-        }
-
-        if (!SupportedPgVersion.VERSION_12.isLE(loader.getVersion())) {
+        } else {
             builder.column("res.relhasoids AS has_oids");
         }
 
@@ -534,7 +541,7 @@ public final class TablesReader extends JdbcReader {
                     .column("x.writable")
                     .join("LEFT JOIN pg_exttable x ON res.oid = x.reloid");
 
-            if (!SupportedPgVersion.VERSION_10.isLE(loader.getVersion())) {
+            if (!SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
                 builder
                         .column("CASE WHEN pl.parlevel = 0 THEN (SELECT pg_get_partition_def(res.oid, true, false)) END AS partclause")
                         .column("CASE WHEN pl.parlevel = 0 THEN (SELECT pg_get_partition_template_def(res.oid, true, false)) END as parttemplate")
@@ -597,7 +604,7 @@ public final class TablesReader extends JdbcReader {
                 .where("a.attnum > 0 GROUP BY a.attrelid")
         ;
 
-        if (SupportedPgVersion.VERSION_12.isLE(loader.getVersion())) {
+        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             builder.column("columns.col_generated");
             subQueryBuilder.column("pg_catalog.array_agg(a.attgenerated ORDER BY a.attnum) AS col_generated");
         }
@@ -605,6 +612,15 @@ public final class TablesReader extends JdbcReader {
         if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
             builder.column("columns.col_compression");
             subQueryBuilder.column("pg_catalog.array_agg(a.attcompression ORDER BY a.attnum) AS col_compression");
+        }
+
+        if (SupportedPgVersion.VERSION_18.isLE(loader.getVersion())) {
+            builder.column("columns.col_notnull_no_inherit");
+            builder.column("columns.col_notnull_con_name");
+            subQueryBuilder
+                    .column("pg_catalog.array_agg(con.conname ORDER BY a.attnum) AS col_notnull_con_name")
+                    .column("pg_catalog.array_agg(con.connoinherit ORDER BY a.attnum) AS col_notnull_no_inherit")
+                    .join("LEFT JOIN pg_catalog.pg_constraint con ON con.contype = 'n' AND con.conkey[1] = a.attnum AND con.conrelid = a.attrelid");
         }
 
         if (loader.isGreenplumDb()) {

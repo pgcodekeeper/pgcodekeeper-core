@@ -22,7 +22,6 @@ import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.Vex;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -52,7 +51,7 @@ public class Delete extends AbstractExprWithNmspc<Delete_stmt_for_psqlContext> {
             select.analyzeCte(with);
         }
 
-        select.addNameReference(delete.delete_table_name, delete.alias, null);
+        var table = select.addNameReference(delete.delete_table_name, delete.alias, null);
         if (delete.USING() != null) {
             select.from(delete.from_item());
         }
@@ -64,10 +63,6 @@ public class Delete extends AbstractExprWithNmspc<Delete_stmt_for_psqlContext> {
             }
         }
 
-        if (delete.RETURNING() != null) {
-            return select.sublist(delete.select_list().select_sublist(), new ValueExpr(select));
-        }
-
-        return Collections.emptyList();
+        return analyzeReturningSelectList(select, delete.returning_select_list_with_alias(), table);
     }
 }

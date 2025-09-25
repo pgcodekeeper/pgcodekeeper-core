@@ -166,11 +166,15 @@ user_name
     ;
 
 table_cols_list
-    : table_cols (COMMA table_cols)*
+    : inheritance_specified_table_cols (COMMA inheritance_specified_table_cols)*
+    ;
+
+inheritance_specified_table_cols
+    : ONLY? schema_qualified_name MULTIPLY? columns?
     ;
 
 table_cols
-    : schema_qualified_name (LEFT_PAREN identifier (COMMA identifier)* RIGHT_PAREN)?
+    : schema_qualified_name columns?
     ;
 
 vacuum_mode
@@ -463,14 +467,13 @@ table_action
     | SET storage_parameters
     | RESET names_in_parens
     | define_foreign_options
-    | INHERIT parent_table=schema_qualified_name
-    | NO INHERIT parent_table=schema_qualified_name
+    | inherit_option parent_table=schema_qualified_name
     | OF type_name=schema_qualified_name
     | NOT OF
     | owner_to
     | set_tablespace
     | REPLICA IDENTITY (DEFAULT | FULL | NOTHING | USING INDEX identifier)
-    | ALTER CONSTRAINT identifier table_deferrable? table_initialy_immed?
+    | ALTER CONSTRAINT identifier table_deferrable? table_initialy_immed? inherit_option?
     ;
 
 column_action
@@ -525,6 +528,10 @@ table_initialy_immed
     : INITIALLY (DEFERRED | IMMEDIATE)
     ;
 
+table_enforced
+    : NOT? ENFORCED
+    ;
+
 function_actions_common
     : (CALLED | RETURNS NULL) ON NULL INPUT
     | (NO | CONTAINS | MODIFIES) SQL
@@ -576,7 +583,7 @@ alter_default_privileges_statement
 abbreviated_grant_or_revoke
     : (GRANT | REVOKE grant_option_for?) (
         table_column_privilege (COMMA table_column_privilege)* ON TABLES
-        | (usage_select_update (COMMA usage_select_update)* | ALL PRIVILEGES?) ON SEQUENCES
+        | (usage_select_update (COMMA usage_select_update)* | ALL PRIVILEGES?) ON (SEQUENCES | LARGE OBJECTS)
         | (EXECUTE | ALL PRIVILEGES?) ON FUNCTIONS
         | (USAGE | CREATE | ALL PRIVILEGES?) ON SCHEMAS
         | (USAGE | ALL PRIVILEGES?) ON TYPES)
@@ -1619,6 +1626,7 @@ copy_option
     | FORCE_NULL (MULTIPLY | identifier_list_in_paren)
     | ON_ERROR (STOP | IGNORE)
     | LOG_VERBOSITY (DEFAULT | VERBOSE)
+    | REJECT_LIMIT iconst
     ;
 
 identifier_list_in_paren
@@ -1627,7 +1635,7 @@ identifier_list_in_paren
 
 create_view_statement
     : (OR REPLACE)? (TEMP | TEMPORARY)? RECURSIVE? MATERIALIZED? VIEW 
-    if_not_exists? name=schema_qualified_name column_names=view_columns?
+    if_not_exists? name=schema_qualified_name column_names=columns?
     (USING identifier)?
     (WITH storage_parameters)?
     table_space?
@@ -1645,7 +1653,7 @@ if_not_exists
     : IF NOT EXISTS
     ;
 
-view_columns
+columns
     : LEFT_PAREN identifier (COMMA identifier)* RIGHT_PAREN
     ;
 
@@ -1923,30 +1931,52 @@ table_column_definition
     ;
 
 like_option
-    : (INCLUDING | EXCLUDING) (COMMENTS | COMPRESSION | CONSTRAINTS | DEFAULTS | GENERATED | IDENTITY | INDEXES | STORAGE | ALL)
+    : (INCLUDING | EXCLUDING) (COMMENTS | COMPRESSION | CONSTRAINTS | DEFAULTS | GENERATED | STATISTICS | IDENTITY | INDEXES | STORAGE | ALL)
     ;
 /** NULL, DEFAULT - column constraint
 * EXCLUDE, FOREIGN KEY - table_constraint
 */
 constraint_common
-    : (CONSTRAINT identifier)? constr_body (NOT VALID)? table_deferrable? table_initialy_immed?
+    : (CONSTRAINT identifier)? constr_body (NOT VALID)? table_deferrable? table_initialy_immed? table_enforced?
     ;
 
 constr_body
     : EXCLUDE (USING index_method=identifier)?
             LEFT_PAREN index_column WITH all_op (COMMA index_column WITH all_op)* RIGHT_PAREN
             index_parameters (where=WHERE exp=vex)?
-    | (FOREIGN KEY col=names_in_parens)? REFERENCES schema_qualified_name ref=names_in_parens?
+    | (FOREIGN KEY col_period=names_with_period)? REFERENCES schema_qualified_name ref_period=names_with_period?
         (MATCH (FULL | PARTIAL | SIMPLE))? changed_action*
-    | CHECK LEFT_PAREN expression=vex RIGHT_PAREN (NO INHERIT)?
-    | NOT? NULL
-    | UNIQUE nulls_distinction? col=names_in_parens? index_parameters
-    | PRIMARY KEY col=names_in_parens? index_parameters
+    | CHECK LEFT_PAREN expression=vex RIGHT_PAREN inherit_option?
+    | NOT? NULL col_name=schema_qualified_name? inherit_option?
+    | UNIQUE nulls_distinction? col_overlaps=names_without_overlaps? index_parameters
+    | PRIMARY KEY col_overlaps=names_without_overlaps? index_parameters
     | DEFAULT default_expr=vex
     | identity_body
-    | GENERATED ALWAYS AS LEFT_PAREN vex RIGHT_PAREN STORED
+    | GENERATED ALWAYS AS LEFT_PAREN vex RIGHT_PAREN (STORED | VIRTUAL)?
     ;
 
+names_without_overlaps
+    : LEFT_PAREN schema_qualified_name (COMMA schema_qualified_name)* 
+    (COMMA name_without_overlaps)? RIGHT_PAREN
+    ;
+
+name_without_overlaps
+    : schema_qualified_name WITHOUT OVERLAPS
+    ;
+    
+names_with_period
+    : LEFT_PAREN schema_qualified_name (COMMA schema_qualified_name)* 
+    (COMMA name_with_period)? RIGHT_PAREN
+    ;
+
+name_with_period
+    : PERIOD schema_qualified_name
+    ;
+
+inherit_option
+    : NO? INHERIT
+    ;
+    
 all_op
     : op
     | EQUAL | NOT_EQUAL | LTH | LEQ | GTH | GEQ
@@ -2321,6 +2351,7 @@ bare_label_keyword
     | ENCODING
     | ENCRYPTED
     | END
+    | ENFORCED
     | ENUM
     | ERROR
     | ESCAPE
@@ -2459,6 +2490,7 @@ bare_label_keyword
     | NULLS
     | NUMERIC
     | OBJECT
+    | OBJECTS
     | OF
     | OFF
     | OIDS
@@ -2485,6 +2517,7 @@ bare_label_keyword
     | PASSING
     | PASSWORD
     | PATH
+    | PERIOD
     | PLACING
     | PLAN
     | PLANS
@@ -2508,7 +2541,6 @@ bare_label_keyword
     | READ
     | REAL
     | REASSIGN
-    | RECHECK
     | RECURSIVE
     | REF
     | REFERENCES
@@ -2631,6 +2663,7 @@ bare_label_keyword
     | VERSION
     | VIEW
     | VIEWS
+    | VIRTUAL
     | VOLATILE
     | WHEN
     | WHITESPACE
@@ -2737,6 +2770,7 @@ tokens_nonreserved
     | ENABLE
     | ENCODING
     | ENCRYPTED
+    | ENFORCED
     | ENUM
     | ERROR
     | ESCAPE
@@ -2833,6 +2867,7 @@ tokens_nonreserved
     | NOWAIT
     | NULLS
     | OBJECT
+    | OBJECTS
     | OF
     | OFF
     | OIDS
@@ -2855,6 +2890,7 @@ tokens_nonreserved
     | PASSING
     | PASSWORD
     | PATH
+    | PERIOD
     | PLAN
     | PLANS
     | POLICY
@@ -2874,7 +2910,6 @@ tokens_nonreserved
     | RANGE
     | READ
     | REASSIGN
-    | RECHECK
     | RECURSIVE
     | REF
     | REFERENCING
@@ -2971,6 +3006,7 @@ tokens_nonreserved
     | VERSION
     | VIEW
     | VIEWS
+    | VIRTUAL
     | VOLATILE
     | WHITESPACE
     | WITHIN
@@ -3273,6 +3309,7 @@ tokens_nonkeyword
     | READABLE
     | RECEIVE
     | REJECT
+    | REJECT_LIMIT
     | REMAINDER
     | REORGANIZE
     | REPLICATED
@@ -3912,7 +3949,7 @@ merge_stmt_for_psql
     MERGE INTO merge_table_name=schema_qualified_name (AS? alias=identifier)?
     USING from_item ON vex
     when_condition+
-    (RETURNING select_list)?
+    returning_select_list_with_alias?
     ;
 
 when_condition
@@ -3944,7 +3981,7 @@ insert_stmt_for_psql
     (OVERRIDING (SYSTEM | USER) VALUE)?
     (select_stmt | DEFAULT VALUES)
     (ON CONFLICT conflict_object? conflict_action)?
-    (RETURNING select_list)?
+    returning_select_list_with_alias?
     ;
 
 insert_columns
@@ -3969,7 +4006,7 @@ delete_stmt_for_psql
     : with_clause? DELETE FROM ONLY? delete_table_name=schema_qualified_name MULTIPLY? (AS? alias=identifier)?
     (USING from_item (COMMA from_item)*)?
     (WHERE (vex | CURRENT OF cursor=identifier))?
-    (RETURNING select_list)?
+    returning_select_list_with_alias?
     ;
 
 update_stmt_for_psql
@@ -3977,9 +4014,21 @@ update_stmt_for_psql
     SET update_set (COMMA update_set)*
     (FROM from_item (COMMA from_item)*)?
     (WHERE (vex | CURRENT OF cursor=identifier))?
-    (RETURNING select_list)?
+    returning_select_list_with_alias?
     ;
 
+returning_select_list_with_alias
+    : RETURNING with_output_alias? select_list
+    ;
+
+with_output_alias
+    : WITH LEFT_PAREN output_alias (COMMA output_alias)* RIGHT_PAREN
+    ;
+
+output_alias
+    : (OLD | NEW) AS identifier
+    ;
+    
 update_set
     : column+=indirection_identifier EQUAL (value+=vex | DEFAULT)
     | LEFT_PAREN column+=indirection_identifier (COMMA column+=indirection_identifier)* RIGHT_PAREN EQUAL ROW?

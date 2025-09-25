@@ -20,7 +20,6 @@ import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
-import org.pgcodekeeper.core.loader.ms.SupportedMsVersion;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.ms.MsConstraintCheck;
@@ -155,17 +154,13 @@ public final class MsTypesReader extends JdbcReader {
                 .column("CASE WHEN basetypes.name IN (N'nchar', N'nvarchar') AND res.max_length >= 0 THEN res.max_length/2 ELSE res.max_length END AS size")
                 .column("res.precision")
                 .column("res.scale")
+                .column("ttt.is_memory_optimized")
                 .from("sys.types res WITH (NOLOCK)")
                 .join("LEFT JOIN sys.types basetypes WITH (NOLOCK) ON res.system_type_id=basetypes.system_type_id AND basetypes.system_type_id=basetypes.user_type_id")
                 .join("LEFT JOIN sys.assembly_types ay WITH (NOLOCK) ON ay.user_type_id=res.user_type_id")
                 .join("LEFT JOIN sys.assemblies a WITH (NOLOCK) ON a.assembly_id=ay.assembly_id")
+                .join("LEFT JOIN sys.table_types ttt WITH (NOLOCK) ON ttt.user_type_id=res.user_type_id")
                 .where("res.is_user_defined=1");
-
-        if (SupportedMsVersion.VERSION_14.isLE(loader.getVersion())) {
-            builder
-                    .column("ttt.is_memory_optimized")
-                    .join("LEFT JOIN sys.table_types ttt WITH (NOLOCK) ON ttt.user_type_id=res.user_type_id");
-        }
 
         // after join ttt
         addMsConstraintsPart(builder);

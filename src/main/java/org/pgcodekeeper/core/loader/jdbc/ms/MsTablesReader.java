@@ -58,21 +58,19 @@ public class MsTablesReader extends JdbcReader {
         loader.setCurrentObject(new GenericColumn(schema.getName(), tableName, DbObjType.TABLE));
         MsTable table = new MsTable(tableName);
 
-        if (SupportedMsVersion.VERSION_14.isLE(loader.getVersion())) {
-            if (res.getBoolean("is_memory_optimized")) {
-                table.addOption("MEMORY_OPTIMIZED", "ON");
-            }
+        if (res.getBoolean("is_memory_optimized")) {
+            table.addOption("MEMORY_OPTIMIZED", "ON");
+        }
 
-            if (res.getBoolean("durability")) {
-                table.addOption("DURABILITY", res.getString("durability_desc"));
-            }
+        if (res.getBoolean("durability")) {
+            table.addOption("DURABILITY", res.getString("durability_desc"));
         }
 
         if (res.getBoolean("data_compression")) {
             table.addOption("DATA_COMPRESSION", res.getString("data_compression_desc"));
         }
 
-        if (SupportedMsVersion.VERSION_16.isLE(loader.getVersion()) && res.getBoolean("temporal_type")) {
+        if (res.getBoolean("temporal_type")) {
             appendSystemVersioning(res, table);
         }
 
@@ -95,13 +93,11 @@ public class MsTablesReader extends JdbcReader {
             table.addColumn(getColumn(col, schema, loader, null));
         }
 
-        if (SupportedMsVersion.VERSION_16.isLE(loader.getVersion())) {
-            String perStartCol = getPeriodColName(res.getInt("start_col_id"), xmlCols);
-            if (perStartCol != null) {
-                String perEndCol = getPeriodColName(res.getInt("end_col_id"), xmlCols);
-                table.setPeriodStartCol(table.getColumn(perStartCol));
-                table.setPeriodEndCol(table.getColumn(perEndCol));
-            }
+        String perStartCol = getPeriodColName(res.getInt("start_col_id"), xmlCols);
+        if (perStartCol != null) {
+            String perEndCol = getPeriodColName(res.getInt("end_col_id"), xmlCols);
+            table.setPeriodStartCol(table.getColumn(perStartCol));
+            table.setPeriodEndCol(table.getColumn(perEndCol));
         }
 
         if (isTextImage) {
@@ -171,7 +167,9 @@ public class MsTablesReader extends JdbcReader {
 
             column.setType(JdbcLoaderBase.getMsType(column, col.getString("st"), col.getString("type"),
                     isUserDefined, col.getInt("size"), col.getInt("pr"), col.getInt("sc")));
-            column.setNullValue(col.getBoolean("nl"));
+            if (!col.getBoolean("nl")) {
+                column.setNotNull(true);
+            }
         } else {
             column.setExpression(exp);
             loader.submitMsAntlrTask(exp, p -> p.expression_eof().expression().get(0),
@@ -183,11 +181,9 @@ public class MsTablesReader extends JdbcReader {
         column.setRowGuidCol(col.getBoolean("rgc"));
         column.setPersisted(col.getBoolean("ps"));
 
-        if (SupportedMsVersion.VERSION_16.isLE(loader.getVersion())) {
-            String maskingFunction = col.getString("mf");
-            if (maskingFunction != null) {
-                column.setMaskingFunction("'" + maskingFunction + "'");
-            }
+        String maskingFunction = col.getString("mf");
+        if (maskingFunction != null) {
+            column.setMaskingFunction("'" + maskingFunction + "'");
         }
 
         if (col.getBoolean("ii")) {
@@ -205,12 +201,10 @@ public class MsTablesReader extends JdbcReader {
                                     ctx, loader.getCurrentLocation())));
         }
 
-        if (SupportedMsVersion.VERSION_16.isLE(loader.getVersion())) {
-            int colGenerated = col.getInt("gen");
-            if (colGenerated != 0) {
-                column.setGenerated(GeneratedType.parseDbType(colGenerated));
-                column.setHidden(col.getBoolean("hd"));
-            }
+        int colGenerated = col.getInt("gen");
+        if (colGenerated != 0) {
+            column.setGenerated(GeneratedType.parseDbType(colGenerated));
+            column.setHidden(col.getBoolean("hd"));
         }
 
         return column;
@@ -237,6 +231,14 @@ public class MsTablesReader extends JdbcReader {
                 .column("sp.data_compression")
                 .column("sp.data_compression_desc")
                 .column("ctt.is_track_columns_updated_on AS is_tracked")
+                .column("res.is_memory_optimized")
+                .column("res.durability")
+                .column("res.durability_desc")
+                .column("per.start_column_id AS start_col_id")
+                .column("per.end_column_id AS end_col_id")
+                .column("SCHEMA_NAME(hist.schema_id) as hist_schema")
+                .column("hist.name as hist_table")
+                .column("res.temporal_type")
                 .from("sys.tables res WITH (NOLOCK)")
                 .join("JOIN sys.indexes ind WITH (NOLOCK) on ind.object_id = res.object_id")
                 .join("JOIN sys.partitions sp WITH (NOLOCK) ON sp.object_id = res.object_id AND ind.index_id = sp.index_id AND sp.index_id IN (0,1) AND sp.partition_number = 1")
@@ -245,25 +247,9 @@ public class MsTablesReader extends JdbcReader {
                 .join("LEFT JOIN sys.index_columns ic WITH (NOLOCK) ON ic.partition_ordinal > 0 AND ic.index_id = ind.index_id and ic.object_id = res.object_id")
                 .join("LEFT JOIN sys.columns c WITH (NOLOCK) ON c.object_id = ic.object_id AND c.column_id = ic.column_id")
                 .join("LEFT JOIN sys.change_tracking_tables ctt WITH (NOLOCK) ON ctt.object_id = res.object_id")
+                .join("LEFT JOIN sys.periods per WITH (NOLOCK) ON per.object_id = res.object_id")
+                .join("LEFT JOIN sys.objects hist WITH (NOLOCK) ON hist.object_id = res.history_table_id")
                 .where("res.type = 'U'");
-
-        if (SupportedMsVersion.VERSION_14.isLE(loader.getVersion())) {
-            builder
-                    .column("res.is_memory_optimized")
-                    .column("res.durability")
-                    .column("res.durability_desc");
-        }
-
-        if (SupportedMsVersion.VERSION_16.isLE(loader.getVersion())) {
-            builder
-                    .column("per.start_column_id AS start_col_id")
-                    .column("per.end_column_id AS end_col_id")
-                    .column("SCHEMA_NAME(hist.schema_id) as hist_schema")
-                    .column("hist.name as hist_table")
-                    .column("res.temporal_type")
-                    .join("LEFT JOIN sys.periods per WITH (NOLOCK) ON per.object_id = res.object_id")
-                    .join("LEFT JOIN sys.objects hist WITH (NOLOCK) ON hist.object_id = res.history_table_id");
-        }
 
         if (SupportedMsVersion.VERSION_17.isLE(loader.getVersion())) {
             builder
@@ -303,21 +289,17 @@ public class MsTablesReader extends JdbcReader {
                           OR (TYPE_NAME(t.system_type_id) IN ('VARCHAR', 'NVARCHAR', 'VARBINARY') AND c.max_length = -1)
                         THEN 1 ELSE 0 END AS ti""")
                 .column("cc.definition AS def")
+                .column("c.is_hidden AS hd")
+                .column("c.generated_always_type AS gen")
+                .column("mc.masking_function AS mf")
                 .from("sys.columns c WITH (NOLOCK)")
                 .join("JOIN sys.types t WITH (NOLOCK) ON c.user_type_id = t.user_type_id")
                 .join("LEFT JOIN sys.computed_columns cc WITH (NOLOCK) ON cc.object_id = c.object_id AND c.column_id = cc.column_id")
                 .join("LEFT JOIN sys.identity_columns ic WITH (NOLOCK) ON c.object_id = ic.object_id AND c.column_id = ic.column_id")
                 .join("LEFT JOIN sys.default_constraints dc WITH (NOLOCK) ON dc.parent_object_id = c.object_id AND c.column_id = dc.parent_column_id")
                 .join("LEFT JOIN sys.objects so WITH (NOLOCK) ON so.object_id = c.object_id")
+                .join("LEFT JOIN sys.masked_columns mc WITH (NOLOCK) ON mc.object_id = c.object_id AND c.column_id = mc.column_id")
                 .where("c.object_id = res.object_id");
-
-        if (SupportedMsVersion.VERSION_16.isLE(loader.getVersion())) {
-            subSelect
-                    .column("c.is_hidden AS hd")
-                    .column("c.generated_always_type AS gen")
-                    .column("mc.masking_function AS mf")
-                    .join("LEFT JOIN sys.masked_columns mc WITH (NOLOCK) ON mc.object_id = c.object_id AND c.column_id = mc.column_id");
-        }
 
         QueryBuilder cols = new QueryBuilder()
                 .column("*")

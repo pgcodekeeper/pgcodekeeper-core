@@ -26,7 +26,6 @@ import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.loader.JdbcRunner;
-import org.pgcodekeeper.core.loader.UrlJdbcConnector;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.*;
@@ -207,7 +206,7 @@ public final class InsertWriter {
      */
     private void generateScript(String source, String name, String filter, StringBuilder sb)
             throws InterruptedException, IOException, SQLException {
-        try (Connection connection = new UrlJdbcConnector(source).getConnection()) {
+        try (Connection connection = Utils.getJdbcConnectorByType(dbType, source).getConnection()) {
             fillGraph(name, filter, connection);
         }
         removeCycles();
@@ -357,7 +356,7 @@ public final class InsertWriter {
                 continue;
             }
 
-            if (!col.getNullValue()) {
+            if (col.isNotNull()) {
                 notNullCols.add(colName);
             }
 

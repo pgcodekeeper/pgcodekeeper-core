@@ -42,29 +42,29 @@ public class QueriesBatchCallable extends StatementCallable<String> {
     private final IMonitor monitor;
     private final Connection connection;
     private final IProgressReporter reporter;
-    private final DatabaseType dbType;
+    private final String batchDelimiter;
 
     private boolean isAutoCommitEnabled = true;
 
     /**
      * Creates a new queries batch callable with the specified parameters.
      *
-     * @param st         the SQL statement to execute
-     * @param batches    list of SQL query locations to process in batch
-     * @param monitor    progress monitor for tracking execution progress
-     * @param reporter   progress reporter for writing execution results and errors
-     * @param connection database connection for batch operations
-     * @param dbType     database type to determine execution strategy
+     * @param st             the SQL statement to execute
+     * @param batches        list of SQL query locations to process in batch
+     * @param monitor        progress monitor for tracking execution progress
+     * @param reporter       progress reporter for writing execution results and errors
+     * @param connection     database connection for batch operations
+     * @param batchDelimiter batch delimiter for split
      */
     public QueriesBatchCallable(Statement st, List<PgObjLocation> batches,
                                 IMonitor monitor, IProgressReporter reporter,
-                                Connection connection, DatabaseType dbType) {
+                                Connection connection, String batchDelimiter) {
         super(st, null);
         this.batches = batches;
         this.monitor = monitor;
         this.connection = connection;
         this.reporter = reporter;
-        this.dbType = dbType;
+        this.batchDelimiter = batchDelimiter;
     }
 
     @Override
@@ -77,36 +77,23 @@ public class QueriesBatchCallable extends StatementCallable<String> {
             if (reporter != null) {
                 reporter.writeDbName();
             }
-            switch (dbType) {
-                case PG:
-                case CH:
-                    subMonitor.setWorkRemaining(batches.size());
-                    for (PgObjLocation query : batches) {
-                        IMonitor.checkCancelled(monitor);
-                        currQuery = query;
-                        executeSingleStatement(query, finalModifiedQuery);
-                        subMonitor.worked(1);
-                    }
-                    break;
-                case MS:
-                    List<List<PgObjLocation>> batchesList = getListBatchesFromSetBatches();
-                    subMonitor.setWorkRemaining(batchesList.size());
-                    for (List<PgObjLocation> queriesList : batchesList) {
-                        IMonitor.checkCancelled(monitor);
-                        // in case we're executing a real batch after a single-statement one
-                        currQuery = null;
-                        if (queriesList.size() == 1) {
-                            currQuery = queriesList.get(0);
-                            executeSingleStatement(currQuery, finalModifiedQuery);
-                        } else {
-                            runBatch(queriesList);
-                        }
-                        subMonitor.worked(1);
-                    }
-                    connection.commit();
-                    break;
-                default:
-                    throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + dbType);
+
+            List<List<PgObjLocation>> batchesList = getListBatchesFromSetBatches();
+            subMonitor.setWorkRemaining(batchesList.size());
+            for (List<PgObjLocation> queriesList : batchesList) {
+                IMonitor.checkCancelled(monitor);
+                // in case we're executing a real batch after a single-statement one
+                currQuery = null;
+                if (queriesList.size() == 1) {
+                    currQuery = queriesList.get(0);
+                    executeSingleStatement(currQuery, finalModifiedQuery);
+                } else {
+                    runBatch(queriesList);
+                }
+                subMonitor.worked(1);
+            }
+            if (!isAutoCommitEnabled) {
+                connection.commit();
             }
 
             if (reporter != null) {
@@ -162,20 +149,23 @@ public class QueriesBatchCallable extends StatementCallable<String> {
 
     private List<List<PgObjLocation>> getListBatchesFromSetBatches() {
         List<List<PgObjLocation>> batchesList = new ArrayList<>();
-        batchesList.add(new ArrayList<>());
+        List<PgObjLocation> currentBatch = new ArrayList<>();
 
         for (PgObjLocation loc : batches) {
-            if (Consts.GO.equalsIgnoreCase(loc.getAction())) {
-                batchesList.add(new ArrayList<>());
+            if (null == batchDelimiter) {
+                currentBatch.add(loc);
+                batchesList.add(currentBatch);
+                currentBatch = new ArrayList<>();
+            } else if (batchDelimiter.equalsIgnoreCase(loc.getAction())) {
+                batchesList.add(currentBatch);
+                currentBatch = new ArrayList<>();
             } else {
-                batchesList.get(batchesList.size() - 1).add(loc);
+                currentBatch.add(loc);
             }
         }
 
-        int lastBatchIdx = batchesList.size() - 1;
-        List<PgObjLocation> lastBatch = batchesList.get(lastBatchIdx);
-        if (lastBatch.isEmpty()) {
-            batchesList.remove(lastBatchIdx);
+        if (!currentBatch.isEmpty()) {
+            batchesList.add(currentBatch);
         }
 
         return batchesList;

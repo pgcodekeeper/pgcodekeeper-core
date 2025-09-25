@@ -608,8 +608,13 @@ class PgDiffTest {
             // Test scenario when trigger is enabled on child partition table and disabled on parent
             "modify_partition_table_trigger_enabled",
             // Test scenario when triggers are removed from partition table
-            "modify_partition_table_removed_triggers"
-
+            "modify_partition_table_removed_triggers",
+            // Test scenario when foreign keys are added
+            "add_foreign_key",
+            // Test scenario when primary keys are added
+            "add_primary_key",
+            // Test scenario when not null constraint is modified
+            "modify_not_null"
     })
     void diffTest(String fileNameTemplate) throws IOException, InterruptedException {
         assertDiff(fileNameTemplate, DatabaseType.PG, PgDiffTest.class);

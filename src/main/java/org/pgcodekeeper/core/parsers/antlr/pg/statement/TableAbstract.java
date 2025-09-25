@@ -17,12 +17,12 @@ package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
-import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
+import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.ConstraintAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.schema.AbstractTable;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.PgObjLocation;
@@ -71,10 +71,43 @@ public abstract class TableAbstract extends PgParserAbstract {
 
     protected void addTableConstraint(Constraint_commonContext tblConstrCtx,
                                       AbstractTable table, String schemaName, String tablespace) {
+        if (tblConstrCtx.constr_body().NULL() != null) {
+            addNotNullTableConstraint(tblConstrCtx, table);
+            return;
+        }
         PgConstraint constrBlank = createTableConstraintBlank(tblConstrCtx);
         processTableConstraintBlank(tblConstrCtx, constrBlank, schemaName,
                 table.getName(), tablespace, fileName);
         doSafe(AbstractTable::addConstraint, table, constrBlank);
+    }
+
+    protected void addNotNullTableConstraint(Constraint_commonContext tblConstrCtx, AbstractTable table) {
+        var body = tblConstrCtx.constr_body();
+        if (body.NOT() != null) {
+            var colNameCtx = body.col_name;
+            fillColNotNull(table, tblConstrCtx, colNameCtx);
+        } else {
+            throw new IllegalArgumentException("Unsupported constraint's type");
+        }
+    }
+
+    protected void fillColNotNull(AbstractTable table, Constraint_commonContext tblConstrCtx,
+                                  Schema_qualified_nameContext colNameCtx) {
+        var col = (PgColumn) getSafe(AbstractTable::getColumn, table, colNameCtx);
+        if (col != null) {
+            fillColNotNull(col, tblConstrCtx);
+        }
+    }
+
+    protected static void fillColNotNull(PgColumn col, Constraint_commonContext constraint) {
+        var body = constraint.constr_body();
+        var constraintName = constraint.identifier();
+
+        col.setNotNull(body.NOT() != null);
+        if (constraintName != null) {
+            col.setNotNullConName(constraintName.getText());
+        }
+        col.setNotNullNoInherit(body.inherit_option() != null);
     }
 
     private void addTableConstraint(Constraint_commonContext ctx, PgColumn col,
@@ -88,7 +121,7 @@ public abstract class TableAbstract extends PgParserAbstract {
             col.setDefaultValue(getExpressionText(def, stream));
             db.addAnalysisLauncher(new VexAnalysisLauncher(col, def, fileName));
         } else if (body.NULL() != null) {
-            col.setNullValue(body.NOT() == null);
+            fillColNotNull(col, ctx);
         } else if (body.REFERENCES() != null) {
             IdentifierContext id = ctx.identifier();
             String constrName = id == null ? table.getName() + '_' + colName + "_fkey" : id.getText();
@@ -133,7 +166,7 @@ public abstract class TableAbstract extends PgParserAbstract {
             col.setSequence(sequence);
             col.setIdentityType(identity.ALWAYS() != null ? "ALWAYS" : "BY DEFAULT");
         } else if (body.GENERATED() != null) {
-            col.setGenerated(true);
+            col.setGenerationOption(body.STORED() != null ? "STORED" : "VIRTUAL");
             VexContext genExpr = body.vex();
             col.setDefaultValue(getExpressionText(genExpr, stream));
             db.addAnalysisLauncher(new VexAnalysisLauncher(col, genExpr, fileName));
@@ -252,7 +285,7 @@ public abstract class TableAbstract extends PgParserAbstract {
             return new PgConstraintCheck(constrName);
         }
 
-        throw new IllegalArgumentException("Unsupportes constraint's type");
+        throw new IllegalArgumentException("Unsupported constraint's type");
     }
 
     protected void processTableConstraintBlank(Constraint_commonContext ctx,
@@ -313,20 +346,27 @@ public abstract class TableAbstract extends PgParserAbstract {
         constrFk.setForeignTable(refTableName);
         constrFk.addDep(fTable);
 
+        var cols = body.col_period;
         if (columnName != null) {
             constrFk.addColumn(columnName);
             constrFk.addDep(new GenericColumn(schemaName, tableName, columnName, DbObjType.COLUMN));
-        } else if (body.col != null) {
-            for (Schema_qualified_nameContext name : body.col.names_references().schema_qualified_name()) {
+        } else if (cols != null) {
+            for (Schema_qualified_nameContext name : cols.schema_qualified_name()) {
                 String colName = QNameParser.getFirstName(getIdentifiers(name));
                 constrFk.addDep(new GenericColumn(schemaName, tableName, colName, DbObjType.COLUMN));
                 constrFk.addColumn(colName);
             }
+            if (cols.name_with_period() != null) {
+                String colName = QNameParser.getFirstName(
+                        getIdentifiers(cols.name_with_period().schema_qualified_name()));
+                constrFk.addDep(new GenericColumn(schemaName, tableName, colName, DbObjType.COLUMN));
+                constrFk.setPeriodColumn(colName);
+            }
         }
 
-        Names_in_parensContext refs = body.ref;
+        var refs = body.ref_period;
         if (refs != null) {
-            List<Schema_qualified_nameContext> columns = refs.names_references().schema_qualified_name();
+            List<Schema_qualified_nameContext> columns = refs.schema_qualified_name();
             if (columnName != null && columns.size() != 1) {
                 throw new UnresolvedReferenceException(
                         "The number of columns in the source and the key assignment does not match", tblRef.start);
@@ -336,6 +376,12 @@ public abstract class TableAbstract extends PgParserAbstract {
                 var fColumn = QNameParser.getFirstName(getIdentifiers(column));
                 constrFk.addForeignColumn(fColumn);
                 constrFk.addDep(new GenericColumn(refSchemaName, refTableName, fColumn, DbObjType.COLUMN));
+            }
+            if (refs.name_with_period() != null) {
+                var periodColName = QNameParser.getFirstName(
+                        getIdentifiers(refs.name_with_period().schema_qualified_name()));
+                constrFk.setPeriodRefColumn(periodColName);
+                constrFk.addDep(new GenericColumn(refSchemaName, refTableName, periodColName, DbObjType.COLUMN));
             }
         }
 
@@ -365,7 +411,7 @@ public abstract class TableAbstract extends PgParserAbstract {
                               String schemaName, String tableName) {
         if (body.PRIMARY() != null) {
             if (col != null) {
-                col.setNullValue(false);
+                col.setNotNull(true);
             }
         } else {
             Nulls_distinctionContext dist = body.nulls_distinction();
@@ -376,10 +422,17 @@ public abstract class TableAbstract extends PgParserAbstract {
             constrPk.addColumn(colName);
             constrPk.addDep(new GenericColumn(schemaName, tableName, colName, DbObjType.COLUMN));
         } else {
-            for (Schema_qualified_nameContext name : body.col.names_references().schema_qualified_name()) {
+            var cols = body.col_overlaps;
+            for (Schema_qualified_nameContext name : cols.schema_qualified_name()) {
                 String columnName = QNameParser.getFirstName(getIdentifiers(name));
                 constrPk.addDep(new GenericColumn(schemaName, tableName, columnName, DbObjType.COLUMN));
                 constrPk.addColumn(columnName);
+            }
+            if (cols.name_without_overlaps() != null) {
+                String withoutOverlaps = QNameParser.getFirstName(getIdentifiers(cols.name_without_overlaps()
+                        .schema_qualified_name()));
+                constrPk.addDep(new GenericColumn(schemaName, tableName, withoutOverlaps, DbObjType.COLUMN));
+                constrPk.setWithoutOverlapsColumn(withoutOverlaps);
             }
         }
 
@@ -391,7 +444,7 @@ public abstract class TableAbstract extends PgParserAbstract {
                 getFullCtxText(constrBody.expression) +
                 (isNeedParens ? ")" : "");
         constrCheck.setExpression(expr);
-        constrCheck.setInherit(constrBody.INHERIT() == null);
+        constrCheck.setInherit(constrBody.inherit_option() == null);
     }
 
     private void fillConstrExcl(PgConstraintExclude constrExcl, Constr_bodyContext body, String schemaName,
@@ -443,5 +496,7 @@ public abstract class TableAbstract extends PgParserAbstract {
         constr.setDeferrable(defer != null && defer.NOT() == null);
         Table_initialy_immedContext init = ctx.table_initialy_immed();
         constr.setInitially(init != null && init.IMMEDIATE() == null);
+        Table_enforcedContext enf = ctx.table_enforced();
+        constr.setNotEnforced(enf != null && enf.NOT() != null);
     }
 }
