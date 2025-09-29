@@ -50,3 +50,4 @@ Reference: action = REVOKE, offset = 2532, line number = 49, charPositionInLine 
 Reference: action = REVOKE, offset = 2602, line number = 50, charPositionInLine = 0
 Reference: action = REVOKE, offset = 2656, line number = 51, charPositionInLine = 0
 Reference: action = REVOKE, offset = 2716, line number = 52, charPositionInLine = 0
+Reference: action = GRANT, offset = 2771, line number = 53, charPositionInLine = 0
