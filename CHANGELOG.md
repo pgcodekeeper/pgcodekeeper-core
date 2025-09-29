@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Fixed messages with double quotes.
 - Fixed parser rule for floating point constants for MS SQL.
+- Fixed parser rule for privileges for ClickHouse.
 
 ## [11.1.0] - 2025-09-10
 

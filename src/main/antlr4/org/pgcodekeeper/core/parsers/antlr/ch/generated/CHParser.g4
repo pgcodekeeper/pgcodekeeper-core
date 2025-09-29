@@ -128,6 +128,7 @@ permission
     | ALTER MODIFY (COLUMN | COMMENT)
     | ALTER (ORDER BY | PROJECTION | SAMPLE BY | SETTINGS | STATISTIC | TTL)
     | ALTER VIEW MODIFY (QUERY | REFRESH | SQL SECURITY)
+    | BACKUP
     | CLUSTER
     | CREATE (object_type | DICTIONARY | FUNCTION | ARBITRARY? TEMPORARY TABLE)?
     | DELETE
@@ -198,21 +199,23 @@ object_type
     ;
 
 source_privilige
-    : FILE
-//  | BACKUP
-    | URL
-    | REMOTE
-    | MYSQL
-    | ODBC
-    | JDBC
+    : AZURE
+    | FILE
     | HDFS
-//  | S3
-//  | POSTGRES
-//  | REDIS
-//  | AZURE
-//  | MONGO
-//  | SQLITE
-//  | HIVE
+    | HIVE
+    | JDBC
+    | KAFKA
+    | MONGO
+    | MYSQL
+    | NATS
+    | ODBC
+    | POSTGRES
+    | RABBITMQ
+    | REDIS
+    | REMOTE
+    | S3
+    | SQLITE
+    | URL
     ;
 
 with_option
@@ -1283,6 +1286,8 @@ tokens_nonreserved
     | ASYNC
     | ATTACH
     | AUTO_INCREMENT
+    | AZURE
+    | BACKUP
     | BEGIN
     | BIGINT
     | BINARY
@@ -1388,6 +1393,7 @@ tokens_nonreserved
     | GROUPING
     | HDFS
     | HIERARCHICAL
+    | HIVE
     | HOST
     | ID
     | IDENTIFIED
@@ -1412,6 +1418,7 @@ tokens_nonreserved
     | IS
     | IS_OBJECT_ID
     | JSON
+    | KAFKA
     | JDBC
     | KEY
     | KEYS
@@ -1443,6 +1450,7 @@ tokens_nonreserved
     | MIN
     | MOD
     | MODIFY
+    | MONGO
     | MOVE
     | MOVES
     | MULTI_POLYGON
@@ -1451,6 +1459,7 @@ tokens_nonreserved
     | NAME
     | NAMED
     | NANOSECOND
+    | NATS
     | NATIONAL
     | NCHAR
     | NESTED
@@ -1484,6 +1493,7 @@ tokens_nonreserved
     | POLICY
     | POLYGIN
     | POPULATE
+    | POSTGRES
     | PRECEDING
     | PRECISION
     | PRIMARY
@@ -1496,11 +1506,13 @@ tokens_nonreserved
     | QUOTA
     | QUOTAS
     | QUEUES
+    | RABBITMQ
     | RANGE
     | READONLY
     | REALM
     | REAL
     | RECOMPRESS
+    | REDIS
     | REFRESH
     | REGEXP
     | RELOAD
@@ -1537,6 +1549,7 @@ tokens_nonreserved
     | SOURCE
     | SOURCES
     | SQL
+    | SQLITE
     | START
     | STATISTIC
     | STEP
@@ -1546,6 +1559,7 @@ tokens_nonreserved
     | SYNC
     | SYNTAX
     | SYSTEM
+    | S3
     | TABLE
     | TABLES
     | TEMPORARY
