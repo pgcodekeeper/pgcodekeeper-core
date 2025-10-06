@@ -78,10 +78,18 @@ public class ChFormatter extends AbstractFormatter {
 
     private void fillChanges(StmtContext stmtContext, CommonTokenStream tokenStream, List<FormatItem> changes) {
         Ddl_stmtContext ddlCtx = stmtContext.ddl_stmt();
-        if (ddlCtx == null) {
+        if (null != ddlCtx) {
+            formatDdl(ddlCtx, tokenStream, changes);
             return;
         }
 
+        var selectStmtCtx = stmtContext.dml_stmt().select_stmt();
+        if (null != selectStmtCtx) {
+            formatSelect(selectStmtCtx, tokenStream, changes);
+        }
+    }
+
+    private void formatDdl(Ddl_stmtContext ddlCtx, CommonTokenStream tokenStream, List<FormatItem> changes) {
         var createCtx = ddlCtx.create_stmt();
         if (createCtx == null) {
             return;
@@ -96,7 +104,10 @@ public class ChFormatter extends AbstractFormatter {
         if (selectStmtCtx == null) {
             return;
         }
+        formatSelect(selectStmtCtx, tokenStream, changes);
+    }
 
+    private void formatSelect(CHParser.Select_stmtContext selectStmtCtx, CommonTokenStream tokenStream, List<FormatItem> changes) {
         StatementFormatter sf = new ChStatementFormatter(start, stop, selectStmtCtx, tokenStream, config);
         sf.format();
         changes.addAll(sf.getChanges());

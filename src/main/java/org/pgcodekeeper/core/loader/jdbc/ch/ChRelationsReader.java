@@ -86,7 +86,7 @@ public final class ChRelationsReader extends JdbcReader {
                         (CommonTokenStream) p.getTokenStream()),
                 pair -> new CreateChView(pair.getFirst(), (ChDatabase) schema.getDatabase(), pair.getSecond(),
                         loader.getSettings())
-                        .parseObject(view));
+                        .parseObject(view, true));
         return view;
     }
 

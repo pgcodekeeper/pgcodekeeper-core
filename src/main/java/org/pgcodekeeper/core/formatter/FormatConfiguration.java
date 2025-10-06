@@ -117,4 +117,14 @@ public class FormatConfiguration {
         config.indentSize = getIndentSize();
         return config;
     }
+
+    public static FormatConfiguration getDefaultConfig() {
+        var config = new FormatConfiguration();
+        config.indentSize = 2;
+        config.indentType = IndentType.WHITESPACE;
+        config.addWhitespaceAfterOp = true;
+        config.addWhitespaceBeforeOp = true;
+        config.removeTrailingWhitespace = true;
+        return config;
+    }
 }

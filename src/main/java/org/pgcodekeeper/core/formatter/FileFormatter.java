@@ -89,4 +89,8 @@ public class FileFormatter {
 
         return formatter.getFormatItems();
     }
+
+    public static String formatSql(String sql, DatabaseType dbType) {
+        return new FileFormatter(sql, 0, sql.length(), FormatConfiguration.getDefaultConfig(), dbType).formatText();
+    }
 }

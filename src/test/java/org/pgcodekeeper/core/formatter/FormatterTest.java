@@ -15,14 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.formatter;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.formatter.FormatConfiguration.IndentType;
 import org.pgcodekeeper.core.utils.FileUtils;
+
+import java.io.IOException;
 
 class FormatterTest {
 
@@ -146,6 +146,13 @@ class FormatterTest {
         String newFile = "new_ch";
         String oldFile = "old_ch";
         testFormatter(oldFile, newFile, config, DatabaseType.CH);
+    }
+
+    @Test
+    void testFormatSql() throws IOException {
+        String newFile = getFileContent("new_ch_format_sql" + FILES_POSTFIX.SQL);
+        String oldFile = getFileContent("old_ch" + FILES_POSTFIX.SQL);
+        Assertions.assertEquals(newFile, FileFormatter.formatSql(oldFile, DatabaseType.CH));
     }
 
     private void testFormatter(String oldFileName, String newFileName, FormatConfiguration config, DatabaseType dbType)

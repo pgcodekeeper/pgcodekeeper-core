@@ -17,6 +17,8 @@ package org.pgcodekeeper.core.parsers.antlr.ch.statement;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.formatter.FileFormatter;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
@@ -73,7 +75,7 @@ public final class CreateChView extends ChParserAbstract {
         List<ParserRuleContext> ids = getIdentifiers(getQname());
         String name = QNameParser.getFirstName(ids);
         ChView view = new ChView(name);
-        parseObject(view);
+        parseObject(view, false);
         addSafe(getSchemaSafe(ids), view, ids);
     }
 
@@ -82,11 +84,12 @@ public final class CreateChView extends ChParserAbstract {
      * Handles simple views, materialized views, and live views with their respective options.
      *
      * @param view the view object to populate with parsed information
+     * @param needFormatSql if true format select part.
      */
-    public void parseObject(ChView view) {
+    public void parseObject(ChView view, boolean needFormatSql) {
         var vQuery = ctx.subquery_clause();
         if (vQuery != null) {
-            view.setQuery(getQuery(vQuery), AntlrUtils.normalizeWhitespaceUnquoted(vQuery, stream, getDbType()));
+            view.setQuery(getQuery(vQuery, needFormatSql), AntlrUtils.normalizeWhitespaceUnquoted(vQuery, stream, getDbType()));
             db.addAnalysisLauncher(new ChViewAnalysisLauncher(view, vQuery, fileName));
         }
 
@@ -107,6 +110,14 @@ public final class CreateChView extends ChParserAbstract {
         }
 
         parseLiveView(ctx.create_live_view_stmt(), view);
+    }
+
+    private String getQuery(Subquery_clauseContext vQuery, boolean needFormatSql) {
+        String sql = getFullCtxText(vQuery);
+        if (needFormatSql && null != vQuery.select_stmt()) {
+            return FileFormatter.formatSql(sql, DatabaseType.CH);
+        }
+        return sql;
     }
 
     private void parseSimpleView(Create_simple_view_stmtContext simpleViewCtx, ChView view) {
