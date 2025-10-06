@@ -202,3 +202,13 @@ CREATE VIEW default.v_5_23
 	`s` UInt16 NOT NULL
 )
 AS SELECT 1+1;
+
+CREATE VIEW IF NOT EXISTS view1 AS SELECT t1.id AS id, t1.value1 AS value1, t2.value2 AS value2, t3.value3 AS value3 FROM t1 LEFT JOIN t2 ON t1.id = t2.id LEFT JOIN t3 ON t1.id = t3.id WHERE t1.id > 0;
+
+CREATE TABLE constraint_on_nullable_type (`id` Nullable(UInt64), CONSTRAINT `c0` CHECK `id` = 1) engine = TinyLog();
+
+WITH x AS (SELECT number AS a FROM numbers(10)), y AS (SELECT number AS a FROM numbers(5)), z AS (SELECT * FROM x WHERE a % 2), w AS (SELECT * FROM y WHERE a > 0) SELECT max(a) FROM x JOIN y USING a WHERE a in (SELECT * FROM z) AND a > (SELECT min(a) FROM w);
+
+SELECT '1947 #3 CHECK - TRUE' as test, ProfileEvents['SleepFunctionCalls'] as sleep_calls, ProfileEvents['SleepFunctionMicroseconds'] as sleep_microseconds FROM system.query_log WHERE query like '%DESCRIBE ( SELECT ''1947 #3 QUERY - TRUE'',%' AND type > 1 AND current_database = currentDatabase() AND event_date >= yesterday() FORMAT JSONEachRow;
+
+SELECT '-21474836.48', 10000000000., '', count(kbytes), '', 10.0001, toStartOfMinute(datetime) AS dt_m, 10, NULL FROM projection_test__fuzz_0 GROUP BY dt_m WITH ROLLUP WITH TOTALS ORDER BY count(retry_count / duration) ASC NULLS LAST, 100000000000000000000. ASC NULLS FIRST format Null;

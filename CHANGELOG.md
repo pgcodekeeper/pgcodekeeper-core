@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Added support for PostgreSQL 18.
+- Added formatting of the SELECT part of VIEW objects when reading from the database for ClickHouse.
 
 ### Changed
 

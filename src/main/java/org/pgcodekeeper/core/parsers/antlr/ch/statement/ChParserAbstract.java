@@ -18,9 +18,9 @@ package org.pgcodekeeper.core.parsers.antlr.ch.statement;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
-import org.pgcodekeeper.core.parsers.antlr.ch.launcher.ChExpressionAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.*;
 import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
+import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.*;
+import org.pgcodekeeper.core.parsers.antlr.ch.launcher.ChExpressionAnalysisLauncher;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.PgObjLocation.LocationType;
 import org.pgcodekeeper.core.schema.ch.*;
@@ -98,10 +98,6 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
     private boolean isColumnNotNullable(Data_type_exprContext typeExpr) {
         return (typeExpr.not_null() != null && typeExpr.not_null().NOT() != null)
                 || typeExpr.data_type().NULLABLE() == null;
-    }
-
-    protected String getQuery(Subquery_clauseContext vQuery) {
-        return getFullCtxText(vQuery);
     }
 
     protected ChEngine getEnginePart(Engine_clauseContext engineClause) {
