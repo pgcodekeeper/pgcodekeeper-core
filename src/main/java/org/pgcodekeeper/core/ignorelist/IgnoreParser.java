@@ -13,14 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.ignoreparser;
+package org.pgcodekeeper.core.ignorelist;
 
 import org.antlr.v4.runtime.RuleContext;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.model.difftree.IIgnoreList;
-import org.pgcodekeeper.core.model.difftree.IgnoreList;
-import org.pgcodekeeper.core.model.difftree.IgnoredObject;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
 import org.pgcodekeeper.core.parsers.antlr.base.generated.IgnoreListParser;
 import org.pgcodekeeper.core.parsers.antlr.base.generated.IgnoreListParser.*;
