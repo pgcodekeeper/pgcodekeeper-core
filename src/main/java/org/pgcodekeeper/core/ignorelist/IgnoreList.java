@@ -13,25 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.model.difftree;
-
-import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.IgnoredObject.AddStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package org.pgcodekeeper.core.ignorelist;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * Implementation of ignore list specifically for schema filtering.
- * Manages rules for showing or hiding database schemas based on pattern matching.
- * Uses black list approach by default (show all, hide some).
+ * Implementation of ignore list for managing database object filtering rules.
+ * Provides functionality to add, merge, and evaluate ignore rules for database objects
+ * with support for hierarchical rule precedence and content-based filtering.
  */
-public class IgnoreSchemaList implements IIgnoreList {
-
-    private static final Logger LOG = LoggerFactory.getLogger(IgnoreSchemaList.class);
+public class IgnoreList implements IIgnoreList {
 
     private final List<IgnoredObject> rules = new ArrayList<>();
 
@@ -62,30 +56,43 @@ public class IgnoreSchemaList implements IIgnoreList {
 
     @Override
     public void add(IgnoredObject rule) {
-        rules.add(rule);
+        IgnoredObject existing = findSameMatchingRule(rule);
+        if (existing != null) {
+            if (existing.isIgnoreContent() != rule.isIgnoreContent()) {
+                if (!existing.isIgnoreContent()) {
+                    // existing rule is narrow (nocontent), use new wider rule
+                    existing.setIgnoreContent(true);
+                    existing.setShow(rule.isShow());
+                }
+            } else {
+                // from same-width alternatives choose a hiding one
+                existing.setShow(existing.isShow() && rule.isShow());
+            }
+        } else {
+            // add new
+            rules.add(rule);
+        }
+    }
+
+    private IgnoredObject findSameMatchingRule(IgnoredObject rule) {
+        for (IgnoredObject match : rules) {
+            if (match.hasSameMatchingCondition(rule)) {
+                return match;
+            }
+        }
+        return null;
     }
 
     /**
-     * Checks if a schema should be shown based on configured rules.
+     * Adds all ignore rules from the collection to this list.
+     * Each rule is processed through the standard add logic to handle merging.
      *
-     * @param schema the schema name to check
-     * @return true if schema should be shown, false if it should be hidden
+     * @param collection collection of ignore rules to add
      */
-    public boolean getNameStatus(String schema) {
-        for (IgnoredObject rule : rules) {
-            if (rule.match(schema)) {
-                AddStatus newStatus = rule.getAddStatus();
-                return switch (newStatus) {
-                    case ADD, ADD_SUBTREE -> true;
-                    case SKIP, SKIP_SUBTREE -> {
-                        var msg = Messages.IgnoreSchemaList_log_ignored_schema.formatted(schema);
-                        LOG.debug(msg);
-                        yield false;
-                    }
-                };
-            }
+    public void addAll(Collection<IgnoredObject> collection) {
+        for (IgnoredObject rule : collection) {
+            add(rule);
         }
-        return isShow;
     }
 
     /**

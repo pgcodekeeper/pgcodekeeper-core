@@ -19,6 +19,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
+import org.pgcodekeeper.core.ignorelist.IgnoreList;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.*;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;

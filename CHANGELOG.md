@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Classes related to ignore lists have been moved to a common package.
+- Classes for creating JDBC connections have been rewritten to reflect the new repository structure.
+
 ### Fixed
 
 ### Removed

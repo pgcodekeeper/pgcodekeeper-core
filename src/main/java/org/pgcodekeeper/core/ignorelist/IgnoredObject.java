@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.model.difftree;
+package org.pgcodekeeper.core.ignorelist;
 
 import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.model.difftree.DbObjType;
 
 import java.util.EnumSet;
 import java.util.Objects;
@@ -132,6 +133,10 @@ public class IgnoredObject {
         this.objTypes = objTypes;
     }
 
+    public Pattern getDbRegex() {
+        return dbRegex;
+    }
+
     /**
      * Creates a copy of this ignore rule with a different name pattern.
      *
@@ -143,42 +148,12 @@ public class IgnoredObject {
                 ignoreContent, isQualified, EnumSet.copyOf(objTypes));
     }
 
-    boolean match(String objName) {
+    public boolean match(String objName) {
         if (isRegular) {
             return regex.matcher(objName).find();
-        } else {
-            return name.equals(objName);
         }
-    }
 
-    /**
-     * Checks if this ignore rule matches the given tree element and database names.
-     *
-     * @param el      the tree element to match against
-     * @param dbNames optional database names to match against the database regex
-     * @return true if the rule matches the element
-     */
-    public boolean match(TreeElement el, String... dbNames) {
-        boolean matches = match(isQualified ? el.getQualifiedName() : el.getName());
-
-        if (!objTypes.isEmpty()) {
-            matches = matches && objTypes.contains(el.getType());
-        }
-        if (matches && dbRegex != null) {
-            if (dbNames != null && dbNames.length != 0) {
-                boolean foundDbMatch = false;
-                for (String dbName : dbNames) {
-                    if (dbName != null && dbRegex.matcher(dbName).find()) {
-                        foundDbMatch = true;
-                        break;
-                    }
-                }
-                matches = foundDbMatch;
-            } else {
-                matches = false;
-            }
-        }
-        return matches;
+        return name.equals(objName);
     }
 
     boolean hasSameMatchingCondition(IgnoredObject rule) {
@@ -195,42 +170,26 @@ public class IgnoredObject {
     public AddStatus getAddStatus() {
         if (isShow) {
             return ignoreContent ? AddStatus.ADD_SUBTREE : AddStatus.ADD;
-        } else {
-            return ignoreContent ? AddStatus.SKIP_SUBTREE : AddStatus.SKIP;
         }
+        return ignoreContent ? AddStatus.SKIP_SUBTREE : AddStatus.SKIP;
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        final int itrue = 1231;
-        final int ifalse = 1237;
-        int result = 1;
-        result = prime * result + (ignoreContent ? itrue : ifalse);
-        result = prime * result + (isQualified ? itrue : ifalse);
-        result = prime * result + (isRegular ? itrue : ifalse);
-        result = prime * result + (isShow ? itrue : ifalse);
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((dbRegexStr == null) ? 0 : dbRegexStr.hashCode());
-        result = prime * result + objTypes.hashCode();
-        return result;
+        return Objects.hash(ignoreContent, isQualified, isRegular, isShow, name, dbRegexStr, objTypes);
     }
 
     @Override
     public boolean equals(Object obj) {
-        boolean eq = false;
-        if (obj instanceof IgnoredObject other) {
-            eq = ignoreContent == other.ignoreContent
+        return obj instanceof IgnoredObject other
+                    && ignoreContent == other.ignoreContent
                     && isQualified == other.isQualified
                     && isRegular == other.isRegular
                     && isShow == other.isShow
                     && Objects.equals(name, other.name)
                     && Objects.equals(dbRegexStr, other.dbRegexStr)
                     && objTypes.equals(other.objTypes);
-        }
-        return eq;
     }
-
 
     @Override
     public String toString() {

@@ -18,7 +18,7 @@ package org.pgcodekeeper.core.loader;
 import org.pgcodekeeper.core.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.model.difftree.IgnoreSchemaList;
+import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrTaskManager;
 import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.ms.MsSchema;
@@ -170,7 +170,7 @@ public class ProjectLoader extends DatabaseLoader {
         // read out schemas names, and work in loop on each
         try (Stream<Path> schemas = Files.list(schemasCommonDir)) {
             for (Path schemaDir : Utils.streamIterator(schemas)) {
-                if (Files.isDirectory(schemaDir) && checkIgnoreSchemaList(schemaDir.getFileName().toString())) {
+                if (Files.isDirectory(schemaDir) && isAllowedSchema(schemaDir.getFileName().toString())) {
                     loadSubdir(schemasCommonDir, schemaDir.getFileName().toString(), db);
                     for (DbObjType dirSub : WorkDirs.getDirLoadOrder()) {
                         loadSubdir(schemaDir, dirSub.name(), db);
@@ -183,7 +183,7 @@ public class ProjectLoader extends DatabaseLoader {
     private void loadMsStructure(Path dir, AbstractDatabase db) throws InterruptedException, IOException {
         Path securityFolder = dir.resolve(WorkDirs.MS_SECURITY);
 
-        loadSubdir(securityFolder, WorkDirs.MS_SCHEMAS, db, this::checkIgnoreSchemaList);
+        loadSubdir(securityFolder, WorkDirs.MS_SCHEMAS, db, this::isAllowedSchema);
         // DBO schema check requires schema loads to finish first
         AntlrTaskManager.finish(antlrTasks);
         addDboSchema(db);
@@ -194,7 +194,7 @@ public class ProjectLoader extends DatabaseLoader {
         for (String dirSub : WorkDirs.getDirectoryNames(DatabaseType.MS)) {
             if (WorkDirs.isInMsSchema(dirSub)) {
                 // get schema name from file names and filter
-                loadSubdir(dir, dirSub, db, this::checkIgnoreSchemaList);
+                loadSubdir(dir, dirSub, db, this::isAllowedSchema);
                 continue;
             }
             loadSubdir(dir, dirSub, db);
@@ -275,7 +275,7 @@ public class ProjectLoader extends DatabaseLoader {
         }
     }
 
-    protected boolean checkIgnoreSchemaList(String resourceName) {
+    protected boolean isAllowedSchema(String resourceName) {
         return ignoreSchemaList == null || ignoreSchemaList.getNameStatus(resourceName.split("\\.")[0]);
     }
 }

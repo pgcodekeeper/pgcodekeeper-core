@@ -15,8 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.difftree;
 
+import org.pgcodekeeper.core.ignorelist.IgnoreList;
+import org.pgcodekeeper.core.ignorelist.IgnoredObject;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.IgnoredObject.AddStatus;
+import org.pgcodekeeper.core.ignorelist.IgnoredObject.AddStatus;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
 import org.pgcodekeeper.core.schema.AbstractDatabase;
 import org.slf4j.Logger;
@@ -128,12 +130,7 @@ public final class TreeFlattener {
     }
 
     private void recurse(TreeElement el) {
-        AddStatus status;
-        if (ignoreList == null) {
-            status = AddStatus.ADD;
-        } else {
-            status = ignoreList.getNameStatus(el, !addSubtreeRoots.isEmpty(), dbNames);
-        }
+        AddStatus status = ignoreList != null ? getNameStatus(el) : AddStatus.ADD;
 
         if (status == AddStatus.SKIP) {
             var msg = Messages.TreeFlattener_log_ignore_obj.formatted(el.getName());
@@ -169,6 +166,72 @@ public final class TreeFlattener {
                 || !el.getPgStatement(dbSource).compare(el.getPgStatement(dbTarget)))) {
             result.add(el);
         }
+    }
+
+    /**
+     * Determines the add status for a tree element based on ignore rules.
+     * Evaluates all matching rules and applies precedence logic.
+     *
+     * @param el           the tree element to evaluate
+     * @return the final add status for the element
+     */
+    private AddStatus getNameStatus(TreeElement el) {
+        AddStatus status = null;
+        for (IgnoredObject rule : ignoreList.getList()) {
+            if (match(rule, el)) {
+                AddStatus newStatus = rule.getAddStatus();
+                if (status == null) {
+                    status = newStatus;
+                } else if ((status == AddStatus.ADD || status == AddStatus.SKIP) &&
+                        (newStatus == AddStatus.ADD_SUBTREE || newStatus == AddStatus.SKIP_SUBTREE)) {
+                    // use wider rule
+                    status = newStatus;
+                } else if (status == AddStatus.ADD && newStatus == AddStatus.SKIP ||
+                        status == AddStatus.ADD_SUBTREE && newStatus == AddStatus.SKIP_SUBTREE) {
+                    // use hiding rule
+                    status = newStatus;
+                }
+            }
+        }
+
+        if (status != null) {
+            return status;
+        }
+
+        return !addSubtreeRoots.isEmpty() || ignoreList.isShow() ? AddStatus.ADD : AddStatus.SKIP;
+    }
+
+    /**
+     * Checks if this ignore rule matches the given tree element and database names.
+     *
+     * @param rule    rule
+     * @param el      the tree element to match against
+     * @return true if the rule matches the element
+     */
+    private boolean match(IgnoredObject rule, TreeElement el) {
+        boolean matches = rule.match(rule.isQualified() ? el.getQualifiedName() : el.getName());
+
+        var objTypes = rule.getObjTypes();
+        if (!objTypes.isEmpty()) {
+            matches = matches && objTypes.contains(el.getType());
+        }
+
+        var pattern = rule.getDbRegex();
+        if (matches && pattern != null) {
+            if (dbNames != null && dbNames.length != 0) {
+                boolean foundDbMatch = false;
+                for (String dbName : dbNames) {
+                    if (dbName != null && pattern.matcher(dbName).find()) {
+                        foundDbMatch = true;
+                        break;
+                    }
+                }
+                matches = foundDbMatch;
+            } else {
+                matches = false;
+            }
+        }
+        return matches;
     }
 
     private void writeChildrenInLog(TreeElement el) {
