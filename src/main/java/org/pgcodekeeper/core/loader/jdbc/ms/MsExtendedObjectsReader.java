@@ -197,16 +197,12 @@ public class MsExtendedObjectsReader extends JdbcReader {
                 .column("t.is_user_defined AS ud")
                 .from("sys.columns as c WITH (NOLOCK)")
                 .join("JOIN sys.types t WITH (NOLOCK) ON c.user_type_id = t.user_type_id")
-                .where("c.object_id = res.object_id");
-
-        QueryBuilder cols = new QueryBuilder()
-                .column("*")
-                .from(subSelect, "ccc ORDER BY ccc.id")
+                .where("c.object_id = res.object_id")
+                .orderBy("c.column_id")
                 .postAction("FOR XML RAW, ROOT");
 
         builder.column("ccc.cols");
-        builder.join("CROSS APPLY", cols, "ccc (cols)");
-
+        builder.join("CROSS APPLY", subSelect, "ccc (cols)");
     }
 
     private void addMsArgsPart(QueryBuilder builder) {
@@ -228,15 +224,11 @@ public class MsExtendedObjectsReader extends JdbcReader {
                 .join("JOIN sys.parameters p WITH (NOLOCK) ON so.object_id = p.object_id")
                 .join("JOIN sys.types t WITH (NOLOCK) ON p.user_type_id = t.user_type_id")
                 .where("p.parameter_id > 0")
-                .where("so.object_id = res.object_id");
-
-        QueryBuilder args = new QueryBuilder()
-                .column("*")
-                .from(subSelect, "cc ORDER BY cc.id")
+                .where("so.object_id = res.object_id")
+                .orderBy("id")
                 .postAction("FOR XML RAW, ROOT");
 
         builder.column("cc.args");
-        builder.join("CROSS APPLY", args, "cc (args)");
-
+        builder.join("CROSS APPLY", subSelect, "cc (args)");
     }
 }

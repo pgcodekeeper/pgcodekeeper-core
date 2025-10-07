@@ -83,15 +83,11 @@ public class MsRolesReader extends AbstractStatementReader {
                 .column("p1.name AS m")
                 .from("sys.database_role_members AS rm WITH (NOLOCK)")
                 .join("INNER JOIN sys.database_principals p1 WITH (NOLOCK) ON rm.member_principal_id=p1.principal_id")
-                .where("rm.role_principal_id=res.principal_id");
-
-        QueryBuilder group = new QueryBuilder()
-                .column("*")
-                .from(subSelect, "cc")
+                .where("rm.role_principal_id=res.principal_id")
                 .postAction("FOR XML RAW, ROOT");
 
         builder.column("cc.groups");
-        builder.join("CROSS APPLY", group, "cc (groups)");
+        builder.join("CROSS APPLY", subSelect, "cc (groups)");
     }
 
     @Override

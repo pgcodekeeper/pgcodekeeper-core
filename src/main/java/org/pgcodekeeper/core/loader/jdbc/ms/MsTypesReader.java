@@ -182,7 +182,6 @@ public final class MsTypesReader extends JdbcReader {
     private void addMsColumnsPart(QueryBuilder builder) {
         QueryBuilder subSelect = new QueryBuilder()
                 .column("c.name")
-                .column("c.column_id AS id")
                 .column("ss.name AS st")
                 .column("usrt.name AS type")
                 .column("usrt.is_user_defined AS ud")
@@ -206,31 +205,23 @@ public final class MsTypesReader extends JdbcReader {
                 .join("LEFT OUTER JOIN sys.schemas ss WITH (NOLOCK) ON ss.schema_id = usrt.schema_id")
                 .join("LEFT OUTER JOIN sys.types baset WITH (NOLOCK) ON (baset.user_type_id = c.system_type_id AND baset.user_type_id = baset.system_type_id)")
                 .join("  OR (baset.system_type_id = c.system_type_id AND baset.user_type_id = c.user_type_id AND baset.is_user_defined = 0 AND baset.is_assembly_type = 1)")
-                .where("ttt.type_table_object_id=c.object_id");
-
-
-        QueryBuilder cols = new QueryBuilder()
-                .column("*")
-                .from(subSelect, "cc ORDER BY cc.id")
+                .where("ttt.type_table_object_id=c.object_id")
+                .orderBy("c.column_id")
                 .postAction("FOR XML RAW, ROOT");
 
         builder.column("cc.cols");
-        builder.join("CROSS APPLY", cols, "cc (cols)");
+        builder.join("CROSS APPLY", subSelect, "cc (cols)");
     }
 
     private void addMsIndicesPart(QueryBuilder builder) {
-        QueryBuilder subSubSubSelect = new QueryBuilder()
-                .column("c.index_column_id AS id")
+        QueryBuilder subSubSelect = new QueryBuilder()
                 .column("sc.name")
                 .column("c.is_descending_key AS is_desc")
                 .from("sys.index_columns c WITH (NOLOCK)")
                 .join("JOIN sys.columns sc WITH (NOLOCK) ON c.object_id = sc.object_id AND c.column_id = sc.column_id")
                 .where("c.object_id = si.object_id")
-                .where("c.index_id = si.index_id");
-
-        QueryBuilder subSubSelect = new QueryBuilder()
-                .column("*")
-                .from(subSubSubSelect, "cc ORDER BY cc.id")
+                .where("c.index_id = si.index_id")
+                .orderBy("c.index_column_id")
                 .postAction("FOR XML RAW, ROOT");
 
         QueryBuilder subSelect = new QueryBuilder()
@@ -248,15 +239,11 @@ public final class MsTypesReader extends JdbcReader {
                 .join("CROSS APPLY", subSubSelect, "ccc (cols)")
                 .where("si.object_id=ttt.type_table_object_id")
                 .where("si.index_id > 0")
-                .where("si.is_hypothetical = 0");
-
-        QueryBuilder indicesBuilder = new QueryBuilder()
-                .column("*")
-                .from(subSelect, "ii")
+                .where("si.is_hypothetical = 0")
                 .postAction("FOR XML RAW, ROOT");
 
         builder.column("ii.indices");
-        builder.join("CROSS APPLY", indicesBuilder, "ii (indices)");
+        builder.join("CROSS APPLY", subSelect, "ii (indices)");
     }
 
     @Override

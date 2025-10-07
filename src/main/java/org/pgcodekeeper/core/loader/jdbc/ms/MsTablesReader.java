@@ -299,16 +299,13 @@ public class MsTablesReader extends JdbcReader {
                 .join("LEFT JOIN sys.default_constraints dc WITH (NOLOCK) ON dc.parent_object_id = c.object_id AND c.column_id = dc.parent_column_id")
                 .join("LEFT JOIN sys.objects so WITH (NOLOCK) ON so.object_id = c.object_id")
                 .join("LEFT JOIN sys.masked_columns mc WITH (NOLOCK) ON mc.object_id = c.object_id AND c.column_id = mc.column_id")
-                .where("c.object_id = res.object_id");
-
-        QueryBuilder cols = new QueryBuilder()
-                .column("*")
-                .from(subSelect, "cc ORDER BY cc.id")
+                .where("c.object_id = res.object_id")
+                .orderBy("c.column_id")
                 .postAction("FOR XML RAW, ROOT");
 
         builder
                 .column("cc.cols")
-                .join("CROSS APPLY", cols, "cc (cols)");
+                .join("CROSS APPLY", subSelect, "cc (cols)");
     }
 
     private void addMsTablespacePart(QueryBuilder builder) {

@@ -213,27 +213,23 @@ public class MsIndicesAndPKReader extends JdbcReader {
 
     protected void addMsColsPart(QueryBuilder builder) {
         QueryBuilder subSelect = new QueryBuilder()
-                .column("c.key_ordinal AS id")
                 .column("sc.name")
                 .column("c.is_descending_key AS is_desc")
                 .column("c.is_included_column AS is_inc")
                 .from("sys.index_columns c WITH (NOLOCK)")
                 .join("JOIN sys.columns sc WITH (NOLOCK) ON c.object_id = sc.object_id AND c.column_id = sc.column_id")
                 .where("c.object_id = res.object_id")
-                .where("c.index_id = res.index_id");
+                .where("c.index_id = res.index_id")
+                .orderBy("c.key_ordinal")
+                .postAction("FOR XML RAW, ROOT");
 
         if (SupportedMsVersion.VERSION_22.isLE(loader.getVersion())) {
             subSelect.column("c.column_store_order_ordinal AS col_order");
         }
 
-        QueryBuilder cols = new QueryBuilder()
-                .column("*")
-                .from(subSelect, "cc ORDER BY cc.id")
-                .postAction("FOR XML RAW, ROOT");
-
         builder
                 .column("cc.cols")
-                .join("CROSS APPLY", cols, "cc (cols)");
+                .join("CROSS APPLY", subSelect, "cc (cols)");
     }
 
     @Override

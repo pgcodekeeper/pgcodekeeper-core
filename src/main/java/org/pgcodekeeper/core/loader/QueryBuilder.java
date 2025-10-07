@@ -33,6 +33,7 @@ public final class QueryBuilder {
     private final List<String> joins = new ArrayList<>();
     private final List<String> wheres = new ArrayList<>();
     private final List<String> groups = new ArrayList<>();
+    private final List<String> orders = new ArrayList<>();
     private String postAction;
 
     /**
@@ -194,6 +195,17 @@ public final class QueryBuilder {
     }
 
     /**
+     * Adds a ORDER BY expression to the query.
+     *
+     * @param order the ORDER BY expression
+     * @return this builder for method chaining
+     */
+    public QueryBuilder orderBy(String order) {
+        orders.add(order);
+        return this;
+    }
+
+    /**
      * Builds and returns the complete SQL query string.
      *
      * @return the constructed SQL query
@@ -220,19 +232,21 @@ public final class QueryBuilder {
             sb.append("\n").append(join);
         }
 
-        if (!wheres.isEmpty()) {
-            sb.append("\nWHERE ").append(String.join("\n  AND ", wheres));
-        }
-
-        if (!groups.isEmpty()) {
-            sb.append("\nGROUP BY ").append(String.join(", ", groups));
-        }
+        appendList(wheres, "\nWHERE ", "\n  AND ", sb);
+        appendList(groups, "\nGROUP BY ", ", ", sb);
+        appendList(orders, "\nORDER BY ", ", ", sb);
 
         if (postAction != null) {
             sb.append("\n").append(postAction);
         }
 
         return sb.toString();
+    }
+
+    private void appendList(List<String> list, String prefix, String delimiter, StringBuilder sb) {
+        if (!list.isEmpty()) {
+            sb.append(prefix).append(String.join(delimiter, list));
+        }
     }
 
     private void appendChild(StringBuilder sb, QueryBuilder childBuilder) {
