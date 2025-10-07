@@ -115,6 +115,30 @@ class QueryBuilderTest {
     }
 
     @Test
+    void testQuery() {
+        String actual = new QueryBuilder()
+                .column("c1")
+                .from("public.t1")
+                .where("c1 > 0")
+                .orderBy("col1")
+                .orderBy("col2")
+                .groupBy("col1")
+                .postAction("FOR XML RAW, ROOT")
+                .build();
+
+        String expected = """
+                SELECT
+                  c1
+                FROM public.t1
+                WHERE c1 > 0
+                GROUP BY col1
+                ORDER BY col1, col2
+                FOR XML RAW, ROOT""";
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
     void testPostAction() {
         String actual = new QueryBuilder()
                 .column("c1")

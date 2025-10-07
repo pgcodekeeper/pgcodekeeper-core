@@ -39,7 +39,8 @@ public abstract class AbstractStatementReader {
             .column("roleprinc.name AS r")
             .from("sys.database_principals roleprinc WITH (NOLOCK)")
             .join("JOIN sys.database_permissions perm WITH (NOLOCK) ON perm.grantee_principal_id = roleprinc.principal_id")
-            .join("LEFT JOIN sys.columns col WITH (NOLOCK) ON col.object_id = perm.major_id AND col.column_id = perm.minor_id");
+            .join("LEFT JOIN sys.columns col WITH (NOLOCK) ON col.object_id = perm.major_id AND col.column_id = perm.minor_id")
+            .postAction("FOR XML RAW, ROOT");
 
     protected static final QueryBuilder EXTENSION_DEPS_CTE_BUILDER = new QueryBuilder()
             .column("objid")
@@ -124,11 +125,7 @@ public abstract class AbstractStatementReader {
     }
 
     protected void addMsPriviligesPart(QueryBuilder builder) {
-        var subSelect = new QueryBuilder()
-                .column("*")
-                .from(formatMsPriviliges(MS_PRIVILEGES_JOIN_SUBSELECT.copy()), "aa")
-                .postAction("FOR XML RAW, ROOT");
-
+        var subSelect = formatMsPriviliges(MS_PRIVILEGES_JOIN_SUBSELECT.copy());
         builder
                 .column("aa.acl")
                 .join("CROSS APPLY", subSelect, "aa (acl)");

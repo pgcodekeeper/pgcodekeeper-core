@@ -87,15 +87,11 @@ public final class MsStatisticsReader extends JdbcReader {
     protected void fillQueryBuilder(QueryBuilder builder) {
         QueryBuilder subSelect = new QueryBuilder()
                 .column("s_column.name AS name")
-                .column("st_col.stats_column_id AS id")
                 .from("sys.stats_columns st_col WITH (NOLOCK)")
                 .join("LEFT JOIN sys.columns s_column WITH (NOLOCK) ON s_column.object_id = res.object_id AND s_column.column_id = st_col.column_id")
                 .where("st_col.object_id = res.object_id")
-                .where("st_col.stats_id = res.stats_id");
-
-        QueryBuilder cols = new QueryBuilder()
-                .column("*")
-                .from(subSelect, "st_col ORDER BY id")
+                .where("st_col.stats_id = res.stats_id")
+                .orderBy("st_col.stats_column_id")
                 .postAction("FOR XML RAW, ROOT");
 
         builder
@@ -106,7 +102,7 @@ public final class MsStatisticsReader extends JdbcReader {
                 .column("res.no_recompute")
                 .column("res.is_incremental")
                 .from("sys.stats res WITH (NOLOCK)")
-                .join("CROSS APPLY", cols, "st_col (cols)")
+                .join("CROSS APPLY", subSelect, "st_col (cols)")
                 .join("LEFT JOIN sys.objects cont WITH (NOLOCK) ON cont.object_id = res.object_id")
                 .where("res.user_created = 1");
 
