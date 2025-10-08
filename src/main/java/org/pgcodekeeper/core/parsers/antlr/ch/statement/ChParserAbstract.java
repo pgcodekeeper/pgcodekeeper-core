@@ -58,10 +58,9 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
         List<ParserRuleContext> ids = getIdentifiers(column.qualified_name());
         var col = new ChColumn(QNameParser.getFirstName(ids));
         Data_type_exprContext typeExpr = column.data_type_expr();
-        if (typeExpr.data_type() != null) {
-            col.setType(getFullCtxText(typeExpr.data_type()));
-            col.setNotNull(isColumnNotNullable(typeExpr));
-
+        var dataType = typeExpr.data_type();
+        if (dataType != null) {
+            setDataType(col, dataType);
             var defType = typeExpr.table_column_property_expr();
             if (defType != null) {
                 if (defType.DEFAULT() != null) {
@@ -78,8 +77,8 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
                 }
             }
         }
-        if (column.not_null() != null) {
-            col.setNotNull(column.not_null().NOT() != null);
+        if (isNullable(column.not_null()) || isNullable(typeExpr.not_null())) {
+            col.setNotNull(false);
         }
         if (column.comment_expr() != null) {
             col.setComment(column.comment_expr().STRING_LITERAL().getText());
@@ -95,9 +94,16 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
         return col;
     }
 
-    private boolean isColumnNotNullable(Data_type_exprContext typeExpr) {
-        return (typeExpr.not_null() != null && typeExpr.not_null().NOT() != null)
-                || typeExpr.data_type().NULLABLE() == null;
+    private boolean isNullable(Not_nullContext notNullContext) {
+        return notNullContext != null && notNullContext.NOT() == null;
+    }
+
+    protected void setDataType(ChColumn col, Data_typeContext dataType) {
+        if (dataType.NULLABLE() != null) {
+            dataType = dataType.nullable_data_type;
+            col.setNotNull(false);
+        }
+        col.setType(getFullCtxText(dataType));
     }
 
     protected ChEngine getEnginePart(Engine_clauseContext engineClause) {

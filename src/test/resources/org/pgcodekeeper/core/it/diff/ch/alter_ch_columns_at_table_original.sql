@@ -52,3 +52,16 @@ CREATE TABLE default.t4
 ENGINE = MergeTree
 ORDER BY a
 SETTINGS index_granularity = 8192;
+
+CREATE TABLE default.t5
+(
+    `a` UInt8 NOT NULL,
+    `b` UInt8,
+    `c` UInt8,
+    `d` UInt8,
+    `e` Nullable(UInt8),
+    `f` UInt8 NULL
+)
+ENGINE = MergeTree
+ORDER BY a
+SETTINGS index_granularity = 8192;

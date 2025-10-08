@@ -7,8 +7,8 @@ ALTER TABLE default.t4
 
 CREATE VIEW default.v3
 (
-	`Id` UInt32 NOT NULL,
-	`Object.Key` Array(UInt16) NOT NULL,
-	`Object.Value` Array(String) NOT NULL
+	`Id` UInt32,
+	`Object.Key` Array(UInt16),
+	`Object.Value` Array(String)
 )
 AS SELECT * REPLACE arrayMap(x -> (x + 1), `Object.Value`) AS `Object.Value` FROM default.t4;

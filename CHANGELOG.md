@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Fixed code generation for columns with Nullable values in ClickHouse.
+
 ### Removed
 
 - Removed support for MS SQL versions below 2017.

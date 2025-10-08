@@ -34,7 +34,6 @@ import java.util.Objects;
  * codecs, and different default types.
  */
 public final class ChColumn extends AbstractColumn {
-
     private String defaultType;
 
     private String ttl;
@@ -48,6 +47,7 @@ public final class ChColumn extends AbstractColumn {
      */
     public ChColumn(String name) {
         super(name);
+        setNotNull(true);
     }
 
     public void setDefaultType(String defaultType) {
@@ -75,12 +75,7 @@ public final class ChColumn extends AbstractColumn {
         var sb = new StringBuilder();
         sb.append(ChDiffUtils.quoteName(name));
 
-        if (type != null) {
-            sb.append(' ').append(type);
-            if (notNull) {
-                sb.append(" NOT NULL");
-            }
-        }
+        appendType(sb);
         appendColumnOptions(sb);
         return sb.toString();
     }
@@ -92,11 +87,22 @@ public final class ChColumn extends AbstractColumn {
         appendIfNotExists(sb, script.getSettings());
         sb.append(ChDiffUtils.quoteName(name));
 
-        if (type != null) {
-            sb.append(' ').append(type);
-        }
+        appendType(sb);
         appendColumnOptions(sb);
         script.addStatement(sb);
+    }
+
+    private void appendType(StringBuilder sb) {
+        if (type == null) {
+            return;
+        }
+
+        sb.append(' ');
+        if (notNull) {
+            sb.append(type);
+        } else {
+            sb.append("Nullable(").append(type).append(")");
+        }
     }
 
     private void appendColumnOptions(StringBuilder sb) {
@@ -135,7 +141,7 @@ public final class ChColumn extends AbstractColumn {
         int startSize = script.getSize();
         ChColumn newColumn = (ChColumn) newCondition;
 
-        compareTypes(newColumn.type, script);
+        compareTypes(newColumn, script);
         compareDefaults(newColumn, script);
         compareCodecs(newColumn.codecs, script);
         compareTtl(newColumn.ttl, newColumn.type, script);
@@ -154,13 +160,14 @@ public final class ChColumn extends AbstractColumn {
         script.addStatement(sb);
     }
 
-    private void compareTypes(String newType, SQLScript script) {
-        if (type.equals(newType)) {
+    private void compareTypes(ChColumn newColumn, SQLScript script) {
+        if (Objects.equals(type, newColumn.type) && notNull == newColumn.notNull) {
             return;
         }
+
         StringBuilder sb = new StringBuilder();
         appendAlterColumn(sb, script.getSettings());
-        sb.append(' ').append(newType);
+        newColumn.appendType(sb);
         script.addStatement(sb);
     }
 

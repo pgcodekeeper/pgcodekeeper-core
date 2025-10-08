@@ -60,14 +60,14 @@ ALTER TABLE default.t2_1 ADD INDEX ind1 col1 > 0 TYPE bloom_filter;
 
 CREATE TABLE default.test
 (
-	`col1` Int32 NOT NULL,
+	`col1` Int32,
 	CONSTRAINT c_name2 CHECK col1 < 10
 )
 ENGINE = Log;
 
 CREATE TABLE default.test2
 (
-	`col1` Int32 NOT NULL,
+	`col1` Int32,
 	CONSTRAINT c_name CHECK col1 > 0,
 	CONSTRAINT c_name2 CHECK col1 < 10
 )

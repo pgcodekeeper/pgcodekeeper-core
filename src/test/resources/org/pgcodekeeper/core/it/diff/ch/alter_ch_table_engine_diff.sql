@@ -48,8 +48,8 @@ DROP TABLE default.t5_1;
 
 CREATE TABLE default.t3_1
 (
-	`col1` Int64 NOT NULL,
-	`col2` Int64 NOT NULL
+	`col1` Int64,
+	`col2` Int64
 )
 ENGINE = MergeTree
 ORDER BY col2
@@ -57,8 +57,8 @@ SETTINGS index_granularity = 8192;
 
 CREATE TABLE default.t3_2
 (
-	`col1` Int64 NOT NULL,
-	`col2` Int64 NOT NULL
+	`col1` Int64,
+	`col2` Int64
 )
 ENGINE = MergeTree
 ORDER BY (col1)
@@ -66,9 +66,9 @@ SETTINGS index_granularity = 8192;
 
 CREATE TABLE default.t5_1
 (
-	`col1` Int64 NOT NULL,
-	`col2` DateTime64(3) NOT NULL,
-	`col3` DateTime64(4) NOT NULL
+	`col1` Int64,
+	`col2` DateTime64(3),
+	`col3` DateTime64(4)
 )
 ENGINE = MergeTree
 PARTITION BY col3

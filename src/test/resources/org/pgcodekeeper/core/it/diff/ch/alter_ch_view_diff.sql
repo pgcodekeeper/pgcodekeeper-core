@@ -26,41 +26,41 @@ DROP VIEW default.v_6_1;
 
 CREATE VIEW default.v_1_1
 (
-	`s` UInt8 NOT NULL,
-	`col1` Int64 NOT NULL TTL col2 + toIntervalDay(1),
-	`col2` Date NOT NULL
+	`s` UInt8,
+	`col1` Int64 TTL col2 + toIntervalDay(1),
+	`col2` Date
 )
 AS SELECT 1 AS s;
 
 CREATE VIEW default.v_1_2
 (
-	`s` UInt8 NOT NULL,
-	`col1` Int64 NOT NULL,
-	`col2` Date NOT NULL
+	`s` UInt8,
+	`col1` Int64,
+	`col2` Date
 )
 AS SELECT 1 AS s;
 
 CREATE VIEW default.v_2_1
 (
-	`s` UInt8 NOT NULL,
-	`col1` Int64 NOT NULL,
-	`col2` Date NOT NULL
+	`s` UInt8,
+	`col1` Int64,
+	`col2` Date
 )
 AS SELECT 1 AS s;
 
 CREATE VIEW default.v_2_2
 (
-	`s` UInt8 NOT NULL,
-	`col1` Int64 NOT NULL
+	`s` UInt8,
+	`col1` Int64
 )
 AS SELECT 1 AS s;
 
 CREATE MATERIALIZED VIEW default.v_3_1
 (
-	`col1` String NOT NULL,
-	`col2` String NOT NULL DEFAULT 'b',
-	`col4` Int64 NOT NULL,
-	`col3` Date NOT NULL
+	`col1` String,
+	`col2` String DEFAULT 'b',
+	`col4` Int64,
+	`col3` Date
 )
 ENGINE = MergeTree
 PARTITION BY tuple()
@@ -71,10 +71,10 @@ AS SELECT concat(tuple(*).1, 'mv1') AS s FROM default.src;
 
 CREATE MATERIALIZED VIEW default.v_3_2
 (
-	`col1` String NOT NULL,
-	`col2` String NOT NULL DEFAULT 'b',
-	`col4` Int64 NOT NULL,
-	`col3` Date NOT NULL
+	`col1` String,
+	`col2` String DEFAULT 'b',
+	`col4` Int64,
+	`col3` Date
 )
 ENGINE = MergeTree
 PARTITION BY tuple()
@@ -84,6 +84,6 @@ AS SELECT concat(tuple(*).1, 'mv1') AS s FROM default.src;
 
 CREATE VIEW default.v_6_1
 (
-	`s` UInt8 NOT NULL
+	`s` UInt8
 )
 AS SELECT 2 AS s;
