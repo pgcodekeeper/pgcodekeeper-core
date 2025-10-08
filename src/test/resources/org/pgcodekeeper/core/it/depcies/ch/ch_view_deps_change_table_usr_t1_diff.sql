@@ -6,9 +6,9 @@ DROP TABLE default.t1_1;
 
 CREATE TABLE default.t1_1
 (
-	`d` DateTime NOT NULL DEFAULT 1,
-	`a` UInt32 NOT NULL,
-	`c` Int64 NOT NULL
+	`d` DateTime DEFAULT 1,
+	`a` UInt32,
+	`c` Int64
 )
 ENGINE = MergeTree
 PRIMARY KEY tuple()
@@ -18,8 +18,8 @@ SETTINGS index_granularity = 8192;
 
 CREATE VIEW default.v1
 (
-	`col1` Int64 NOT NULL,
-	`col2` Int64 NOT NULL
+	`col1` Int64,
+	`col2` Int64
 )
 AS SELECT A + B AS col1, C AS col2
 FROM (

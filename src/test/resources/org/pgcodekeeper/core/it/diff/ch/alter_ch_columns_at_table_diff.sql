@@ -12,6 +12,9 @@ ALTER TABLE default.t4 MODIFY COLUMN `c` ALIAS b + a;
 ALTER TABLE default.t4
 	DROP COLUMN `d`;
 
+ALTER TABLE default.t5
+	ADD COLUMN `g` Nullable(UInt8);
+
 ALTER TABLE default.t MODIFY COLUMN `b` Int64;
 
 ALTER TABLE default.t MODIFY COLUMN `c` Int64 TTL col11 + toIntervalDay(1);
@@ -49,3 +52,11 @@ ALTER TABLE default.t1 COMMENT COLUMN `c3` 'test comment';
 ALTER TABLE default.t1 MODIFY COLUMN `c4` EPHEMERAL b + a;
 
 ALTER TABLE default.t1 MODIFY COLUMN `col13` REMOVE COMMENT;
+
+ALTER TABLE default.t5 MODIFY COLUMN `c` Nullable(UInt8);
+
+ALTER TABLE default.t5 MODIFY COLUMN `d` Nullable(UInt8);
+
+ALTER TABLE default.t5 MODIFY COLUMN `e` UInt8;
+
+ALTER TABLE default.t5 MODIFY COLUMN `f` UInt8;

@@ -7,8 +7,8 @@ ALTER TABLE default.t3
 
 CREATE VIEW default.v2
 (
-	`col1` Int64 NOT NULL,
-	`col2` Int64 NOT NULL
+	`col1` Int64,
+	`col2` Int64
 )
 AS SELECT A + B AS col1, C AS col2
 FROM (

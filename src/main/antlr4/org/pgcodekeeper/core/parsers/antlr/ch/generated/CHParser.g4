@@ -1076,7 +1076,7 @@ data_type
     | NCHAR VARYING
     | NESTED LPAREN identifier data_type (COMMA identifier data_type)* RPAREN
     | NOTHING
-    | NULLABLE LPAREN data_type RPAREN
+    | NULLABLE LPAREN nullable_data_type=data_type RPAREN
     | NUMERIC
     | NVARCHAR
     | OBJECT_TYPE LPAREN STRING_LITERAL RPAREN

@@ -67,7 +67,7 @@ public final class CreateChDictionary extends ChParserAbstract {
     public void parseObject(ChDictionary dictionary) {
         for (var attrCtx : ctx.dictionary_attr_def()) {
             var col = new ChColumn(attrCtx.identifier().getText());
-            col.setType(getFullCtxText(attrCtx.data_type()));
+            setDataType(col, attrCtx.data_type());
             if (attrCtx.DEFAULT() != null) {
                 col.setDefaultType("DEFAULT");
                 col.setDefaultValue(getFullCtxText(attrCtx.literal()));

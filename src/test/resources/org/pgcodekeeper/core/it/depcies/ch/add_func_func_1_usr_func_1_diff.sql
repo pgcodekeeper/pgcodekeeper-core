@@ -2,7 +2,7 @@
 
 CREATE VIEW default.v1
 (
-	`s` UInt8 NOT NULL
+	`s` UInt8
 )
 AS SELECT 1 AS s;
 
