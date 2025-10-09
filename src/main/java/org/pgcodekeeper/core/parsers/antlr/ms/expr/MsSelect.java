@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.ms.expr;
 
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.ms.rulectx.MsSelectOps;
@@ -119,7 +120,7 @@ public class MsSelect extends MsAbstractExprWithNmspc<Select_statementContext> {
                 ret = select(query);
             }
         } else {
-            log("No alternative in SelectOps!");
+            log(Messages.MsSelect_log_not_alter_selectops);
         }
         return ret;
     }
@@ -265,7 +266,7 @@ public class MsSelect extends MsAbstractExprWithNmspc<Select_statementContext> {
         } else if ((primary = item.from_primary()) != null) {
             primary(primary);
         } else {
-            log("No alternative in from_item!");
+            log(item, Messages.MsSelect_log_not_alter_item);
         }
     }
 

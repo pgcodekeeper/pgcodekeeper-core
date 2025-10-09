@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class Update extends AbstractExprWithNmspc<Update_stmt_for_psqlContext> {
 
-    protected Update(AbstractExpr parent) {
+    protected Update(PgAbstractExpr parent) {
         super(parent);
     }
 

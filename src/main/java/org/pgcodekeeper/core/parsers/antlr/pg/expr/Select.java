@@ -30,8 +30,6 @@ import org.pgcodekeeper.core.schema.PgObjLocation;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 import org.pgcodekeeper.core.utils.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -41,8 +39,6 @@ import java.util.function.Predicate;
  * Parser for SELECT statements with namespace support.
  */
 public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Select.class);
 
     /**
      * Flags for proper FROM (subquery) analysis.<br>
@@ -67,7 +63,7 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
         super(db);
     }
 
-    Select(AbstractExpr parent) {
+    Select(PgAbstractExpr parent) {
         super(parent);
     }
 
@@ -224,14 +220,14 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
             } else if (selectStmt != null) {
                 select.analyze(selectStmt);
             } else {
-                LOG.warn(Messages.Select_log_not_alter_right_part);
+                log(Messages.Select_log_not_alter_right_part);
             }
         } else if (primary != null) {
             ret = primary(primary);
         } else if (selectOps.leftParen() != null && selectOps.rightParen() != null && selectStmt != null) {
             ret = analyze(selectStmt);
         } else {
-            LOG.warn(Messages.Select_log_not_alter_selectops);
+            log(Messages.Select_log_not_alter_selectops);
             ret = Collections.emptyList();
         }
         return ret;
@@ -287,7 +283,7 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
                 }
             }
         } else {
-            LOG.warn(Messages.Select_log_not_alter_select);
+            log(primary, Messages.Select_log_not_alter_select);
             ret = Collections.emptyList();
         }
         return ret;
@@ -379,7 +375,7 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
         }
 
         // add dependencies to primary key
-        for (PgObjLocation dep : child.getDepcies()) {
+        for (PgObjLocation dep : child.getDependencies()) {
             vex.addDepcy(dep);
             addPrimaryKeyDepcy(dep, vex);
         }
@@ -393,7 +389,7 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
         for (IConstraint con : meta.getConstraints(dep.getSchema(), dep.getTable())) {
             if (con.isPrimaryKey() && con.containsColumn(dep.getObjName())) {
                 // implicit reference
-                vex.addDepcy(new GenericColumn(con.getSchemaName(),
+                vex.addDependency(new GenericColumn(con.getSchemaName(),
                         con.getTableName(), con.getName(), DbObjType.CONSTRAINT), null);
             }
         }
@@ -442,20 +438,19 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
 
         Entry<String, GenericColumn> ref = findReference(schema, relation, null);
         if (ref == null) {
-            var msg = Messages.Select_log_aster_qual_not_found.formatted(schema, relation);
-            LOG.warn(msg);
+            log(Messages.Select_log_aster_qual_not_found, schema, relation);
             return false;
         }
         GenericColumn relationGc = ref.getValue();
         if (relationGc != null) {
             if (schemaCtx != null) {
-                addDepcy(new GenericColumn(relationGc.schema, DbObjType.SCHEMA), schemaCtx);
+                addDependency(new GenericColumn(relationGc.schema, DbObjType.SCHEMA), schemaCtx);
             }
 
             if (relationGc.getObjName().equals(relation)) {
-                addDepcy(relationGc, relationCtx);
+                addDependency(relationGc, relationCtx);
             } else {
-                addAliasReference(relationGc, relationCtx);
+                addReference(relationGc, relationCtx);
             }
 
             addFilteredRelationColumnsDepcies(relationGc.schema, relationGc.table, ANY)
@@ -470,8 +465,7 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
                     .forEach(cols::add);
             return true;
         }
-        var msg = Messages.Select_log_complex_not_found.formatted(relation);
-        LOG.warn(msg);
+        log(Messages.AbstractExpr_log_complex_not_found, relation);
         return false;
     }
 
@@ -533,8 +527,11 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
             Schema_qualified_nameContext table;
             Table_subqueryContext subquery;
 
-            fromFunctionCommon(primary);
-            if ((table = primary.schema_qualified_name()) != null) {
+            if (primary.function_call() != null
+                    || primary.from_function_column_def() != null
+                    || primary.from_rows_with_alias() != null) {
+                fromFunctionCommon(primary);
+            } else if ((table = primary.schema_qualified_name()) != null) {
                 addNameReference(table, alias);
                 if (primary.TABLESAMPLE() != null) {
                     ValueExpr vex = new ValueExpr(this);
@@ -562,10 +559,10 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
                     lateralAllowed = oldLateral;
                 }
             } else {
-                LOG.warn(Messages.Select_log_not_alter_prim);
+                log(primary, Messages.Select_log_not_alter_prim);
             }
         } else {
-            LOG.warn(Messages.Select_log_not_alter_item);
+            log(fromItem, Messages.Select_log_not_alter_item);
         }
     }
 

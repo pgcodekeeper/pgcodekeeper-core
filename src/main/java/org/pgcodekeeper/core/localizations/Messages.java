@@ -187,8 +187,6 @@ public final class Messages {
 
     public static String Select_log_aster_qual_not_found;
 
-    public static String Select_log_complex_not_found;
-
     public static String Select_log_not_alter_item;
 
     public static String Select_log_not_alter_prim;
@@ -244,6 +242,44 @@ public final class Messages {
     public static String XmlStore_write_error;
 
     public static String DatabaseFactory_errors_found_while_parsing;
+
+    public static String AbstractExpr_log_column_not_found_in_complex;
+
+    public static String AbstractExpr_log_complex_not_found;
+
+    public static String AbstractExpr_log_unknown_column_ref;
+
+    public static String AbstractExpr_log_column_not_found_in_relation;
+
+    public static String AbstractExpr_log_relation_not_found;
+
+    public static String AbstractExpr_log_tableless_column_not_resolved;
+
+    public static String ValueExpr_log_no_vex_alternative;
+
+    public static String ValueExpr_log_no_primary_alternative;
+
+    public static String ValueExpr_log_subselect_empty;
+
+    public static String ValueExpr_log_long_indirection;
+
+    public static String ValueExpr_log_duplicate_named_arg;
+
+    public static String ValueExpr_log_no_function_special_alternative;
+
+    public static String ValueExpr_log_no_datetime_alternative;
+
+    public static String ValueExpr_log_no_literal_alternative;
+
+    public static String MsAbstractExprWithNmspc_log_dupl_unaliased_table;
+
+    public static String MsSelect_log_not_alter_selectops;
+
+    public static String MsSelect_log_not_alter_item;
+
+    public static String ChAbstractExprWithNmspc_log_dupl_unaliased_table;
+
+    public static String ChSelect_log_not_alter_selectops;
 
     static {
         ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_NAME);

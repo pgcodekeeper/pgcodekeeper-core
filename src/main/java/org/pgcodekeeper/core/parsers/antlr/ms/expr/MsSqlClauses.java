@@ -123,7 +123,7 @@ public class MsSqlClauses extends MsAbstractExpr {
             if (names != null) {
                 for (Qualified_nameContext trig : names.qualified_name()) {
                     IdContext nameCtx = trig.name;
-                    addDepcy(new GenericColumn(cont.schema, cont.table,
+                    addDependency(new GenericColumn(cont.schema, cont.table,
                             nameCtx.getText(), DbObjType.TRIGGER), nameCtx);
                 }
             }
@@ -136,13 +136,13 @@ public class MsSqlClauses extends MsAbstractExpr {
         Names_referencesContext names;
         if (index != null) {
             IdContext nameCtx = index.name;
-            addDepcy(new GenericColumn(cont.schema,
-                    cont.table, nameCtx.getText(), DbObjType.TRIGGER), nameCtx);
+            addDependency(
+                    new GenericColumn(cont.schema, cont.table, nameCtx.getText(), DbObjType.TRIGGER), nameCtx);
         } else if ((names = us.names_references()) != null) {
             for (Qualified_nameContext ind : names.qualified_name()) {
                 IdContext nameCtx = ind.name;
-                addDepcy(new GenericColumn(cont.schema,
-                        cont.table, nameCtx.getText(), DbObjType.TRIGGER), nameCtx);
+                addDependency(
+                        new GenericColumn(cont.schema, cont.table, nameCtx.getText(), DbObjType.TRIGGER), nameCtx);
             }
         }
     }

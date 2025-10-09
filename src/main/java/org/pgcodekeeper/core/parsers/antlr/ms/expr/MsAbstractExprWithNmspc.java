@@ -17,6 +17,7 @@ package org.pgcodekeeper.core.parsers.antlr.ms.expr;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.As_table_aliasContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Common_table_expressionContext;
@@ -70,27 +71,28 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
     }
 
     @Override
-    protected MsAbstractExprWithNmspc<?> findCte(String cteName) {
-        return cte.contains(cteName) ? this : super.findCte(cteName);
+    protected boolean hasCte(String cteName) {
+        return cte.contains(cteName) || super.hasCte(cteName);
     }
 
     @Override
-    protected Entry<String, GenericColumn> findReferenceRecursive(String schema, String name) {
+    public Entry<String, GenericColumn> findReference(String schema, String name, String column) {
         Entry<String, GenericColumn> ref = findReferenceInNmspc(schema, name);
-        return ref == null ? super.findReferenceRecursive(schema, name) : ref;
+        return ref == null ? super.findReference(schema, name, column) : ref;
     }
 
     protected Entry<String, GenericColumn> findReferenceInNmspc(String schema, String name) {
+        String loweredName = name.toLowerCase(Locale.ROOT);
         boolean found;
         GenericColumn dereferenced = null;
-        if (schema == null && namespace.containsKey(name)) {
+        if (schema == null && namespace.containsKey(loweredName)) {
             found = true;
-            dereferenced = namespace.get(name);
+            dereferenced = namespace.get(loweredName);
         } else if (!unaliasedNamespace.isEmpty()) {
             // simple empty check to save some allocations
             // it will almost always be empty
             for (GenericColumn unaliased : unaliasedNamespace) {
-                if (unaliased.table.equalsIgnoreCase(name) &&
+                if (unaliased.table.equalsIgnoreCase(loweredName) &&
                         (schema == null || unaliased.schema.equalsIgnoreCase(schema))) {
                     if (dereferenced == null) {
                         dereferenced = unaliased;
@@ -99,7 +101,7 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
                             break;
                         }
                     } else {
-                        log("Ambiguous reference: %s", name);
+                        log(Messages.AbstractExprWithNmspc_log_ambiguos_ref, name);
                     }
                 }
             }
@@ -168,7 +170,7 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
     public void addRawTableReference(GenericColumn qualifiedTable) {
         boolean exists = !unaliasedNamespace.add(qualifiedTable);
         if (exists) {
-            log("Duplicate unaliased table: %s %s", qualifiedTable.schema, qualifiedTable.table);
+            log(Messages.MsAbstractExprWithNmspc_log_dupl_unaliased_table, qualifiedTable.schema, qualifiedTable.table);
         }
     }
 
@@ -203,7 +205,7 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
 
             String withName = withQuery.id().getText();
             if (!cte.add(withName)) {
-                log("Duplicate CTE " + withName);
+                log(withQuery.id(), Messages.AbstractExprWithNmspc_log_dupl_cte, withName);
             }
         }
     }

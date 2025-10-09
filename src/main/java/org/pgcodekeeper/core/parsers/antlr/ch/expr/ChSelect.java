@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.ch.expr;
 
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.*;
 import org.pgcodekeeper.core.parsers.antlr.ch.rulectx.ChSelectOps;
 import org.pgcodekeeper.core.parsers.antlr.ch.rulectx.ChSelectStmt;
@@ -100,7 +101,7 @@ public final class ChSelect extends ChAbstractExprWithNmspc<Select_stmtContext> 
             return select(query);
         }
 
-        log("No alternative in SelectOps!");
+        log(Messages.ChSelect_log_not_alter_selectops);
         return Collections.emptyList();
     }
 

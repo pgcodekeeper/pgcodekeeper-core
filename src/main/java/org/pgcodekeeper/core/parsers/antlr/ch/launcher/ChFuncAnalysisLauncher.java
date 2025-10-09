@@ -53,7 +53,7 @@ public final class ChFuncAnalysisLauncher extends AbstractAnalysisLauncher {
     public Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
         ChValueExpr expr = new ChValueExpr(meta);
         expr.analyze((ExprContext) ctx);
-        return expr.getDepcies();
+        return expr.getDependencies();
     }
 
     @Override

@@ -56,10 +56,10 @@ public class MsExpressionAnalysisLauncher extends AbstractAnalysisLauncher {
 
             expr.addRawTableReference(new GenericColumn(schemaName, rawTableReference, DbObjType.TABLE));
             expr.analyze((ExpressionContext) ctx);
-            return expr.getDepcies();
+            return expr.getDependencies();
         }
         MsValueExpr expr = new MsValueExpr(getSchemaName(), meta);
         expr.analyze((ExpressionContext) ctx);
-        return expr.getDepcies();
+        return expr.getDependencies();
     }
 }

@@ -85,6 +85,6 @@ public abstract class AbstractPgAnalysisLauncher extends AbstractAnalysisLaunche
     protected <T extends ParserRuleContext> Set<PgObjLocation> analyze(
             T ctx, AbstractExprWithNmspc<T> analyzer) {
         analyzer.analyze(ctx);
-        return analyzer.getDepcies();
+        return analyzer.getDependencies();
     }
 }

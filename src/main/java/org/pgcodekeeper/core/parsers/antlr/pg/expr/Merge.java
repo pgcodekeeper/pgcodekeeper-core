@@ -31,7 +31,7 @@ public class Merge extends AbstractExprWithNmspc<Merge_stmt_for_psqlContext> {
      *
      * @param parent the parent expression context
      */
-    public Merge(AbstractExpr parent) {
+    public Merge(PgAbstractExpr parent) {
         super(parent);
     }
 

@@ -51,6 +51,6 @@ public class VexAnalysisLauncher extends AbstractPgAnalysisLauncher {
 
         ValueExpr expr = new ValueExpr(meta);
         expr.analyze(new Vex((VexContext) ctx));
-        return expr.getDepcies();
+        return expr.getDependencies();
     }
 }
