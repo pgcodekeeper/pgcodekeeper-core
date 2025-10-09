@@ -19,6 +19,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
@@ -30,17 +31,13 @@ import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 import org.pgcodekeeper.core.utils.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 /**
  * Parser for value expressions with namespace support.
  */
-public final class ValueExpr extends AbstractExpr {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ValueExpr.class);
+public final class ValueExpr extends PgAbstractExpr {
 
     /**
      * Creates a ValueExpr parser with meta container.
@@ -51,11 +48,11 @@ public final class ValueExpr extends AbstractExpr {
         super(meta);
     }
 
-    ValueExpr(AbstractExpr parent) {
+    ValueExpr(PgAbstractExpr parent) {
         super(parent);
     }
 
-    ValueExpr(AbstractExpr parent, Set<PgObjLocation> depcies) {
+    ValueExpr(PgAbstractExpr parent, Set<PgObjLocation> depcies) {
         super(parent, depcies);
     }
 
@@ -161,7 +158,7 @@ public final class ValueExpr extends AbstractExpr {
             return operandsList.get(0);
         }
 
-        LOG.warn("No alternative in Vex!");
+        log(vex.getVexCtx(), Messages.ValueExpr_log_no_vex_alternative);
         return new ModPair<>(NONAME, TypesSetManually.UNKNOWN);
     }
 
@@ -200,7 +197,7 @@ public final class ValueExpr extends AbstractExpr {
                 operator = ctx.getText();
             } else {
                 schema = opSchemaCtx.getText();
-                addDepcy(new GenericColumn(schema, DbObjType.SCHEMA), opSchemaCtx);
+                addDependency(new GenericColumn(schema, DbObjType.SCHEMA), opSchemaCtx);
                 ctx = op.all_simple_op();
                 operator = ctx.getText();
             }
@@ -220,7 +217,7 @@ public final class ValueExpr extends AbstractExpr {
                 availableOperators(schema));
 
         if (resultOperFunction != null) {
-            addDepcy(new GenericColumn(resultOperFunction.getSchemaName(),
+            addDependency(new GenericColumn(resultOperFunction.getSchemaName(),
                     resultOperFunction.getName(), DbObjType.OPERATOR), ctx);
 
             String returns = resultOperFunction.getReturns();
@@ -334,7 +331,7 @@ public final class ValueExpr extends AbstractExpr {
             }
             ret = new ModPair<>("overlaps", TypesSetManually.BOOLEAN);
         } else {
-            LOG.warn("No alternative in Vex Primary!");
+            log(primary, Messages.ValueExpr_log_no_primary_alternative);
             ret = new ModPair<>(NONAME, TypesSetManually.UNKNOWN);
         }
         return ret;
@@ -343,7 +340,7 @@ public final class ValueExpr extends AbstractExpr {
     private ModPair<String, String> getSubselectColumn(
             List<ModPair<String, String>> list) {
         if (list.isEmpty()) {
-            LOG.warn("Subselect return 0 element");
+            log(Messages.ValueExpr_log_subselect_empty);
             return new ModPair<>(NONAME, TypesSetManually.UNKNOWN);
         }
         return list.get(0);
@@ -391,7 +388,7 @@ public final class ValueExpr extends AbstractExpr {
 
         ModPair<String, String> ret;
         if (ids.size() > 3) {
-            LOG.warn("Very long indirection!");
+            log(indirection, Messages.ValueExpr_log_long_indirection);
             ret = new ModPair<>(NONAME, TypesSetManually.UNKNOWN);
         } else {
             ret = processColumn(ids);
@@ -485,7 +482,7 @@ public final class ValueExpr extends AbstractExpr {
         ParserRuleContext id = QNameParser.getSchemaNameCtx(ids);
         if (id != null) {
             schemaName = id.getText();
-            addDepcy(new GenericColumn(schemaName, DbObjType.SCHEMA), id);
+            addDependency(new GenericColumn(schemaName, DbObjType.SCHEMA), id);
         }
 
         List<Vex_or_named_notationContext> args = function.vex_or_named_notation();
@@ -503,8 +500,7 @@ public final class ValueExpr extends AbstractExpr {
             if (argnameCtx != null) {
                 String argname = argnameCtx.getText();
                 if (argsName.put(argname, argType) != null) {
-                    var msg = "Duplicate values for function named arg: %s".formatted(argname);
-                    LOG.warn(msg);
+                    log(argnameCtx, Messages.ValueExpr_log_duplicate_named_arg, argname);
                 }
             } else {
                 argsType.add(argType);
@@ -605,7 +601,7 @@ public final class ValueExpr extends AbstractExpr {
             }
             ret = new ModPair<>(colname, coltype);
         } else {
-            LOG.warn("No alternative in functionSpecial!");
+            log(function, Messages.ValueExpr_log_no_function_special_alternative);
             ret = new ModPair<>(NONAME, TypesSetManually.UNKNOWN);
         }
 
@@ -682,7 +678,7 @@ public final class ValueExpr extends AbstractExpr {
             colname = "timestamp";
             coltype = TypesSetManually.TIMESTAMP;
         } else {
-            LOG.warn("No alternative in date_time_function!");
+            log(datetime, Messages.ValueExpr_log_no_datetime_alternative);
             colname = NONAME;
             coltype = TypesSetManually.UNKNOWN;
         }
@@ -1039,7 +1035,7 @@ public final class ValueExpr extends AbstractExpr {
                 ret = TypesSetManually.TEXT;
             }
         } else {
-            LOG.warn("No alternative in unsigned_value_specification!");
+            log(constCtx, Messages.ValueExpr_log_no_literal_alternative);
             ret = TypesSetManually.UNKNOWN;
         }
         return ret;

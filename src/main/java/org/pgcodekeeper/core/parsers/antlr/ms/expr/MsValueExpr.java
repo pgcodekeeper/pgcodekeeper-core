@@ -267,14 +267,14 @@ public class MsValueExpr extends MsAbstractExpr {
         IdContext relationCtx = tableName.name;
         String relationName = relationCtx.getText();
 
-        Entry<String, GenericColumn> ref = findReference(null, relationName);
+        Entry<String, GenericColumn> ref = findReference(null, relationName, null);
         if (ref != null) {
             GenericColumn table = ref.getValue();
             if (table != null) {
                 if (relationName.equals(table.table)) {
-                    addDepcy(table, relationCtx);
+                    addDependency(table, relationCtx);
                 } else {
-                    addAliasReference(table, relationCtx);
+                    addReference(table, relationCtx);
                 }
             }
         }

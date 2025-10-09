@@ -20,7 +20,6 @@ import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.*;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.IRelation;
-import org.pgcodekeeper.core.schema.PgObjLocation.LocationType;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.Pair;
 
@@ -44,7 +43,7 @@ public final class ChValueExpr extends ChAbstractExpr {
      * @param meta the metadata container for database objects
      */
     public ChValueExpr(MetaContainer meta) {
-        super(meta);
+        super(null, meta);
     }
 
     /**
@@ -133,7 +132,7 @@ public final class ChValueExpr extends ChAbstractExpr {
 
         var columnName = QNameParser.getFirstName(ids);
         var tableName = QNameParser.getSecondName(ids);
-        var ref = findReference(null, tableName);
+        var ref = findReference(null, tableName, null);
         if (ref == null) {
             // if we don't found reference by alias try to find table in metadata where tableName will be schemaName
             // and columnName will be relationName
@@ -151,19 +150,19 @@ public final class ChValueExpr extends ChAbstractExpr {
 
         var schemaName = QNameParser.getThirdName(ids);
         if (schemaName != null) {
-            addDepcy(new GenericColumn(schemaName, DbObjType.SCHEMA), QNameParser.getThirdNameCtx(ids));
+            addDependency(new GenericColumn(schemaName, DbObjType.SCHEMA), QNameParser.getThirdNameCtx(ids));
         }
 
         var tableCtx = QNameParser.getSecondNameCtx(ids);
         var tName = parent.table;
         if (Objects.equals(tableName, tName)) {
-            addDepcy(parent, tableCtx);
+            addDependency(parent, tableCtx);
         }
 
         var column = new GenericColumn(parent.schema, tName, columnName, DbObjType.COLUMN);
 
-        addDepcy(column, QNameParser.getFirstNameCtx(ids));
-        addReference(parent, tableCtx, LocationType.LOCAL_REF);
+        addDependency(column, QNameParser.getFirstNameCtx(ids));
+        addReference(parent, tableCtx);
     }
 
     void functionCall(Function_callContext functionCall) {
@@ -200,7 +199,7 @@ public final class ChValueExpr extends ChAbstractExpr {
                 .toList();
         analyzeExprs(exprs);
         GenericColumn depcy = new GenericColumn(funcName.getText(), DbObjType.FUNCTION);
-        addDepcy(depcy, funcName);
+        addDependency(depcy, funcName);
     }
 
     void window(Window_exprContext windowExpr) {
@@ -246,7 +245,7 @@ public final class ChValueExpr extends ChAbstractExpr {
         IRelation rel = relCol.getFirst();
         Pair<String, String> col = relCol.getSecond();
         var column = new GenericColumn(rel.getSchemaName(), rel.getName(), col.getFirst(), DbObjType.COLUMN);
-        addDepcy(column, qualNameCtx);
+        addDependency(column, qualNameCtx);
     }
 
     private void addDynamicColumnDepcies(LiteralContext lit, boolean include) {
@@ -262,9 +261,9 @@ public final class ChValueExpr extends ChAbstractExpr {
             return;
         }
 
-        List<GenericColumn> tempDepcies = new ArrayList<>();
-        for (var depcy : getDepcies()) {
-            var obj = depcy.getObj();
+        List<GenericColumn> tempDependencies = new ArrayList<>();
+        for (var dependency : getDependencies()) {
+            var obj = dependency.getObj();
             if (obj.type != DbObjType.TABLE) {
                 continue;
             }
@@ -272,11 +271,11 @@ public final class ChValueExpr extends ChAbstractExpr {
             if (rel != null) {
                 rel.getRelationColumns()
                 .filter(e -> isNeedColumn(e.getFirst(), namePart, include, contains))
-                .forEach(e ->
-                tempDepcies.add(new GenericColumn(rel.getSchemaName(), rel.getName(), e.getFirst(), DbObjType.COLUMN)));
+                .forEach(e -> tempDependencies.add(
+                        new GenericColumn(rel.getSchemaName(), rel.getName(), e.getFirst(), DbObjType.COLUMN)));
             }
         }
-        tempDepcies.forEach(e -> addDepcy(e, lit));
+        tempDependencies.forEach(e -> addDependency(e, lit));
     }
 
     /**

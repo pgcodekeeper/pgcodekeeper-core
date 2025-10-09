@@ -15,8 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.ms.expr;
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.database.base.parser.antlr.AbstractExpr;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Data_typeContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Full_column_nameContext;
@@ -25,13 +26,9 @@ import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Qualified_nam
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.IRelation;
 import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.PgObjLocation.LocationType;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map.Entry;
@@ -42,67 +39,18 @@ import java.util.Set;
  * Provides common functionality for parsing and analyzing SQL expressions,
  * managing dependencies, and handling database object references.
  */
-public abstract class MsAbstractExpr {
+public abstract class MsAbstractExpr extends AbstractExpr {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MsAbstractExpr.class);
-
-    private final MetaContainer meta;
     private final String schema;
-    private final MsAbstractExpr parent;
-    private final Set<PgObjLocation> depcies;
-
-    /**
-     * Returns an unmodifiable set of dependencies found during expression analysis.
-     *
-     * @return unmodifiable set of database object dependencies
-     */
-    public Set<PgObjLocation> getDepcies() {
-        return Collections.unmodifiableSet(depcies);
-    }
 
     protected MsAbstractExpr(String schema, MetaContainer meta) {
-        this(schema, null, new LinkedHashSet<>(), meta);
+        super(meta);
+        this.schema = schema;
     }
 
     protected MsAbstractExpr(MsAbstractExpr parent) {
-        this(parent.schema, parent, parent.depcies, parent.meta);
-    }
-
-    private MsAbstractExpr(String schema, MsAbstractExpr parent, Set<PgObjLocation> depcies, MetaContainer meta) {
-        this.schema = schema;
-        this.parent = parent;
-        this.depcies = depcies;
-        this.meta = meta;
-    }
-
-    protected MsAbstractExprWithNmspc<?> findCte(String cteName) {
-        return parent == null ? null : parent.findCte(cteName);
-    }
-
-    protected boolean hasCte(String cteName) {
-        return findCte(cteName) != null;
-    }
-
-    /**
-     * @param schema optional schema qualification of name, may be null
-     * @param name   alias of the referenced object, lower-case for case-insensitive search
-     *               call {@link #findReference(String, String)} to lower-case automatically
-     * @return a pair of (Alias, Dealiased name) where Alias is the given name.
-     */
-    protected Entry<String, GenericColumn> findReferenceRecursive(String schema, String name) {
-        return parent == null ? null : parent.findReferenceRecursive(schema, name);
-    }
-
-    protected final Entry<String, GenericColumn> findReference(String schema, String name) {
-        return findReferenceRecursive(schema, name.toLowerCase(Locale.ROOT));
-    }
-
-    protected Pair<IRelation, Pair<String, String>> findColumn(String name) {
-        return parent == null ? null : parent.findColumn(name);
-    }
-
-    protected IRelation findRelation(String schemaName, String relationName) {
-        return meta.findRelation(schemaName, relationName);
+        super(parent);
+        this.schema = parent.schema;
     }
 
     protected GenericColumn addObjectDepcy(Qualified_nameContext qualifiedName, DbObjType type) {
@@ -114,48 +62,24 @@ public abstract class MsAbstractExpr {
             schemaName = schema;
         } else {
             schemaName = schemaCtx.getText();
-            addDepcy(new GenericColumn(schemaName, DbObjType.SCHEMA), schemaCtx);
+            addDependency(new GenericColumn(schemaName, DbObjType.SCHEMA), schemaCtx);
         }
 
         GenericColumn depcy = new GenericColumn(schemaName, relationName, type);
-        addDepcy(depcy, nameCtx);
+        addDependency(depcy, nameCtx);
         return depcy;
     }
 
     protected void addTypeDepcy(Data_typeContext dt) {
         Qualified_nameContext name = dt.qualified_name();
         if (name != null && name.schema != null
-                && !Utils.isMsSystemSchema(name.schema.getText())) {
+                && !isSystemSchema(name.schema.getText())) {
             addObjectDepcy(name, DbObjType.TYPE);
         }
     }
 
-    protected void addDepcy(GenericColumn depcy, ParserRuleContext ctx) {
-        if (!Utils.isMsSystemSchema(depcy.schema)) {
-            PgObjLocation dep = new PgObjLocation.Builder()
-                    .setObject(depcy)
-                    .setCtx(ctx)
-                    .build();
-            depcies.add(dep);
-        }
-    }
-
-    protected void addAliasReference(GenericColumn depcy, ParserRuleContext ctx) {
-        depcies.add(new PgObjLocation.Builder()
-                .setObject(depcy)
-                .setCtx(ctx)
-                .setLocationType(LocationType.LOCAL_REF)
-                .setAlias(ctx.getText())
-                .build());
-    }
-
-    protected void addVariable(GenericColumn depcy, ParserRuleContext ctx) {
-        depcies.add(new PgObjLocation.Builder()
-                .setObject(depcy)
-                .setCtx(ctx)
-                .setLocationType(LocationType.VARIABLE)
-                .setAlias(ctx.getText())
-                .build());
+    protected boolean isSystemSchema(String schema) {
+        return Utils.isMsSystemSchema(schema);
     }
 
     protected void addColumnDepcy(Full_column_nameContext fcn) {
@@ -171,7 +95,7 @@ public abstract class MsAbstractExpr {
 
             IRelation rel = relCol.getFirst();
             Pair<String, String> col = relCol.getSecond();
-            addDepcy(new GenericColumn(rel.getSchemaName(), rel.getName(), col.getFirst(), DbObjType.COLUMN),
+            addDependency(new GenericColumn(rel.getSchemaName(), rel.getName(), col.getFirst(), DbObjType.COLUMN),
                     columnCtx);
             return;
         }
@@ -180,32 +104,27 @@ public abstract class MsAbstractExpr {
         String schemaName = null;
         if (schemaCtx != null) {
             schemaName = schemaCtx.getText();
-            addDepcy(new GenericColumn(schemaName, DbObjType.SCHEMA), schemaCtx);
+            addDependency(new GenericColumn(schemaName, DbObjType.SCHEMA), schemaCtx);
         }
 
         IdContext relationCtx = tableName.name;
         String relationName = relationCtx.getText();
 
-        Entry<String, GenericColumn> ref = findReference(schemaName, relationName);
+        var ref = findReference(schemaName, relationName, null);
         if (ref != null) {
             GenericColumn table = ref.getValue();
             if (table != null) {
                 if (relationName.equals(table.table)) {
-                    addDepcy(table, relationCtx);
+                    addDependency(table, relationCtx);
                 } else {
-                    addAliasReference(table, relationCtx);
+                    addReference(table, relationCtx);
                 }
 
-                addDepcy(new GenericColumn(table.schema, table.table,
+                addDependency(new GenericColumn(table.schema, table.table,
                         columnName, DbObjType.COLUMN), columnCtx);
             }
         } else {
-            log("Unknown column reference: %s %s %s", schemaName, relationName, columnName);
+            log(relationCtx, Messages.AbstractExpr_log_unknown_column_ref, schemaName, relationName, columnName);
         }
-    }
-
-    protected void log(String msg, Object... args) {
-        var traceMsg = msg.formatted(args);
-        LOG.trace(traceMsg);
     }
 }

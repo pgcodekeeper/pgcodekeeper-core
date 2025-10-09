@@ -65,8 +65,7 @@ public class MsInsert extends MsAbstractExprWithNmspc<Insert_statementContext> {
 
             if (gc != null && (columns = insert.name_list_in_brackets()) != null) {
                 for (IdContext id : columns.id()) {
-                    addDepcy(new GenericColumn(gc.schema, gc.table, id.getText(),
-                            DbObjType.COLUMN), id);
+                    addDependency(new GenericColumn(gc.schema, gc.table, id.getText(), DbObjType.COLUMN), id);
                 }
             }
         }

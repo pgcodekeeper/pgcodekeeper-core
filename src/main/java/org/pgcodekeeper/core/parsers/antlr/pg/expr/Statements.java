@@ -31,7 +31,7 @@ import java.util.List;
  */
 public abstract class Statements<T extends ParserRuleContext> extends AbstractExprWithNmspc<T> {
 
-    protected Statements(AbstractExpr parent) {
+    protected Statements(PgAbstractExpr parent) {
         super(parent);
     }
 

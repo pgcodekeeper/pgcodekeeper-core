@@ -103,18 +103,18 @@ public final class MsFuncProcTrigAnalysisLauncher extends AbstractAnalysisLaunch
         if (ctx instanceof Sql_clausesContext sqlCtx) {
             MsSqlClauses clauses = new MsSqlClauses(schema, meta);
             clauses.analyze(sqlCtx);
-            return clauses.getDepcies();
+            return clauses.getDependencies();
         }
 
         if (ctx instanceof Select_statementContext selectCtx) {
             MsSelect select = new MsSelect(schema, meta);
             select.analyze(selectCtx);
-            return select.getDepcies();
+            return select.getDependencies();
         }
 
         MsValueExpr expr = new MsValueExpr(schema, meta);
         expr.analyze((ExpressionContext) ctx);
-        return expr.getDepcies();
+        return expr.getDependencies();
     }
 
     @Override

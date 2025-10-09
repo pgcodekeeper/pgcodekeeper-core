@@ -47,6 +47,6 @@ public class MsViewAnalysisLauncher extends AbstractAnalysisLauncher {
     public Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
         MsSelect select = new MsSelect(getSchemaName(), meta);
         select.analyze((Select_statementContext) ctx);
-        return select.getDepcies();
+        return select.getDependencies();
     }
 }

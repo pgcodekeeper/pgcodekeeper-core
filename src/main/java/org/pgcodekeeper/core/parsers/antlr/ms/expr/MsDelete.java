@@ -48,7 +48,7 @@ public class MsDelete extends MsAbstractExprWithNmspc<Delete_statementContext> {
         boolean isAlias = false;
 
         if (tableName != null && tableName.schema == null) {
-            isAlias = select.findReference(null, tableName.name.getText()) != null;
+            isAlias = select.findReference(null, tableName.name.getText(), null) != null;
         }
 
         if (tableName != null && !isAlias) {

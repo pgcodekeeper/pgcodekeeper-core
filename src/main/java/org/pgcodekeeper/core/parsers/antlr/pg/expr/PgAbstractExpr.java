@@ -19,7 +19,9 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.database.base.parser.antlr.AbstractExpr;
 import org.pgcodekeeper.core.loader.FullAnalyze;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
 import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
@@ -27,81 +29,45 @@ import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.PgParserAbstract;
 import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.PgObjLocation.LocationType;
 import org.pgcodekeeper.core.schema.meta.MetaCompositeType;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 import org.pgcodekeeper.core.utils.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 /**
- * Abstract base class for SQL expression analysis.
+ * Abstract base class for PostgreSQL expression analysis.
  * Provides core functionality for dependency tracking and reference resolution.
  */
-public abstract class AbstractExpr {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractExpr.class);
+public abstract class PgAbstractExpr extends AbstractExpr {
 
     protected static final String NONAME = "?column?";
 
-    // TODO get current postgresql version.
-    // Need to get version. I already got it from JdbcLoader(READER)
-    // and put it to the 'PgDatabase' as currentPostgreSqlVersion,
-    // but I couldn't get it from PgDumpLoader(WRITER), that's why for
-    // cases with 'PgDumpLoader(WRITER)' the version was hard-coded in 'PgDatabase'.
-    protected final MetaContainer meta;
-    private final AbstractExpr parent;
-    private final Set<PgObjLocation> depcies;
-
     private FullAnalyze fullAnalyze;
 
-    public Set<PgObjLocation> getDepcies() {
-        return Collections.unmodifiableSet(depcies);
+    protected PgAbstractExpr(MetaContainer meta) {
+        super(meta);
     }
 
-    protected AbstractExpr(MetaContainer meta) {
-        parent = null;
-        depcies = new LinkedHashSet<>();
-        this.meta = meta;
-    }
-
-    protected AbstractExpr(AbstractExpr parent) {
-        this(parent, parent.depcies);
-    }
-
-    protected AbstractExpr(AbstractExpr parent, Set<PgObjLocation> depcies) {
-        this.parent = parent;
-        this.depcies = depcies;
-        this.meta = parent.meta;
+    protected PgAbstractExpr(PgAbstractExpr parent) {
+        super(parent);
         this.fullAnalyze = parent.fullAnalyze;
     }
 
-    public void setFullAnaLyze(FullAnalyze fullAnalyze) {
+    protected PgAbstractExpr(PgAbstractExpr parent, Set<PgObjLocation> dependencies) {
+        super(parent, dependencies, parent.meta);
+        this.fullAnalyze = parent.fullAnalyze;
+    }
+
+    public void setFullAnalyze(FullAnalyze fullAnalyze) {
         this.fullAnalyze = fullAnalyze;
-    }
-
-    protected List<Pair<String, String>> findCte(String cteName) {
-        return parent == null ? null : parent.findCte(cteName);
-    }
-
-    /**
-     * @param schema optional schema qualification of name, may be null
-     * @param name   alias of the referenced object
-     * @param column optional referenced column alias, may be null
-     * @return a pair of (Alias, Dealiased name) where Alias is the given name.
-     * Dealiased name can be null if the name is internal to the query
-     * and is not a reference to external table.<br>
-     * null if the name is not found
-     */
-    protected Entry<String, GenericColumn> findReference(String schema, String name, String column) {
-        return parent == null ? null : parent.findReference(schema, name, column);
     }
 
     /**
@@ -110,15 +76,18 @@ public abstract class AbstractExpr {
      * ColumnsList list of columns as pair 'columnName-columnType' of the internal query.<br>
      */
     protected List<Pair<String, String>> findReferenceComplex(String name) {
-        return parent == null ? null : parent.findReferenceComplex(name);
-    }
+        if (parent instanceof PgAbstractExpr pgAbstractExpr) {
+            return pgAbstractExpr.findReferenceComplex(name);
+        }
 
-    protected Pair<IRelation, Pair<String, String>> findColumn(String name) {
-        return parent == null ? null : parent.findColumn(name);
+        return null;
     }
 
     protected Pair<String, String> findColumnInComplex(String name) {
-        return parent == null ? null : parent.findColumnInComplex(name);
+        if (parent instanceof PgAbstractExpr pgAbstractExpr) {
+            return pgAbstractExpr.findColumnInComplex(name);
+        }
+        return null;
     }
 
     protected GenericColumn addRelationDepcy(List<ParserRuleContext> ids) {
@@ -153,12 +122,8 @@ public abstract class AbstractExpr {
         return addDepcy(PgParserAbstract.getIdentifiers(typeName), DbObjType.TYPE, null);
     }
 
-    protected void addDepcy(GenericColumn depcy, ParserRuleContext ctx) {
-        addDepcy(depcy, ctx, null);
-    }
-
     protected void addDepcy(GenericColumn depcy, ParserRuleContext ctx, Token start) {
-        if (!Utils.isPgSystemSchema(depcy.schema)) {
+        if (!isSystemSchema(depcy.schema)) {
             PgObjLocation loc = new PgObjLocation.Builder()
                     .setObject(depcy)
                     .setCtx(ctx)
@@ -168,31 +133,18 @@ public abstract class AbstractExpr {
                         codeUnitStart.getLine() - 1, codeUnitStart.getCodeUnitPositionInLine(), null);
             }
 
-            depcies.add(loc);
+            addDependency(loc);
         }
     }
 
-    protected void addAliasReference(GenericColumn depcy, ParserRuleContext ctx) {
-        depcies.add(new PgObjLocation.Builder()
-                .setObject(depcy)
-                .setCtx(ctx)
-                .setLocationType(LocationType.LOCAL_REF)
-                .setAlias(ctx.getText())
-                .build());
-    }
-
-    protected void addVariable(GenericColumn depcy, ParserRuleContext ctx) {
-        depcies.add(new PgObjLocation.Builder()
-                .setObject(depcy)
-                .setCtx(ctx)
-                .setLocationType(LocationType.VARIABLE)
-                .setAlias(ctx.getText())
-                .build());
+    @Override
+    protected boolean isSystemSchema(String schema) {
+        return Utils.isPgSystemSchema(schema);
     }
 
     protected void addDepcy(PgObjLocation loc) {
-        if (!Utils.isPgSystemSchema(loc.getSchema())) {
-            depcies.add(loc);
+        if (!isSystemSchema(loc.getSchema())) {
+            addDependency(loc);
         }
     }
 
@@ -217,13 +169,13 @@ public abstract class AbstractExpr {
             GenericColumn referencedTable = ref.getValue();
             if (referencedTable != null) {
                 if (schemaNameCtx != null) {
-                    addDepcy(new GenericColumn(referencedTable.schema, DbObjType.SCHEMA), schemaNameCtx);
+                    addDependency(new GenericColumn(referencedTable.schema, DbObjType.SCHEMA), schemaNameCtx);
                 }
 
                 if (referencedTable.getObjName().equals(columnParent)) {
-                    addDepcy(referencedTable, columnParentCtx);
+                    addDependency(referencedTable, columnParentCtx);
                 } else {
-                    addAliasReference(referencedTable, columnParentCtx);
+                    addReference(referencedTable, columnParentCtx);
                 }
 
                 columnType = addFilteredColumnDepcy(
@@ -234,14 +186,14 @@ public abstract class AbstractExpr {
                         .map(Pair::getSecond)
                         .findAny()
                         .orElseGet(() -> {
-                            log("Column %s not found in complex %s", columnName, columnParent);
+                            log(columnParentCtx, Messages.AbstractExpr_log_column_not_found_in_complex, columnName, columnParent);
                             return TypesSetManually.COLUMN;
                         });
             } else {
-                log("Complex not found: %s", columnParent);
+                log(columnParentCtx, Messages.AbstractExpr_log_complex_not_found, columnParent);
             }
         } else {
-            log("Unknown column reference: %s %s %s", schemaName, columnParent, columnName);
+            log(columnParentCtx, Messages.AbstractExpr_log_unknown_column_ref, schemaName, columnParent, columnName);
         }
 
         return new ModPair<>(columnName, columnType);
@@ -266,7 +218,7 @@ public abstract class AbstractExpr {
             case "cmin", "cmax" -> "cid";
             case "ctid" -> "tid";
             default -> columns.findAny().map(Pair::getSecond).orElseGet(() -> {
-                log("Column %s not found in relation %s", colName, relationName);
+                log(Messages.AbstractExpr_log_column_not_found_in_relation, colName, relationName);
                 return TypesSetManually.COLUMN;
             });
         };
@@ -292,10 +244,11 @@ public abstract class AbstractExpr {
      * @return column stream with attached depcy-addition peek-step; empty stream if no relation found
      */
     protected Stream<Pair<String, String>> addFilteredRelationColumnsDepcies(String schemaName,
-                                                                             String relationName, Predicate<String> colNamePredicate) {
+                                                                             String relationName,
+                                                                             Predicate<String> colNamePredicate) {
         IRelation relation = findRelation(schemaName, relationName);
         if (relation == null) {
-            log("Relation not found: %s.%s", schemaName, relationName);
+            log(Messages.AbstractExpr_log_relation_not_found, schemaName, relationName);
             return Stream.empty();
         }
 
@@ -313,12 +266,12 @@ public abstract class AbstractExpr {
                 .filter(col -> colNamePredicate.test(col.getFirst()));
 
         String relSchemaName = relation.getSchemaName();
-        if (Utils.isPgSystemSchema(relSchemaName)) {
+        if (isSystemSchema(relSchemaName)) {
             return cols;
         }
 
         // hack
-        return cols.peek(col -> addDepcy(new GenericColumn(relSchemaName,
+        return cols.peek(col -> addDependency(new GenericColumn(relSchemaName,
                 relation.getName(), col.getFirst(), DbObjType.COLUMN), null));
     }
 
@@ -334,12 +287,12 @@ public abstract class AbstractExpr {
         if (col == null) {
             Pair<IRelation, Pair<String, String>> relCol = findColumn(name);
             if (relCol == null) {
-                log("Tableless column not resolved: %s", name);
+                log(id, Messages.AbstractExpr_log_tableless_column_not_resolved, name);
                 return new ModPair<>(name, TypesSetManually.COLUMN);
             }
             IRelation rel = relCol.getFirst();
             col = relCol.getSecond();
-            addDepcy(new GenericColumn(rel.getSchemaName(), rel.getName(),
+            addDependency(new GenericColumn(rel.getSchemaName(), rel.getName(),
                     col.getFirst(), DbObjType.COLUMN), id);
         }
         return col.copyMod();
@@ -357,7 +310,7 @@ public abstract class AbstractExpr {
     }
 
     protected void addFunctionDepcy(IFunction function, ParserRuleContext ctx) {
-        addDepcy(new GenericColumn(function.getSchemaName(), function.getName(),
+        addDependency(new GenericColumn(function.getSchemaName(), function.getName(),
                 function.getStatementType()), ctx);
     }
 
@@ -373,7 +326,7 @@ public abstract class AbstractExpr {
         }
 
         String schemaName = schemaCtx.getText();
-        if (Utils.isPgSystemSchema(schemaName)) {
+        if (isSystemSchema(schemaName)) {
             return;
         }
         addDepcy(new GenericColumn(schemaName, DbObjType.SCHEMA), schemaCtx, start);
@@ -413,7 +366,7 @@ public abstract class AbstractExpr {
         }
 
         String schemaName = schemaCtx.getText();
-        if (Utils.isPgSystemSchema(schemaName)) {
+        if (isSystemSchema(schemaName)) {
             return;
         }
         addDepcy(new GenericColumn(schemaName, DbObjType.SCHEMA), schemaCtx, start);
@@ -437,20 +390,15 @@ public abstract class AbstractExpr {
         return meta.availableOperators(getSchemaName(schemaName));
     }
 
-    protected IRelation findRelation(String schemaName, String relationName) {
-        return meta.findRelation(getSchemaName(schemaName), relationName);
-    }
-
     protected MetaCompositeType findType(String schemaName, String typeName) {
         return meta.findType(getSchemaName(schemaName), typeName);
     }
 
-    private String getSchemaName(String schemaName) {
-        return schemaName == null ? Consts.PG_CATALOG : schemaName;
-    }
-
-    protected void log(String msg, Object... args) {
-        var traceMsg = msg.formatted(args);
-        LOG.trace(traceMsg);
+    @Override
+    protected String getSchemaName(String schemaName) {
+        if (schemaName == null) {
+            return Consts.PG_CATALOG;
+        }
+        return super.getSchemaName(schemaName);
     }
 }

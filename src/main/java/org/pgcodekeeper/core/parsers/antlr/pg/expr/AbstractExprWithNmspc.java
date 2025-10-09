@@ -29,8 +29,6 @@ import org.pgcodekeeper.core.schema.IRelation;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 import org.pgcodekeeper.core.utils.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
@@ -40,9 +38,7 @@ import java.util.stream.Stream;
 /**
  * Abstract expression parser with namespace support for tracking variables, references, and CTEs.
  */
-public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends AbstractExpr {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractExprWithNmspc.class);
+public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends PgAbstractExpr {
 
     private static final String FUNC_ARGS_KEY = "\\_SPECIAL_CONTAINER_FOR_PRIMITIVE_VARS\\";
 
@@ -88,7 +84,7 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
         super(meta);
     }
 
-    protected AbstractExprWithNmspc(AbstractExpr parent) {
+    protected AbstractExprWithNmspc(PgAbstractExpr parent) {
         super(parent);
     }
 
@@ -96,6 +92,11 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
     protected List<Pair<String, String>> findCte(String cteName) {
         List<Pair<String, String>> pairs = cte.get(cteName);
         return pairs != null ? pairs : super.findCte(cteName);
+    }
+
+    @Override
+    protected boolean hasCte(String cteName) {
+        return cte.containsKey(cteName) || super.hasCte(cteName);
     }
 
     protected boolean namespaceAccessible() {
@@ -112,7 +113,7 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
     }
 
     @Override
-    protected Entry<String, GenericColumn> findReference(String schema, String name, String column) {
+    public Entry<String, GenericColumn> findReference(String schema, String name, String column) {
         if (!namespaceAccessible()) {
             return super.findReference(schema, name, column);
         }
@@ -135,8 +136,7 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
                             break;
                         }
                     } else {
-                        var msg = Messages.AbstractExprWithNmspc_log_ambiguos_ref.formatted(name);
-                        LOG.warn(msg);
+                        log(Messages.AbstractExprWithNmspc_log_ambiguos_ref, name);
                     }
                 }
             }
@@ -277,8 +277,7 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
     public boolean addReference(String alias, GenericColumn object) {
         boolean exists = namespace.containsKey(alias);
         if (exists) {
-            var msg = Consts.DUPLICATE_ALIASES.formatted(alias);
-            LOG.warn(msg);
+            log(Consts.DUPLICATE_ALIASES, alias);
         } else {
             namespace.put(alias, object);
         }
@@ -288,9 +287,8 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
     public void addRawTableReference(GenericColumn qualifiedTable) {
         boolean exists = !unaliasedNamespace.add(qualifiedTable);
         if (exists) {
-            var msg = Messages.AbstractExprWithNmspc_log_dupl_unaliased_table.formatted(
+            log(Messages.AbstractExprWithNmspc_log_dupl_unaliased_table,
                     qualifiedTable.schema, qualifiedTable.table);
-            LOG.warn(msg);
         }
     }
 
@@ -298,8 +296,7 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
         Set<String> columns = columnAliases.computeIfAbsent(alias, k -> new HashSet<>());
         boolean exists = !columns.add(column);
         if (exists) {
-            var msg = Messages.AbstractExprWithNmspc_log_dupl_col_alias.formatted(alias, column);
-            LOG.warn(msg);
+            log(Messages.AbstractExprWithNmspc_log_dupl_col_alias, alias, column);
         }
     }
 
@@ -372,13 +369,12 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
             } else if ((merge = data.merge_stmt_for_psql()) != null) {
                 pairs = new Merge(this).analyze(merge);
             } else {
-                LOG.warn(Messages.AbstractExprWithNmspc_log_not_alternative);
+                log(Messages.AbstractExprWithNmspc_log_not_alternative);
                 continue;
             }
 
             if (addCteSignature(withQuery, pairs)) {
-                var msg = Messages.AbstractExprWithNmspc_log_dupl_cte.formatted(withName);
-                LOG.warn(msg);
+                log(Messages.AbstractExprWithNmspc_log_dupl_cte, withName);
             }
         }
     }
@@ -391,8 +387,7 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
         List<IdentifierContext> paramNamesIdentifiers = withQuery.column_name;
         for (int i = 0; i < paramNamesIdentifiers.size(); ++i) {
             if (i >= resultTypes.size()) {
-                var msg = Messages.AbstractExprWithNmspc_log_cte_contains_cols.formatted(withName);
-                LOG.warn(msg);
+                log(Messages.AbstractExprWithNmspc_log_cte_contains_cols, withName);
                 break;
             }
             resultTypes.get(i).setFirst(paramNamesIdentifiers.get(i).getText());

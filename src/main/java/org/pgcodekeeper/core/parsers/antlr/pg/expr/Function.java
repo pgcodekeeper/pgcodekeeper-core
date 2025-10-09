@@ -26,8 +26,6 @@ import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 import org.pgcodekeeper.core.utils.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,8 +37,6 @@ import java.util.Map.Entry;
  */
 public final class Function extends AbstractExprWithNmspc<Plpgsql_functionContext> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Function.class);
-
     /**
      * Creates a Function parser with meta container.
      *
@@ -50,7 +46,7 @@ public final class Function extends AbstractExprWithNmspc<Plpgsql_functionContex
         super(meta);
     }
 
-    private Function(AbstractExpr parent) {
+    private Function(PgAbstractExpr parent) {
         super(parent);
     }
 
@@ -140,8 +136,7 @@ public final class Function extends AbstractExprWithNmspc<Plpgsql_functionContex
                 type = pair.getSecond();
             } else {
                 type = TypesSetManually.UNKNOWN;
-                var msg = Messages.Function_log_variable_not_found.formatted(variable);
-                LOG.warn(msg);
+                log(Messages.Function_log_variable_not_found, variable);
             }
 
             addNamespaceVariable(new Pair<>(alias, type));

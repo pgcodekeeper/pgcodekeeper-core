@@ -51,7 +51,7 @@ public class ChViewAnalysisLauncher extends AbstractAnalysisLauncher {
         if (selectCtx != null) {
             ChSelect select = new ChSelect(getSchemaName(), meta);
             select.analyze(selectCtx);
-            return select.getDepcies();
+            return select.getDependencies();
         }
 
         return Collections.emptySet();

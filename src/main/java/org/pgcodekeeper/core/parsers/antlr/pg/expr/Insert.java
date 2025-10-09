@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class Insert extends AbstractExprWithNmspc<Insert_stmt_for_psqlContext> {
 
-    protected Insert(AbstractExpr parent) {
+    protected Insert(PgAbstractExpr parent) {
         super(parent);
     }
 

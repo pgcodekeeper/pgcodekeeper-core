@@ -55,6 +55,6 @@ public class StatisticsAnalysisLauncher extends AbstractAnalysisLauncher {
         }
 
         expr.analyze(new Vex((VexContext) ctx));
-        return expr.getDepcies();
+        return expr.getDependencies();
     }
 }

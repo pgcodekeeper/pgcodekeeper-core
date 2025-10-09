@@ -55,11 +55,11 @@ public class ChExpressionAnalysisLauncher extends AbstractAnalysisLauncher {
 
             expr.addRawTableReference(new GenericColumn(schemaName, rawTableReference, DbObjType.TABLE));
             expr.analyze((ExprContext) ctx);
-            return expr.getDepcies();
+            return expr.getDependencies();
         }
         var expr = new ChValueExpr(meta);
         expr.analyze((ExprContext) ctx);
-        return expr.getDepcies();
+        return expr.getDependencies();
     }
 
     private boolean isNeedNmspc() {

@@ -26,7 +26,7 @@ import java.util.List;
  */
 public class Sql extends Statements<SqlContext> {
 
-    protected Sql(AbstractExpr parent) {
+    protected Sql(PgAbstractExpr parent) {
         super(parent);
     }
 

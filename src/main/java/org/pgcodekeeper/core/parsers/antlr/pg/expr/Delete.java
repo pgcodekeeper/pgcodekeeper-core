@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class Delete extends AbstractExprWithNmspc<Delete_stmt_for_psqlContext> {
 
-    protected Delete(AbstractExpr parent) {
+    protected Delete(PgAbstractExpr parent) {
         super(parent);
     }
 

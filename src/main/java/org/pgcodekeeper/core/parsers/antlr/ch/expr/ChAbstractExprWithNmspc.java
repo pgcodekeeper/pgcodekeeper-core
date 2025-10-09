@@ -17,11 +17,11 @@ package org.pgcodekeeper.core.parsers.antlr.ch.expr;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.*;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.IRelation;
-import org.pgcodekeeper.core.schema.PgObjLocation.LocationType;
 import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.Pair;
 
@@ -70,14 +70,14 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
     }
 
     @Override
-    protected ChAbstractExprWithNmspc<?> findCte(String cteName) {
-        return cte.contains(cteName) ? this : super.findCte(cteName);
+    protected boolean hasCte(String cteName) {
+        return cte.contains(cteName) || super.hasCte(cteName);
     }
 
     @Override
-    protected Entry<String, GenericColumn> findReferenceRecursive(String schema, String name) {
+    public Entry<String, GenericColumn> findReference(String schema, String name, String column) {
         Entry<String, GenericColumn> ref = findReferenceInNmspc(schema, name);
-        return ref == null ? super.findReferenceRecursive(schema, name) : ref;
+        return ref == null ? super.findReference(schema, name, column) : ref;
     }
 
     private Entry<String, GenericColumn> findReferenceInNmspc(String schema, String name) {
@@ -99,7 +99,7 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
                             break;
                         }
                     } else {
-                        log("Ambiguous reference: %s", name);
+                        log(Messages.AbstractExprWithNmspc_log_ambiguos_ref, name);
                     }
                 }
             }
@@ -149,7 +149,7 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
     public void addRawTableReference(GenericColumn qualifiedTable) {
         boolean exists = !unaliasedNamespace.add(qualifiedTable);
         if (exists) {
-            log("Duplicate unaliased table: %s %s", qualifiedTable.schema, qualifiedTable.table);
+            log(Messages.ChAbstractExprWithNmspc_log_dupl_unaliased_table, qualifiedTable.schema, qualifiedTable.table);
         }
     }
 
@@ -201,7 +201,7 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
             }
 
             if (!cte.add(withName)) {
-                log("Duplicate CTE " + withName);
+                log(withQuery.name, Messages.AbstractExprWithNmspc_log_dupl_cte, withName);
             }
         }
     }
@@ -218,7 +218,7 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
             ParserRuleContext aliasCtx = getAliasCtx(alias);
             if (depcy != null) {
                 // add alias definition
-                addReference(depcy, aliasCtx, LocationType.VARIABLE);
+                addVariable(depcy, aliasCtx);
             }
             addReference(aliasCtx.getText(), depcy);
         } else if (isCte) {
