@@ -9,6 +9,14 @@
 
 ### Добавлено
 
+### Изменено
+
+### Исправлено
+
+## [12.0.0] - 2025-10-14
+
+### Добавлено
+
 - Добавлена поддержка PostgreSQL 18.
 - Добавлено форматирование SELECT части объектов VIEW при чтении из базы данных для ClickHouse.
 
@@ -2350,7 +2358,8 @@
 
 - Добавлен парсинг ORDER BY для агрегатных функции.
 
-[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.2.0...HEAD
+[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v12.0.0...HEAD
+[12.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.2.0...v12.0.0
 [11.2.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.1.0...v11.2.0
 [11.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.0.0...v11.1.0
 [11.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/releases/tag/v11.0.0

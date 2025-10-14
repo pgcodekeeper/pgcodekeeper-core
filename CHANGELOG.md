@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [12.0.0] - 2025-10-14
+
+### Added
+
 - Added support for PostgreSQL 18.
 - Added formatting of the SELECT part of VIEW objects when reading from the database for ClickHouse.
 
@@ -2349,7 +2357,8 @@ We increment major version in this release due to decision to shift our developm
 
 - ORDER BY parsing has been added to the aggregate functions.
 
-[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.2.0...HEAD
+[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v12.0.0...HEAD
+[12.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.2.0...v12.0.0
 [11.2.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.1.0...v11.2.0
 [11.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.0.0...v11.1.0
 [11.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/releases/tag/v11.0.0
