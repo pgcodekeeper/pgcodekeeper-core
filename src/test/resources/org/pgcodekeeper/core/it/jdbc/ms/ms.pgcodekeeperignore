@@ -1,0 +1,4 @@
+SHOW ALL
+HIDE NONE guest type=SCHEMA
+HIDE REGEX db_ type=SCHEMA
+HIDE NONE dbo type=USER

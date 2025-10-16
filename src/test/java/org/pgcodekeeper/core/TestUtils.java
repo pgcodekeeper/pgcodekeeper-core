@@ -22,7 +22,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Locale;
 
 public final class TestUtils {
 
@@ -40,6 +40,19 @@ public final class TestUtils {
     public static Path getPathToResource(String resourceName, Class<?> clazz) throws URISyntaxException {
         URL url = clazz.getResource(resourceName);
         return Paths.get(url.toURI());
+    }
+
+    public static String getFilePath(String resourceName, Class<?> clazz) {
+        var resource = clazz.getResource(resourceName);
+        if (resource == null) {
+            throw new IllegalArgumentException("Test resource not found: " + resourceName);
+        }
+
+        try {
+            return Paths.get(resource.toURI()).toString();
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Invalid resource URI: " + resourceName, e);
+        }
     }
 
     private TestUtils() {

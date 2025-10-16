@@ -21,8 +21,9 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.PgCodekeeperException;
-import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.monitor.NullMonitor;
+import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -166,12 +167,8 @@ public class PgCodeKeeperApiTest {
         Files.copy(Paths.get(getFilePath("test_update_project_old_second_table.sql")), secondTableFile, StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private static String getFilePath(String fileName) {
-        var resource = PgCodeKeeperApiTest.class.getResource(fileName);
-        if (resource == null) {
-            throw new IllegalArgumentException("Test resource not found: " + fileName);
-        }
-        return resource.toString().substring(5);
+    private String getFilePath(String fileName) {
+        return TestUtils.getFilePath(fileName, getClass());
     }
 
     private String getFileContent(String fileName) throws IOException {

@@ -1,0 +1,3 @@
+SHOW ALL
+HIDE NONE default type=SCHEMA
+HIDE NONE test type=USER
