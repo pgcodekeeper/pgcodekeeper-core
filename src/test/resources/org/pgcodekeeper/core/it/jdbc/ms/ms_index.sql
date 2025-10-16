@@ -1,0 +1,39 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE TABLE [dbo].[table1](
+    [c1] [int] NOT NULL,
+    [c2] [int] NOT NULL,
+    [c3] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
+) ON [PRIMARY]
+GO
+
+CREATE CLUSTERED INDEX [index_c2] ON [dbo].[table1] ([c2]) WITH (ONLINE = ON, RESUMABLE = ON, MAX_DURATION = 240 MINUTES)
+GO
+
+CREATE CLUSTERED INDEX [idx_1] ON [dbo].[table1] ([c1]) WITH (ONLINE = ON (WAIT_AT_LOW_PRIORITY (MAX_DURATION = 5 MINUTES, ABORT_AFTER_WAIT = BLOCKERS)));
+GO
+
+-- test nonclusterd columnstore index
+CREATE TABLE [dbo].[table3](
+	[col1] [int] NULL,
+	[col2] [int] NULL,
+	[col3] [int] NULL
+) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED COLUMNSTORE INDEX [idx_table3] ON [dbo].[table3] ([col1])
+WITH (ALLOW_PAGE_LOCKS = OFF, ALLOW_ROW_LOCKS = OFF, DATA_COMPRESSION = COLUMNSTORE, DROP_EXISTING = ON)
+ON [PRIMARY]
+GO
+
+-- add table with CLUSTERED COLUMNSTORE ORDER index
+CREATE TABLE dbo.t4
+(
+    [c1] [int] NOT NULL,
+    [c2] [int] NOT NULL,
+    [c3] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+    INDEX ix_4 CLUSTERED COLUMNSTORE  ORDER ([c2], [c1])
+) ON [PRIMARY]
+GO

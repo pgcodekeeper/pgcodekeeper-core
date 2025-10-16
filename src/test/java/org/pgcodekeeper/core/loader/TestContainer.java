@@ -55,7 +55,7 @@ public final class TestContainer {
         CH_PORT = CH_DB.getFirstMappedPort();
 
         PG_URL = "jdbc:postgresql://localhost:" + PG_PORT + "/test" + PG_CH_URL_POSTFIX;
-        MS_URL = "jdbc:sqlserver://localhost:" + MS_PORT + ";databaseName=msdb;user=sa;password=A_Str0ng_Required_Password";
+        MS_URL = "jdbc:sqlserver://localhost:" + MS_PORT + ";databaseName=tempdb;user=sa;password=A_Str0ng_Required_Password";
         CH_URL = "jdbc:clickhouse://localhost:" + CH_PORT + "/default" + PG_CH_URL_POSTFIX;
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
