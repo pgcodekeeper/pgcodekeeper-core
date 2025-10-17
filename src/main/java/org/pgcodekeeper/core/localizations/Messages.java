@@ -31,6 +31,8 @@ public final class Messages {
 
     public static String Version;
 
+    public static String AbstractJdbcConnector_url_validation_failed;
+
     public static String AbstractAnalysisLauncher_error_prefix;
 
     public static String AbstractExprWithNmspc_log_ambiguos_ref;

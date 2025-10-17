@@ -36,7 +36,17 @@ class MsJdbcConnectorTest {
 
     @Test
     void wrongUrlConnectionTest() {
-        var connector = new MsJdbcConnector("jdbc:postgresql://localhost:5432/broken");
+        var connector = new MsJdbcConnector("jdbc:sqlserver://localhost:5432/broken");
         Assertions.assertThrows(IOException.class, connector::getConnection);
+    }
+
+    @Test
+    void urlValidationFailTest() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new MsJdbcConnector("test"));
+    }
+
+    @Test
+    void urlValidationTest() {
+        Assertions.assertDoesNotThrow(() -> new MsJdbcConnector("jdbc:sqlserver:"));
     }
 }
