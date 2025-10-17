@@ -39,4 +39,14 @@ class PgJdbcConnectorTest {
         var connector = new PgJdbcConnector("jdbc:postgresql://localhost:5432/broken");
         Assertions.assertThrows(IOException.class, connector::getConnection);
     }
+
+    @Test
+    void urlValidationFailTest() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new PgJdbcConnector("test"));
+    }
+
+    @Test
+    void urlValidationTest() {
+        Assertions.assertDoesNotThrow(() -> new PgJdbcConnector("jdbc:postgresql:"));
+    }
 }

@@ -27,12 +27,15 @@ public class MsJdbcConnector extends AbstractJdbcConnector {
 
     private static final String DRIVER_NAME = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
+    protected static final String URL_START_MS = "jdbc:sqlserver:";
+
     private final String url;
 
     /**
      * @param url full jdbc connection string
      */
     public MsJdbcConnector(String url) {
+        validateUrl(url, URL_START_MS);
         this.url = url;
     }
 
@@ -59,5 +62,10 @@ public class MsJdbcConnector extends AbstractJdbcConnector {
     @Override
     public String getBatchDelimiter() {
         return Consts.GO;
+    }
+
+    @Override
+    protected String getDefaultPort() {
+        return "1433";
     }
 }

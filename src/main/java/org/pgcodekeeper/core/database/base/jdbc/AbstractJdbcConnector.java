@@ -16,6 +16,7 @@
 package org.pgcodekeeper.core.database.base.jdbc;
 
 import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.localizations.Messages;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -80,5 +81,18 @@ public abstract class AbstractJdbcConnector {
      */
     public String getBatchDelimiter() {
         return null;
+    }
+
+    protected abstract String getDefaultPort();
+
+    protected void validateUrl(String url, String... allowedPrefixes) {
+        for (var prefix : allowedPrefixes) {
+            if (url.startsWith(prefix)) {
+                return;
+            }
+        }
+
+        var options = String.join(", ", allowedPrefixes);
+        throw new IllegalArgumentException(Messages.AbstractJdbcConnector_url_validation_failed.formatted(options));
     }
 }

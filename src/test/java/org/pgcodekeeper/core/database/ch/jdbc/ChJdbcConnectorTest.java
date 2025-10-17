@@ -17,6 +17,8 @@ package org.pgcodekeeper.core.database.ch.jdbc;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.loader.TestContainer;
 
 import java.io.IOException;
@@ -32,5 +34,25 @@ class ChJdbcConnectorTest {
              var rs = statement.executeQuery("SELECT 1")) {
             Assertions.assertTrue(rs.next());
         }
+    }
+
+    @Test
+    void wrongUrlConnectionTest() {
+        var connector = new ChJdbcConnector("jdbc:clickhouse://localhost:5432/broken");
+        Assertions.assertThrows(IOException.class, connector::getConnection);
+    }
+
+    @Test
+    void urlValidationFailTest() {
+       Assertions.assertThrows(IllegalArgumentException.class, () -> new ChJdbcConnector("test"));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "jdbc:clickhouse:",
+            "jdbc:ch:"
+    })
+    void urlValidationTest(String url) {
+        Assertions.assertDoesNotThrow(() -> new ChJdbcConnector(url));
     }
 }

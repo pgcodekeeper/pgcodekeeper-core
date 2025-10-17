@@ -24,12 +24,15 @@ public class PgJdbcConnector extends AbstractJdbcConnector {
 
     private static final String DRIVER_NAME = "org.postgresql.Driver";
 
+    protected static final String URL_START_PG = "jdbc:postgresql:";
+
     private final String url;
 
     /**
      * @param url full jdbc connection string
      */
     public PgJdbcConnector(String url) {
+        validateUrl(url, URL_START_PG);
         this.url = url;
     }
 
@@ -41,5 +44,10 @@ public class PgJdbcConnector extends AbstractJdbcConnector {
     @Override
     protected String getDriverName() {
         return DRIVER_NAME;
+    }
+
+    @Override
+    protected String getDefaultPort() {
+        return "5432";
     }
 }

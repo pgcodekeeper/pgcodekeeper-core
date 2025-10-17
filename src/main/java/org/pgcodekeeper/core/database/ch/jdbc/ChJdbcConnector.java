@@ -24,9 +24,13 @@ public class ChJdbcConnector extends AbstractJdbcConnector {
 
     private static final String DRIVER_NAME = "com.clickhouse.jdbc.ClickHouseDriver";
 
+    protected static final String URL_START_CH = "jdbc:clickhouse:";
+    private static final String URL_START_CH_SHORT = "jdbc:ch:";
+
     private final String url;
 
     public ChJdbcConnector(String url) {
+        validateUrl(url, URL_START_CH, URL_START_CH_SHORT);
         this.url = url;
     }
 
@@ -38,5 +42,10 @@ public class ChJdbcConnector extends AbstractJdbcConnector {
     @Override
     protected String getDriverName() {
         return DRIVER_NAME;
+    }
+
+    @Override
+    protected String getDefaultPort() {
+        return "8123";
     }
 }
