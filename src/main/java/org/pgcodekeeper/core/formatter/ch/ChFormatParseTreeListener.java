@@ -71,6 +71,11 @@ public class ChFormatParseTreeListener extends FormatParseTreeListener {
             putIndent(node.getSymbol(), IndentDirection.BLOCK_LINE);
         }
 
+        var withCtx = ctx.with_clause();
+        if (withCtx != null) {
+            putIndent(withCtx.WITH().getSymbol(), IndentDirection.BLOCK_LINE);
+        }
+
         var columnsCtx = ctx.select_list().expr();
         if (columnsCtx.size() > 1) {
             for (var expr : columnsCtx) {
