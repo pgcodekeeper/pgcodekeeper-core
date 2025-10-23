@@ -242,7 +242,7 @@ CREATE VIEW default.v_5_16
 (
 	`s` UInt8 NOT NULL
 )
-AS   WITH x -> * AS lambda
+AS WITH x -> * AS lambda
 SELECT lambda(1)
 FROM test_table;
 
@@ -367,7 +367,7 @@ WHERE t1.id > 0;
 
 CREATE TABLE constraint_on_nullable_type (`id` Nullable(UInt64), CONSTRAINT `c0` CHECK `id` = 1) engine = TinyLog();
 
-  WITH x AS (SELECT number AS a
+WITH x AS (SELECT number AS a
 FROM numbers(10)), y AS (SELECT number AS a
 FROM numbers(5)), z AS (SELECT *
 FROM x
