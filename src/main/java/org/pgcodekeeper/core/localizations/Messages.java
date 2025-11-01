@@ -125,6 +125,8 @@ public final class Messages {
 
     public static String JdbcLoader_log_succes_queried;
 
+    public static String JdbcReader_column_null_value_error_message;
+
     public static String JdbcLoaderBase_log_check_extension;
 
     public static String JdbcLoaderBase_log_check_gp_db;

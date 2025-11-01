@@ -68,7 +68,7 @@ public final class EventTriggersReader extends AbstractStatementReader {
                 break;
         }
 
-        String[] tags = JdbcReader.getColArray(res, "evttags");
+        String[] tags = JdbcReader.getColArray(res, "evttags", true);
         if (tags != null) {
             for (String tag : tags) {
                 evt.addTag(PgDiffUtils.quoteString(tag));

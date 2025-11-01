@@ -65,7 +65,7 @@ public final class ServersReader extends AbstractStatementReader {
             srv.setVersion(PgDiffUtils.quoteString(srvVersion));
         }
 
-        String[] options = JdbcReader.getColArray(res, "srvoptions");
+        String[] options = JdbcReader.getColArray(res, "srvoptions", true);
         if (options != null) {
             ParserAbstract.fillOptionParams(options, srv::addOption, false, true, false);
         }

@@ -35,7 +35,7 @@ public final class ChJdbcUtils {
 
     static <T extends PgStatement> void addRoles(ResultSet res, String roleCol, String exceptCol, T statement,
                                                  BiConsumer<T, String> addRoleMethod, BiConsumer<T, String> addExceptMethod) throws SQLException {
-        String[] roles = JdbcReader.getColArray(res, roleCol);
+        String[] roles = JdbcReader.getColArray(res, roleCol, true);
         if (roles != null) {
             for (String role : roles) {
                 addRoleMethod.accept(statement, role);
@@ -43,7 +43,7 @@ public final class ChJdbcUtils {
             }
         }
 
-        String[] excepts = JdbcReader.getColArray(res, exceptCol);
+        String[] excepts = JdbcReader.getColArray(res, exceptCol, true);
         if (excepts != null) {
             for (String except : excepts) {
                 addExceptMethod.accept(statement, except);

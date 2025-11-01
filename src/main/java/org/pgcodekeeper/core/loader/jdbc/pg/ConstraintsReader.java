@@ -63,7 +63,7 @@ public final class ConstraintsReader extends JdbcReader {
 
         String schemaName = schema.getName();
         String constraintName = res.getString("conname");
-        String[] params = getColArray(res, "reloptions");
+        String[] params = getColArray(res, "reloptions", true);
         loader.setCurrentObject(new GenericColumn(schemaName, tableName, constraintName, DbObjType.CONSTRAINT));
         PgConstraint constr;
 
