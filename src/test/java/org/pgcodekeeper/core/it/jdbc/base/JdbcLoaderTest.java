@@ -39,9 +39,15 @@ public abstract class JdbcLoaderTest {
 
     protected void jdbcLoaderTest(String dumpFileName, String ignoreListName, String url, AbstractJdbcConnector connector,
                                   CoreSettings settings, SupportedPgVersion version, Class<?> clazz)
+            throws PgCodekeeperException, SQLException, IOException, URISyntaxException, InterruptedException{
+        settings.setAddTransaction(true);
+        jdbcLoaderTest(dumpFileName, ignoreListName, url, connector, settings, version, clazz, false);
+    }
+
+    protected void jdbcLoaderTest(String dumpFileName, String ignoreListName, String url, AbstractJdbcConnector connector,
+                                  CoreSettings settings, SupportedPgVersion version, Class<?> clazz, boolean isMemoryOptimized)
             throws PgCodekeeperException, SQLException, IOException, URISyntaxException, InterruptedException {
         settings.setEnableFunctionBodiesDependencies(true);
-        settings.setAddTransaction(true);
         var df = new DatabaseFactory(settings);
         List<String> ignoreLists = new ArrayList<>() ;
         ignoreLists.add(TestUtils.getFilePath(ignoreListName, clazz));
@@ -50,13 +56,19 @@ public abstract class JdbcLoaderTest {
         if (null != version) {
             dumpDb.setVersion(version);
         }
+        var script = Files.readString(TestUtils.getPathToResource(dumpFileName, clazz));
 
         ScriptParser parser = new ScriptParser(dumpFileName,
                 Files.readString(TestUtils.getPathToResource(dumpFileName, clazz)), settings);
 
         var startConfDb = df.loadFromJdbc(url);
         try {
-            new JdbcRunner(new NullMonitor()).runBatches(connector, parser.batch(), null);
+            var runner = new JdbcRunner(new NullMonitor());
+            if (isMemoryOptimized) {
+                runner.run(connector, script);
+            } else {
+                runner.runBatches(connector, parser.batch(), null);
+            }
             var remoteDb = df.loadFromJdbc(url);
             var actual = PgCodeKeeperApi.diff(settings, dumpDb, remoteDb, ignoreLists);
             Assertions.assertEquals("", actual, "Incorrect run dump %s on Database".formatted(dumpFileName));

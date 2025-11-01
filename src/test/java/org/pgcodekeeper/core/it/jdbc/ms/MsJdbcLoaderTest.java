@@ -50,4 +50,15 @@ class MsJdbcLoaderTest extends JdbcLoaderTest {
         jdbcLoaderTest(fileName + FILES_POSTFIX.SQL, "ms.pgcodekeeperignore",
                 TestContainer.MS_URL, new MsJdbcConnector(TestContainer.MS_URL), settings, null, getClass());
     }
+
+    @ParameterizedTest
+    @CsvSource({
+            "ms_table_type",
+    })
+    void msJdbcLoaderWithMemomyOptimizedTest(String fileName) throws PgCodekeeperException, IOException, InterruptedException, SQLException, URISyntaxException {
+        var settings = new CoreSettings();
+        settings.setDbType(DatabaseType.MS);
+        jdbcLoaderTest(fileName + "_memory_optimized" + FILES_POSTFIX.SQL, "ms.pgcodekeeperignore",
+                TestContainer.MS_URL_MEMORY_OPTIMIZED, new MsJdbcConnector(TestContainer.MS_URL_MEMORY_OPTIMIZED), settings, null, getClass(), true);
+    }
 }
