@@ -31,6 +31,7 @@ public final class TestContainer {
 
     public static final String PG_URL;
     public static final String MS_URL;
+    public static final String MS_URL_MEMORY_OPTIMIZED;
     public static final String CH_URL;
 
     public static final Integer PG_PORT;
@@ -55,7 +56,8 @@ public final class TestContainer {
         CH_PORT = CH_DB.getFirstMappedPort();
 
         PG_URL = "jdbc:postgresql://localhost:" + PG_PORT + "/test" + PG_CH_URL_POSTFIX;
-        MS_URL = "jdbc:sqlserver://localhost:" + MS_PORT + ";databaseName=test_db;user=sa;password=A_Str0ng_Required_Password";
+        MS_URL = buildMsConnectionUrl("test_db");
+        MS_URL_MEMORY_OPTIMIZED = buildMsConnectionUrl("test_db_memory_optimized");
         CH_URL = "jdbc:clickhouse://localhost:" + CH_PORT + "/default" + PG_CH_URL_POSTFIX;
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -68,6 +70,12 @@ public final class TestContainer {
 
     private static String getInitScriptPath(String fileName) {
         return TestContainer.class.getPackage().getName().replace('.', '/') + '/' + fileName;
+    }
+
+    private static String buildMsConnectionUrl(String databaseName) {
+        return "jdbc:sqlserver://localhost:" + MS_PORT +
+                ";databaseName=" + databaseName +
+                ";user=sa;password=A_Str0ng_Required_Password";
     }
 
     private TestContainer() {
