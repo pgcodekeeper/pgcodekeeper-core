@@ -43,7 +43,9 @@ class ChObjReferencesTest {
             "ch_privileges",
             "ch_user",
             "ch_role",
-            "ch_dictionary"
+            "ch_dictionary",
+            "ch_update",
+            "ch_delete"
     })
     void compareChReferences(final String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();

@@ -1,0 +1,15 @@
+Reference: action = UPDATE, offset = 0, line number = 1, charPositionInLine = 0
+Reference: action = UPDATE, offset = 41, line number = 2, charPositionInLine = 0
+Reference: action = UPDATE, offset = 104, line number = 3, charPositionInLine = 0
+Reference: action = UPDATE, offset = 155, line number = 4, charPositionInLine = 0
+Reference: action = UPDATE, offset = 216, line number = 5, charPositionInLine = 0
+Reference: action = UPDATE, offset = 277, line number = 6, charPositionInLine = 0
+Reference: action = UPDATE, offset = 342, line number = 7, charPositionInLine = 0
+Reference: action = UPDATE, offset = 401, line number = 8, charPositionInLine = 0
+Reference: action = UPDATE, offset = 472, line number = 9, charPositionInLine = 0
+Reference: action = UPDATE, offset = 551, line number = 10, charPositionInLine = 0
+Reference: action = UPDATE, offset = 637, line number = 11, charPositionInLine = 0
+Reference: action = UPDATE, offset = 708, line number = 12, charPositionInLine = 0
+Reference: action = UPDATE, offset = 777, line number = 13, charPositionInLine = 0
+Reference: action = UPDATE, offset = 866, line number = 14, charPositionInLine = 0
+Reference: action = UPDATE, offset = 921, line number = 15, charPositionInLine = 0
