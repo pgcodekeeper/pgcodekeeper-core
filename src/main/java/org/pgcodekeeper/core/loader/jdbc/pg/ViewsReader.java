@@ -104,7 +104,7 @@ public final class ViewsReader extends JdbcReader {
 
 
         // Query columns default values and comments
-        String[] colNames = getColArray(res, "column_names");
+        String[] colNames = getColArray(res, "column_names", true);
         if (colNames != null) {
             String[] colComments = getColArray(res, "column_comments");
             String[] colDefaults = getColArray(res, "column_defaults");
@@ -137,7 +137,7 @@ public final class ViewsReader extends JdbcReader {
         loader.setComment(v, res);
 
         // STORAGE PARAMETRS
-        String[] options = getColArray(res, "reloptions");
+        String[] options = getColArray(res, "reloptions", true);
         if (options != null) {
             ParserAbstract.fillOptionParams(options, v::addOption, false, false, false);
         }

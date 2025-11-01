@@ -62,7 +62,7 @@ public final class UserMappingReader extends AbstractStatementReader {
         loader.setCurrentObject(new GenericColumn(usm.getName(), DbObjType.USER_MAPPING));
         usm.addDep(new GenericColumn(usm.getServer(), DbObjType.SERVER));
 
-        String[] options = JdbcReader.getColArray(res, "umoptions");
+        String[] options = JdbcReader.getColArray(res, "umoptions", true);
         if (options != null) {
             ParserAbstract.fillOptionParams(options, usm::addOption, false, true, false);
         }

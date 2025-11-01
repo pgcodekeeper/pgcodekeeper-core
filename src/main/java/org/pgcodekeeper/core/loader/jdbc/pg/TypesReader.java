@@ -110,7 +110,7 @@ public final class TypesReader extends JdbcReader {
         d.setDefaultValue(def);
         d.setNotNull(res.getBoolean("dom_notnull"));
 
-        String[] connames = getColArray(res, "dom_connames");
+        String[] connames = getColArray(res, "dom_connames", true);
         if (connames != null) {
             String[] condefs = getColArray(res, "dom_condefs");
             String[] concomments = getColArray(res, "dom_concomments");
@@ -279,7 +279,7 @@ public final class TypesReader extends JdbcReader {
 
     private PgCompositeType getCompositeType(ResultSet res, String name) throws SQLException {
         PgCompositeType t = new PgCompositeType(name);
-        String[] attnames = getColArray(res, "comp_attnames");
+        String[] attnames = getColArray(res, "comp_attnames", true);
         if (attnames == null) {
             return t;
         }
@@ -318,7 +318,7 @@ public final class TypesReader extends JdbcReader {
 
     private PgEnumType getEnumType(ResultSet res, String name) throws SQLException {
         PgEnumType t = new PgEnumType(name);
-        String[] enums = getColArray(res, "enums");
+        String[] enums = getColArray(res, "enums", true);
         if (enums != null) {
             for (String enum_ : enums) {
                 t.addEnum(PgDiffUtils.quoteString(enum_));

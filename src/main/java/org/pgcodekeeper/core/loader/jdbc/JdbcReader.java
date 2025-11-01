@@ -19,6 +19,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.schema.AbstractSchema;
@@ -126,23 +127,36 @@ public abstract class JdbcReader extends AbstractStatementReader {
         }
     }
 
+    public static <T> T[] getColArray(ResultSet rs, String columnName) throws SQLException {
+        return getColArray(rs, columnName, false);
+    }
+
     /**
      * Retrieves an array column from the result set.
+     * Returns the array values if present, or handles null values based on the allowed null flag.
      *
-     * @param <T>        the array element type
-     * @param rs         the result set
-     * @param columnName the column name containing the array
-     * @return the array values, or null if the column is null
-     * @throws SQLException if array retrieval fails
+     * @param <T> the array element type
+     * @param rs the result set containing the data
+     * @param columnName the name of the column containing the array
+     * @param isAllowedNull if true, returns null when column value is null;
+     *                      if false, throws IllegalArgumentException when column value is null
+     * @return the array values from the specified column, or null if the column value is null and nulls are allowed
+     * @throws SQLException if array retrieval from the result set fails
+     * @throws IllegalArgumentException if the column value is null and nulls are not allowed
      */
-    public static <T> T[] getColArray(ResultSet rs, String columnName) throws SQLException {
+    public static <T> T[] getColArray(ResultSet rs, String columnName, boolean isAllowedNull) throws SQLException {
         Array arr = rs.getArray(columnName);
         if (arr != null) {
             @SuppressWarnings("unchecked")
             T[] ret = (T[]) arr.getArray();
             return ret;
         }
-        return null;
+
+        if (isAllowedNull) {
+            return null;
+        }
+        String callerClassName = Thread.currentThread().getStackTrace()[2].getFileName();
+        throw new IllegalArgumentException(Messages.JdbcReader_column_null_value_error_message.formatted(columnName, callerClassName));
     }
 
     /**

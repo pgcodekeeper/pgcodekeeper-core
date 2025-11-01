@@ -57,12 +57,12 @@ public final class FtsConfigurationsReader extends JdbcReader {
         config.setParser(PgDiffUtils.getQuotedName(parserSchema) + '.' + PgDiffUtils.getQuotedName(parserName));
         addDep(config, parserSchema, parserName, DbObjType.FTS_PARSER);
 
-        String[] fragments = getColArray(res, "tokennames");
-        String[] dictSchemas = getColArray(res, "dictschemas");
-        String[] dictionaries = getColArray(res, "dictnames");
+        String[] fragments = getColArray(res, "tokennames", true);
 
         if (fragments != null) {
             Map<String, List<String>> dictMap = new HashMap<>();
+            String[] dictSchemas = getColArray(res, "dictschemas");
+            String[] dictionaries = getColArray(res, "dictnames");
 
             for (int i = 0; i < fragments.length; i++) {
                 String fragment = fragments[i];

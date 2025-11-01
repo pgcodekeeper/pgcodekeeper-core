@@ -64,7 +64,7 @@ public final class ForeignDataWrappersReader extends AbstractStatementReader {
             JdbcReader.setFunctionWithDep(PgForeignDataWrapper::setValidator, f, fdwValidator, CreateFdw.VALIDATOR_SIGNATURE);
         }
 
-        String[] options = JdbcReader.getColArray(res, "fdwoptions");
+        String[] options = JdbcReader.getColArray(res, "fdwoptions", true);
         if (options != null) {
             ParserAbstract.fillOptionParams(options, f::addOption, false, true, false);
         }

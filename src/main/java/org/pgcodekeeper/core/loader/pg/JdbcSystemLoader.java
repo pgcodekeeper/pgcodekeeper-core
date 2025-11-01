@@ -139,7 +139,7 @@ public final class JdbcSystemLoader extends JdbcLoaderBase {
 
                 MetaFunction function = new MetaFunction(schemaName, signature, functionName);
 
-                String[] arr = JdbcReader.getColArray(result, "proargmodes");
+                String[] arr = JdbcReader.getColArray(result, "proargmodes", true);
                 if (arr != null) {
                     List<String> argModes = Arrays.asList(arr);
                     if (argModes.contains("t")) {
@@ -217,7 +217,7 @@ public final class JdbcSystemLoader extends JdbcLoaderBase {
                 };
                 MetaRelation relation = new MetaRelation(schemaName, relationName, type);
 
-                String[] colNames = JdbcReader.getColArray(result, "col_names");
+                String[] colNames = JdbcReader.getColArray(result, "col_names", true);
                 if (colNames != null) {
                     String[] colTypes = JdbcReader.getColArray(result, "col_types");
                     List<Pair<String, String>> columns = new ArrayList<>(colNames.length);

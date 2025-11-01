@@ -163,7 +163,7 @@ public final class TriggersReader extends JdbcReader {
             t.setNewTable(res.getString("tgnewtable"));
         }
 
-        String[] arrCols = getColArray(res, "cols");
+        String[] arrCols = getColArray(res, "cols", true);
         if (arrCols != null) {
             for (String colName : arrCols) {
                 t.addUpdateColumn(colName);

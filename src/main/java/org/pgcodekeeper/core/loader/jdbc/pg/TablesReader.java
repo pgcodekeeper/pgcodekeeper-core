@@ -105,7 +105,7 @@ public final class TablesReader extends JdbcReader {
             }
         }
 
-        String[] foptions = getColArray(res, "ftoptions");
+        String[] foptions = getColArray(res, "ftoptions", true);
         if (foptions != null) {
             ParserAbstract.fillOptionParams(foptions, t::addOption, false, true, false);
         }
@@ -119,7 +119,7 @@ public final class TablesReader extends JdbcReader {
         readColumns(res, t, ofTypeOid, schema);
 
         // INHERITS
-        String[] inhrelnames = getColArray(res, "inhrelnames");
+        String[] inhrelnames = getColArray(res, "inhrelnames", true);
         if (inhrelnames != null) {
             String[] inhnspnames = getColArray(res, "inhnspnames");
 
@@ -130,12 +130,12 @@ public final class TablesReader extends JdbcReader {
         }
 
         // STORAGE PARAMETERS
-        String[] opts = getColArray(res, "reloptions");
+        String[] opts = getColArray(res, "reloptions", true);
         if (opts != null) {
             ParserAbstract.fillOptionParams(opts, t::addOption, false, false, false);
         }
 
-        String[] toast = getColArray(res, "toast_reloptions");
+        String[] toast = getColArray(res, "toast_reloptions", true);
         if (toast != null) {
             ParserAbstract.fillOptionParams(toast, t::addOption, true, false, false);
         }
@@ -213,7 +213,7 @@ public final class TablesReader extends JdbcReader {
 
     private void readColumns(ResultSet res, AbstractPgTable t, long ofTypeOid,
                              AbstractSchema schema) throws SQLException {
-        String[] colNames = getColArray(res, "col_names");
+        String[] colNames = getColArray(res, "col_names", true);
         if (colNames == null) {
             return;
         }
@@ -261,11 +261,11 @@ public final class TablesReader extends JdbcReader {
 
         String[] colGenerated = null;
         if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
-            colGenerated = getColArray(res, "col_generated");
+            colGenerated = getColArray(res, "col_generated", true);
         }
         String[] colCompression = null;
         if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
-            colCompression = getColArray(res, "col_compression");
+            colCompression = getColArray(res, "col_compression", true);
         }
         String[] colEncOptions = null;
         if (loader.isGreenplumDb()) {

@@ -159,7 +159,7 @@ public final class FunctionsReader extends JdbcReader {
 
     private void fillTransform(AbstractPgFunction function, ResultSet res) throws SQLException {
         if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
-            Long[] protrftypes = getColArray(res, "protrftypes");
+            Long[] protrftypes = getColArray(res, "protrftypes", true);
             if (protrftypes != null) {
                 for (Long s : protrftypes) {
                     function.addTransform(loader.getCachedTypeByOid(s).getFullName());
@@ -196,7 +196,7 @@ public final class FunctionsReader extends JdbcReader {
     }
 
     private void fillConfiguration(AbstractPgFunction function, ResultSet res) throws SQLException {
-        String[] proconfig = getColArray(res, "proconfig");
+        String[] proconfig = getColArray(res, "proconfig", true);
         if (proconfig == null) {
             return;
         }
@@ -456,9 +456,9 @@ public final class FunctionsReader extends JdbcReader {
     private List<Pair<String, GenericColumn>> fillArguments(AbstractPgFunction f,
                                                             ResultSet res) throws SQLException {
         StringBuilder sb = new StringBuilder();
-        String[] argModes = getColArray(res, "proargmodes");
-        String[] argNames = getColArray(res, "proargnames");
-        Long[] argTypeOids = getColArray(res, "proallargtypes");
+        String[] argModes = getColArray(res, "proargmodes", true);
+        String[] argNames = getColArray(res, "proargnames", true);
+        Long[] argTypeOids = getColArray(res, "proallargtypes", true);
         Long[] argTypes = argTypeOids != null ? argTypeOids : getColArray(res, "argtypes");
 
         // It will be used for sending the arguments of function to the namespaces

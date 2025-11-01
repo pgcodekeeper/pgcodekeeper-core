@@ -71,7 +71,7 @@ public class PoliciesReader extends JdbcReader {
                 break;
         }
 
-        String[] roles = getColArray(res, "polroles");
+        String[] roles = getColArray(res, "polroles", true);
         if (roles != null) {
             for (String role : roles) {
                 p.addRole(role);
