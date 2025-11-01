@@ -313,18 +313,16 @@ public abstract class AbstractRegularTable extends AbstractPgTable implements IS
     }
 
     @Override
-    public boolean compare(PgStatement obj) {
-        if (obj instanceof AbstractRegularTable table && super.compare(obj)) {
-            return Objects.equals(tablespace, table.tablespace)
-                    && isLogged == table.isLogged
-                    && isRowSecurity == table.isRowSecurity
-                    && isForceSecurity == table.isForceSecurity
-                    && Objects.equals(partitionBy, table.partitionBy)
-                    && Objects.equals(distribution, table.distribution)
-                    && Objects.equals(method, table.method);
-        }
-
-        return false;
+    protected boolean compareTable(PgStatement obj) {
+        return obj instanceof AbstractRegularTable table
+                && super.compareTable(table)
+                && Objects.equals(tablespace, table.tablespace)
+                && isLogged == table.isLogged
+                && isRowSecurity == table.isRowSecurity
+                && isForceSecurity == table.isForceSecurity
+                && Objects.equals(partitionBy, table.partitionBy)
+                && Objects.equals(distribution, table.distribution)
+                && Objects.equals(method, table.method);
     }
 
     @Override

@@ -188,11 +188,8 @@ public class ChTable extends AbstractTable {
     }
 
     @Override
-    public boolean compare(PgStatement obj) {
-        if (this == obj) {
-            return true;
-        }
-        return obj instanceof ChTable table && super.compare(table)
+    protected boolean compareTable(PgStatement obj) {
+        return obj instanceof ChTable table
                 && Objects.equals(projections, table.projections)
                 && Objects.equals(engine, table.engine);
     }

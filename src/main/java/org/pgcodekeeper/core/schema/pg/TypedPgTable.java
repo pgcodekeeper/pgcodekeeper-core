@@ -103,12 +103,10 @@ public final class TypedPgTable extends AbstractRegularTable {
     }
 
     @Override
-    public boolean compare(PgStatement obj) {
-        if (obj instanceof TypedPgTable table && super.compare(obj)) {
-            return Objects.equals(ofType, table.ofType);
-        }
-
-        return false;
+    protected boolean compareTable(PgStatement obj) {
+        return obj instanceof TypedPgTable table
+                && super.compareTable(table)
+                && Objects.equals(ofType, table.ofType);
     }
 
     @Override

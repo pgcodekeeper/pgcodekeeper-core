@@ -492,15 +492,11 @@ public abstract class AbstractPgTable extends AbstractTable {
     protected abstract void compareTableTypes(AbstractPgTable newTable, SQLScript script);
 
     @Override
-    public boolean compare(PgStatement obj) {
-        if (this == obj) {
-            return true;
-        } else if (obj instanceof AbstractPgTable table && super.compare(obj)) {
-            return hasOids == table.hasOids
-                    && inherits.equals(table.inherits)
-                    && triggerStates.equals(table.triggerStates);
-        }
-        return false;
+    protected boolean compareTable(PgStatement obj) {
+        return obj instanceof AbstractPgTable table
+                && hasOids == table.hasOids
+                && inherits.equals(table.inherits)
+                && triggerStates.equals(table.triggerStates);
     }
 
     @Override

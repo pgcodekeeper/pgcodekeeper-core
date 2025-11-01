@@ -676,4 +676,15 @@ class PgDiffTest {
         String script = getScript(fileNameTemplate, settings, PgDiffTest.class);
         assertResult(script, fileNameTemplate, PgDiffTest.class);
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "alter_gp_external_table_option_with_ignore_column_order"
+    })
+    void compareTableWithIgnoreColumnOrderTest(String fileNameTemplate) throws IOException, InterruptedException {
+        var settings = new CoreSettings();
+        settings.setIgnoreColumnOrder(true);
+        String script = getScript(fileNameTemplate, settings, PgDiffTest.class);
+        assertResult(script, fileNameTemplate, PgDiffTest.class);
+    }
 }
