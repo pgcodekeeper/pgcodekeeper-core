@@ -1,0 +1,15 @@
+UPDATE table1 SET col1 = 1 WHERE id = 1;
+UPDATE mydb.mytable SET name = 'test' WHERE status = 'active';
+UPDATE table1 SET col1 = 1, col2 = 2 WHERE id = 1;
+UPDATE table1 SET col1 = 1, col2 = 2, col3 = 3 WHERE id = 1;
+UPDATE table1 SET col1 = 1 ON CLUSTER cluster1 WHERE id = 1;
+UPDATE table1 SET col1 = 1 ON CLUSTER 'my_cluster' WHERE id = 1;
+UPDATE table1 SET col1 = 1 IN PARTITION 2024 WHERE id = 1;
+UPDATE table1 SET col1 = 1 IN PARTITION 'partition_name' WHERE id = 1;
+UPDATE table1 SET col1 = 1 ON CLUSTER cluster1 IN PARTITION 2024 WHERE id = 1;
+UPDATE table1 SET col1 = 1 ON CLUSTER 'my_cluster' IN PARTITION 'part1' WHERE id = 1;
+UPDATE table1 SET col1 = 1, col2 = 2 ON CLUSTER cluster1 WHERE id = 1;
+UPDATE table1 SET col1 = 1, col2 = 2 IN PARTITION 2024 WHERE id = 1;
+UPDATE table1 SET col1 = 1, col2 = 2 ON CLUSTER cluster1 IN PARTITION 2024 WHERE id = 1;
+UPDATE table1 SET col1 = col1 + 1 WHERE counter < 100;
+UPDATE table1 SET price = price * 0.9 ON CLUSTER dc1 IN PARTITION 'sales' WHERE category = 'clearance';

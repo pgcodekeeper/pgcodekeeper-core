@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Improved parser rules for ClickHouse.
+
 ### Fixed
 
 - Fixed CTE formatting in ClickHouse.

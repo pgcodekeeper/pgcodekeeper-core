@@ -58,8 +58,22 @@ dml_stmt
     | use_stmt
     | watch_stmt
     | insert_stmt
+    | update_stmt
+    | delete_stmt
     | select_stmt
     | transaction_stmt
+    ;
+
+delete_stmt
+    : DELETE FROM qualified_name cluster_clause? in_partition_clause? where_clause
+    ;
+
+update_stmt
+    : UPDATE qualified_name SET assignment_expr_list cluster_clause? in_partition_clause? where_clause
+    ;
+
+in_partition_clause
+    : IN PARTITION expr
     ;
 
 create_stmt
@@ -252,7 +266,7 @@ with_clause
 
 with_query
     : expr AS name=identifier
-    | name=identifier AS LPAREN dml_stmt RPAREN
+    | RECURSIVE? name=identifier AS LPAREN dml_stmt RPAREN
     ;
 
 select_ops
@@ -404,7 +418,11 @@ alter_table_action
     | REPLACE partition_clause FROM qualified_name
     | RESET SETTING (identifier | pair) (COMMA (identifier | pair))*
     | UNFREEZE partition_clause? WITH NAME identifier
-    | UPDATE qualified_name EQ_SINGLE expr (COMMA qualified_name EQ_SINGLE expr)* (IN partition_clause)? where_clause settings_clause?
+    | UPDATE assignment_expr_list (IN partition_clause)? where_clause settings_clause?
+    ;
+
+assignment_expr_list
+    : qualified_name EQ_SINGLE expr (COMMA qualified_name EQ_SINGLE expr)*
     ;
 
 alter_table_add_action
@@ -801,7 +819,7 @@ optimize_by_expr
     ;
 
 rename_stmt
-    : RENAME TABLE qualified_name TO qualified_name (COMMA qualified_name TO qualified_name)* cluster_clause?
+    : RENAME (TABLE | DATABASE | DICTIONARY) qualified_name TO qualified_name (COMMA qualified_name TO qualified_name)* cluster_clause?
     ;
 
 select_primary
@@ -987,7 +1005,7 @@ show_stmt
     | FILESYSTEM CACHES
     | FULL? TEMPORARY? TABLES from_in_db? (like_expr | where_clause)? limit_clause?
     | FUNCTIONS like_expr?
-    | GRANTS (FOR identifier_list)?
+    | GRANTS (FOR identifier_list)? (WITH IMPLICIT)? FINAL?
     | PRIVILEGES
     | PROCESSLIST
     | QUOTAS
@@ -1398,6 +1416,7 @@ tokens_nonreserved
     | ID
     | IDENTIFIED
     | IF
+    | IMPLICIT
     | IN
     | INDEX
     | INDEXES
@@ -1523,6 +1542,7 @@ tokens_nonreserved
     | REPLICA
     | REPLICATED
     | REPLICATION
+    | RECURSIVE
     | RESET
     | RESTART
     | RESTRICTIVE
