@@ -82,3 +82,20 @@ CREATE TABLE default.test2
     CONSTRAINT c_name2 CHECK col1 < 10
 )
 ENGINE = Log;
+
+CREATE TABLE default.test3
+(
+    `col1` Int32 NOT NULL,
+    CONSTRAINT c_name2 CHECK col1 < 10
+)
+ENGINE = Log
+COMMENT 'test table comment';
+
+CREATE TABLE default.test4
+(
+    `col1` Int32 NOT NULL,
+    `сol2` UInt32 NOT NULL,
+    CONSTRAINT c_name2 CHECK col1 < 10
+)
+ENGINE = Log
+COMMENT 'test table comment';
