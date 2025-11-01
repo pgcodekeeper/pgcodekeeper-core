@@ -70,12 +70,9 @@ public final class ChTableLog extends ChTable {
     }
 
     @Override
-    public boolean compare(PgStatement obj) {
-        if (this == obj) {
-            return true;
-        }
+    protected boolean compareTable(PgStatement obj) {
         return obj instanceof ChTableLog table
-                && super.compare(table)
+                && super.compareTable(table)
                 && Objects.equals(constrs, table.constrs);
     }
 

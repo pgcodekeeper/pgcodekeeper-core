@@ -242,12 +242,10 @@ public final class GpExternalTable extends AbstractPgTable implements PgForeignO
     }
 
     @Override
-    public boolean compare(PgStatement obj) {
-        if (obj instanceof GpExternalTable table && super.compare(obj)) {
-            return compareExternalOptions(table);
-        }
-
-        return false;
+    protected boolean compareTable(PgStatement obj) {
+        return  obj instanceof GpExternalTable table
+                && super.compareTable(table)
+                && compareExternalOptions(table);
     }
 
     private boolean compareExternalOptions(GpExternalTable table) {

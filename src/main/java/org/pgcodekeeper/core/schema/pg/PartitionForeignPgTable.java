@@ -100,12 +100,10 @@ public final class PartitionForeignPgTable extends AbstractForeignTable implemen
     }
 
     @Override
-    public boolean compare(PgStatement obj) {
-        if (obj instanceof PartitionForeignPgTable table && super.compare(obj)) {
-            return Objects.equals(partitionBounds, table.partitionBounds);
-        }
-
-        return false;
+    protected boolean compareTable(PgStatement obj) {
+        return obj instanceof PartitionForeignPgTable table
+                && super.compareTable(table)
+                && Objects.equals(partitionBounds, table.partitionBounds);
     }
 
     @Override

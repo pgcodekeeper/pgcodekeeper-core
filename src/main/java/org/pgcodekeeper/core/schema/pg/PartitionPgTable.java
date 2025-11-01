@@ -143,12 +143,10 @@ public final class PartitionPgTable extends AbstractRegularTable implements IPar
     }
 
     @Override
-    public boolean compare(PgStatement obj) {
-        if (obj instanceof PartitionPgTable table && super.compare(obj)) {
-            return Objects.equals(partitionBounds, table.partitionBounds);
-        }
-
-        return false;
+    protected boolean compareTable(PgStatement obj) {
+        return obj instanceof PartitionPgTable table
+                && super.compareTable(table)
+                && Objects.equals(partitionBounds, table.partitionBounds);
     }
 
     @Override

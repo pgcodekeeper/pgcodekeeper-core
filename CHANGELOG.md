@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Fixed CTE formatting in ClickHouse.
+- Fixed a bug in the behavior of the compiler when the ignore column order setting is enabled.
 
 ## [12.0.0] - 2025-10-14
 

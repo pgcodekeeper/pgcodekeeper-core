@@ -207,6 +207,8 @@ public abstract class AbstractTable extends PgStatementContainer implements IOpt
         return compare(obj, true);
     }
 
+    protected abstract boolean compareTable(PgStatement obj);
+
     private boolean compare(PgStatement obj, boolean checkColumnOrder) {
         if (this == obj) {
             return true;
@@ -222,7 +224,8 @@ public abstract class AbstractTable extends PgStatementContainer implements IOpt
 
             return isColumnsEqual
                     && getClass().equals(table.getClass())
-                    && options.equals(table.options);
+                    && options.equals(table.options)
+                    && compareTable(table);
         }
 
         return false;

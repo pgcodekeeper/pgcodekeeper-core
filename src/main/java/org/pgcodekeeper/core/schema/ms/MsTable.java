@@ -418,12 +418,8 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
     }
 
     @Override
-    public boolean compare(PgStatement obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        return obj instanceof MsTable table && super.compare(obj)
+    protected boolean compareTable(PgStatement obj) {
+        return obj instanceof MsTable table
                 && ansiNulls == table.ansiNulls
                 && Objects.equals(textImage, table.textImage)
                 && Objects.equals(fileStream, table.fileStream)
