@@ -34,7 +34,7 @@ class MsJdbcLoaderTest extends JdbcLoaderTest {
     @ParameterizedTest
     @CsvSource({
             "ms_dump_test",
-//            "ms_index",
+            "ms_index",
             "ms_sequence",
             "ms_statistics",
             "ms_sys_ver_table",

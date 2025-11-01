@@ -120,27 +120,30 @@ public class MsIndicesAndPKReader extends JdbcReader {
         // cannot be used in memory_optimized tables
         boolean allowRowLocks = isMemoryOptimized || res.getBoolean("allow_row_locks");
         boolean allowPageLocks = isMemoryOptimized || res.getBoolean("allow_page_locks");
+        boolean isColumnstore = false;
 
         Map<String, String> options = new HashMap<>();
+        if (res.getBoolean("data_compression")) {
+            var compressionType = res.getString("data_compression_desc");
+            options.put("DATA_COMPRESSION", compressionType);
+            isColumnstore = compressionType.startsWith("COLUMNSTORE");
+        }
+
         if (res.getBoolean("is_padded")) {
             options.put("PAD_INDEX", "ON");
         }
 
-        if (!allowPageLocks) {
+        if (!allowPageLocks && !isColumnstore) {
             options.put("ALLOW_PAGE_LOCKS", "OFF");
         }
 
-        if (!allowRowLocks) {
+        if (!allowRowLocks && !isColumnstore) {
             options.put("ALLOW_ROW_LOCKS", "OFF");
         }
 
         long fillfactor = res.getLong("fill_factor");
         if (fillfactor != 0) {
             options.put("FILLFACTOR", Long.toString(fillfactor));
-        }
-
-        if (res.getBoolean("data_compression")) {
-            options.put("DATA_COMPRESSION", res.getString("data_compression_desc"));
         }
 
         if (res.getBoolean("ignore_dup_key")) {

@@ -43,7 +43,7 @@ public final class TestContainer {
 
     static {
         PG_DB.withUsername(TEST_USER).withPassword(TEST_PASSWORD);
-        MS_DB.withEnv("ACCEPT_EULA", "Y");
+        MS_DB.withEnv("ACCEPT_EULA", "Y").withInitScript(getInitScriptPath("init_ms_db.sql"));
         CH_DB.withUsername(TEST_USER).withPassword(TEST_PASSWORD);
 
         PG_DB.start();
@@ -55,7 +55,7 @@ public final class TestContainer {
         CH_PORT = CH_DB.getFirstMappedPort();
 
         PG_URL = "jdbc:postgresql://localhost:" + PG_PORT + "/test" + PG_CH_URL_POSTFIX;
-        MS_URL = "jdbc:sqlserver://localhost:" + MS_PORT + ";databaseName=tempdb;user=sa;password=A_Str0ng_Required_Password";
+        MS_URL = "jdbc:sqlserver://localhost:" + MS_PORT + ";databaseName=test_db;user=sa;password=A_Str0ng_Required_Password";
         CH_URL = "jdbc:clickhouse://localhost:" + CH_PORT + "/default" + PG_CH_URL_POSTFIX;
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -64,6 +64,10 @@ public final class TestContainer {
             MS_DB.close();
             CH_DB.close();
         }));
+    }
+
+    private static String getInitScriptPath(String fileName) {
+        return TestContainer.class.getPackage().getName().replace('.', '/') + '/' + fileName;
     }
 
     private TestContainer() {

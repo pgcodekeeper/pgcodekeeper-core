@@ -67,7 +67,11 @@ public class MsTablesReader extends JdbcReader {
         }
 
         if (res.getBoolean("data_compression")) {
-            table.addOption("DATA_COMPRESSION", res.getString("data_compression_desc"));
+            var compressionType = res.getString("data_compression_desc");
+            // we don't need to store these types of compression as it is assigned automatically when created columnstore index
+            if (!compressionType.startsWith("COLUMNSTORE")) {
+                table.addOption("DATA_COMPRESSION", compressionType);
+            }
         }
 
         if (res.getBoolean("temporal_type")) {
