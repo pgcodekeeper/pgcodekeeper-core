@@ -137,6 +137,10 @@ public final class CreateMsTable extends MsTableAbstract {
             index.setClustered(columnstoreIndCtx.CLUSTERED() != null);
             parseColumnstoreIndex(indCtx.columnstore_index(), index, schemaName, tableName);
             parseIndexOptions(index, indCtx.index_where(), indCtx.index_options(), ctx.id());
+            // if user didn't set it, database will be set it by default
+            if (null == index.getOptions().get("DATA_COMPRESSION")) {
+                index.addOption("DATA_COMPRESSION", "COLUMNSTORE");
+            }
         }
 
         if (index.getTablespace() == null) {

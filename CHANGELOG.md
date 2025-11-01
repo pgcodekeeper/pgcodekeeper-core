@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - Improved parser rules for ClickHouse.
+- Improved migration script generation for tables and indexes with options in MS SQL.
 
 ### Fixed
 
