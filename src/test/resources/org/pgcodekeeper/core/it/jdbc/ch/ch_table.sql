@@ -39,3 +39,10 @@ ORDER BY col9 AND col10
 SETTINGS min_bytes_for_wide_part = 123,
 index_granularity = 8192
 COMMENT 'TEST';
+
+CREATE TABLE default.log_t1
+(
+	`col1` Int32,
+	CONSTRAINT c_name2 CHECK col1 < 10
+)
+ENGINE = Log;

@@ -42,8 +42,22 @@ DROP TABLE default.test;
 
 DROP TABLE default.test2;
 
+ALTER TABLE default.test3
+	MODIFY COMMENT 'test table comment';
+
+DROP TABLE default.test4;
+
 ALTER TABLE default.t2_2
 	ADD COLUMN `col2` Int64;
+
+CREATE TABLE default.test4
+(
+	`col1` Int32,
+	`сol2` UInt32,
+	CONSTRAINT c_name2 CHECK col1 < 10
+)
+ENGINE = Log
+COMMENT 'test table comment';
 
 ALTER TABLE default.t2_2 ADD INDEX ind3 col1 > col2 TYPE bloom_filter;
 

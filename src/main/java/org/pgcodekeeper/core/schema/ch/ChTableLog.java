@@ -19,9 +19,7 @@ import org.pgcodekeeper.core.ChDiffUtils;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.schema.AbstractConstraint;
 import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.ObjectState;
 import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.script.SQLScript;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,11 +58,6 @@ public final class ChTableLog extends ChTable {
     }
 
     @Override
-    public ObjectState appendAlterSQL(PgStatement newCondition, SQLScript script) {
-        return (compare(newCondition) && compareChildren(newCondition)) ? ObjectState.NOTHING : ObjectState.RECREATE;
-    }
-
-    @Override
     protected boolean isNotEmptyTable() {
         return super.isNotEmptyTable() || !constrs.isEmpty();
     }
@@ -89,5 +82,13 @@ public final class ChTableLog extends ChTable {
         table.engine = engine;
         table.constrs.addAll(constrs);
         return table;
+    }
+
+    @Override
+    protected boolean isNeedRecreate(AbstractTable newTable) {
+        var newChLogTable = (ChTableLog) newTable;
+        return super.isNeedRecreate(newChLogTable)
+                || !constrs.equals(newChLogTable.constrs)
+                || !columns.equals(newChLogTable.columns);
     }
 }
