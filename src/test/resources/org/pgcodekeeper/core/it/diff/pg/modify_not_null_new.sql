@@ -8,6 +8,7 @@ CREATE TABLE public.testtable (
     field7 integer,
     field8 integer,
     field9 integer NOT NULL,
+    field10 integer constraint testtable_field10_not_null NOT NULL,
     CONSTRAINT field7_not_null_test NOT NULL field7 NO INHERIT,
     CONSTRAINT testtable_field8_not_null NOT NULL field8
 );

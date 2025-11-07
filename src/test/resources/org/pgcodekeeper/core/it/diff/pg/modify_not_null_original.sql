@@ -7,5 +7,6 @@ CREATE TABLE public.testtable (
     field6 integer NOT NULL,
     field7 integer NOT NULL,
     field8 integer NOT NULL,
-    field9 integer NOT NULL
+    field9 integer NOT NULL,
+    field10 integer NOT NULL
 );

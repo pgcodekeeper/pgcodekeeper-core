@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed CTE formatting in ClickHouse.
 - Fixed a bug in the behavior of the compiler when the ignore column order setting is enabled.
 - Fixed bug in generating the migration script when adding a column to Log family tables in ClickHouse.
+- Fixed a false difference between NOT NULL constraints with the default name in PostgreSQL.
 
 ## [12.0.0] - 2025-10-14
 

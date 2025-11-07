@@ -113,7 +113,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
 
         if (notNull) {
             if (notNullConName != null) {
-                sbDefinition.append(" CONSTRAINT ").append(getNotNullConName());
+                sbDefinition.append(" CONSTRAINT ").append(notNullConName);
             }
             sbDefinition.append(NOT_NULL);
             if (isNotNullNoInherit) {
@@ -753,6 +753,12 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
     public void setNotNullNoInherit(boolean isNotNullNoInherit) {
         this.isNotNullNoInherit = isNotNullNoInherit;
         resetHash();
+    }
+
+    public void setNotNullConName(String tableName, String conName) {
+        if (!DEFAULT_NOT_NULL_CONSTRAINT_NAME.formatted(tableName, name).equals(conName)) {
+            setNotNullConName(conName);
+        }
     }
 
     public void setNotNullConName(String notNullConName) {
