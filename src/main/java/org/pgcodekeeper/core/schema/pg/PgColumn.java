@@ -220,19 +220,8 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
     @Override
     public void getDropSQL(SQLScript script, boolean optionExists) {
         if (type != null && getParentCol((AbstractPgTable) parent) == null) {
-            boolean addOnly = true;
-
-            //// Condition for partitioned tables.
-            // If there are sections, then it is impossible to delete a column
-            // only from a partitioned table.
-            // Because of impossible inherit from partitioned tables, this
-            // condition will also be true for cases when a partitioned table
-            // does not have sections.
-            if (parent instanceof AbstractRegularTable regTable) {
-                addOnly = regTable.getPartitionBy() == null;
-            }
             StringBuilder dropSb = new StringBuilder();
-            dropSb.append(getAlterTable(addOnly)).append("\n\tDROP COLUMN ");
+            dropSb.append(getAlterTable(isNeedOnly())).append("\n\tDROP COLUMN ");
             if (optionExists) {
                 dropSb.append(IF_EXISTS);
             }
@@ -253,6 +242,16 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
         compareIdentity(identityType, null, sequence, null, script);
 
         appendComments(script);
+    }
+
+    /**
+     * @return true if parent table isn't partition table with existing partitions, false otherwise
+     */
+    private boolean isNeedOnly() {
+        if (parent instanceof AbstractRegularTable regTable) {
+            return regTable.getPartitionBy() == null;
+        }
+        return true;
     }
 
     @Override
@@ -311,7 +310,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
     private void writeOptions(boolean isCreate, SQLScript script) {
         if (!options.isEmpty()) {
             StringBuilder sb = new StringBuilder();
-            sb.append(getAlterTableColumn(true, name));
+            sb.append(getAlterTableColumn(isNeedOnly(), name));
             sb.append(isCreate ? " SET (" : " RESET (");
             for (Entry<String, String> option : options.entrySet()) {
                 sb.append(option.getKey());
@@ -492,7 +491,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
         boolean newNotNull = newColumn != null && newColumn.isNotNull();
 
         if (oldNotNull && !newNotNull) {
-            script.addStatement(getAlterTableColumn(true, name) + " DROP" + NOT_NULL);
+            script.addStatement(getAlterTableColumn(isNeedOnly(), name) + " DROP" + NOT_NULL);
             return;
         }
 

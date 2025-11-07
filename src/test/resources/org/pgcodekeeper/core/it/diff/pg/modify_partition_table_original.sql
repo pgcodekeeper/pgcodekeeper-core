@@ -95,3 +95,41 @@ CREATE TABLE public.tab_of_type OF public.comp (
 PARTITION BY LIST ("left"(lower(f2), 1));
 
 ALTER TABLE public.tab_of_type OWNER TO galiev_mr;
+
+CREATE TABLE public.measurement (
+	id integer DEFAULT nextval('public.measurement_id_seq'::regclass) NOT NULL,
+	logdate date NOT NULL,
+	temperature real
+)
+PARTITION BY RANGE (logdate);
+
+ALTER TABLE public.measurement OWNER TO rashit;
+
+CREATE TABLE public.measurement_2023 PARTITION OF public.measurement
+FOR VALUES FROM ('2023-01-01') TO ('2024-01-01');
+
+ALTER TABLE ONLY public.measurement_2023 ALTER COLUMN id SET DEFAULT nextval('public.measurement_id_seq'::regclass);
+
+ALTER TABLE public.measurement_2023 OWNER TO rashit;
+
+CREATE TABLE public.measurement_2024 PARTITION OF public.measurement
+FOR VALUES FROM ('2024-01-01') TO ('2025-01-01');
+
+ALTER TABLE ONLY public.measurement_2024 ALTER COLUMN id SET DEFAULT nextval('public.measurement_id_seq'::regclass);
+
+ALTER TABLE public.measurement_2024 OWNER TO rashit;
+
+CREATE TABLE public.sales (
+	id integer,
+	sale_date date,
+	amount numeric(10,2),
+	rand integer
+)
+DISTRIBUTED BY (id)
+PARTITION BY RANGE(sale_date)
+          (
+          START ('2024-01-01'::date) END ('2024-04-01'::date) EVERY ('1 mon'::interval),
+          DEFAULT PARTITION extra
+          );
+
+ALTER TABLE public.sales OWNER TO rashit;
