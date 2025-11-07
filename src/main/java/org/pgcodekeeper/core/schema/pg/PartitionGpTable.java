@@ -163,6 +163,11 @@ public final class PartitionGpTable extends AbstractRegularTable {
     }
 
     @Override
+    public String getPartitionBy() {
+        return normalizedPartitionGpBounds;
+    }
+
+    @Override
     protected void compareTableTypes(AbstractPgTable newTable, SQLScript script) {
         // no implements
     }

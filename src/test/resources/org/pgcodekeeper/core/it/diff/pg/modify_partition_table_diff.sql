@@ -2,6 +2,9 @@ SET search_path = pg_catalog;
 
 DROP TABLE public.cities_mz;
 
+ALTER TABLE public.sales
+	DROP COLUMN amount;
+
 DROP TABLE public.cities_hi;
 
 ALTER TABLE public.cities_cd
@@ -34,6 +37,9 @@ CREATE TABLE public.tab_of_type OF public.comp (
 );
 
 ALTER TABLE public.tab_of_type OWNER TO galiev_mr;
+
+ALTER TABLE public.measurement
+	ALTER COLUMN logdate DROP NOT NULL;
 
 ALTER TABLE public.cities_ab
 	DROP CONSTRAINT constr_check;
