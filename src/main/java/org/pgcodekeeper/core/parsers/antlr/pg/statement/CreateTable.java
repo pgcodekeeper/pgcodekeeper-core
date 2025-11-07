@@ -210,7 +210,7 @@ public final class CreateTable extends TableAbstract {
         AntlrTaskManager.submit(antlrTasks, () -> colNameCtx, colCtx -> {
             var col = (PgColumn) getSafe(AbstractTable::getColumn, table, colNameCtx);
             if (col != null) {
-                fillColNotNull(col, tblConstrCtx);
+                fillColNotNull(col, table.getName(), tblConstrCtx);
             }
         });
     }

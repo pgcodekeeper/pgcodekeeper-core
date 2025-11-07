@@ -231,21 +231,21 @@ public final class TablesReader extends JdbcReader {
             colNotNullNoInherit = getColArray(res, "col_notnull_no_inherit");
         }
 
-        Integer[] colStatictics;
+        Integer[] colStatistics;
         if (SupportedPgVersion.VERSION_16.isLE(loader.getVersion())) {
             // in PG 16 type changed from int4 to int2
-            Short[] tmpStatictics = getColArray(res, "col_statictics");
-            colStatictics = new Integer[tmpStatictics.length];
-            for (int i = 0; i < tmpStatictics.length; i++) {
+            Short[] tmpStatistics = getColArray(res, "col_statistics");
+            colStatistics = new Integer[tmpStatistics.length];
+            for (int i = 0; i < tmpStatistics.length; i++) {
                 //in PG 17 we can have null instead -1
-                if (tmpStatictics[i] == null) {
-                    colStatictics[i] = -1;
+                if (tmpStatistics[i] == null) {
+                    colStatistics[i] = -1;
                 } else {
-                    colStatictics[i] = (int) tmpStatictics[i];
+                    colStatistics[i] = (int) tmpStatistics[i];
                 }
             }
         } else {
-            colStatictics = getColArray(res, "col_statictics");
+            colStatistics = getColArray(res, "col_statistics");
         }
 
         Boolean[] colIsLocal = getColArray(res, "col_local");
@@ -338,11 +338,11 @@ public final class TablesReader extends JdbcReader {
                 column.setNotNull(true);
                 if (SupportedPgVersion.VERSION_18.isLE(loader.getVersion())) {
                     column.setNotNullNoInherit(colNotNullNoInherit[i]);
-                    column.setNotNullConName(colNotNullConName[i]);
+                    column.setNotNullConName(t.getName(), colNotNullConName[i]);
                 }
             }
 
-            int statistics = colStatictics[i];
+            int statistics = colStatistics[i];
             // if the attstattarget entry for this column is
             // non-negative (i.e. it's not the default value)
             if (statistics > -1) {
@@ -587,7 +587,7 @@ public final class TablesReader extends JdbcReader {
                            END
                           ) ORDER BY a.attnum
                         ) AS col_notnull""")
-                .column("pg_catalog.array_agg(a.attstattarget ORDER BY a.attnum) AS col_statictics")
+                .column("pg_catalog.array_agg(a.attstattarget ORDER BY a.attnum) AS col_statistics")
                 .column("pg_catalog.array_agg(a.attislocal ORDER BY a.attnum) AS col_local")
                 .column("pg_catalog.array_agg(a.attacl::text ORDER BY a.attnum) AS col_acl")
                 .column("pg_catalog.array_agg(a.attcollation::bigint ORDER BY a.attnum) AS col_collation")
@@ -643,7 +643,7 @@ public final class TablesReader extends JdbcReader {
         builder.column("columns.col_type_ids");
         builder.column("columns.col_type_name");
         builder.column("columns.col_notnull");
-        builder.column("columns.col_statictics");
+        builder.column("columns.col_statistics");
         builder.column("columns.col_local");
         builder.column("columns.col_acl");
         builder.column("columns.col_collation");
