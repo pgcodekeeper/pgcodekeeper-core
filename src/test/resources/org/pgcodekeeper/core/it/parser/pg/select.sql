@@ -1441,3 +1441,19 @@ COLUMNS (
         COLUMNS (
           author_id FOR ORDINALITY,
           author_name text PATH '$.name'))));
+
+SELECT js,
+  js IS JSON "json?",
+  js IS JSON SCALAR "scalar?",
+  js IS JSON OBJECT "object?",
+  js IS JSON ARRAY "array?"
+FROM (VALUES
+      ('123'), ('"abc"'), ('{"a": "b"}'), ('[1,2]'),('abc')) foo(js);
+SELECT js,
+  js IS JSON OBJECT "object?",
+  js IS JSON ARRAY "array?",
+  js IS JSON ARRAY WITH UNIQUE KEYS "array w. UK?",
+  js IS JSON ARRAY WITHOUT UNIQUE KEYS "array w/o UK?"
+FROM (VALUES ('[{"a":"1"},
+ {"b":"2","b":"3"}]')) foo(js);
+SELECT _txt IS JSON;
