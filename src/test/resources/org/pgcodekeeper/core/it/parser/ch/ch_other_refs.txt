@@ -1,0 +1,103 @@
+Reference: action = ALTER, offset = 0, line number = 1, charPositionInLine = 0
+Reference: action = ATTACH, offset = 42, line number = 2, charPositionInLine = 0
+Reference: action = ATTACH, offset = 69, line number = 3, charPositionInLine = 0
+Reference: action = BEGIN, offset = 111, line number = 4, charPositionInLine = 0
+Reference: action = CHECK, offset = 130, line number = 5, charPositionInLine = 0
+Reference: action = CHECK, offset = 180, line number = 6, charPositionInLine = 0
+Reference: action = CHECK, offset = 209, line number = 7, charPositionInLine = 0
+Reference: action = CHECK, offset = 264, line number = 8, charPositionInLine = 0
+Reference: action = CHECK, offset = 332, line number = 9, charPositionInLine = 0
+Reference: action = CHECK, offset = 440, line number = 10, charPositionInLine = 0
+Reference: action = CHECK, offset = 492, line number = 11, charPositionInLine = 0
+Reference: action = CHECK, offset = 526, line number = 12, charPositionInLine = 0
+Reference: action = CHECK, offset = 589, line number = 13, charPositionInLine = 0
+Reference: action = CHECK, offset = 630, line number = 14, charPositionInLine = 0
+Reference: action = CHECK, offset = 672, line number = 15, charPositionInLine = 0
+Reference: action = CHECK, offset = 736, line number = 16, charPositionInLine = 0
+Reference: action = CHECK, offset = 783, line number = 17, charPositionInLine = 0
+Reference: action = CHECK, offset = 835, line number = 18, charPositionInLine = 0
+Reference: action = CHECK, offset = 898, line number = 19, charPositionInLine = 0
+Reference: action = CHECK, offset = 935, line number = 20, charPositionInLine = 0
+Reference: action = CHECK, offset = 956, line number = 21, charPositionInLine = 0
+Reference: action = CHECK, offset = 977, line number = 22, charPositionInLine = 0
+Reference: action = CHECK, offset = 1039, line number = 23, charPositionInLine = 0
+Reference: action = CHECK, offset = 1129, line number = 24, charPositionInLine = 0
+Reference: action = COMMIT, offset = 1203, line number = 25, charPositionInLine = 0
+Reference: action = CREATE, offset = 1211, line number = 26, charPositionInLine = 0
+Reference: Object = test_01915_db (SCHEMA), action = null, offset = 1302, line number = 27, charPositionInLine = 29
+Reference: Object = test_01915_db.test_dictionary (DICTIONARY), action = CREATE, offset = 1316, line number = 27, charPositionInLine = 43
+Reference: Object = test_01915_db (SCHEMA), action = null, offset = 1493, line number = 28, charPositionInLine = 29
+Reference: Object = test_01915_db.test_dictionary (DICTIONARY), action = CREATE, offset = 1507, line number = 28, charPositionInLine = 43
+Reference: Object = alias_local10 (TABLE), action = CREATE, offset = 1693, line number = 29, charPositionInLine = 24
+Reference: Object = distributed (TABLE), action = CREATE, offset = 1927, line number = 30, charPositionInLine = 24
+Reference: Object = t1 (TABLE), action = CREATE, offset = 2049, line number = 31, charPositionInLine = 24
+Reference: Object = t1 (TABLE), action = CREATE, offset = 2136, line number = 32, charPositionInLine = 24
+Reference: action = DESC, offset = 2189, line number = 33, charPositionInLine = 0
+Reference: action = DESC, offset = 2219, line number = 34, charPositionInLine = 0
+Reference: action = DESC, offset = 2256, line number = 35, charPositionInLine = 0
+Reference: action = DESC, offset = 2273, line number = 36, charPositionInLine = 0
+Reference: action = DESC, offset = 2290, line number = 37, charPositionInLine = 0
+Reference: action = DESC, offset = 2322, line number = 38, charPositionInLine = 0
+Reference: action = DESC, offset = 2354, line number = 39, charPositionInLine = 0
+Reference: action = DESC, offset = 2377, line number = 40, charPositionInLine = 0
+Reference: action = DESC, offset = 2412, line number = 41, charPositionInLine = 0
+Reference: action = DESC, offset = 2454, line number = 42, charPositionInLine = 0
+Reference: action = DESC, offset = 2479, line number = 43, charPositionInLine = 0
+Reference: action = DESC, offset = 2502, line number = 44, charPositionInLine = 0
+Reference: action = DESC, offset = 2520, line number = 45, charPositionInLine = 0
+Reference: action = DESC, offset = 2532, line number = 46, charPositionInLine = 0
+Reference: action = DESC, offset = 2617, line number = 47, charPositionInLine = 0
+Reference: action = DESC, offset = 2756, line number = 48, charPositionInLine = 0
+Reference: action = DESCRIBE, offset = 2903, line number = 49, charPositionInLine = 0
+Reference: action = DESCRIBE, offset = 2929, line number = 50, charPositionInLine = 0
+Reference: action = DESCRIBE, offset = 2955, line number = 51, charPositionInLine = 0
+Reference: action = DESCRIBE, offset = 3020, line number = 52, charPositionInLine = 0
+Reference: action = DESCRIBE, offset = 3115, line number = 53, charPositionInLine = 0
+Reference: action = DESCRIBE, offset = 3145, line number = 54, charPositionInLine = 0
+Reference: action = DESCRIBE, offset = 3187, line number = 55, charPositionInLine = 0
+Reference: action = DETACH, offset = 3202, line number = 56, charPositionInLine = 0
+Reference: action = DETACH, offset = 3240, line number = 57, charPositionInLine = 0
+Reference: action = DETACH, offset = 3281, line number = 58, charPositionInLine = 0
+Reference: action = DETACH, offset = 3323, line number = 59, charPositionInLine = 0
+Reference: Object = order_test1 (TABLE), action = DROP, offset = 3386, line number = 60, charPositionInLine = 21
+Reference: action = DROP, offset = 3399, line number = 61, charPositionInLine = 0
+Reference: Object = wups (TABLE), action = DROP, offset = 3473, line number = 62, charPositionInLine = 21
+Reference: action = EXISTS, offset = 3479, line number = 63, charPositionInLine = 0
+Reference: action = EXPLAIN, offset = 3498, line number = 64, charPositionInLine = 0
+Reference: action = EXPLAIN, offset = 3566, line number = 65, charPositionInLine = 0
+Reference: action = EXPLAIN, offset = 3762, line number = 66, charPositionInLine = 0
+Reference: action = EXPLAIN, offset = 3917, line number = 67, charPositionInLine = 0
+Reference: action = EXPLAIN, offset = 4003, line number = 68, charPositionInLine = 0
+Reference: action = EXPLAIN, offset = 4037, line number = 69, charPositionInLine = 0
+Reference: action = EXPLAIN, offset = 4132, line number = 70, charPositionInLine = 0
+Reference: action = EXPLAIN, offset = 4245, line number = 71, charPositionInLine = 0
+Reference: action = EXPLAIN, offset = 4315, line number = 72, charPositionInLine = 0
+Reference: action = EXPLAIN, offset = 4394, line number = 73, charPositionInLine = 0
+Reference: action = OPTIMIZE, offset = 4448, line number = 74, charPositionInLine = 0
+Reference: action = RENAME, offset = 4495, line number = 75, charPositionInLine = 0
+Reference: action = RENAME, offset = 4543, line number = 76, charPositionInLine = 0
+Reference: action = RENAME, offset = 4594, line number = 77, charPositionInLine = 0
+Reference: Object = "01913_db" (SCHEMA), action = null, offset = 4653, line number = 78, charPositionInLine = 19
+Reference: Object = "01913_db".test_dictionary (DICTIONARY), action = CREATE, offset = 4664, line number = 78, charPositionInLine = 30
+Reference: Object = buf (TABLE), action = CREATE, offset = 4835, line number = 79, charPositionInLine = 14
+Reference: Object = "join" (TABLE), action = CREATE, offset = 4934, line number = 80, charPositionInLine = 14
+Reference: Object = t1 (TABLE), action = CREATE, offset = 5017, line number = 81, charPositionInLine = 14
+Reference: Object = t1 (TABLE), action = CREATE, offset = 5074, line number = 82, charPositionInLine = 14
+Reference: action = ROLLBACK, offset = 5127, line number = 83, charPositionInLine = 0
+Reference: action = SET, offset = 5137, line number = 84, charPositionInLine = 0
+Reference: action = SYSTEM, offset = 5168, line number = 85, charPositionInLine = 0
+Reference: action = SYSTEM, offset = 5203, line number = 86, charPositionInLine = 0
+Reference: action = SYSTEM, offset = 5245, line number = 87, charPositionInLine = 0
+Reference: action = SYSTEM, offset = 5264, line number = 88, charPositionInLine = 0
+Reference: action = SYSTEM, offset = 5283, line number = 89, charPositionInLine = 0
+Reference: action = SYSTEM, offset = 5311, line number = 90, charPositionInLine = 0
+Reference: action = SYSTEM, offset = 5339, line number = 91, charPositionInLine = 0
+Reference: action = SYSTEM, offset = 5370, line number = 92, charPositionInLine = 0
+Reference: action = SYSTEM, offset = 5413, line number = 93, charPositionInLine = 0
+Reference: action = SYSTEM, offset = 5443, line number = 94, charPositionInLine = 0
+Reference: action = SYSTEM, offset = 5472, line number = 95, charPositionInLine = 0
+Reference: action = TRUNCATE, offset = 5512, line number = 96, charPositionInLine = 0
+Reference: action = TRUNCATE, offset = 5545, line number = 97, charPositionInLine = 0
+Reference: action = TRUNCATE, offset = 5582, line number = 98, charPositionInLine = 0
+Reference: action = TRUNCATE, offset = 5603, line number = 99, charPositionInLine = 0
+Reference: action = TRUNCATE, offset = 5619, line number = 100, charPositionInLine = 0

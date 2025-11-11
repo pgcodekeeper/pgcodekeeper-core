@@ -35,6 +35,9 @@ class ChObjReferencesTest {
     @ValueSource(strings = {
             "ch_database",
             "ch_function",
+            "ch_index",
+            "ch_insert",
+            "ch_other",
             "ch_show",
             "ch_view",
             "ch_policy",

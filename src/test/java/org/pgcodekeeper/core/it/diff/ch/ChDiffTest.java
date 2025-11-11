@@ -60,11 +60,7 @@ class ChDiffTest {
             "drop_ch_table",
             "drop_ch_user",
             "drop_ch_view",
-            "revoke_ch_privilegies",
-            // uncovereged cases
-            // "ch_table_uncovereged_cases_with_diffs",
-            // "ch_table_uncovereged_cases_without_diffs",
-            // "ch_view_uncovereged_cases_with_diffs_original",
+            "revoke_ch_privilegies"
 
     })
     void diffTest(String fileNameTemplate) throws IOException, InterruptedException {
