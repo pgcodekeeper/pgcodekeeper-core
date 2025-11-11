@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
+import org.pgcodekeeper.core.database.base.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.utils.DaemonThreadFactory;
 import org.pgcodekeeper.core.reporter.IProgressReporter;
 import org.pgcodekeeper.core.loader.callables.QueriesBatchCallable;
@@ -101,7 +101,7 @@ public class JdbcRunner {
      * @throws IOException          if connection creation fails
      * @throws InterruptedException if execution is interrupted
      */
-    public void run(AbstractJdbcConnector connector, String script)
+    public void run(IJdbcConnector connector, String script)
             throws SQLException, IOException, InterruptedException {
         try (Connection connection = connector.getConnection();
              Statement st = connection.createStatement()) {
@@ -119,7 +119,7 @@ public class JdbcRunner {
      * @throws IOException          if connection creation fails
      * @throws InterruptedException if execution is interrupted
      */
-    public void runBatches(AbstractJdbcConnector connector, List<PgObjLocation> batches,
+    public void runBatches(IJdbcConnector connector, List<PgObjLocation> batches,
                            IProgressReporter reporter) throws SQLException, IOException, InterruptedException {
         try (Connection connection = connector.getConnection();
              Statement st = connection.createStatement()) {

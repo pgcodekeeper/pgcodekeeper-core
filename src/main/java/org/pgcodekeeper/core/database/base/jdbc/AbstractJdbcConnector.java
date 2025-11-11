@@ -28,15 +28,18 @@ import java.util.Properties;
  * Abstract base class for JDBC database connectors.
  * Provides common functionality for establishing database connections.
  */
-public abstract class AbstractJdbcConnector {
+public abstract class AbstractJdbcConnector implements IJdbcConnector {
+
+    private final String url;
 
     /**
-     * Creates a new database connection using the parameters specified in the constructor.
-     * The caller is responsible for closing the connection.
-     *
-     * @return new database connection
-     * @throws IOException if the driver is not found or a database access error occurs
+     * @param url jdbc connection string
      */
+    protected AbstractJdbcConnector(String url) {
+        this.url = url;
+    }
+
+    @Override
     public Connection getConnection() throws IOException {
         try {
             loadDriver();
@@ -55,10 +58,10 @@ public abstract class AbstractJdbcConnector {
         Class.forName(getDriverName());
     }
 
-    /**
-     * @return full connection string
-     */
-    protected abstract String getUrl();
+    @Override
+    public String getUrl() {
+        return url;
+    }
 
     /**
      * @return connection properties
@@ -75,16 +78,17 @@ public abstract class AbstractJdbcConnector {
     protected abstract String getDriverName();
 
     /**
-     * Returns batch delimiter. If the value is null, each statement will be executed separately in autocommit mode.
-     *
-     * @return batch delimiter
+     * @return default port
      */
-    public String getBatchDelimiter() {
-        return null;
-    }
+    protected abstract int getDefaultPort();
 
-    protected abstract String getDefaultPort();
-
+    /**
+     * Validates connection string
+     *
+     * @param url connection string
+     * @param allowedPrefixes allowed prefixes
+     * @throws IllegalArgumentException if the string does not start with the allowed prefixes
+     */
     protected void validateUrl(String url, String... allowedPrefixes) {
         for (var prefix : allowedPrefixes) {
             if (url.startsWith(prefix)) {

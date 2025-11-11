@@ -15,12 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.jdbc;
 
+import java.io.IOException;
+import java.sql.SQLException;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.pgcodekeeper.core.loader.TestContainer;
-
-import java.io.IOException;
-import java.sql.SQLException;
 
 class MsJdbcConnectorTest {
 

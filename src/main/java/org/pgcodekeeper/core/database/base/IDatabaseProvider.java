@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.database.base;
 
 import org.antlr.v4.runtime.*;
-import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
+import org.pgcodekeeper.core.database.base.jdbc.IJdbcConnector;
 
 /**
  * Interface for DBMS
@@ -27,11 +27,6 @@ public interface IDatabaseProvider {
      * @return name of DBMS
      */
     String getDatabaseType();
-
-    /**
-     * @return default port for DBMS
-     */
-    String getDefaultPort();
 
     /**
      * @param stream - char stream
@@ -62,5 +57,5 @@ public interface IDatabaseProvider {
      * @param url full jdbc url
      * @return jdbc connector for DBMS
      */
-    AbstractJdbcConnector getJdbcConnector(String url);
+    IJdbcConnector getJdbcConnector(String url);
 }

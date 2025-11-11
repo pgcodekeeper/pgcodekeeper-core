@@ -15,14 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.jdbc;
 
+import java.io.IOException;
+import java.sql.SQLException;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.loader.TestContainer;
-
-import java.io.IOException;
-import java.sql.SQLException;
 
 class ChJdbcConnectorTest {
 
@@ -44,7 +44,7 @@ class ChJdbcConnectorTest {
 
     @Test
     void urlValidationFailTest() {
-       Assertions.assertThrows(IllegalArgumentException.class, () -> new ChJdbcConnector("test"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new ChJdbcConnector("test"));
     }
 
     @ParameterizedTest

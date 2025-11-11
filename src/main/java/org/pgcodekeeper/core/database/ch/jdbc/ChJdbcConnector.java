@@ -24,19 +24,21 @@ public class ChJdbcConnector extends AbstractJdbcConnector {
 
     private static final String DRIVER_NAME = "com.clickhouse.jdbc.ClickHouseDriver";
 
-    protected static final String URL_START_CH = "jdbc:clickhouse:";
+    private static final String URL_START_CH = "jdbc:clickhouse:";
     private static final String URL_START_CH_SHORT = "jdbc:ch:";
 
-    private final String url;
+    private static final int DEFAULT_PORT = 8123;
 
+    /**
+     * @param url full jdbc connection string
+     */
     public ChJdbcConnector(String url) {
+        super(url);
         validateUrl(url, URL_START_CH, URL_START_CH_SHORT);
-        this.url = url;
     }
 
-    @Override
-    protected String getUrl() {
-        return url;
+    public ChJdbcConnector(String host, int port, String dbName) {
+        super(URL_START_CH + "//" + host + ':' + (port > 0 ? port : DEFAULT_PORT) + (dbName == null ? "" : "/" + dbName));
     }
 
     @Override
@@ -45,7 +47,12 @@ public class ChJdbcConnector extends AbstractJdbcConnector {
     }
 
     @Override
-    protected String getDefaultPort() {
-        return "8123";
+    protected int getDefaultPort() {
+        return DEFAULT_PORT;
+    }
+
+    @Override
+    public String getBatchDelimiter() {
+        return null;
     }
 }

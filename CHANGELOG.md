@@ -9,13 +9,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- Added URL validation.
+- Added connection string validation.
+- Added a common interface for JDBC connections.
 
 ### Changed
 
 - Improved parser rules for ClickHouse.
 - Improved migration script generation for tables and indexes with options in MS SQL.
 - Added the IS JSON parser rule for PostgreSQL.
+- Improved validation of arrays obtained from metadata queries.
 
 ### Fixed
 

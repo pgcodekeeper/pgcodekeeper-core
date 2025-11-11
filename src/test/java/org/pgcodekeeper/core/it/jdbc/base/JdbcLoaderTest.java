@@ -20,7 +20,7 @@ import org.pgcodekeeper.core.PgCodekeeperException;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.DatabaseFactory;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
-import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
+import org.pgcodekeeper.core.database.base.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.loader.JdbcRunner;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
 import org.pgcodekeeper.core.monitor.NullMonitor;
@@ -37,14 +37,14 @@ import java.util.List;
 
 public abstract class JdbcLoaderTest {
 
-    protected void jdbcLoaderTest(String dumpFileName, String ignoreListName, String url, AbstractJdbcConnector connector,
+    protected void jdbcLoaderTest(String dumpFileName, String ignoreListName, String url, IJdbcConnector connector,
                                   CoreSettings settings, SupportedPgVersion version, Class<?> clazz)
             throws PgCodekeeperException, SQLException, IOException, URISyntaxException, InterruptedException{
         settings.setAddTransaction(true);
         jdbcLoaderTest(dumpFileName, ignoreListName, url, connector, settings, version, clazz, false);
     }
 
-    protected void jdbcLoaderTest(String dumpFileName, String ignoreListName, String url, AbstractJdbcConnector connector,
+    protected void jdbcLoaderTest(String dumpFileName, String ignoreListName, String url, IJdbcConnector connector,
                                   CoreSettings settings, SupportedPgVersion version, Class<?> clazz, boolean isMemoryOptimized)
             throws PgCodekeeperException, SQLException, IOException, URISyntaxException, InterruptedException {
         settings.setEnableFunctionBodiesDependencies(true);
@@ -78,7 +78,7 @@ public abstract class JdbcLoaderTest {
     }
 
     private void clearDb(CoreSettings settings, AbstractDatabase startConfDb, DatabaseFactory df,
-                               AbstractJdbcConnector connector, String url)
+                               IJdbcConnector connector, String url)
             throws PgCodekeeperException, IOException, InterruptedException, SQLException {
         var oldDb = df.loadFromJdbc(url);
         var dropScript = PgCodeKeeperApi.diff(settings, oldDb, startConfDb);

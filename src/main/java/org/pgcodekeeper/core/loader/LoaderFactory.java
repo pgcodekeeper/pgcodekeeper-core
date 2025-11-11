@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.loader;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.Utils;
-import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
+import org.pgcodekeeper.core.database.base.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.loader.ch.JdbcChLoader;
 import org.pgcodekeeper.core.loader.ms.JdbcMsLoader;
 import org.pgcodekeeper.core.loader.pg.JdbcPgLoader;
@@ -71,7 +71,7 @@ public final class LoaderFactory {
      * @return database loader for the specified database type
      */
     public static DatabaseLoader createJdbcLoader(ISettings settings, String timezone,
-                                                  AbstractJdbcConnector connector, IMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
+                                                  IJdbcConnector connector, IMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
         return switch (settings.getDbType()) {
             case MS -> new JdbcMsLoader(connector, settings, monitor, ignoreSchemaList);
             case PG -> new JdbcPgLoader(connector, timezone, settings, monitor, ignoreSchemaList);

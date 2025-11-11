@@ -20,7 +20,7 @@ import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.Utils;
-import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
+import org.pgcodekeeper.core.database.base.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.exception.MonitorCancelledRuntimeException;
 import org.pgcodekeeper.core.loader.DatabaseLoader;
 import org.pgcodekeeper.core.loader.JdbcQueries;
@@ -81,7 +81,7 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
     private final ISettings settings;
     private final IgnoreSchemaList ignoreSchemaList;
     protected final Map<Object, AbstractSchema> schemaIds = new HashMap<>();
-    protected final AbstractJdbcConnector connector;
+    protected final IJdbcConnector connector;
 
     private boolean isGreenplumDb;
     private int version;
@@ -96,7 +96,7 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
     protected Connection connection;
     protected Statement statement;
 
-    protected JdbcLoaderBase(AbstractJdbcConnector connector, IMonitor monitor, ISettings settings,
+    protected JdbcLoaderBase(IJdbcConnector connector, IMonitor monitor, ISettings settings,
                              IgnoreSchemaList ignoreSchemaList) {
         this.connector = connector;
         this.monitor = monitor;

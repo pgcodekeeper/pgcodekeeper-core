@@ -29,24 +29,18 @@ import org.pgcodekeeper.core.localizations.Messages;
  */
 public enum DatabaseType {
 
-    PG("PostgreSQL", "5432"),
-    MS("MS SQL", "1433"),
-    CH("ClickHouse", "8123");
+    PG("PostgreSQL"),
+    MS("MS SQL"),
+    CH("ClickHouse");
 
     private final String dbTypeName;
-    private final String defaultPort;
 
-    DatabaseType(String dbTypeName, String defaultPort) {
+    DatabaseType(String dbTypeName) {
         this.dbTypeName = dbTypeName;
-        this.defaultPort = defaultPort;
     }
 
     public final String getDbTypeName() {
         return dbTypeName;
-    }
-
-    public String getDefaultPort() {
-        return defaultPort;
     }
 
     /**

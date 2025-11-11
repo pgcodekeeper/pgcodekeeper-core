@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.ms;
 
-import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
+import org.pgcodekeeper.core.database.base.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.ms.*;
 import org.pgcodekeeper.core.localizations.Messages;
@@ -48,7 +48,7 @@ public final class JdbcMsLoader extends JdbcLoaderBase {
      * @param monitor          progress monitor for tracking loading progress
      * @param ignoreSchemaList list of schemas to ignore during loading
      */
-    public JdbcMsLoader(AbstractJdbcConnector connector, ISettings settings,
+    public JdbcMsLoader(IJdbcConnector connector, ISettings settings,
                         IMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
         super(connector, monitor, settings, ignoreSchemaList);
     }
