@@ -18,7 +18,7 @@ package org.pgcodekeeper.core.database.ms;
 import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.base.IDatabaseProvider;
-import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
+import org.pgcodekeeper.core.database.base.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.ms.jdbc.MsJdbcConnector;
 import org.pgcodekeeper.core.parsers.antlr.ms.CustomTSQLAntlrErrorStrategy;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLLexer;
@@ -29,11 +29,6 @@ public class MsDatabaseProvider implements IDatabaseProvider {
     @Override
     public String getDatabaseType() {
         return "MS SQL";
-    }
-
-    @Override
-    public String getDefaultPort() {
-        return "1433";
     }
 
     @Override
@@ -57,7 +52,7 @@ public class MsDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public AbstractJdbcConnector getJdbcConnector(String url) {
+    public IJdbcConnector getJdbcConnector(String url) {
         return new MsJdbcConnector(url);
     }
 }

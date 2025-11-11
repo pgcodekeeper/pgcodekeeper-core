@@ -24,21 +24,20 @@ public class PgJdbcConnector extends AbstractJdbcConnector {
 
     private static final String DRIVER_NAME = "org.postgresql.Driver";
 
-    protected static final String URL_START_PG = "jdbc:postgresql:";
+    private static final String URL_START_PG = "jdbc:postgresql:";
 
-    private final String url;
+    private static final int DEFAULT_PORT = 5432;
 
     /**
      * @param url full jdbc connection string
      */
     public PgJdbcConnector(String url) {
+        super(url);
         validateUrl(url, URL_START_PG);
-        this.url = url;
     }
 
-    @Override
-    protected String getUrl() {
-        return url;
+    public PgJdbcConnector(String host, int port, String dbName) {
+        super(URL_START_PG + "//" + host + ':' + (port > 0 ? port : DEFAULT_PORT) + '/' + dbName);
     }
 
     @Override
@@ -47,7 +46,12 @@ public class PgJdbcConnector extends AbstractJdbcConnector {
     }
 
     @Override
-    protected String getDefaultPort() {
-        return "5432";
+    protected int getDefaultPort() {
+        return DEFAULT_PORT;
+    }
+
+    @Override
+    public String getBatchDelimiter() {
+        return null;
     }
 }

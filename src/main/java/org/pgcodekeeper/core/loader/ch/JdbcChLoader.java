@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.loader.ch;
 
 import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
+import org.pgcodekeeper.core.database.base.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.ch.*;
 import org.pgcodekeeper.core.localizations.Messages;
@@ -50,7 +50,7 @@ public final class JdbcChLoader extends JdbcLoaderBase {
      * @param monitor          progress monitor for tracking loading progress
      * @param ignoreSchemaList list of schemas to ignore during loading
      */
-    public JdbcChLoader(AbstractJdbcConnector connector, ISettings settings, IMonitor monitor,
+    public JdbcChLoader(IJdbcConnector connector, ISettings settings, IMonitor monitor,
                         IgnoreSchemaList ignoreSchemaList) {
         super(connector, monitor, settings, ignoreSchemaList);
     }

@@ -27,21 +27,21 @@ public class MsJdbcConnector extends AbstractJdbcConnector {
 
     private static final String DRIVER_NAME = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
-    protected static final String URL_START_MS = "jdbc:sqlserver:";
+    private static final String URL_START_MS = "jdbc:sqlserver:";
 
-    private final String url;
+    private static final int DEFAULT_PORT = 1433;
 
     /**
      * @param url full jdbc connection string
      */
     public MsJdbcConnector(String url) {
+        super(url);
         validateUrl(url, URL_START_MS);
-        this.url = url;
     }
 
-    @Override
-    protected String getUrl() {
-        return url;
+    public MsJdbcConnector(String host, int port, String dbName) {
+        super(URL_START_MS + "//" + host + ':' + (port > 0 ? port : DEFAULT_PORT)
+                + (dbName == null ? "" : ";databaseName={" + dbName + '}'));
     }
 
     @Override
@@ -52,7 +52,7 @@ public class MsJdbcConnector extends AbstractJdbcConnector {
     @Override
     protected Properties makeProperties() {
         Properties props = super.makeProperties();
-        if (url != null && !url.contains(Consts.TRUST_CERT)) {
+        if (!getUrl().contains(Consts.TRUST_CERT)) {
             // revert to pre-10.x jdbc driver behavior unless told otherwise
             props.setProperty(Consts.TRUST_CERT, "true");
         }
@@ -65,7 +65,7 @@ public class MsJdbcConnector extends AbstractJdbcConnector {
     }
 
     @Override
-    protected String getDefaultPort() {
-        return "1433";
+    protected int getDefaultPort() {
+        return DEFAULT_PORT;
     }
 }

@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
-import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
+import org.pgcodekeeper.core.database.base.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;
 import org.pgcodekeeper.core.database.ms.jdbc.MsJdbcConnector;
 import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
@@ -194,7 +194,7 @@ public final class Utils {
      * @param url full jdbc connection string
      * @return JdbcConnector for the given database type.
      */
-    public static AbstractJdbcConnector getJdbcConnectorByType(DatabaseType dbType, String url) {
+    public static IJdbcConnector getJdbcConnectorByType(DatabaseType dbType, String url) {
         return switch (dbType) {
             case PG -> new PgJdbcConnector(url);
             case MS -> new MsJdbcConnector(url);

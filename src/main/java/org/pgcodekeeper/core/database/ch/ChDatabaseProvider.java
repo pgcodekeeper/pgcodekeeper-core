@@ -18,7 +18,7 @@ package org.pgcodekeeper.core.database.ch;
 import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.base.IDatabaseProvider;
-import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
+import org.pgcodekeeper.core.database.base.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;
 import org.pgcodekeeper.core.parsers.antlr.ch.CustomChSQLAntlrErrorStrategy;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHLexer;
@@ -29,11 +29,6 @@ public class ChDatabaseProvider implements IDatabaseProvider {
     @Override
     public String getDatabaseType() {
         return "ClickHouse";
-    }
-
-    @Override
-    public String getDefaultPort() {
-        return "8123";
     }
 
     @Override
@@ -58,7 +53,7 @@ public class ChDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public AbstractJdbcConnector getJdbcConnector(String url) {
+    public IJdbcConnector getJdbcConnector(String url) {
         return new ChJdbcConnector(url);
     }
 }
