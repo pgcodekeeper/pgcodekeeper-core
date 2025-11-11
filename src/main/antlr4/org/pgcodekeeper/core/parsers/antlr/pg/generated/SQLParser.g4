@@ -3489,6 +3489,7 @@ vex
   | vex IS NOT? OF LEFT_PAREN type_list RIGHT_PAREN
   | vex ISNULL
   | vex NOTNULL
+  | vex IS NOT? JSON (VALUE | SCALAR | ARRAY | OBJECT)? ((WITH | WITHOUT) UNIQUE KEYS?)?
   | <assoc=right> NOT vex
   | vex AND vex
   | vex OR vex
