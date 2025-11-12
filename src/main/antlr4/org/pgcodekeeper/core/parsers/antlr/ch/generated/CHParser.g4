@@ -147,12 +147,13 @@ permission
     | CREATE (object_type | DICTIONARY | FUNCTION | ARBITRARY? TEMPORARY TABLE)?
     | DELETE
     | DICTGET
+    | DISPLAY_SECRETS_IN_SHOW_AND_SELECT
     | DROP (object_type | DICTIONARY | FUNCTION)?
     | source_privilige
     | INSERT
-    | INTROSPECTION
+    | INTROSPECTION (ADDRESS_TO_LINE | ADDRESS_TO_LINE_WITH_IN_LINES | ADDRESS_TO_SYMBOL | DEMANGLE)?
     | KILL (QUERY | TRANSACTION)
-//  | MOVE PARTITION BETWEEN SHARDS
+    | MOVE PARTITION BETWEEN SHARDS
     | NAMED COLLECTION ADMIN?
     | NONE
     | OPTIMIZE
@@ -161,7 +162,7 @@ permission
     | SET DEFINER
     | SHOW (COLUMNS | DATABASES | DICTIONARIES | QUOTAS | ROLES | ROW POLICIES | TABLES | USERS
            | ACCESS | FILESYSTEM CACHES | SETTINGS PROFILES)?
-//  | SHOW NAMED COLLECTIONS SECRETS?
+    | SHOW NAMED COLLECTIONS SECRETS?
     | SOURCES
     | SYSTEM
 //  | SYSTEM CLEANUP
@@ -191,13 +192,8 @@ permission
 //  | SYSTEM VIRTUAL PARTS UPDATE
 //  | SYSTEM WAIT LOADING PARTS
     | TRUNCATE
-//  | UNDROP TABLE
+    | UNDROP TABLE
     | USAGE
-//  | addressToLine
-//  | addressToLineWithInlines
-//  | addressToSymbol
-//  | demangle
-//  | displaySecretsInShowAndSelect
     ;
 
 object_type
@@ -699,7 +695,6 @@ table_column_def
 data_type_expr
     : not_null? table_column_property_expr
     | data_type not_null? table_column_property_expr?
-    | IDENTIFIER NULL table_column_property_expr
     ;
 
 comment_expr
@@ -1291,6 +1286,9 @@ tokens_nonreserved
     : ACCESS
     | ADD
     | ADMIN
+    | ADDRESS_TO_LINE
+    | ADDRESS_TO_LINE_WITH_IN_LINES
+    | ADDRESS_TO_SYMBOL
     | AFTER
     | AGGREGATE_FUNCTION
     | ALIAS
@@ -1333,6 +1331,7 @@ tokens_nonreserved
     | CODEC
     | COLLATE
     | COLLECTION
+    | COLLECTIONS
     | COLUMN
     | COLUMNS
     | COMMENT
@@ -1357,6 +1356,7 @@ tokens_nonreserved
     | DELAY
     | DELETE
     | DELETED
+    | DEMANGLE
     | DESC
     | DESCENDING
     | DESCRIBE
@@ -1554,6 +1554,7 @@ tokens_nonreserved
     | ROLLUP
     | ROW
     | ROWS
+    | SECRETS
     | SECURITY
     | SELECT
     | SENDS
@@ -1561,6 +1562,7 @@ tokens_nonreserved
     | SET
     | SETS
     | SETTING
+    | SHARDS
     | SHOW
     | SHUTDOWN
     | SIGNED
@@ -1607,6 +1609,7 @@ tokens_nonreserved
     | UNBOUNDED
     | UNFREEZE
     | UNCOMPRESSED
+    | UNDROP
     | UNSIGNED
     | UNTIL
     | UPDATE
