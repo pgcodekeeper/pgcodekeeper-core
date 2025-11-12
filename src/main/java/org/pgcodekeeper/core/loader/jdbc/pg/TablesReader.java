@@ -35,6 +35,8 @@ import org.pgcodekeeper.core.utils.Pair;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Reader for PostgreSQL tables.
@@ -43,6 +45,9 @@ import java.sql.SQLException;
 public final class TablesReader extends JdbcReader {
 
     private static final String CREATE_TABLE = "CREATE TABLE noname () ";
+    private static final String GP_SYSTEM_OPTIONS = "'format', 'formatter', 'delimiter', 'null', 'escape', 'quote'," +
+            " 'header', 'newline', 'fill_missing_fields', 'force_not_null', 'is_writable', 'location_uris'," +
+            " 'execute_on', 'log_errors', 'reject_limit', 'reject_limit_type', 'encoding'";
 
     /**
      * Creates a new TablesReader.
@@ -58,56 +63,15 @@ public final class TablesReader extends JdbcReader {
         String schemaName = schema.getName();
         String tableName = res.getString("relname");
         loader.setCurrentObject(new GenericColumn(schemaName, tableName, DbObjType.TABLE));
-        String partitionBound = null;
-        String partitionGpBound = null;
-        String partitionGpTemplate = null;
 
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion()) &&
-                res.getBoolean("relispartition")) {
-            partitionBound = res.getString("partition_bound");
-            checkObjectValidity(partitionBound, DbObjType.TABLE, tableName);
-        }
-        if (loader.isGreenplumDb() && !SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
-            partitionGpBound = res.getString("partclause");
-            partitionGpTemplate = res.getString("parttemplate");
-        }
-
-        AbstractPgTable t;
-        String serverName = res.getString("server_name");
         long ofTypeOid = res.getLong("of_type");
-        if (serverName != null) {
-            if (partitionBound == null) {
-                t = new SimpleForeignPgTable(tableName, serverName);
-            } else {
-                t = new PartitionForeignPgTable(tableName, serverName, partitionBound);
-            }
-            t.addDep(new GenericColumn(serverName, DbObjType.SERVER));
-        } else if (ofTypeOid != 0) {
-            JdbcType jdbcOfType = loader.getCachedTypeByOid(ofTypeOid);
-            String ofType = jdbcOfType.getFullName();
-            t = new TypedPgTable(tableName, ofType);
-            jdbcOfType.addTypeDepcy(t);
-        } else if (partitionBound != null) {
-            t = new PartitionPgTable(tableName, partitionBound);
-        } else if (partitionGpBound != null) {
-            t = createGpParttionTable(tableName, partitionGpBound, partitionGpTemplate);
-        } else if (loader.isGreenplumDb() && res.getString("exloc") != null) {
-            t = new GpExternalTable(tableName);
-            readExternalTable((GpExternalTable) t, res);
-        } else {
-            t = new SimplePgTable(tableName);
-        }
+        AbstractPgTable t = getTable(res, tableName, ofTypeOid);
 
         if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion()) && t instanceof AbstractRegularTable regTable) {
             String accessMethod = res.getString("access_method");
             if (accessMethod != null) {
                 regTable.setMethod(accessMethod);
             }
-        }
-
-        String[] foptions = getColArray(res, "ftoptions", true);
-        if (foptions != null) {
-            ParserAbstract.fillOptionParams(foptions, t::addOption, false, true, false);
         }
 
         // PRIVILEGES, OWNER
@@ -151,8 +115,57 @@ public final class TablesReader extends JdbcReader {
         schema.addTable(t);
     }
 
-    private AbstractPgTable createGpParttionTable(String tableName, String partitionGpBound,
-                                                  String partitionGpTemplate) {
+    private AbstractPgTable getTable(ResultSet res, String tableName, long ofTypeOid) throws SQLException {
+        if (loader.isGreenplumDb() && res.getString("exloc") != null) {
+            return createExternalTable(tableName, res);
+        }
+
+        String partitionBound = null;
+        String partitionGpBound = null;
+        String partitionGpTemplate = null;
+
+        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+            if (res.getBoolean("relispartition")) {
+                partitionBound = res.getString("partition_bound");
+                checkObjectValidity(partitionBound, DbObjType.TABLE, tableName);
+            }
+        } else {
+            partitionGpBound = res.getString("partclause");
+            partitionGpTemplate = res.getString("parttemplate");
+        }
+
+        AbstractPgTable t;
+        String serverName = res.getString("server_name");
+        if (serverName != null) {
+            if (partitionBound == null) {
+                t = new SimpleForeignPgTable(tableName, serverName);
+            } else {
+                t = new PartitionForeignPgTable(tableName, serverName, partitionBound);
+            }
+            t.addDep(new GenericColumn(serverName, DbObjType.SERVER));
+        } else if (ofTypeOid != 0) {
+            JdbcType jdbcOfType = loader.getCachedTypeByOid(ofTypeOid);
+            String ofType = jdbcOfType.getFullName();
+            t = new TypedPgTable(tableName, ofType);
+            jdbcOfType.addTypeDepcy(t);
+        } else if (partitionBound != null) {
+            t = new PartitionPgTable(tableName, partitionBound);
+        } else if (partitionGpBound != null) {
+            t = createGpPartitionTable(tableName, partitionGpBound, partitionGpTemplate);
+        } else {
+            t = new SimplePgTable(tableName);
+        }
+
+        String[] foptions = getColArray(res, "ftoptions", true);
+        if (foptions != null) {
+            ParserAbstract.fillOptionParams(foptions, t::addOption, false, true, false);
+        }
+
+        return t;
+    }
+
+    private AbstractPgTable createGpPartitionTable(String tableName, String partitionGpBound,
+                                                   String partitionGpTemplate) {
         PartitionGpTable table = new PartitionGpTable(tableName);
 
         loader.submitAntlrTask(CREATE_TABLE + partitionGpBound + ';',
@@ -350,11 +363,7 @@ public final class TablesReader extends JdbcReader {
             }
 
             if (colGenerated != null && !colGenerated[i].isEmpty()) {
-                if ("s".equals(colGenerated[i])) {
-                    column.setGenerationOption("STORED");
-                } else {
-                    column.setGenerationOption("VIRTUAL");
-                }
+                column.setGenerationOption("s".equals(colGenerated[i]) ? "STORED" : "VIRTUAL");
             }
 
             if (colCompression != null) {
@@ -401,7 +410,9 @@ public final class TablesReader extends JdbcReader {
         }
     }
 
-    private void readExternalTable(GpExternalTable extTable, ResultSet res) throws SQLException {
+    private GpExternalTable createExternalTable(String tableName, ResultSet res) throws SQLException {
+        var extTable = new GpExternalTable(tableName);
+
         String rowUrLoc = res.getString("urloc");
         if (rowUrLoc != null) {
             if (rowUrLoc.startsWith("{http")) {
@@ -446,16 +457,38 @@ public final class TablesReader extends JdbcReader {
                 break;
         }
 
-        String options = PgDiffUtils.unquoteQuotedString(res.getString("options"), 1);
-        if (!options.isBlank()) {
-            ParserAbstract.fillOptionParams(options.split(","), extTable::addOption, false, true, false);
+        String formatOptions = res.getString("fmtopts");
+        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+            String[] ftoptionNames = getColArray(res, "ftoption_names");
+            String[] ftoptionValues = getColArray(res, "ftoption_values");
+
+            int splitIndex = ftoptionNames.length != 0 ? formatOptions.indexOf(ftoptionNames[0]) : formatOptions.length();
+            // format options in fmtopts go before options defined in OPTIONS block
+            String formatOptionsPart = formatOptions.substring(0, splitIndex).trim();
+            extTable.setFormatOptions(appendFormatOptions(formatOptionsPart));
+
+            List<String> options = new ArrayList<>();
+            for (int i = 0; i < ftoptionNames.length; i++) {
+                String optionName = ftoptionNames[i];
+                options.add(optionName + "=" + ftoptionValues[i]);
+            }
+
+            ParserAbstract.fillOptionParams(options.toArray(String[]::new), extTable::addOption,
+                    false, true, false);
+        } else {
+            String options = PgDiffUtils.unquoteQuotedString(res.getString("options"), 1);
+            if (!options.isBlank()) {
+                ParserAbstract.fillOptionParams(options.split(","), extTable::addOption, false, true, false);
+            }
+            extTable.setFormatOptions(appendFormatOptions(formatOptions));
         }
 
-        extTable.setFormatOptions(appendFormatOptions(res));
-
-        extTable.setRejectLimit(res.getInt("rejlim"));
-        extTable.setIsLogErrors(res.getBoolean("logerrors"));
-        extTable.setRowReject(!"p".equals(res.getString("rejtyp")));
+        var rejtype = res.getString("rejtype");
+        if (rejtype != null) {
+            extTable.setRejectLimit(res.getInt("rejlim"));
+            extTable.setIsLogErrors(res.getBoolean("logerrors"));
+            extTable.setRowReject(!"p".equals(rejtype));
+        }
         extTable.setEncoding(PgDiffUtils.quoteString(res.getString("enc")));
         extTable.setWritable(res.getBoolean("writable"));
 
@@ -463,10 +496,10 @@ public final class TablesReader extends JdbcReader {
         if (distribution != null && !distribution.isBlank()) {
             extTable.setDistribution(distribution);
         }
+        return extTable;
     }
 
-    private String appendFormatOptions(ResultSet res) throws SQLException {
-        String formatOptions = res.getString("fmtopts");
+    private String appendFormatOptions(String formatOptions) {
         if (formatOptions.contains("formatter")) {
             return formatOptions.trim().replace(" ", "=");
         }
@@ -521,8 +554,6 @@ public final class TablesReader extends JdbcReader {
                     .column("res.relispartition")
                     .column("pg_catalog.pg_get_partkeydef(res.oid) AS partition_by")
                     .column("pg_catalog.pg_get_expr(res.relpartbound, res.oid) AS partition_bound");
-        } else {
-            builder.column("res.relhasoids AS has_oids");
         }
 
         if (loader.isGreenplumDb()) {
@@ -534,15 +565,22 @@ public final class TablesReader extends JdbcReader {
                     .column("x.fmtopts")
                     .column("x.command")
                     .column("x.rejectlimit AS rejlim")
-                    .column("x.rejectlimittype AS rejtyp")
+                    .column("x.rejectlimittype AS rejtype")
                     .column("x.logerrors")
                     .column("x.options")
                     .column("pg_catalog.pg_encoding_to_char(x.encoding) AS enc")
                     .column("x.writable")
                     .join("LEFT JOIN pg_exttable x ON res.oid = x.reloid");
 
-            if (!SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+            if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+                builder.column(("ARRAY(SELECT option_name FROM pg_options_to_table(ftbl.ftoptions) " +
+                        "WHERE option_name NOT IN (%s)) AS ftoption_names").formatted(GP_SYSTEM_OPTIONS));
+                builder.column(("ARRAY(SELECT option_value FROM pg_options_to_table(ftbl.ftoptions) " +
+                        "WHERE option_name NOT IN (%s)) AS ftoption_values").formatted(GP_SYSTEM_OPTIONS));
+            } else {
                 builder
+                        .column("res.relhasoids AS has_oids")
+                        .column("x.options")
                         .column("CASE WHEN pl.parlevel = 0 THEN (SELECT pg_get_partition_def(res.oid, true, false)) END AS partclause")
                         .column("CASE WHEN pl.parlevel = 0 THEN (SELECT pg_get_partition_template_def(res.oid, true, false)) END as parttemplate")
                         .join("LEFT JOIN pg_partitions ps on (res.relname = ps.partitiontablename)")

@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed a false difference between NOT NULL constraints with the default name in PostgreSQL.
 - Fixed adding ONLY for columns in partitioned tables in PostgreSQL.
 - Fixed broken ClickHouse tests.
+- Fixed reading of EXTERNAL TABLES in Greenplum 7.
 
 ## [12.0.0] - 2025-10-14
 
