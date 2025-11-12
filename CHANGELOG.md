@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [13.0.0] - 2025-11-12
+
+### Added
+
 - Added connection string validation.
 - Added a common interface for JDBC connections.
 
@@ -22,7 +30,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Fixed CTE formatting in ClickHouse.
-- Fixed a bug in the behavior of the compiler when the ignore column order setting is enabled.
+- Fixed an error comparing tables when the column order is ignored setting is enabled.
 - Fixed bug in generating the migration script when adding a column to Log family tables in ClickHouse.
 - Fixed a false difference between NOT NULL constraints with the default name in PostgreSQL.
 - Fixed adding ONLY for columns in partitioned tables in PostgreSQL.
@@ -2373,7 +2381,8 @@ We increment major version in this release due to decision to shift our developm
 
 - ORDER BY parsing has been added to the aggregate functions.
 
-[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v12.0.0...HEAD
+[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v13.0.0...HEAD
+[13.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v12.0.0...v13.0.0
 [12.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.2.0...v12.0.0
 [11.2.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.1.0...v11.2.0
 [11.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.0.0...v11.1.0
