@@ -51,3 +51,9 @@ Reference: action = REVOKE, offset = 2602, line number = 50, charPositionInLine 
 Reference: action = REVOKE, offset = 2656, line number = 51, charPositionInLine = 0
 Reference: action = REVOKE, offset = 2716, line number = 52, charPositionInLine = 0
 Reference: action = GRANT, offset = 2771, line number = 53, charPositionInLine = 0
+Reference: action = GRANT, offset = 2920, line number = 54, charPositionInLine = 0
+Reference: action = GRANT, offset = 2974, line number = 55, charPositionInLine = 0
+Reference: action = GRANT, offset = 3039, line number = 56, charPositionInLine = 0
+Reference: action = GRANT, offset = 3095, line number = 57, charPositionInLine = 0
+Reference: action = GRANT, offset = 3144, line number = 58, charPositionInLine = 0
+Reference: action = GRANT, offset = 3432, line number = 59, charPositionInLine = 0
