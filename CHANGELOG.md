@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [13.0.0] - 2025-11-12
 
+### Added
+
+- Added connection string validation.
+- Added a common interface for JDBC connections.
+
 ### Changed
 
 - Improved parser rules for ClickHouse.
