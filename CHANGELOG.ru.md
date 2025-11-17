@@ -11,6 +11,8 @@
 
 ### Изменено
 
+- Обновлены библиотечные зависимости. Для использования [Windows аутентификации](https://pgcodekeeper.readthedocs.io/ru/latest/windowsauth.html#id2) требуется обновить [DDL](https://github.com/microsoft/mssql-jdbc/releases/tag/v13.2.1).
+
 ### Исправлено
 
 ## [13.0.0] - 2025-11-12
