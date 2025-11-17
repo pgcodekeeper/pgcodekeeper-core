@@ -45,13 +45,9 @@
         <sonar.java.target>${java.version}</sonar.java.target>
         <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
         <sonar.exclusions>**/*.sql, **/*.xml, **/generated/**, **/Messages.java</sonar.exclusions>
-        <gpg.version>3.2.4</gpg.version>
-        <maven.source.version>3.3.1</maven.source.version>
-        <maven.javadoc.version>3.7.0</maven.javadoc.version>
-        <testcontainers.version>1.21.3</testcontainers.version>
 
-        <java.version>17</java.version>
         <antlr.version>4.13.2</antlr.version>
+        <testcontainers.version>1.21.3</testcontainers.version>
     </properties>
 
     <dependencies>
@@ -74,12 +70,12 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.7</version>
+            <version>42.7.8</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>12.4.2.jre11</version>
+            <version>13.2.1.jre11</version>
         </dependency>
         <dependency>
             <groupId>com.clickhouse</groupId>
@@ -97,7 +93,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.13.4</version>
+            <version>5.14.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -149,7 +145,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.12.1</version>
+                <version>3.14.1</version>
                 <configuration>
                     <release>${java.version}</release>
                 </configuration>
@@ -157,7 +153,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>${maven.javadoc.version}</version>
+                <version>3.12.0</version>
                 <configuration>
                     <show>public</show>
                     <doclint>all,-missing</doclint>
@@ -174,7 +170,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>${maven.source.version}</version>
+                <version>3.3.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -187,7 +183,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>5.1.8</version>
+                <version>6.0.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -201,7 +197,7 @@
                     <Require-Bundle>
                         wrapped.com.github.technology16.pgpass;bundle-version="[2.0.1,3.0.0)",
                         org.postgresql.jdbc;bundle-version="[42.7.3,43.0.0)",
-                        com.microsoft.sqlserver.mssql-jdbc;bundle-version="[12.4.2,13.0.0)",
+                        com.microsoft.sqlserver.mssql-jdbc;bundle-version="[13.2.0,14.0.0)",
                         org.antlr.antlr4-runtime;bundle-version="[4.13.1,5.0.0)",
                         org.jgrapht.core;bundle-version="[1.5.1,2.0.0)",
                         lz4-java;bundle-version="[1.8.0,2.0.0)"
@@ -220,7 +216,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>${gpg.version}</version>
+                        <version>3.2.4</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -234,7 +230,7 @@
                     <plugin>
                         <groupId>org.sonatype.central</groupId>
                         <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.8.0</version>
+                        <version>0.9.0</version>
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>central</publishingServerId>
@@ -252,7 +248,7 @@
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.13</version>
+                        <version>0.8.14</version>
                         <executions>
                             <execution>
                                 <id>prepare-agent</id>
