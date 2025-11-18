@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Fixed an error when reading functions from the ClickHouse database.
+
 ## [13.0.0] - 2025-11-12
 
 ### Added
