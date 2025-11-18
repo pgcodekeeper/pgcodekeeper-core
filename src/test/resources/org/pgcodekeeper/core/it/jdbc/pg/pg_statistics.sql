@@ -14,13 +14,7 @@ BEGIN
 END;
 $$;
 
---ORIGIN:
---
---CREATE STATISTICS second.s1 ON first.f1(b), a FROM first.t1;
---
---DIFF:
-
---CREATE STATISTICS second.s1 ON a, first.f1(b) FROM first.t1;
+CREATE STATISTICS second.s1 ON first.f1(b), a FROM first.t1;
 
 CREATE STATISTICS second.s2 ON b, first.f1(a) FROM first.v1;
 
@@ -40,4 +34,4 @@ ALTER MATERIALIZED VIEW first.v1 OWNER TO test;
 
 ALTER STATISTICS second.s2 OWNER TO test;
 
---ALTER STATISTICS second.s1 OWNER TO test;
+ALTER STATISTICS second.s1 OWNER TO test;

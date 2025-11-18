@@ -20,6 +20,7 @@
 package org.pgcodekeeper.core.schema.pg;
 
 import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.schema.AbstractStatistics;
 import org.pgcodekeeper.core.schema.ObjectState;
@@ -69,7 +70,7 @@ public final class PgStatistics extends AbstractStatistics {
         sb.append(PgDiffUtils.getQuotedName(foreignTable));
         script.addStatement(sb);
 
-        if (statistics > 0) {
+        if (statistics >= 0) {
             script.addStatement(appendStatistics(this));
         }
 
@@ -158,7 +159,7 @@ public final class PgStatistics extends AbstractStatistics {
 
     private boolean compareUnalterable(PgStatistics stat) {
         return Objects.equals(kinds, stat.kinds)
-                && Objects.equals(expressions, stat.expressions)
+                && Utils.setLikeEquals(expressions, stat.expressions)
                 && Objects.equals(stat.foreignSchema, foreignSchema)
                 && Objects.equals(stat.foreignTable, foreignTable);
     }
