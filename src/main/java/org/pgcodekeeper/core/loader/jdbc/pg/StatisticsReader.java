@@ -64,7 +64,10 @@ public final class StatisticsReader extends JdbcReader {
                         .parseStatistics(stat));
 
         if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
-            stat.setStatistics(res.getInt("stxstattarget"));
+            var statVal = res.getString("stxstattarget");
+            if (null != statVal) {
+                stat.setStatistics(Integer.parseInt(statVal));
+            }
         }
 
         loader.setOwner(stat, res.getLong("stxowner"));
