@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+### Fixed
+
+## [13.1.0] - 2025-11-18
+
+### Changed
+
 - Updated library dependencies. To use [Windows authentication](https://pgcodekeeper.readthedocs.io/en/latest/windowsauth.html#id2) you need to update [DDL](https://github.com/microsoft/mssql-jdbc/releases/tag/v13.2.1).
 
 ### Fixed
@@ -2386,7 +2392,8 @@ We increment major version in this release due to decision to shift our developm
 
 - ORDER BY parsing has been added to the aggregate functions.
 
-[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v13.0.0...HEAD
+[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v13.1.0...HEAD
+[13.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v13.0.0...v13.1.0
 [13.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v12.0.0...v13.0.0
 [12.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.2.0...v12.0.0
 [11.2.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.1.0...v11.2.0
