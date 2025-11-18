@@ -68,6 +68,6 @@ public final class ChFunctionsReader extends AbstractStatementReader {
                 .column("create_query")
                 .column("name")
                 .from("system.functions")
-                .where("origin != 'System'");
+                .where("origin = 'SQLUserDefined'");
     }
 }
