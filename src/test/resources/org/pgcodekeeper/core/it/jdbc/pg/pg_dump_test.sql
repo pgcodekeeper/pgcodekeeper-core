@@ -392,4 +392,3 @@ CREATE TABLE ignore.testtable (
 ALTER SCHEMA public OWNER TO pg_database_owner;
 
 ALTER TABLE ignore.testtable OWNER TO test;
-

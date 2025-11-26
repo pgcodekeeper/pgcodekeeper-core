@@ -47,7 +47,6 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
 
     private static final String ALTER_FOREIGN_OPTION = "%s OPTIONS (%s %s %s)";
     private static final String COMPRESSION = " COMPRESSION ";
-    private static final String DEFAULT_NOT_NULL_CONSTRAINT_NAME = "%s_%s_not_null";
     public static final String NO_INHERIT = " NO INHERIT";
 
     private Integer statistics;
@@ -520,8 +519,8 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
 
         // newNotNull is always true here
         if (oldNotNull) {
-            String oldConName = oldColumn.getNotNullConName();
-            String newConName = newColumn.getNotNullConName();
+            String oldConName = PgDiffUtils.getQuotedName(oldColumn.getNotNullConName());
+            String newConName = PgDiffUtils.getQuotedName(newColumn.getNotNullConName());
 
             if (!Objects.equals(oldConName, newConName)) {
                 var statement = getAlterTable(false) + "\n\tRENAME CONSTRAINT " + oldConName + " TO " + newConName;
@@ -755,7 +754,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
     }
 
     public void setNotNullConName(String tableName, String conName) {
-        if (!DEFAULT_NOT_NULL_CONSTRAINT_NAME.formatted(tableName, name).equals(conName)) {
+        if (!PgDiffUtils.getDefaultObjectName(tableName, name, "not_null").equals(conName)) {
             setNotNullConName(conName);
         }
     }
@@ -767,7 +766,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
 
     private String getNotNullConName() {
         if (notNullConName == null) {
-            return DEFAULT_NOT_NULL_CONSTRAINT_NAME.formatted(parent.getName(), name);
+            return PgDiffUtils.getDefaultObjectName(parent.getName(), name, "not_null");
         }
 
         return notNullConName;

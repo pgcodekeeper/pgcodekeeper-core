@@ -22,6 +22,9 @@ package org.pgcodekeeper.core;
 import org.pgcodekeeper.core.sql.Keyword;
 import org.pgcodekeeper.core.sql.Keyword.KeywordCategory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -30,6 +33,8 @@ import java.util.*;
  * @author fordfrog
  */
 public final class PgDiffUtils {
+
+    private static final int MAX_IDENTIFIER_LEN = 64;
 
     /**
      * Checks if string is a valid PostgreSQL identifier.
@@ -229,4 +234,114 @@ public final class PgDiffUtils {
     private PgDiffUtils() {
     }
 
+    /**
+     * Create a name for an implicitly created index, sequence, constraint, extended statistics, etc.
+     * <p>
+     * The result is "tableName_columnName_label", but the table and column names
+     * are truncated if needed to keep the total length under 63 bytes.
+     * The suffix is never truncated.
+     * <p>
+     * When truncation is needed, the longer name (table or column) is shortened first.
+     * This ensures the result stays within PostgreSQL's 63 bytes limit.
+     * <p>
+     * <b>Note:</b> This implementation assumes the database encoding is UTF-8.
+     *
+     * @param tableName  the table name (name1)
+     * @param columnName the column name (name2), can be null
+     * @param suffix     the suffix (like "pkey", "not_null"), can be null
+     * @return the generated name with proper truncation
+     * @see <a href="https://github.com/postgres/postgres/blob/master/src/backend/commands/indexcmds.c#L2517">PostgreSQL makeObjectName</a>
+     */
+    public static String getDefaultObjectName(String tableName, String columnName, String suffix) {
+        byte[] tableBytes = tableName.getBytes(StandardCharsets.UTF_8);
+        byte[] columnBytes = columnName != null ? columnName.getBytes(StandardCharsets.UTF_8) : new byte[0];
+        byte[] suffixBytes = suffix != null ? suffix.getBytes(StandardCharsets.UTF_8) : new byte[0];
+
+        int tableLen = tableBytes.length;
+        int columnLen = columnBytes.length;
+
+        int overhead = 0;
+        if (columnName != null) {
+            overhead++;
+        }
+        if (suffix != null) {
+            overhead += suffixBytes.length + 1;
+        }
+
+        int remainingBytes = MAX_IDENTIFIER_LEN - 1 - overhead;
+
+        while (tableLen + columnLen > remainingBytes) {
+            if (tableLen > columnLen) {
+                tableLen--;
+            } else {
+                columnLen--;
+            }
+        }
+
+        tableLen = clipToValidUtf8(tableBytes, tableLen);
+        if (columnName != null) {
+            columnLen = clipToValidUtf8(columnBytes, columnLen);
+        }
+
+        try {
+            var byteStream = new ByteArrayOutputStream(MAX_IDENTIFIER_LEN);
+            byteStream.write(tableBytes, 0, tableLen);
+
+            if (columnName != null) {
+                byteStream.write('_');
+                byteStream.write(columnBytes, 0, columnLen);
+            }
+
+            if (suffix != null) {
+                byteStream.write('_');
+                byteStream.write(suffixBytes);
+            }
+
+            return byteStream.toString(StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new IllegalStateException("Error constructing object name", e);
+        }
+    }
+
+    /**
+     * Adjusts the clip length to avoid cutting a UTF-8 character in the middle.
+     * <p>
+     * If the requested length would split a multibyte UTF-8 character,
+     * this returns the position where the last complete character starts.
+     * This prevents creating invalid UTF-8 sequences.
+     *
+     * @param bytes  the UTF-8 encoded byte array
+     * @param length the desired clip length
+     * @return the adjusted length that doesn't split UTF-8 characters
+     */
+    private static int clipToValidUtf8(byte[] bytes, int length) {
+        if (length <= 0) return 0;
+        if (length >= bytes.length) return bytes.length;
+
+        int startOfLastChar = length - 1;
+        while (startOfLastChar >= 0 && (bytes[startOfLastChar] & 0xC0) == 0x80) {
+            startOfLastChar--;
+        }
+
+        if (startOfLastChar < 0) return 0;
+
+        int firstByte = bytes[startOfLastChar] & 0xFF;
+        int charLen;
+
+        if ((firstByte & 0xE0) == 0xC0) {
+            charLen = 2;
+        } else if ((firstByte & 0xF0) == 0xE0) {
+            charLen = 3;
+        } else if ((firstByte & 0xF8) == 0xF0) {
+            charLen = 4;
+        } else {
+            charLen = 1;
+        }
+
+        if (startOfLastChar + charLen > length) {
+            return startOfLastChar;
+        }
+
+        return length;
+    }
 }
