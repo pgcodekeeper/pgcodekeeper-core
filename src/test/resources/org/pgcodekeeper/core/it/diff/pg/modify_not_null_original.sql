@@ -8,5 +8,11 @@ CREATE TABLE public.testtable (
     field7 integer NOT NULL,
     field8 integer NOT NULL,
     field9 integer NOT NULL,
-    field10 integer NOT NULL
+    field10 integer NOT NULL,
+    very_very_very_very_very_very_very_very_long_column_name integer NOT NULL
+);
+
+CREATE TABLE public."👨‍👩‍👧‍👦👨‍👩‍👧‍👦" (
+    "🇷🇺🇷🇺🇷🇺" integer NOT NULL,
+    "шестьдесятбайт_шестьдесятбайт_ш" integer NOT NULL
 );

@@ -16,3 +16,16 @@ CREATE TABLE public.testtable2 (
 );
 
 ALTER TABLE public.testtable2 OWNER TO fordfrog;
+
+CREATE TABLE public.very_very_very_very_very_long_table_name (
+	very_very_very_very_long_col_name INTEGER
+);
+
+ALTER TABLE public.very_very_very_very_very_long_table_name ALTER COLUMN very_very_very_very_long_col_name ADD GENERATED ALWAYS AS IDENTITY (
+	SEQUENCE NAME public.very_very_very_very_very_long_very_very_very_very_long_col__seq
+	START WITH 1
+	INCREMENT BY 1
+	NO MAXVALUE
+	NO MINVALUE
+	CACHE 1
+);

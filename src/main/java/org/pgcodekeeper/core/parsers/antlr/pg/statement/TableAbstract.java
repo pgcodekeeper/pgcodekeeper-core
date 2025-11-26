@@ -17,6 +17,7 @@ package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
@@ -124,7 +125,7 @@ public abstract class TableAbstract extends PgParserAbstract {
             fillColNotNull(col, table.getName(), ctx);
         } else if (body.REFERENCES() != null) {
             IdentifierContext id = ctx.identifier();
-            String constrName = id == null ? table.getName() + '_' + colName + "_fkey" : id.getText();
+            String constrName = id == null ? PgDiffUtils.getDefaultObjectName(table.getName(), colName, "fkey") : id.getText();
             constr = new PgConstraintFk(constrName);
             fillConstrFk((PgConstraintFk) constr, body, colName, schemaName, table.getName());
         } else if (body.UNIQUE() != null || body.PRIMARY() != null) {
@@ -133,9 +134,9 @@ public abstract class TableAbstract extends PgParserAbstract {
             if (id != null) {
                 constrName = id.getText();
             } else if (body.PRIMARY() != null) {
-                constrName = table.getName() + "_pkey";
+                constrName = PgDiffUtils.getDefaultObjectName(table.getName(), null, "pkey");
             } else {
-                constrName = table.getName() + '_' + colName + "_key";
+                constrName = PgDiffUtils.getDefaultObjectName(table.getName(), colName, "key");
             }
             constr = new PgConstraintPk(constrName, body.PRIMARY() != null);
             fillConstrPk((PgConstraintPk) constr, body, col, colName, schemaName, table.getName());
@@ -145,7 +146,7 @@ public abstract class TableAbstract extends PgParserAbstract {
             if (id != null) {
                 constrName = id.getText();
             } else {
-                constrName = table.getName() + '_' + colName + "_check";
+                constrName = PgDiffUtils.getDefaultObjectName(table.getName(), colName, "check");
             }
             constr = new PgConstraintCheck(constrName);
             fillConstrCheck((PgConstraintCheck) constr, body, true);
@@ -153,7 +154,7 @@ public abstract class TableAbstract extends PgParserAbstract {
             db.addAnalysisLauncher(new ConstraintAnalysisLauncher(constr, expCtx, fileName));
         } else if (body.identity_body() != null) {
             Identity_bodyContext identity = body.identity_body();
-            String name = table.getName() + '_' + colName + "_seq";
+            String name = PgDiffUtils.getDefaultObjectName(table.getName(), colName, "seq");
             for (Sequence_bodyContext bodyCtx : identity.sequence_body()) {
                 if (bodyCtx.NAME() != null) {
                     name = QNameParser.getFirstName(getIdentifiers(bodyCtx.name));

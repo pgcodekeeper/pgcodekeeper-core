@@ -14,3 +14,7 @@ CREATE TABLE public.testtable2 (
 );
 
 ALTER TABLE public.testtable2 OWNER TO fordfrog;
+
+CREATE TABLE public.very_very_very_very_very_long_table_name (
+    very_very_very_very_long_col_name INTEGER GENERATED ALWAYS AS IDENTITY
+);
