@@ -1313,6 +1313,7 @@ tokens_nonreserved
     | BOTH
     | BY
     | BYTE
+    | BYTES
     | BYTEA
     | CACHE
     | CACHES
@@ -1382,6 +1383,8 @@ tokens_nonreserved
     | EPHEMERAL
     | ESTIMATE
     | EVENTS
+    | EXCHANGE
+    | EXECUTION
     | EXISTS
     | EXPLAIN
     | EXPRESSION
@@ -1421,8 +1424,10 @@ tokens_nonreserved
     | INDEX
     | INDEXES
     | INDICES
+    | INHERIT
     | INJECTIVE
     | INSERT
+    | INSERTS
     | INT
     | INT_TYPE
     | INTEGER
@@ -1440,6 +1445,7 @@ tokens_nonreserved
     | KAFKA
     | JDBC
     | KEY
+    | KEYED
     | KEYS
     | KILL
     | LARGE
@@ -1447,6 +1453,7 @@ tokens_nonreserved
     | LAYOUT
     | LEADING
     | LIFETIME
+    | LIMITS
     | LIVE
     | LOCAL
     | LOGS
@@ -1492,6 +1499,7 @@ tokens_nonreserved
     | OBJECT
     | OBJECT_TYPE
     | ODBC
+    | ONLY
     | OPTIMIZE
     | OPTION
     | OR
@@ -1526,7 +1534,9 @@ tokens_nonreserved
     | QUOTAS
     | QUEUES
     | RABBITMQ
+    | RANDOMIZED
     | RANGE
+    | READ
     | READONLY
     | REALM
     | REAL
@@ -1546,6 +1556,7 @@ tokens_nonreserved
     | RESET
     | RESTART
     | RESTRICTIVE
+    | RESULT
     | REVOKE
     | RING
     | ROLE
@@ -1628,6 +1639,7 @@ tokens_nonreserved
     | WATCH
     | WHEN
     | WRITABLE
+    | WRITTEN
     ;
 
 alias_clause

@@ -50,7 +50,7 @@ public class AntlrUtils {
      * @return normalized SQL string with proper whitespace
      */
     public static String normalizeWhitespaceUnquoted(ParserRuleContext ctx,
-            CommonTokenStream stream, DatabaseType dbType) {
+                                                     CommonTokenStream stream, DatabaseType dbType) {
         StringBuilder sb = new StringBuilder();
 
         // skip space before first token
@@ -69,7 +69,7 @@ public class AntlrUtils {
             if (!isSpecialChar(type, previous, dbType)) {
                 sb.append(' ');
             }
-            sb.append(getTokenText(type, token));
+            sb.append(getTokenText(type, token, dbType));
             previous = type;
         }
         return sb.toString();
@@ -101,20 +101,34 @@ public class AntlrUtils {
         return false;
     }
 
-    private static String getTokenText(int type, Token token) {
-        if (type == SQLLexer.QuotedIdentifier
-                // FIXME test this
-                // || type == SQLLexer.UnicodeQuotedIdentifier
-                // || type == SQLLexer.UnicodeEscapeStringConstant
-                || type == SQLLexer.StringConstant) {
-            // get text with quotes
-            return token.getInputStream().getText(
-                    Interval.of(token.getStartIndex(), token.getStopIndex()));
-        }
+    private static String getTokenText(int type, Token token, DatabaseType dbType) {
+        if (DatabaseType.PG == dbType) {
+            if (type == SQLLexer.QuotedIdentifier
+                    // FIXME test this
+                    // || type == SQLLexer.UnicodeQuotedIdentifier
+                    // || type == SQLLexer.UnicodeEscapeStringConstant
+                    || type == SQLLexer.StringConstant) {
+                // get text with quotes
+                return token.getInputStream().getText(
+                        Interval.of(token.getStartIndex(), token.getStopIndex()));
+            }
 
-        if (SQLLexer.ALL <= type && type <= SQLLexer.WITH) {
-            // upper case reserved keywords
-            return token.getText().toUpperCase(Locale.ROOT);
+            if (SQLLexer.ALL <= type && type <= SQLLexer.WITH) {
+                // upper case reserved keywords
+                return token.getText().toUpperCase(Locale.ROOT);
+            }
+        } else if (DatabaseType.CH == dbType) {
+            if (type == CHLexer.DOUBLE_QUOTED_IDENTIFIER
+                    || type == CHLexer.BACK_QUOTED_IDENTIFIER) {
+                // get text with quotes
+                return token.getInputStream().getText(
+                        Interval.of(token.getStartIndex(), token.getStopIndex()));
+            }
+
+            if (CHLexer.ALL <= type && type <= CHLexer.WITH) {
+                // upper case reserved keywords
+                return token.getText().toUpperCase(Locale.ROOT);
+            }
         }
 
         return token.getText();
