@@ -21,6 +21,5 @@ package org.pgcodekeeper.core.parsers.antlr.base;
  */
 public enum ErrorTypes {
     MISPLACEERROR,
-    VERIFICATIONERROR,
     OTHER
 }
