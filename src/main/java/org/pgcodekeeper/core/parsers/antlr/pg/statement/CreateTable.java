@@ -206,11 +206,12 @@ public final class CreateTable extends TableAbstract {
     }
 
     @Override
-    protected void fillColNotNull(AbstractTable table, Constraint_commonContext tblConstrCtx, Schema_qualified_nameContext colNameCtx) {
+    protected void fillColNotNull(AbstractTable table, Constraint_commonContext tblConstrCtx,
+                                  Schema_qualified_nameContext colNameCtx) {
         AntlrTaskManager.submit(antlrTasks, () -> colNameCtx, colCtx -> {
             var col = (PgColumn) getSafe(AbstractTable::getColumn, table, colNameCtx);
             if (col != null) {
-                fillColNotNull(col, table.getName(), tblConstrCtx);
+                fillColNotNull(col, table, tblConstrCtx);
             }
         });
     }

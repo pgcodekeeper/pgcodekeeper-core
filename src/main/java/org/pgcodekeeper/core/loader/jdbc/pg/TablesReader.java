@@ -348,11 +348,16 @@ public final class TablesReader extends JdbcReader {
             }
 
             if (colNotNull[i]) {
-                column.setNotNull(true);
+                PgConstraintNotNull notNullConstraint;
                 if (SupportedPgVersion.VERSION_18.isLE(loader.getVersion())) {
-                    column.setNotNullNoInherit(colNotNullNoInherit[i]);
-                    column.setNotNullConName(t.getName(), colNotNullConName[i]);
+                    notNullConstraint = new PgConstraintNotNull(colNotNullConName[i]);
+                    notNullConstraint.setNoInherit(colNotNullNoInherit[i]);
+                } else {
+                    notNullConstraint = new PgConstraintNotNull(t.getName(), column.getName());
                 }
+
+                column.setNotNullConstraint(notNullConstraint);
+                notNullConstraint.setParent(column);
             }
 
             int statistics = colStatistics[i];

@@ -9,8 +9,12 @@ CREATE TABLE public.testtable (
     field8 integer NOT NULL,
     field9 integer NOT NULL,
     field10 integer NOT NULL,
+    field11 integer,
     very_very_very_very_very_very_very_very_long_column_name integer NOT NULL
 );
+
+ALTER TABLE public.testtable
+    ADD CONSTRAINT testtable_field11_not_null NOT NULL field11 NOT VALID;
 
 CREATE TABLE public."👨‍👩‍👧‍👦👨‍👩‍👧‍👦" (
     "🇷🇺🇷🇺🇷🇺" integer NOT NULL,

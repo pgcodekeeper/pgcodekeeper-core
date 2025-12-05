@@ -139,7 +139,7 @@ public final class AlterTable extends TableAbstract {
                         tabl.addColumn(col);
                     }
                 }
-                parseColumnAction(schema, col, colAction);
+                parseColumnAction(schema, col, colAction, tabl.getName());
             }
 
             if (tablAction.WITHOUT() != null && tablAction.OIDS() != null) {
@@ -229,7 +229,7 @@ public final class AlterTable extends TableAbstract {
     }
 
     private void parseColumnAction(AbstractSchema schema, PgColumn col,
-                                   Column_actionContext colAction) {
+                                   Column_actionContext colAction, String tableName) {
         // column statistics
         Set_statisticsContext statistics = colAction.set_statistics();
         if (statistics != null) {
@@ -238,7 +238,7 @@ public final class AlterTable extends TableAbstract {
 
         // column not null constraint
         if (colAction.set != null) {
-            col.setNotNull(true);
+            addSimpleNotNull(col, tableName, null);
         }
 
         // column default

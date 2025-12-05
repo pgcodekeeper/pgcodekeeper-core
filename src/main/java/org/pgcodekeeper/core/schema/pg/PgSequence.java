@@ -19,6 +19,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.schema.pg;
 
+import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.schema.AbstractSequence;
 import org.pgcodekeeper.core.schema.GenericColumn;
@@ -237,6 +238,17 @@ public final class PgSequence extends AbstractSequence {
             setStartWith(Objects.requireNonNullElseGet(this.minValue, () -> inc < 0 ? "-1" : "1"));
         }
         resetHash();
+    }
+
+    /**
+     * Append rename command to sql script
+     *
+     * @param newName - new constrain name
+     * @param script - sql script
+     */
+    public void rename(String newName, SQLScript script) {
+        var command = "ALTER SEQUENCE " + getQualifiedName() + " RENAME TO " + PgDiffUtils.getQuotedName(newName);
+        script.addStatement(command);
     }
 
     @Override

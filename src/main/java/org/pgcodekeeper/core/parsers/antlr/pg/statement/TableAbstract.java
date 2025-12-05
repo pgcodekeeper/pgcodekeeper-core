@@ -96,19 +96,31 @@ public abstract class TableAbstract extends PgParserAbstract {
                                   Schema_qualified_nameContext colNameCtx) {
         var col = (PgColumn) getSafe(AbstractTable::getColumn, table, colNameCtx);
         if (col != null) {
-            fillColNotNull(col, table.getName(), tblConstrCtx);
+            fillColNotNull(col, table, tblConstrCtx);
         }
     }
 
-    protected static void fillColNotNull(PgColumn col, String tableName, Constraint_commonContext constraint) {
+    protected void fillColNotNull(PgColumn col, AbstractTable table, Constraint_commonContext constraint) {
         var body = constraint.constr_body();
-        col.setNotNull(body.NOT() != null);
-        col.setNotNullNoInherit(body.inherit_option() != null);
 
-        var constraintNameCtx = constraint.identifier();
-        if (constraintNameCtx != null) {
-            col.setNotNullConName(tableName, constraintNameCtx.getText());
+        if (body.NOT() == null) {
+            return;
         }
+
+        var constrIdentifier = constraint.identifier();
+        String constrName = constrIdentifier != null ? constrIdentifier.getText() : null;
+
+        var notNullConstraint = addSimpleNotNull(col, table.getName(), constrName);
+        notNullConstraint.setNoInherit(body.inherit_option() != null);
+        notNullConstraint.setNotValid(constraint.VALID() != null);
+    }
+
+    protected PgConstraintNotNull addSimpleNotNull(PgColumn col, String tableName, String name) {
+        var notNull = name != null ? new PgConstraintNotNull(name) : new PgConstraintNotNull(tableName, col.getName());
+        col.setNotNullConstraint(notNull);
+        notNull.setParent(col);
+
+        return notNull;
     }
 
     private void addTableConstraint(Constraint_commonContext ctx, PgColumn col,
@@ -122,7 +134,7 @@ public abstract class TableAbstract extends PgParserAbstract {
             col.setDefaultValue(getExpressionText(def, stream));
             db.addAnalysisLauncher(new VexAnalysisLauncher(col, def, fileName));
         } else if (body.NULL() != null) {
-            fillColNotNull(col, table.getName(), ctx);
+            fillColNotNull(col, table, ctx);
         } else if (body.REFERENCES() != null) {
             IdentifierContext id = ctx.identifier();
             String constrName = id == null ? PgDiffUtils.getDefaultObjectName(table.getName(), colName, "fkey") : id.getText();
@@ -412,7 +424,7 @@ public abstract class TableAbstract extends PgParserAbstract {
                               String schemaName, String tableName) {
         if (body.PRIMARY() != null) {
             if (col != null) {
-                col.setNotNull(true);
+                addSimpleNotNull(col, tableName, null);
             }
         } else {
             Nulls_distinctionContext dist = body.nulls_distinction();
