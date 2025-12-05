@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Fixed default name generation for CONSTRAINT and SEQUENCE objects in PostgreSQL.
 
+### Removed
+
+- Removed code style verification logic.
+
 ## [13.1.0] - 2025-11-18
 
 ### Changed
