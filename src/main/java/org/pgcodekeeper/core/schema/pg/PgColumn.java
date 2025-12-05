@@ -47,7 +47,6 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
 
     private static final String ALTER_FOREIGN_OPTION = "%s OPTIONS (%s %s %s)";
     private static final String COMPRESSION = " COMPRESSION ";
-    public static final String NO_INHERIT = " NO INHERIT";
 
     private Integer statistics;
     private String storage;
@@ -58,8 +57,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
     private String compression;
     private boolean isInherit;
     private String generationOption;
-    private boolean isNotNullNoInherit;
-    private String notNullConName;
+    private PgConstraintNotNull notNullConstraint;
 
     // greenplum type fields
     private String compressType;
@@ -110,14 +108,8 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
                     .append(defaultValue);
         }
 
-        if (notNull) {
-            if (notNullConName != null) {
-                sbDefinition.append(" CONSTRAINT ").append(notNullConName);
-            }
-            sbDefinition.append(NOT_NULL);
-            if (isNotNullNoInherit) {
-                sbDefinition.append(NO_INHERIT);
-            }
+        if (notNullConstraint != null) {
+            notNullConstraint.getDefinitionForColumn(sbDefinition);
         }
     }
 
@@ -137,7 +129,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
     public void getCreationSQL(SQLScript script) {
         StringBuilder sb = new StringBuilder();
 
-        boolean mergeDefaultNotNull = false;
+        boolean isMergeDefaultNotNull = false;
         if (type != null && getParentCol((AbstractPgTable) parent) == null) {
             sb.append(getAlterTable(false));
             sb.append("\n\tADD COLUMN ");
@@ -152,8 +144,8 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
                 sb.append(COLLATE).append(collation);
             }
 
-            mergeDefaultNotNull = notNull;
-            if (mergeDefaultNotNull) {
+            isMergeDefaultNotNull = notNullConstraint != null;
+            if (isMergeDefaultNotNull) {
                 // for NOT NULL columns we'd emit a time-consuming UPDATE column=DEFAULT anyway,
                 // so we can merge DEFAULT with column definition with no performance loss
                 // this operation also becomes fast on PostgreSQL 11+ (metadata only operation)
@@ -168,7 +160,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
 
         // column may have a default expression or a generation expression
         // (https://www.postgresql.org/docs/12/catalog-pg-attribute.html) (param - 'atthasdef')
-        if (!mergeDefaultNotNull && generationOption == null) {
+        if (!isMergeDefaultNotNull && generationOption == null) {
             compareDefaults(null, defaultValue, new AtomicBoolean(), script);
             compareNotNull(null, this, script);
         }
@@ -270,15 +262,15 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
         if (isNeedDropDefault) {
             compareDefaults(defaultValue, null, null, script);
         }
-        AtomicBoolean isNeedDepcies = new AtomicBoolean();
+        AtomicBoolean isNeedDependencies = new AtomicBoolean();
         StringBuilder typeBuilder = new StringBuilder();
-        compareTypes(this, newColumn, isNeedDepcies, typeBuilder, true, true, script.getSettings());
+        compareTypes(this, newColumn, isNeedDependencies, typeBuilder, true, true, script.getSettings());
         if (!typeBuilder.isEmpty()) {
             script.addStatement(typeBuilder);
         }
 
         String oldDefault = isNeedDropDefault ? null : defaultValue;
-        compareDefaults(oldDefault, newColumn.defaultValue, isNeedDepcies, script);
+        compareDefaults(oldDefault, newColumn.defaultValue, isNeedDependencies, script);
         compareNotNull(this, newColumn, script);
         compareStorages(storage, newColumn.storage, script);
         compareCompression(compression, newColumn.compression, script);
@@ -291,7 +283,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
 
         compareIdentity(identityType, newColumn.identityType, sequence, newColumn.sequence, script);
         appendAlterComments(newColumn, script);
-        return getObjectState(isNeedDepcies.get(), script, startSize);
+        return getObjectState(isNeedDependencies.get(), script, startSize);
     }
 
     private boolean compareCompressOptions(PgColumn newColumn) {
@@ -334,7 +326,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
      * @param script          for collect sql statements
      */
     private void compareIdentity(String oldIdentityType, String newIdentityType,
-                                 AbstractSequence oldSequence, AbstractSequence newSequence, SQLScript script) {
+                                 PgSequence oldSequence, PgSequence newSequence, SQLScript script) {
         if (!Objects.equals(oldIdentityType, newIdentityType)) {
             StringBuilder sb = new StringBuilder();
             sb.append(getAlterTableColumn(false, name));
@@ -360,12 +352,9 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
 
         if (oldSequence != null && newSequence != null &&
                 !Objects.equals(oldSequence, newSequence)) {
-            if (!oldSequence.getName().equals(newSequence.getName())) {
-                String sbSeq = "ALTER SEQUENCE " +
-                        oldSequence.getQualifiedName() +
-                        " RENAME TO " +
-                        PgDiffUtils.getQuotedName(newSequence.getName());
-                script.addStatement(sbSeq);
+            var newName = newSequence.getName();
+            if (!oldSequence.getName().equals(newName)) {
+                oldSequence.rename(newName, script);
             }
 
             oldSequence.appendAlterSQL(newSequence, script);
@@ -383,7 +372,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
                 && (!Objects.equals(type, newColumn.type)
                 || !Objects.equals(collation, newColumn.collation))
                 && Objects.equals(defaultValue, newColumn.defaultValue)
-                && notNull == newColumn.notNull
+                && Objects.equals(notNullConstraint != null, newColumn.notNullConstraint != null)
                 && compareColOptions(newColumn)
                 && Objects.equals(comment, newColumn.comment);
     }
@@ -407,14 +396,14 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
      * If the values are not equal, then the column will be changed with dependencies.
      * Adds warning as SQL comment.
      *
-     * @param oldColumn        old column
-     * @param newColumn        new column
-     * @param isNeedDepcies    if set true, column will be changed with dependencies
-     * @param sb               StringBuilder for difference
-     * @param isNeedAlterTable if true ALTER TABLE sentence added before ALTER COLUMN
-     * @param isLastColumn     if true will be added ";" in the end of ALTER COLUMN. If false then - ",".
+     * @param oldColumn           old column
+     * @param newColumn           new column
+     * @param isNeedDependencies  if set true, column will be changed with dependencies
+     * @param sb                  StringBuilder for difference
+     * @param isNeedAlterTable    if true ALTER TABLE sentence added before ALTER COLUMN
+     * @param isLastColumn        if true will be added ";" in the end of ALTER COLUMN. If false then - ",".
      */
-    private void compareTypes(PgColumn oldColumn, PgColumn newColumn, AtomicBoolean isNeedDepcies,
+    private void compareTypes(PgColumn oldColumn, PgColumn newColumn, AtomicBoolean isNeedDependencies,
                               StringBuilder sb, boolean isNeedAlterTable, boolean isLastColumn, ISettings settings) {
         String oldType = oldColumn.type;
         String newType = newColumn.type;
@@ -426,7 +415,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
         String newCollation = newColumn.collation;
 
         if (!Objects.equals(oldType, newType) || (newCollation != null && !newCollation.equals(oldCollation))) {
-            isNeedDepcies.set(true);
+            isNeedDependencies.set(true);
             sb.append(getAlterTableColumn(false, newColumn.name, isNeedAlterTable));
             sb.append(" TYPE ").append(newType);
 
@@ -486,15 +475,22 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
      * @param script    script for collect sql statements
      */
     private void compareNotNull(PgColumn oldColumn, PgColumn newColumn, SQLScript script) {
-        boolean oldNotNull = oldColumn != null && oldColumn.isNotNull();
-        boolean newNotNull = newColumn != null && newColumn.isNotNull();
+        boolean isOldNotNull = oldColumn != null && notNullConstraint != null;
+        boolean isNewNotNull = newColumn != null && newColumn.notNullConstraint != null;
 
-        if (oldNotNull && !newNotNull) {
+        if (!isNewNotNull && !isOldNotNull) {
+            return;
+        }
+
+        // DROP
+        if (isOldNotNull && !isNewNotNull) {
             script.addStatement(getAlterTableColumn(isNeedOnly(), name) + " DROP" + NOT_NULL);
             return;
         }
 
-        if (!oldNotNull && newNotNull) {
+        // CREATE
+        var newNotNullConstraint = newColumn.notNullConstraint;
+        if (!isOldNotNull) {
             if (newColumn.defaultValue != null) {
                 String sql = "UPDATE " + parent.getQualifiedName() +
                         "\n\tSET " + PgDiffUtils.getQuotedName(name) +
@@ -503,40 +499,21 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
                 script.addStatement(sql);
             }
 
-            if (newColumn.notNullConName != null || newColumn.isNotNullNoInherit) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(getAlterTable(false));
-                sb.append("\n\tADD CONSTRAINT ").append(newColumn.getNotNullConName()).append(NOT_NULL).append(" ");
-                sb.append(PgDiffUtils.getQuotedName(name));
-                if (newColumn.isNotNullNoInherit) {
-                    sb.append(NO_INHERIT);
-                }
-                script.addStatement(sb);
+            if (newNotNullConstraint.isComplexNotNull()) {
+                newNotNullConstraint.getCreationSQL(script);
             } else {
                 script.addStatement(getAlterTableColumn(false, name) + " SET" + NOT_NULL);
             }
+            return;
         }
 
-        // newNotNull is always true here
-        if (oldNotNull) {
-            String oldConName = PgDiffUtils.getQuotedName(oldColumn.getNotNullConName());
-            String newConName = PgDiffUtils.getQuotedName(newColumn.getNotNullConName());
-
-            if (!Objects.equals(oldConName, newConName)) {
-                var statement = getAlterTable(false) + "\n\tRENAME CONSTRAINT " + oldConName + " TO " + newConName;
-                script.addStatement(statement);
-            }
-
-            boolean newNotNullNoInherit = newColumn.isNotNullNoInherit;
-            if (oldColumn.isNotNullNoInherit != newNotNullNoInherit) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(getAlterTable(false));
-                sb.append("\n\tALTER CONSTRAINT ");
-                sb.append(newConName);
-                sb.append(newNotNullNoInherit ? NO_INHERIT : " INHERIT");
-                script.addStatement(sb);
-            }
+        // ALTER
+        var newName = newNotNullConstraint.getName();
+        if (!notNullConstraint.getName().equals(newName)) {
+            notNullConstraint.rename(newName, script);
         }
+
+        notNullConstraint.appendAlterSQL(newNotNullConstraint, script);
     }
 
     /**
@@ -544,12 +521,12 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
      * the default values are not equal, and the new value is not null, then the
      * column will be changed with dependencies.
      *
-     * @param oldDefault    old column default value
-     * @param newDefault    new column default value
-     * @param isNeedDepcies if set true, column will be changed with dependencies
-     * @param script        for collect sql statements
+     * @param oldDefault         old column default value
+     * @param newDefault         new column default value
+     * @param isNeedDependencies if set true, column will be changed with dependencies
+     * @param script             for collect sql statements
      */
-    private void compareDefaults(String oldDefault, String newDefault, AtomicBoolean isNeedDepcies, SQLScript script) {
+    private void compareDefaults(String oldDefault, String newDefault, AtomicBoolean isNeedDependencies, SQLScript script) {
         if (!Objects.equals(oldDefault, newDefault)) {
             StringBuilder sql = new StringBuilder();
             sql.append(getAlterTableColumn(true, name));
@@ -557,7 +534,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
                 sql.append(" DROP DEFAULT");
             } else {
                 sql.append(" SET DEFAULT ").append(newDefault);
-                isNeedDepcies.set(true);
+                isNeedDependencies.set(true);
             }
             script.addStatement(sql);
         }
@@ -698,6 +675,16 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
         resetHash();
     }
 
+    @Override
+    public boolean isNotNull() {
+        return notNullConstraint != null;
+    }
+
+    @Override
+    public void setNotNull(boolean notNull) {
+        throw new UnsupportedOperationException("Not supported, add NOT NULL as a constraint instead");
+    }
+
     public boolean isGenerated() {
         return generationOption != null;
     }
@@ -748,28 +735,9 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
         resetHash();
     }
 
-    public void setNotNullNoInherit(boolean isNotNullNoInherit) {
-        this.isNotNullNoInherit = isNotNullNoInherit;
+    public void setNotNullConstraint(PgConstraintNotNull notNullConstraint) {
+        this.notNullConstraint = notNullConstraint;
         resetHash();
-    }
-
-    public void setNotNullConName(String tableName, String conName) {
-        if (!PgDiffUtils.getDefaultObjectName(tableName, name, "not_null").equals(conName)) {
-            setNotNullConName(conName);
-        }
-    }
-
-    public void setNotNullConName(String notNullConName) {
-        this.notNullConName = notNullConName;
-        resetHash();
-    }
-
-    private String getNotNullConName() {
-        if (notNullConName == null) {
-            return PgDiffUtils.getDefaultObjectName(parent.getName(), name, "not_null");
-        }
-
-        return notNullConName;
     }
 
     @Override
@@ -786,14 +754,13 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
                 && Objects.equals(storage, col.storage)
                 && Objects.equals(identityType, col.identityType)
                 && isInherit == col.isInherit
-                && isNotNullNoInherit == col.isNotNullNoInherit
-                && Objects.equals(notNullConName, col.notNullConName)
                 && options.equals(col.options)
                 && fOptions.equals(col.fOptions)
                 && compareCompressOptions(col)
                 && Objects.equals(sequence, col.sequence)
                 && Objects.equals(compression, col.compression)
-                && Objects.equals(generationOption, col.generationOption);
+                && Objects.equals(generationOption, col.generationOption)
+                && Objects.equals(notNullConstraint, col.notNullConstraint);
     }
 
     @Override
@@ -811,8 +778,17 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
         hasher.put(identityType);
         hasher.put(isInherit);
         hasher.put(generationOption);
-        hasher.put(isNotNullNoInherit);
-        hasher.put(notNullConName);
+        hasher.put(notNullConstraint);
+    }
+
+    @Override
+    public AbstractColumn shallowCopy() {
+        AbstractColumn colDst = getColumnCopy();
+        copyBaseFields(colDst);
+        colDst.setType(type);
+        colDst.setCollation(collation);
+        colDst.setDefaultValue(defaultValue);
+        return colDst;
     }
 
     @Override
@@ -830,8 +806,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
         copy.setCompression(compression);
         copy.setInherit(isInherit);
         copy.setGenerationOption(generationOption);
-        copy.setNotNullNoInherit(isNotNullNoInherit);
-        copy.setNotNullConName(notNullConName);
+        copy.setNotNullConstraint(notNullConstraint);
         return copy;
     }
 }

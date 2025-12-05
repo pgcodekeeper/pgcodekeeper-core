@@ -91,17 +91,24 @@ class PgAntlrLoaderTest {
         }
     }
 
+    private PgConstraintNotNull createNotNullConstraint(SimplePgTable table, PgColumn col) {
+        var notNullConstraint = new PgConstraintNotNull(table.getName(), col.getName());
+        notNullConstraint.setParent(col);
+        col.setNotNullConstraint(notNullConstraint);
+        return notNullConstraint;
+    }
+
     @Test
     void testDB1() throws IOException, InterruptedException {
         AbstractDatabase d = createDumpDB(DatabaseType.PG);
         AbstractSchema schema = d.getDefaultSchema();
 
-        AbstractTable table = new SimplePgTable("fax_boxes");
+        SimplePgTable table = new SimplePgTable("fax_boxes");
         schema.addTable(table);
 
-        AbstractColumn col = new PgColumn("fax_box_id");
+        PgColumn col = new PgColumn("fax_box_id");
         col.setType("serial");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("name");
@@ -120,7 +127,7 @@ class PgAntlrLoaderTest {
 
         col = new PgColumn("fax_id");
         col.setType("serial");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("fax_box_id");
@@ -180,7 +187,7 @@ class PgAntlrLoaderTest {
 
         col = new PgColumn("id");
         col.setType("serial");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         constraintFk = new PgConstraintFk("extensions_fax_box_id_fkey");
@@ -241,41 +248,41 @@ class PgAntlrLoaderTest {
         seq.setCache("1");
         schema.addSequence(seq);
 
-        AbstractTable table = new SimplePgTable("admins");
+        SimplePgTable table = new SimplePgTable("admins");
         schema.addTable(table);
 
-        AbstractColumn col = new PgColumn("aid");
+        PgColumn col = new PgColumn("aid");
         col.setType(INTEGER);
         col.setDefaultValue("nextval('\"admins_aid_seq\"'::regclass)");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("companyid");
         col.setType(INTEGER);
         col.setDefaultValue("0");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("groupid");
         col.setType(INTEGER);
         col.setDefaultValue("0");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("username");
         col.setType("character varying");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("password");
         col.setType(CHARACTER_VARYING_40);
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("superuser");
         col.setType(BOOLEAN);
         col.setDefaultValue("'f'::bool");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("name");
@@ -288,7 +295,7 @@ class PgAntlrLoaderTest {
 
         col = new PgColumn("email");
         col.setType("character varying(100)");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("tel");
@@ -302,13 +309,13 @@ class PgAntlrLoaderTest {
         col = new PgColumn("enabled");
         col.setType(BOOLEAN);
         col.setDefaultValue("'t'::bool");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("lastlogints");
         col.setType("timestamp with time zone");
         col.setDefaultValue("now()");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("expirienced");
@@ -328,12 +335,12 @@ class PgAntlrLoaderTest {
         AbstractDatabase d = createDumpDB(DatabaseType.PG);
         AbstractSchema schema = d.getDefaultSchema();
 
-        AbstractTable table = new SimplePgTable("call_logs");
+        SimplePgTable table = new SimplePgTable("call_logs");
         schema.addTable(table);
 
-        AbstractColumn col = new PgColumn("id");
+        PgColumn col = new PgColumn("id");
         col.setType(BIGINT);
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         col.setDefaultValue("nextval('public.call_logs_id_seq'::regclass)");
         table.addColumn(col);
 
@@ -541,18 +548,18 @@ class PgAntlrLoaderTest {
         AbstractDatabase d = createDumpDB(DatabaseType.PG);
         AbstractSchema schema = d.getDefaultSchema();
 
-        AbstractTable table = new SimplePgTable("user_data");
+        SimplePgTable table = new SimplePgTable("user_data");
         schema.addTable(table);
 
-        AbstractColumn col = new PgColumn("id");
+        PgColumn col = new PgColumn("id");
         col.setType(BIGINT);
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         col.setDefaultValue("nextval('public.user_id_seq'::regclass)");
         table.addColumn(col);
 
         col = new PgColumn("email");
         col.setType("character varying(128)");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("created");
@@ -624,12 +631,12 @@ class PgAntlrLoaderTest {
 
         schema.setOwner(POSTGRES);
 
-        AbstractTable table = new SimplePgTable("acl_role");
+        SimplePgTable table = new SimplePgTable("acl_role");
         schema.addTable(table);
 
-        AbstractColumn col = new PgColumn("id");
+        PgColumn col = new PgColumn("id");
         col.setType(BIGINT);
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         var constraintPK = new PgConstraintPk("acl_role_pkey", true);
@@ -643,51 +650,51 @@ class PgAntlrLoaderTest {
 
         col = new PgColumn("id");
         col.setType(BIGINT);
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("email");
         col.setType("character varying(255)");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("name");
         col.setType("character varying(255)");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("password");
         col.setType(CHARACTER_VARYING_40);
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("is_active");
         col.setType(BOOLEAN);
         col.setDefaultValue("false");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("updated");
         col.setType("timestamp without time zone");
         col.setDefaultValue("now()");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("created");
         col.setType("timestamp without time zone");
         col.setDefaultValue("now()");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("role_id");
         col.setType(BIGINT);
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         col = new PgColumn("last_visit");
         col.setType("timestamp without time zone");
         col.setDefaultValue("now()");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         table.addColumn(col);
 
         PgIndex idx = new PgIndex("fki_user_role_id_fkey");
@@ -784,19 +791,19 @@ class PgAntlrLoaderTest {
 
         func.setOwner("fordfrog");
 
-        AbstractTable table = new SimplePgTable("test");
+        SimplePgTable table = new SimplePgTable("test");
         schema.addTable(table);
 
-        AbstractColumn col = new PgColumn("id");
+        PgColumn col = new PgColumn("id");
         col.setType(INTEGER);
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         col.setComment("'id column'");
         col.setDefaultValue("nextval('public.test_id_seq'::regclass)");
         table.addColumn(col);
 
         col = new PgColumn("text");
         col.setType("character varying(20)");
-        col.setNotNull(true);
+        createNotNullConstraint(table, col);
         col.setComment("'text column'");
         table.addColumn(col);
 

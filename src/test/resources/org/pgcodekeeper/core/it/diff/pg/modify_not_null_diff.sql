@@ -32,3 +32,9 @@ ALTER TABLE public.testtable
 
 ALTER TABLE public.testtable
 	ALTER CONSTRAINT field7_not_null_test NO INHERIT;
+
+ALTER TABLE public.testtable
+	RENAME CONSTRAINT testtable_field11_not_null TO field_11_new_name;
+
+ALTER TABLE public.testtable
+	VALIDATE CONSTRAINT testtable_field11_not_null;
