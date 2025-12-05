@@ -20,6 +20,7 @@ import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.schema.GenericColumn;
 import org.pgcodekeeper.core.schema.PgStatement;
 
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.function.BiConsumer;
@@ -35,7 +36,7 @@ public final class ChJdbcUtils {
 
     static <T extends PgStatement> void addRoles(ResultSet res, String roleCol, String exceptCol, T statement,
                                                  BiConsumer<T, String> addRoleMethod, BiConsumer<T, String> addExceptMethod) throws SQLException {
-        String[] roles = JdbcReader.getColArray(res, roleCol, true);
+        String[] roles = getColArray(res, roleCol);
         if (roles != null) {
             for (String role : roles) {
                 addRoleMethod.accept(statement, role);
@@ -43,7 +44,7 @@ public final class ChJdbcUtils {
             }
         }
 
-        String[] excepts = JdbcReader.getColArray(res, exceptCol, true);
+        String[] excepts = getColArray(res, exceptCol);
         if (excepts != null) {
             for (String except : excepts) {
                 addExceptMethod.accept(statement, except);
@@ -52,4 +53,18 @@ public final class ChJdbcUtils {
         }
 
     }
+
+    static String[] getColArray(ResultSet rs, String columnName) throws SQLException {
+        Array arr = rs.getArray(columnName);
+        Object[] array = (Object[]) arr.getArray();
+        if (0 == array.length) {
+            return null;
+        }
+        String[] stringArray = new String[array.length];
+        for (int i = 0; i < array.length; i++) {
+            stringArray[i] = (String) array[i];
+        }
+        return stringArray;
+    }
+
 }

@@ -44,7 +44,7 @@ public abstract class AbstractJdbcConnector implements IJdbcConnector {
         try {
             loadDriver();
             return DriverManager.getConnection(getUrl(), makeProperties());
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             throw new IOException(e.getLocalizedMessage(), e);
         }
     }
@@ -52,11 +52,9 @@ public abstract class AbstractJdbcConnector implements IJdbcConnector {
     /**
      * Loads driver classes
      *
-     * @throws ClassNotFoundException if driver classes are not found in classpath
+     * @throws SQLException if driver already load or something gone are wrong
      */
-    protected void loadDriver() throws ClassNotFoundException {
-        Class.forName(getDriverName());
-    }
+    protected abstract void loadDriver() throws SQLException;
 
     @Override
     public String getUrl() {
@@ -71,16 +69,6 @@ public abstract class AbstractJdbcConnector implements IJdbcConnector {
         props.setProperty("ApplicationName", "pgCodeKeeper, version: " + Utils.getVersion());
         return props;
     }
-
-    /**
-     * @return driver name
-     */
-    protected abstract String getDriverName();
-
-    /**
-     * @return default port
-     */
-    protected abstract int getDefaultPort();
 
     /**
      * Validates connection string

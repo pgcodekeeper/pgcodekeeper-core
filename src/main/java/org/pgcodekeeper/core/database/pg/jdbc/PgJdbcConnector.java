@@ -16,13 +16,14 @@
 package org.pgcodekeeper.core.database.pg.jdbc;
 
 import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
+import org.postgresql.Driver;
+
+import java.sql.SQLException;
 
 /**
  *  JDBC database connector implementation for PostgreSQL.
  */
 public class PgJdbcConnector extends AbstractJdbcConnector {
-
-    private static final String DRIVER_NAME = "org.postgresql.Driver";
 
     private static final String URL_START_PG = "jdbc:postgresql:";
 
@@ -41,13 +42,10 @@ public class PgJdbcConnector extends AbstractJdbcConnector {
     }
 
     @Override
-    protected String getDriverName() {
-        return DRIVER_NAME;
-    }
-
-    @Override
-    protected int getDefaultPort() {
-        return DEFAULT_PORT;
+    protected void loadDriver() throws SQLException {
+        if (!Driver.isRegistered()) {
+            Driver.register();
+        }
     }
 
     @Override
