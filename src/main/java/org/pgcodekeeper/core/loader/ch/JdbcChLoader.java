@@ -66,8 +66,6 @@ public final class JdbcChLoader extends JdbcLoaderBase {
             this.connection = connection;
             this.statement = statement;
 
-            connection.setAutoCommit(false);
-
             LOG.info(Messages.JdbcLoader_log_read_db_objects);
             new ChSchemasReader(this, d).read();
             new ChFunctionsReader(this, d).read();
@@ -80,7 +78,6 @@ public final class JdbcChLoader extends JdbcLoaderBase {
             }
 
             finishLoaders();
-            connection.commit();
 
             LOG.info(Messages.JdbcLoader_log_succes_queried);
         } catch (InterruptedException ex) {

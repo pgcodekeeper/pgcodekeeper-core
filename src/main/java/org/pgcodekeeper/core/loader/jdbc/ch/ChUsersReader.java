@@ -80,14 +80,14 @@ public final class ChUsersReader extends AbstractStatementReader {
     private void fillHosts(ResultSet res, ChUser user) throws SQLException {
         boolean isAnyHost = false;
 
-        String[] hostNames = JdbcReader.getColArray(res, "host_names", true);
+        String[] hostNames = ChJdbcUtils.getColArray(res, "host_names");
         if (hostNames != null) {
             for (String hostName : hostNames) {
                 user.addHost(LOCAL.equals(hostName) ? "LOCAL" : "NAME " + ChDiffUtils.quoteLiteralName(hostName));
             }
         }
 
-        String[] hostIps = JdbcReader.getColArray(res, "host_ip", true);
+        String[] hostIps = ChJdbcUtils.getColArray(res, "host_ip");
         if (hostIps != null) {
             for (String ip : hostIps) {
                 if (!IP.equals(ip)) {
@@ -98,14 +98,14 @@ public final class ChUsersReader extends AbstractStatementReader {
             }
         }
 
-        String[] hostRegexps = JdbcReader.getColArray(res, "host_names_regexp", true);
+        String[] hostRegexps = ChJdbcUtils.getColArray(res, "host_names_regexp");
         if (hostRegexps != null) {
             for (String regexp : hostRegexps) {
                 user.addHost("REGEXP " + ChDiffUtils.quoteLiteralName(regexp));
             }
         }
 
-        String[] hostLike = JdbcReader.getColArray(res, "host_names_like", true);
+        String[] hostLike = ChJdbcUtils.getColArray(res, "host_names_like");
         if (hostLike != null) {
             for (String like : hostLike) {
                 user.addHost("LIKE " + ChDiffUtils.quoteLiteralName(like));

@@ -15,14 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.jdbc;
 
+import com.clickhouse.jdbc.Driver;
 import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * JDBC database connector implementation for ClickHouse.
  */
 public class ChJdbcConnector extends AbstractJdbcConnector {
-
-    private static final String DRIVER_NAME = "com.clickhouse.jdbc.ClickHouseDriver";
 
     private static final String URL_START_CH = "jdbc:clickhouse:";
     private static final String URL_START_CH_SHORT = "jdbc:ch:";
@@ -42,13 +45,22 @@ public class ChJdbcConnector extends AbstractJdbcConnector {
     }
 
     @Override
-    protected String getDriverName() {
-        return DRIVER_NAME;
+    public Connection getConnection() throws IOException {
+        var con = super.getConnection();
+        //FIXME when the connection() method of the clickhouse driver throws an exception
+        // when trying to connect to a non-existent database.
+        try (var st = con.createStatement();
+             var rs = st.executeQuery("SELECT 1")) {
+            // check connection catch and throw exception if false
+        } catch (SQLException e) {
+            throw new IOException(e);
+        }
+        return con;
     }
 
     @Override
-    protected int getDefaultPort() {
-        return DEFAULT_PORT;
+    protected void loadDriver() {
+        Driver.load();
     }
 
     @Override

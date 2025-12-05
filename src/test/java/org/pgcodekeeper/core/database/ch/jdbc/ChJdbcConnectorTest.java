@@ -38,7 +38,7 @@ class ChJdbcConnectorTest {
 
     @Test
     void wrongUrlConnectionTest() {
-        var connector = new ChJdbcConnector("jdbc:clickhouse://localhost:5432/broken");
+        var connector = new ChJdbcConnector("jdbc:clickhouse://localhost:5432/broken?user=user&password=password");
         Assertions.assertThrows(IOException.class, connector::getConnection);
     }
 

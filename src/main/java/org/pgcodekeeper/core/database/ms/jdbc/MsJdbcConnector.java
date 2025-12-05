@@ -15,17 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.jdbc;
 
+import com.microsoft.sqlserver.jdbc.SQLServerDriver;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
 
+import java.sql.SQLException;
 import java.util.Properties;
 
 /**
  * JDBC database connector implementation for MS SQL.
  */
 public class MsJdbcConnector extends AbstractJdbcConnector {
-
-    private static final String DRIVER_NAME = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
     private static final String URL_START_MS = "jdbc:sqlserver:";
 
@@ -45,8 +45,8 @@ public class MsJdbcConnector extends AbstractJdbcConnector {
     }
 
     @Override
-    protected String getDriverName() {
-        return DRIVER_NAME;
+    protected void loadDriver() throws SQLException {
+        SQLServerDriver.register();
     }
 
     @Override
@@ -62,10 +62,5 @@ public class MsJdbcConnector extends AbstractJdbcConnector {
     @Override
     public String getBatchDelimiter() {
         return Consts.GO;
-    }
-
-    @Override
-    protected int getDefaultPort() {
-        return DEFAULT_PORT;
     }
 }
