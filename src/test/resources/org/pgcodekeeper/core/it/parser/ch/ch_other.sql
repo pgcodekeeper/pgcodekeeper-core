@@ -61,6 +61,7 @@ drop table if exists order_test1;
 DROP NAMED COLLECTION IF EXISTS `02918_json_fuzzer`;
 drop temporary table wups;
 EXISTS TABLE aine;
+EXCHANGE DICTIONARIES `01914_db`.dictionary_1 AND `01914_db`.dictionary_2;
 EXPLAIN (SELECT 1 UNION DISTINCT SELECT 1) UNION DISTINCT SELECT 1;
 EXPLAIN actions=0, description=0, header=1 SELECT * FROM ( SELECT 'key2' AS key ) AS s1 JOIN ( SELECT 'key1' AS key, '1' AS value UNION ALL SELECT 'key2' AS key, '1' AS value ) AS s2 USING (key);
 explain description=0 select * from remote('127.{1,2}', view(select * from numbers(1e6))) order by number limit 10 settings distributed_push_down_limit=1;

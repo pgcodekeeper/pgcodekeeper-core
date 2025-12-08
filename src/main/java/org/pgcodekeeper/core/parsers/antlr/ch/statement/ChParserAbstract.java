@@ -174,9 +174,10 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
 
     protected ChIndex getIndex(Table_index_defContext indexCtx) {
         var index = new ChIndex(indexCtx.identifier().getText());
-        setExprWithAnalyze(ChIndex::setExpr, index, indexCtx.expr());
-        index.setType(getFullCtxText(indexCtx.index_type()));
-        var granVal = indexCtx.gran;
+        var indexTypeDefCtx = indexCtx.index_type_def();
+        setExprWithAnalyze(ChIndex::setExpr, index, indexTypeDefCtx.expr());
+        index.setType(getFullCtxText(indexTypeDefCtx.index_type()));
+        var granVal = indexTypeDefCtx.gran;
         if (granVal != null) {
             index.setGranVal(Integer.parseInt(granVal.getText()));
         }

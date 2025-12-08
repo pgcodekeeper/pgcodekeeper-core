@@ -12,10 +12,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - The clickhouse-jdbc driver has been updated. All connections to ClickHouse must now include the required `password` parameter.
+- Improved parser rules for ClickHouse.
 
 ### Fixed
 
 - Fixed default name generation for CONSTRAINT and SEQUENCE objects in PostgreSQL.
+- Fixed logic for normalizing views for ClickHouse.
 
 ## [13.1.0] - 2025-11-18
 

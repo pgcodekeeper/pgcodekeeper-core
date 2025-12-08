@@ -50,6 +50,7 @@ dml_stmt
     : check_stmt
     | describe_stmt
     | exists_stmt
+    | exchange_stmt
     | explain_stmt
     | move_stmt
     | set_stmt
@@ -86,6 +87,9 @@ create_stmt
     | create_named_collection_stmt
     | create_user_stmt
     | create_role_stmt
+    | create_index_stmt
+    | create_quota_stmt
+    | create_settings_profile
     ;
 
 alter_stmt
@@ -94,6 +98,8 @@ alter_stmt
     | alter_named_collection_stmt
     | alter_user_stmt
     | alter_role_stmt
+    | alter_quota_stmt
+    | alter_settings_profile
     ;
 
 privilegy_stmt
@@ -242,6 +248,27 @@ alter_role_stmt
     user_settings?
     ;
 
+alter_quota_stmt
+    : ALTER QUOTA (if_exists)? alter_quota_action
+    ;
+
+alter_quota_action
+    : quota_stmt_body
+    | identifier RENAME TO idetifier_or_string
+    ;
+
+alter_settings_profile
+    : ALTER SETTINGS? PROFILE if_exists? identifier (RENAME TO identifier | (COMMA identifier)+)? cluster_clause? alter_settings_profile_actions*
+    ;
+
+alter_settings_profile_actions
+    : DROP ALL (PROFILES | SETTINGS)
+    | DROP (PROFILES | SETTINGS) identifier_list
+    | (ADD | MODIFY)? profile_setting
+    | to_user_role_clause
+    | ADD PROFILES identifier_list
+    ;
+
 select_stmt
     :
     {selectLevel++;}
@@ -282,7 +309,7 @@ create_named_collection_stmt
     ;
 
 create_user_stmt
-    : CREATE USER (if_not_exists | OR REPLACE)? name_with_cluster (COMMA name_with_cluster)*
+    : CREATE USER if_not_exists_or_replace? name_with_cluster (COMMA name_with_cluster)*
     (NOT IDENTIFIED | IDENTIFIED identification)?
     (HOST host)?
     (VALID UNTIL STRING_LITERAL)?
@@ -317,9 +344,76 @@ host_type
     ;
 
 create_role_stmt
-     : CREATE ROLE (if_not_exists | OR REPLACE)? name_with_cluster (COMMA name_with_cluster)*
+     : CREATE ROLE if_not_exists_or_replace? name_with_cluster (COMMA name_with_cluster)*
      (IN identifier)? user_settings?
      ;
+
+create_index_stmt
+    : CREATE INDEX if_not_exists? identifier ON qualified_name index_type_def
+    ;
+
+create_quota_stmt
+    : CREATE QUOTA if_not_exists_or_replace? quota_stmt_body
+    ;
+
+create_settings_profile
+    : CREATE SETTINGS? PROFILE if_not_exists_or_replace? identifier_list cluster_clause? access_stor_type?
+    profile_setting?
+    to_user_role_clause?
+    ;
+
+profile_setting
+    : SETTINGS (common_settings | profile_inherit_list) (COMMA common_settings)*
+    ;
+
+profile_inherit_list
+    : profile_inherit (COMMA profile_inherit)*
+    ;
+
+profile_inherit
+    : INHERIT idetifier_or_string (COMMA idetifier_or_string)*
+    ;
+
+quota_stmt_body
+    : name_with_cluster (COMMA name_with_cluster)*
+    access_stor_type?
+    quota_stmt_body_values*
+    to_user_role_clause?
+    ;
+
+to_user_role_clause
+    : TO identifier_list (EXCEPT identifier_list)?
+    ;
+
+quota_stmt_body_values
+    : (KEY | KEYED) BY idetifier_or_string (COMMA idetifier_or_string)*
+    | NOT KEYED
+    | quota_with_interval_param (COMMA quota_with_interval_param)*
+    ;
+
+access_stor_type
+    : IN identifier
+    ;
+
+quota_with_interval_param
+    : FOR RANDOMIZED? INTERVAL? expr interval quota_param_list
+    ;
+
+quota_param_list
+    : MAX quota_param_values EQ_SINGLE expr (COMMA MAX? quota_param_values EQ_SINGLE expr)*
+    | NO LIMITS
+    | TRACKING ONLY
+    ;
+
+quota_param_values
+    : identifier
+    | QUERY (SELECTS | INSERTS)
+    | RESULT (ROWS | BYTES)
+    | READ (ROWS | BYTES)
+    | WRITTEN BYTES
+    | EXECUTION TIME
+    | FAILED SEQUENTIAL AUTHENTICATIONS
+    ;
 
 name_with_cluster
     : identifier cluster_clause?
@@ -330,8 +424,12 @@ user_settings
     ;
 
 user_setting
-    : identifier (EQ_SINGLE signed_number_literal)? ((MIN | MAX) EQ_SINGLE? signed_number_literal)* option_type?
+    : common_settings
     | PROFILE literal
+    ;
+
+common_settings
+    : identifier (EQ_SINGLE signed_number_literal)? ((MIN | MAX) EQ_SINGLE? signed_number_literal)* option_type?
     ;
 
 option_type
@@ -363,7 +461,7 @@ alter_user_stmt
     ;
 
 create_policy_stmt
-    : CREATE ROW? POLICY (if_not_exists | OR REPLACE)? policy_name (COMMA policy_name)* policy_action*
+    : CREATE ROW? POLICY if_not_exists_or_replace? policy_name (COMMA policy_name)* policy_action*
     ;
 
 alter_policy_stmt
@@ -529,7 +627,7 @@ subquery_clause
     ;
 
 create_function_stmt
-    : CREATE FUNCTION qualified_name cluster_clause? AS lambda_expr
+    : CREATE (OR REPLACE)? FUNCTION qualified_name cluster_clause? AS lambda_expr
     ;
 
 create_table_stmt
@@ -543,6 +641,11 @@ if_exists
 
 if_not_exists
     : IF NOT EXISTS
+    ;
+
+if_not_exists_or_replace
+    : if_not_exists
+    | OR REPLACE
     ;
 
 table_body_expr
@@ -610,7 +713,12 @@ dictionary_arg_value
     ;
 
 cluster_clause
-    : ON CLUSTER (identifier | STRING_LITERAL)
+    : ON CLUSTER idetifier_or_string
+    ;
+
+idetifier_or_string
+    : identifier
+    | STRING_LITERAL
     ;
 
 table_override_clause
@@ -707,7 +815,11 @@ table_column_property_expr
     ;
 
 table_index_def
-    : identifier expr TYPE index_type (GRANULARITY gran=NUMBER?)?
+    : identifier index_type_def
+    ;
+
+index_type_def
+    : expr TYPE index_type (GRANULARITY gran=NUMBER?)?
     ;
 
 index_type
@@ -762,6 +874,10 @@ exists_stmt
     | EXISTS (DICTIONARY | TEMPORARY? TABLE | VIEW)? qualified_name
     ;
 
+exchange_stmt
+    : EXCHANGE (TABLES | DICTIONARIES) qualified_name AND qualified_name cluster_clause?
+    ;
+
 explain_stmt
     : EXPLAIN (AST | SYNTAX | QUERY TREE | PLAN | PIPELINE | ESTIMATE | TABLE OVERRIDE)? pairs? stmt
     ;
@@ -779,16 +895,21 @@ move_stmt
     ;
 
 json_pair
-    : literal COLON literal
+    : json_value COLON json_value
+    ;
+
+json_value
+    : DOUBLE_QUOTED_IDENTIFIER
+    | literal
     ;
 
 insert_stmt
-    : INSERT INTO TABLE? (qualified_name | FUNCTION table_function_expr) columns_clause? data_clause
+    : INSERT INTO TABLE? (qualified_name | FUNCTION table_function_expr) settings_clause? columns_clause? data_clause
     ;
 
 columns_clause
     : LPAREN qualified_name (COMMA qualified_name)* RPAREN
-    | LPAREN ASTERISK EXCEPT LPAREN identifier_list RPAREN RPAREN
+    | LPAREN ASTERISK (EXCEPT LPAREN identifier_list RPAREN)? RPAREN
     ;
 
 data_clause
@@ -1301,6 +1422,7 @@ tokens_nonreserved
     | AST
     | ASYNC
     | ATTACH
+    | AUTHENTICATIONS
     | AUTO_INCREMENT
     | AZURE
     | BACKUP
@@ -1390,6 +1512,7 @@ tokens_nonreserved
     | EXPRESSION
     | EXTENDED
     | EXTRACT
+    | FAILED
     | FETCH
     | FETCHES
     | FIELDS
@@ -1568,7 +1691,9 @@ tokens_nonreserved
     | SECRETS
     | SECURITY
     | SELECT
+    | SELECTS
     | SENDS
+    | SEQUENTIAL
     | SERVER
     | SET
     | SETS

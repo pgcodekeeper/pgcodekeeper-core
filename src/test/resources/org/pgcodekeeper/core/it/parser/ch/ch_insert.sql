@@ -348,3 +348,6 @@ INSERT INTO zstd_1_00 SELECT * FROM words;
 INSERT INTO {CLICKHOUSE_DATABASE:Identifier}.table_ip_trie SELECT  '255.255.255.255/' || toString(number) AS prefix,  toString(number) AS val FROM VALUES ('number UInt32', 5, 13, 24, 30);
 INSERT INTO {CLICKHOUSE_DATABASE:Identifier}.table_ip_trie VALUES ('101.79.55.22', 'JA'), ('127.0.0.1', 'RU'), ('2620:0:870::/48', 'US'), ('2a02:6b8:1::/48', 'UK'), ('2001:db8::/32', 'ZZ');
 INSERT INTO t FORMAT TabSeparated;
+INSERT INTO t VALUES (0x1.f7ced916872b0p-4);
+INSERT INTO testAggregatingMT (*) VALUES ('d1', 1, 1);
+insert into data_02572 settings materialized_views_ignore_errors=1 values (2);

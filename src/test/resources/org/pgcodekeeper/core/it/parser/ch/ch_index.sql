@@ -24,3 +24,11 @@ ALTER TABLE default.tab4 ADD INDEX idx_tab4_9 (col4, col3) TYPE minmax GRANULARI
 ALTER TABLE default.tab4 ADD INDEX IF NOT EXISTS i_a (a) TYPE minmax GRANULARITY 2;
 ALTER TABLE default.tab4 DROP INDEX i_a;
 ALTER TABLE default.tab4 DROP INDEX IF EXISTS i_a;
+
+create index i_a on t_index(a) TYPE minmax GRANULARITY 4;
+create index i_b on t_index(b) TYPE bloom_filter GRANULARITY 2;
+create index idx2 on rmt date(ts) TYPE MinMax GRANULARITY 1;
+CREATE INDEX idx_tab1_4 on tab1 (col4) TYPE MinMax;
+CREATE INDEX idx_tab2_0 ON tab2 (col0 ,col1) TYPE MinMax;
+create index if not exists i_a on t_index(a) TYPE minmax GRANULARITY 2;
+create index if not exists i_a on t_index(a) TYPE set(100) GRANULARITY 2;
