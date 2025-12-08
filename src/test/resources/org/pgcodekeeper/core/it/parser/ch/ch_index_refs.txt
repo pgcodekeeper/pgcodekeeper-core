@@ -74,3 +74,10 @@ Reference: Object = "default" (SCHEMA), action = null, offset = 2062, line numbe
 Reference: Object = "default".tab4 (TABLE), action = ALTER, offset = 2070, line number = 25, charPositionInLine = 20
 Reference: Object = "default" (SCHEMA), action = null, offset = 2103, line number = 26, charPositionInLine = 12
 Reference: Object = "default".tab4 (TABLE), action = ALTER, offset = 2111, line number = 26, charPositionInLine = 20
+Reference: action = CREATE, offset = 2143, line number = 28, charPositionInLine = 0
+Reference: action = CREATE, offset = 2201, line number = 29, charPositionInLine = 0
+Reference: action = CREATE, offset = 2265, line number = 30, charPositionInLine = 0
+Reference: action = CREATE, offset = 2326, line number = 31, charPositionInLine = 0
+Reference: action = CREATE, offset = 2378, line number = 32, charPositionInLine = 0
+Reference: action = CREATE, offset = 2436, line number = 33, charPositionInLine = 0
+Reference: action = CREATE, offset = 2508, line number = 34, charPositionInLine = 0
