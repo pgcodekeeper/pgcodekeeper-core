@@ -73,11 +73,13 @@ public final class MsStatisticsReader extends JdbcReader {
         if (SupportedMsVersion.VERSION_22.isLE(loader.getVersion())) {
             var sample = res.getInt("persisted_sample_percent");
             if (sample != 0) {
-                stat.putOption("SAMPLE", Integer.toString(sample) + " PERCENT");
+                stat.setSamplePercent(sample + " PERCENT");
             }
             if (res.getBoolean("auto_drop")) {
                 stat.putOption("AUTO_DROP", "ON");
             }
+            var rowCount = res.getLong("row_count");
+            stat.setParentHasData(rowCount != 0);
         }
 
         schema.getStatementContainer(containerName).addChild(stat);
@@ -110,6 +112,7 @@ public final class MsStatisticsReader extends JdbcReader {
             builder
                     .column("res.auto_drop")
                     .column("st_prop.persisted_sample_percent")
+                    .column("st_prop.rows AS row_count")
                     .join("CROSS APPLY sys.dm_db_stats_properties(res.object_id, res.stats_id) st_prop");
         }
     }

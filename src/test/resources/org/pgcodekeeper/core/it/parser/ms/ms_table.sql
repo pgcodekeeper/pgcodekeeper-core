@@ -559,3 +559,23 @@ CREATE TABLE [dbo].["🙈 🙉 🙊 🙈 🙉 🙊"](
 	[c2] [text] COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
+
+CREATE TABLE dbo.PartitionTable (
+    [col1] [datetime2] (0) NOT NULL,
+    [col2] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL)
+    ON myRangePS1([col1]) ;
+GO
+
+ALTER TABLE [dbo].[PartitionTable]
+	ADD CONSTRAINT [PK__Partitio__357D0D3E9BAF9BB1] PRIMARY KEY CLUSTERED ([col1], [col2]) ON [myRangePS1]([col1])
+GO
+
+CREATE TABLE dbo.PartitionTable2 (
+    [col1] [datetime2] (0) CONSTRAINT [PK__Partitio__357D0D3E42EB1890] PRIMARY KEY CLUSTERED  ([col1]) ON [myRangePS1]([col1]) NOT NULL ,
+    [col2] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL)
+    ON myRangePS1([col1]) ;
+GO
+
+CREATE CLUSTERED INDEX CIX_TransactionDate
+ON FinancialTransactions (TransactionDate)
+ON ps_TransactionsByMonth (TransactionDate);

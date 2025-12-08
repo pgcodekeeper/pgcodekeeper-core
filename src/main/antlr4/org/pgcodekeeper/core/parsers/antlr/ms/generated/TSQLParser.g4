@@ -1190,7 +1190,7 @@ alter_service
 
 // https://docs.microsoft.com/en-us/sql/t-sql/statements/create-service-transact-sql
 create_service
-    : SERVICE id (AUTHORIZATION id)? ON QUEUE qualified_name (LR_BRACKET (COMMA? id_or_default)+ RR_BRACKET)?
+    : SERVICE id (AUTHORIZATION id)? ON QUEUE qualified_name name_list_in_brackets?
     ;
 
 // https://docs.microsoft.com/en-us/sql/t-sql/statements/alter-service-master-key-transact-sql
@@ -1297,7 +1297,7 @@ alter_queue
 queue_action
     : REBUILD (WITH LR_BRACKET queue_rebuild_options RR_BRACKET)?
     | REORGANIZE (WITH LOB_COMPACTION EQUAL on_off)?
-    | MOVE TO id_or_default
+    | MOVE TO id
     ;
 
 queue_rebuild_options
@@ -1306,7 +1306,7 @@ queue_rebuild_options
 
 create_contract
     : CONTRACT expression (AUTHORIZATION id)?
-    LR_BRACKET (id_or_default? SENT BY (INITIATOR | TARGET | ANY) COMMA?)+ RR_BRACKET
+    LR_BRACKET (id? SENT BY (INITIATOR | TARGET | ANY) COMMA?)+ RR_BRACKET
     ;
 
 conversation_statement
@@ -1556,15 +1556,10 @@ string_id_local_id
     | string_or_local_id
     ;
 
-decimal_id_local_id
-    : id
-    | decimal_or_local_id
-    ;
-
 create_spatial_index
     : SPATIAL INDEX index_name LR_BRACKET id RR_BRACKET
      ((USING id)? WITH LR_BRACKET spatial_index_option (COMMA spatial_index_option)* RR_BRACKET)?
-     (ON id)?
+     dataspace?
     ;
 
 spatial_index_option
@@ -1592,7 +1587,7 @@ xml_index_using
 // https://msdn.microsoft.com/en-us/library/ms188783.aspx
 create_index
     : UNIQUE? clustered? INDEX index_name index_rest
-    | clustered? COLUMNSTORE INDEX index_name name_list_in_brackets? (ORDER order_cols=index_sort)? index_where? index_options? (ON id)?
+    | clustered? COLUMNSTORE INDEX index_name name_list_in_brackets? (ORDER order_cols=index_sort)? index_where? index_options? dataspace?
     ;
 
 index_name
@@ -1600,7 +1595,7 @@ index_name
     ;
 
 index_rest
-    : index_sort index_include? index_where? index_options? (ON id)?
+    : index_sort index_include? index_where? index_options? dataspace?
     ;
 
 index_sort
@@ -1745,15 +1740,10 @@ update_statistics_with_option
 // https://msdn.microsoft.com/en-us/library/ms174979.aspx
 create_table
     : TABLE qualified_name LR_BRACKET table_elements_extended COMMA? RR_BRACKET
-    (ON tablespace=id_or_default (LR_BRACKET partition_col_name=id RR_BRACKET)?)?
-    (TEXTIMAGE_ON textimage=id_or_default)?
-    (FILESTREAM_ON filestream=id_or_default)?
+    dataspace?
+    (TEXTIMAGE_ON textimage=id)?
+    (FILESTREAM_ON filestream=id)?
     table_options*
-    ;
-
-id_or_default
-    : id
-    | DEFAULT
     ;
 
 table_options
@@ -1790,7 +1780,7 @@ alter_table_action
 
 alter_table_set_action
     : LOCK_ESCALATION EQUAL (AUTO | TABLE | DISABLE)
-    | (FILESTREAM_ON filestream=id_or_default)?
+    | (FILESTREAM_ON filestream=id)?
     | index_option
     ;
 
@@ -2557,7 +2547,7 @@ column_set_def
     ;
 
 table_index
-    : INDEX ind_name=id  (UNIQUE? clustered? HASH? index_rest | columnstore_index index_where? index_options? (ON id)?)
+    : INDEX ind_name=id  (UNIQUE? clustered? HASH? index_rest | columnstore_index index_where? index_options? dataspace?)
     ;
 
 columnstore_index
@@ -2603,7 +2593,7 @@ identity_value
     ;
 
 column_constraint_body
-    : (PRIMARY KEY | UNIQUE) clustered? HASH? (LR_BRACKET column_name_list_with_order RR_BRACKET)? index_options? (ON id)?
+    : (PRIMARY KEY | UNIQUE) clustered? HASH? (LR_BRACKET column_name_list_with_order RR_BRACKET)? index_options? dataspace?
     | CHECK not_for_replication? LR_BRACKET search_condition RR_BRACKET
     | (FOREIGN KEY)? REFERENCES qualified_name (LR_BRACKET id RR_BRACKET)? on_delete? on_update? not_for_replication?
     | DEFAULT expression (WITH VALUES)?
@@ -2615,10 +2605,14 @@ table_constraint
     ;
 
 table_constraint_body
-    : (PRIMARY KEY | UNIQUE) clustered? HASH? LR_BRACKET column_name_list_with_order RR_BRACKET index_options? (ON id)?
+    : (PRIMARY KEY | UNIQUE) clustered? HASH? LR_BRACKET column_name_list_with_order RR_BRACKET index_options? dataspace?
     | CHECK not_for_replication? LR_BRACKET search_condition RR_BRACKET
     | DEFAULT expression FOR id
     | FOREIGN KEY fk=name_list_in_brackets REFERENCES qualified_name pk=name_list_in_brackets? on_delete? on_update? not_for_replication?
+    ;
+
+dataspace
+    : ON (filegroup=id | partition_table=id (LR_BRACKET partition_col=id RR_BRACKET))
     ;
 
 on_delete

@@ -123,7 +123,7 @@ public final class MsConstraintPk extends MsConstraint
             StatementUtils.appendOptionsWithParen(sbSQL, options, getDbType());
         }
         if (dataSpace != null) {
-            sbSQL.append(" ON ").append(MsDiffUtils.quoteName(dataSpace));
+            sbSQL.append(" ON ").append(dataSpace);
         }
         return sbSQL.toString();
     }

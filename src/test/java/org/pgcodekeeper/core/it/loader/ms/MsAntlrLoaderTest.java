@@ -49,7 +49,7 @@ class MsAntlrLoaderTest {
     private static final String TEXT = "[text]";
     private static final String INT = "[int]";
     private static final String MS_USER = "ms_user";
-    private static final String PRIMARY = "PRIMARY";
+    private static final String PRIMARY = "[PRIMARY]";
     private static final String ENCODING = Consts.UTF_8;
 
     void testDatabase(String fileName, AbstractDatabase d) throws IOException, InterruptedException {

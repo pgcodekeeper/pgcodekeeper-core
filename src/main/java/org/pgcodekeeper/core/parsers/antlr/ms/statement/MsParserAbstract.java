@@ -49,9 +49,9 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
         var constrPk = new MsConstraintPk(conName, body.PRIMARY() != null);
         var clusteredCtx = body.clustered();
         constrPk.setClustered(clusteredCtx != null && clusteredCtx.CLUSTERED() != null);
-        var dataSpaceCtx = body.id();
-        if (dataSpaceCtx != null) {
-            constrPk.setDataSpace(dataSpaceCtx.getText());
+        var dataspaceCtx = body.dataspace();
+        if (dataspaceCtx != null) {
+            constrPk.setDataSpace(buildDataSpace(dataspaceCtx));
         }
 
         fillColumns(constrPk, body.column_name_list_with_order().column_with_order(), schema, table);
@@ -74,19 +74,19 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
                 index.addDep(new GenericColumn(schema, table, col.getText(), DbObjType.COLUMN));
             }
         }
-        parseIndexOptions(index, rest.index_where(), rest.index_options(), rest.id());
+        parseIndexOptions(index, rest.index_where(), rest.index_options(), rest.dataspace());
     }
 
     protected void parseIndexOptions(AbstractIndex index, Index_whereContext wherePart,
-                                     Index_optionsContext options, IdContext tablespace) {
+                                     Index_optionsContext options, DataspaceContext space) {
         if (wherePart != null) {
             index.setWhere(getFullCtxText(wherePart.where));
         }
         if (options != null) {
             fillOptions(index, options.index_option());
         }
-        if (tablespace != null) {
-            index.setTablespace(MsDiffUtils.quoteName(tablespace.getText()));
+        if (space != null) {
+            index.setTablespace(buildDataSpace(space));
         }
     }
 
@@ -140,9 +140,9 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
             var constrPk = new MsConstraintPk(constraintName, constraintCtx.PRIMARY() != null);
             var clusteredCtx = constraintCtx.clustered();
             constrPk.setClustered(clusteredCtx != null && clusteredCtx.CLUSTERED() != null);
-            var dataSpaceCtx = constraintCtx.id();
-            if (dataSpaceCtx != null) {
-                constrPk.setDataSpace(dataSpaceCtx.getText());
+            var dataspaceCtx = constraintCtx.dataspace();
+            if (dataspaceCtx != null) {
+                constrPk.setDataSpace(buildDataSpace(dataspaceCtx));
             }
             var optionsCtx = constraintCtx.index_options();
             if (optionsCtx != null) {
@@ -338,6 +338,15 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
         }
 
         return type;
+    }
+
+    protected String buildDataSpace(DataspaceContext dataspaceCtx) {
+        if (dataspaceCtx.filegroup != null) {
+            return MsDiffUtils.quoteName(dataspaceCtx.filegroup.getText());
+        }
+
+        return MsDiffUtils.quoteName(dataspaceCtx.partition_table.getText())
+                + "(" + MsDiffUtils.quoteName(dataspaceCtx.partition_col.getText()) + ")";
     }
 
     @Override

@@ -1,0 +1,2 @@
+UPDATE STATISTICS [dbo].[t6] (stat3)
+GO

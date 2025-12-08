@@ -112,3 +112,12 @@ Reference: Object = dbo (SCHEMA), action = null, offset = 14899, line number = 5
 Reference: Object = dbo."""😎 🤙 😎 🤙!!""" (TABLE), action = CREATE, offset = 14905, line number = 551, charPositionInLine = 19
 Reference: Object = dbo (SCHEMA), action = null, offset = 15052, line number = 557, charPositionInLine = 13
 Reference: Object = dbo."""🙈 🙉 🙊 🙈 🙉 🙊""" (TABLE), action = CREATE, offset = 15058, line number = 557, charPositionInLine = 19
+Reference: Object = dbo (SCHEMA), action = null, offset = 15209, line number = 563, charPositionInLine = 13
+Reference: Object = dbo."PartitionTable" (TABLE), action = CREATE, offset = 15213, line number = 563, charPositionInLine = 17
+Reference: Object = dbo (SCHEMA), action = null, offset = 15381, line number = 569, charPositionInLine = 12
+Reference: Object = dbo."PartitionTable" (TABLE), action = ALTER, offset = 15387, line number = 569, charPositionInLine = 18
+Reference: Object = dbo."PartitionTable"."PK__Partitio__357D0D3E9BAF9BB1" (CONSTRAINT), action = CREATE, offset = 15420, line number = 570, charPositionInLine = 16
+Reference: Object = dbo (SCHEMA), action = null, offset = 15533, line number = 573, charPositionInLine = 13
+Reference: Object = dbo."PartitionTable2" (TABLE), action = CREATE, offset = 15537, line number = 573, charPositionInLine = 17
+Reference: Object = "CIX_TransactionDate" (INDEX), action = CREATE, offset = 15818, line number = 579, charPositionInLine = 23
+Reference: Object = "FinancialTransactions" (TABLE), action = null, offset = 15841, line number = 580, charPositionInLine = 3
