@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Fixed default name generation for CONSTRAINT and SEQUENCE objects in PostgreSQL.
 - Fixed logic for normalizing views for ClickHouse.
+- Fixed parser errors for partitioned tables in MS SQL.
+- Fixed a false difference for the STATISTICS object in MS SQL.
+- Fixed reading of column length and precision for binary, datetime2, datetimeoffset, and time types in MS SQL database.
 
 ### Removed
 

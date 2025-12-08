@@ -69,12 +69,9 @@ public final class CreateMsTable extends MsTableAbstract {
 
         table.setAnsiNulls(ansiNulls);
 
-        if (ctx.tablespace != null) {
-            String tableSpace = MsDiffUtils.quoteName(ctx.tablespace.getText());
-            if (ctx.partition_col_name != null) {
-                tableSpace = tableSpace + '(' + MsDiffUtils.quoteName(ctx.partition_col_name.getText()) + ')';
-            }
-            table.setTablespace(tableSpace);
+        var dataSpaceCtx = ctx.dataspace();
+        if (dataSpaceCtx != null) {
+            table.setTablespace(buildDataSpace(dataSpaceCtx));
         }
 
         if (ctx.textimage != null) {
@@ -136,7 +133,7 @@ public final class CreateMsTable extends MsTableAbstract {
             index.setColumnstore(true);
             index.setClustered(columnstoreIndCtx.CLUSTERED() != null);
             parseColumnstoreIndex(indCtx.columnstore_index(), index, schemaName, tableName);
-            parseIndexOptions(index, indCtx.index_where(), indCtx.index_options(), ctx.id());
+            parseIndexOptions(index, indCtx.index_where(), indCtx.index_options(), ctx.dataspace());
             // if user didn't set it, database will be set it by default
             if (null == index.getOptions().get("DATA_COMPRESSION")) {
                 index.addOption("DATA_COMPRESSION", "COLUMNSTORE");

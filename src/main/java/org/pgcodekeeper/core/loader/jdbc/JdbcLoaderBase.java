@@ -478,12 +478,15 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
         sb.append(quoteName ? MsDiffUtils.quoteName(dataType) : dataType);
 
         switch (dataType) {
-            case "varbinary", "nvarchar", "varchar", "nchar", "char":
+            case "varbinary", "nvarchar", "varchar", "nchar", "char", "binary":
                 if (size == -1) {
                     sb.append(" (max)");
                 } else {
                     sb.append(" (").append(size).append(')');
                 }
+                break;
+            case "datetime2", "datetimeoffset", "time":
+                sb.append(" (").append(scale).append(')');
                 break;
             case "decimal", "numeric":
                 sb.append(" (").append(precision).append(", ").append(scale).append(')');

@@ -29,9 +29,12 @@ import java.util.*;
  */
 public final class MsStatistics extends AbstractStatistics {
 
+    public static final String SAMPLE = "SAMPLE";
     private String filter;
+    private String samplePercent;
     private final List<String> cols = new ArrayList<>();
     private final Map<String, String> options = new HashMap<>();
+    private boolean isParentHasData;
 
     /**
      * Creates a new Microsoft SQL statistics object.
@@ -53,18 +56,17 @@ public final class MsStatistics extends AbstractStatistics {
         if (filter != null) {
             sb.append("\nWHERE ").append(filter);
         }
-        appendOptions(sb, options);
+        appendOptions(sb);
         script.addStatement(sb);
     }
 
-    private void appendOptions(StringBuilder sb, Map<String, String> options) {
-        if (options.isEmpty()) {
+    private void appendOptions(StringBuilder sb) {
+        if (options.isEmpty() && samplePercent == null) {
             return;
         }
         sb.append("\nWITH");
-        var sapmlePercent = options.get("SAMPLE");
-        if (sapmlePercent != null) {
-            sb.append(" SAMPLE ").append(sapmlePercent).append(", PERSIST_SAMPLE_PERCENT = ON,");
+        if (samplePercent != null) {
+            sb.append(" SAMPLE ").append(samplePercent).append(", PERSIST_SAMPLE_PERCENT = ON,");
         }
         appendOption(sb, "NORECOMPUTE", " NORECOMPUTE,");
         appendOption(sb, "AUTO_DROP", " AUTO_DROP = ON,");
@@ -86,11 +88,11 @@ public final class MsStatistics extends AbstractStatistics {
         if (!compareUnalterable(newStat)) {
             return ObjectState.RECREATE;
         }
-        if (!Objects.equals(newStat.options, options)) {
+        if (!Objects.equals(options, newStat.options) || !compareSample(newStat)) {
             StringBuilder sql = new StringBuilder();
             sql.append("UPDATE STATISTICS ")
                     .append(parent.getQualifiedName()).append(" (").append(name).append(")");
-            appendOptions(sql, newStat.options);
+            newStat.appendOptions(sql);
             script.addStatement(sql);
         }
 
@@ -110,12 +112,20 @@ public final class MsStatistics extends AbstractStatistics {
             return true;
         }
 
-        if (obj instanceof MsStatistics stat) {
-            return super.compare(stat)
-                    && compareUnalterable(stat)
-                    && Objects.equals(options, stat.options);
+        return obj instanceof MsStatistics stat
+                && super.compare(stat)
+                && compareUnalterable(stat)
+                && compareSample(stat)
+                && Objects.equals(options, stat.options);
+    }
+
+    private boolean compareSample(MsStatistics stat) {
+        if (!isParentHasData || !stat.isParentHasData) {
+            // MS SQL doesn't persist samplePercent for empty tables - compare only when both have data
+            return true;
         }
-        return false;
+
+        return Objects.equals(samplePercent, stat.samplePercent);
     }
 
     private boolean compareUnalterable(MsStatistics stat) {
@@ -127,8 +137,10 @@ public final class MsStatistics extends AbstractStatistics {
     protected AbstractStatistics getStatisticsCopy() {
         var stat = new MsStatistics(name);
         stat.setFilter(filter);
+        stat.setSamplePercent(samplePercent);
         stat.cols.addAll(cols);
         stat.options.putAll(options);
+        stat.setParentHasData(isParentHasData);
         return stat;
     }
 
@@ -149,6 +161,16 @@ public final class MsStatistics extends AbstractStatistics {
 
     public void setFilter(String filter) {
         this.filter = filter;
+        resetHash();
+    }
+
+    public void setSamplePercent(String samplePercent) {
+        this.samplePercent = samplePercent;
+        resetHash();
+    }
+
+    public void setParentHasData(boolean parentHasData) {
+        this.isParentHasData = parentHasData;
         resetHash();
     }
 

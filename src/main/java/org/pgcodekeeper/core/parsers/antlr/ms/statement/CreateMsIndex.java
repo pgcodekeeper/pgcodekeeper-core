@@ -88,7 +88,7 @@ public final class CreateMsIndex extends MsParserAbstract {
         if (orderCols != null) {
             fillOrderCols((MsIndex) index, orderCols.column_name_list_with_order().column_with_order(), schema, table);
         }
-        parseIndexOptions(index, ctx.index_where(), ctx.index_options(), ctx.id());
+        parseIndexOptions(index, ctx.index_where(), ctx.index_options(), ctx.dataspace());
     }
 
     @Override

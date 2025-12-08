@@ -61,6 +61,8 @@ public final class CreateMsStatistics extends MsParserAbstract {
         addObjReference(Arrays.asList(schemaCtx, parentCtx), DbObjType.TABLE, null);
 
         var stat = new MsStatistics(nameCtx.getText());
+        // Assume table is not empty
+        stat.setParentHasData(true);
         var whereCtx = ctx.index_where();
         if (whereCtx != null) {
             stat.setFilter(getFullCtxText(whereCtx.where));
@@ -91,7 +93,7 @@ public final class CreateMsStatistics extends MsParserAbstract {
             } else {
                 sb.append("100 PERCENT");
             }
-            stat.putOption("SAMPLE", sb.toString());
+            stat.setSamplePercent(sb.toString());
         } else if (option.NORECOMPUTE() != null) {
             stat.putOption("NORECOMPUTE", "NORECOMPUTE");
         } else if (option.AUTO_DROP() != null && option.on_off().ON() != null) {

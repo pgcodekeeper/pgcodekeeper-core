@@ -61,8 +61,13 @@ public class MsIndicesAndPKReader extends JdbcReader {
 
         Map<String, String> options = readOption(res);
 
-        String dataSpace = res.getString("data_space");
+        String dataSpace = MsDiffUtils.quoteName(res.getString("data_space"));
+        String partitionColumn = res.getString("partition_column");
         String filter = res.getString("filter_definition");
+
+        if (partitionColumn != null) {
+            dataSpace += "(" + MsDiffUtils.quoteName(partitionColumn) + ")";
+        }
 
         String parent = res.getString("table_name");
         var cont = schema.getStatementContainer(parent);
@@ -91,7 +96,7 @@ public class MsIndicesAndPKReader extends JdbcReader {
             index.setClustered(isClustered);
             index.setUnique(res.getBoolean("is_unique"));
             index.setWhere(filter);
-            index.setTablespace(MsDiffUtils.quoteName(dataSpace));
+            index.setTablespace(dataSpace);
             options.forEach(index::addOption);
             cont.addChild(index);
         }
@@ -193,6 +198,7 @@ public class MsIndicesAndPKReader extends JdbcReader {
                 .column("st.no_recompute")
                 .column("st.is_incremental")
                 .column("t.is_memory_optimized")
+                .column("c_part.name AS partition_column")
                 .from("sys.indexes res WITH (NOLOCK)")
                 .join("LEFT JOIN sys.filegroups f WITH (NOLOCK) ON res.data_space_id = f.data_space_id")
                 .join("LEFT JOIN sys.data_spaces d WITH (NOLOCK) ON res.data_space_id = d.data_space_id")
@@ -200,6 +206,8 @@ public class MsIndicesAndPKReader extends JdbcReader {
                 .join("JOIN sys.objects o WITH (NOLOCK) ON res.object_id = o.object_id")
                 .join("JOIN sys.partitions sp WITH (NOLOCK) ON sp.object_id = res.object_id AND sp.index_id = res.index_id AND sp.partition_number = 1")
                 .join("LEFT JOIN sys.tables t WITH (NOLOCK) ON o.object_id = t.object_id")
+                .join("LEFT JOIN sys.index_columns ic_part WITH (NOLOCK) ON ic_part.object_id = res.object_id AND ic_part.index_id = res.index_id AND ic_part.partition_ordinal > 0")
+                .join("LEFT JOIN sys.columns c_part WITH (NOLOCK) ON ic_part.object_id = c_part.object_id AND ic_part.column_id = c_part.column_id")
                 .where("o.type IN ('U', 'V')")
                 .where("res.type IN (1, 2, 5, 6)");
 

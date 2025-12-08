@@ -9,3 +9,6 @@ CREATE STATISTICS stat1 ON [dbo].[t6] (col1, col2);
 
 CREATE STATISTICS stat2 ON [dbo].[t6] (col1, col2, col3)
 WITH FULLSCAN;
+
+CREATE STATISTICS stat3 ON [dbo].[t6] (col1, col2, col3)
+WITH FULLSCAN;
