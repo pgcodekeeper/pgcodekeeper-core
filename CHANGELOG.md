@@ -24,7 +24,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Removed
 
-- Removed code style verification logic.
+- Removed code style checking logic.
+- Removed logic for gathering data from the database, taking into account foreign key (FK) constraints.
 
 ## [13.1.0] - 2025-11-18
 
