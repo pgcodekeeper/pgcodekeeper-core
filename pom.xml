@@ -79,14 +79,8 @@
         </dependency>
         <dependency>
             <groupId>com.clickhouse</groupId>
-            <artifactId>clickhouse-jdbc</artifactId>
+            <artifactId>jdbc-v2</artifactId>
             <version>0.9.4</version>
-        </dependency>
-        <!--lz4-java required for clickhouse-jdbc-->
-        <dependency>
-            <groupId>org.lz4</groupId>
-            <artifactId>lz4-java</artifactId>
-            <version>1.8.0</version>
         </dependency>
 
         <!--test dependencies-->
@@ -195,12 +189,10 @@
                         org.slf4j.*;resolution:=optional,
                     </Import-Package>
                     <Require-Bundle>
-                        wrapped.com.github.technology16.pgpass;bundle-version="[2.0.1,3.0.0)",
                         org.postgresql.jdbc;bundle-version="[42.7.3,43.0.0)",
                         com.microsoft.sqlserver.mssql-jdbc;bundle-version="[13.2.0,14.0.0)",
                         org.antlr.antlr4-runtime;bundle-version="[4.13.1,5.0.0)",
-                        org.jgrapht.core;bundle-version="[1.5.1,2.0.0)",
-                        lz4-java;bundle-version="[1.8.0,2.0.0)"
+                        org.jgrapht.core;bundle-version="[1.5.1,2.0.0)"
                     </Require-Bundle>
                     </instructions>
                 </configuration>
