@@ -11,16 +11,17 @@ import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitLexer;
 
 // NOTE: don't forget to add new keywords to the parser rule "keyword"!
 
-
-// case sensitive data types
+// case sensitive privigies
 ADDRESS_TO_LINE      options { caseInsensitive = false; } : 'addressToLine';
 ADDRESS_TO_LINE_WITH_IN_LINES options { caseInsensitive = false; } : 'addressToLineWithInlines';
 ADDRESS_TO_SYMBOL  options { caseInsensitive = false; } : 'addressToSymbol';
-AGGREGATE_FUNCTION options { caseInsensitive = false; } : 'Simple'? 'AggregateFunction';
-// ARRAY_TYPE: 'Array';
 DEMANGLE           options { caseInsensitive = false; } : 'demangle';
 DICTGET            options { caseInsensitive = false; } : 'dictGet';
 DISPLAY_SECRETS_IN_SHOW_AND_SELECT options { caseInsensitive = false; } : 'displaySecretsInShowAndSelect';
+
+// case sensitive data types
+AGGREGATE_FUNCTION options { caseInsensitive = false; } : 'Simple'? 'AggregateFunction';
+// ARRAY_TYPE: 'Array';
 ENUM               options { caseInsensitive = false; } : 'Enum' ('8'|'16') | [eE] [nN] [uU] [mM];
 FIXED_STRING       options { caseInsensitive = false; } : 'FixedString';
 FLOAT              options { caseInsensitive = false; } : 'Float' ('32' | '64') | [fF] [lL] [oO] [aA] [tT];
