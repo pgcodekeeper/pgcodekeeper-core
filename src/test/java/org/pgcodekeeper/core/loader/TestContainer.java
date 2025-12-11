@@ -15,9 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
+import java.time.Duration;
 import org.testcontainers.clickhouse.ClickHouseContainer;
 import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.startupcheck.MinimumDurationRunningStartupCheckStrategy;
 
 public final class TestContainer {
 
@@ -44,7 +46,10 @@ public final class TestContainer {
 
     static {
         PG_DB.withUsername(TEST_USER).withPassword(TEST_PASSWORD);
-        MS_DB.withEnv("ACCEPT_EULA", "Y").withInitScript(getInitScriptPath("init_ms_db.sql"));
+        MS_DB.withEnv("ACCEPT_EULA", "Y")
+        .withInitScript(getInitScriptPath("init_ms_db.sql"))
+        .withStartupCheckStrategy(
+                new MinimumDurationRunningStartupCheckStrategy(Duration.ofSeconds(10)));
         CH_DB.withUsername(TEST_USER).withPassword(TEST_PASSWORD);
 
         PG_DB.start();
