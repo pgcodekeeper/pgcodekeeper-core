@@ -47,7 +47,7 @@
         <sonar.exclusions>**/*.sql, **/*.xml, **/generated/**, **/Messages.java</sonar.exclusions>
 
         <antlr.version>4.13.2</antlr.version>
-        <testcontainers.version>1.21.3</testcontainers.version>
+        <testcontainers.version>2.0.2</testcontainers.version>
     </properties>
 
     <dependencies>
@@ -98,19 +98,19 @@
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
+            <artifactId>testcontainers-postgresql</artifactId>
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>mssqlserver</artifactId>
+            <artifactId>testcontainers-mssqlserver</artifactId>
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>clickhouse</artifactId>
+            <artifactId>testcontainers-clickhouse</artifactId>
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
