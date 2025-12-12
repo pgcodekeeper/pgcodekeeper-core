@@ -19,16 +19,15 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.Vex;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.PgParserAbstract;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 import org.pgcodekeeper.core.utils.Pair;
 
@@ -52,7 +51,7 @@ public final class ValueExpr extends PgAbstractExpr {
         super(parent);
     }
 
-    ValueExpr(PgAbstractExpr parent, Set<PgObjLocation> depcies) {
+    ValueExpr(PgAbstractExpr parent, Set<ObjectLocation> depcies) {
         super(parent, depcies);
     }
 
@@ -194,13 +193,12 @@ public final class ValueExpr extends PgAbstractExpr {
             IdentifierContext opSchemaCtx = op.identifier();
             if (opSchemaCtx == null) {
                 ctx = op.op_chars();
-                operator = ctx.getText();
             } else {
                 schema = opSchemaCtx.getText();
                 addDependency(new GenericColumn(schema, DbObjType.SCHEMA), opSchemaCtx);
                 ctx = op.all_simple_op();
-                operator = ctx.getText();
             }
+            operator = ctx.getText();
         }
 
         String larg = null;
@@ -772,7 +770,7 @@ public final class ValueExpr extends PgAbstractExpr {
             int namedArgN = 0;
             int exactMatches = 0;
             boolean signatureApplicable = true;
-            for (Argument arg : f.getArguments()) {
+            for (IArgument arg : f.getArguments()) {
                 if (!arg.getMode().isIn()) {
                     continue;
                 }

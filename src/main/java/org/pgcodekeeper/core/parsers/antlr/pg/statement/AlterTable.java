@@ -18,15 +18,17 @@ package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
+import org.pgcodekeeper.core.database.api.schema.IRelation;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.pg.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.ArrayList;
@@ -68,9 +70,9 @@ public final class AlterTable extends TableAbstract {
         List<ParserRuleContext> ids = getIdentifiers(ctx.name);
         AbstractSchema schema = getSchemaSafe(ids);
         ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
-        AbstractPgTable tabl;
+        PgAbstractTable tabl;
 
-        PgObjLocation loc = addObjReference(ids, DbObjType.TABLE, ACTION_ALTER);
+        ObjectLocation loc = addObjReference(ids, DbObjType.TABLE, ACTION_ALTER);
 
         for (Table_actionContext tablAction : ctx.table_action()) {
             IdentifierContext column = tablAction.column;
@@ -88,7 +90,7 @@ public final class AlterTable extends TableAbstract {
             }
 
             // everything else requires a real table, so fail immediately
-            tabl = (AbstractPgTable) getSafe(AbstractSchema::getTable, schema, nameCtx);
+            tabl = (PgAbstractTable) getSafe(AbstractSchema::getTable, schema, nameCtx);
 
             if (tablAction.tabl_constraint != null) {
                 var tableConstraint = tablAction.tabl_constraint;
@@ -105,7 +107,7 @@ public final class AlterTable extends TableAbstract {
                     addSafe(tabl, constr, Arrays.asList(
                             QNameParser.getSchemaNameCtx(ids), nameCtx, conNameCtx));
                 } else {
-                    doSafe(AbstractPgTable::addConstraint, tabl, constr);
+                    doSafe(PgAbstractTable::addConstraint, tabl, constr);
                 }
             }
 
@@ -156,7 +158,7 @@ public final class AlterTable extends TableAbstract {
                 createRule(tabl, tablAction);
             }
 
-            if (tablAction.SECURITY() != null && tabl instanceof AbstractRegularTable regTable) {
+            if (tablAction.SECURITY() != null && tabl instanceof PgAbstractRegularTable regTable) {
                 // since 9.5 PostgreSQL
                 if (tablAction.FORCE() != null) {
                     regTable.setForceSecurity(tablAction.NO() == null);
@@ -167,21 +169,21 @@ public final class AlterTable extends TableAbstract {
         }
         var alterPartition = ctx.alter_partition_gp();
         if (alterPartition != null && !isRefMode()) {
-            tabl = (PartitionGpTable) getSafe(AbstractSchema::getTable, schema, nameCtx);
-            parseGpPartitionTemplate((PartitionGpTable) tabl, alterPartition, stream);
+            tabl = (GpPartitionTable) getSafe(AbstractSchema::getTable, schema, nameCtx);
+            parseGpPartitionTemplate((GpPartitionTable) tabl, alterPartition, stream);
         }
     }
 
     private void fillRelationAction(AbstractSchema schema, ParserRuleContext nameCtx, Table_actionContext tablAction) {
         IRelation r = getSafe(AbstractSchema::getRelation, schema, nameCtx);
         if (tablAction.owner_to() != null) {
-            if (r instanceof PgStatement st) {
+            if (r instanceof AbstractStatement st) {
                 fillOwnerTo(tablAction.owner_to().user_name().identifier(), st);
             }
             return;
         }
 
-        if (r instanceof PgStatementContainer cont) {
+        if (r instanceof AbstractStatementContainer cont) {
             var indexNameCtx = tablAction.index_name;
             ParserRuleContext indexName = QNameParser.getFirstNameCtx(getIdentifiers(indexNameCtx));
             AbstractConstraint constr = cont.getConstraint(indexName.getText());
@@ -192,7 +194,7 @@ public final class AlterTable extends TableAbstract {
                     throw new IllegalArgumentException(Messages.Constraint_WarningMismatchedConstraintTypeForClusterOn);
                 }
             } else {
-                AbstractIndex index = getSafe(PgStatementContainer::getIndex, cont, indexName);
+                AbstractIndex index = getSafe(AbstractStatementContainer::getIndex, cont, indexName);
                 doSafe(AbstractIndex::setClustered, index, true);
             }
         }
@@ -206,7 +208,7 @@ public final class AlterTable extends TableAbstract {
      * @param alterPartition the ALTER PARTITION context
      * @param stream         the token stream for parsing
      */
-    public static void parseGpPartitionTemplate(PartitionGpTable tabl, Alter_partition_gpContext alterPartition,
+    public static void parseGpPartitionTemplate(GpPartitionTable tabl, Alter_partition_gpContext alterPartition,
                                                 CommonTokenStream stream) {
         // ALTER PARTITION partition_name clause
         String partitionName = null;
@@ -214,7 +216,7 @@ public final class AlterTable extends TableAbstract {
         if (!alterPartitionClause.isEmpty() && alterPartitionClause.get(0).identifier() != null) {
             partitionName = alterPartitionClause.get(0).identifier().getText();
         }
-        PartitionTemplateContainer template = new PartitionTemplateContainer(partitionName);
+        GpPartitionTemplateContainer template = new GpPartitionTemplateContainer(partitionName);
 
         // SET SUBPARTITION TEMPLATE clause
         var partitionAction = alterPartition.partition_gp_action();
@@ -289,7 +291,7 @@ public final class AlterTable extends TableAbstract {
             CreateSequence.fillSequence(sequence, identity.sequence_body());
 
             var table = col.getParent();
-            if (table instanceof AbstractRegularTable regTable) {
+            if (table instanceof PgAbstractRegularTable regTable) {
                 sequence.setLogged(regTable.isLogged());
             }
 
@@ -299,22 +301,22 @@ public final class AlterTable extends TableAbstract {
         }
     }
 
-    private void createTrigger(AbstractPgTable tabl, Table_actionContext tablAction, List<ParserRuleContext> ids) {
+    private void createTrigger(PgAbstractTable tabl, Table_actionContext tablAction, List<ParserRuleContext> ids) {
         var triggerNameCtx = tablAction.trigger_name;
         if (triggerNameCtx == null) {
             return;
         }
 
-        TriggerState triggerState = null;
+        PgTriggerState triggerState = null;
         if (tablAction.DISABLE() != null) {
-            triggerState = TriggerState.DISABLE;
+            triggerState = PgTriggerState.DISABLE;
         } else if (tablAction.ENABLE() != null) {
             if (tablAction.REPLICA() != null) {
-                triggerState = TriggerState.ENABLE_REPLICA;
+                triggerState = PgTriggerState.ENABLE_REPLICA;
             } else if (tablAction.ALWAYS() != null) {
-                triggerState = TriggerState.ENABLE_ALWAYS;
+                triggerState = PgTriggerState.ENABLE_ALWAYS;
             } else {
-                triggerState = TriggerState.ENABLE;
+                triggerState = PgTriggerState.ENABLE;
             }
         }
 
@@ -325,7 +327,7 @@ public final class AlterTable extends TableAbstract {
             }
             tabl.putTriggerState(triggerName, triggerState);
         } else {
-            PgTrigger trigger = (PgTrigger) getSafe(PgStatementContainer::getTrigger, tabl,
+            PgTrigger trigger = (PgTrigger) getSafe(AbstractStatementContainer::getTrigger, tabl,
                     triggerNameCtx);
             trigger.setTriggerState(triggerState);
         }
@@ -334,8 +336,8 @@ public final class AlterTable extends TableAbstract {
         addObjReference(idsCopy, DbObjType.TRIGGER, null);
     }
 
-    private void createRule(AbstractPgTable tabl, Table_actionContext tablAction) {
-        PgRule rule = getSafe(AbstractTable::getRule, tabl, getIdentifiers(tablAction.rewrite_rule_name).get(0));
+    private void createRule(PgAbstractTable tabl, Table_actionContext tablAction) {
+        PgRule rule = (PgRule) getSafe(AbstractTable::getRule, tabl, getIdentifiers(tablAction.rewrite_rule_name).get(0));
         if (rule != null) {
             if (tablAction.DISABLE() != null) {
                 rule.setEnabledState("DISABLE");
@@ -357,8 +359,8 @@ public final class AlterTable extends TableAbstract {
     }
 
     @Override
-    protected PgObjLocation fillQueryLocation(ParserRuleContext ctx) {
-        PgObjLocation loc = super.fillQueryLocation(ctx);
+    protected ObjectLocation fillQueryLocation(ParserRuleContext ctx) {
+        ObjectLocation loc = super.fillQueryLocation(ctx);
         for (Table_actionContext tablAction : ((Schema_alterContext) ctx)
                 .alter_table_statement().table_action()) {
             IdentifierContext column = tablAction.column;

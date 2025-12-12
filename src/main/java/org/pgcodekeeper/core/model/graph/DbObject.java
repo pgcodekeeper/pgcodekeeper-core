@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 
 /**
  * Record representing a database object pair for comparison operations.
@@ -24,5 +24,5 @@ import org.pgcodekeeper.core.schema.PgStatement;
  * @param oldStatement the statement from the old database schema
  * @param newStatement the statement from the new database schema
  */
-public record DbObject(PgStatement oldStatement, PgStatement newStatement) {
+public record DbObject(IStatement oldStatement, IStatement newStatement) {
 }

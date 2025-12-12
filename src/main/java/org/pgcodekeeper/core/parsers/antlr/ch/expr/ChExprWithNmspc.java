@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.parsers.antlr.ch.expr;
 
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.ExprContext;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 
 import java.util.Collections;
 import java.util.List;

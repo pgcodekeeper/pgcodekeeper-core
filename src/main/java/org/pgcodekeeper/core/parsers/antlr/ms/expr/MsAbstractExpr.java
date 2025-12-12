@@ -18,21 +18,15 @@ package org.pgcodekeeper.core.parsers.antlr.ms.expr;
 import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.database.base.parser.antlr.AbstractExpr;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Data_typeContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Full_column_nameContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.IdContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Qualified_nameContext;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.IRelation;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.IRelation;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.Pair;
-
-import java.util.LinkedHashSet;
-import java.util.Locale;
-import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * Abstract base class for Microsoft SQL expression analysis.

@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.parsers.antlr.ms.expr;
 
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.ExpressionContext;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 
 import java.util.Collections;
 import java.util.List;

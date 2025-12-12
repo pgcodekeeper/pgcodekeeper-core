@@ -16,17 +16,16 @@
 package org.pgcodekeeper.core.parsers.antlr.ms.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.MsDiffUtils;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.launcher.MsExpressionAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.*;
-import org.pgcodekeeper.core.schema.AbstractIndex;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.ms.MsColumn;
-import org.pgcodekeeper.core.schema.ms.MsDatabase;
-import org.pgcodekeeper.core.schema.ms.MsIndex;
-import org.pgcodekeeper.core.schema.ms.MsTable;
+import org.pgcodekeeper.core.database.base.schema.AbstractIndex;
+import org.pgcodekeeper.core.database.base.schema.AbstractTable;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.ms.schema.MsColumn;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
+import org.pgcodekeeper.core.database.ms.schema.MsIndex;
+import org.pgcodekeeper.core.database.ms.schema.MsTable;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Arrays;
@@ -177,7 +176,7 @@ public final class CreateMsTable extends MsTableAbstract {
         if (nameList != null) {
             for (IdContext col : nameList.id()) {
                 index.addInclude(col.getText());
-                index.addDep(new GenericColumn(schema, table, col.getText(), DbObjType.COLUMN));
+                index.addDependency(new GenericColumn(schema, table, col.getText(), DbObjType.COLUMN));
             }
         }
         var orderCols = ctx.order_cols;

@@ -22,9 +22,9 @@ import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Ch_fileContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Privilegy_stmtContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.QueryContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.statement.GrantChPrivilege;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.StatementOverride;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.StatementOverride;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.monitor.IMonitor;
 
@@ -37,7 +37,7 @@ import java.util.Map;
  */
 public final class ChSQLOverridesListener extends CustomParserListener<ChDatabase> implements ChSqlContextProcessor {
 
-    private final Map<PgStatement, StatementOverride> overrides;
+    private final Map<AbstractStatement, StatementOverride> overrides;
 
     /**
      * Creates a new listener for ClickHouse SQL with override support.
@@ -51,7 +51,7 @@ public final class ChSQLOverridesListener extends CustomParserListener<ChDatabas
      * @param settings  application settings
      */
     public ChSQLOverridesListener(ChDatabase database, String filename, ParserListenerMode mode, List<Object> errors,
-                                  IMonitor monitor, Map<PgStatement, StatementOverride> overrides, ISettings settings) {
+                                  IMonitor monitor, Map<AbstractStatement, StatementOverride> overrides, ISettings settings) {
         super(database, filename, mode, errors, monitor, settings);
         this.overrides = overrides;
     }

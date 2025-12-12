@@ -16,17 +16,18 @@
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
 import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.loader.JdbcQueries;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.pg.PgColumn;
-import org.pgcodekeeper.core.schema.pg.PgSequence;
+import org.pgcodekeeper.core.database.pg.schema.PgColumn;
+import org.pgcodekeeper.core.database.pg.schema.PgSequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,7 +105,7 @@ public final class SequencesReader extends JdbcReader {
         if (isDefault || "a".equals(identityType)) {
             AbstractTable table = schema.getTable(refTable);
             if (table == null) {
-                var msg = Messages.SequencesReader_log_not_found_table.formatted(table, s);
+                var msg = Messages.SequencesReader_log_not_found_table.formatted(refTable, s);
                 LOG.error(msg);
                 return;
             }

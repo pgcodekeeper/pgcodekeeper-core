@@ -15,14 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.ms;
 
-import org.pgcodekeeper.core.database.base.jdbc.IJdbcConnector;
+import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.ms.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.ms.MsDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

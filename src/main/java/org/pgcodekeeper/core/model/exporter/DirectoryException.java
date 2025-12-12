@@ -16,6 +16,7 @@
 package org.pgcodekeeper.core.model.exporter;
 
 import java.io.IOException;
+import java.io.Serial;
 
 /**
  * Exception thrown when encountering directory-related errors during export operations.
@@ -25,6 +26,7 @@ import java.io.IOException;
  */
 public class DirectoryException extends IOException {
 
+    @Serial
     private static final long serialVersionUID = 2339456504336693884L;
 
     /**

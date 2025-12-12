@@ -17,17 +17,18 @@ package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.AggregateAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
-import org.pgcodekeeper.core.schema.Argument;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.pg.PgAggregate;
-import org.pgcodekeeper.core.schema.pg.PgAggregate.AggFuncs;
-import org.pgcodekeeper.core.schema.pg.PgAggregate.AggKinds;
-import org.pgcodekeeper.core.schema.pg.PgAggregate.ModifyType;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
+import org.pgcodekeeper.core.database.base.schema.Argument;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.IArgument;
+import org.pgcodekeeper.core.database.pg.schema.PgAggregate;
+import org.pgcodekeeper.core.database.pg.schema.PgAggregate.AggFuncs;
+import org.pgcodekeeper.core.database.pg.schema.PgAggregate.AggKinds;
+import org.pgcodekeeper.core.database.pg.schema.PgAggregate.ModifyType;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Arrays;
@@ -269,9 +270,9 @@ public final class CreateAggregate extends PgParserAbstract {
 
         String sType = aggregate.getSType();
         String mSType = aggregate.getMSType();
-        List<Argument> args = aggregate.getArguments();
+        var args = aggregate.getArguments();
         int directCount = aggregate.getDirectCount();
-        List<Argument> orderByArgs = args.subList(directCount, args.size());
+        var orderByArgs = args.subList(directCount, args.size());
 
         switch (paramName) {
             case SFUNC, MSFUNC, MINVFUNC:
@@ -311,8 +312,8 @@ public final class CreateAggregate extends PgParserAbstract {
         return sb.toString();
     }
 
-    private static void fillStringByArgs(StringBuilder sb, List<Argument> args) {
-        for (Argument arg : args) {
+    private static void fillStringByArgs(StringBuilder sb, List<IArgument> args) {
+        for (var arg : args) {
             arg.appendDeclaration(sb, false, true);
             sb.append(", ");
         }

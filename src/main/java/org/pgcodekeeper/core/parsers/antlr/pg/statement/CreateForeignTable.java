@@ -17,15 +17,15 @@ package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.AbstractSequence;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.pg.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.base.schema.AbstractSequence;
+import org.pgcodekeeper.core.database.base.schema.AbstractTable;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.List;
@@ -78,15 +78,15 @@ public final class CreateForeignTable extends TableAbstract {
         Define_columnsContext colCtx = ctx.define_columns();
         Define_partitionContext partCtx = ctx.define_partition();
 
-        AbstractPgTable table;
+        PgAbstractTable table;
 
         if (colCtx != null) {
-            table = fillForeignTable(srvCtx, new SimpleForeignPgTable(
+            table = fillForeignTable(srvCtx, new PgSimpleForeignTable(
                     tableName, srvName.getText()));
             fillColumns(colCtx, table, schemaName, null);
         } else {
             String partBound = ParserAbstract.getFullCtxText(partCtx.for_values_bound());
-            table = fillForeignTable(srvCtx, new PartitionForeignPgTable(
+            table = fillForeignTable(srvCtx, new PgPartitionForeignTable(
                     tableName, srvName.getText(), partBound));
 
             fillTypeColumns(partCtx.list_of_type_column_def(), table, schemaName, null);
@@ -97,7 +97,7 @@ public final class CreateForeignTable extends TableAbstract {
         return table;
     }
 
-    private AbstractForeignTable fillForeignTable(Define_serverContext server, AbstractForeignTable table) {
+    private PgAbstractForeignTable fillForeignTable(Define_serverContext server, PgAbstractForeignTable table) {
         Define_foreign_optionsContext options = server.define_foreign_options();
         if (options != null) {
             for (Foreign_optionContext option : options.foreign_option()) {

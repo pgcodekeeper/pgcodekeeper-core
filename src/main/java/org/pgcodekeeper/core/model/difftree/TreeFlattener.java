@@ -15,12 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.difftree;
 
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.ignorelist.IgnoreList;
 import org.pgcodekeeper.core.ignorelist.IgnoredObject;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.ignorelist.IgnoredObject.AddStatus;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -163,7 +164,7 @@ public final class TreeFlattener {
                 && (!onlySelected || el.isSelected())
                 && (onlyTypes == null || onlyTypes.isEmpty() || onlyTypes.contains(el.getType()))
                 && (!onlyEdits || el.getSide() != DiffSide.BOTH
-                || !el.getPgStatement(dbSource).compare(el.getPgStatement(dbTarget)))) {
+                || !el.getStatement(dbSource).compare(el.getStatement(dbTarget)))) {
             result.add(el);
         }
     }

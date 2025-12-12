@@ -18,6 +18,12 @@ package org.pgcodekeeper.core.parsers.antlr.pg;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.database.api.schema.IRelation;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.StatementOverride;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.parsers.antlr.base.CustomParserListener;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
@@ -26,8 +32,7 @@ import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.AlterOwner;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.GrantPrivilege;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.PgParserAbstract;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.monitor.IMonitor;
 
@@ -42,7 +47,7 @@ import java.util.function.BiFunction;
 public final class SQLOverridesListener extends CustomParserListener<PgDatabase>
         implements SqlContextProcessor {
 
-    private final Map<PgStatement, StatementOverride> overrides;
+    private final Map<AbstractStatement, StatementOverride> overrides;
 
     /**
      * Creates a new listener with override support.
@@ -56,7 +61,7 @@ public final class SQLOverridesListener extends CustomParserListener<PgDatabase>
      * @param settings  application settings
      */
     public SQLOverridesListener(PgDatabase db, String filename, ParserListenerMode mode, List<Object> errors,
-                                IMonitor mon, Map<PgStatement, StatementOverride> overrides, ISettings settings) {
+                                IMonitor mon, Map<AbstractStatement, StatementOverride> overrides, ISettings settings) {
         super(db, filename, mode, errors, mon, settings);
         this.overrides = overrides;
     }
@@ -111,7 +116,7 @@ public final class SQLOverridesListener extends CustomParserListener<PgDatabase>
             return;
         }
 
-        PgStatement st = getSafe(AbstractDatabase::getSchema, db, ctx.name);
+        AbstractStatement st = getSafe(AbstractDatabase::getSchema, db, ctx.name);
         if (st.getName().equals(Consts.PUBLIC) && "postgres".equals(owner.getText())) {
             return;
         }
@@ -132,7 +137,7 @@ public final class SQLOverridesListener extends CustomParserListener<PgDatabase>
             IdentifierContext name;
             if (owner != null && (name = owner.user_name().identifier()) != null) {
                 IRelation st = getSafe(AbstractSchema::getRelation, schema, nameCtx);
-                overrides.computeIfAbsent((PgStatement) st,
+                overrides.computeIfAbsent((AbstractStatement) st,
                         k -> new StatementOverride()).setOwner(name.getText());
             }
         }

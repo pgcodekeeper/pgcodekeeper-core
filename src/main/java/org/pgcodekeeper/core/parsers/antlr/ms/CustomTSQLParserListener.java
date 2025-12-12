@@ -22,8 +22,8 @@ import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.parsers.antlr.base.CustomParserListener;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.ms.statement.*;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.ms.MsDatabase;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.monitor.IMonitor;
 
@@ -82,7 +82,7 @@ public final class CustomTSQLParserListener extends CustomParserListener<MsDatab
     }
 
     private void endBatch(Go_statementContext goCtx) {
-        PgObjLocation loc = new PgObjLocation.Builder()
+        ObjectLocation loc = new ObjectLocation.Builder()
                 .setAction(Consts.GO)
                 .setCtx(goCtx)
                 .setSql(Consts.GO)

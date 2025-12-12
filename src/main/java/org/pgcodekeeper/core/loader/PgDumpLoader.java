@@ -20,8 +20,11 @@
 package org.pgcodekeeper.core.loader;
 
 import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrTask;
 import org.pgcodekeeper.core.parsers.antlr.ch.ChSQLOverridesListener;
@@ -33,13 +36,12 @@ import org.pgcodekeeper.core.parsers.antlr.ms.TSqlContextProcessor;
 import org.pgcodekeeper.core.parsers.antlr.pg.CustomSQLParserListener;
 import org.pgcodekeeper.core.parsers.antlr.pg.SQLOverridesListener;
 import org.pgcodekeeper.core.parsers.antlr.pg.SqlContextProcessor;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
-import org.pgcodekeeper.core.schema.ch.ChSchema;
-import org.pgcodekeeper.core.schema.ms.MsDatabase;
-import org.pgcodekeeper.core.schema.ms.MsSchema;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgSchema;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.database.ch.schema.ChSchema;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
+import org.pgcodekeeper.core.database.ms.schema.MsSchema;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgSchema;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
@@ -68,7 +70,7 @@ public class PgDumpLoader extends DatabaseLoader {
     private final int monitoringLevel;
 
     private ParserListenerMode mode = ParserListenerMode.NORMAL;
-    private Map<PgStatement, StatementOverride> overrides;
+    private Map<AbstractStatement, StatementOverride> overrides;
 
     /**
      * Sets the parser listener mode for controlling parsing behavior.
@@ -84,7 +86,7 @@ public class PgDumpLoader extends DatabaseLoader {
      *
      * @param overrides map of statement overrides
      */
-    public void setOverridesMap(Map<PgStatement, StatementOverride> overrides) {
+    public void setOverridesMap(Map<AbstractStatement, StatementOverride> overrides) {
         this.overrides = overrides;
     }
 
@@ -183,7 +185,7 @@ public class PgDumpLoader extends DatabaseLoader {
             case CH -> new ChSchema(Consts.CH_DEFAULT_DB);
         };
         d.addSchema(schema);
-        PgObjLocation loc = new PgObjLocation.Builder()
+        ObjectLocation loc = new ObjectLocation.Builder()
                 .setObject(new GenericColumn(schema.getName(), DbObjType.SCHEMA))
                 .build();
 

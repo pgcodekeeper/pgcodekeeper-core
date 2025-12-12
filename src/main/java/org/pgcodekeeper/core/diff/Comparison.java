@@ -15,9 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.diff;
 
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.base.schema.AbstractTable;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.settings.ISettings;
 
 /**
@@ -33,7 +33,7 @@ public class Comparison {
      * @param newObject new object state
      * @return true if objects are equals
      */
-    public static boolean compare(ISettings settings, PgStatement oldObject, PgStatement newObject) {
+    public static boolean compare(ISettings settings, AbstractStatement oldObject, AbstractStatement newObject) {
         if (oldObject.hashCode() == newObject.hashCode() && oldObject.equals(newObject)) {
             return true;
         }

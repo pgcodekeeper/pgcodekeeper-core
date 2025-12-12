@@ -16,15 +16,15 @@
 package org.pgcodekeeper.core.parsers.antlr.ch.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.ch.launcher.ChFuncAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Create_function_stmtContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Function_argumentsContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Identifier_listContext;
-import org.pgcodekeeper.core.schema.Argument;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
-import org.pgcodekeeper.core.schema.ch.ChFunction;
+import org.pgcodekeeper.core.database.base.schema.Argument;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.database.ch.schema.ChFunction;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.List;

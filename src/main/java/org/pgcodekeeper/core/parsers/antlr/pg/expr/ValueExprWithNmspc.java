@@ -18,7 +18,7 @@ package org.pgcodekeeper.core.parsers.antlr.pg.expr;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.VexContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Vex_bContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.Vex;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 
 import java.util.Collections;

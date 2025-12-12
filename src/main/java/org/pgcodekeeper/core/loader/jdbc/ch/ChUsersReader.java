@@ -19,12 +19,10 @@ import org.pgcodekeeper.core.ChDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
-import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
-import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
-import org.pgcodekeeper.core.schema.ch.ChUser;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.database.ch.schema.ChUser;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -51,7 +49,7 @@ public final class ChUsersReader extends AbstractStatementReader {
     }
 
     @Override
-    protected void processResult(ResultSet res) throws SQLException, XmlReaderException {
+    protected void processResult(ResultSet res) throws SQLException {
         String name = res.getString("name");
         loader.setCurrentObject(new GenericColumn(name, DbObjType.USER));
 

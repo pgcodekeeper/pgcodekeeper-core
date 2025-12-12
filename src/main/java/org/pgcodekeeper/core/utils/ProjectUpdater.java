@@ -15,14 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.utils;
 
-import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.PgCodekeeperException;
 import org.pgcodekeeper.core.WorkDirs;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.exporter.ModelExporter;
 import org.pgcodekeeper.core.model.exporter.OverridesModelExporter;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

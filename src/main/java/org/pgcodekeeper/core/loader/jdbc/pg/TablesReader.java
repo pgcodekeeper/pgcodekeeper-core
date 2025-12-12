@@ -17,20 +17,20 @@ package org.pgcodekeeper.core.loader.jdbc.pg;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcType;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
 import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.AlterTable;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.ICompressOptionContainer;
-import org.pgcodekeeper.core.schema.pg.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ICompressOptionContainer;
 import org.pgcodekeeper.core.utils.Pair;
 
 import java.sql.ResultSet;
@@ -65,9 +65,9 @@ public final class TablesReader extends JdbcReader {
         loader.setCurrentObject(new GenericColumn(schemaName, tableName, DbObjType.TABLE));
 
         long ofTypeOid = res.getLong("of_type");
-        AbstractPgTable t = getTable(res, tableName, ofTypeOid);
+        var t = getTable(res, tableName, ofTypeOid);
 
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion()) && t instanceof AbstractRegularTable regTable) {
+        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion()) && t instanceof PgAbstractRegularTable regTable) {
             String accessMethod = res.getString("access_method");
             if (accessMethod != null) {
                 regTable.setMethod(accessMethod);
@@ -108,14 +108,14 @@ public final class TablesReader extends JdbcReader {
             t.setHasOids(true);
         }
 
-        if (t instanceof AbstractRegularTable) {
+        if (t instanceof PgAbstractRegularTable) {
             fillRegularTable(t, res);
         }
 
         schema.addTable(t);
     }
 
-    private AbstractPgTable getTable(ResultSet res, String tableName, long ofTypeOid) throws SQLException {
+    private PgAbstractTable getTable(ResultSet res, String tableName, long ofTypeOid) throws SQLException {
         if (loader.isGreenplumDb() && res.getString("exloc") != null) {
             return createExternalTable(tableName, res);
         }
@@ -134,26 +134,26 @@ public final class TablesReader extends JdbcReader {
             partitionGpTemplate = res.getString("parttemplate");
         }
 
-        AbstractPgTable t;
+        PgAbstractTable t;
         String serverName = res.getString("server_name");
         if (serverName != null) {
             if (partitionBound == null) {
-                t = new SimpleForeignPgTable(tableName, serverName);
+                t = new PgSimpleForeignTable(tableName, serverName);
             } else {
-                t = new PartitionForeignPgTable(tableName, serverName, partitionBound);
+                t = new PgPartitionForeignTable(tableName, serverName, partitionBound);
             }
-            t.addDep(new GenericColumn(serverName, DbObjType.SERVER));
+            t.addDependency(new GenericColumn(serverName, DbObjType.SERVER));
         } else if (ofTypeOid != 0) {
             JdbcType jdbcOfType = loader.getCachedTypeByOid(ofTypeOid);
             String ofType = jdbcOfType.getFullName();
-            t = new TypedPgTable(tableName, ofType);
+            t = new PgTypedTable(tableName, ofType);
             jdbcOfType.addTypeDepcy(t);
         } else if (partitionBound != null) {
-            t = new PartitionPgTable(tableName, partitionBound);
+            t = new PgPartitionTable(tableName, partitionBound);
         } else if (partitionGpBound != null) {
             t = createGpPartitionTable(tableName, partitionGpBound, partitionGpTemplate);
         } else {
-            t = new SimplePgTable(tableName);
+            t = new PgSimpleTable(tableName);
         }
 
         String[] foptions = getColArray(res, "ftoptions", true);
@@ -164,9 +164,9 @@ public final class TablesReader extends JdbcReader {
         return t;
     }
 
-    private AbstractPgTable createGpPartitionTable(String tableName, String partitionGpBound,
+    private PgAbstractTable createGpPartitionTable(String tableName, String partitionGpBound,
                                                    String partitionGpTemplate) {
-        PartitionGpTable table = new PartitionGpTable(tableName);
+        GpPartitionTable table = new GpPartitionTable(tableName);
 
         loader.submitAntlrTask(CREATE_TABLE + partitionGpBound + ';',
                 p -> new Pair<>(
@@ -189,8 +189,8 @@ public final class TablesReader extends JdbcReader {
         return table;
     }
 
-    private void fillRegularTable(AbstractPgTable t, ResultSet res) throws SQLException {
-        AbstractRegularTable regTable = (AbstractRegularTable) t;
+    private void fillRegularTable(PgAbstractTable t, ResultSet res) throws SQLException {
+        PgAbstractRegularTable regTable = (PgAbstractRegularTable) t;
 
         // TableSpace
         String tableSpace = res.getString("table_space");
@@ -198,7 +198,7 @@ public final class TablesReader extends JdbcReader {
             regTable.setTablespace(tableSpace);
         }
 
-        if (loader.isGreenplumDb() && !(t instanceof PartitionPgTable)) {
+        if (loader.isGreenplumDb() && !(t instanceof PgPartitionTable)) {
             String distribution = res.getString("distribution");
             if (distribution != null && !distribution.isBlank()) {
                 regTable.setDistribution(distribution);
@@ -224,7 +224,7 @@ public final class TablesReader extends JdbcReader {
         }
     }
 
-    private void readColumns(ResultSet res, AbstractPgTable t, long ofTypeOid,
+    private void readColumns(ResultSet res, PgAbstractTable t, long ofTypeOid,
                              AbstractSchema schema) throws SQLException {
         String[] colNames = getColArray(res, "col_names", true);
         if (colNames == null) {

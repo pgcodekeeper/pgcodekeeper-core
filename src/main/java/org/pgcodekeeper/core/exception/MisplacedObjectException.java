@@ -17,12 +17,15 @@ package org.pgcodekeeper.core.exception;
 
 import org.antlr.v4.runtime.Token;
 
+import java.io.Serial;
+
 /**
  * Exception indicating incorrect placement or reference to a database object.
  * Thrown when an object is referenced in a context where it doesn't belong.
  */
 public class MisplacedObjectException extends UnresolvedReferenceException {
 
+    @Serial
     private static final long serialVersionUID = -8377509522524043609L;
 
     /**

@@ -18,14 +18,14 @@ package org.pgcodekeeper.core.parsers.antlr.ms.expr;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.As_table_aliasContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Common_table_expressionContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Qualified_nameContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.With_expressionContext;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.IRelation;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.IRelation;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.Pair;
 
 import java.util.AbstractMap.SimpleEntry;

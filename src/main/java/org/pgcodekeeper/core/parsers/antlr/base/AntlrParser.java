@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.parsers.antlr.base;
 
 import org.antlr.v4.runtime.*;
-import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.exception.MonitorCancelledRuntimeException;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.parsers.antlr.base.generated.IgnoreListLexer;

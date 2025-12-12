@@ -15,11 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc;
 
+import java.io.Serial;
+
 /**
  * Exception thrown when XML reading operations fail during JDBC metadata processing.
  */
 public class XmlReaderException extends Exception {
 
+    @Serial
     private static final long serialVersionUID = 893099268209172548L;
 
     /**

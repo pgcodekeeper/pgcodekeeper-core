@@ -15,12 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Create_event_trigger_statementContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Event_trigger_filter_variablesContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Schema_qualified_name_nontypeContext;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgEventTrigger;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgEventTrigger;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Collections;

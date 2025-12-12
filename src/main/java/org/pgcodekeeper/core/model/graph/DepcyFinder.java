@@ -18,11 +18,13 @@ package org.pgcodekeeper.core.model.graph;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.pgcodekeeper.core.Utils;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.StatementUtils;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractTable;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.StatementUtils;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -36,14 +38,14 @@ public class DepcyFinder {
 
     private static final int START_LEVEL = 0;
 
-    private final AbstractDatabase db;
-    private final Graph<PgStatement, DefaultEdge> graph;
+    private final IDatabase db;
+    private final Graph<IStatement, DefaultEdge> graph;
     private final int depth;
     private final EnumSet<DbObjType> filterObjTypes;
     private final boolean isInvertFilter;
     private final List<PrintObj> printObjects = new ArrayList<>();
 
-    private DepcyFinder(AbstractDatabase db, int depth, boolean isReverse,
+    private DepcyFinder(IDatabase db, int depth, boolean isReverse,
                         Collection<DbObjType> filterObjTypes, boolean isInvertFilter) {
         this.db = db;
         DepcyGraph dg = new DepcyGraph(db);
@@ -85,7 +87,7 @@ public class DepcyFinder {
      * @return list of formatted dependency strings
      */
     public static List<String> byStatement(int depth, boolean isReverse, Collection<DbObjType> filterObjTypes,
-                                           PgStatement st) {
+                                           AbstractStatement st) {
         DepcyFinder depcyFinder = new DepcyFinder(st.getDatabase(), depth, isReverse, filterObjTypes, false);
         depcyFinder.fillTree(st, START_LEVEL, new HashSet<>(), null, 0);
         return depcyFinder.getResult();
@@ -110,7 +112,7 @@ public class DepcyFinder {
         }
     }
 
-    private boolean find(Map<Pattern, Boolean> patterns, PgStatement st) {
+    private boolean find(Map<Pattern, Boolean> patterns, IStatement st) {
         for (var entry : patterns.entrySet()) {
             boolean isNeedQuotes = entry.getValue();
             String objName;
@@ -128,7 +130,7 @@ public class DepcyFinder {
         return false;
     }
 
-    private void fillTree(PgStatement st, int level, Set<PgStatement> added, PgStatement parentSt, int hiddenObj) {
+    private void fillTree(IStatement st, int level, Set<IStatement> added, IStatement parentSt, int hiddenObj) {
         DbObjType type = st.getStatementType();
 
         if (DbObjType.DATABASE == type && START_LEVEL != level) {
@@ -138,7 +140,7 @@ public class DepcyFinder {
 
         boolean isCyclic = !added.add(st);
 
-        final PgStatement finalParentSt;
+        final IStatement finalParentSt;
         if (isPrintObj(st)) {
             printObjects.add(new PrintObj(st, parentSt, level, hiddenObj, isCyclic));
             finalParentSt = st;
@@ -153,12 +155,12 @@ public class DepcyFinder {
             final int finalHiddenObj = hiddenObj;
 
             graph.outgoingEdgesOf(st).stream().map(graph::getEdgeTarget)
-                    .sorted(Comparator.comparing(PgStatement::getStatementType))
+                    .sorted(Comparator.comparing(IStatement::getStatementType))
                     .forEach(pgSt -> fillTree(pgSt, finalLevel, new HashSet<>(added), finalParentSt, finalHiddenObj));
         }
     }
 
-    private boolean isPrintObj(PgStatement st) {
+    private boolean isPrintObj(IStatement st) {
         DbObjType type = st.getStatementType();
 
         if (filterObjTypes.isEmpty()) {

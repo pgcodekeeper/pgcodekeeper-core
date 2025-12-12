@@ -15,12 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
 import org.pgcodekeeper.core.model.difftree.TreeFlattener;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.PgStatement;
 
 import java.util.*;
 
@@ -31,8 +31,8 @@ import java.util.*;
  */
 public final class DepcyTreeExtender {
 
-    private final AbstractDatabase dbSource;
-    private final AbstractDatabase dbTarget;
+    private final IDatabase dbSource;
+    private final IDatabase dbTarget;
     private final SimpleDepcyResolver depRes;
     private final TreeElement root;
     /**
@@ -55,7 +55,7 @@ public final class DepcyTreeExtender {
      * @param dbTarget target database schema
      * @param root     root element of the tree to analyze
      */
-    public DepcyTreeExtender(AbstractDatabase dbSource, AbstractDatabase dbTarget, TreeElement root) {
+    public DepcyTreeExtender(IDatabase dbSource, IDatabase dbTarget, TreeElement root) {
         this.dbSource = dbSource;
         this.dbTarget = dbTarget;
         this.root = root;
@@ -68,11 +68,11 @@ public final class DepcyTreeExtender {
      * for creating or modifying the object
      */
     private void fillDepcyOfNewEdit() {
-        PgStatement markedToCreate;
-        Set<PgStatement> newEditDepcy = new HashSet<>();
+        IStatement markedToCreate;
+        Set<IStatement> newEditDepcy = new HashSet<>();
         for (TreeElement sel : userSelection) {
             if (sel.getSide() != DiffSide.LEFT
-                    && (markedToCreate = sel.getPgStatement(dbTarget)) != null) {
+                    && (markedToCreate = sel.getStatement(dbTarget)) != null) {
                 newEditDepcy.addAll(depRes.getCreateDepcies(markedToCreate));
             }
         }
@@ -83,12 +83,12 @@ public final class DepcyTreeExtender {
      * When deleting an object, pulls dependencies from below
      */
     private void fillDepcyOfDeleted() {
-        PgStatement markedToDelete;
-        Set<PgStatement> deleteDepcy = new HashSet<>();
+        IStatement markedToDelete;
+        Set<IStatement> deleteDepcy = new HashSet<>();
         for (TreeElement sel : userSelection) {
             if (sel.getSide() == DiffSide.LEFT
                     && sel.getType() != DbObjType.SEQUENCE
-                    && (markedToDelete = sel.getPgStatement(dbSource)) != null) {
+                    && (markedToDelete = sel.getStatement(dbSource)) != null) {
                 deleteDepcy.addAll(depRes.getDropDepcies(markedToDelete));
             }
         }
@@ -99,14 +99,14 @@ public final class DepcyTreeExtender {
      * Extracts objects from tree for dependencies
      *
      * @param treeDepcy list to add dependent tree elements to
-     * @param pgDecies  collection of database statement dependencies
+     * @param dependencies collection of database statement dependencies
      */
-    private void fillTreeDepcies(List<TreeElement> treeDepcy, Collection<PgStatement> pgDecies) {
-        for (PgStatement depcy : pgDecies) {
+    private void fillTreeDepcies(List<TreeElement> treeDepcy, Collection<IStatement> dependencies) {
+        for (IStatement depcy : dependencies) {
             TreeElement finded = root.findElement(depcy);
             if (finded != null) {
                 if (finded.getSide() == DiffSide.BOTH) {
-                    if (!finded.getPgStatement(dbSource).compare(finded.getPgStatement(dbTarget))) {
+                    if (!finded.getStatement(dbSource).compare(finded.getStatement(dbTarget))) {
                         treeDepcy.add(finded);
                     }
                 } else {

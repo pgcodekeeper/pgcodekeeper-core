@@ -21,17 +21,17 @@ import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.ViewAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.pg.AbstractPgView;
-import org.pgcodekeeper.core.schema.pg.MaterializedPgView;
-import org.pgcodekeeper.core.schema.pg.PgView;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractView;
+import org.pgcodekeeper.core.database.pg.schema.PgMaterializedView;
+import org.pgcodekeeper.core.database.pg.schema.PgView;
 import org.pgcodekeeper.core.utils.Pair;
 
 import java.sql.PreparedStatement;
@@ -59,11 +59,11 @@ public final class ViewsReader extends JdbcReader {
         String viewName = res.getString("relname");
         loader.setCurrentObject(new GenericColumn(schemaName, viewName, DbObjType.VIEW));
 
-        AbstractPgView v;
+        PgAbstractView v;
 
         // materialized view
         if ("m".equals(res.getString("kind"))) {
-            var matV = new MaterializedPgView(viewName);
+            var matV = new PgMaterializedView(viewName);
             matV.setIsWithData(res.getBoolean("relispopulated"));
             String tableSpace = res.getString("table_space");
             if (tableSpace != null && !tableSpace.isEmpty()) {

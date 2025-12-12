@@ -17,9 +17,9 @@ package org.pgcodekeeper.core.parsers.antlr.pg.launcher;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.VexContext;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
-import org.pgcodekeeper.core.schema.pg.PgConstraint;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.pg.schema.PgConstraint;
 
 import java.util.Set;
 
@@ -41,7 +41,7 @@ public class ConstraintAnalysisLauncher extends AbstractPgAnalysisLauncher {
     }
 
     @Override
-    public Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
         return analyzeTableChildVex((VexContext) ctx, meta);
     }
 }

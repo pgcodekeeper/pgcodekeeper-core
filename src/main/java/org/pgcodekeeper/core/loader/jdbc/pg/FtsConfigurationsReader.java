@@ -20,10 +20,10 @@ import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.pg.PgFtsConfiguration;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.pg.schema.PgFtsConfiguration;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -71,8 +71,8 @@ public final class FtsConfigurationsReader extends JdbcReader {
 
                 StringBuilder sb = new StringBuilder();
                 if (!Consts.PG_CATALOG.equals(dictSchema)) {
-                    config.addDep(new GenericColumn(dictSchema, dictName, DbObjType.FTS_DICTIONARY));
-                    sb.append(PgDiffUtils.getQuotedName(dictSchema) + '.');
+                    config.addDependency(new GenericColumn(dictSchema, dictName, DbObjType.FTS_DICTIONARY));
+                    sb.append(PgDiffUtils.getQuotedName(dictSchema)).append('.');
                 }
 
                 sb.append(PgDiffUtils.getQuotedName(dictName));

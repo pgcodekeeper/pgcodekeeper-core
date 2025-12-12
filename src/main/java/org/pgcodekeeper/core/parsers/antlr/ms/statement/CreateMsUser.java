@@ -16,13 +16,13 @@
 package org.pgcodekeeper.core.parsers.antlr.ms.statement;
 
 import org.pgcodekeeper.core.MsDiffUtils;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Create_userContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.IdContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.User_loginContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.User_optionContext;
-import org.pgcodekeeper.core.schema.ms.MsDatabase;
-import org.pgcodekeeper.core.schema.ms.MsUser;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
+import org.pgcodekeeper.core.database.ms.schema.MsUser;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.List;

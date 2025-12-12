@@ -17,14 +17,14 @@ package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.PgStatementContainer;
-import org.pgcodekeeper.core.schema.pg.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractTable;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatementContainer;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Arrays;
@@ -93,9 +93,9 @@ public final class CommentOn extends PgParserAbstract {
                         "Table name is missing for commented column!", nameCtx.getStart());
             }
             String tableName = tableCtx.getText();
-            AbstractPgTable table = (AbstractPgTable) schema.getTable(tableName);
+            PgAbstractTable table = (PgAbstractTable) schema.getTable(tableName);
             if (table == null) {
-                AbstractPgView view = (AbstractPgView) schema.getView(tableName);
+                PgAbstractView view = (PgAbstractView) schema.getView(tableName);
                 if (view == null) {
                     PgCompositeType t = ((PgCompositeType) getSafe(PgSchema::getType, schema, tableCtx));
                     addObjReference(tableIds, DbObjType.TYPE, null);
@@ -132,7 +132,7 @@ public final class CommentOn extends PgParserAbstract {
             schema = getSchemaSafe(ids);
         }
 
-        PgStatement st;
+        AbstractStatement st;
         DbObjType type;
         if (obj.function_args() != null && obj.ROUTINE() == null) {
             if (obj.PROCEDURE() != null) {
@@ -172,8 +172,8 @@ public final class CommentOn extends PgParserAbstract {
                 st = getSafe(PgDomain::getConstraint, domain, nameCtx);
             } else {
                 addObjReference(parentIds, DbObjType.TABLE, null);
-                PgStatementContainer table = getSafe(PgSchema::getStatementContainer, schema, parentCtx);
-                st = getSafe(PgStatementContainer::getConstraint, table, nameCtx);
+                AbstractStatementContainer table = getSafe(PgSchema::getStatementContainer, schema, parentCtx);
+                st = getSafe(AbstractStatementContainer::getConstraint, table, nameCtx);
             }
             ids = Arrays.asList(QNameParser.getSchemaNameCtx(parentIds), parentCtx, nameCtx);
         } else if (obj.CAST() != null) {
@@ -215,16 +215,16 @@ public final class CommentOn extends PgParserAbstract {
             addObjReference(parentIds, DbObjType.TABLE, null);
             ParserRuleContext tableCtx = QNameParser.getFirstNameCtx(parentIds);
             ids = Arrays.asList(QNameParser.getSchemaNameCtx(parentIds), tableCtx, nameCtx);
-            PgStatementContainer c = getSafe(PgSchema::getStatementContainer, schema, tableCtx);
+            AbstractStatementContainer c = getSafe(PgSchema::getStatementContainer, schema, tableCtx);
             if (obj.POLICY() != null) {
                 type = DbObjType.POLICY;
-                st = getSafe(PgStatementContainer::getPolicy, c, nameCtx);
+                st = getSafe(AbstractStatementContainer::getPolicy, c, nameCtx);
             } else if (obj.RULE() != null) {
                 type = DbObjType.RULE;
-                st = getSafe(PgStatementContainer::getRule, c, nameCtx);
+                st = getSafe(AbstractStatementContainer::getRule, c, nameCtx);
             } else {
                 type = DbObjType.TRIGGER;
-                st = getSafe(PgStatementContainer::getTrigger, c, nameCtx);
+                st = getSafe(AbstractStatementContainer::getTrigger, c, nameCtx);
             }
         } else if (obj.CONFIGURATION() != null) {
             type = DbObjType.FTS_CONFIGURATION;
@@ -246,7 +246,7 @@ public final class CommentOn extends PgParserAbstract {
             return;
         }
 
-        doSafe(PgStatement::setComment, st, comment);
+        doSafe(AbstractStatement::setComment, st, comment);
         if (type == DbObjType.FUNCTION || type == DbObjType.PROCEDURE || type == DbObjType.AGGREGATE) {
             addObjReference(ids, type, ACTION_ALTER, parseArguments(obj.function_args()));
         } else {

@@ -15,17 +15,22 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ms;
 
+import org.pgcodekeeper.core.database.api.schema.ISimpleColumnContainer;
+import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
+import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.base.schema.SimpleColumn;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.ms.MsConstraintCheck;
-import org.pgcodekeeper.core.schema.ms.MsConstraintPk;
-import org.pgcodekeeper.core.schema.ms.MsIndex;
-import org.pgcodekeeper.core.schema.ms.MsType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.ms.schema.MsConstraintCheck;
+import org.pgcodekeeper.core.database.ms.schema.MsConstraintPk;
+import org.pgcodekeeper.core.database.ms.schema.MsIndex;
+import org.pgcodekeeper.core.database.ms.schema.MsType;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -58,7 +63,7 @@ public final class MsTypesReader extends JdbcReader {
         if (assembly != null) {
             type.setAssemblyName(assembly);
             type.setAssemblyClass(res.getString("assembly_class"));
-            type.addDep(new GenericColumn(assembly, DbObjType.ASSEMBLY));
+            type.addDependency(new GenericColumn(assembly, DbObjType.ASSEMBLY));
         } else if (baseType != null) {
             type.setBaseType(JdbcLoaderBase.getMsType(type, null, baseType, false, res.getInt("size"),
                     res.getInt("precision"), res.getInt("scale")));
@@ -84,7 +89,7 @@ public final class MsTypesReader extends JdbcReader {
             type.addChild(column);
             // extract type depcy from column object since it is temporary
             // (column also has depcy that is not related to the analysis)
-            type.addAllDeps(column.getDeps());
+            column.getDependencies().forEach(type::addDependency);
         }
     }
 

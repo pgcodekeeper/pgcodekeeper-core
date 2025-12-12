@@ -16,15 +16,16 @@
 package org.pgcodekeeper.core.parsers.antlr.pg.launcher;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.parsers.antlr.base.launcher.AbstractAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.expr.AbstractExprWithNmspc;
 import org.pgcodekeeper.core.parsers.antlr.pg.expr.ValueExprWithNmspc;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.VexContext;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 
 import java.util.Set;
 
@@ -34,7 +35,7 @@ import java.util.Set;
  */
 public abstract class AbstractPgAnalysisLauncher extends AbstractAnalysisLauncher {
 
-    protected AbstractPgAnalysisLauncher(PgStatement stmt, ParserRuleContext ctx, String location) {
+    protected AbstractPgAnalysisLauncher(AbstractStatement stmt, ParserRuleContext ctx, String location) {
         super(stmt, ctx, location);
     }
 
@@ -48,8 +49,8 @@ public abstract class AbstractPgAnalysisLauncher extends AbstractAnalysisLaunche
      *
      * @return dependencies from child expression
      */
-    protected Set<PgObjLocation> analyzeTableChildVex(VexContext ctx, MetaContainer meta) {
-        PgStatement table = stmt.getParent();
+    protected Set<ObjectLocation> analyzeTableChildVex(VexContext ctx, MetaContainer meta) {
+        IStatement table = stmt.getParent();
         String schemaName = table.getParent().getName();
         String rawTableReference = table.getName();
 
@@ -71,9 +72,9 @@ public abstract class AbstractPgAnalysisLauncher extends AbstractAnalysisLaunche
      *
      * @return dependencies from trigger/rule expression
      */
-    protected <T extends ParserRuleContext> Set<PgObjLocation> analyzeTableChild (
+    protected <T extends ParserRuleContext> Set<ObjectLocation> analyzeTableChild (
             T ctx, AbstractExprWithNmspc<T> analyzer) {
-        PgStatement table = stmt.getParent();
+        IStatement table = stmt.getParent();
         String schemaName = table.getParent().getName();
         String tableName = table.getName();
         GenericColumn implicitTable = new GenericColumn(schemaName, tableName, DbObjType.TABLE);
@@ -82,7 +83,7 @@ public abstract class AbstractPgAnalysisLauncher extends AbstractAnalysisLaunche
         return analyze(ctx, analyzer);
     }
 
-    protected <T extends ParserRuleContext> Set<PgObjLocation> analyze(
+    protected <T extends ParserRuleContext> Set<ObjectLocation> analyze(
             T ctx, AbstractExprWithNmspc<T> analyzer) {
         analyzer.analyze(ctx);
         return analyzer.getDependencies();

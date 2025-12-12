@@ -20,12 +20,12 @@ import org.pgcodekeeper.core.PgCodekeeperException;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.DatabaseFactory;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
-import org.pgcodekeeper.core.database.base.jdbc.IJdbcConnector;
+import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.loader.JdbcRunner;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.parsers.antlr.base.ScriptParser;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;

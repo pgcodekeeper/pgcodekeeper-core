@@ -17,14 +17,14 @@ package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.IndexAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.PgStatementContainer;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgIndex;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatementContainer;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgIndex;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Arrays;
@@ -93,7 +93,7 @@ public final class CreateIndex extends PgParserAbstract {
 
         if (nameCtx != null) {
             ParserRuleContext parent = QNameParser.getFirstNameCtx(ids);
-            PgStatementContainer table = getSafe(AbstractSchema::getStatementContainer,
+            AbstractStatementContainer table = getSafe(AbstractSchema::getStatementContainer,
                     getSchemaSafe(ids), parent);
             addSafe(table, ind, Arrays.asList(QNameParser.getSchemaNameCtx(ids), nameCtx));
         }

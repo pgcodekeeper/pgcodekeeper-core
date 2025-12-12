@@ -15,12 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.exporter;
 
-import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.PgCodekeeperException;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.ObjectPrivilege;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
-import org.pgcodekeeper.core.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
@@ -78,7 +80,7 @@ public final class OverridesModelExporter extends ModelExporter {
             throw new NotDirectoryException(outDir.toString());
         }
 
-        List<PgStatement> list = oldDb.getDescendants().collect(Collectors.toList());
+        List<IStatement> list = oldDb.getDescendants().collect(Collectors.toList());
         Set<Path> paths = new HashSet<>();
 
         for (TreeElement el : changeList) {
@@ -88,8 +90,8 @@ public final class OverridesModelExporter extends ModelExporter {
                          STATISTICS:
                         break;
                     default:
-                        PgStatement stInNew = el.getPgStatement(newDb);
-                        PgStatement stInOld = el.getPgStatement(oldDb);
+                        var stInNew = el.getStatement(newDb);
+                        var stInOld = el.getStatement(oldDb);
                         list.set(list.indexOf(stInOld), stInNew);
                         paths.add(getRelativeFilePath(stInNew));
                         deleteStatementIfExists(stInNew);
@@ -108,18 +110,18 @@ public final class OverridesModelExporter extends ModelExporter {
     }
 
     @Override
-    protected String getDumpSql(PgStatement st) {
+    protected String getDumpSql(IStatement st) {
         SQLScript script = new SQLScript(settings);
-        Set<PgPrivilege> privs = st.getPrivileges();
+        Set<ObjectPrivilege> privs = st.getPrivileges();
         st.appendOwnerSQL(script);
-        PgPrivilege.appendPrivileges(privs, script);
+        ObjectPrivilege.appendPrivileges(privs, script);
         if (privs.isEmpty() && st.getDbType() == DatabaseType.PG) {
-            PgPrivilege.appendDefaultPostgresPrivileges(st, script);
+            ObjectPrivilege.appendDefaultPostgresPrivileges(st, script);
         }
 
         if (DbObjType.TABLE == st.getStatementType()) {
             for (AbstractColumn col : ((AbstractTable) st).getColumns()) {
-                PgPrivilege.appendPrivileges(col.getPrivileges(), script);
+                ObjectPrivilege.appendPrivileges(col.getPrivileges(), script);
             }
         }
         return script.getFullScript();

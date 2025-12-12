@@ -18,17 +18,17 @@ package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.ConstraintAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.pg.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractTable;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.List;
@@ -191,7 +191,7 @@ public abstract class TableAbstract extends PgParserAbstract {
         }
     }
 
-    protected void fillColumns(Define_columnsContext columnsCtx, AbstractPgTable table,
+    protected void fillColumns(Define_columnsContext columnsCtx, PgAbstractTable table,
                                String schemaName, String tablespace) {
         for (Table_column_defContext colCtx : columnsCtx.table_column_def()) {
             if (colCtx.tabl_constraint != null) {
@@ -236,7 +236,7 @@ public abstract class TableAbstract extends PgParserAbstract {
             addTableConstraint(column_constraint, col, table, schemaName);
         }
         if (options != null) {
-            if (table instanceof AbstractForeignTable) {
+            if (table instanceof PgAbstractForeignTable) {
                 for (Foreign_optionContext option : options.foreign_option()) {
                     var opt = option.sconst();
                     String value = opt == null ? "" : opt.getText();
@@ -266,7 +266,7 @@ public abstract class TableAbstract extends PgParserAbstract {
         addColumn(columnName, null, null, null, null, constraints, null, null, table, schemaName);
     }
 
-    protected void addInherit(AbstractPgTable table, List<ParserRuleContext> idsInh) {
+    protected void addInherit(PgAbstractTable table, List<ParserRuleContext> idsInh) {
         String inhSchemaName = getSchemaNameSafe(idsInh);
         String inhTableName = QNameParser.getFirstName(idsInh);
         table.addInherits(inhSchemaName, inhTableName);
@@ -353,26 +353,26 @@ public abstract class TableAbstract extends PgParserAbstract {
 
         String refTableName = QNameParser.getFirstName(ids);
 
-        PgObjLocation loc = addObjReference(ids, DbObjType.TABLE, null);
+        ObjectLocation loc = addObjReference(ids, DbObjType.TABLE, null);
         GenericColumn fTable = loc.getObj();
         constrFk.setForeignSchema(refSchemaName);
         constrFk.setForeignTable(refTableName);
-        constrFk.addDep(fTable);
+        constrFk.addDependency(fTable);
 
         var cols = body.col_period;
         if (columnName != null) {
             constrFk.addColumn(columnName);
-            constrFk.addDep(new GenericColumn(schemaName, tableName, columnName, DbObjType.COLUMN));
+            constrFk.addDependency(new GenericColumn(schemaName, tableName, columnName, DbObjType.COLUMN));
         } else if (cols != null) {
             for (Schema_qualified_nameContext name : cols.schema_qualified_name()) {
                 String colName = QNameParser.getFirstName(getIdentifiers(name));
-                constrFk.addDep(new GenericColumn(schemaName, tableName, colName, DbObjType.COLUMN));
+                constrFk.addDependency(new GenericColumn(schemaName, tableName, colName, DbObjType.COLUMN));
                 constrFk.addColumn(colName);
             }
             if (cols.name_with_period() != null) {
                 String colName = QNameParser.getFirstName(
                         getIdentifiers(cols.name_with_period().schema_qualified_name()));
-                constrFk.addDep(new GenericColumn(schemaName, tableName, colName, DbObjType.COLUMN));
+                constrFk.addDependency(new GenericColumn(schemaName, tableName, colName, DbObjType.COLUMN));
                 constrFk.setPeriodColumn(colName);
             }
         }
@@ -388,13 +388,13 @@ public abstract class TableAbstract extends PgParserAbstract {
             for (Schema_qualified_nameContext column : columns) {
                 var fColumn = QNameParser.getFirstName(getIdentifiers(column));
                 constrFk.addForeignColumn(fColumn);
-                constrFk.addDep(new GenericColumn(refSchemaName, refTableName, fColumn, DbObjType.COLUMN));
+                constrFk.addDependency(new GenericColumn(refSchemaName, refTableName, fColumn, DbObjType.COLUMN));
             }
             if (refs.name_with_period() != null) {
                 var periodColName = QNameParser.getFirstName(
                         getIdentifiers(refs.name_with_period().schema_qualified_name()));
                 constrFk.setPeriodRefColumn(periodColName);
-                constrFk.addDep(new GenericColumn(refSchemaName, refTableName, periodColName, DbObjType.COLUMN));
+                constrFk.addDependency(new GenericColumn(refSchemaName, refTableName, periodColName, DbObjType.COLUMN));
             }
         }
 
@@ -433,18 +433,18 @@ public abstract class TableAbstract extends PgParserAbstract {
 
         if (colName != null) {
             constrPk.addColumn(colName);
-            constrPk.addDep(new GenericColumn(schemaName, tableName, colName, DbObjType.COLUMN));
+            constrPk.addDependency(new GenericColumn(schemaName, tableName, colName, DbObjType.COLUMN));
         } else {
             var cols = body.col_overlaps;
             for (Schema_qualified_nameContext name : cols.schema_qualified_name()) {
                 String columnName = QNameParser.getFirstName(getIdentifiers(name));
-                constrPk.addDep(new GenericColumn(schemaName, tableName, columnName, DbObjType.COLUMN));
+                constrPk.addDependency(new GenericColumn(schemaName, tableName, columnName, DbObjType.COLUMN));
                 constrPk.addColumn(columnName);
             }
             if (cols.name_without_overlaps() != null) {
                 String withoutOverlaps = QNameParser.getFirstName(getIdentifiers(cols.name_without_overlaps()
                         .schema_qualified_name()));
-                constrPk.addDep(new GenericColumn(schemaName, tableName, withoutOverlaps, DbObjType.COLUMN));
+                constrPk.addDependency(new GenericColumn(schemaName, tableName, withoutOverlaps, DbObjType.COLUMN));
                 constrPk.setWithoutOverlapsColumn(withoutOverlaps);
             }
         }
@@ -475,7 +475,7 @@ public abstract class TableAbstract extends PgParserAbstract {
     private void fillParam(PgIndexParamContainer constr, Index_parametersContext parameters, String schemaName,
                            String tableName) {
         if (parameters.including_index() != null) {
-            fillIncludingDepcy(parameters.including_index(), (PgStatement) constr, schemaName, tableName);
+            fillIncludingDepcy(parameters.including_index(), (AbstractStatement) constr, schemaName, tableName);
             for (var incl : parameters.including_index().identifier()) {
                 constr.addInclude(incl.getText());
             }

@@ -15,12 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.difftree;
 
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.diff.Comparison;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractTable;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.ISettings;
 
@@ -114,7 +115,7 @@ public final class DiffTree {
                 List<AbstractColumn> oldColumns;
 
                 if (side == DiffSide.LEFT || side == DiffSide.BOTH) {
-                    AbstractTable oldTbl = (AbstractTable) el.getPgStatement(oldDbFull);
+                    AbstractTable oldTbl = (AbstractTable) el.getStatement(oldDbFull);
                     oldColumns = oldTbl.getColumns();
                 } else {
                     oldColumns = Collections.emptyList();
@@ -122,7 +123,7 @@ public final class DiffTree {
 
                 List<AbstractColumn> newColumns;
                 if (side == DiffSide.RIGHT || side == DiffSide.BOTH) {
-                    AbstractTable newTbl = (AbstractTable) el.getPgStatement(newDbFull);
+                    AbstractTable newTbl = (AbstractTable) el.getStatement(newDbFull);
                     newColumns = newTbl.getColumns();
                 } else {
                     newColumns = Collections.emptyList();
@@ -165,7 +166,7 @@ public final class DiffTree {
         return db;
     }
 
-    private void addChildren(PgStatement left, PgStatement right, TreeElement parent) throws InterruptedException {
+    private void addChildren(AbstractStatement left, AbstractStatement right, TreeElement parent) throws InterruptedException {
         for (CompareResult res : compareStatements(left, right)) {
             IMonitor.checkCancelled(monitor);
             TreeElement child = new TreeElement(res.getStatement(), res.getSide());
@@ -180,14 +181,14 @@ public final class DiffTree {
     /**
      * Compare lists and put elements onto appropriate sides.
      */
-    private List<CompareResult> compareStatements(PgStatement left, PgStatement right) {
+    private List<CompareResult> compareStatements(AbstractStatement left, AbstractStatement right) {
         List<CompareResult> rv = new ArrayList<>();
 
         // add LEFT and BOTH here
         // and RIGHT in a separate pass
         if (left != null) {
             left.getChildren().forEach(sLeft -> {
-                PgStatement foundRight = null;
+                AbstractStatement foundRight = null;
                 if (right != null) {
                     foundRight = right.getChildren().filter(
                                     sRight -> sLeft.getName().equals(sRight.getName())
@@ -222,7 +223,7 @@ public final class DiffTree {
  * Contains references to the left and right statements and provides methods to
  * determine the comparison side and retrieve statement information.
  */
-record CompareResult(PgStatement left, PgStatement right) {
+record CompareResult(AbstractStatement left, AbstractStatement right) {
 
     /**
      * Determines which side of the comparison this result represents.
@@ -250,7 +251,7 @@ record CompareResult(PgStatement left, PgStatement right) {
      * @return the statement from this comparison
      * @throws IllegalStateException if both sides are null
      */
-    public PgStatement getStatement() {
+    public AbstractStatement getStatement() {
         if (left != null) {
             return left;
         }

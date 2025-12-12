@@ -17,18 +17,18 @@ package org.pgcodekeeper.core.database.base.parser.antlr;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.IRelation;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.IRelation;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static org.pgcodekeeper.core.schema.PgObjLocation.Builder;
-import static org.pgcodekeeper.core.schema.PgObjLocation.LocationType;
+import static org.pgcodekeeper.core.database.api.schema.ObjectLocation.Builder;
+import static org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 
 /**
  * Abstract base class for SQL expression analysis.
@@ -37,7 +37,7 @@ public abstract class AbstractExpr {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractExpr.class);
 
-    private final Set<PgObjLocation> dependencies;
+    private final Set<ObjectLocation> dependencies;
 
     // TODO get current version.
     // Need to get version. I already got it from JdbcLoader(READER)
@@ -55,7 +55,7 @@ public abstract class AbstractExpr {
      * @param dependencies set for dependencies
      * @param meta meta storage
      */
-    protected AbstractExpr(AbstractExpr parent, Set<PgObjLocation> dependencies, MetaContainer meta) {
+    protected AbstractExpr(AbstractExpr parent, Set<ObjectLocation> dependencies, MetaContainer meta) {
         this.parent = parent;
         this.dependencies = dependencies;
         this.meta = meta;
@@ -82,9 +82,9 @@ public abstract class AbstractExpr {
     /**
      * Gets an unmodifiable set of database object dependencies found in this expression.
      *
-     * @return set of {@link PgObjLocation} representing dependencies
+     * @return set of {@link ObjectLocation} representing dependencies
      */
-    public Set<PgObjLocation> getDependencies() {
+    public Set<ObjectLocation> getDependencies() {
         return Collections.unmodifiableSet(dependencies);
     }
 
@@ -137,7 +137,7 @@ public abstract class AbstractExpr {
      *
      * @param dependency dependency
      */
-    public void addDependency(PgObjLocation dependency) {
+    public void addDependency(ObjectLocation dependency) {
         dependencies.add(dependency);
     }
 

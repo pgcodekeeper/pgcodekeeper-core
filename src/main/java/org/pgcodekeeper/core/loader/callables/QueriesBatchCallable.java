@@ -18,11 +18,9 @@ package org.pgcodekeeper.core.loader.callables;
 import com.microsoft.sqlserver.jdbc.SQLServerError;
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.DatabaseType;
 import org.pgcodekeeper.core.reporter.IProgressReporter;
 import org.pgcodekeeper.core.loader.jdbc.JdbcType;
-import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.schema.PgObjLocation;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
@@ -38,7 +36,7 @@ import java.util.List;
  */
 public class QueriesBatchCallable extends StatementCallable<String> {
 
-    private final List<PgObjLocation> batches;
+    private final List<ObjectLocation> batches;
     private final IMonitor monitor;
     private final Connection connection;
     private final IProgressReporter reporter;
@@ -56,7 +54,7 @@ public class QueriesBatchCallable extends StatementCallable<String> {
      * @param connection     database connection for batch operations
      * @param batchDelimiter batch delimiter for split
      */
-    public QueriesBatchCallable(Statement st, List<PgObjLocation> batches,
+    public QueriesBatchCallable(Statement st, List<ObjectLocation> batches,
                                 IMonitor monitor, IProgressReporter reporter,
                                 Connection connection, String batchDelimiter) {
         super(st, null);
@@ -70,7 +68,7 @@ public class QueriesBatchCallable extends StatementCallable<String> {
     @Override
     public String call() throws Exception {
         IMonitor subMonitor = monitor.createSubMonitor();
-        PgObjLocation currQuery = null;
+        ObjectLocation currQuery = null;
         String[] finalModifiedQuery = new String[1];
 
         try {
@@ -78,9 +76,9 @@ public class QueriesBatchCallable extends StatementCallable<String> {
                 reporter.writeDbName();
             }
 
-            List<List<PgObjLocation>> batchesList = getListBatchesFromSetBatches();
+            List<List<ObjectLocation>> batchesList = getListBatchesFromSetBatches();
             subMonitor.setWorkRemaining(batchesList.size());
-            for (List<PgObjLocation> queriesList : batchesList) {
+            for (List<ObjectLocation> queriesList : batchesList) {
                 IMonitor.checkCancelled(monitor);
                 // in case we're executing a real batch after a single-statement one
                 currQuery = null;
@@ -147,11 +145,11 @@ public class QueriesBatchCallable extends StatementCallable<String> {
         return Consts.JDBC_SUCCESS;
     }
 
-    private List<List<PgObjLocation>> getListBatchesFromSetBatches() {
-        List<List<PgObjLocation>> batchesList = new ArrayList<>();
-        List<PgObjLocation> currentBatch = new ArrayList<>();
+    private List<List<ObjectLocation>> getListBatchesFromSetBatches() {
+        List<List<ObjectLocation>> batchesList = new ArrayList<>();
+        List<ObjectLocation> currentBatch = new ArrayList<>();
 
-        for (PgObjLocation loc : batches) {
+        for (ObjectLocation loc : batches) {
             if (null == batchDelimiter) {
                 currentBatch.add(loc);
                 batchesList.add(currentBatch);
@@ -171,7 +169,7 @@ public class QueriesBatchCallable extends StatementCallable<String> {
         return batchesList;
     }
 
-    private void executeSingleStatement(PgObjLocation query, String[] finalModifiedQuery)
+    private void executeSingleStatement(ObjectLocation query, String[] finalModifiedQuery)
             throws SQLException, InterruptedException {
         String sql = query.getSql();
 
@@ -183,7 +181,7 @@ public class QueriesBatchCallable extends StatementCallable<String> {
         writeStatus(query.getAction());
     }
 
-    private void runBatch(List<PgObjLocation> queriesList)
+    private void runBatch(List<ObjectLocation> queriesList)
             throws SQLException {
         if (isAutoCommitEnabled) {
             connection.setAutoCommit(false);
@@ -194,7 +192,7 @@ public class QueriesBatchCallable extends StatementCallable<String> {
             reporter.writeMessage("Starting batch"); //$NON-NLS-1$
         }
 
-        for (PgObjLocation query : queriesList) {
+        for (ObjectLocation query : queriesList) {
             st.addBatch(query.getSql());
             writeStatus(query.getAction());
         }

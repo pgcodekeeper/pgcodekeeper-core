@@ -18,26 +18,28 @@ package org.pgcodekeeper.core.loader.jdbc.pg;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.Consts.FUNC_SIGN;
 import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.database.api.schema.ArgMode;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcType;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.VexContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.FuncProcAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.CreateAggregate;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.pg.AbstractPgFunction;
-import org.pgcodekeeper.core.schema.pg.PgAggregate;
-import org.pgcodekeeper.core.schema.pg.PgAggregate.AggFuncs;
-import org.pgcodekeeper.core.schema.pg.PgAggregate.AggKinds;
-import org.pgcodekeeper.core.schema.pg.PgAggregate.ModifyType;
-import org.pgcodekeeper.core.schema.pg.PgFunction;
-import org.pgcodekeeper.core.schema.pg.PgProcedure;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractFunction;
+import org.pgcodekeeper.core.database.pg.schema.PgAggregate;
+import org.pgcodekeeper.core.database.pg.schema.PgAggregate.AggFuncs;
+import org.pgcodekeeper.core.database.pg.schema.PgAggregate.AggKinds;
+import org.pgcodekeeper.core.database.pg.schema.PgAggregate.ModifyType;
+import org.pgcodekeeper.core.database.pg.schema.PgFunction;
+import org.pgcodekeeper.core.database.pg.schema.PgProcedure;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Pair;
 
@@ -77,9 +79,9 @@ public final class FunctionsReader extends JdbcReader {
         schema.addFunction(f);
     }
 
-    private AbstractPgFunction getFunc(ResultSet res, AbstractSchema schema, String funcName) throws SQLException {
+    private PgAbstractFunction getFunc(ResultSet res, AbstractSchema schema, String funcName) throws SQLException {
         boolean isProc = SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion()) && res.getBoolean("proisproc");
-        AbstractPgFunction function = isProc ? new PgProcedure(funcName) : new PgFunction(funcName);
+        PgAbstractFunction function = isProc ? new PgProcedure(funcName) : new PgFunction(funcName);
         loader.setCurrentObject(new GenericColumn(schema.getName(), funcName, function.getStatementType()));
 
         function.setLanguageCost(res.getString("lang_name"), res.getFloat("procost"));
@@ -90,7 +92,7 @@ public final class FunctionsReader extends JdbcReader {
         if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             String supportFunc = res.getString("support_func");
             if (!"-".equals(supportFunc)) {
-                setFunctionWithDep(AbstractPgFunction::setSupportFunc, function, supportFunc,
+                setFunctionWithDep(PgAbstractFunction::setSupportFunc, function, supportFunc,
                         FUNC_SIGN.INTERNAL.getName());
             }
 
@@ -157,7 +159,7 @@ public final class FunctionsReader extends JdbcReader {
         return function;
     }
 
-    private void fillTransform(AbstractPgFunction function, ResultSet res) throws SQLException {
+    private void fillTransform(PgAbstractFunction function, ResultSet res) throws SQLException {
         if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             Long[] protrftypes = getColArray(res, "protrftypes", true);
             if (protrftypes != null) {
@@ -168,7 +170,7 @@ public final class FunctionsReader extends JdbcReader {
         }
     }
 
-    private void fillDefaultValues(AbstractPgFunction function, AbstractDatabase db, ResultSet res)
+    private void fillDefaultValues(PgAbstractFunction function, AbstractDatabase db, ResultSet res)
             throws SQLException {
         String defaultValuesAsString = res.getString("default_values_as_string");
         if (defaultValuesAsString == null) {
@@ -184,7 +186,7 @@ public final class FunctionsReader extends JdbcReader {
                         if (!vexCtxListIterator.hasPrevious()) {
                             break;
                         }
-                        Argument a = function.getArguments().get(i);
+                        var a = function.getArguments().get(i);
                         if (a.getMode().isIn()) {
                             VexContext vx = vexCtxListIterator.previous();
                             a.setDefaultExpression(ParserAbstract.getFullCtxText(vx));
@@ -195,7 +197,7 @@ public final class FunctionsReader extends JdbcReader {
                 });
     }
 
-    private void fillConfiguration(AbstractPgFunction function, ResultSet res) throws SQLException {
+    private void fillConfiguration(PgAbstractFunction function, ResultSet res) throws SQLException {
         String[] proconfig = getColArray(res, "proconfig", true);
         if (proconfig == null) {
             return;
@@ -232,7 +234,7 @@ public final class FunctionsReader extends JdbcReader {
         }
     }
 
-    private void fillBody(AbstractPgFunction function, AbstractDatabase db, ResultSet res) throws SQLException {
+    private void fillBody(PgAbstractFunction function, AbstractDatabase db, ResultSet res) throws SQLException {
         List<Pair<String, GenericColumn>> argsQualTypes = fillArguments(function, res);
 
         String body = "";
@@ -333,8 +335,8 @@ public final class FunctionsReader extends JdbcReader {
                 // that are not constrained to match the aggregated arguments.
 
                 // last argument must be VARIADIC "any"
-                List<Argument> args = aggregate.getArguments();
-                aggregate.addArgument(args.get(args.size() - 1));
+                var args = aggregate.getArguments();
+                aggregate.addArgument((Argument) args.get(args.size() - 1));
             }
         }
 
@@ -453,7 +455,7 @@ public final class FunctionsReader extends JdbcReader {
      * Returns a list of pairs, each of which contains the name of the argument and its full type name in GenericColumn
      * object (typeSchema, typeName, DbObjType.TYPE).
      */
-    private List<Pair<String, GenericColumn>> fillArguments(AbstractPgFunction f,
+    private List<Pair<String, GenericColumn>> fillArguments(PgAbstractFunction f,
                                                             ResultSet res) throws SQLException {
         StringBuilder sb = new StringBuilder();
         String[] argModes = getColArray(res, "proargmodes", true);

@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.formatter;
 
-import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.formatter.ch.ChFormatter;
 import org.pgcodekeeper.core.formatter.ms.MsFormatter;
 import org.pgcodekeeper.core.formatter.pg.PgFormatter;

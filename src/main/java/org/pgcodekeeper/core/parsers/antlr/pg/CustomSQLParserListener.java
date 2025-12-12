@@ -25,7 +25,7 @@ import org.pgcodekeeper.core.parsers.antlr.base.AntlrTask;
 import org.pgcodekeeper.core.parsers.antlr.base.CustomParserListener;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.*;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.List;

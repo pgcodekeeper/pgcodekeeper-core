@@ -15,12 +15,15 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
+import java.io.Serial;
+
 /**
  * Exception indicating that a {@code DbObjType} object
  * is not allowed in the current context.
  */
 public class NotAllowedObjectException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = -283715845801619786L;
 
     /**

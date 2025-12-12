@@ -16,17 +16,17 @@
 package org.pgcodekeeper.core.model.graph;
 
 import org.pgcodekeeper.core.*;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.ms.MsColumn;
-import org.pgcodekeeper.core.schema.ms.MsConstraintPk;
-import org.pgcodekeeper.core.schema.ms.MsTable;
-import org.pgcodekeeper.core.schema.ms.MsView;
-import org.pgcodekeeper.core.schema.pg.PartitionPgTable;
-import org.pgcodekeeper.core.schema.pg.PgColumn;
-import org.pgcodekeeper.core.schema.pg.PgSequence;
+import org.pgcodekeeper.core.database.ms.schema.MsColumn;
+import org.pgcodekeeper.core.database.ms.schema.MsConstraintPk;
+import org.pgcodekeeper.core.database.ms.schema.MsTable;
+import org.pgcodekeeper.core.database.ms.schema.MsView;
+import org.pgcodekeeper.core.database.pg.schema.PgPartitionTable;
+import org.pgcodekeeper.core.database.pg.schema.PgColumn;
+import org.pgcodekeeper.core.database.pg.schema.PgSequence;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
@@ -68,13 +68,13 @@ public final class ActionsToScriptConverter {
     private final SQLScript script;
     private final ISettings settings;
     private final Set<ActionContainer> actions;
-    private final Set<PgStatement> toRefresh;
-    private final AbstractDatabase oldDbFull;
-    private final AbstractDatabase newDbFull;
+    private final Set<IStatement> toRefresh;
+    private final IDatabase oldDbFull;
+    private final IDatabase newDbFull;
 
     private final Map<ActionContainer, List<ActionContainer>> joinableTableActions = new HashMap<>();
     private final Set<ActionContainer> toSkip = new HashSet<>();
-    private final Set<PgStatement> droppedObjects = new HashSet<>();
+    private final Set<IStatement> droppedObjects = new HashSet<>();
 
     /**
      * renamed table qualified names and their temporary (simple) names
@@ -88,7 +88,7 @@ public final class ActionsToScriptConverter {
     /**
      * map where key - parent table and values - children tables
      */
-    private Map<String, List<PartitionPgTable>> partitionTables;
+    private Map<String, List<PgPartitionTable>> partitionTables;
 
     private List<String> partitionChildren;
 
@@ -104,8 +104,8 @@ public final class ActionsToScriptConverter {
      * @param selected  list of user-selected tree elements for filtering actions
      */
     public static void fillScript(SQLScript script,
-                                  Set<ActionContainer> actions, Set<PgStatement> toRefresh,
-                                  AbstractDatabase oldDbFull, AbstractDatabase newDbFull, List<TreeElement> selected) {
+                                  Set<ActionContainer> actions, Set<IStatement> toRefresh,
+                                  IDatabase oldDbFull, IDatabase newDbFull, List<TreeElement> selected) {
         new ActionsToScriptConverter(script, actions, toRefresh, oldDbFull, newDbFull).fillScript(selected);
     }
 
@@ -120,7 +120,7 @@ public final class ActionsToScriptConverter {
      * @param newDbFull the complete new database schema for reference and data movement
      */
     public ActionsToScriptConverter(SQLScript script, Set<ActionContainer> actions,
-                                    Set<PgStatement> toRefresh, AbstractDatabase oldDbFull, AbstractDatabase newDbFull) {
+                                    Set<IStatement> toRefresh, IDatabase oldDbFull, IDatabase newDbFull) {
         this.script = script;
         this.actions = actions;
         this.toRefresh = toRefresh;
@@ -141,7 +141,7 @@ public final class ActionsToScriptConverter {
      * @param selected list of user-selected tree elements for filtering actions
      */
     private void fillScript(List<TreeElement> selected) {
-        Set<PgStatement> refreshed = new HashSet<>(toRefresh.size());
+        Set<IStatement> refreshed = new HashSet<>(toRefresh.size());
         if (settings.isDataMovementMode()) {
             fillPartitionTables();
         }
@@ -152,7 +152,7 @@ public final class ActionsToScriptConverter {
                 continue;
             }
 
-            PgStatement obj = action.getOldObj();
+            var obj = action.getOldObj();
 
             if (toRefresh.contains(obj)) {
                 if (action.getState() == ObjectState.CREATE && obj instanceof MsView) {
@@ -175,9 +175,9 @@ public final class ActionsToScriptConverter {
         //
         // if any refreshes were not emitted as statement replacements
         // add them explicitly in reverse order (the resolver adds them in "drop order")
-        PgStatement[] orphanRefreshes = toRefresh.stream()
+        IStatement[] orphanRefreshes = toRefresh.stream()
                 .filter(r -> r instanceof MsView && !refreshed.contains(r))
-                .toArray(PgStatement[]::new);
+                .toArray(IStatement[]::new);
         for (int i = orphanRefreshes.length - 1; i >= 0; --i) {
             script.addStatement(REFRESH_MODULE.formatted(
                     PgDiffUtils.quoteString(orphanRefreshes[i].getQualifiedName())));
@@ -227,7 +227,7 @@ public final class ActionsToScriptConverter {
         }
     }
 
-    private void printAction(ActionContainer action, PgStatement obj) {
+    private void printAction(ActionContainer action, IStatement obj) {
         String depcy = getComment(action, obj);
         switch (action.getState()) {
             case CREATE:
@@ -287,7 +287,7 @@ public final class ActionsToScriptConverter {
         }
     }
 
-    private void checkMsTableOptions(PgStatement obj) {
+    private void checkMsTableOptions(IStatement obj) {
         if (obj instanceof MsConstraintPk && obj.getParent() instanceof MsTable oldTable) {
             MsTable newTable = (MsTable) oldTable.getTwin(newDbFull);
             if (oldTable.compare(newTable)) {
@@ -296,11 +296,11 @@ public final class ActionsToScriptConverter {
         }
     }
 
-    private void addToAddScript(PgStatement obj) {
+    private void addToAddScript(IStatement obj) {
         obj.getCreationSQL(script);
     }
 
-    private void addToDropScript(PgStatement obj, boolean isExist) {
+    private void addToDropScript(IStatement obj, boolean isExist) {
         // check "drop before create"
         if (!droppedObjects.add(obj.getTwin(oldDbFull))) {
             return;
@@ -327,20 +327,20 @@ public final class ActionsToScriptConverter {
 
     private void fillPartitionTables() {
         for (ActionContainer action : actions) {
-            PgStatement obj = action.getOldObj();
+            var obj = action.getOldObj();
 
-            if (action.getState() == ObjectState.CREATE && obj instanceof PartitionPgTable table) {
+            if (action.getState() == ObjectState.CREATE && obj instanceof PgPartitionTable table) {
                 partitionTables.computeIfAbsent(table.getParentTable(), tables -> new ArrayList<>()).add(table);
             }
         }
 
-        Iterator<Entry<String, List<PartitionPgTable>>> iterator = partitionTables.entrySet().iterator();
+        Iterator<Entry<String, List<PgPartitionTable>>> iterator = partitionTables.entrySet().iterator();
         while (iterator.hasNext()) {
-            Entry<String, List<PartitionPgTable>> next = iterator.next();
+            Entry<String, List<PgPartitionTable>> next = iterator.next();
             String parent = next.getKey();
-            for (Entry<String, List<PartitionPgTable>> partitions : partitionTables.entrySet()) {
-                List<PartitionPgTable> tables = partitions.getValue();
-                if (tables.stream().map(PgStatement::getQualifiedName).anyMatch(el -> el.equals(parent))) {
+            for (Entry<String, List<PgPartitionTable>> partitions : partitionTables.entrySet()) {
+                List<PgPartitionTable> tables = partitions.getValue();
+                if (tables.stream().map(AbstractStatement::getQualifiedName).anyMatch(el -> el.equals(parent))) {
                     tables.addAll(next.getValue());
                     iterator.remove();
                     break;
@@ -350,21 +350,21 @@ public final class ActionsToScriptConverter {
 
         partitionChildren = partitionTables.values().stream()
                 .flatMap(List::stream)
-                .map(PgStatement::getQualifiedName)
+                .map(AbstractStatement::getQualifiedName)
                 .toList();
     }
 
-    private void moveData(AbstractTable oldTable, PgStatement newObj) {
+    private void moveData(AbstractTable oldTable, IStatement newObj) {
         String qname = newObj.getQualifiedName();
         String tempName = tblTmpNames.get(qname);
         if (tempName == null) {
             return;
         }
 
-        List<PartitionPgTable> tables = partitionTables.get(qname);
+        List<PgPartitionTable> tables = partitionTables.get(qname);
         if (tables != null) {
             // print create for partition tables
-            for (PartitionPgTable table : tables) {
+            for (PgPartitionTable table : tables) {
                 addToAddScript(table);
             }
         }
@@ -372,7 +372,7 @@ public final class ActionsToScriptConverter {
         oldTable.appendMoveDataSql(newObj, script, tempName, tblIdentityCols.get(qname));
 
         if (tables != null) {
-            List<PartitionPgTable> list = new ArrayList<>(tables);
+            List<PgPartitionTable> list = new ArrayList<>(tables);
             Collections.reverse(list);
             list.forEach(this::printDropTempTable);
         }
@@ -391,8 +391,8 @@ public final class ActionsToScriptConverter {
         }
     }
 
-    private String getComment(ActionContainer action, PgStatement oldObj) {
-        PgStatement objStarter = action.getStarter();
+    private String getComment(ActionContainer action, IStatement oldObj) {
+        IStatement objStarter = action.getStarter();
         if (objStarter == null || objStarter == oldObj || objStarter == action.getNewObj()) {
             return null;
         }
@@ -425,7 +425,7 @@ public final class ActionsToScriptConverter {
      * @return true if action should be hidden, false if it may be executed
      */
     private boolean hideAction(ActionContainer action, List<TreeElement> selected) {
-        PgStatement obj = action.getOldObj();
+        var obj = action.getOldObj();
         if (action.getState() == ObjectState.DROP && !obj.canDrop()) {
             addHiddenObj(action, "object cannot be dropped");
             return true;
@@ -453,7 +453,7 @@ public final class ActionsToScriptConverter {
     }
 
     private void addHiddenObj(ActionContainer action, String reason) {
-        PgStatement old = action.getOldObj();
+        var old = action.getOldObj();
         String message = HIDDEN_OBJECT.formatted(
                 old.getQualifiedName(), old.getStatementType(), action.getState(), reason);
         script.addStatement(message);
@@ -467,11 +467,11 @@ public final class ActionsToScriptConverter {
      * @return true if the action object was selected in the diff panel, false otherwise
      */
     private boolean isSelectedAction(ActionContainer action, List<TreeElement> selected) {
-        Predicate<PgStatement> isSelectedObj = obj ->
+        Predicate<IStatement> isSelectedObj = obj ->
                 selected.stream()
                         .filter(e -> e.getType().equals(obj.getStatementType()))
                         .filter(e -> e.getName().equals(obj.getName()))
-                        .map(e -> e.getPgStatement(obj.getDatabase()))
+                        .map(e -> e.getStatement(obj.getDatabase()))
                         .anyMatch(obj::equals);
 
         return switch (action.getState()) {
@@ -536,7 +536,7 @@ public final class ActionsToScriptConverter {
         }
     }
 
-    private String getTempName(PgStatement st) {
+    private String getTempName(AbstractStatement st) {
         String tmpSuffix = '_' + UUID.randomUUID().toString().replace("-", "");
         String name = st.getName();
         if (name.length() > 30) {
@@ -553,7 +553,7 @@ public final class ActionsToScriptConverter {
      * @param newName the new name for given object
      * @return sql command to rename the given object
      */
-    private String getRenameCommand(PgStatement st, String newName) {
+    private String getRenameCommand(AbstractStatement st, String newName) {
         return switch (settings.getDbType()) {
             case PG -> RENAME_PG_OBJECT.formatted(
                     st.getStatementType(), st.getQualifiedName(), PgDiffUtils.getQuotedName(newName));

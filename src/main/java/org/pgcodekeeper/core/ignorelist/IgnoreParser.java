@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.ignorelist;
 
 import org.antlr.v4.runtime.RuleContext;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
 import org.pgcodekeeper.core.parsers.antlr.base.generated.IgnoreListParser;
 import org.pgcodekeeper.core.parsers.antlr.base.generated.IgnoreListParser.*;

@@ -16,9 +16,9 @@
 package org.pgcodekeeper.core.parsers.antlr.ms.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.ms.schema.*;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.*;
-import org.pgcodekeeper.core.schema.ms.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Arrays;

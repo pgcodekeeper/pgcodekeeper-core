@@ -16,17 +16,16 @@
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.AlterTable;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.PgStatementContainer;
-import org.pgcodekeeper.core.schema.pg.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.utils.Pair;
 
 import java.sql.ResultSet;
@@ -56,7 +55,7 @@ public final class ConstraintsReader extends JdbcReader {
         }
 
         String tableName = res.getString("relname");
-        PgStatementContainer cont = schema.getStatementContainer(tableName);
+        var cont = schema.getStatementContainer(tableName);
         if (cont == null) {
             return;
         }

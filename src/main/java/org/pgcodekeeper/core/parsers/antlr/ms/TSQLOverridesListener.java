@@ -22,9 +22,9 @@ import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.ms.statement.AlterMsAuthorization;
 import org.pgcodekeeper.core.parsers.antlr.ms.statement.GrantMsPrivilege;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.StatementOverride;
-import org.pgcodekeeper.core.schema.ms.MsDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.StatementOverride;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.monitor.IMonitor;
 
@@ -39,7 +39,7 @@ import java.util.function.BiFunction;
 public final class TSQLOverridesListener extends CustomParserListener<MsDatabase>
         implements TSqlContextProcessor {
 
-    private final Map<PgStatement, StatementOverride> overrides;
+    private final Map<AbstractStatement, StatementOverride> overrides;
 
     /**
      * Creates a new T-SQL listener with override support.
@@ -53,7 +53,7 @@ public final class TSQLOverridesListener extends CustomParserListener<MsDatabase
      * @param settings  application settings
      */
     public TSQLOverridesListener(MsDatabase db, String filename, ParserListenerMode mode, List<Object> errors,
-                                 IMonitor mon, Map<PgStatement, StatementOverride> overrides, ISettings settings) {
+                                 IMonitor mon, Map<AbstractStatement, StatementOverride> overrides, ISettings settings) {
         super(db, filename, mode, errors, mon, settings);
         this.overrides = overrides;
     }
@@ -120,7 +120,7 @@ public final class TSQLOverridesListener extends CustomParserListener<MsDatabase
         }
     }
 
-    private <R extends PgStatement> void computeOverride(
+    private <R extends AbstractStatement> void computeOverride(
             BiFunction<MsDatabase, String, R> getter, IdContext nameCtx, IdContext ownerCtx) {
         String name = nameCtx.getText();
         R statement = getter.apply(db, name);

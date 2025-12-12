@@ -17,17 +17,17 @@ package org.pgcodekeeper.core.parsers.antlr.pg.expr;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.SelectOps;
 import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.SelectStmt;
 import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.Vex;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.PgParserAbstract;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.IConstraint;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.IConstraint;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 import org.pgcodekeeper.core.utils.Pair;
 
@@ -375,13 +375,13 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
         }
 
         // add dependencies to primary key
-        for (PgObjLocation dep : child.getDependencies()) {
+        for (ObjectLocation dep : child.getDependencies()) {
             vex.addDepcy(dep);
             addPrimaryKeyDepcy(dep, vex);
         }
     }
 
-    private void addPrimaryKeyDepcy(PgObjLocation dep, ValueExpr vex) {
+    private void addPrimaryKeyDepcy(ObjectLocation dep, ValueExpr vex) {
         if (dep.getType() != DbObjType.COLUMN) {
             return;
         }

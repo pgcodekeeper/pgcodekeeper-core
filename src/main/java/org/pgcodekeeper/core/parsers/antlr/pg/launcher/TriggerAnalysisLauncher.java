@@ -18,9 +18,9 @@ package org.pgcodekeeper.core.parsers.antlr.pg.launcher;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.expr.ValueExprWithNmspc;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.VexContext;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
-import org.pgcodekeeper.core.schema.pg.PgTrigger;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.pg.schema.PgTrigger;
 
 import java.util.Set;
 
@@ -42,7 +42,7 @@ public class TriggerAnalysisLauncher extends AbstractPgAnalysisLauncher {
     }
 
     @Override
-    public Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
         ValueExprWithNmspc vex = new ValueExprWithNmspc(meta);
         return analyzeTableChild((VexContext) ctx, vex);
     }

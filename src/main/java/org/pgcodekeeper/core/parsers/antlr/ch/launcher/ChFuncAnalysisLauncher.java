@@ -16,13 +16,13 @@
 package org.pgcodekeeper.core.parsers.antlr.ch.launcher;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.launcher.AbstractAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.ch.expr.ChValueExpr;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.ExprContext;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.ch.ChFunction;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.ch.schema.ChFunction;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -50,7 +50,7 @@ public final class ChFuncAnalysisLauncher extends AbstractAnalysisLauncher {
     }
 
     @Override
-    public Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
         ChValueExpr expr = new ChValueExpr(meta);
         expr.analyze((ExprContext) ctx);
         return expr.getDependencies();

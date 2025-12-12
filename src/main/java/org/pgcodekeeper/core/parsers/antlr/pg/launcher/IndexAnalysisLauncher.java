@@ -20,9 +20,9 @@ import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Index_columnCo
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Index_restContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Storage_parameter_optionContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Storage_parametersContext;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
-import org.pgcodekeeper.core.schema.pg.PgIndex;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.pg.schema.PgIndex;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -54,8 +54,8 @@ public class IndexAnalysisLauncher extends AbstractPgAnalysisLauncher {
      * @return set of object locations referenced in the index definition
      */
     @Override
-    public Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
-        Set<PgObjLocation> depcies = new LinkedHashSet<>();
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+        Set<ObjectLocation> depcies = new LinkedHashSet<>();
         Index_restContext rest = (Index_restContext) ctx;
 
         for (Index_columnContext c : rest.index_columns().index_column()) {

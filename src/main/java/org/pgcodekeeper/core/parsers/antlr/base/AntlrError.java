@@ -18,11 +18,14 @@ package org.pgcodekeeper.core.parsers.antlr.base;
 import org.antlr.v4.runtime.Token;
 import org.pgcodekeeper.core.ContextLocation;
 
+import java.io.Serial;
+
 /**
  * Represents an error found during ANTLR parsing with location information
  */
 public class AntlrError extends ContextLocation {
 
+    @Serial
     private static final long serialVersionUID = 3133510141858228651L;
 
     private final String msg;

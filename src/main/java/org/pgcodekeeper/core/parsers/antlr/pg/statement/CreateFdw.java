@@ -15,13 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Create_foreign_data_wrapper_statementContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Define_foreign_optionsContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Foreign_optionContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.IdentifierContext;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgForeignDataWrapper;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgForeignDataWrapper;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.List;

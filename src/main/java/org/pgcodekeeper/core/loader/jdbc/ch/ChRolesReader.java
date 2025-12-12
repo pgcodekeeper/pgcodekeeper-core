@@ -18,11 +18,10 @@ package org.pgcodekeeper.core.loader.jdbc.ch;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
-import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
-import org.pgcodekeeper.core.schema.ch.ChRole;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.database.ch.schema.ChRole;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -47,7 +46,7 @@ public final class ChRolesReader extends AbstractStatementReader {
     }
 
     @Override
-    protected void processResult(ResultSet result) throws SQLException, XmlReaderException {
+    protected void processResult(ResultSet result) throws SQLException {
         String name = result.getString("name");
         loader.setCurrentObject(new GenericColumn(name, DbObjType.ROLE));
 

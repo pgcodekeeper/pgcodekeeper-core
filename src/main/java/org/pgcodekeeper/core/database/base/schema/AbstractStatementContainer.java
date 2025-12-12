@@ -1,0 +1,264 @@
+/*******************************************************************************
+ * Copyright 2017-2025 TAXTELECOM, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+package org.pgcodekeeper.core.database.base.schema;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.hasher.Hasher;
+
+import java.util.*;
+
+/**
+ * Abstract base class for database objects that can contain other statements.
+ * Provides common functionality for containers like tables and views that can have
+ * indexes, triggers, rules, policies, and constraints as child objects.
+ */
+public abstract class AbstractStatementContainer extends AbstractStatement
+        implements IRelation, IStatementContainer, ISearchPath {
+
+    private final Map<String, AbstractIndex> indexes = new LinkedHashMap<>();
+    private final Map<String, AbstractTrigger> triggers = new LinkedHashMap<>();
+    private final Map<String, AbstractRule> rules = new LinkedHashMap<>();
+    private final Map<String, AbstractPolicy> policies = new LinkedHashMap<>();
+
+    protected AbstractStatementContainer(String name) {
+        super(name);
+    }
+
+    @Override
+    protected void fillChildrenList(List<Collection<? extends AbstractStatement>> l) {
+        l.add(indexes.values());
+        l.add(triggers.values());
+        l.add(rules.values());
+        l.add(policies.values());
+    }
+
+    @Override
+    public AbstractStatement getChild(String name, DbObjType type) {
+        return switch (type) {
+            case INDEX -> getIndex(name);
+            case TRIGGER -> getTrigger(name);
+            case RULE -> getRule(name);
+            case CONSTRAINT -> getConstraint(name);
+            case POLICY -> getPolicy(name);
+            default -> null;
+        };
+    }
+
+    @Override
+    public void addChild(IStatement st) {
+        DbObjType type = st.getStatementType();
+        switch (type) {
+            case INDEX:
+                addIndex((AbstractIndex) st);
+                break;
+            case CONSTRAINT:
+                addConstraint((AbstractConstraint) st);
+                break;
+            case TRIGGER:
+                addTrigger((AbstractTrigger) st);
+                break;
+            case RULE:
+                addRule((AbstractRule) st);
+                break;
+            case POLICY:
+                addPolicy((AbstractPolicy) st);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported child type: " + type);
+        }
+    }
+
+    /**
+     * Checks if this container has any clustered indexes or constraints.
+     */
+    public final boolean isClustered() {
+        for (AbstractIndex ind : getIndexes()) {
+            if (ind.isClustered) {
+                return true;
+            }
+        }
+
+        for (AbstractConstraint constr : getConstraints()) {
+            if (constr instanceof IConstraintPk pk && pk.isClustered()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Finds constraint according to specified constraint {@code name}.
+     *
+     * @param name name of the constraint to be searched
+     * @return found constraint or null if no such constraint has been found
+     */
+    public abstract AbstractConstraint getConstraint(final String name);
+
+    /**
+     * Finds index according to specified index {@code name}.
+     *
+     * @param name name of the index to be searched
+     * @return found index or null if no such index has been found
+     */
+    public AbstractIndex getIndex(final String name) {
+        return getChildByName(indexes, name);
+    }
+
+    /**
+     * Finds trigger according to specified trigger {@code name}.
+     *
+     * @param name name of the trigger to be searched
+     * @return found trigger or null if no such trigger has been found
+     */
+    public AbstractTrigger getTrigger(final String name) {
+        return getChildByName(triggers, name);
+    }
+
+    /**
+     * Finds rule according to specified rule {@code name}.
+     *
+     * @param name name of the rule to be searched
+     * @return found rule or null if no such rule has been found
+     */
+    public AbstractRule getRule(final String name) {
+        return getChildByName(rules, name);
+    }
+
+    /**
+     * Finds policy according to specified policy {@code name}.
+     *
+     * @param name name of the policy to be searched
+     * @return found policy or null if no such policy has been found
+     */
+    public AbstractPolicy getPolicy(String name) {
+        return getChildByName(policies, name);
+    }
+
+    public abstract Collection<AbstractConstraint> getConstraints();
+
+    /**
+     * Getter for {@link #indexes}. The list cannot be modified.
+     *
+     * @return {@link #indexes}
+     */
+    public Collection<AbstractIndex> getIndexes() {
+        return Collections.unmodifiableCollection(indexes.values());
+    }
+
+    /**
+     * Getter for {@link #triggers}. The list cannot be modified.
+     *
+     * @return {@link #triggers}
+     */
+    public Collection<AbstractTrigger> getTriggers() {
+        return Collections.unmodifiableCollection(triggers.values());
+    }
+
+    /**
+     * Getter for {@link #rules}. The list cannot be modified.
+     *
+     * @return {@link #rules}
+     */
+    public Collection<AbstractRule> getRules() {
+        return Collections.unmodifiableCollection(rules.values());
+    }
+
+    /**
+     * Getter for {@link #policies}. The list cannot be modified.
+     *
+     * @return {@link #policies}
+     */
+    public Collection<AbstractPolicy> getPolicies() {
+        return Collections.unmodifiableCollection(policies.values());
+    }
+
+    /**
+     * Adds a constraint to this container.
+     *
+     * @param constraint the constraint to add
+     */
+    public abstract void addConstraint(final AbstractConstraint constraint);
+
+    /**
+     * Adds an index to this container.
+     *
+     * @param index the index to add
+     */
+    public void addIndex(final AbstractIndex index) {
+        addUnique(indexes, index);
+    }
+
+    /**
+     * Adds a trigger to this container.
+     *
+     * @param trigger the trigger to add
+     */
+    public void addTrigger(final AbstractTrigger trigger) {
+        addUnique(triggers, trigger);
+    }
+
+    /**
+     * Adds a rule to this container.
+     *
+     * @param rule the rule to add
+     */
+    public void addRule(final AbstractRule rule) {
+        addUnique(rules, rule);
+    }
+
+    /**
+     * Adds a policy to this container.
+     *
+     * @param policy the policy to add
+     */
+    public void addPolicy(AbstractPolicy policy) {
+        addUnique(policies, policy);
+    }
+
+    @Override
+    public boolean compareChildren(AbstractStatement obj) {
+        if (obj instanceof AbstractStatementContainer table) {
+            return indexes.equals(table.indexes)
+                    && triggers.equals(table.triggers)
+                    && rules.equals(table.rules)
+                    && policies.equals(table.policies);
+        }
+        return false;
+    }
+
+    @Override
+    public void computeChildrenHash(Hasher hasher) {
+        hasher.putUnordered(indexes);
+        hasher.putUnordered(triggers);
+        hasher.putUnordered(rules);
+        hasher.putUnordered(policies);
+    }
+
+    @Override
+    public AbstractStatementContainer shallowCopy() {
+        AbstractStatementContainer copy = getCopy();
+        copyBaseFields(copy);
+        return copy;
+    }
+
+    protected abstract AbstractStatementContainer getCopy();
+
+    @Override
+    public AbstractSchema getContainingSchema() {
+        return (AbstractSchema) this.getParent();
+    }
+}

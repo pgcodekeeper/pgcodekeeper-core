@@ -16,16 +16,16 @@
 package org.pgcodekeeper.core.parsers.antlr.ch.statement;
 
 import org.pgcodekeeper.core.ChDiffUtils;
-import org.pgcodekeeper.core.DatabaseType;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Columns_permissionsContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.IdentifierContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Privilegy_stmtContext;
 import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
-import org.pgcodekeeper.core.schema.PgPrivilege;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.StatementOverride;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
+import org.pgcodekeeper.core.database.api.schema.ObjectPrivilege;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.StatementOverride;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -41,7 +41,7 @@ public final class GrantChPrivilege extends ChParserAbstract {
 
     private final Privilegy_stmtContext ctx;
     private final String state;
-    private final Map<PgStatement, StatementOverride> overrides;
+    private final Map<AbstractStatement, StatementOverride> overrides;
 
     /**
      * Creates a parser for ClickHouse GRANT/REVOKE privilege statements.
@@ -51,7 +51,7 @@ public final class GrantChPrivilege extends ChParserAbstract {
      * @param overrides map of statement overrides for privilege modifications
      * @param settings  parsing configuration settings
      */
-    public GrantChPrivilege(Privilegy_stmtContext ctx, ChDatabase db, Map<PgStatement, StatementOverride> overrides,
+    public GrantChPrivilege(Privilegy_stmtContext ctx, ChDatabase db, Map<AbstractStatement, StatementOverride> overrides,
                             ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -87,14 +87,14 @@ public final class GrantChPrivilege extends ChParserAbstract {
             // 1 privilege for each user or role
             for (var user : usersOrRoles) {
                 var userName = user.getText();
-                PgStatement st = getStatement(userName);
+                AbstractStatement st = getStatement(userName);
                 if (st == null) {
                     continue;
                 }
                 addObjReference(List.of(user), st.getStatementType(), state);
                 // 1 privilege for each permission
                 for (String per : permissions) {
-                    addPrivilege(st, new PgPrivilege(state, per, objectName,
+                    addPrivilege(st, new ObjectPrivilege(state, per, objectName,
                             ChDiffUtils.getQuotedName(userName), isGrantOption, DatabaseType.CH));
                 }
             }
@@ -132,15 +132,15 @@ public final class GrantChPrivilege extends ChParserAbstract {
                 }
 
                 addObjReference(List.of(user), st.getStatementType(), state);
-                addPrivilege(st, new PgPrivilege(state, permission.toString(), objectName,
+                addPrivilege(st, new ObjectPrivilege(state, permission.toString(), objectName,
                         userName, isGrantOption, DatabaseType.CH));
             }
         }
     }
 
     // get user or role statement
-    private PgStatement getStatement(String name) {
-        PgStatement st = db.getChild(name, DbObjType.USER);
+    private AbstractStatement getStatement(String name) {
+        AbstractStatement st = db.getChild(name, DbObjType.USER);
         return st != null ? st : db.getChild(name, DbObjType.ROLE);
     }
 
@@ -157,7 +157,7 @@ public final class GrantChPrivilege extends ChParserAbstract {
         return usersOrRoles;
     }
 
-    private void addPrivilege(PgStatement st, PgPrivilege privilege) {
+    private void addPrivilege(AbstractStatement st, ObjectPrivilege privilege) {
         if (overrides == null) {
             st.addPrivilege(privilege);
         } else {

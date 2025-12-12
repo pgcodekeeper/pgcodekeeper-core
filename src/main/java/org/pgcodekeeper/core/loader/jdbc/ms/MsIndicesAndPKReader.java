@@ -16,16 +16,19 @@
 package org.pgcodekeeper.core.loader.jdbc.ms;
 
 import org.pgcodekeeper.core.MsDiffUtils;
+import org.pgcodekeeper.core.database.api.schema.ISimpleColumnContainer;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.base.schema.SimpleColumn;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
 import org.pgcodekeeper.core.loader.ms.SupportedMsVersion;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.ms.MsConstraintPk;
-import org.pgcodekeeper.core.schema.ms.MsIndex;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.ms.schema.MsConstraintPk;
+import org.pgcodekeeper.core.database.ms.schema.MsIndex;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -115,7 +118,7 @@ public class MsIndicesAndPKReader extends JdbcReader {
                 simpleCol.setDesc(isDesc);
                 stmt.addColumn(simpleCol);
             }
-            ((PgStatement) stmt).addDep(new GenericColumn(schema, parent, colName, DbObjType.COLUMN));
+            stmt.addDependency(new GenericColumn(schema, parent, colName, DbObjType.COLUMN));
         }
     }
 

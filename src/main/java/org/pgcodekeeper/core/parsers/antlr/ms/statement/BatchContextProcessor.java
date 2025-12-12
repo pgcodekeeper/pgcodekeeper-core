@@ -20,9 +20,9 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.Interval;
 import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.SourceStatement;
-import org.pgcodekeeper.core.schema.ms.MsDatabase;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.ms.schema.MsSourceStatement;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.List;
@@ -50,7 +50,7 @@ public abstract class BatchContextProcessor extends MsParserAbstract {
      */
     protected abstract ParserRuleContext getDelimiterCtx();
 
-    protected void setSourceParts(SourceStatement st) {
+    protected void setSourceParts(MsSourceStatement st) {
         String first = getHiddenLeftCtxText(batchCtx, stream);
         st.setFirstPart(checkNewLines(first));
 
@@ -63,7 +63,7 @@ public abstract class BatchContextProcessor extends MsParserAbstract {
     }
 
     @Override
-    protected PgObjLocation fillQueryLocation(ParserRuleContext ctx) {
+    protected ObjectLocation fillQueryLocation(ParserRuleContext ctx) {
         String act = getStmtAction();
         List<Token> startTokens = stream.getHiddenTokensToLeft(ctx.getStart().getTokenIndex());
         List<Token> stopTokens = stream.getHiddenTokensToRight(ctx.getStop().getTokenIndex());
@@ -76,7 +76,7 @@ public abstract class BatchContextProcessor extends MsParserAbstract {
         int lineNumber = cuStart.getLine();
         int charPositionInLine = cuStart.getCodeUnitPositionInLine();
 
-        PgObjLocation loc = new PgObjLocation.Builder()
+        ObjectLocation loc = new ObjectLocation.Builder()
                 .setAction(action)
                 .setOffset(offset)
                 .setLineNumber(lineNumber)

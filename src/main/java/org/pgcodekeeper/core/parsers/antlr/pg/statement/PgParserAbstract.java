@@ -19,14 +19,14 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.PgObjLocation.LocationType;
-import org.pgcodekeeper.core.schema.pg.*;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Pair;
 
@@ -69,7 +69,7 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
             } else {
                 simpCol = new SimpleColumn(getFullCtxText(col.column.vex()));
                 simpCol.setCollation(getFullCtxText(collate.collation));
-                addDepSafe((PgStatement) cont, getIdentifiers(collate.collation), DbObjType.COLLATION);
+                addDepSafe((AbstractStatement) cont, getIdentifiers(collate.collation), DbObjType.COLLATION);
             }
 
             var opClass = col.operator_class;
@@ -116,13 +116,13 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
         }
     }
 
-    protected static void fillIncludingDepcy(Including_indexContext incl, PgStatement st, String schema, String table) {
+    protected static void fillIncludingDepcy(Including_indexContext incl, AbstractStatement st, String schema, String table) {
         for (IdentifierContext inclCol : incl.identifier()) {
-            st.addDep(new GenericColumn(schema, table, inclCol.getText(), DbObjType.COLUMN));
+            st.addDependency(new GenericColumn(schema, table, inclCol.getText(), DbObjType.COLUMN));
         }
     }
 
-    protected void addTypeDepcy(Data_typeContext ctx, PgStatement st) {
+    protected void addTypeDepcy(Data_typeContext ctx, AbstractStatement st) {
         Schema_qualified_name_nontypeContext qname = ctx.predefined_type().schema_qualified_name_nontype();
         if (qname != null && qname.identifier() != null) {
             addDepSafe(st, getIdentifiers(qname), DbObjType.TYPE);
@@ -135,7 +135,7 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
      * @param owner parser context with owner
      * @param st    object
      */
-    protected void fillOwnerTo(IdentifierContext owner, PgStatement st) {
+    protected void fillOwnerTo(IdentifierContext owner, AbstractStatement st) {
         if (owner == null || settings.isIgnorePrivileges() || isRefMode()) {
             return;
         }
@@ -345,7 +345,7 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
      * @return the formatted function signature string
      */
     public static String parseSignature(String name, Function_argsContext argsContext) {
-        AbstractPgFunction function = new PgFunction(name == null ? "noname" : name);
+        PgAbstractFunction function = new PgFunction(name == null ? "noname" : name);
         fillFuncArgs(argsContext.function_arguments(), function);
         if (argsContext.agg_order() != null) {
             fillFuncArgs(argsContext.agg_order().function_arguments(), function);
@@ -357,7 +357,7 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
         return signature;
     }
 
-    private static void fillFuncArgs(List<Function_argumentsContext> argsCtx, AbstractPgFunction function) {
+    private static void fillFuncArgs(List<Function_argumentsContext> argsCtx, PgAbstractFunction function) {
         for (Function_argumentsContext argument : argsCtx) {
             String type = getTypeName(argument.data_type());
             Identifier_nontypeContext name = argument.identifier_nontype();
@@ -395,8 +395,8 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
     }
 
     @Override
-    protected PgObjLocation getLocation(List<? extends ParserRuleContext> ids, DbObjType type, String action,
-                                        boolean isDep, String signature, LocationType locationType) {
+    protected ObjectLocation getLocation(List<? extends ParserRuleContext> ids, DbObjType type, String action,
+                                         boolean isDep, String signature, LocationType locationType) {
         if (type == DbObjType.CAST) {
             ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
             return buildLocation(nameCtx, action, locationType,

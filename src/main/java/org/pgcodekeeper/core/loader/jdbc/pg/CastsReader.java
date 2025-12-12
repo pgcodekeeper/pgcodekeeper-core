@@ -22,16 +22,16 @@ import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.PgParserAbstract;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.ICast.CastContext;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.pg.PgCast;
-import org.pgcodekeeper.core.schema.pg.PgCast.CastMethod;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ICast.CastContext;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.pg.schema.PgCast;
+import org.pgcodekeeper.core.database.pg.schema.PgCast.CastMethod;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -98,7 +98,7 @@ public final class CastsReader extends AbstractStatementReader {
                     if (schemaName != null && !Utils.isPgSystemSchema(schemaName)) {
                         String funcName = PgParserAbstract.parseSignature(
                                 QNameParser.getFirstName(ids), ctx.function_args());
-                        cast.addDep(new GenericColumn(schemaName, funcName, DbObjType.FUNCTION));
+                        cast.addDependency(new GenericColumn(schemaName, funcName, DbObjType.FUNCTION));
                     }
                 });
 
@@ -119,12 +119,12 @@ public final class CastsReader extends AbstractStatementReader {
         db.addChild(cast);
     }
 
-    private void addDep(PgStatement statement, String objectName) {
+    private void addDep(AbstractStatement statement, String objectName) {
         if (objectName.indexOf('.') != -1) {
             QNameParser<ParserRuleContext> parser = QNameParser.parsePg(objectName);
             String schemaName = parser.getSchemaName();
             if (schemaName != null && !Utils.isPgSystemSchema(schemaName)) {
-                statement.addDep(new GenericColumn(schemaName, parser.getFirstName(), DbObjType.TYPE));
+                statement.addDependency(new GenericColumn(schemaName, parser.getFirstName(), DbObjType.TYPE));
             }
         }
     }

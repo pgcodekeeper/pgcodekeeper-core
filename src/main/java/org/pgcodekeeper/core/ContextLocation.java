@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -26,6 +27,7 @@ import java.util.Objects;
  */
 public abstract class ContextLocation implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -7001017512350210951L;
 
     private final String filePath;

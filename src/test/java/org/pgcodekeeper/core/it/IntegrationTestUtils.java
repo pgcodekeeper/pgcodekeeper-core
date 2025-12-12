@@ -18,18 +18,19 @@ package org.pgcodekeeper.core.it;
 import org.junit.jupiter.api.Assertions;
 import org.pgcodekeeper.core.*;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.loader.DatabaseLoader;
 import org.pgcodekeeper.core.loader.PgDumpLoader;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.ch.ChSchema;
-import org.pgcodekeeper.core.schema.ms.MsSchema;
-import org.pgcodekeeper.core.schema.pg.PgSchema;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.ch.schema.ChSchema;
+import org.pgcodekeeper.core.database.ms.schema.MsSchema;
+import org.pgcodekeeper.core.database.pg.schema.PgSchema;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 
@@ -74,7 +75,7 @@ public final class IntegrationTestUtils {
         };
         db.addSchema(schema);
         db.setDefaultSchema(schema.getName());
-        PgObjLocation loc = new PgObjLocation.Builder()
+        ObjectLocation loc = new ObjectLocation.Builder()
                 .setObject(new GenericColumn(schema.getName(), DbObjType.SCHEMA))
                 .build();
         schema.setLocation(loc);
@@ -178,10 +179,10 @@ public final class IntegrationTestUtils {
         }
     }
 
-    public static String getRefsAsString(Map<String, Set<PgObjLocation>> refs) {
+    public static String getRefsAsString(Map<String, Set<ObjectLocation>> refs) {
         StringBuilder sb = new StringBuilder();
 
-        for (Map.Entry<String, Set<PgObjLocation>> entry : refs.entrySet()) {
+        for (Map.Entry<String, Set<ObjectLocation>> entry : refs.entrySet()) {
             entry.getValue().stream().sorted(Comparator.comparingInt(ContextLocation::getOffset)).forEach(loc -> {
                 sb.append("Reference: ");
                 GenericColumn col = loc.getObj();

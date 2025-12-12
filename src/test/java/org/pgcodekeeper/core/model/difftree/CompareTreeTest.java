@@ -21,9 +21,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.pgcodekeeper.core.model.difftree.CompareTree;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.model.difftree.TreeElement;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
 
 class CompareTreeTest {

@@ -18,8 +18,8 @@ package org.pgcodekeeper.core.model.graph;
 import org.jgrapht.event.TraversalListenerAdapter;
 import org.jgrapht.event.VertexTraversalEvent;
 import org.jgrapht.graph.DefaultEdge;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,30 +27,30 @@ import java.util.List;
 /**
  * Traversal adapter that collects statements during graph traversal.
  */
-final class CollectingTraversalAdapter extends TraversalListenerAdapter<PgStatement, DefaultEdge> {
+final class CollectingTraversalAdapter extends TraversalListenerAdapter<IStatement, DefaultEdge> {
 
-    private final List<PgStatement> statements = new ArrayList<>();
+    private final List<IStatement> statements = new ArrayList<>();
 
-    private final PgStatement starter;
+    private final IStatement starter;
 
     /**
      * Creates a new collecting traversal adapter.
      *
      * @param starter the starting statement to exclude from collection
      */
-    public CollectingTraversalAdapter(PgStatement starter) {
+    public CollectingTraversalAdapter(IStatement starter) {
         this.starter = starter;
     }
 
     @Override
-    public void vertexFinished(VertexTraversalEvent<PgStatement> e) {
-        PgStatement statement = e.getVertex();
+    public void vertexFinished(VertexTraversalEvent<IStatement> e) {
+        IStatement statement = e.getVertex();
         if (statement.getStatementType() != DbObjType.DATABASE && statement != starter) {
             statements.add(statement);
         }
     }
 
-    List<PgStatement> getStatements() {
+    List<IStatement> getStatements() {
         return statements;
     }
 }

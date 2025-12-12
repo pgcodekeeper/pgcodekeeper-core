@@ -19,18 +19,17 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.antlr.AbstractExpr;
 import org.pgcodekeeper.core.loader.FullAnalyze;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
 import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.PgParserAbstract;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.meta.MetaCompositeType;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaCompositeType;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 import org.pgcodekeeper.core.utils.Pair;
 
@@ -61,7 +60,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
         this.fullAnalyze = parent.fullAnalyze;
     }
 
-    protected PgAbstractExpr(PgAbstractExpr parent, Set<PgObjLocation> dependencies) {
+    protected PgAbstractExpr(PgAbstractExpr parent, Set<ObjectLocation> dependencies) {
         super(parent, dependencies, parent.meta);
         this.fullAnalyze = parent.fullAnalyze;
     }
@@ -124,7 +123,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
 
     protected void addDepcy(GenericColumn depcy, ParserRuleContext ctx, Token start) {
         if (!isSystemSchema(depcy.schema)) {
-            PgObjLocation loc = new PgObjLocation.Builder()
+            ObjectLocation loc = new ObjectLocation.Builder()
                     .setObject(depcy)
                     .setCtx(ctx)
                     .build();
@@ -142,7 +141,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
         return Utils.isPgSystemSchema(schema);
     }
 
-    protected void addDepcy(PgObjLocation loc) {
+    protected void addDepcy(ObjectLocation loc) {
         if (!isSystemSchema(loc.getSchema())) {
             addDependency(loc);
         }

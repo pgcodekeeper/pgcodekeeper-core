@@ -17,10 +17,10 @@ package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Collections;
@@ -137,7 +137,7 @@ public final class DropStatement extends PgParserAbstract {
         for (Schema_qualified_nameContext objName : ctx.if_exist_names_restrict_cascade().names_references()
                 .schema_qualified_name()) {
             List<ParserRuleContext> ids = getIdentifiers(objName);
-            PgObjLocation loc = addObjReference(ids, type, ACTION_DROP);
+            ObjectLocation loc = addObjReference(ids, type, ACTION_DROP);
 
             if (type == DbObjType.TABLE) {
                 loc.setWarning(DangerStatement.DROP_TABLE);
@@ -201,8 +201,8 @@ public final class DropStatement extends PgParserAbstract {
     }
 
     @Override
-    protected PgObjLocation fillQueryLocation(ParserRuleContext ctx) {
-        PgObjLocation loc = super.fillQueryLocation(ctx);
+    protected ObjectLocation fillQueryLocation(ParserRuleContext ctx) {
+        ObjectLocation loc = super.fillQueryLocation(ctx);
         Drop_statementsContext dropSt = ((Schema_dropContext) ctx).drop_statements();
         if (dropSt != null && dropSt.TABLE() != null) {
             loc.setWarning(DangerStatement.DROP_TABLE);

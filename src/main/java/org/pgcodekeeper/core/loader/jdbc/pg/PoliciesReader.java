@@ -15,14 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.pg;
 
+import org.pgcodekeeper.core.database.api.schema.EventType;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.pg.PgPolicy;
+import org.pgcodekeeper.core.database.pg.schema.PgPolicy;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -45,7 +47,7 @@ public class PoliciesReader extends JdbcReader {
     @Override
     protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException {
         String tableName = res.getString("relname");
-        PgStatementContainer c = schema.getStatementContainer(tableName);
+        var c = schema.getStatementContainer(tableName);
         if (c == null) {
             return;
         }

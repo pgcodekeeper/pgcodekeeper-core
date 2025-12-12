@@ -19,7 +19,7 @@ import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Function_bodyC
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Function_returnContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.StatementContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.Vex;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 
 import java.util.Collections;

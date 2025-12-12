@@ -19,7 +19,7 @@ import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.library.PgLibrary;
 import org.pgcodekeeper.core.library.PgLibrarySource;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.FileUtils;
 import org.pgcodekeeper.core.xmlstore.DependenciesXmlStore;

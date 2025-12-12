@@ -17,14 +17,14 @@ package org.pgcodekeeper.core.parsers.antlr.ms.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.ms.schema.*;
 import org.pgcodekeeper.core.parsers.antlr.ms.launcher.MsExpressionAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.*;
-import org.pgcodekeeper.core.schema.AbstractConstraint;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.ms.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.base.schema.AbstractTable;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Arrays;
@@ -58,7 +58,7 @@ public final class AlterMsTable extends MsTableAbstract {
         List<ParserRuleContext> ids = Arrays.asList(schemaCtx, nameCtx);
         AbstractSchema schema = getSchemaSafe(ids);
         AbstractTable table = getSafe(AbstractSchema::getTable, schema, nameCtx);
-        PgObjLocation ref = addObjReference(ids, DbObjType.TABLE, ACTION_ALTER);
+        ObjectLocation ref = addObjReference(ids, DbObjType.TABLE, ACTION_ALTER);
 
         var tableActionCtx = ctx.alter_table_action();
         var elements = tableActionCtx.table_elements_extended();
@@ -133,8 +133,8 @@ public final class AlterMsTable extends MsTableAbstract {
     }
 
     @Override
-    protected PgObjLocation fillQueryLocation(ParserRuleContext ctx) {
-        PgObjLocation loc = super.fillQueryLocation(ctx);
+    protected ObjectLocation fillQueryLocation(ParserRuleContext ctx) {
+        ObjectLocation loc = super.fillQueryLocation(ctx);
         Alter_tableContext alterTblCtx = ((Schema_alterContext) ctx).alter_table();
         var tableActionCtx = alterTblCtx.alter_table_action();
         if (tableActionCtx.DROP() != null && tableActionCtx.COLUMN() != null) {

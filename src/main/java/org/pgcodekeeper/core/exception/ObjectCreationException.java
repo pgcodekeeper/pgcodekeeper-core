@@ -15,7 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.exception;
 
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+
+import java.io.Serial;
 
 /**
  * Exception thrown when attempting to create a database object that already exists.
@@ -26,6 +28,7 @@ public class ObjectCreationException extends RuntimeException {
     private static final String WITHOUT_PARENT = "%s %s already exists"; //$NON-NLS-1$
     private static final String WITH_PARENT = "%s %s already exists for %s %s"; //$NON-NLS-1$
 
+    @Serial
     private static final long serialVersionUID = -8514537124804597343L;
 
     /**
@@ -81,7 +84,7 @@ public class ObjectCreationException extends RuntimeException {
      *
      * @param st the statement that already exists
      */
-    public ObjectCreationException(PgStatement st) {
+    public ObjectCreationException(AbstractStatement st) {
         super(WITHOUT_PARENT.formatted(st.getStatementType(), st.getName()));
     }
 
@@ -91,7 +94,7 @@ public class ObjectCreationException extends RuntimeException {
      * @param st     the statement that already exists
      * @param parent the parent statement context
      */
-    public ObjectCreationException(PgStatement st, PgStatement parent) {
+    public ObjectCreationException(AbstractStatement st, AbstractStatement parent) {
         super(WITH_PARENT.formatted(st.getStatementType(), st.getName(),
                 parent.getStatementType(), parent.getName()));
     }

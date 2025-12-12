@@ -21,11 +21,11 @@ import org.pgcodekeeper.core.parsers.antlr.base.launcher.AbstractAnalysisLaunche
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.AggregateAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.OperatorAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.ViewAnalysisLauncher;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.IRelation;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
-import org.pgcodekeeper.core.schema.meta.MetaUtils;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.api.schema.IRelation;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaUtils;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -40,7 +40,7 @@ import java.util.Queue;
 public final class FullAnalyze {
 
     private final List<Object> errors;
-    private final List<PgObjLocation> refs = new ArrayList<>();
+    private final List<ObjectLocation> refs = new ArrayList<>();
     private final Queue<AntlrTask<?>> antlrTasks = new ArrayDeque<>();
     private final AbstractDatabase db;
     private final MetaContainer meta;
@@ -87,8 +87,9 @@ public final class FullAnalyze {
             if (l != null) {
                 AntlrTaskManager.submit(antlrTasks,
                         () -> l.launchAnalyze(errors, meta),
-                        deps -> {
-                            l.getStmt().addAllDeps(deps);
+                        dependencies -> {
+                            var st = l.getStmt();
+                            dependencies.forEach(st::addDependency);
                             refs.addAll(l.getReferences());
                         });
             }
@@ -96,7 +97,7 @@ public final class FullAnalyze {
         db.clearAnalysisLaunchers();
         AntlrTaskManager.finish(antlrTasks);
 
-        for (PgObjLocation ref : refs) {
+        for (ObjectLocation ref : refs) {
             db.addReference(ref.getFilePath(), ref);
         }
     }
@@ -118,7 +119,9 @@ public final class FullAnalyze {
                 // and protects from infinite recursion
                 launchers.set(i, null);
                 v.setFullAnalyze(this);
-                l.getStmt().addAllDeps(l.launchAnalyze(errors, meta));
+                var st = l.getStmt();
+                var dependencies = l.launchAnalyze(errors, meta);
+                dependencies.forEach(st::addDependency);
                 refs.addAll(l.getReferences());
             }
         }

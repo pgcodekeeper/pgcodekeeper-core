@@ -17,15 +17,15 @@ package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Alter_owner_statementContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.IdentifierContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Target_operatorContext;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.StatementOverride;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgSchema;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.StatementOverride;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgSchema;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.List;
@@ -42,7 +42,7 @@ import java.util.Map;
 public final class AlterOwner extends PgParserAbstract {
 
     private final Alter_owner_statementContext ctx;
-    private final Map<PgStatement, StatementOverride> overrides;
+    private final Map<AbstractStatement, StatementOverride> overrides;
 
     /**
      * Constructs a new AlterOwner parser without statement overrides.
@@ -64,7 +64,7 @@ public final class AlterOwner extends PgParserAbstract {
      * @param settings  the ISettings object
      */
     public AlterOwner(Alter_owner_statementContext ctx, PgDatabase db,
-                      Map<PgStatement, StatementOverride> overrides, ISettings settings) {
+                      Map<AbstractStatement, StatementOverride> overrides, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
         this.overrides = overrides;
@@ -95,7 +95,7 @@ public final class AlterOwner extends PgParserAbstract {
         ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
 
         DbObjType type = null;
-        PgStatement st = null;
+        AbstractStatement st = null;
         if (objCtx.SCHEMA() != null) {
             st = getSafe(PgDatabase::getSchema, db, nameCtx);
             type = DbObjType.SCHEMA;
@@ -168,7 +168,7 @@ public final class AlterOwner extends PgParserAbstract {
         setOwner(st, name);
     }
 
-    private void setOwner(PgStatement st, IdentifierContext owner) {
+    private void setOwner(AbstractStatement st, IdentifierContext owner) {
         if (overrides == null) {
             fillOwnerTo(owner, st);
         } else {

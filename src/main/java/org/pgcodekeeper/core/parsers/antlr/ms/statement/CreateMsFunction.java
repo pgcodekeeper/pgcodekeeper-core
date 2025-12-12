@@ -17,16 +17,16 @@ package org.pgcodekeeper.core.parsers.antlr.ms.statement;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.launcher.MsFuncProcTrigAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.*;
-import org.pgcodekeeper.core.schema.AbstractFunction;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.Argument;
-import org.pgcodekeeper.core.schema.FuncTypes;
-import org.pgcodekeeper.core.schema.ms.MsClrFunction;
-import org.pgcodekeeper.core.schema.ms.MsDatabase;
-import org.pgcodekeeper.core.schema.ms.MsFunction;
+import org.pgcodekeeper.core.database.base.schema.AbstractFunction;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.base.schema.Argument;
+import org.pgcodekeeper.core.database.ms.schema.MsFunctionTypes;
+import org.pgcodekeeper.core.database.ms.schema.MsClrFunction;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
+import org.pgcodekeeper.core.database.ms.schema.MsFunction;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Arrays;
@@ -108,9 +108,9 @@ public final class CreateMsFunction extends BatchContextProcessor {
 
             Func_returnContext ret = ctx.func_return();
             if (ret.LOCAL_ID() != null) {
-                func.setFuncType(FuncTypes.MULTI);
+                func.setFuncType(MsFunctionTypes.MULTI);
             } else if (ret.data_type() == null) {
-                func.setFuncType(FuncTypes.TABLE);
+                func.setFuncType(MsFunctionTypes.TABLE);
             }
 
             f = func;
@@ -141,9 +141,9 @@ public final class CreateMsFunction extends BatchContextProcessor {
 
             Func_returnContext ret = ctx.func_return();
             if (ret.LOCAL_ID() != null) {
-                func.setFuncType(FuncTypes.MULTI);
+                func.setFuncType(MsFunctionTypes.MULTI);
             } else if (ret.data_type() == null) {
-                func.setFuncType(FuncTypes.TABLE);
+                func.setFuncType(MsFunctionTypes.TABLE);
             }
 
             f = func;

@@ -17,16 +17,18 @@ package org.pgcodekeeper.core.loader.jdbc.pg;
 
 import org.pgcodekeeper.core.Consts.FUNC_SIGN;
 import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ICompressOptionContainer;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcType;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.CreateDomain;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.pg.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.sql.ResultSet;
@@ -52,14 +54,14 @@ public final class TypesReader extends JdbcReader {
 
     @Override
     protected void processResult(ResultSet result, AbstractSchema schema) throws SQLException {
-        PgStatement typeOrDomain = getTypeDomain(result, schema);
+        AbstractStatement typeOrDomain = getTypeDomain(result, schema);
         if (typeOrDomain != null) {
             schema.addChild(typeOrDomain);
         }
     }
 
-    private PgStatement getTypeDomain(ResultSet res, AbstractSchema schema) throws SQLException {
-        PgStatement st;
+    private AbstractStatement getTypeDomain(ResultSet res, AbstractSchema schema) throws SQLException {
+        AbstractStatement st;
         String typtype = res.getString("typtype");
         if ("d".equals(typtype)) {
             st = getDomain(res, schema);

@@ -16,9 +16,9 @@
 package org.pgcodekeeper.core.settings;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.formatter.FormatConfiguration;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -15,15 +15,15 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Cast_nameContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Create_cast_statementContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Data_typeContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Schema_qualified_nameContext;
-import org.pgcodekeeper.core.schema.ICast.CastContext;
-import org.pgcodekeeper.core.schema.pg.PgCast;
-import org.pgcodekeeper.core.schema.pg.PgCast.CastMethod;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
+import org.pgcodekeeper.core.database.api.schema.ICast.CastContext;
+import org.pgcodekeeper.core.database.pg.schema.PgCast;
+import org.pgcodekeeper.core.database.pg.schema.PgCast.CastMethod;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.List;

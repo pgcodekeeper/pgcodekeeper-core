@@ -15,12 +15,15 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.formatter;
 
+import java.io.Serial;
+
 /**
  * Exception thrown when errors occur during SQL formatting operations.
  * Wraps various formatting-related errors with appropriate context.
  */
 public class FormatterException extends Exception {
 
+    @Serial
     private static final long serialVersionUID = -3464810941906751101L;
 
     /**

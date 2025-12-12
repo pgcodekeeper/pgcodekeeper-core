@@ -21,10 +21,10 @@ import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgEventTrigger;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgEventTrigger;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,7 +49,7 @@ public final class EventTriggersReader extends AbstractStatementReader {
     }
 
     @Override
-    protected void processResult(ResultSet res) throws SQLException, XmlReaderException {
+    protected void processResult(ResultSet res) throws SQLException {
         String evtName = res.getString("evtname");
         loader.setCurrentObject(new GenericColumn(evtName, DbObjType.EVENT_TRIGGER));
 
@@ -78,7 +78,7 @@ public final class EventTriggersReader extends AbstractStatementReader {
         String funcName = res.getString("proname");
         String funcSchema = res.getString("nspname");
         evt.setExecutable(funcSchema + '.' + funcName + "()");
-        evt.addDep(new GenericColumn(funcSchema, funcName + "()", DbObjType.FUNCTION));
+        evt.addDependency(new GenericColumn(funcSchema, funcName + "()", DbObjType.FUNCTION));
 
         loader.setOwner(evt, res.getString("rolname"));
         loader.setComment(evt, res);

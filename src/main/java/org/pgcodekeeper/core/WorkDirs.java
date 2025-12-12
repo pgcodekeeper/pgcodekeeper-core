@@ -15,9 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.PgStatement;
 import org.pgcodekeeper.core.utils.FileUtils;
 
 import java.nio.file.Path;
@@ -127,7 +128,7 @@ public final class WorkDirs {
      * @return relative path where the statement should be stored
      * @throws IllegalStateException if the object type is not supported
      */
-    public static Path getRelativeFolderPath(PgStatement st, Path baseDir) {
+    public static Path getRelativeFolderPath(IStatement st, Path baseDir) {
         var databaseType = st.getDbType();
         return switch (databaseType) {
             case CH -> getChRelativeFolderPath(st, baseDir);
@@ -183,7 +184,7 @@ public final class WorkDirs {
         return !MS_ASSEMBLIES.equals(dirSub) && !MS_SECURITY.equals(dirSub);
     }
 
-    private static Path getPgRelativeFolderPath(PgStatement st, Path baseDir) {
+    private static Path getPgRelativeFolderPath(IStatement st, Path baseDir) {
         DbObjType type = st.getStatementType();
         return switch (type) {
             case EXTENSION, SERVER, USER_MAPPING, CAST, EVENT_TRIGGER, FOREIGN_DATA_WRAPPER -> baseDir
@@ -194,7 +195,7 @@ public final class WorkDirs {
             }
             case COLLATION, SEQUENCE, TYPE, DOMAIN, VIEW, TABLE, FUNCTION, PROCEDURE, AGGREGATE, OPERATOR,
             FTS_TEMPLATE, FTS_PARSER, FTS_DICTIONARY, FTS_CONFIGURATION, STATISTICS -> {
-                PgStatement parentSt = st.getParent();
+                var parentSt = st.getParent();
                 String schemaName = FileUtils.getValidFilename(parentSt.getBareName());
                 yield baseDir.resolve(PG_SCHEMA).resolve(schemaName).resolve(getPgDirectoryNameForType(type));
             }
@@ -202,7 +203,7 @@ public final class WorkDirs {
         };
     }
 
-    private static Path getMsRelativeFolderPath(PgStatement st, Path baseDir) {
+    private static Path getMsRelativeFolderPath(IStatement st, Path baseDir) {
         DbObjType type = st.getStatementType();
         return switch (type) {
             case SCHEMA, ROLE, USER -> baseDir.resolve(MS_SECURITY).resolve(getMsDirectoryNameForType(type));
@@ -212,7 +213,7 @@ public final class WorkDirs {
         };
     }
 
-    private static Path getChRelativeFolderPath(PgStatement st, Path baseDir) {
+    private static Path getChRelativeFolderPath(IStatement st, Path baseDir) {
         DbObjType type = st.getStatementType();
         return switch (type) {
             case USER, ROLE, FUNCTION, POLICY -> baseDir.resolve(getChDirectoryNameForType(type));
@@ -221,7 +222,7 @@ public final class WorkDirs {
                 yield baseDir.resolve(CH_DATABASE).resolve(databaseName);
             }
             case TABLE, DICTIONARY, VIEW -> {
-                PgStatement parentSt = st.getParent();
+                var parentSt = st.getParent();
                 String databaseName = FileUtils.getValidFilename(parentSt.getBareName());
                 yield baseDir.resolve(CH_DATABASE).resolve(databaseName).resolve(getChDirectoryNameForType(type));
             }

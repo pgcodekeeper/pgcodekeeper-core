@@ -18,11 +18,11 @@ package org.pgcodekeeper.core.parsers.antlr.ms.statement;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.pgcodekeeper.core.DangerStatement;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Qualified_nameContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Update_statementContext;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.ms.MsDatabase;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Arrays;
@@ -52,15 +52,15 @@ public final class UpdateMsStatement extends MsParserAbstract {
     public void parseObject() {
         Qualified_nameContext qname = ctx.qualified_name();
         if (qname != null) {
-            PgObjLocation loc = addObjReference(Arrays.asList(qname.schema, qname.name),
+            ObjectLocation loc = addObjReference(Arrays.asList(qname.schema, qname.name),
                     DbObjType.TABLE, ACTION_UPDATE);
             loc.setWarning(DangerStatement.UPDATE);
         }
     }
 
     @Override
-    protected PgObjLocation fillQueryLocation(ParserRuleContext ctx) {
-        PgObjLocation loc = super.fillQueryLocation(ctx);
+    protected ObjectLocation fillQueryLocation(ParserRuleContext ctx) {
+        ObjectLocation loc = super.fillQueryLocation(ctx);
         loc.setWarning(DangerStatement.UPDATE);
         return loc;
     }

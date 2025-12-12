@@ -16,15 +16,15 @@
 package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Alter_index_statementContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Schema_qualified_nameContext;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgIndex;
-import org.pgcodekeeper.core.schema.pg.PgSchema;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgIndex;
+import org.pgcodekeeper.core.database.pg.schema.PgSchema;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.List;
@@ -56,7 +56,7 @@ public final class AlterIndex extends PgParserAbstract {
     @Override
     public void parseObject() {
         if (alterIdxAllAction != null) {
-            PgObjLocation loc = new PgObjLocation.Builder()
+            ObjectLocation loc = new ObjectLocation.Builder()
                     .setAction(alterIdxAllAction)
                     .setCtx(ctx.getParent())
                     .build();

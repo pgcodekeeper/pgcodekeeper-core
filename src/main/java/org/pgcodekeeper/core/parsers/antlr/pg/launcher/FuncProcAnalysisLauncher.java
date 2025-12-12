@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.parsers.antlr.pg.launcher;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.pg.expr.AbstractExprWithNmspc;
 import org.pgcodekeeper.core.parsers.antlr.pg.expr.Function;
 import org.pgcodekeeper.core.parsers.antlr.pg.expr.Sql;
@@ -24,10 +24,10 @@ import org.pgcodekeeper.core.parsers.antlr.pg.expr.SqlFunctionBody;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Function_bodyContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Plpgsql_functionContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.SqlContext;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
-import org.pgcodekeeper.core.schema.pg.AbstractPgFunction;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractFunction;
 import org.pgcodekeeper.core.utils.Pair;
 
 import java.util.EnumSet;
@@ -57,7 +57,7 @@ public final class FuncProcAnalysisLauncher extends AbstractPgAnalysisLauncher {
      * @param funcArgs                           list of function arguments
      * @param isEnableFunctionBodiesDependencies flag to control function body dependency collection
      */
-    public FuncProcAnalysisLauncher(AbstractPgFunction stmt, SqlContext ctx,
+    public FuncProcAnalysisLauncher(PgAbstractFunction stmt, SqlContext ctx,
             String location, List<Pair<String, GenericColumn>> funcArgs, boolean isEnableFunctionBodiesDependencies) {
         super(stmt, ctx, location);
         this.funcArgs = funcArgs;
@@ -73,7 +73,7 @@ public final class FuncProcAnalysisLauncher extends AbstractPgAnalysisLauncher {
      * @param funcArgs                           list of function arguments
      * @param isEnableFunctionBodiesDependencies flag to control function body dependency collection
      */
-    public FuncProcAnalysisLauncher(AbstractPgFunction stmt, Function_bodyContext ctx,
+    public FuncProcAnalysisLauncher(PgAbstractFunction stmt, Function_bodyContext ctx,
             String location, List<Pair<String, GenericColumn>> funcArgs, boolean isEnableFunctionBodiesDependencies) {
         super(stmt, ctx, location);
         this.funcArgs = funcArgs;
@@ -89,7 +89,7 @@ public final class FuncProcAnalysisLauncher extends AbstractPgAnalysisLauncher {
      * @param funcArgs                           list of function arguments
      * @param isEnableFunctionBodiesDependencies flag to control function body dependency collection
      */
-    public FuncProcAnalysisLauncher(AbstractPgFunction stmt, Plpgsql_functionContext ctx,
+    public FuncProcAnalysisLauncher(PgAbstractFunction stmt, Plpgsql_functionContext ctx,
             String location, List<Pair<String, GenericColumn>> funcArgs, boolean isEnableFunctionBodiesDependencies) {
         super(stmt, ctx, location);
         this.funcArgs = funcArgs;
@@ -97,7 +97,7 @@ public final class FuncProcAnalysisLauncher extends AbstractPgAnalysisLauncher {
     }
 
     @Override
-    public Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
         if (ctx instanceof SqlContext sqlCtx) {
             Sql sql = new Sql(meta);
             declareAnalyzerArgs(sql);

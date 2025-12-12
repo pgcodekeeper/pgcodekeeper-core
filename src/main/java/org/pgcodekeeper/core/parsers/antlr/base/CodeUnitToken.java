@@ -20,12 +20,15 @@ import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.Pair;
 
+import java.io.Serial;
+
 /**
  * Extended token class that tracks additional position information
  * for accurate source mapping in code units.
  */
 public class CodeUnitToken extends CommonToken {
 
+    @Serial
     private static final long serialVersionUID = -7656354484680429471L;
 
     private int codeUnitStart;
