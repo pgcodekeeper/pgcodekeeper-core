@@ -17,12 +17,15 @@ package org.pgcodekeeper.core.exception;
 
 import org.antlr.v4.runtime.Token;
 
+import java.io.Serial;
+
 /**
  * Exception thrown when a database object reference cannot be resolved.
  * Indicates that a referenced object was not found in the database schema.
  */
 public class UnresolvedReferenceException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = 3362236974343429554L;
 
     private final transient Token errorToken;

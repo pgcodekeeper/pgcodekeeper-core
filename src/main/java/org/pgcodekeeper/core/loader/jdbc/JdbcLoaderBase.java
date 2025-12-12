@@ -20,7 +20,11 @@ import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.Utils;
-import org.pgcodekeeper.core.database.base.jdbc.IJdbcConnector;
+import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ISearchPath;
+import org.pgcodekeeper.core.database.api.schema.ObjectPrivilege;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.exception.MonitorCancelledRuntimeException;
 import org.pgcodekeeper.core.loader.DatabaseLoader;
 import org.pgcodekeeper.core.loader.JdbcQueries;
@@ -28,7 +32,7 @@ import org.pgcodekeeper.core.loader.JdbcRunner;
 import org.pgcodekeeper.core.loader.ms.SupportedMsVersion;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
@@ -37,8 +41,7 @@ import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.pg.AbstractPgFunction;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractFunction;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -224,40 +227,40 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
         return oid == 0 ? "PUBLIC" : cachedRolesNamesByOid.get(oid);
     }
 
-    public final void setComment(PgStatement f, ResultSet res) throws SQLException {
+    public final void setComment(AbstractStatement f, ResultSet res) throws SQLException {
         String comment = res.getString("description");
         if (comment != null && !comment.isEmpty()) {
             f.setComment(Utils.checkNewLines(PgDiffUtils.quoteString(comment), settings.isKeepNewlines()));
         }
     }
 
-    public void setOwner(PgStatement statement, long ownerOid) {
+    public void setOwner(AbstractStatement statement, long ownerOid) {
         if (!settings.isIgnorePrivileges()) {
             statement.setOwner(getRoleByOid(ownerOid));
         }
     }
 
-    public void setOwner(PgStatement st, String owner) {
+    public void setOwner(AbstractStatement st, String owner) {
         if (!settings.isIgnorePrivileges()) {
             st.setOwner(owner);
         }
     }
 
-    public void setAuthor(PgStatement st, ResultSet res) throws SQLException {
+    public void setAuthor(AbstractStatement st, ResultSet res) throws SQLException {
         if (getExtensionSchema() != null) {
             st.setAuthor(res.getString("ses_user"));
         }
     }
 
-    public void setPrivileges(PgStatement st, String aclItemsArrayAsString, String schemaName) {
+    public void setPrivileges(AbstractStatement st, String aclItemsArrayAsString, String schemaName) {
         setPrivileges(st, aclItemsArrayAsString, null, schemaName);
     }
 
-    public void setPrivileges(PgStatement st, String aclItemsArrayAsString, String columnName, String schemaName) {
+    public void setPrivileges(AbstractStatement st, String aclItemsArrayAsString, String columnName, String schemaName) {
         DbObjType type = st.getStatementType();
         String signature;
         if (type.in(DbObjType.FUNCTION, DbObjType.PROCEDURE, DbObjType.AGGREGATE)) {
-            signature = ((AbstractPgFunction) st).appendFunctionSignature(new StringBuilder(), false, true).toString();
+            signature = ((PgAbstractFunction) st).appendFunctionSignature(new StringBuilder(), false, true).toString();
         } else {
             signature = PgDiffUtils.getQuotedName(st.getName());
         }
@@ -297,7 +300,7 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
      * For privilege characters see JdbcAclParser.PrivilegeTypes
      * Order of all characters (for all types of objects combined) : raxdtDXCcTUw
      */
-    private void setPrivileges(PgStatement st, String stSignature,
+    private void setPrivileges(AbstractStatement st, String stSignature,
                                String aclItemsArrayAsString, String owner, String columnId, String schemaName) {
         if (aclItemsArrayAsString == null || settings.isIgnorePrivileges()) {
             return;
@@ -388,14 +391,14 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
         // If "GRANT ALL to PUBLIC" for FUNCTION/TYPE/DOMAIN is absent, then
         // in this case for them explicitly added "REVOKE ALL from PUBLIC".
         if (!metPublicRoleGrants && isFunctionOrTypeOrDomain) {
-            st.addPrivilege(new PgPrivilege("REVOKE", "ALL" + column,
+            st.addPrivilege(new ObjectPrivilege("REVOKE", "ALL" + column,
                     stType + " " + qualStSignature, "PUBLIC", false, st.getDbType()));
         }
 
         // 'REVOKE ALL' for COLUMN never happened, because of the overlapping
         // privileges from the table.
         if (column.isEmpty() && !metDefaultOwnersGrants) {
-            st.addPrivilege(new PgPrivilege("REVOKE", "ALL" + column,
+            st.addPrivilege(new ObjectPrivilege("REVOKE", "ALL" + column,
                     stType + " " + qualStSignature, PgDiffUtils.getQuotedName(owner), false, st.getDbType()));
         }
 
@@ -411,12 +414,12 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
                     (isFunctionOrTypeOrDomain && grant.isGrantAllToPublic()))) {
                 continue;
             }
-            st.addPrivilege(new PgPrivilege("GRANT", grant.getGrantString(column),
+            st.addPrivilege(new ObjectPrivilege("GRANT", grant.getGrantString(column),
                     stType + " " + qualStSignature, grant.getGrantee(), grant.isGO(), st.getDbType()));
         }
     }
 
-    public void setPrivileges(PgStatement st, List<XmlReader> privs) {
+    public void setPrivileges(AbstractStatement st, List<XmlReader> privs) {
         if (settings.isIgnorePrivileges()) {
             return;
         }
@@ -449,7 +452,7 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
                 sb.append(st.getStatementType()).append("::").append(MsDiffUtils.quoteName(st.getName()));
             }
 
-            PgPrivilege priv = new PgPrivilege(state, permission, sb.toString(),
+            ObjectPrivilege priv = new ObjectPrivilege(state, permission, sb.toString(),
                     MsDiffUtils.quoteName(role), isWithGrantOption, st.getDbType());
 
             if (col != null && st instanceof AbstractTable table) {
@@ -460,17 +463,17 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
         }
     }
 
-    public static String getMsType(PgStatement statement, String schema, String dataType,
+    public static String getMsType(AbstractStatement statement, String schema, String dataType,
                                    boolean isUserDefined, int size, int precision, int scale) {
         return getMsType(statement, schema, dataType, isUserDefined, size, precision, scale, true);
     }
 
-    public static String getMsType(PgStatement statement, String schema, String dataType,
+    public static String getMsType(AbstractStatement statement, String schema, String dataType,
                                    boolean isUserDefined, int size, int precision, int scale, boolean quoteSysTypes) {
         StringBuilder sb = new StringBuilder();
 
         if (isUserDefined) {
-            statement.addDep(new GenericColumn(schema, dataType, DbObjType.TYPE));
+            statement.addDependency(new GenericColumn(schema, dataType, DbObjType.TYPE));
             sb.append(MsDiffUtils.quoteName(schema)).append('.');
         }
 

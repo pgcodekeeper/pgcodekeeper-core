@@ -15,12 +15,15 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.exception;
 
+import java.io.Serial;
+
 /**
  * Exception indicating that a monitoring operation was cancelled.
  * Thrown when an ongoing monitoring process is interrupted by user request or system shutdown.
  */
 public final class MonitorCancelledRuntimeException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = 1305941709453867664L;
 
     /**

@@ -17,11 +17,11 @@ package org.pgcodekeeper.core.parsers.antlr.pg.launcher;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.parsers.antlr.base.launcher.AbstractAnalysisLauncher;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.IFunction;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.IFunction;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 
 import java.util.Collections;
 import java.util.Set;
@@ -41,15 +41,15 @@ public class AggregateAnalysisLauncher extends AbstractAnalysisLauncher {
      * @param function the function being analyzed
      * @param location the source location identifier
      */
-    public AggregateAnalysisLauncher(PgStatement stmt, GenericColumn function,
-            String location) {
+    public AggregateAnalysisLauncher(AbstractStatement stmt, GenericColumn function,
+                                     String location) {
         super(stmt, null, location);
         this.function = function;
     }
 
     @Override
-    protected Set<PgObjLocation> analyze(ParserRuleContext ctx,
-            MetaContainer meta) {
+    protected Set<ObjectLocation> analyze(ParserRuleContext ctx,
+                                          MetaContainer meta) {
 
         IFunction func = meta.findFunction(function.schema, function.table);
         IFunction aggr = meta.findFunction(getSchemaName(), stmt.getName());

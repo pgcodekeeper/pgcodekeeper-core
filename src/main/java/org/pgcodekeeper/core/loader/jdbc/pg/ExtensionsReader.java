@@ -18,10 +18,10 @@ package org.pgcodekeeper.core.loader.jdbc.pg;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgExtension;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgExtension;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -52,7 +52,7 @@ public final class ExtensionsReader extends AbstractStatementReader {
         PgExtension e = new PgExtension(extName);
         e.setSchema(res.getString("namespace"));
         e.setRelocatable(res.getBoolean("extrelocatable"));
-        e.addDep(new GenericColumn(e.getSchema(), DbObjType.SCHEMA));
+        e.addDependency(new GenericColumn(e.getSchema(), DbObjType.SCHEMA));
         loader.setComment(e, res);
         loader.setAuthor(e, res);
         db.addChild(e);

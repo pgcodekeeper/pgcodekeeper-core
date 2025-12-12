@@ -17,13 +17,13 @@ package org.pgcodekeeper.core.parsers.antlr.ms.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.MsDiffUtils;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.ms.schema.*;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.ms.launcher.MsExpressionAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.ms.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.ArrayList;
@@ -71,7 +71,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
         if (include != null) {
             for (IdContext col : include.name_list_in_brackets().id()) {
                 index.addInclude(col.getText());
-                index.addDep(new GenericColumn(schema, table, col.getText(), DbObjType.COLUMN));
+                index.addDependency(new GenericColumn(schema, table, col.getText(), DbObjType.COLUMN));
             }
         }
         parseIndexOptions(index, rest.index_where(), rest.index_options(), rest.dataspace());
@@ -113,7 +113,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
             if (null != historyTable) {
                 var histSchemaName = historyTable.schema.getText();
                 var histTableName = historyTable.name.getText();
-                ((PgStatement) stmt).addDep(new GenericColumn(histSchemaName, histTableName, DbObjType.TABLE));
+                stmt.addDependency(new GenericColumn(histSchemaName, histTableName, DbObjType.TABLE));
             }
         }
     }
@@ -167,9 +167,9 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
             List<IdContext> ids = Arrays.asList(ref.schema, ref.name);
             String fSchemaName = getSchemaNameSafe(ids);
             String fTableName = QNameParser.getFirstName(ids);
-            PgObjLocation loc = addObjReference(ids, DbObjType.TABLE, null);
+            ObjectLocation loc = addObjReference(ids, DbObjType.TABLE, null);
             GenericColumn fTable = loc.getObj();
-            constrFk.addDep(fTable);
+            constrFk.addDependency(fTable);
             constrFk.setForeignSchema(fSchemaName);
             constrFk.setForeignTable(fTableName);
 
@@ -177,7 +177,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
             if (column != null) {
                 String colFk = column.getText();
                 constrFk.addForeignColumn(colFk);
-                constrFk.addDep(new GenericColumn(fSchemaName, fTableName, colFk, DbObjType.COLUMN));
+                constrFk.addDependency(new GenericColumn(fSchemaName, fTableName, colFk, DbObjType.COLUMN));
             }
             var del = constraintCtx.on_delete();
             if (del != null) {
@@ -273,18 +273,18 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
         }
     }
 
-    private GeneratedType getGenerated(Column_optionContext option) {
+    private MsGeneratedType getGenerated(Column_optionContext option) {
         boolean isStart = option.START() != null;
         if (option.ROW() != null) {
-            return isStart ? GeneratedType.ROW_START : GeneratedType.ROW_END;
+            return isStart ? MsGeneratedType.ROW_START : MsGeneratedType.ROW_END;
         }
 
         if (option.TRANSACTION_ID() != null) {
-            return isStart ? GeneratedType.TRAN_START : GeneratedType.TRAN_END;
+            return isStart ? MsGeneratedType.TRAN_START : MsGeneratedType.TRAN_END;
         }
 
         if (option.SEQUENCE_NUMBER() != null) {
-            return isStart ? GeneratedType.SEQ_START : GeneratedType.SEQ_END;
+            return isStart ? MsGeneratedType.SEQ_START : MsGeneratedType.SEQ_END;
         }
 
         throw new IllegalStateException("Unsupported GENERATED ALWAYS column type: " + getFullCtxText(option));
@@ -300,7 +300,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
             simpCol.setDesc(orderCtx != null && orderCtx.DESC() != null);
             stmt.addColumn(simpCol);
             if (schema != null && table != null) {
-                ((PgStatement) stmt).addDep(new GenericColumn(schema, table, name, DbObjType.COLUMN));
+                stmt.addDependency(new GenericColumn(schema, table, name, DbObjType.COLUMN));
             }
         }
     }
@@ -309,11 +309,11 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
         for (var col : cols) {
             var colName = col.id().getText();
             index.addOrderCol(colName);
-            index.addDep(new GenericColumn(schema, table, colName, DbObjType.COLUMN));
+            index.addDependency(new GenericColumn(schema, table, colName, DbObjType.COLUMN));
         }
     }
 
-    protected void addTypeDepcy(Data_typeContext ctx, PgStatement st) {
+    protected void addTypeDepcy(Data_typeContext ctx, AbstractStatement st) {
         Qualified_nameContext qname = ctx.qualified_name();
         if (qname != null && qname.schema != null) {
             addDepSafe(st, Arrays.asList(qname.schema, qname.name), DbObjType.TYPE);

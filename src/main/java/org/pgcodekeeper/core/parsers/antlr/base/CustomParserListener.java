@@ -19,14 +19,15 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.exception.MisplacedObjectException;
 import org.pgcodekeeper.core.exception.MonitorCancelledRuntimeException;
 import org.pgcodekeeper.core.exception.ObjectCreationException;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.PgObjLocation;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.slf4j.Logger;
@@ -132,10 +133,10 @@ public class CustomParserListener<T extends AbstractDatabase> {
      * <br>
      * <br>
      * 'undescribed DB object' - means that it is not a child of
-     * {@link org.pgcodekeeper.core.schema.PgStatement}.
+     * {@link AbstractStatement}.
      */
     protected void addToQueries(ParserRuleContext ctx, String acton) {
-        PgObjLocation loc = new PgObjLocation.Builder()
+        ObjectLocation loc = new ObjectLocation.Builder()
                 .setAction(acton)
                 .setCtx(ctx)
                 .setSql(ParserListenerMode.SCRIPT == mode ? ParserAbstract.getFullCtxText(ctx) : null)

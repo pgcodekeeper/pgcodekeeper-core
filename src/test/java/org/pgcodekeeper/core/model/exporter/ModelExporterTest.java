@@ -19,13 +19,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
@@ -61,14 +61,14 @@ class ModelExporterTest {
     }
 
     /**
-     * get {@link PgStatement} object from {@link AbstractDatabase}
+     * get {@link AbstractStatement} object from {@link AbstractDatabase}
      *
      * @param db       - {@link AbstractDatabase} witch store PgStatement
-     * @param stmtName - name of {@link PgStatement} witch we need for test
-     * @param type     - {@link DbObjType} of {@link PgStatement} witch we need for test
-     * @return - {@link PgStatement} witch we need for test
+     * @param stmtName - name of {@link AbstractStatement} witch we need for test
+     * @param type     - {@link DbObjType} of {@link AbstractStatement} witch we need for test
+     * @return - {@link AbstractStatement} witch we need for test
      */
-    private PgStatement getStatement(AbstractDatabase db, String stmtName, DbObjType type) {
+    private AbstractStatement getStatement(AbstractDatabase db, String stmtName, DbObjType type) {
         String[] arr = Arrays.copyOf(stmtName.split("\\."), 3);
         return db.getStatement(new GenericColumn(arr[0], arr[1], arr[2], type));
     }
@@ -76,10 +76,10 @@ class ModelExporterTest {
     /**
      * generate SQL script with default settings
      *
-     * @param statement - {@link PgStatement} witch we used for test
+     * @param statement - {@link AbstractStatement} witch we used for test
      * @return - generated script
      */
-    private String getCreationSQL(PgStatement statement) {
+    private String getCreationSQL(AbstractStatement statement) {
         var script = new SQLScript(new CoreSettings());
         statement.getCreationSQL(script);
         return script.getFullScript();

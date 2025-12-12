@@ -16,14 +16,14 @@
 package org.pgcodekeeper.core.parsers.antlr.ch.statement;
 
 import org.pgcodekeeper.core.DangerStatement;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Alter_table_actionContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Alter_table_stmtContext;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.base.schema.AbstractTable;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Arrays;
@@ -59,7 +59,7 @@ public final class AlterChTable extends ChParserAbstract {
         var schemaCtx = QNameParser.getSchemaNameCtx(ids);
         var nameCtx = QNameParser.getFirstNameCtx(ids);
         AbstractTable table = getSafe(AbstractSchema::getTable, getSchemaSafe(ids), nameCtx);
-        PgObjLocation loc = addObjReference(ids, DbObjType.TABLE, ACTION_ALTER);
+        ObjectLocation loc = addObjReference(ids, DbObjType.TABLE, ACTION_ALTER);
         for (Alter_table_actionContext alterAction : ctx.alter_table_actions().alter_table_action()) {
             if (alterAction.UPDATE() != null) {
                 loc.setWarning(DangerStatement.UPDATE);

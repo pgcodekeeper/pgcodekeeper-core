@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 
 /**
  * Represents a database object for printing in dependency tree output.
@@ -24,8 +24,8 @@ import org.pgcodekeeper.core.schema.PgStatement;
  */
 public class PrintObj {
 
-    private final PgStatement statement;
-    private final PgStatement parentSt;
+    private final IStatement statement;
+    private final IStatement parentSt;
     private final int indent;
     private final int hiddenObj;
     private final boolean isCyclic;
@@ -39,7 +39,7 @@ public class PrintObj {
      * @param hiddenObj count of hidden objects at this level
      * @param isCyclic  whether this object is part of a cyclic dependency
      */
-    public PrintObj(PgStatement statement, PgStatement parentSt, int indent, int hiddenObj, boolean isCyclic) {
+    public PrintObj(IStatement statement, IStatement parentSt, int indent, int hiddenObj, boolean isCyclic) {
         this.statement = statement;
         this.parentSt = parentSt;
         this.indent = indent;
@@ -47,11 +47,11 @@ public class PrintObj {
         this.isCyclic = isCyclic;
     }
 
-    public PgStatement getStatement() {
+    public IStatement getStatement() {
         return statement;
     }
 
-    public PgStatement getParentSt() {
+    public IStatement getParentSt() {
         return parentSt;
     }
 

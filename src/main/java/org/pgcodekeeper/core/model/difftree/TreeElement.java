@@ -15,10 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.difftree;
 
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.IStatementContainer;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractTable;
+import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -129,7 +132,7 @@ public final class TreeElement {
      * @param statement the database statement
      * @param side      the diff side
      */
-    public TreeElement(PgStatement statement, DiffSide side) {
+    public TreeElement(AbstractStatement statement, DiffSide side) {
         this.name = statement.getName();
         this.side = side;
         this.type = statement.getStatementType();
@@ -228,11 +231,11 @@ public final class TreeElement {
      * @return the corresponding database statement
      * @throws IllegalArgumentException if no statement found for parent
      */
-    public PgStatement getPgStatement(AbstractDatabase db) {
+    public IStatement getStatement(IDatabase db) {
         if (type == DbObjType.DATABASE) {
             return db;
         }
-        PgStatement stParent = parent.getPgStatement(db);
+        IStatement stParent = parent.getStatement(db);
         if (stParent == null) {
             throw new IllegalArgumentException("No statement found for " + parent);
         }
@@ -254,10 +257,10 @@ public final class TreeElement {
      * @param right the right database
      * @return statement from the appropriate database
      */
-    public PgStatement getPgStatementSide(AbstractDatabase left, AbstractDatabase right) {
+    public IStatement getStatementSide(AbstractDatabase left, AbstractDatabase right) {
         return switch (side) {
-            case LEFT, BOTH -> getPgStatement(left);
-            case RIGHT -> getPgStatement(right);
+            case LEFT, BOTH -> getStatement(left);
+            case RIGHT -> getStatement(right);
         };
     }
 
@@ -267,7 +270,7 @@ public final class TreeElement {
      * @param st the database statement to find
      * @return the matching tree element, or null if not found
      */
-    public TreeElement findElement(PgStatement st) {
+    public TreeElement findElement(IStatement st) {
         if (st.getStatementType() == DbObjType.DATABASE) {
             TreeElement root = this;
             while (root.parent != null) {

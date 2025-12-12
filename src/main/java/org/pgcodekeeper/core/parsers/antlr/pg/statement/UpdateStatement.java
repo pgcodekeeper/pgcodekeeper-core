@@ -17,10 +17,10 @@ package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Update_stmt_for_psqlContext;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.List;
@@ -50,13 +50,13 @@ public final class UpdateStatement extends PgParserAbstract {
     @Override
     public void parseObject() {
         List<ParserRuleContext> ids = getIdentifiers(ctx.update_table_name);
-        PgObjLocation loc = addObjReference(ids, DbObjType.TABLE, ACTION_UPDATE);
+        ObjectLocation loc = addObjReference(ids, DbObjType.TABLE, ACTION_UPDATE);
         loc.setWarning(DangerStatement.UPDATE);
     }
 
     @Override
-    protected PgObjLocation fillQueryLocation(ParserRuleContext ctx) {
-        PgObjLocation loc = super.fillQueryLocation(ctx);
+    protected ObjectLocation fillQueryLocation(ParserRuleContext ctx) {
+        ObjectLocation loc = super.fillQueryLocation(ctx);
         loc.setWarning(DangerStatement.UPDATE);
         return loc;
     }

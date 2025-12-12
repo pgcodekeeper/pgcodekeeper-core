@@ -19,9 +19,9 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.parsers.antlr.base.launcher.AbstractAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Select_statementContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.expr.MsSelect;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
-import org.pgcodekeeper.core.schema.ms.MsView;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.ms.schema.MsView;
 
 import java.util.Set;
 
@@ -44,7 +44,7 @@ public class MsViewAnalysisLauncher extends AbstractAnalysisLauncher {
     }
 
     @Override
-    public Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
         MsSelect select = new MsSelect(getSchemaName(), meta);
         select.analyze((Select_statementContext) ctx);
         return select.getDependencies();

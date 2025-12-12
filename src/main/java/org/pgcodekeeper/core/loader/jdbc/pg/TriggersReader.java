@@ -20,15 +20,15 @@ import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.CreateTrigger;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.PgStatementContainer;
-import org.pgcodekeeper.core.schema.pg.AbstractPgTable;
-import org.pgcodekeeper.core.schema.pg.PgTrigger;
-import org.pgcodekeeper.core.schema.pg.PgTrigger.TgTypes;
-import org.pgcodekeeper.core.schema.pg.TriggerState;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatementContainer;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractTable;
+import org.pgcodekeeper.core.database.pg.schema.PgTrigger;
+import org.pgcodekeeper.core.database.pg.schema.PgTrigger.TgTypes;
+import org.pgcodekeeper.core.database.pg.schema.PgTriggerState;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
@@ -65,7 +65,7 @@ public final class TriggersReader extends JdbcReader {
     @Override
     protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException {
         String tableName = res.getString("relname");
-        PgStatementContainer c = schema.getStatementContainer(tableName);
+        AbstractStatementContainer c = schema.getStatementContainer(tableName);
         if (c == null) {
             return;
         }
@@ -74,7 +74,7 @@ public final class TriggersReader extends JdbcReader {
         String triggerName = res.getString("tgname");
         String tgEnabled = res.getString("tgenabled");
 
-        if (c instanceof AbstractPgTable table
+        if (c instanceof PgAbstractTable table
                 && SupportedPgVersion.VERSION_15.isLE(loader.getVersion())
                 && !NO_PARENT.equals(res.getString("tgparentid"))) {
             table.putTriggerState(triggerName, readEnabledState(tgEnabled, true));
@@ -167,7 +167,7 @@ public final class TriggersReader extends JdbcReader {
         if (arrCols != null) {
             for (String colName : arrCols) {
                 t.addUpdateColumn(colName);
-                t.addDep(new GenericColumn(schemaName, tableName, colName, DbObjType.COLUMN));
+                t.addDependency(new GenericColumn(schemaName, tableName, colName, DbObjType.COLUMN));
             }
         }
 
@@ -182,13 +182,13 @@ public final class TriggersReader extends JdbcReader {
         c.addTrigger(t);
     }
 
-    private TriggerState readEnabledState(String tgEnabled, boolean isChild) {
+    private PgTriggerState readEnabledState(String tgEnabled, boolean isChild) {
         return switch (tgEnabled) {
-            case "f", "D" -> TriggerState.DISABLE;
-            case "t", "O" -> isChild ? TriggerState.ENABLE : null;
-            case "R" -> TriggerState.ENABLE_REPLICA;
-            case "A" -> TriggerState.ENABLE_ALWAYS;
-            default -> TriggerState.ENABLE;
+            case "f", "D" -> PgTriggerState.DISABLE;
+            case "t", "O" -> isChild ? PgTriggerState.ENABLE : null;
+            case "R" -> PgTriggerState.ENABLE_REPLICA;
+            case "A" -> PgTriggerState.ENABLE_ALWAYS;
+            default -> PgTriggerState.ENABLE;
         };
     }
 

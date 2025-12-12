@@ -19,9 +19,9 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.expr.TypesSetManually;
 import org.pgcodekeeper.core.parsers.antlr.pg.expr.ValueExprWithNmspc;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.VexContext;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
-import org.pgcodekeeper.core.schema.pg.PgDomain;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.pg.schema.PgDomain;
 import org.pgcodekeeper.core.utils.Pair;
 
 import java.util.Set;
@@ -44,7 +44,7 @@ public class DomainAnalysisLauncher extends AbstractPgAnalysisLauncher {
     }
 
     @Override
-    public Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
         ValueExprWithNmspc vex = new ValueExprWithNmspc(meta);
         vex.addNamespaceVariable(new Pair<>("VALUE", TypesSetManually.UNKNOWN));
         return analyze((VexContext) ctx, vex);

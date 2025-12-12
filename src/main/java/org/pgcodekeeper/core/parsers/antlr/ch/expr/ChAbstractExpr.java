@@ -18,12 +18,12 @@ package org.pgcodekeeper.core.parsers.antlr.ch.expr;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.database.base.parser.antlr.AbstractExpr;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Alias_clauseContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Qualified_nameContext;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 
 /**
  * Abstract base class for ClickHouse SQL expression parsing and dependency analysis.

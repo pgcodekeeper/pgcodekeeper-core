@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.it.jdbc.ch;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.PgCodekeeperException;
 import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;

@@ -17,8 +17,10 @@ package org.pgcodekeeper.core.model.graph;
 
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -31,8 +33,8 @@ import java.util.Set;
  */
 public class SimpleDepcyResolver {
 
-    private final AbstractDatabase oldDb;
-    private final AbstractDatabase newDb;
+    private final IDatabase oldDb;
+    private final IDatabase newDb;
     private final DepcyGraph oldDepcyGraph;
     private final DepcyGraph newDepcyGraph;
 
@@ -53,7 +55,7 @@ public class SimpleDepcyResolver {
      * @param newDatabase   the new database schema, can be null
      * @param isShowColumns whether to show column dependencies
      */
-    public SimpleDepcyResolver(AbstractDatabase oldDatabase, AbstractDatabase newDatabase, boolean isShowColumns) {
+    public SimpleDepcyResolver(IDatabase oldDatabase, IDatabase newDatabase, boolean isShowColumns) {
         this.oldDb = oldDatabase;
         this.newDb = newDatabase;
         this.oldDepcyGraph = new DepcyGraph(oldDatabase, !isShowColumns);
@@ -68,12 +70,12 @@ public class SimpleDepcyResolver {
      * @return collection of statements that must be created before the target statement
      * @throws IllegalStateException if new database is not defined
      */
-    public Collection<PgStatement> getCreateDepcies(PgStatement toCreate) {
+    public Collection<IStatement> getCreateDepcies(IStatement toCreate) {
         if (newDb == null) {
             throw new IllegalStateException("New database not defined");
         }
 
-        PgStatement statement = toCreate.getTwin(newDb);
+        IStatement statement = toCreate.getTwin(newDb);
         var dependencies = GraphUtils.forward(newDepcyGraph, statement);
         dependencies.add(statement);
         return dependencies;
@@ -86,8 +88,8 @@ public class SimpleDepcyResolver {
      * @param toDrop the statement to drop
      * @return collection of statements that depend on the target statement and must be dropped first
      */
-    public Collection<PgStatement> getDropDepcies(PgStatement toDrop) {
-        PgStatement statement = toDrop.getTwin(oldDb);
+    public Collection<IStatement> getDropDepcies(IStatement toDrop) {
+        IStatement statement = toDrop.getTwin(oldDb);
         var dependents = GraphUtils.reverse(oldDepcyGraph, statement);
         dependents.add(statement);
         return dependents;
@@ -100,9 +102,9 @@ public class SimpleDepcyResolver {
      * @param entity the statement to find connections for
      * @return set of statements that the entity depends on
      */
-    public Set<PgStatement> getConnectedTo(PgStatement entity) {
-        Set<PgStatement> connected = new HashSet<>();
-        Graph<PgStatement, DefaultEdge> currentGraph = oldDepcyGraph.getGraph();
+    public Set<IStatement> getConnectedTo(AbstractStatement entity) {
+        Set<IStatement> connected = new HashSet<>();
+        Graph<IStatement, DefaultEdge> currentGraph = oldDepcyGraph.getGraph();
         for (DefaultEdge e : currentGraph.outgoingEdgesOf(entity)) {
             connected.add(currentGraph.getEdgeTarget(e));
         }

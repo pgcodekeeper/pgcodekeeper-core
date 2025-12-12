@@ -19,6 +19,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.ignorelist.IgnoreList;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.*;
@@ -27,9 +30,7 @@ import org.pgcodekeeper.core.model.graph.ActionContainer;
 import org.pgcodekeeper.core.model.graph.ActionsToScriptConverter;
 import org.pgcodekeeper.core.model.graph.DbObject;
 import org.pgcodekeeper.core.model.graph.DepcyResolver;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractTable;
 import org.pgcodekeeper.core.script.SQLActionType;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -88,10 +89,10 @@ public class PgDiff {
      * @throws IOException if an I/O error occurs
      */
     public String diff(TreeElement root,
-                       AbstractDatabase oldDb,
-                       AbstractDatabase newDb,
-                       List<Entry<PgStatement, PgStatement>> additionalDependenciesOldDb,
-                       List<Entry<PgStatement, PgStatement>> additionalDependenciesNewDb,
+                       IDatabase oldDb,
+                       IDatabase newDb,
+                       List<Entry<IStatement, IStatement>> additionalDependenciesOldDb,
+                       List<Entry<IStatement, IStatement>> additionalDependenciesNewDb,
                        IgnoreList ignoreList)
             throws IOException {
         List<TreeElement> selected = getSelectedElements(root, ignoreList);
@@ -99,7 +100,7 @@ public class PgDiff {
             return EMPTY_SCRIPT;
         }
 
-        Set<PgStatement> toRefresh = new LinkedHashSet<>();
+        Set<IStatement> toRefresh = new LinkedHashSet<>();
         var actions = resolveDependencies(selected, oldDb, newDb, additionalDependenciesOldDb,
                 additionalDependenciesNewDb, toRefresh);
         if (actions.isEmpty()) {
@@ -113,8 +114,8 @@ public class PgDiff {
         };
     }
 
-    private String getPgScript(Set<ActionContainer> actions, Set<PgStatement> toRefresh, List<TreeElement> selected,
-            AbstractDatabase oldDb, AbstractDatabase newDb)
+    private String getPgScript(Set<ActionContainer> actions, Set<IStatement> toRefresh, List<TreeElement> selected,
+                               IDatabase oldDb, IDatabase newDb)
             throws IOException {
         SQLScript script = new SQLScript(settings);
         for (String preFilePath : settings.getPreFilePath()) {
@@ -173,8 +174,8 @@ public class PgDiff {
         }
     }
 
-    private String getMsScript(Set<ActionContainer> actions, Set<PgStatement> toRefresh, List<TreeElement> selected,
-            AbstractDatabase oldDb, AbstractDatabase newDb) {
+    private String getMsScript(Set<ActionContainer> actions, Set<IStatement> toRefresh, List<TreeElement> selected,
+                               IDatabase oldDb, IDatabase newDb) {
         SQLScript script = new SQLScript(settings);
         if (settings.isAddTransaction()) {
             script.addStatement("BEGIN TRANSACTION", SQLActionType.BEGIN); //$NON-NLS-1$
@@ -189,8 +190,8 @@ public class PgDiff {
         return script.getFullScript();
     }
 
-    private String getChScript(Set<ActionContainer> actions, Set<PgStatement> toRefresh, List<TreeElement> selected,
-            AbstractDatabase oldDb, AbstractDatabase newDb) {
+    private String getChScript(Set<ActionContainer> actions, Set<IStatement> toRefresh, List<TreeElement> selected,
+                               IDatabase oldDb, IDatabase newDb) {
         SQLScript script = new SQLScript(settings);
         ActionsToScriptConverter.fillScript(script, actions, toRefresh, oldDb, newDb, selected);
         return script.getFullScript();
@@ -205,29 +206,29 @@ public class PgDiff {
     }
 
     private Set<ActionContainer> resolveDependencies(List<TreeElement> selected,
-                                                     AbstractDatabase oldDb,
-                                                     AbstractDatabase newDb,
-                                                     List<Entry<PgStatement, PgStatement>> additionalDependenciesOldDb,
-                                                     List<Entry<PgStatement, PgStatement>> additionalDependenciesNewDb,
-                                                     Set<PgStatement> toRefresh) {
+                                                     IDatabase oldDb,
+                                                     IDatabase newDb,
+                                                     List<Entry<IStatement, IStatement>> additionalDependenciesOldDb,
+                                                     List<Entry<IStatement, IStatement>> additionalDependenciesNewDb,
+                                                     Set<IStatement> toRefresh) {
         addColumnsAsElements(oldDb, newDb, selected);
 
         selected.sort(new CompareTree());
 
         List<DbObject> objects = new ArrayList<>();
         for (TreeElement st : selected) {
-            PgStatement oldStatement = null;
-            PgStatement newStatement = null;
+            IStatement oldStatement = null;
+            IStatement newStatement = null;
             switch (st.getSide()) {
             case LEFT:
-                oldStatement = st.getPgStatement(oldDb);
+                oldStatement = st.getStatement(oldDb);
                 break;
             case BOTH:
-                oldStatement = st.getPgStatement(oldDb);
-                newStatement = st.getPgStatement(newDb);
+                oldStatement = st.getStatement(oldDb);
+                newStatement = st.getStatement(newDb);
                 break;
             case RIGHT:
-                newStatement = st.getPgStatement(newDb);
+                newStatement = st.getStatement(newDb);
                 break;
             }
             objects.add(new DbObject(oldStatement, newStatement));
@@ -237,13 +238,13 @@ public class PgDiff {
     }
 
     @Deprecated
-    private void addColumnsAsElements(AbstractDatabase oldDb, AbstractDatabase newDb,
+    private void addColumnsAsElements(IDatabase oldDb, IDatabase newDb,
             List<TreeElement> selected) {
         List<TreeElement> tempColumns = new ArrayList<>();
         for (TreeElement el : selected) {
             if (el.getType() == DbObjType.TABLE && el.getSide() == DiffSide.BOTH) {
-                AbstractTable oldTbl = (AbstractTable) el.getPgStatement(oldDb);
-                AbstractTable newTbl = (AbstractTable) el.getPgStatement(newDb);
+                AbstractTable oldTbl = (AbstractTable) el.getStatement(oldDb);
+                AbstractTable newTbl = (AbstractTable) el.getStatement(newDb);
                 DiffTree.addColumns(oldTbl.getColumns(), newTbl.getColumns(), el, tempColumns);
             }
         }

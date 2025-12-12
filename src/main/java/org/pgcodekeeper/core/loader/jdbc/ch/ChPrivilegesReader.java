@@ -16,15 +16,14 @@
 package org.pgcodekeeper.core.loader.jdbc.ch;
 
 import org.pgcodekeeper.core.ChDiffUtils;
-import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
-import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.PgPrivilege;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.ObjectPrivilege;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,10 +48,10 @@ public final class ChPrivilegesReader extends AbstractStatementReader {
     }
 
     @Override
-    protected void processResult(ResultSet result) throws SQLException, XmlReaderException {
+    protected void processResult(ResultSet result) throws SQLException {
         String user = result.getString("user_name");
         String role = result.getString("role_name");
-        PgStatement st = user != null ? db.getChild(user, DbObjType.USER) : db.getChild(role, DbObjType.ROLE);
+        AbstractStatement st = user != null ? db.getChild(user, DbObjType.USER) : db.getChild(role, DbObjType.ROLE);
 
         String database = getNameOrAsterisk(result.getString("database"));
         String table = getNameOrAsterisk(result.getString("table"));
@@ -63,7 +62,7 @@ public final class ChPrivilegesReader extends AbstractStatementReader {
         String columnStr = col == null ? "" : '(' + col + ')';
         boolean isGrantOption = result.getBoolean("grant_option");
 
-        st.addPrivilege(new PgPrivilege("GRANT", permission + columnStr, fullName,
+        st.addPrivilege(new ObjectPrivilege("GRANT", permission + columnStr, fullName,
                 user != null ? user : role, isGrantOption, DatabaseType.CH));
     }
 

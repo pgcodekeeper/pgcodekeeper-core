@@ -19,7 +19,7 @@ import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Insert_columns
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Insert_stmt_for_psqlContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Select_stmtContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.With_clauseContext;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 
 import java.util.List;

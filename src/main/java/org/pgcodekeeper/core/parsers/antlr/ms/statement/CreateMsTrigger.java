@@ -17,15 +17,15 @@ package org.pgcodekeeper.core.parsers.antlr.ms.statement;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.launcher.MsFuncProcTrigAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Batch_statementContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Create_or_alter_triggerContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.IdContext;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.PgStatementContainer;
-import org.pgcodekeeper.core.schema.ms.MsDatabase;
-import org.pgcodekeeper.core.schema.ms.MsTrigger;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatementContainer;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
+import org.pgcodekeeper.core.database.ms.schema.MsTrigger;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Arrays;
@@ -105,7 +105,7 @@ public final class CreateMsTrigger extends BatchContextProcessor {
         db.addAnalysisLauncher(new MsFuncProcTrigAnalysisLauncher(trigger,
                 ctx.sql_clauses(), fileName, settings.isEnableFunctionBodiesDependencies()));
 
-        PgStatementContainer cont = getSafe(AbstractSchema::getStatementContainer,
+        AbstractStatementContainer cont = getSafe(AbstractSchema::getStatementContainer,
                 schema, tableNameCtx);
 
         if (isJdbc && schema != null) {

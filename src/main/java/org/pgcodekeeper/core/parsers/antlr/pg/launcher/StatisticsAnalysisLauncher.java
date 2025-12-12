@@ -16,15 +16,15 @@
 package org.pgcodekeeper.core.parsers.antlr.pg.launcher;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.launcher.AbstractAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.expr.ValueExprWithNmspc;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.VexContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.Vex;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
-import org.pgcodekeeper.core.schema.pg.PgStatistics;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.pg.schema.PgStatistics;
 
 import java.util.Set;
 
@@ -46,7 +46,7 @@ public class StatisticsAnalysisLauncher extends AbstractAnalysisLauncher {
     }
 
     @Override
-    public Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
         ValueExprWithNmspc expr = new ValueExprWithNmspc(meta);
 
         if (stmt instanceof PgStatistics stat) {

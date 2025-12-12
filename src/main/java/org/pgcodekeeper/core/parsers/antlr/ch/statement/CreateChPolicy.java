@@ -19,8 +19,8 @@ import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Create_policy_s
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.ExprContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Policy_actionContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.launcher.ChExpressionAnalysisLauncher;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
-import org.pgcodekeeper.core.schema.ch.ChPolicy;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.database.ch.schema.ChPolicy;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Arrays;

@@ -20,10 +20,10 @@ import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.ms.MsConstraintFk;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.ms.schema.MsConstraintFk;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -59,14 +59,14 @@ public class MsFKReader extends JdbcReader {
 
         constrFk.setForeignSchema(fSchemaName);
         constrFk.setForeignTable(fTableName);
-        constrFk.addDep(new GenericColumn(fSchemaName, fTableName, DbObjType.TABLE));
+        constrFk.addDependency(new GenericColumn(fSchemaName, fTableName, DbObjType.TABLE));
 
         for (XmlReader col : XmlReader.readXML(res.getString("cols"))) {
             String field = col.getString("f");
             String fCol = col.getString("r");
 
             constrFk.addForeignColumn(fCol);
-            constrFk.addDep(new GenericColumn(fSchemaName, fTableName, fCol, DbObjType.COLUMN));
+            constrFk.addDependency(new GenericColumn(fSchemaName, fTableName, fCol, DbObjType.COLUMN));
             constrFk.addColumn(field);
         }
 

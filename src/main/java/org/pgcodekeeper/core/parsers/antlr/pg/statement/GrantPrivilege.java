@@ -16,16 +16,17 @@
 package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.ObjectPrivilege;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.pg.AbstractPgFunction;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgSchema;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractFunction;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgSchema;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -45,7 +46,7 @@ public final class GrantPrivilege extends PgParserAbstract {
     private final Rule_commonContext ctx;
     private final String state;
     private final boolean isGO;
-    private final Map<PgStatement, StatementOverride> overrides;
+    private final Map<AbstractStatement, StatementOverride> overrides;
 
     /**
      * Constructs a new GrantPrivilege parser without statement overrides.
@@ -66,7 +67,7 @@ public final class GrantPrivilege extends PgParserAbstract {
      * @param overrides optional map for statement overrides, may be null
      * @param settings  ISettings object
      */
-    public GrantPrivilege(Rule_commonContext ctx, PgDatabase db, Map<PgStatement, StatementOverride> overrides,
+    public GrantPrivilege(Rule_commonContext ctx, PgDatabase db, Map<AbstractStatement, StatementOverride> overrides,
                           ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
@@ -163,7 +164,7 @@ public final class GrantPrivilege extends PgParserAbstract {
             List<ParserRuleContext> funcIds = getIdentifiers(funct.schema_qualified_name());
             ParserRuleContext functNameCtx = QNameParser.getFirstNameCtx(funcIds);
             PgSchema schema = getSchemaSafe(funcIds);
-            AbstractPgFunction func = (AbstractPgFunction) getSafe(PgSchema::getFunction, schema,
+            PgAbstractFunction func = (PgAbstractFunction) getSafe(PgSchema::getFunction, schema,
                     parseSignature(functNameCtx.getText(), funct.function_args()),
                     functNameCtx.getStart());
 
@@ -183,7 +184,7 @@ public final class GrantPrivilege extends PgParserAbstract {
             func.appendFunctionSignature(sb, false, true);
 
             for (String role : roles) {
-                addPrivilege(func, new PgPrivilege(state, permissions,
+                addPrivilege(func, new ObjectPrivilege(state, permissions,
                         sb.toString(), role, isGO, DatabaseType.PG));
             }
         }
@@ -223,7 +224,7 @@ public final class GrantPrivilege extends PgParserAbstract {
         ParserRuleContext firstPart = QNameParser.getFirstNameCtx(ids);
 
         // write privileges as we received them in one line
-        PgStatement st = (PgStatement) getSafe(PgSchema::getRelation, schema, firstPart);
+        AbstractStatement st = (AbstractStatement) getSafe(PgSchema::getRelation, schema, firstPart);
 
         for (Entry<String, Entry<IdentifierContext, List<String>>> colPriv : colPrivs.entrySet()) {
             StringBuilder permission = new StringBuilder();
@@ -235,7 +236,7 @@ public final class GrantPrivilege extends PgParserAbstract {
             permission.setLength(permission.length() - 1);
 
             for (String role : roles) {
-                PgPrivilege priv = new PgPrivilege(state, permission.toString(),
+                ObjectPrivilege priv = new ObjectPrivilege(state, permission.toString(),
                         "TABLE " + st.getQualifiedName(), role, isGO, DatabaseType.PG);
                 if (DbObjType.TABLE != st.getStatementType()) {
                     addPrivilege(st, priv);
@@ -253,10 +254,10 @@ public final class GrantPrivilege extends PgParserAbstract {
                          String state, String permissions, List<String> roles, boolean isGO) {
         List<ParserRuleContext> ids = getIdentifiers(name);
         ParserRuleContext idCtx = QNameParser.getFirstNameCtx(ids);
-        PgStatement statement = switch (type) {
+        AbstractStatement statement = switch (type) {
             case SCHEMA -> getSafe(PgDatabase::getSchema, db, idCtx);
             case DOMAIN -> getSafe(PgSchema::getDomain, getSchemaSafe(ids), idCtx);
-            case TABLE -> (PgStatement) getSafe(PgSchema::getRelation, getSchemaSafe(ids), idCtx);
+            case TABLE -> (AbstractStatement) getSafe(PgSchema::getRelation, getSchemaSafe(ids), idCtx);
             case SEQUENCE -> getSafe(PgSchema::getSequence, getSchemaSafe(ids), idCtx);
             case FOREIGN_DATA_WRAPPER -> getSafe(PgDatabase::getForeignDW, db, idCtx);
             case SERVER -> getSafe(PgDatabase::getServer, db, idCtx);
@@ -275,16 +276,16 @@ public final class GrantPrivilege extends PgParserAbstract {
         if (statement != null) {
             String typeName = type == DbObjType.SERVER ? "FOREIGN SERVER" : type.getTypeName();
             for (String role : roles) {
-                addPrivilege(statement, new PgPrivilege(state, permissions,
+                addPrivilege(statement, new ObjectPrivilege(state, permissions,
                         typeName + " " + statement.getQualifiedName(), role, isGO, DatabaseType.PG));
             }
         }
     }
 
 
-    private void addPrivilege(PgStatement st, PgPrivilege privilege) {
+    private void addPrivilege(AbstractStatement st, ObjectPrivilege privilege) {
         if (overrides == null) {
-            doSafe(PgStatement::addPrivilege, st, privilege);
+            doSafe(AbstractStatement::addPrivilege, st, privilege);
         } else {
             overrides.computeIfAbsent(st,
                     k -> new StatementOverride()).addPrivilege(privilege);

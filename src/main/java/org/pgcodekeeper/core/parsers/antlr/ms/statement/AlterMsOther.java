@@ -17,12 +17,12 @@ package org.pgcodekeeper.core.parsers.antlr.ms.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Alter_sequenceContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Qualified_nameContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Schema_alterContext;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.ms.MsDatabase;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Arrays;
@@ -63,7 +63,7 @@ public final class AlterMsOther extends MsParserAbstract {
 
     private void alterSequence(Alter_sequenceContext alter) {
         Qualified_nameContext qname = alter.qualified_name();
-        PgObjLocation ref = addObjReference(Arrays.asList(qname.schema, qname.name),
+        ObjectLocation ref = addObjReference(Arrays.asList(qname.schema, qname.name),
                 DbObjType.SEQUENCE, ACTION_ALTER);
         if (!alter.RESTART().isEmpty()) {
             ref.setWarning(DangerStatement.RESTART_WITH);
@@ -71,8 +71,8 @@ public final class AlterMsOther extends MsParserAbstract {
     }
 
     @Override
-    protected PgObjLocation fillQueryLocation(ParserRuleContext ctx) {
-        PgObjLocation loc = super.fillQueryLocation(ctx);
+    protected ObjectLocation fillQueryLocation(ParserRuleContext ctx) {
+        ObjectLocation loc = super.fillQueryLocation(ctx);
         Alter_sequenceContext alterSeqCtx = ((Schema_alterContext) ctx).alter_sequence();
         if (alterSeqCtx != null && !alterSeqCtx.RESTART().isEmpty()) {
             loc.setWarning(DangerStatement.RESTART_WITH);

@@ -18,12 +18,12 @@ package org.pgcodekeeper.core.api;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.PgCodekeeperException;
 import org.pgcodekeeper.core.PgDiff;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.ignorelist.IgnoreList;
 import org.pgcodekeeper.core.ignorelist.IgnoreParser;
 import org.pgcodekeeper.core.model.difftree.*;
 import org.pgcodekeeper.core.model.exporter.ModelExporter;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.utils.ProjectUpdater;
@@ -90,8 +90,8 @@ public final class PgCodeKeeperApi {
     public static String diff(ISettings settings,
                               AbstractDatabase oldDb,
                               AbstractDatabase newDb,
-                              List<Map.Entry<PgStatement, PgStatement>> additionalDependenciesOldDb,
-                              List<Map.Entry<PgStatement, PgStatement>> additionalDependenciesNewDb,
+                              List<Map.Entry<IStatement, IStatement>> additionalDependenciesOldDb,
+                              List<Map.Entry<IStatement, IStatement>> additionalDependenciesNewDb,
                               Collection<String> ignoreLists)
             throws IOException, InterruptedException {
         TreeElement root = DiffTree.create(settings, oldDb, newDb);
@@ -116,8 +116,8 @@ public final class PgCodeKeeperApi {
                               TreeElement root,
                               AbstractDatabase oldDb,
                               AbstractDatabase newDb,
-                              List<Map.Entry<PgStatement, PgStatement>> additionalDependenciesOldDb,
-                              List<Map.Entry<PgStatement, PgStatement>> additionalDependenciesNewDb,
+                              List<Map.Entry<IStatement, IStatement>> additionalDependenciesOldDb,
+                              List<Map.Entry<IStatement, IStatement>> additionalDependenciesNewDb,
                               Collection<String> ignoreLists)
             throws IOException {
         IgnoreList ignoreList = IgnoreParser.parseLists(ignoreLists);
@@ -136,7 +136,7 @@ public final class PgCodeKeeperApi {
      * @throws InterruptedException if the thread is interrupted during the operation
      */
     public static void export(ISettings settings, AbstractDatabase dbToExport, String exportTo)
-            throws PgCodekeeperException, IOException, InterruptedException {
+            throws IOException, InterruptedException {
         export(settings, dbToExport, exportTo, Collections.emptyList(), null);
     }
 
@@ -190,14 +190,13 @@ public final class PgCodeKeeperApi {
      * @param projectToUpdate      path to the project directory to update
      * @param ignoreLists          collection of paths to files containing objects to ignore
      * @param monitor              progress monitor for tracking the operation
-     * @throws PgCodekeeperException if update operation fails or if parsing errors occur
      * @throws IOException           if I/O operations fail, if project directory does not exist, if path is a file,
      *                               or if ignore list files cannot be read
      * @throws InterruptedException  if the thread is interrupted during the operation
      */
     public static void update(ISettings settings, AbstractDatabase oldDb, AbstractDatabase newDb,
                               String projectToUpdate, Collection<String> ignoreLists, IMonitor monitor)
-            throws PgCodekeeperException, IOException, InterruptedException {
+            throws IOException, InterruptedException {
         IgnoreList ignoreList = IgnoreParser.parseLists(ignoreLists);
         TreeElement root = DiffTree.create(settings, oldDb, newDb, monitor);
         root.setAllChecked();

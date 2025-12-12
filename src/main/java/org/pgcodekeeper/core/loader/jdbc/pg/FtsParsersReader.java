@@ -18,8 +18,8 @@ package org.pgcodekeeper.core.loader.jdbc.pg;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.pg.PgFtsParser;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.pg.schema.PgFtsParser;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

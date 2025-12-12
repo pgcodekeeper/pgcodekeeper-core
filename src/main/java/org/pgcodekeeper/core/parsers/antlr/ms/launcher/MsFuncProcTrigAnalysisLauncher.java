@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.parsers.antlr.ms.launcher;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.launcher.AbstractAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.ExpressionContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Select_statementContext;
@@ -24,10 +24,10 @@ import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Sql_clausesCo
 import org.pgcodekeeper.core.parsers.antlr.ms.expr.MsSelect;
 import org.pgcodekeeper.core.parsers.antlr.ms.expr.MsSqlClauses;
 import org.pgcodekeeper.core.parsers.antlr.ms.expr.MsValueExpr;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
-import org.pgcodekeeper.core.schema.ms.AbstractMsFunction;
-import org.pgcodekeeper.core.schema.ms.MsTrigger;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.ms.schema.MsAbstractFunction;
+import org.pgcodekeeper.core.database.ms.schema.MsTrigger;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -48,7 +48,7 @@ public final class MsFuncProcTrigAnalysisLauncher extends AbstractAnalysisLaunch
      * @param location                           source location identifier
      * @param isEnableFunctionBodiesDependencies controls function body dependency collection
      */
-    public MsFuncProcTrigAnalysisLauncher(AbstractMsFunction stmt,
+    public MsFuncProcTrigAnalysisLauncher(MsAbstractFunction stmt,
             Sql_clausesContext ctx, String location, boolean isEnableFunctionBodiesDependencies) {
         super(stmt, ctx, location);
         this.isEnableFunctionBodiesDependencies = isEnableFunctionBodiesDependencies;
@@ -62,7 +62,7 @@ public final class MsFuncProcTrigAnalysisLauncher extends AbstractAnalysisLaunch
      * @param location                           source location identifier
      * @param isEnableFunctionBodiesDependencies controls function body dependency collection
      */
-    public MsFuncProcTrigAnalysisLauncher(AbstractMsFunction stmt,
+    public MsFuncProcTrigAnalysisLauncher(MsAbstractFunction stmt,
             Select_statementContext ctx, String location, boolean isEnableFunctionBodiesDependencies) {
         super(stmt, ctx, location);
         this.isEnableFunctionBodiesDependencies = isEnableFunctionBodiesDependencies;
@@ -76,7 +76,7 @@ public final class MsFuncProcTrigAnalysisLauncher extends AbstractAnalysisLaunch
      * @param location                           source location identifier
      * @param isEnableFunctionBodiesDependencies controls function body dependency collection
      */
-    public MsFuncProcTrigAnalysisLauncher(AbstractMsFunction stmt,
+    public MsFuncProcTrigAnalysisLauncher(MsAbstractFunction stmt,
             ExpressionContext ctx, String location, boolean isEnableFunctionBodiesDependencies) {
         super(stmt, ctx, location);
         this.isEnableFunctionBodiesDependencies = isEnableFunctionBodiesDependencies;
@@ -97,7 +97,7 @@ public final class MsFuncProcTrigAnalysisLauncher extends AbstractAnalysisLaunch
     }
 
     @Override
-    public Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
         String schema = getSchemaName();
 
         if (ctx instanceof Sql_clausesContext sqlCtx) {

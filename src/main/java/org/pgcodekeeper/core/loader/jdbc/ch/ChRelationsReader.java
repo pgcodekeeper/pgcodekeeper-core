@@ -16,18 +16,17 @@
 package org.pgcodekeeper.core.loader.jdbc.ch;
 
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.pgcodekeeper.core.database.ch.schema.*;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
-import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ch.statement.CreateChDictionary;
 import org.pgcodekeeper.core.parsers.antlr.ch.statement.CreateChTable;
 import org.pgcodekeeper.core.parsers.antlr.ch.statement.CreateChView;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.ch.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.utils.Pair;
 
 import java.sql.ResultSet;
@@ -50,8 +49,8 @@ public final class ChRelationsReader extends JdbcReader {
     }
 
     @Override
-    protected void processResult(ResultSet result, AbstractSchema schema) throws SQLException, XmlReaderException {
-        PgStatement child;
+    protected void processResult(ResultSet result, AbstractSchema schema) throws SQLException {
+        AbstractStatement child;
         String name = result.getString("name");
         String definition = result.getString("definition");
 
@@ -67,7 +66,7 @@ public final class ChRelationsReader extends JdbcReader {
         schema.addChild(child);
     }
 
-    private PgStatement getDictionary(AbstractSchema schema, String name, String definition) {
+    private AbstractStatement getDictionary(AbstractSchema schema, String name, String definition) {
         loader.setCurrentObject(new GenericColumn(schema.getName(), name, DbObjType.DICTIONARY));
         ChDictionary dict = new ChDictionary(name);
         loader.submitChAntlrTask(definition,
@@ -77,7 +76,7 @@ public final class ChRelationsReader extends JdbcReader {
         return dict;
     }
 
-    private PgStatement getView(AbstractSchema schema, String name, String definition) {
+    private AbstractStatement getView(AbstractSchema schema, String name, String definition) {
         loader.setCurrentObject(new GenericColumn(schema.getName(), name, DbObjType.VIEW));
         ChView view = new ChView(name);
         loader.submitChAntlrTask(definition,
@@ -90,7 +89,7 @@ public final class ChRelationsReader extends JdbcReader {
         return view;
     }
 
-    private PgStatement getTable(AbstractSchema schema, String name, String definition, String engineName) {
+    private AbstractStatement getTable(AbstractSchema schema, String name, String definition, String engineName) {
         loader.setCurrentObject(new GenericColumn(schema.getName(), name, DbObjType.TABLE));
         ChTable table;
         if (engineName.endsWith("log")) {

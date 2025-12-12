@@ -16,16 +16,16 @@
 package org.pgcodekeeper.core.parsers.antlr.ms.launcher;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.launcher.AbstractAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.ExpressionContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.expr.MsExprWithNmspc;
 import org.pgcodekeeper.core.parsers.antlr.ms.expr.MsValueExpr;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 
 import java.util.Set;
 
@@ -42,15 +42,15 @@ public class MsExpressionAnalysisLauncher extends AbstractAnalysisLauncher {
      * @param ctx      the expression parse tree context
      * @param location the source location identifier
      */
-    public MsExpressionAnalysisLauncher(PgStatement stmt, ExpressionContext ctx, String location) {
+    public MsExpressionAnalysisLauncher(AbstractStatement stmt, ExpressionContext ctx, String location) {
         super(stmt, ctx, location);
     }
 
     @Override
-    public Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
         if (stmt instanceof AbstractColumn) {
             var expr = new MsExprWithNmspc(getSchemaName(), meta);
-            PgStatement table = stmt.getParent();
+            var table = stmt.getParent();
             String schemaName = table.getParent().getName();
             String rawTableReference = table.getName();
 

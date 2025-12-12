@@ -18,9 +18,9 @@ package org.pgcodekeeper.core.parsers.antlr.pg.launcher;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.pg.expr.*;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
-import org.pgcodekeeper.core.schema.pg.PgRule;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.pg.schema.PgRule;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -44,8 +44,8 @@ public class RuleAnalysisLauncher extends AbstractPgAnalysisLauncher {
     }
 
     @Override
-    public Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
-        Set<PgObjLocation> depcies = new LinkedHashSet<>();
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+        Set<ObjectLocation> depcies = new LinkedHashSet<>();
 
         Create_rewrite_statementContext createRewriteCtx = (Create_rewrite_statementContext) ctx;
 
@@ -61,7 +61,7 @@ public class RuleAnalysisLauncher extends AbstractPgAnalysisLauncher {
         return depcies;
     }
 
-    private Set<PgObjLocation> analyzeRulesCommand(Rewrite_commandContext cmd, MetaContainer meta) {
+    private Set<ObjectLocation> analyzeRulesCommand(Rewrite_commandContext cmd, MetaContainer meta) {
         Select_stmtContext select;
         if ((select = cmd.select_stmt()) != null) {
             return analyzeTableChild(select, new Select(meta));

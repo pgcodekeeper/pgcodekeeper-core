@@ -15,11 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.ch.statement;
 
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Create_database_stmtContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Engine_exprContext;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
-import org.pgcodekeeper.core.schema.ch.ChSchema;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.database.ch.schema.ChSchema;
 import org.pgcodekeeper.core.settings.ISettings;
 
 /**

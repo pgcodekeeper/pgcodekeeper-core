@@ -16,17 +16,16 @@
 package org.pgcodekeeper.core.loader.jdbc.ms;
 
 import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.database.api.schema.ArgMode;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.ms.schema.*;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.ms.AbstractMsClrFunction;
-import org.pgcodekeeper.core.schema.ms.MsClrFunction;
-import org.pgcodekeeper.core.schema.ms.MsClrProcedure;
-import org.pgcodekeeper.core.schema.ms.MsColumn;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -59,7 +58,7 @@ public class MsExtendedObjectsReader extends JdbcReader {
         String assemblyClass = res.getString("assembly_class");
         String assemblyMethod = res.getString("assembly_method");
 
-        AbstractMsClrFunction func;
+        MsAbstractClrFunction func;
 
         if (type == DbObjType.PROCEDURE) {
             func = new MsClrProcedure(name, assembly, assemblyClass, assemblyMethod);
@@ -82,7 +81,7 @@ public class MsExtendedObjectsReader extends JdbcReader {
             func = localFunc;
         }
 
-        func.addDep(new GenericColumn(assembly, DbObjType.ASSEMBLY));
+        func.addDependency(new GenericColumn(assembly, DbObjType.ASSEMBLY));
 
         String executeAs = res.getString("execute_as");
         func.addOption("EXECUTE AS " + (executeAs == null ? "CALLER" : executeAs));
@@ -110,10 +109,10 @@ public class MsExtendedObjectsReader extends JdbcReader {
         }
 
         localFunc.setReturns("TABLE (\n" + String.join(",\n", columns) + ")");
-        localFunc.setFuncType(FuncTypes.TABLE);
+        localFunc.setFuncType(MsFunctionTypes.TABLE);
     }
 
-    private void addArguments(AbstractMsClrFunction func, List<XmlReader> args) {
+    private void addArguments(MsAbstractClrFunction func, List<XmlReader> args) {
         for (XmlReader arg : args) {
             boolean isUserDefined = arg.getBoolean("ud");
             Argument argDst = new Argument(arg.getBoolean("ou") ? ArgMode.OUTPUT : ArgMode.IN,

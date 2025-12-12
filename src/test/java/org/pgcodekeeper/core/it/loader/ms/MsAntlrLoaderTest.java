@@ -17,11 +17,12 @@ package org.pgcodekeeper.core.it.loader.ms;
 
 import org.junit.jupiter.api.Test;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.ObjectPrivilege;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.ms.schema.*;
 import org.pgcodekeeper.core.loader.ProjectLoader;
 import org.pgcodekeeper.core.model.exporter.ModelExporter;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.ms.*;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.utils.TempDir;
 
@@ -472,15 +473,15 @@ class MsAntlrLoaderTest {
         AbstractDatabase d = createDumpDB(dbType);
         AbstractSchema schema = d.getDefaultSchema();
 
-        schema.addPrivilege(new PgPrivilege(REVOKE, "SELECT", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
-        schema.addPrivilege(new PgPrivilege(REVOKE, "UPDATE", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
-        schema.addPrivilege(new PgPrivilege(REVOKE, "DELETE", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
-        schema.addPrivilege(new PgPrivilege(REVOKE, "INSERT", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege(REVOKE, "SELECT", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege(REVOKE, "UPDATE", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege(REVOKE, "DELETE", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege(REVOKE, "INSERT", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
 
-        schema.addPrivilege(new PgPrivilege(GRANT, "SELECT", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
-        schema.addPrivilege(new PgPrivilege(GRANT, "UPDATE", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
-        schema.addPrivilege(new PgPrivilege(GRANT, "DELETE", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
-        schema.addPrivilege(new PgPrivilege(GRANT, "INSERT", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege(GRANT, "SELECT", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege(GRANT, "UPDATE", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege(GRANT, "DELETE", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege(GRANT, "INSERT", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
 
         MsTable table = new MsTable("test_table");
         table.setAnsiNulls(true);
@@ -855,7 +856,7 @@ class MsAntlrLoaderTest {
         MsFunction func = new MsFunction("function_string_to_table");
         func.setAnsiNulls(true);
         func.setQuotedIdentified(true);
-        func.setFuncType(FuncTypes.MULTI);
+        func.setFuncType(MsFunctionTypes.MULTI);
         func.addArgument(new Argument("@string", "nvarchar(MAX)"));
         func.addArgument(new Argument("@delimiter", "char(1)"));
         func.setFirstPart("");
@@ -884,7 +885,7 @@ class MsAntlrLoaderTest {
         func = new MsFunction("function_empty");
         func.setAnsiNulls(true);
         func.setQuotedIdentified(true);
-        func.setFuncType(FuncTypes.MULTI);
+        func.setFuncType(MsFunctionTypes.MULTI);
         func.addArgument(new Argument("@string", "nvarchar(MAX)"));
         func.addArgument(new Argument("@delimiter", "char(1)"));
         func.setFirstPart("");
@@ -908,15 +909,15 @@ class MsAntlrLoaderTest {
         AbstractDatabase d = createDumpDB(dbType);
         AbstractSchema schema = d.getDefaultSchema();
 
-        schema.addPrivilege(new PgPrivilege(REVOKE, "SELECT", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
-        schema.addPrivilege(new PgPrivilege(REVOKE, "UPDATE", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
-        schema.addPrivilege(new PgPrivilege(REVOKE, "DELETE", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
-        schema.addPrivilege(new PgPrivilege(REVOKE, "INSERT", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege(REVOKE, "SELECT", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege(REVOKE, "UPDATE", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege(REVOKE, "DELETE", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege(REVOKE, "INSERT", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
 
-        schema.addPrivilege(new PgPrivilege(GRANT, "SELECT", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
-        schema.addPrivilege(new PgPrivilege(GRANT, "UPDATE", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
-        schema.addPrivilege(new PgPrivilege(GRANT, "DELETE", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
-        schema.addPrivilege(new PgPrivilege(GRANT, "INSERT", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege(GRANT, "SELECT", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege(GRANT, "UPDATE", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege(GRANT, "DELETE", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege(GRANT, "INSERT", SCHEMA_DBO, QUOTED_MS_USER, false, dbType));
 
         MsSequence seq = new MsSequence("test_id_seq");
         seq.setStartWith("1");

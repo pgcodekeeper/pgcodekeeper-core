@@ -19,7 +19,7 @@ import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.loader.PgDumpLoader;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.schema.PgObjLocation;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ public final class ScriptParser {
     private static final Logger LOG = LoggerFactory.getLogger(ScriptParser.class);
     private final String script;
 
-    private final List<PgObjLocation> batches;
+    private final List<ObjectLocation> batches;
     private final List<Object> errors;
     private final Set<DangerStatement> dangerStatements;
 
@@ -65,8 +65,8 @@ public final class ScriptParser {
         batches = new ArrayList<>(loader.load().getObjReferences(name));
 
         dangerStatements = batches.stream()
-                .filter(PgObjLocation::isDanger)
-                .map(PgObjLocation::getDanger)
+                .filter(ObjectLocation::isDanger)
+                .map(ObjectLocation::getDanger)
                 .collect(Collectors.toCollection(() -> EnumSet.noneOf(DangerStatement.class)));
         errors = loader.getErrors();
     }
@@ -76,7 +76,7 @@ public final class ScriptParser {
      *
      * @return list of parsed statement locations and metadata
      */
-    public List<PgObjLocation> batch() {
+    public List<ObjectLocation> batch() {
         return batches;
     }
 

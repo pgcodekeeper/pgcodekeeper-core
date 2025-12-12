@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
+import java.io.Serial;
+
 /**
  * Exception class for pgCodeKeeper specific exceptions.
  * <p>
@@ -22,6 +24,7 @@ package org.pgcodekeeper.core;
  */
 public class PgCodekeeperException extends Exception {
 
+    @Serial
     private static final long serialVersionUID = 8958777207045999192L;
 
     /**

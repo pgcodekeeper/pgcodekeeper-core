@@ -17,16 +17,16 @@ package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.ViewAnalysisLauncher;
-import org.pgcodekeeper.core.schema.pg.AbstractPgView;
-import org.pgcodekeeper.core.schema.pg.MaterializedPgView;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgView;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractView;
+import org.pgcodekeeper.core.database.pg.schema.PgMaterializedView;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgView;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.List;
@@ -80,9 +80,9 @@ public final class CreateView extends PgParserAbstract {
         Create_view_statementContext ctx = context;
         List<ParserRuleContext> ids = getIdentifiers(ctx.name);
         ParserRuleContext name = QNameParser.getFirstNameCtx(ids);
-        AbstractPgView view = new PgView(name.getText());
+        PgAbstractView view = new PgView(name.getText());
         if (ctx.MATERIALIZED() != null) {
-            var matV = new MaterializedPgView(name.getText());
+            var matV = new PgMaterializedView(name.getText());
             matV.setIsWithData(ctx.NO() == null);
             Table_spaceContext space = ctx.table_space();
             if (space != null) {
@@ -126,7 +126,7 @@ public final class CreateView extends PgParserAbstract {
             }
         }
         if (ctx.with_check_option() != null) {
-            view.addOption(AbstractPgView.CHECK_OPTION,
+            view.addOption(PgAbstractView.CHECK_OPTION,
                     ctx.with_check_option().LOCAL() != null ? "local" : "cascaded");
         }
 

@@ -15,12 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.ch.statement;
 
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Alter_policy_stmtContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Alter_role_stmtContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Alter_stmtContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Alter_user_stmtContext;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Arrays;

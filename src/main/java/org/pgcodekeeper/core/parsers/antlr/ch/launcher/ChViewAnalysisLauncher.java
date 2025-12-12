@@ -20,9 +20,9 @@ import org.pgcodekeeper.core.parsers.antlr.base.launcher.AbstractAnalysisLaunche
 import org.pgcodekeeper.core.parsers.antlr.ch.expr.ChSelect;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Select_stmtContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Subquery_clauseContext;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.ch.ChView;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.ch.schema.ChView;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 
 import java.util.Collections;
 import java.util.Set;
@@ -45,7 +45,7 @@ public class ChViewAnalysisLauncher extends AbstractAnalysisLauncher {
     }
 
     @Override
-    public Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
         Subquery_clauseContext subQueryCtx = (Subquery_clauseContext) ctx;
         Select_stmtContext selectCtx = subQueryCtx.select_stmt();
         if (selectCtx != null) {

@@ -17,16 +17,16 @@ package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrTask;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrTaskManager;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.AbstractTable;
-import org.pgcodekeeper.core.schema.pg.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.base.schema.AbstractTable;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.List;
@@ -83,7 +83,7 @@ public final class CreateTable extends TableAbstract {
         for (AbstractColumn col : table.getColumns()) {
             PgSequence seq = ((PgColumn) col).getSequence();
             if (seq != null) {
-                if (table instanceof AbstractRegularTable regTable) {
+                if (table instanceof PgAbstractRegularTable regTable) {
                     seq.setLogged(regTable.isLogged());
                 }
                 seq.setParent(schema);
@@ -97,22 +97,22 @@ public final class CreateTable extends TableAbstract {
         Define_typeContext typeCtx = tabCtx.define_type();
         Define_partitionContext partCtx = tabCtx.define_partition();
 
-        AbstractPgTable table;
+        PgAbstractTable table;
 
         if (typeCtx != null) {
             table = defineType(typeCtx, tableName, schemaName);
         } else if (colCtx != null) {
-            AbstractRegularTable abstractRegTable;
+            PgAbstractRegularTable abstractRegTable;
             if (ctx.partition_gp() != null) {
-                abstractRegTable = new PartitionGpTable(tableName);
+                abstractRegTable = new GpPartitionTable(tableName);
             } else {
-                abstractRegTable = new SimplePgTable(tableName);
+                abstractRegTable = new PgSimpleTable(tableName);
             }
             table = fillRegularTable(abstractRegTable);
             fillColumns(colCtx, table, schemaName, tablespace);
         } else {
             String partBound = getFullCtxText(partCtx.for_values_bound());
-            table = fillRegularTable(new PartitionPgTable(tableName, partBound));
+            table = fillRegularTable(new PgPartitionTable(tableName, partBound));
             fillTypeColumns(partCtx.list_of_type_column_def(), table, schemaName, tablespace);
             addInherit(table, getIdentifiers(partCtx.parent_table));
         }
@@ -120,18 +120,18 @@ public final class CreateTable extends TableAbstract {
         return table;
     }
 
-    private TypedPgTable defineType(Define_typeContext typeCtx, String tableName,
-                                    String schemaName) {
+    private PgTypedTable defineType(Define_typeContext typeCtx, String tableName,
+                                      String schemaName) {
         Data_typeContext typeName = typeCtx.type_name;
         String ofType = getTypeName(typeName);
-        TypedPgTable table = new TypedPgTable(tableName, ofType);
+        PgTypedTable table = new PgTypedTable(tableName, ofType);
         fillTypeColumns(typeCtx.list_of_type_column_def(), table, schemaName, tablespace);
         addTypeDepcy(typeName, table);
         fillRegularTable(table);
         return table;
     }
 
-    private AbstractRegularTable fillRegularTable(AbstractRegularTable table) {
+    private PgAbstractRegularTable fillRegularTable(PgAbstractRegularTable table) {
         if (ctx.table_space() != null) {
             table.setTablespace(ctx.table_space().identifier().getText());
         } else if (tablespace != null) {
@@ -141,7 +141,7 @@ public final class CreateTable extends TableAbstract {
         String distribution = parseDistribution(ctx.distributed_clause());
         table.setDistribution(distribution);
 
-        if (table instanceof PartitionGpTable partTable) {
+        if (table instanceof GpPartitionTable partTable) {
             var partitionGP = ctx.partition_gp();
             partTable.setPartitionGpBound(getFullCtxText(partitionGP),
                     AntlrUtils.normalizeWhitespaceUnquoted(partitionGP, stream));
@@ -186,7 +186,7 @@ public final class CreateTable extends TableAbstract {
         return table;
     }
 
-    private void parseOptions(List<Storage_parameter_optionContext> options, AbstractRegularTable table) {
+    private void parseOptions(List<Storage_parameter_optionContext> options, PgAbstractRegularTable table) {
         for (Storage_parameter_optionContext option : options) {
             Storage_parameter_nameContext key = option.storage_parameter_name();
             List<Col_labelContext> optionIds = key.col_label();

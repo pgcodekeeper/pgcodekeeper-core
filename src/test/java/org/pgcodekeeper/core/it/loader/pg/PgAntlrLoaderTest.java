@@ -21,13 +21,12 @@ package org.pgcodekeeper.core.it.loader.pg;
 
 import org.junit.jupiter.api.Test;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.loader.ProjectLoader;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.exporter.ModelExporter;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.pg.*;
-import org.pgcodekeeper.core.schema.pg.PgTrigger.TgTypes;
+import org.pgcodekeeper.core.database.pg.schema.PgTrigger.TgTypes;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.utils.TempDir;
 
@@ -91,7 +90,7 @@ class PgAntlrLoaderTest {
         }
     }
 
-    private PgConstraintNotNull createNotNullConstraint(SimplePgTable table, PgColumn col) {
+    private PgConstraintNotNull createNotNullConstraint(PgSimpleTable table, PgColumn col) {
         var notNullConstraint = new PgConstraintNotNull(table.getName(), col.getName());
         notNullConstraint.setParent(col);
         col.setNotNullConstraint(notNullConstraint);
@@ -103,7 +102,7 @@ class PgAntlrLoaderTest {
         AbstractDatabase d = createDumpDB(DatabaseType.PG);
         AbstractSchema schema = d.getDefaultSchema();
 
-        SimplePgTable table = new SimplePgTable("fax_boxes");
+        PgSimpleTable table = new PgSimpleTable("fax_boxes");
         schema.addTable(table);
 
         PgColumn col = new PgColumn("fax_box_id");
@@ -122,7 +121,7 @@ class PgAntlrLoaderTest {
 
         table.setOwner(POSTGRES);
 
-        table = new SimplePgTable("faxes");
+        table = new PgSimpleTable("faxes");
         schema.addTable(table);
 
         col = new PgColumn("fax_id");
@@ -182,7 +181,7 @@ class PgAntlrLoaderTest {
         constraintFk.addDelActCol("fax_box_id");
         table.addConstraint(constraintFk);
 
-        table = new SimplePgTable("extensions");
+        table = new PgSimpleTable("extensions");
         schema.addTable(table);
 
         col = new PgColumn("id");
@@ -216,7 +215,7 @@ class PgAntlrLoaderTest {
 
         schema = d.getSchema(Consts.PUBLIC);
 
-        AbstractTable table = new SimplePgTable("contacts");
+        AbstractTable table = new PgSimpleTable("contacts");
         schema.addTable(table);
 
         AbstractColumn col = new PgColumn("id");
@@ -248,7 +247,7 @@ class PgAntlrLoaderTest {
         seq.setCache("1");
         schema.addSequence(seq);
 
-        SimplePgTable table = new SimplePgTable("admins");
+        PgSimpleTable table = new PgSimpleTable("admins");
         schema.addTable(table);
 
         PgColumn col = new PgColumn("aid");
@@ -335,7 +334,7 @@ class PgAntlrLoaderTest {
         AbstractDatabase d = createDumpDB(DatabaseType.PG);
         AbstractSchema schema = d.getDefaultSchema();
 
-        SimplePgTable table = new SimplePgTable("call_logs");
+        PgSimpleTable table = new PgSimpleTable("call_logs");
         schema.addTable(table);
 
         PgColumn col = new PgColumn("id");
@@ -425,12 +424,12 @@ class PgAntlrLoaderTest {
         AbstractDatabase d = createDumpDB(dbType);
         AbstractSchema schema = d.getDefaultSchema();
 
-        schema.addPrivilege(new PgPrivilege("REVOKE", "ALL", "SCHEMA public", "PUBLIC", false, dbType));
-        schema.addPrivilege(new PgPrivilege("REVOKE", "ALL", "SCHEMA public", POSTGRES, false, dbType));
-        schema.addPrivilege(new PgPrivilege("GRANT", "ALL", "SCHEMA public", POSTGRES, false, dbType));
-        schema.addPrivilege(new PgPrivilege("GRANT", "ALL", "SCHEMA public", "PUBLIC", false, dbType));
+        schema.addPrivilege(new ObjectPrivilege("REVOKE", "ALL", "SCHEMA public", "PUBLIC", false, dbType));
+        schema.addPrivilege(new ObjectPrivilege("REVOKE", "ALL", "SCHEMA public", POSTGRES, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege("GRANT", "ALL", "SCHEMA public", POSTGRES, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege("GRANT", "ALL", "SCHEMA public", "PUBLIC", false, dbType));
 
-        AbstractTable table = new SimplePgTable("test_table");
+        AbstractTable table = new PgSimpleTable("test_table");
         schema.addTable(table);
 
         AbstractColumn col = new PgColumn("id");
@@ -548,7 +547,7 @@ class PgAntlrLoaderTest {
         AbstractDatabase d = createDumpDB(DatabaseType.PG);
         AbstractSchema schema = d.getDefaultSchema();
 
-        SimplePgTable table = new SimplePgTable("user_data");
+        PgSimpleTable table = new PgSimpleTable("user_data");
         schema.addTable(table);
 
         PgColumn col = new PgColumn("id");
@@ -581,7 +580,7 @@ class PgAntlrLoaderTest {
         schema.addSequence(seq);
         seq.setOwner(POSTGRES);
 
-        table = new SimplePgTable("t1");
+        table = new PgSimpleTable("t1");
         schema.addTable(table);
 
         col = new PgColumn("c1");
@@ -631,7 +630,7 @@ class PgAntlrLoaderTest {
 
         schema.setOwner(POSTGRES);
 
-        SimplePgTable table = new SimplePgTable("acl_role");
+        PgSimpleTable table = new PgSimpleTable("acl_role");
         schema.addTable(table);
 
         PgColumn col = new PgColumn("id");
@@ -645,7 +644,7 @@ class PgAntlrLoaderTest {
 
         table.setOwner(POSTGRES);
 
-        table = new SimplePgTable("user");
+        table = new PgSimpleTable("user");
         schema.addTable(table);
 
         col = new PgColumn("id");
@@ -761,10 +760,10 @@ class PgAntlrLoaderTest {
         AbstractDatabase d = createDumpDB(dbType);
         AbstractSchema schema = d.getDefaultSchema();
 
-        schema.addPrivilege(new PgPrivilege("REVOKE", "ALL", "SCHEMA public", "PUBLIC", false, dbType));
-        schema.addPrivilege(new PgPrivilege("REVOKE", "ALL", "SCHEMA public", POSTGRES, false, dbType));
-        schema.addPrivilege(new PgPrivilege("GRANT", "ALL", "SCHEMA public", POSTGRES, false, dbType));
-        schema.addPrivilege(new PgPrivilege("GRANT", "ALL", "SCHEMA public", "PUBLIC", false, dbType));
+        schema.addPrivilege(new ObjectPrivilege("REVOKE", "ALL", "SCHEMA public", "PUBLIC", false, dbType));
+        schema.addPrivilege(new ObjectPrivilege("REVOKE", "ALL", "SCHEMA public", POSTGRES, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege("GRANT", "ALL", "SCHEMA public", POSTGRES, false, dbType));
+        schema.addPrivilege(new ObjectPrivilege("GRANT", "ALL", "SCHEMA public", "PUBLIC", false, dbType));
 
         // d.setComment("'comments database'")
         // schema.setComment("'public schema'")
@@ -791,7 +790,7 @@ class PgAntlrLoaderTest {
 
         func.setOwner("fordfrog");
 
-        SimplePgTable table = new SimplePgTable("test");
+        PgSimpleTable table = new PgSimpleTable("test");
         schema.addTable(table);
 
         PgColumn col = new PgColumn("id");
@@ -861,7 +860,7 @@ class PgAntlrLoaderTest {
         AbstractDatabase d = createDumpDB(DatabaseType.PG);
         AbstractSchema schema = d.getDefaultSchema();
 
-        AbstractTable table = new SimplePgTable("test");
+        AbstractTable table = new PgSimpleTable("test");
         schema.addTable(table);
 
         AbstractColumn col = new PgColumn("id");
@@ -879,7 +878,7 @@ class PgAntlrLoaderTest {
         AbstractSchema schema = d.getDefaultSchema();
 
         // table1
-        AbstractTable table = new SimplePgTable("t_work");
+        AbstractTable table = new PgSimpleTable("t_work");
         schema.addTable(table);
 
         AbstractColumn col = new PgColumn("id");
@@ -887,7 +886,7 @@ class PgAntlrLoaderTest {
         table.addColumn(col);
 
         // table2
-        AbstractTable table2 = new SimplePgTable("t_chart");
+        AbstractTable table2 = new PgSimpleTable("t_chart");
         schema.addTable(table2);
         col = new PgColumn("id");
         col.setType(INTEGER);
@@ -910,7 +909,7 @@ class PgAntlrLoaderTest {
         AbstractSchema schema = d.getDefaultSchema();
 
         // table1
-        AbstractTable table = new SimplePgTable("t_work");
+        AbstractTable table = new PgSimpleTable("t_work");
         schema.addTable(table);
 
         AbstractColumn col = new PgColumn("id");
@@ -918,14 +917,14 @@ class PgAntlrLoaderTest {
         table.addColumn(col);
 
         // table2
-        AbstractTable table2 = new SimplePgTable("t_chart");
+        AbstractTable table2 = new PgSimpleTable("t_chart");
         schema.addTable(table2);
         col = new PgColumn("id");
         col.setType(INTEGER);
         table2.addColumn(col);
 
         // table 3
-        AbstractTable table3 = new SimplePgTable("t_memo");
+        AbstractTable table3 = new PgSimpleTable("t_memo");
         schema.addTable(table3);
         col = new PgColumn("name");
         col.setType("text");

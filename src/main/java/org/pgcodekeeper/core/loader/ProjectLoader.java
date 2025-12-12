@@ -16,12 +16,12 @@
 package org.pgcodekeeper.core.loader;
 
 import org.pgcodekeeper.core.*;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrTaskManager;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.ms.MsSchema;
+import org.pgcodekeeper.core.database.ms.schema.MsSchema;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.monitor.IMonitor;
 
@@ -46,7 +46,7 @@ public class ProjectLoader extends DatabaseLoader {
     private final String dirPath;
     protected final IMonitor monitor;
     private final IgnoreSchemaList ignoreSchemaList;
-    protected final Map<PgStatement, StatementOverride> overrides = new LinkedHashMap<>();
+    protected final Map<AbstractStatement, StatementOverride> overrides = new LinkedHashMap<>();
 
     protected boolean isOverrideMode;
 
@@ -204,7 +204,7 @@ public class ProjectLoader extends DatabaseLoader {
     protected void addDboSchema(AbstractDatabase db) {
         if (!db.containsSchema(Consts.DBO)) {
             MsSchema schema = new MsSchema(Consts.DBO);
-            PgObjLocation loc = new PgObjLocation.Builder()
+            ObjectLocation loc = new ObjectLocation.Builder()
                     .setObject(new GenericColumn(Consts.DBO, DbObjType.SCHEMA))
                     .build();
 
@@ -250,12 +250,12 @@ public class ProjectLoader extends DatabaseLoader {
     }
 
     protected void replaceOverrides() {
-        Iterator<Entry<PgStatement, StatementOverride>> iterator = overrides.entrySet().iterator();
+        Iterator<Entry<AbstractStatement, StatementOverride>> iterator = overrides.entrySet().iterator();
         while (iterator.hasNext()) {
-            Entry<PgStatement, StatementOverride> entry = iterator.next();
+            Entry<AbstractStatement, StatementOverride> entry = iterator.next();
             iterator.remove();
 
-            PgStatement st = entry.getKey();
+            AbstractStatement st = entry.getKey();
             StatementOverride override = entry.getValue();
             if (override.getOwner() != null) {
                 st.setOwner(override.getOwner());
@@ -268,7 +268,7 @@ public class ProjectLoader extends DatabaseLoader {
                         col.clearPrivileges();
                     }
                 }
-                for (PgPrivilege privilege : override.getPrivileges()) {
+                for (ObjectPrivilege privilege : override.getPrivileges()) {
                     st.addPrivilege(privilege);
                 }
             }

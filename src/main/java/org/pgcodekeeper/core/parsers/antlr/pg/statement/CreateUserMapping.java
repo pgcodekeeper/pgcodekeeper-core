@@ -15,10 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgUserMapping;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgUserMapping;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Collections;

@@ -17,15 +17,20 @@ package org.pgcodekeeper.core.parsers.antlr.base.launcher;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
+import org.pgcodekeeper.core.database.api.schema.ISearchPath;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrError;
 import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
 import org.pgcodekeeper.core.parsers.antlr.base.ErrorTypes;
 import org.pgcodekeeper.core.exception.MisplacedObjectException;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,9 +44,9 @@ public abstract class AbstractAnalysisLauncher {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractAnalysisLauncher.class);
 
-    private final List<PgObjLocation> references = new ArrayList<>();
+    private final List<ObjectLocation> references = new ArrayList<>();
 
-    protected PgStatement stmt;
+    protected IStatement stmt;
     private final ParserRuleContext ctx;
     private final String location;
 
@@ -49,14 +54,14 @@ public abstract class AbstractAnalysisLauncher {
     private int lineOffset;
     private int inLineOffset;
 
-    protected AbstractAnalysisLauncher(PgStatement stmt,
-            ParserRuleContext ctx, String location) {
+    protected AbstractAnalysisLauncher(AbstractStatement stmt,
+                                       ParserRuleContext ctx, String location) {
         this.stmt = stmt;
         this.ctx = ctx;
         this.location = location;
     }
 
-    public PgStatement getStmt() {
+    public IStatement getStmt() {
         return stmt;
     }
 
@@ -78,7 +83,7 @@ public abstract class AbstractAnalysisLauncher {
      *
      * @return unmodifiable list of references
      */
-    public List<PgObjLocation> getReferences() {
+    public List<ObjectLocation> getReferences() {
         return Collections.unmodifiableList(references);
     }
 
@@ -119,10 +124,10 @@ public abstract class AbstractAnalysisLauncher {
         }
 
         try {
-            Set<PgObjLocation> locs = analyze(ctx, meta);
+            Set<ObjectLocation> locs = analyze(ctx, meta);
             Set<GenericColumn> depcies = new LinkedHashSet<>();
             EnumSet<DbObjType> disabledDepcies = getDisabledDepcies();
-            for (PgObjLocation loc : locs) {
+            for (ObjectLocation loc : locs) {
                 if (!disabledDepcies.contains(loc.getType())) {
                     depcies.add(loc.getObj());
                 }
@@ -175,5 +180,5 @@ public abstract class AbstractAnalysisLauncher {
      * @return set of object locations representing dependencies found in the context
      * @throws UnresolvedReferenceException if references cannot be resolved
      */
-    protected abstract Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta);
+    protected abstract Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta);
 }

@@ -16,14 +16,14 @@
 package org.pgcodekeeper.core.parsers.antlr.ch.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Create_dictinary_stmtContext;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Dictionary_optionContext;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.ch.ChColumn;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
-import org.pgcodekeeper.core.schema.ch.ChDictionary;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.ch.schema.ChColumn;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.database.ch.schema.ChDictionary;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.List;
@@ -144,7 +144,7 @@ public final class CreateChDictionary extends ChParserAbstract {
             if (sourceDbName == null) {
                 sourceDbName = "default";
             }
-            dictionary.addDep(new GenericColumn(sourceDbName, sourceTableName, DbObjType.TABLE));
+            dictionary.addDependency(new GenericColumn(sourceDbName, sourceTableName, DbObjType.TABLE));
         }
     }
 

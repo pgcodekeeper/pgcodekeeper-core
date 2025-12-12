@@ -19,10 +19,10 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.expr.ValueExpr;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.VexContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.Vex;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 
 import java.util.Set;
 
@@ -39,12 +39,12 @@ public class VexAnalysisLauncher extends AbstractPgAnalysisLauncher {
      * @param ctx      the value expression context to analyze
      * @param location the source location identifier
      */
-    public VexAnalysisLauncher(PgStatement stmt, VexContext ctx, String location) {
+    public VexAnalysisLauncher(AbstractStatement stmt, VexContext ctx, String location) {
         super(stmt, ctx, location);
     }
 
     @Override
-    public Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
         if (stmt instanceof AbstractColumn) {
             return analyzeTableChildVex((VexContext) ctx, meta);
         }

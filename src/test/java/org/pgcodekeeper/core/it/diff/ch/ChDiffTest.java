@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.it.diff.ch;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;

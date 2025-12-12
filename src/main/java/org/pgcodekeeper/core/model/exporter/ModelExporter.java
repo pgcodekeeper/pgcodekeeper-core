@@ -16,12 +16,10 @@
 package org.pgcodekeeper.core.model.exporter;
 
 import org.pgcodekeeper.core.*;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
-import org.pgcodekeeper.core.schema.AbstractDatabase;
-import org.pgcodekeeper.core.schema.ISearchPath;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.FileUtils;
@@ -179,7 +177,7 @@ public class ModelExporter {
                     outDir.toAbsolutePath()));
         }
 
-        List<PgStatement> list = oldDb.getDescendants().collect(Collectors.toList());
+        List<IStatement> list = oldDb.getDescendants().collect(Collectors.toList());
         Set<Path> paths = new HashSet<>();
 
         for (TreeElement el : changeList) {
@@ -188,9 +186,9 @@ public class ModelExporter {
             }
             switch (el.getSide()) {
                 case LEFT:
-                    PgStatement stInOld = el.getPgStatement(oldDb);
+                    var stInOld = el.getStatement(oldDb);
                     list.remove(stInOld);
-                    for (PgStatement child : Utils.streamIterator(stInOld.getChildren())) {
+                    for (var child : Utils.streamIterator(stInOld.getChildren())) {
                         list.remove(child);
                         deleteStatementIfExists(child);
                     }
@@ -198,14 +196,14 @@ public class ModelExporter {
                     deleteStatementIfExists(stInOld);
                     break;
                 case RIGHT:
-                    PgStatement stInNew = el.getPgStatement(newDb);
+                    var stInNew = el.getStatement(newDb);
                     list.add(stInNew);
                     paths.add(getRelativeFilePath(stInNew));
                     deleteStatementIfExists(stInNew);
                     break;
                 case BOTH:
-                    stInNew = el.getPgStatement(newDb);
-                    stInOld = el.getPgStatement(oldDb);
+                    stInNew = el.getStatement(newDb);
+                    stInOld = el.getStatement(oldDb);
                     list.set(list.indexOf(stInOld), stInNew);
                     paths.add(getRelativeFilePath(stInNew));
                     deleteStatementIfExists(stInNew);
@@ -230,9 +228,9 @@ public class ModelExporter {
     public void exportProject() throws IOException {
         createOutDir();
 
-        List<PgStatement> list = new ArrayList<>();
+        List<IStatement> list = new ArrayList<>();
         changeList.stream().filter(el -> el.getType() != DbObjType.DATABASE)
-                .forEach(el -> list.add(el.getPgStatement(newDb)));
+                .forEach(el -> list.add(el.getStatement(newDb)));
 
         Map<Path, StringBuilder> dumps = new HashMap<>();
         list.stream()
@@ -250,7 +248,7 @@ public class ModelExporter {
         writeProjVersion(outDir.resolve(Consts.FILENAME_WORKING_DIR_MARKER));
     }
 
-    protected void dumpStatement(PgStatement st, Map<Path, StringBuilder> dumps) {
+    protected void dumpStatement(IStatement st, Map<Path, StringBuilder> dumps) {
         Path path = outDir.resolve(getRelativeFilePath(st));
         StringBuilder sb = dumps.computeIfAbsent(path, e -> new StringBuilder());
         String dump = getDumpSql(st);
@@ -274,7 +272,7 @@ public class ModelExporter {
         }
     }
 
-    protected String getDumpSql(PgStatement statement) {
+    protected String getDumpSql(IStatement statement) {
         return statement.getSQL(true, settings);
     }
 
@@ -284,7 +282,7 @@ public class ModelExporter {
      * @param st the statement whose file should be deleted
      * @throws IOException if deletion fails
      */
-    protected void deleteStatementIfExists(PgStatement st) throws IOException {
+    protected void deleteStatementIfExists(IStatement st) throws IOException {
         Path toDelete = outDir.resolve(getRelativeFilePath(st));
 
         if (Files.deleteIfExists(toDelete)) {
@@ -299,7 +297,7 @@ public class ModelExporter {
      * @param statement the database statement
      * @return sanitized filename suitable for file system
      */
-    public static String getExportedFilename(PgStatement statement) {
+    public static String getExportedFilename(IStatement statement) {
         return FileUtils.getValidFilename(statement.getBareName());
     }
 
@@ -332,8 +330,8 @@ public class ModelExporter {
      * @param st the database statement
      * @return relative path for the statement's file
      */
-    public static Path getRelativeFilePath(PgStatement st) {
-        if (st.isSubElement()) {
+    public static Path getRelativeFilePath(IStatement st) {
+        if (st instanceof ISubElement) {
             st = st.getParent();
         }
         Path path = WorkDirs.getRelativeFolderPath(st, Paths.get("")); //$NON-NLS-1$
@@ -350,12 +348,12 @@ public class ModelExporter {
 /**
  * Sets fixed order for table subelements export as historically defined by DiffTree.create().
  */
-final class ExportTableOrder implements Comparator<PgStatement> {
+final class ExportTableOrder implements Comparator<IStatement> {
 
     static final ExportTableOrder INSTANCE = new ExportTableOrder();
 
     @Override
-    public int compare(PgStatement o1, PgStatement o2) {
+    public int compare(IStatement o1, IStatement o2) {
         int result = Integer.compare(getTableSubElementRank(o1), getTableSubElementRank(o2));
         if (result != 0) {
             return result;
@@ -364,7 +362,7 @@ final class ExportTableOrder implements Comparator<PgStatement> {
         return o1.getBareName().compareTo(o2.getBareName());
     }
 
-    private int getTableSubElementRank(PgStatement el) {
+    private int getTableSubElementRank(IStatement el) {
         return switch (el.getStatementType()) {
             case INDEX -> 1;
             case TRIGGER -> 2;

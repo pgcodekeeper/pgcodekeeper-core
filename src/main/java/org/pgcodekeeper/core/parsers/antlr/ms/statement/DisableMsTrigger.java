@@ -16,16 +16,16 @@
 package org.pgcodekeeper.core.parsers.antlr.ms.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Enable_disable_triggerContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.IdContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Names_referencesContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Qualified_nameContext;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.PgStatementContainer;
-import org.pgcodekeeper.core.schema.ms.MsDatabase;
-import org.pgcodekeeper.core.schema.ms.MsTrigger;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatementContainer;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
+import org.pgcodekeeper.core.database.ms.schema.MsTrigger;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Arrays;
@@ -60,13 +60,13 @@ public final class DisableMsTrigger extends MsParserAbstract {
         }
 
         IdContext schemaCtx = parent.schema;
-        PgStatementContainer cont = getSafe(AbstractSchema::getStatementContainer,
+        AbstractStatementContainer cont = getSafe(AbstractSchema::getStatementContainer,
                 getSchemaSafe(Arrays.asList(schemaCtx, parent.name)), parent.name);
         addObjReference(Arrays.asList(parent.schema, parent.name),
                 DbObjType.TABLE, null);
 
         for (Qualified_nameContext qname : triggers.qualified_name()) {
-            MsTrigger trig = (MsTrigger) getSafe(PgStatementContainer::getTrigger,
+            MsTrigger trig = (MsTrigger) getSafe(AbstractStatementContainer::getTrigger,
                     cont, qname.name);
             addObjReference(Arrays.asList(schemaCtx, parent.name, qname.name),
                     DbObjType.TRIGGER, ACTION_ALTER);
@@ -77,7 +77,7 @@ public final class DisableMsTrigger extends MsParserAbstract {
     }
 
     @Override
-    protected PgObjLocation fillQueryLocation(ParserRuleContext ctx) {
+    protected ObjectLocation fillQueryLocation(ParserRuleContext ctx) {
         StringBuilder sb = new StringBuilder();
         Enable_disable_triggerContext ctxEnableDisableTr = (Enable_disable_triggerContext) ctx;
         sb.append(ctxEnableDisableTr.DISABLE() != null ? "DISABLE " : "ENABLE ")
@@ -102,7 +102,7 @@ public final class DisableMsTrigger extends MsParserAbstract {
             sb.setLength(sb.length() - 2);
         }
 
-        PgObjLocation loc = new PgObjLocation.Builder()
+        ObjectLocation loc = new ObjectLocation.Builder()
                 .setAction(sb.toString())
                 .setCtx(ctx)
                 .setSql(getFullCtxText(ctx))

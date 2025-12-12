@@ -21,14 +21,14 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.pgcodekeeper.core.*;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.exception.MisplacedObjectException;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
 import org.pgcodekeeper.core.model.exporter.ModelExporter;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.PgObjLocation.LocationType;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.nio.file.Files;
@@ -192,9 +192,9 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
         return ArgMode.of(mode.getText());
     }
 
-    protected PgObjLocation addObjReference(List<? extends ParserRuleContext> ids,
-                                            DbObjType type, String action, String signature) {
-        PgObjLocation loc = getLocation(ids, type, action, false, signature, LocationType.REFERENCE);
+    protected ObjectLocation addObjReference(List<? extends ParserRuleContext> ids,
+                                             DbObjType type, String action, String signature) {
+        ObjectLocation loc = getLocation(ids, type, action, false, signature, LocationType.REFERENCE);
         if (loc != null) {
             db.addReference(fileName, loc);
         }
@@ -202,8 +202,8 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
         return loc;
     }
 
-    protected PgObjLocation addObjReference(List<? extends ParserRuleContext> ids,
-                                            DbObjType type, String action) {
+    protected ObjectLocation addObjReference(List<? extends ParserRuleContext> ids,
+                                             DbObjType type, String action) {
         return addObjReference(ids, type, action, null);
     }
 
@@ -250,20 +250,20 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
                     + name, errToken);
         }
 
-        checkLocation((PgStatement) statement, errToken);
+        checkLocation((AbstractStatement) statement, errToken);
 
         return statement;
     }
 
-    protected void addSafe(IStatementContainer parent, PgStatement child,
+    protected void addSafe(IStatementContainer parent, AbstractStatement child,
                            List<? extends ParserRuleContext> ids) {
         addSafe(parent, child, ids, null);
     }
 
-    protected void addSafe(IStatementContainer parent, PgStatement child,
+    protected void addSafe(IStatementContainer parent, AbstractStatement child,
                            List<? extends ParserRuleContext> ids, String signature) {
         doSafe(IStatementContainer::addChild, parent, child);
-        PgObjLocation loc = getLocation(ids, child.getStatementType(),
+        ObjectLocation loc = getLocation(ids, child.getStatementType(),
                 ACTION_CREATE, false, signature, LocationType.DEFINITION);
         if (loc != null) {
             child.setLocation(loc);
@@ -274,7 +274,7 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
         checkLocation(child, QNameParser.getFirstNameCtx(ids).getStart());
     }
 
-    protected void checkLocation(PgStatement statement, Token errToken) {
+    protected void checkLocation(AbstractStatement statement, Token errToken) {
         if (isRefMode() || fileName == null) {
             return;
         }
@@ -307,9 +307,9 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
         }
     }
 
-    protected PgObjLocation getLocation(List<? extends ParserRuleContext> ids,
-                                        DbObjType type, String action, boolean isDep, String signature,
-                                        LocationType locationType) {
+    protected ObjectLocation getLocation(List<? extends ParserRuleContext> ids,
+                                         DbObjType type, String action, boolean isDep, String signature,
+                                         LocationType locationType) {
         ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
         switch (type) {
             case ASSEMBLY:
@@ -355,9 +355,9 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
         };
     }
 
-    protected PgObjLocation buildLocation(ParserRuleContext nameCtx, String action, LocationType locationType,
-                                          GenericColumn object) {
-        return new PgObjLocation.Builder()
+    protected ObjectLocation buildLocation(ParserRuleContext nameCtx, String action, LocationType locationType,
+                                           GenericColumn object) {
+        return new ObjectLocation.Builder()
                 .setFilePath(fileName)
                 .setCtx(nameCtx)
                 .setObject(object)
@@ -373,15 +373,15 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
         }
     }
 
-    protected void addDepSafe(PgStatement st, List<? extends ParserRuleContext> ids, DbObjType type) {
+    protected void addDepSafe(AbstractStatement st, List<? extends ParserRuleContext> ids, DbObjType type) {
         addDepSafe(st, ids, type, null);
     }
 
-    protected void addDepSafe(PgStatement st, List<? extends ParserRuleContext> ids, DbObjType type, String signature) {
-        PgObjLocation loc = getLocation(ids, type, null, true, signature, LocationType.REFERENCE);
+    protected void addDepSafe(AbstractStatement st, List<? extends ParserRuleContext> ids, DbObjType type, String signature) {
+        ObjectLocation loc = getLocation(ids, type, null, true, signature, LocationType.REFERENCE);
         if (loc != null && !Utils.isSystemSchema(loc.getSchema(), getDbType())) {
             if (!refMode) {
-                st.addDep(loc.getObj());
+                st.addDependency(loc.getObj());
             }
             db.addReference(fileName, loc);
         }
@@ -479,9 +479,9 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
      * and it's position in the script from statement context, and then puts
      * filled 'PgObjLocation'-object to the storage of queries.
      */
-    protected PgObjLocation fillQueryLocation(ParserRuleContext ctx) {
+    protected ObjectLocation fillQueryLocation(ParserRuleContext ctx) {
         String act = getStmtAction();
-        PgObjLocation loc = new PgObjLocation.Builder()
+        ObjectLocation loc = new ObjectLocation.Builder()
                 .setAction(act != null ? act : ctx.getStart().getText().toUpperCase(Locale.ROOT))
                 .setSql(getFullCtxText(ctx))
                 .setCtx(ctx)
@@ -497,7 +497,7 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
      * for objects which undefined in DbObjType).
      */
     protected void addOutlineRefForCommentOrRule(String action, ParserRuleContext ctx) {
-        PgObjLocation loc = new PgObjLocation.Builder()
+        ObjectLocation loc = new ObjectLocation.Builder()
                 .setAction(action)
                 .setCtx(ctx)
                 .build();

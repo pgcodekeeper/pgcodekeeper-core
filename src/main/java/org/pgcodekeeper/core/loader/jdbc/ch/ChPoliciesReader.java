@@ -18,13 +18,12 @@ package org.pgcodekeeper.core.loader.jdbc.ch;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
-import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ch.launcher.ChExpressionAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
-import org.pgcodekeeper.core.schema.ch.ChPolicy;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.database.ch.schema.ChPolicy;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,7 +48,7 @@ public class ChPoliciesReader extends AbstractStatementReader {
     }
 
     @Override
-    protected void processResult(ResultSet res) throws SQLException, XmlReaderException {
+    protected void processResult(ResultSet res) throws SQLException {
         String policyName = res.getString("name");
 
         loader.setCurrentObject(new GenericColumn(policyName, DbObjType.POLICY));

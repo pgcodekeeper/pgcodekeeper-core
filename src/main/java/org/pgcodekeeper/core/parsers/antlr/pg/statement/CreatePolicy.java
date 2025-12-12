@@ -16,17 +16,17 @@
 package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Create_policy_statementContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.User_nameContext;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.VexContext;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.EventType;
-import org.pgcodekeeper.core.schema.PgStatementContainer;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgPolicy;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.EventType;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatementContainer;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgPolicy;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.ArrayList;
@@ -87,7 +87,7 @@ public final class CreatePolicy extends PgParserAbstract {
         }
 
         ParserRuleContext parent = QNameParser.getFirstNameCtx(ids);
-        PgStatementContainer cont = getSafe(
+        AbstractStatementContainer cont = getSafe(
                 AbstractSchema::getStatementContainer, getSchemaSafe(ids), parent);
         addSafe(cont, policy, Arrays.asList(QNameParser.getSchemaNameCtx(ids), parent, ctx.identifier()));
     }

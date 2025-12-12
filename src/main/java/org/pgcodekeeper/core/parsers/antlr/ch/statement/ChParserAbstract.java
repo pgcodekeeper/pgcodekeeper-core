@@ -16,14 +16,16 @@
 package org.pgcodekeeper.core.parsers.antlr.ch.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.ch.schema.*;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.*;
 import org.pgcodekeeper.core.parsers.antlr.ch.launcher.ChExpressionAnalysisLauncher;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.PgObjLocation.LocationType;
-import org.pgcodekeeper.core.schema.ch.*;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.ArrayList;
@@ -184,15 +186,15 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
         return index;
     }
 
-    private <T extends PgStatement> void setExprWithAnalyze(BiConsumer<T, String> adder, T stmt,
-                                                            ExprContext ctx) {
+    private <T extends AbstractStatement> void setExprWithAnalyze(BiConsumer<T, String> adder, T stmt,
+                                                                  ExprContext ctx) {
         adder.accept(stmt, getFullCtxText(ctx));
         db.addAnalysisLauncher(new ChExpressionAnalysisLauncher(stmt, ctx, fileName));
     }
 
     @Override
-    protected PgObjLocation getLocation(List<? extends ParserRuleContext> ids, DbObjType type, String action,
-                                        boolean isDep, String signature, LocationType locationType) {
+    protected ObjectLocation getLocation(List<? extends ParserRuleContext> ids, DbObjType type, String action,
+                                         boolean isDep, String signature, LocationType locationType) {
         ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
 
         if (type == DbObjType.FUNCTION) {
@@ -209,8 +211,8 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
         return super.getLocation(ids, type, action, isDep, signature, locationType);
     }
 
-    protected <T extends PgStatement> void addRoles(UsersContext usersCtx, T stmt,
-                                                    BiConsumer<T, String> addRoleMethod, BiConsumer<T, String> addExceptMethod, String ignoreRole) {
+    protected <T extends AbstractStatement> void addRoles(UsersContext usersCtx, T stmt,
+                                                          BiConsumer<T, String> addRoleMethod, BiConsumer<T, String> addExceptMethod, String ignoreRole) {
         if (usersCtx == null) {
             return;
         }

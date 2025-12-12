@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.utils;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -27,6 +28,7 @@ import java.io.Serializable;
  */
 public class Pair<K, V> implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 8641621982915379836L;
 
     protected K first;

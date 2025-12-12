@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc;
 
+import java.io.Serial;
+
 /**
  * Exception thrown when concurrent modification of a resource is detected.
  * Indicates that a modification conflict occurred while multiple threads or processes
@@ -22,6 +24,7 @@ package org.pgcodekeeper.core.loader.jdbc;
  */
 public final class ConcurrentModificationException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = -6952773835185629552L;
 
     /**

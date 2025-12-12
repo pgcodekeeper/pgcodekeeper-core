@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.utils;
 
+import java.io.Serial;
+
 /**
  * Modifiable pair class extending the immutable Pair class.
  * Provides setter methods to modify the first and second elements after construction.
@@ -24,6 +26,7 @@ package org.pgcodekeeper.core.utils;
  */
 public class ModPair<K, V> extends Pair<K, V> {
 
+    @Serial
     private static final long serialVersionUID = 7623190777562696369L;
 
     /**

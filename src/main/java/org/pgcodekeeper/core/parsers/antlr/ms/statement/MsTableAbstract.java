@@ -15,14 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.ms.statement;
 
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.*;
-import org.pgcodekeeper.core.schema.AbstractConstraint;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.ms.MsConstraintCheck;
-import org.pgcodekeeper.core.schema.ms.MsConstraintFk;
-import org.pgcodekeeper.core.schema.ms.MsDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.ms.schema.MsConstraintCheck;
+import org.pgcodekeeper.core.database.ms.schema.MsConstraintFk;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Arrays;
@@ -63,14 +63,13 @@ public abstract class MsTableAbstract extends MsParserAbstract {
         var cols = body.fk;
         for (var col : cols.id()) {
             constrFk.addColumn(col.getText());
-            constrFk.addDep(new GenericColumn(schema, table, col.getText(), DbObjType.COLUMN));
+            constrFk.addDependency(new GenericColumn(schema, table, col.getText(), DbObjType.COLUMN));
         }
 
         Qualified_nameContext ref = body.qualified_name();
         List<IdContext> ids = Arrays.asList(ref.schema, ref.name);
-        PgObjLocation loc = addObjReference(ids, DbObjType.TABLE, null);
-        constrFk.addDep(loc.getObj());
-
+        ObjectLocation loc = addObjReference(ids, DbObjType.TABLE, null);
+        constrFk.addDependency(loc.getObj());
 
         Name_list_in_bracketsContext columns = body.pk;
         String fSchemaName = getSchemaNameSafe(ids);
@@ -81,7 +80,7 @@ public abstract class MsTableAbstract extends MsParserAbstract {
             for (IdContext column : columns.id()) {
                 String fCol = column.getText();
                 constrFk.addForeignColumn(fCol);
-                constrFk.addDep(new GenericColumn(fSchemaName, fTableName, fCol, DbObjType.COLUMN));
+                constrFk.addDependency(new GenericColumn(fSchemaName, fTableName, fCol, DbObjType.COLUMN));
             }
         }
 

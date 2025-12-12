@@ -20,17 +20,17 @@ import org.antlr.v4.runtime.Token;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.Consts.FUNC_SIGN;
 import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.*;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.FuncProcAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
-import org.pgcodekeeper.core.schema.Argument;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.pg.AbstractPgFunction;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgFunction;
-import org.pgcodekeeper.core.schema.pg.PgProcedure;
+import org.pgcodekeeper.core.database.base.schema.Argument;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractFunction;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgFunction;
+import org.pgcodekeeper.core.database.pg.schema.PgProcedure;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Pair;
 
@@ -77,7 +77,7 @@ public final class CreateFunction extends PgParserAbstract {
     public void parseObject() {
         List<ParserRuleContext> ids = getIdentifiers(ctx.function_parameters().schema_qualified_name());
         String name = QNameParser.getFirstName(ids);
-        AbstractPgFunction function = ctx.PROCEDURE() != null ? new PgProcedure(name)
+        PgAbstractFunction function = ctx.PROCEDURE() != null ? new PgProcedure(name)
                 : new PgFunction(name);
 
         fillFunction(function);
@@ -100,7 +100,7 @@ public final class CreateFunction extends PgParserAbstract {
         addSafe(getSchemaSafe(ids), function, ids, parseArguments(ctx.function_parameters().function_args()));
     }
 
-    private void fillFunction(AbstractPgFunction function) {
+    private void fillFunction(PgAbstractFunction function) {
         Function_defContext funcDef = null;
         Float cost = null;
         String language = null;
@@ -199,7 +199,7 @@ public final class CreateFunction extends PgParserAbstract {
         function.setLanguageCost(language, cost);
     }
 
-    private void setConfigParams(Function_actions_commonContext action, AbstractPgFunction function) {
+    private void setConfigParams(Function_actions_commonContext action, PgAbstractFunction function) {
         Session_local_optionContext setOpts = action.session_local_option();
         if (setOpts.XML() != null) {
             function.addConfiguration("xmloption", setOpts.DOCUMENT() != null ? "'document'" : "'content'");
@@ -250,7 +250,7 @@ public final class CreateFunction extends PgParserAbstract {
         }
 
         if (setOpts.FROM() != null) {
-            function.addConfiguration(par, AbstractPgFunction.FROM_CURRENT);
+            function.addConfiguration(par, PgAbstractFunction.FROM_CURRENT);
             return;
         }
 
@@ -268,7 +268,7 @@ public final class CreateFunction extends PgParserAbstract {
         function.addConfiguration(par, sb.toString());
     }
 
-    private void analyzeFunctionDefinition(AbstractPgFunction function, String language,
+    private void analyzeFunctionDefinition(PgAbstractFunction function, String language,
                                            SconstContext definition, List<Pair<String, GenericColumn>> funcArgs) {
         Pair<String, Token> pair = unquoteQuotedString(definition);
         String def = pair.getFirst();
@@ -307,7 +307,7 @@ public final class CreateFunction extends PgParserAbstract {
         }
     }
 
-    private void analyzeFunctionBody(AbstractPgFunction function, Function_bodyContext body,
+    private void analyzeFunctionBody(PgAbstractFunction function, Function_bodyContext body,
                                      List<Pair<String, GenericColumn>> funcArgs) {
         // finalizer-only task, defers analyzer until finalizing stage
         AntlrTaskManager.submit(antlrTasks, () -> body,
@@ -322,7 +322,7 @@ public final class CreateFunction extends PgParserAbstract {
      * Returns a list of pairs, each of which contains the name of the argument
      * and its full type name in GenericColumn object (typeSchema, typeName, DbObjType.TYPE).
      */
-    private List<Pair<String, GenericColumn>> fillArguments(AbstractPgFunction function) {
+    private List<Pair<String, GenericColumn>> fillArguments(PgAbstractFunction function) {
         List<Pair<String, GenericColumn>> funcArgs = new ArrayList<>();
         for (Function_argumentsContext argument : ctx.function_parameters()
                 .function_args().function_arguments()) {

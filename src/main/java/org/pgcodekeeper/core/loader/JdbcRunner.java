@@ -15,14 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import org.pgcodekeeper.core.database.base.jdbc.IJdbcConnector;
+import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.utils.DaemonThreadFactory;
 import org.pgcodekeeper.core.reporter.IProgressReporter;
 import org.pgcodekeeper.core.loader.callables.QueriesBatchCallable;
 import org.pgcodekeeper.core.loader.callables.QueryCallable;
 import org.pgcodekeeper.core.loader.callables.ResultSetCallable;
 import org.pgcodekeeper.core.loader.callables.StatementCallable;
-import org.pgcodekeeper.core.schema.PgObjLocation;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.slf4j.Logger;
@@ -119,7 +119,7 @@ public class JdbcRunner {
      * @throws IOException          if connection creation fails
      * @throws InterruptedException if execution is interrupted
      */
-    public void runBatches(IJdbcConnector connector, List<PgObjLocation> batches,
+    public void runBatches(IJdbcConnector connector, List<ObjectLocation> batches,
                            IProgressReporter reporter) throws SQLException, IOException, InterruptedException {
         try (Connection connection = connector.getConnection();
              Statement st = connection.createStatement()) {

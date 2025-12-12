@@ -16,12 +16,12 @@
 package org.pgcodekeeper.core.parsers.antlr.ms.expr;
 
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.ms.rulectx.MsSelectOps;
 import org.pgcodekeeper.core.parsers.antlr.ms.rulectx.MsSelectStmt;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 
 import java.util.ArrayList;
 import java.util.Collections;

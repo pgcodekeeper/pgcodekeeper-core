@@ -18,7 +18,7 @@ package org.pgcodekeeper.core.model.graph;
 import org.jgrapht.event.TraversalListenerAdapter;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.DepthFirstIterator;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +40,7 @@ public final class GraphUtils {
      * @param statement the statement to find dependents for
      * @return list of all statements that directly or indirectly depend on the given statement
      */
-    public static List<PgStatement> reverse(DepcyGraph depcyGraph, PgStatement statement) {
+    public static List<IStatement> reverse(DepcyGraph depcyGraph, IStatement statement) {
         if (!depcyGraph.getReversedGraph().containsVertex(statement)) {
             return Collections.emptyList();
         }
@@ -60,7 +60,7 @@ public final class GraphUtils {
      * @param statement the statement to find dependencies for
      * @return list of all statements that the given statement directly or indirectly depends on
      */
-    public static List<PgStatement> forward(DepcyGraph depcyGraph, PgStatement statement) {
+    public static List<IStatement> forward(DepcyGraph depcyGraph, IStatement statement) {
         if (!depcyGraph.getGraph().containsVertex(statement)) {
             return Collections.emptyList();
         }
@@ -76,8 +76,8 @@ public final class GraphUtils {
      * @param dfi the depth-first iterator for traversal
      * @param adapter the adapter for collecting traversed objects
      */
-    private static void iterate(DepthFirstIterator<PgStatement, DefaultEdge> dfi,
-                                TraversalListenerAdapter<PgStatement, DefaultEdge> adapter) {
+    private static void iterate(DepthFirstIterator<IStatement, DefaultEdge> dfi,
+                                TraversalListenerAdapter<IStatement, DefaultEdge> adapter) {
         dfi.addTraversalListener(adapter);
         while (dfi.hasNext()) {
             dfi.next();

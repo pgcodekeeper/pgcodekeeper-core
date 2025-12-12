@@ -15,8 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
-import org.pgcodekeeper.core.schema.ObjectState;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.ObjectState;
 
 import java.util.Objects;
 
@@ -25,10 +25,10 @@ import java.util.Objects;
  * Also stores the object that initiated the action.
  */
 public class ActionContainer {
-    private final PgStatement oldObj;
-    private final PgStatement newObj;
+    private final IStatement oldObj;
+    private final IStatement newObj;
     private final ObjectState state;
-    private final PgStatement starter;
+    private final IStatement starter;
 
     /**
      * Creates an action container with the specified objects and action.
@@ -38,19 +38,19 @@ public class ActionContainer {
      * @param action  the action to be performed (CREATE, ALTER, DROP)
      * @param starter the object that initiated this action
      */
-    public ActionContainer(PgStatement oldObj, PgStatement newObj,
-                           ObjectState action, PgStatement starter) {
+    public ActionContainer(IStatement oldObj, IStatement newObj,
+                           ObjectState action, IStatement starter) {
         this.oldObj = oldObj;
         this.newObj = newObj;
         this.state = action;
         this.starter = starter;
     }
 
-    public PgStatement getOldObj() {
+    public IStatement getOldObj() {
         return oldObj;
     }
 
-    public PgStatement getNewObj() {
+    public IStatement getNewObj() {
         return newObj;
     }
 
@@ -58,7 +58,7 @@ public class ActionContainer {
         return state;
     }
 
-    public PgStatement getStarter() {
+    public IStatement getStarter() {
         return starter;
     }
 

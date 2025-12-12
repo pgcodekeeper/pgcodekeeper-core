@@ -21,10 +21,10 @@ import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
 import org.pgcodekeeper.core.loader.ms.SupportedMsVersion;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.ms.MsStatistics;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.ms.schema.MsStatistics;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -55,7 +55,7 @@ public final class MsStatisticsReader extends JdbcReader {
         for (var col : XmlReader.readXML(res.getString("cols"))) {
             var colName = col.getString("name");
             stat.addCol(colName);
-            stat.addDep(new GenericColumn(schemaName, containerName, colName, DbObjType.COLUMN));
+            stat.addDependency(new GenericColumn(schemaName, containerName, colName, DbObjType.COLUMN));
         }
 
         var filter = res.getString("filter_definition");

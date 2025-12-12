@@ -15,10 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.ms.statement;
 
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Alter_db_roleContext;
-import org.pgcodekeeper.core.schema.ms.MsDatabase;
-import org.pgcodekeeper.core.schema.ms.MsRole;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
+import org.pgcodekeeper.core.database.ms.schema.MsRole;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Collections;

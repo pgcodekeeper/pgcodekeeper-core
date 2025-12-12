@@ -20,14 +20,13 @@ import org.jgrapht.alg.cycle.CycleDetector;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
-import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.*;
-import org.pgcodekeeper.core.schema.pg.AbstractPgFunction;
-import org.pgcodekeeper.core.schema.pg.AbstractPgTable;
-import org.pgcodekeeper.core.schema.pg.PartitionPgTable;
-import org.pgcodekeeper.core.schema.pg.PgColumn;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractFunction;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractTable;
+import org.pgcodekeeper.core.database.pg.schema.PgPartitionTable;
+import org.pgcodekeeper.core.database.pg.schema.PgColumn;
 import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,10 +47,10 @@ public final class DepcyGraph {
 
     private static final String REMOVE_DEP = Messages.DepcyGraph_log_remove_deps;
 
-    private final Graph<PgStatement, DefaultEdge> graph =
+    private final Graph<IStatement, DefaultEdge> graph =
             new SimpleDirectedGraph<>(DefaultEdge.class);
 
-    private final EdgeReversedGraph<PgStatement, DefaultEdge> reversedGraph =
+    private final EdgeReversedGraph<IStatement, DefaultEdge> reversedGraph =
             new EdgeReversedGraph<>(graph);
 
     /**
@@ -60,22 +59,22 @@ public final class DepcyGraph {
      *
      * @return the dependency graph
      */
-    public Graph<PgStatement, DefaultEdge> getGraph() {
+    public Graph<IStatement, DefaultEdge> getGraph() {
         return graph;
     }
 
-    public EdgeReversedGraph<PgStatement, DefaultEdge> getReversedGraph() {
+    public EdgeReversedGraph<IStatement, DefaultEdge> getReversedGraph() {
         return reversedGraph;
     }
 
-    private final AbstractDatabase db;
+    private final IDatabase db;
 
     /**
      * Copied database, graph source.<br>
      * <b>Do not modify</b> any elements in this as it will break
      * HashSets/HashMaps and with them the generated graph.
      */
-    public AbstractDatabase getDb() {
+    public IDatabase getDb() {
         return db;
     }
 
@@ -84,7 +83,7 @@ public final class DepcyGraph {
      *
      * @param graphSrc the source database to build graph from
      */
-    public DepcyGraph(AbstractDatabase graphSrc) {
+    public DepcyGraph(IDatabase graphSrc) {
         this(graphSrc, false);
     }
 
@@ -94,8 +93,8 @@ public final class DepcyGraph {
      * @param graphSrc    the source database to build graph from
      * @param reduceGraph if true, merge column nodes into table nodes
      */
-    public DepcyGraph(AbstractDatabase graphSrc, boolean reduceGraph) {
-        db = (AbstractDatabase) graphSrc.deepCopy();
+    public DepcyGraph(IDatabase graphSrc, boolean reduceGraph) {
+        db = (IDatabase) graphSrc.deepCopy();
         create();
         removeCycles();
 
@@ -122,14 +121,14 @@ public final class DepcyGraph {
             } else if (st.getStatementType() == DbObjType.COLUMN
                     && st.getDbType() == DatabaseType.PG) {
                 PgColumn col = (PgColumn) st;
-                PgStatement tbl = col.getParent();
-                if (st.getParent() instanceof PartitionPgTable) {
-                    createChildColToPartTblCol((PartitionPgTable) tbl, col);
+                AbstractStatement tbl = col.getParent();
+                if (st.getParent() instanceof PgPartitionTable) {
+                    createChildColToPartTblCol((PgPartitionTable) tbl, col);
                 } else {
                     // Creating the connection between the column of a inherit
                     // table and the columns of its child tables.
 
-                    AbstractColumn parentTblCol = col.getParentCol((AbstractPgTable) tbl);
+                    AbstractColumn parentTblCol = col.getParentCol((PgAbstractTable) tbl);
                     if (parentTblCol != null) {
                         graph.addEdge(col, parentTblCol);
                     }
@@ -139,10 +138,10 @@ public final class DepcyGraph {
     }
 
     private void reduce() {
-        List<Pair<PgStatement, PgStatement>> newEdges = new ArrayList<>();
+        List<Pair<IStatement, IStatement>> newEdges = new ArrayList<>();
         for (DefaultEdge edge : graph.edgeSet()) {
-            PgStatement source = graph.getEdgeSource(edge);
-            PgStatement target = graph.getEdgeTarget(edge);
+            var source = graph.getEdgeSource(edge);
+            var target = graph.getEdgeTarget(edge);
             boolean changeEdge = false;
             if (source.getStatementType() == DbObjType.COLUMN) {
                 changeEdge = true;
@@ -156,12 +155,12 @@ public final class DepcyGraph {
                 newEdges.add(new Pair<>(source, target));
             }
         }
-        for (Pair<PgStatement, PgStatement> edge : newEdges) {
+        for (var edge : newEdges) {
             graph.addEdge(edge.getFirst(), edge.getSecond());
         }
 
-        List<PgStatement> toRemove = new ArrayList<>();
-        for (PgStatement st : graph.vertexSet()) {
+        List<IStatement> toRemove = new ArrayList<>();
+        for (var st : graph.vertexSet()) {
             if (st.getStatementType() == DbObjType.COLUMN) {
                 toRemove.add(st);
             }
@@ -170,20 +169,20 @@ public final class DepcyGraph {
     }
 
     private void removeCycles() {
-        CycleDetector<PgStatement, DefaultEdge> detector = new CycleDetector<>(graph);
+        CycleDetector<IStatement, DefaultEdge> detector = new CycleDetector<>(graph);
 
-        for (PgStatement st : detector.findCycles()) {
-            if (!(st instanceof AbstractPgFunction)) {
+        for (var st : detector.findCycles()) {
+            if (!(st instanceof PgAbstractFunction)) {
                 continue;
             }
 
-            for (PgStatement vertex : detector.findCyclesContainingVertex(st)) {
+            for (var vertex : detector.findCyclesContainingVertex(st)) {
                 if (vertex.getStatementType() == DbObjType.COLUMN) {
                     graph.removeEdge(st, vertex);
                     var msg = REMOVE_DEP.formatted(st.getQualifiedName(), vertex.getQualifiedName());
                     LOG.info(msg);
 
-                    PgStatement table = vertex.getParent();
+                    var table = vertex.getParent();
                     if (graph.removeEdge(st, table) != null) {
                         msg = REMOVE_DEP.formatted(st.getQualifiedName(), table.getQualifiedName());
                         LOG.info(msg);
@@ -193,9 +192,9 @@ public final class DepcyGraph {
         }
     }
 
-    private void processDeps(PgStatement st) {
-        for (GenericColumn dep : st.getDeps()) {
-            PgStatement depSt = db.getStatement(dep);
+    private void processDeps(IStatement st) {
+        for (GenericColumn dep : st.getDependencies()) {
+            IStatement depSt = db.getStatement(dep);
             if (depSt != null && !st.equals(depSt)) {
                 graph.addEdge(st, depSt);
             }
@@ -205,7 +204,7 @@ public final class DepcyGraph {
     /**
      * The only way to find this depcy is to compare refcolumns against all existing unique
      * contraints/keys in reftable.
-     * Unfortunately they might not exist at the stage where {@link PgStatement#getDeps()}
+     * Unfortunately they might not exist at the stage where {@link AbstractStatement#getDependencies()}
      * are populated so we have to defer their lookup until here.
      */
     private void createFkeyToUnique(IConstraintFk con) {
@@ -217,15 +216,15 @@ public final class DepcyGraph {
         IStatement cont = db.getStatement(
                 new GenericColumn(con.getForeignSchema(), con.getForeignTable(), DbObjType.TABLE));
 
-        if (cont instanceof PgStatementContainer c) {
+        if (cont instanceof AbstractStatementContainer c) {
             for (AbstractConstraint refCon : c.getConstraints()) {
                 if (refCon instanceof IConstraintPk && refs.equals(refCon.getColumns())) {
-                    graph.addEdge((PgStatement) con, refCon);
+                    graph.addEdge(con, refCon);
                 }
             }
             for (AbstractIndex refInd : c.getIndexes()) {
                 if (refInd.isUnique() && refInd.compareColumns(refs)) {
-                    graph.addEdge((PgStatement) con, refInd);
+                    graph.addEdge(con, refInd);
                 }
             }
         }
@@ -237,16 +236,16 @@ public final class DepcyGraph {
      * <br />
      * Partitioned tables cannot use the inheritance mechanism, as in simple tables.
      */
-    private void createChildColToPartTblCol(PartitionPgTable tbl, PgColumn col) {
+    private void createChildColToPartTblCol(PgPartitionTable tbl, PgColumn col) {
         for (Inherits in : tbl.getInherits()) {
-            IStatement parentTbl = db.getStatement(new GenericColumn(in.getKey(), in.getValue(), DbObjType.TABLE));
+            IStatement parentTbl = db.getStatement(new GenericColumn(in.key(), in.value(), DbObjType.TABLE));
             if (parentTbl == null) {
                 var msg = Messages.DepcyGraph_log_no_such_table.formatted(in.getQualifiedName());
                 LOG.error(msg);
                 continue;
             }
 
-            if (parentTbl instanceof PartitionPgTable partTable) {
+            if (parentTbl instanceof PgPartitionTable partTable) {
                 createChildColToPartTblCol(partTable, col);
             } else {
                 String colName = col.getName();
@@ -268,11 +267,11 @@ public final class DepcyGraph {
      *
      * @param depcies list of custom dependency pairs to add
      */
-    public void addCustomDepcies(List<Entry<PgStatement, PgStatement>> depcies) {
+    public void addCustomDepcies(List<Entry<IStatement, IStatement>> depcies) {
         if (depcies == null) {
             return;
         }
-        for (Entry<PgStatement, PgStatement> depcy : depcies) {
+        for (var depcy : depcies) {
             graph.addEdge(depcy.getKey(), depcy.getValue());
         }
     }

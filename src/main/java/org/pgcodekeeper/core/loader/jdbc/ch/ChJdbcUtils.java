@@ -15,10 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc.ch;
 
-import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 
 import java.sql.Array;
 import java.sql.ResultSet;
@@ -34,13 +33,13 @@ public final class ChJdbcUtils {
     private ChJdbcUtils() {
     }
 
-    static <T extends PgStatement> void addRoles(ResultSet res, String roleCol, String exceptCol, T statement,
-                                                 BiConsumer<T, String> addRoleMethod, BiConsumer<T, String> addExceptMethod) throws SQLException {
+    static <T extends AbstractStatement> void addRoles(ResultSet res, String roleCol, String exceptCol, T statement,
+                                                       BiConsumer<T, String> addRoleMethod, BiConsumer<T, String> addExceptMethod) throws SQLException {
         String[] roles = getColArray(res, roleCol);
         if (roles != null) {
             for (String role : roles) {
                 addRoleMethod.accept(statement, role);
-                statement.addDep(new GenericColumn(role, DbObjType.ROLE));
+                statement.addDependency(new GenericColumn(role, DbObjType.ROLE));
             }
         }
 
@@ -48,7 +47,7 @@ public final class ChJdbcUtils {
         if (excepts != null) {
             for (String except : excepts) {
                 addExceptMethod.accept(statement, except);
-                statement.addDep(new GenericColumn(except, DbObjType.ROLE));
+                statement.addDependency(new GenericColumn(except, DbObjType.ROLE));
             }
         }
 

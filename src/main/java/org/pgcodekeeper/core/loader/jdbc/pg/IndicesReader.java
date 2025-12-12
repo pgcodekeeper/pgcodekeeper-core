@@ -20,13 +20,12 @@ import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.CreateIndex;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.PgStatementContainer;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
-import org.pgcodekeeper.core.schema.pg.PgIndex;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgIndex;
 import org.pgcodekeeper.core.utils.Pair;
 
 import java.sql.ResultSet;
@@ -50,7 +49,7 @@ public final class IndicesReader extends JdbcReader {
     @Override
     protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException {
         String tableName = res.getString("table_name");
-        PgStatementContainer cont = schema.getStatementContainer(tableName);
+        var cont = schema.getStatementContainer(tableName);
         if (cont == null) {
             return;
         }

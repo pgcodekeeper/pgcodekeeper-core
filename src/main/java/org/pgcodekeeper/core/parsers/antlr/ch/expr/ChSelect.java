@@ -19,7 +19,7 @@ import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.*;
 import org.pgcodekeeper.core.parsers.antlr.ch.rulectx.ChSelectOps;
 import org.pgcodekeeper.core.parsers.antlr.ch.rulectx.ChSelectStmt;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 
 import java.util.Collections;
 import java.util.List;

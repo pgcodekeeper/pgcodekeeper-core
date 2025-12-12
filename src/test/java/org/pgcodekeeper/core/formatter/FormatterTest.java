@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.formatter;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.formatter.FormatConfiguration.IndentType;
 import org.pgcodekeeper.core.utils.FileUtils;

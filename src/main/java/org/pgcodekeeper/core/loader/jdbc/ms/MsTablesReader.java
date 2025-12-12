@@ -22,15 +22,15 @@ import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
 import org.pgcodekeeper.core.loader.ms.SupportedMsVersion;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.launcher.MsExpressionAnalysisLauncher;
-import org.pgcodekeeper.core.schema.AbstractColumn;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.ms.GeneratedType;
-import org.pgcodekeeper.core.schema.ms.MsColumn;
-import org.pgcodekeeper.core.schema.ms.MsTable;
-import org.pgcodekeeper.core.schema.ms.MsType;
+import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.ms.schema.MsGeneratedType;
+import org.pgcodekeeper.core.database.ms.schema.MsColumn;
+import org.pgcodekeeper.core.database.ms.schema.MsTable;
+import org.pgcodekeeper.core.database.ms.schema.MsType;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -155,7 +155,7 @@ public class MsTablesReader extends JdbcReader {
         }
         sysVersioning.append(')');
         table.setSysVersioning(sysVersioning.toString());
-        table.addDep(new GenericColumn(histSchemaName, histTableName, DbObjType.TABLE));
+        table.addDependency(new GenericColumn(histSchemaName, histTableName, DbObjType.TABLE));
     }
 
     // 'MsType type' used only for MsTypesReader processing to extract type depcy
@@ -207,7 +207,7 @@ public class MsTablesReader extends JdbcReader {
 
         int colGenerated = col.getInt("gen");
         if (colGenerated != 0) {
-            column.setGenerated(GeneratedType.parseDbType(colGenerated));
+            column.setGenerated(MsGeneratedType.parseDbType(colGenerated));
             column.setHidden(col.getBoolean("hd"));
         }
 

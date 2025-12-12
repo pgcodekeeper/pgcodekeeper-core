@@ -17,16 +17,16 @@ package org.pgcodekeeper.core.parsers.antlr.ch.statement;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.formatter.FileFormatter;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.ch.launcher.ChViewAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.*;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
-import org.pgcodekeeper.core.schema.ch.ChView;
-import org.pgcodekeeper.core.schema.ch.ChView.ChViewType;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.database.ch.schema.ChView;
+import org.pgcodekeeper.core.database.ch.schema.ChView.ChViewType;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.List;

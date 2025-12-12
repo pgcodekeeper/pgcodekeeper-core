@@ -20,11 +20,11 @@ import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.GenericColumn;
-import org.pgcodekeeper.core.schema.PgStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,10 +160,10 @@ public abstract class JdbcReader extends AbstractStatementReader {
     }
 
     /**
-     * @deprecated {@link #setFunctionWithDep(BiConsumer, PgStatement, String, String)}
+     * @deprecated {@link #setFunctionWithDep(BiConsumer, AbstractStatement, String, String)}
      */
     @Deprecated
-    protected <T extends PgStatement> void setFunctionWithDep(
+    protected <T extends AbstractStatement> void setFunctionWithDep(
             BiConsumer<T, String> setter, T statement, String function) {
         setFunctionWithDep(setter, statement, function, null);
     }
@@ -178,27 +178,27 @@ public abstract class JdbcReader extends AbstractStatementReader {
      * @param function  the function name (possibly schema-qualified)
      * @param signature the function signature, or null if not applicable
      */
-    public static <T extends PgStatement> void setFunctionWithDep(
+    public static <T extends AbstractStatement> void setFunctionWithDep(
             BiConsumer<T, String> setter, T statement, String function, String signature) {
         if (function.indexOf('.') != -1) {
             QNameParser<ParserRuleContext> parser = QNameParser.parsePg(function);
             String schemaName = parser.getSchemaName();
             if (schemaName != null && !Utils.isPgSystemSchema(schemaName)) {
-                statement.addDep(new GenericColumn(schemaName, DbObjType.SCHEMA));
+                statement.addDependency(new GenericColumn(schemaName, DbObjType.SCHEMA));
                 String name = parser.getFirstName();
                 if (signature != null) {
                     name = PgDiffUtils.getQuotedName(name) + signature;
                 }
-                statement.addDep(new GenericColumn(schemaName, name, DbObjType.FUNCTION));
+                statement.addDependency(new GenericColumn(schemaName, name, DbObjType.FUNCTION));
             }
         }
         setter.accept(statement, function);
     }
 
-    protected void addDep(PgStatement statement, String schemaName, String name, DbObjType type) {
+    protected void addDep(AbstractStatement statement, String schemaName, String name, DbObjType type) {
         if (schemaName != null && !Utils.isPgSystemSchema(schemaName)) {
-            statement.addDep(new GenericColumn(schemaName, DbObjType.SCHEMA));
-            statement.addDep(new GenericColumn(schemaName, name, type));
+            statement.addDependency(new GenericColumn(schemaName, DbObjType.SCHEMA));
+            statement.addDependency(new GenericColumn(schemaName, name, type));
         }
     }
 

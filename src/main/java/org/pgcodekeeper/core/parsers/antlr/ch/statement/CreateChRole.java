@@ -16,8 +16,8 @@
 package org.pgcodekeeper.core.parsers.antlr.ch.statement;
 
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Create_role_stmtContext;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
-import org.pgcodekeeper.core.schema.ch.ChRole;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.database.ch.schema.ChRole;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.List;

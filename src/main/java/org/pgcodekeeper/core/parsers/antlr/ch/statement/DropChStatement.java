@@ -17,10 +17,10 @@ package org.pgcodekeeper.core.parsers.antlr.ch.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Drop_stmtContext;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Collections;
@@ -56,7 +56,7 @@ public final class DropChStatement extends ChParserAbstract {
         } else if (element.VIEW() != null) {
             addObjReference(getIdentifiers(element.qualified_name()), DbObjType.VIEW, ACTION_DROP);
         } else if (element.TABLE() != null) {
-            PgObjLocation loc = addObjReference(getIdentifiers(element.qualified_name()), DbObjType.TABLE, ACTION_DROP);
+            ObjectLocation loc = addObjReference(getIdentifiers(element.qualified_name()), DbObjType.TABLE, ACTION_DROP);
             loc.setWarning(DangerStatement.DROP_TABLE);
         } else if (element.FUNCTION() != null) {
             addObjReference(Collections.singletonList(ctx.drop_element().name_with_cluster().identifier()),

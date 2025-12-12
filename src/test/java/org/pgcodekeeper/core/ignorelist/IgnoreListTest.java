@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.ignorelist;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;

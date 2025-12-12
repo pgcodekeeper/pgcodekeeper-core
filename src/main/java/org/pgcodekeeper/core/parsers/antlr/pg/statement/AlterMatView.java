@@ -16,14 +16,14 @@
 package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Alter_materialized_view_statementContext;
-import org.pgcodekeeper.core.schema.AbstractIndex;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.pg.AbstractPgView;
-import org.pgcodekeeper.core.schema.pg.PgDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractIndex;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractView;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.List;
@@ -59,7 +59,7 @@ public final class AlterMatView extends PgParserAbstract {
             List<ParserRuleContext> ids = getIdentifiers(ctx.schema_qualified_name());
             addObjReference(ids, DbObjType.VIEW, action);
 
-            AbstractPgView view = (AbstractPgView) getSafe(AbstractSchema::getView,
+            PgAbstractView view = (PgAbstractView) getSafe(AbstractSchema::getView,
                     getSchemaSafe(ids), QNameParser.getFirstNameCtx(ids));
 
             var alterAction = ctx.alter_materialized_view_action();
@@ -68,13 +68,13 @@ public final class AlterMatView extends PgParserAbstract {
                     var indexNameCtx = act.index_name;
                     if (indexNameCtx != null) {
                         ParserRuleContext indexName = QNameParser.getFirstNameCtx(getIdentifiers(indexNameCtx));
-                        AbstractIndex index = getSafe(AbstractPgView::getIndex, view, indexName);
+                        AbstractIndex index = getSafe(PgAbstractView::getIndex, view, indexName);
                         doSafe(AbstractIndex::setClustered, index, true);
                     }
                 }
             }
         } else {
-            db.addReference(fileName, new PgObjLocation.Builder()
+            db.addReference(fileName, new ObjectLocation.Builder()
                     .setAction(action).setCtx(ctx.getParent()).build());
         }
     }

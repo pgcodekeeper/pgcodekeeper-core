@@ -21,7 +21,7 @@ import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.parsers.antlr.base.CustomParserListener;
 import org.pgcodekeeper.core.parsers.antlr.ch.statement.*;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.*;
-import org.pgcodekeeper.core.schema.ch.ChDatabase;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.monitor.IMonitor;
 

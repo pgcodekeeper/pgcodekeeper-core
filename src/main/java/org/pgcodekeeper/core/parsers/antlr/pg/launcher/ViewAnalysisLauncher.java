@@ -20,10 +20,10 @@ import org.pgcodekeeper.core.loader.FullAnalyze;
 import org.pgcodekeeper.core.parsers.antlr.base.launcher.AbstractAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.expr.Select;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Select_stmtContext;
-import org.pgcodekeeper.core.schema.PgObjLocation;
-import org.pgcodekeeper.core.schema.meta.MetaContainer;
-import org.pgcodekeeper.core.schema.meta.MetaUtils;
-import org.pgcodekeeper.core.schema.pg.AbstractPgView;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaUtils;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractView;
 
 import java.util.Set;
 
@@ -42,7 +42,7 @@ public class ViewAnalysisLauncher extends AbstractAnalysisLauncher {
      * @param ctx      the SELECT statement context defining the view
      * @param location the source location identifier
      */
-    public ViewAnalysisLauncher(AbstractPgView stmt, Select_stmtContext ctx, String location) {
+    public ViewAnalysisLauncher(PgAbstractView stmt, Select_stmtContext ctx, String location) {
         super(stmt, ctx, location);
     }
 
@@ -51,7 +51,7 @@ public class ViewAnalysisLauncher extends AbstractAnalysisLauncher {
     }
 
     @Override
-    public Set<PgObjLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
         Select select = new Select(meta);
         select.setFullAnalyze(fullAnalyze);
         MetaUtils.initializeView(meta, getSchemaName(), stmt.getName(),

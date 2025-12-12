@@ -16,14 +16,14 @@
 package org.pgcodekeeper.core.parsers.antlr.ms.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.model.difftree.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Alter_authorizationContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Class_typeContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.IdContext;
-import org.pgcodekeeper.core.schema.AbstractSchema;
-import org.pgcodekeeper.core.schema.PgStatement;
-import org.pgcodekeeper.core.schema.StatementOverride;
-import org.pgcodekeeper.core.schema.ms.MsDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.StatementOverride;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Arrays;
@@ -38,7 +38,7 @@ import java.util.Map;
 public final class AlterMsAuthorization extends MsParserAbstract {
 
     private final Alter_authorizationContext ctx;
-    private final Map<PgStatement, StatementOverride> overrides;
+    private final Map<AbstractStatement, StatementOverride> overrides;
 
     /**
      * Creates a parser for Microsoft SQL ALTER AUTHORIZATION statements without overrides.
@@ -60,7 +60,7 @@ public final class AlterMsAuthorization extends MsParserAbstract {
      * @param settings  parsing configuration settings
      */
     public AlterMsAuthorization(Alter_authorizationContext ctx, MsDatabase db,
-                                Map<PgStatement, StatementOverride> overrides, ISettings settings) {
+                                Map<AbstractStatement, StatementOverride> overrides, ISettings settings) {
         super(db, settings);
         this.ctx = ctx;
         this.overrides = overrides;
@@ -79,7 +79,7 @@ public final class AlterMsAuthorization extends MsParserAbstract {
         IdContext schemaCtx = ctx.qualified_name().schema;
         List<ParserRuleContext> ids = Arrays.asList(schemaCtx, nameCtx);
 
-        PgStatement st = null;
+        AbstractStatement st = null;
         if (type == null || type.OBJECT() != null || type.TYPE() != null) {
             AbstractSchema schema = getSchemaSafe(ids);
             st = getSafe((k, v) -> k.getChildren().filter(
@@ -105,7 +105,7 @@ public final class AlterMsAuthorization extends MsParserAbstract {
         }
     }
 
-    private void setOwner(PgStatement st, String owner) {
+    private void setOwner(AbstractStatement st, String owner) {
         if (overrides == null) {
             st.setOwner(owner);
         } else {
