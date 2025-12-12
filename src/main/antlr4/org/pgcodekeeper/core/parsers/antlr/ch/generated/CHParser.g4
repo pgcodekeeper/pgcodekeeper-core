@@ -1161,8 +1161,9 @@ watch_stmt
     ;
 
 data_type
-    : AGGREGATE_FUNCTION LPAREN identifier (COMMA data_type)+ RPAREN
+    : AGGREGATE_FUNCTION LPAREN (identifier | function_call) (COMMA data_type)+ RPAREN
     | ARRAY LPAREN data_type RPAREN
+    | BFLOAT
     | BINARY
     | BINARY LARGE OBJECT
     | BINARY VARYING
@@ -1184,23 +1185,22 @@ data_type
     | DECIMAL LPAREN signed_number_literal COMMA signed_number_literal RPAREN
     | DECIMAL_BIT LPAREN signed_number_literal RPAREN
     | DOUBLE PRECISION? precision?
+    | DYNAMIC (LPAREN MAX_TYPES EQ_SINGLE NUMBER RPAREN)?
     | ENUM LPAREN enum_value (COMMA enum_value)* RPAREN
     | FIXED
     | FIXED_STRING LPAREN number_literal RPAREN
     | FLOAT precision?
-    | GEOMETRY
     | INT_TYPE
     | INTERVAL_TYPE
     | IPV4
     | IPV6
-    | JSON
+    | JSON (LPAREN json_data_type (COMMA json_data_type)* RPAREN)?
     | LONGBLOB
     | LONGTEXT
     | LOW_CARDINALITY LPAREN data_type RPAREN
     | MAP LPAREN key=data_type COMMA value=data_type RPAREN
     | MEDIUMBLOB
     | MEDIUMTEXT
-    | MULTI_POLYGON
     | NATIONAL CHAR VARYING?
     | NATIONAL CHARACTER
     | NATIONAL CHARACTER LARGE OBJECT
@@ -1214,10 +1214,9 @@ data_type
     | NUMERIC
     | NVARCHAR
     | OBJECT_TYPE LPAREN STRING_LITERAL RPAREN
-    | POINT
-    | POLYGIN
+    | geo_types
+    | QBIT LPAREN (BFLOAT | FLOAT) COMMA NUMBER RPAREN
     | REAL
-    | RING
     | SET
     | SINGLE
     | STRING
@@ -1230,9 +1229,28 @@ data_type
     | UUID
     | VARBINARY
     | VARCHAR
+    | VARIANT (LPAREN data_type (COMMA data_type)* RPAREN)
     | YEAR
     | (INT | INTEGER | BIGINT | MEDIUMINT | SMALLINT | TINYINT) (UNSIGNED | SIGNED)? precision?
     ;
+
+geo_types
+    : POINT
+    | POLYGIN
+    | RING
+    | LINE_STRING
+    | MULTI_POLYGON
+    | GEOMETRY
+    ;
+
+json_data_type
+    : qualified_name data_type
+    | SKIP_ qualified_name
+    | SKIP_ REGEXP STRING_LITERAL
+    | (MAX_DYNAMIC_PATHS | MAX_DYNAMIC_TYPES) EQ_SINGLE NUMBER
+    ;
+
+
 
 precision
     : LPAREN signed_number_literal (COMMA signed_number_literal)? RPAREN
@@ -1427,6 +1445,7 @@ tokens_nonreserved
     | AZURE
     | BACKUP
     | BEGIN
+    | BFLOAT
     | BIGINT
     | BINARY
     | BIT
@@ -1495,6 +1514,7 @@ tokens_nonreserved
     | DNS
     | DOUBLE
     | DROP
+    | DYNAMIC
     | EMPTY
     | ENABLED
     | END
@@ -1577,6 +1597,7 @@ tokens_nonreserved
     | LEADING
     | LIFETIME
     | LIMITS
+    | LINE_STRING
     | LIVE
     | LOCAL
     | LOGS
@@ -1590,6 +1611,9 @@ tokens_nonreserved
     | MATERIALIZE
     | MATERIALIZED
     | MAX
+    | MAX_DYNAMIC_PATHS
+    | MAX_DYNAMIC_TYPES
+    | MAX_TYPES
     | MEDIUMBLOB
     | MEDIUMINT
     | MEDIUMTEXT
@@ -1652,6 +1676,7 @@ tokens_nonreserved
     | PROFILE
     | PROFILES
     | PROJECTION
+    | QBIT
     | QUERY
     | QUOTA
     | QUOTAS
@@ -1758,6 +1783,7 @@ tokens_nonreserved
     | VALUES
     | VARBINARY
     | VARCHAR
+    | VARIANT
     | VARYING
     | VIEW
     | VOLUME

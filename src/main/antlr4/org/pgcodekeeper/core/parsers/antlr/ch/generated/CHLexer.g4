@@ -21,25 +21,34 @@ DISPLAY_SECRETS_IN_SHOW_AND_SELECT options { caseInsensitive = false; } : 'displ
 
 // case sensitive data types
 AGGREGATE_FUNCTION options { caseInsensitive = false; } : 'Simple'? 'AggregateFunction';
+BFLOAT             options { caseInsensitive = false; } : 'BFloat16';
+DECIMAL_BIT        options { caseInsensitive = false; } : 'Decimal' ('8' | '16' | '32' | '64' | '128' | '256');
 // ARRAY_TYPE: 'Array';
+DYNAMIC            options { caseInsensitive = false; } : 'Dynamic';
 ENUM               options { caseInsensitive = false; } : 'Enum' ('8'|'16') | [eE] [nN] [uU] [mM];
 FIXED_STRING       options { caseInsensitive = false; } : 'FixedString';
 FLOAT              options { caseInsensitive = false; } : 'Float' ('32' | '64') | [fF] [lL] [oO] [aA] [tT];
+GEOMETRY           options { caseInsensitive = false; } : 'Geometry';
+INF                options { caseInsensitive = false; } : '-'? 'Inf';
 INT_TYPE           options { caseInsensitive = false; } : 'U'? 'Int' ('8' | '16' | '32' | '64' | '128' | '256');
 IPV4               options { caseInsensitive = false; } : 'IPv4' | [iI] [nN] [eE] [tT] '4';
 IPV6               options { caseInsensitive = false; } : 'IPv6' | [iI] [nN] [eE] [tT] '6';
+LINE_STRING        options { caseInsensitive = false; } : 'Multi'? 'LineString';
 LOW_CARDINALITY    options { caseInsensitive = false; } : 'LowCardinality';
 MAP                options { caseInsensitive = false; } : 'Map';
 MULTI_POLYGON      options { caseInsensitive = false; } : 'MultiPolygon';
+NAN                options { caseInsensitive = false; } : 'NaN';
 NESTED             options { caseInsensitive = false; } : 'Nested';
 NOTHING            options { caseInsensitive = false; } : 'Nothing';
 NULLABLE           options { caseInsensitive = false; } : 'Nullable';
 OBJECT_TYPE        options { caseInsensitive = false; } : 'Object';
 POINT              options { caseInsensitive = false; } : 'Point';
 POLYGIN            options { caseInsensitive = false; } : 'Polygon';
+QBIT               options { caseInsensitive = false; } : 'QBit';
 RING               options { caseInsensitive = false; } : 'Ring';
 STRING             options { caseInsensitive = false; } : 'String';
 TUPLE              options { caseInsensitive = false; } : 'Tuple';
+TIME               options { caseInsensitive = false; } : 'Time' '64'?;
 // UUID_TYPE: 'UUID';
 INTERVAL_TYPE options { caseInsensitive = false; }
     : 'IntervalDay'
@@ -54,6 +63,12 @@ INTERVAL_TYPE options { caseInsensitive = false; }
     | 'IntervalWeek'
     | 'IntervalYear'
     ;
+VARIANT            options { caseInsensitive = false; } : 'Variant';
+
+// case sensitive options for data_types
+MAX_DYNAMIC_PATHS  options { caseInsensitive = false; } : 'max_dynamic_paths';
+MAX_DYNAMIC_TYPES  options { caseInsensitive = false; } : 'max_dynamic_types';
+MAX_TYPES          options { caseInsensitive = false; } : 'max_types';
 
 // Keywords
 
@@ -122,7 +137,6 @@ DATETIME64: 'DATETIME64';
 DATETIME: 'DATETIME' '32'?;
 DAY: 'DAY' 'S'?;
 DECIMAL: 'DEC' 'IMAL'?;
-DECIMAL_BIT: 'DECIMAL' ('8' | '16' | '32' | '64' | '128' | '256');
 DEDUPLICATE: 'DEDUPLICATE';
 DEFAULT: 'DEFAULT';
 DEFINER: 'DEFINER';
@@ -174,7 +188,6 @@ FOR: 'FOR';
 FREEZE: 'FREEZE';
 FUNCTION: 'FUNCTION';
 FUNCTIONS: 'FUNCTIONS';
-GEOMETRY: 'GEOMETRY';
 GRANT: 'GRANT';
 GRANTEES: 'GRANTEES';
 GRANTS: 'GRANTS';
@@ -194,7 +207,6 @@ IN: 'IN';
 INDEX: 'INDEX';
 INDEXES: 'INDEXES';
 INDICES: 'INDICES';
-INF: 'INF';
 INJECTIVE: 'INJECTIVE';
 INSERT: 'INSERT';
 INSERTS: 'INSERTS';
@@ -250,7 +262,6 @@ MUTATION: 'MUTATION';
 MYSQL: 'MYSQL';
 NAME: 'NAME';
 NAMED: 'NAMED';
-NAN: 'NAN';
 NANOSECOND: 'NANOSECOND' 'S'?;
 NATS: 'NATS';
 NATIONAL: 'NATIONAL';
@@ -343,6 +354,7 @@ SHOW: 'SHOW';
 SHUTDOWN: 'SHUTDOWN';
 SIGNED: 'SIGNED';
 SINGLE: 'SINGLE';
+SKIP_: 'SKIP'; // because SKIP is rezerved by Antlr4
 SMALLINT: 'SMALLINT';
 SOURCE: 'SOURCE';
 SOURCES: 'SOURCES';
@@ -364,7 +376,6 @@ TEST: 'TEST';
 TEXT: 'TEXT';
 THEN: 'THEN';
 TIES: 'TIES';
-TIME: 'TIME';
 TIMEOUT: 'TIMEOUT';
 TIMESTAMP: 'TIMESTAMP';
 TINYBLOB: 'TINYBLOB';

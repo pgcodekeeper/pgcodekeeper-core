@@ -4,7 +4,7 @@ CREATE TABLE t (x UInt8) ENGINE = MergeTree ORDER BY ();
 create table x (i int) engine MergeTree order by tuple();
 -- парсер ломается в правиле keyword есть коментарий. обойти это ограничение или игнорировать комент
 --CREATE TABLE NULL (c String) ENGINE = MergeTree ORDER BY c;
-create table t (c Decimal32(9)) engine MergeTree order by c;
+create table t (c Decimal32(9), my_float BFloat16) engine MergeTree order by c;
 create table t (n int, s String) engine MergeTree order by n;
 CREATE TABLE db.t (n Int8) ENGINE=MergeTree ORDER BY n;
 CREATE TABLE `$4@^7` (c String) ENGINE = MergeTree ORDER BY c;
@@ -514,6 +514,12 @@ path = 'filesystem_query_cache/',
 cache_on_write_operations= 1,
 enable_filesystem_query_cache_limit = 1,
 delayed_cleanup_interval_ms = 100, disk = 's3_disk');
+CREATE TABLE t
+(
+    column1 AggregateFunction(uniq, UInt64),
+    column2 AggregateFunction(anyIf, String, UInt8),
+    column3 AggregateFunction(quantiles(0.5, 0.9), UInt64)
+) engine MergeTree order by c;
 
 --ReplicatedMergeTree
 create table t1_r1 (x Int32) engine=ReplicatedMergeTree('/test/02442/{database}/t', 'r1') order by x;
@@ -946,6 +952,17 @@ CREATE TABLE unsigned_types
     l BIGINT UNSIGNED
 ) engine=Memory;
 create table arrays_02735 engine = Memory as select * from generateRandom(' u32 Array(UInt32), i8 Array(Int8), datetime Array(DateTime), enum16 Array(Enum16(''xx'' = 1000, ''yy'' = 2000, ''zz'' = 3000)), float32 Array(Float32), str Array(String), fstr Array(FixedString(12)), u128 Array(UInt128), decimal64 Array(Decimal64(10)), ipv4 Array(IPv4), msi Map(String, Int16), tup Tuple(FixedString(3), Array(String), Map(Int8, Date))') limit 10000;
+
+CREATE TABLE geo_linestring (l LineString) ENGINE = Memory();
+CREATE TABLE geo_multilinestring (l MultiLineString) ENGINE = Memory();
+CREATE TABLE test (d Dynamic) ENGINE = Memory;
+CREATE TABLE test (d Dynamic(max_types=3)) ENGINE = Memory;
+CREATE TABLE test (v Variant(UInt64, String, Array(UInt64))) ENGINE = Memory;
+CREATE TABLE test (json JSON) ENGINE = Memory;
+CREATE TABLE test (json JSON(a.b UInt32)) ENGINE = Memory;
+CREATE TABLE test (json JSON(a.b UInt32, SKIP a.e)) ENGINE = Memory;
+CREATE TABLE test (id UInt64, json JSON(max_dynamic_paths=3)) ENGINE=Memory ORDER BY id;
+CREATE TABLE test (id UInt32, vec QBit(Float32, 8)) ENGINE = Memory;
 
 --Buffer
 create table buf (n int) engine=Buffer(currentDatabase(), dist, 1, 10, 100, 10, 100, 1000, 1000);
