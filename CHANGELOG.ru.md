@@ -10,6 +10,7 @@
 ### Добавлено
 
 - Добавлена поддержка новых типов данных в ClickHouse.
+- Добавлена поддержка парсинга Refreshable Materialized View в ClickHouse.
 
 ### Изменено
 
