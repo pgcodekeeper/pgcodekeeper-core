@@ -58,6 +58,10 @@ public final class ChRelationsReader extends JdbcReader {
         if (engineName.contains("dictionary")) {
             child = getDictionary(schema, name, definition);
         } else if (engineName.contains("view")) {
+            // TODO remove it when added processing for refreshable materialized view
+            if (definition.toLowerCase(Locale.ROOT).contains("refresh") && !definition.toLowerCase(Locale.ROOT).contains("live")) {
+                return;
+            }
             child = getView(schema, name, definition);
         } else {
             child = getTable(schema, name, definition, engineName);

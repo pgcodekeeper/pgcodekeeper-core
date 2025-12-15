@@ -143,9 +143,16 @@ public final class CreateChView extends ChParserAbstract {
 
     private void parseMatView(Create_mat_view_stmtContext matViewCtx, ChView view) {
         view.setType(ChViewType.MATERIALIZED);
-        fillColumns(matViewCtx.table_schema_clause(), view);
+        var simpleMatViewCtx = matViewCtx.simple_mat_view_stmt();
+        if (null != simpleMatViewCtx) {
+            parseSimpleMatView(simpleMatViewCtx, view);
+        }
+    }
 
-        var destCtx = matViewCtx.destination_clause();
+    private void parseSimpleMatView(Simple_mat_view_stmtContext simpleMatViewCtx, ChView view) {
+        fillColumns(simpleMatViewCtx.table_schema_clause(), view);
+
+        var destCtx = simpleMatViewCtx.destination_clause();
         if (destCtx != null) {
             var qnameCtx = destCtx.qualified_name();
             var ids = getIdentifiers(qnameCtx);
@@ -153,10 +160,10 @@ public final class CreateChView extends ChParserAbstract {
             view.setDestination(getFullCtxText(qnameCtx));
         }
 
-        view.setEngine(getEnginePart(matViewCtx.engine_clause()));
+        view.setEngine(getEnginePart(simpleMatViewCtx.engine_clause()));
 
-        setDefiner(matViewCtx.definer_clause(), view);
-        setSqlSecurity(matViewCtx.sql_security_clause(), view);
+        setDefiner(simpleMatViewCtx.definer_clause(), view);
+        setSqlSecurity(simpleMatViewCtx.sql_security_clause(), view);
     }
 
     private void fillColumns(Table_schema_clauseContext tableSchemaCtx, ChView view) {

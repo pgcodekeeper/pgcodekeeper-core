@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Added support for new data types in ClickHouse.
+- Added parser support for Refreshable Materialized View in ClickHouse.
 
 ### Changed
 

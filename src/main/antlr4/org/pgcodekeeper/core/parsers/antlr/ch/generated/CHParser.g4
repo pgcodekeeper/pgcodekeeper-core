@@ -604,8 +604,22 @@ create_simple_view_stmt
     ;
 
 create_mat_view_stmt
-    : MATERIALIZED VIEW if_not_exists? qualified_name
-    cluster_clause? destination_clause? table_schema_clause? engine_clause? POPULATE? definer_clause? sql_security_clause?
+    : MATERIALIZED VIEW if_not_exists? qualified_name cluster_clause? (simple_mat_view_stmt | refreshable_mat_view_stmt)
+    ;
+
+simple_mat_view_stmt
+    : destination_clause? table_schema_clause? engine_clause? POPULATE? definer_clause? sql_security_clause?
+    ;
+
+refreshable_mat_view_stmt
+    : REFRESH (EVERY | AFTER) expr interval (OFFSET expr interval)?
+     (RANDOMIZE FOR expr interval)?
+     (DEPENDS ON qualified_name (COMMA qualified_name)*)?
+     (SETTINGS identifier EQ_SINGLE expr (COMMA identifier EQ_SINGLE expr)*)?
+     APPEND?
+     destination_clause? table_schema_clause? engine_clause?
+     EMPTY?
+     definer_clause?
     ;
 
 create_live_view_stmt
@@ -1433,6 +1447,7 @@ tokens_nonreserved
     | ALIAS
     | ALTER
     | AND
+    | APPEND
     | APPLY
     | ARBITRARY
     | ASCENDING
@@ -1499,6 +1514,7 @@ tokens_nonreserved
     | DELETE
     | DELETED
     | DEMANGLE
+    | DEPENDS
     | DESC
     | DESCENDING
     | DESCRIBE
@@ -1525,6 +1541,7 @@ tokens_nonreserved
     | EPHEMERAL
     | ESTIMATE
     | EVENTS
+    | EVERY
     | EXCHANGE
     | EXECUTION
     | EXISTS
@@ -1682,6 +1699,7 @@ tokens_nonreserved
     | QUOTAS
     | QUEUES
     | RABBITMQ
+    | RANDOMIZE
     | RANDOMIZED
     | RANGE
     | READ
