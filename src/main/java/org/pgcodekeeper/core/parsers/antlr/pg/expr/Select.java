@@ -411,14 +411,14 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
 
     private void unqualAster(List<ModPair<String, String>> cols) {
         for (GenericColumn gc : unaliasedNamespace) {
-            addFilteredRelationColumnsDepcies(gc.schema, gc.table, ANY)
+            addFilteredRelationColumnsDepcies(gc.schema(), gc.table(), ANY)
                     .map(Pair::copyMod)
                     .forEach(cols::add);
         }
 
         for (GenericColumn gc : namespace.values()) {
             if (gc != null) {
-                addFilteredRelationColumnsDepcies(gc.schema, gc.table, ANY)
+                addFilteredRelationColumnsDepcies(gc.schema(), gc.table(), ANY)
                         .map(Pair::copyMod)
                         .forEach(cols::add);
             }
@@ -444,7 +444,7 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
         GenericColumn relationGc = ref.getValue();
         if (relationGc != null) {
             if (schemaCtx != null) {
-                addDependency(new GenericColumn(relationGc.schema, DbObjType.SCHEMA), schemaCtx);
+                addDependency(new GenericColumn(relationGc.schema(), DbObjType.SCHEMA), schemaCtx);
             }
 
             if (relationGc.getObjName().equals(relation)) {
@@ -453,7 +453,7 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
                 addReference(relationGc, relationCtx);
             }
 
-            addFilteredRelationColumnsDepcies(relationGc.schema, relationGc.table, ANY)
+            addFilteredRelationColumnsDepcies(relationGc.schema(), relationGc.table(), ANY)
                     .map(Pair::copyMod)
                     .forEach(cols::add);
             return true;

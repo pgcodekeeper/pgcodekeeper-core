@@ -34,7 +34,7 @@ import java.util.Set;
 public class OperatorAnalysisLauncher extends AbstractAnalysisLauncher {
 
     private final GenericColumn function;
-    
+
     /**
      * Creates an operator analyzer.
      *
@@ -49,7 +49,7 @@ public class OperatorAnalysisLauncher extends AbstractAnalysisLauncher {
 
     @Override
     protected Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
-        IFunction func = meta.findFunction(function.schema, function.table);
+        IFunction func = meta.findFunction(function.schema(), function.table());
         IOperator oper = meta.findOperator(getSchemaName(), stmt.getName());
 
         if (oper != null && func != null) {

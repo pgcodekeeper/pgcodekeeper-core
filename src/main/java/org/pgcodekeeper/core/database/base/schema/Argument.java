@@ -34,7 +34,7 @@ import java.util.Objects;
 public class Argument implements IArgument, Serializable, IHashable {
 
     @Serial
-    private static final long serialVersionUID = -2427789431834197575L;
+    private static final long serialVersionUID = 3874102714546491143L;
 
     private final ArgMode mode;
     private final String name;
@@ -52,30 +52,37 @@ public class Argument implements IArgument, Serializable, IHashable {
         this.dataType = dataType;
     }
 
+    @Override
     public String getDataType() {
         return dataType;
     }
 
+    @Override
     public String getDefaultExpression() {
         return defaultExpression;
     }
 
+    @Override
     public void setDefaultExpression(final String defaultExpression) {
         this.defaultExpression = defaultExpression;
     }
 
+    @Override
     public boolean isReadOnly() {
         return isReadOnly;
     }
 
+    @Override
     public void setReadOnly(final boolean isReadOnly) {
         this.isReadOnly = isReadOnly;
     }
 
+    @Override
     public ArgMode getMode() {
         return mode;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -87,6 +94,7 @@ public class Argument implements IArgument, Serializable, IHashable {
      * @param includeDefaultValue whether to include the default value
      * @param includeArgName      whether to include the argument name
      */
+    @Override
     public void appendDeclaration(StringBuilder sbString,
                                   boolean includeDefaultValue, boolean includeArgName) {
         if (includeArgName) {

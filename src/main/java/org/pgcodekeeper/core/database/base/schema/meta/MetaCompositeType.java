@@ -28,7 +28,7 @@ import java.util.Map;
 public final class MetaCompositeType extends MetaStatement {
 
     @Serial
-    private static final long serialVersionUID = 195609665520321852L;
+    private static final long serialVersionUID = 2037382156455950170L;
 
     private final Map<String, String> attrs = new HashMap<>();
 

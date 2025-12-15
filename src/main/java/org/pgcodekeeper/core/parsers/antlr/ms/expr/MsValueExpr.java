@@ -271,7 +271,7 @@ public class MsValueExpr extends MsAbstractExpr {
         if (ref != null) {
             GenericColumn table = ref.getValue();
             if (table != null) {
-                if (relationName.equals(table.table)) {
+                if (relationName.equals(table.table())) {
                     addDependency(table, relationCtx);
                 } else {
                     addReference(table, relationCtx);

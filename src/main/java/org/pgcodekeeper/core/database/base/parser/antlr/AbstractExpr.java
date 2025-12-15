@@ -184,7 +184,7 @@ public abstract class AbstractExpr {
      * @param ctx rule context
      */
     public void addDependency(GenericColumn genericColumn, ParserRuleContext ctx) {
-        if (isSystemSchema(genericColumn.schema)) {
+        if (isSystemSchema(genericColumn.schema())) {
             return;
         }
 

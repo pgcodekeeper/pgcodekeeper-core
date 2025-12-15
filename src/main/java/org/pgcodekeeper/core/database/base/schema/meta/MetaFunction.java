@@ -30,7 +30,7 @@ import java.util.*;
 public final class MetaFunction extends MetaStatement implements IFunction {
 
     @Serial
-    private static final long serialVersionUID = 9086580570309984176L;
+    private static final long serialVersionUID = -5384625158372975821L;
 
     private final String bareName;
     private List<IArgument> arguments;

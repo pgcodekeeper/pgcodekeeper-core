@@ -154,12 +154,12 @@ public final class ChValueExpr extends ChAbstractExpr {
         }
 
         var tableCtx = QNameParser.getSecondNameCtx(ids);
-        var tName = parent.table;
+        var tName = parent.table();
         if (Objects.equals(tableName, tName)) {
             addDependency(parent, tableCtx);
         }
 
-        var column = new GenericColumn(parent.schema, tName, columnName, DbObjType.COLUMN);
+        var column = new GenericColumn(parent.schema(), tName, columnName, DbObjType.COLUMN);
 
         addDependency(column, QNameParser.getFirstNameCtx(ids));
         addReference(parent, tableCtx);
@@ -264,10 +264,10 @@ public final class ChValueExpr extends ChAbstractExpr {
         List<GenericColumn> tempDependencies = new ArrayList<>();
         for (var dependency : getDependencies()) {
             var obj = dependency.getObj();
-            if (obj.type != DbObjType.TABLE) {
+            if (obj.type() != DbObjType.TABLE) {
                 continue;
             }
-            var rel = findRelation(obj.schema, obj.table);
+            var rel = findRelation(obj.schema(), obj.table());
             if (rel != null) {
                 rel.getRelationColumns()
                 .filter(e -> isNeedColumn(e.getFirst(), namePart, include, contains))

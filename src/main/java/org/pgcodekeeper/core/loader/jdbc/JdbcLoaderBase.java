@@ -187,14 +187,14 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
         if (currentObject == null) {
             return sb.append(currentOperation).toString();
         }
-        if (currentObject.schema != null) {
-            sb.append('/').append(currentObject.schema);
+        if (currentObject.schema() != null) {
+            sb.append('/').append(currentObject.schema());
         }
-        if (currentObject.table != null) {
-            sb.append('/').append(currentObject.table);
+        if (currentObject.table() != null) {
+            sb.append('/').append(currentObject.table());
         }
-        if (currentObject.column != null) {
-            sb.append('/').append(currentObject.column);
+        if (currentObject.column() != null) {
+            sb.append('/').append(currentObject.column());
         }
         return sb.toString();
     }

@@ -42,7 +42,7 @@ public final class MetaStorage implements Serializable {
     private static final Logger LOG = LoggerFactory.getLogger(MetaStorage.class);
 
     @Serial
-    private static final long serialVersionUID = 8194906497159326596L;
+    private static final long serialVersionUID = -277642492286966398L;
 
     private static final String FILTER_PATTERN = """
             maxdepth=7;\

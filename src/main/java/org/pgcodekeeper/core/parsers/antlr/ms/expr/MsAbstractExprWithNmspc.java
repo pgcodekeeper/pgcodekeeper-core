@@ -92,8 +92,8 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
             // simple empty check to save some allocations
             // it will almost always be empty
             for (GenericColumn unaliased : unaliasedNamespace) {
-                if (unaliased.table.equalsIgnoreCase(loweredName) &&
-                        (schema == null || unaliased.schema.equalsIgnoreCase(schema))) {
+                if (unaliased.table().equalsIgnoreCase(loweredName) &&
+                        (schema == null || unaliased.schema().equalsIgnoreCase(schema))) {
                     if (dereferenced == null) {
                         dereferenced = unaliased;
                         if (schema != null) {
@@ -127,7 +127,7 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
             if (ref == null) {
                 continue;
             }
-            IRelation rel = findRelation(ref.schema, ref.table);
+            IRelation rel = findRelation(ref.schema(), ref.table());
             if (rel == null) {
                 continue;
             }
@@ -170,7 +170,7 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
     public void addRawTableReference(GenericColumn qualifiedTable) {
         boolean exists = !unaliasedNamespace.add(qualifiedTable);
         if (exists) {
-            log(Messages.MsAbstractExprWithNmspc_log_dupl_unaliased_table, qualifiedTable.schema, qualifiedTable.table);
+            log(Messages.MsAbstractExprWithNmspc_log_dupl_unaliased_table, qualifiedTable.schema(), qualifiedTable.table());
         }
     }
 
