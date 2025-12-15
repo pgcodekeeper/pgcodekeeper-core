@@ -457,7 +457,7 @@ public abstract class PgAbstractFunction extends AbstractFunction {
     public class PgArgument extends Argument {
 
         @Serial
-        private static final long serialVersionUID = -47388216522727060L;
+        private static final long serialVersionUID = -2054106742779645431L;
 
         /**
          * Creates a new PostgreSQL function argument.

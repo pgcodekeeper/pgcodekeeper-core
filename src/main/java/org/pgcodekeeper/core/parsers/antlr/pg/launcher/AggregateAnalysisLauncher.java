@@ -51,7 +51,7 @@ public class AggregateAnalysisLauncher extends AbstractAnalysisLauncher {
     protected Set<ObjectLocation> analyze(ParserRuleContext ctx,
                                           MetaContainer meta) {
 
-        IFunction func = meta.findFunction(function.schema, function.table);
+        IFunction func = meta.findFunction(function.schema(), function.table());
         IFunction aggr = meta.findFunction(getSchemaName(), stmt.getName());
 
 

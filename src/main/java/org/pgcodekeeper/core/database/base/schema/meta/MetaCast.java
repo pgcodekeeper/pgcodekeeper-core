@@ -30,7 +30,7 @@ import java.io.Serial;
 public final class MetaCast extends MetaStatement implements ICast {
 
     @Serial
-    private static final long serialVersionUID = 3309369936371201302L;
+    private static final long serialVersionUID = 5369541137617339001L;
 
     private final String source;
     private final String target;

@@ -195,7 +195,7 @@ public final class MsDatabase extends AbstractDatabase {
 
     @Override
     protected AbstractStatement resolveStatistics(AbstractSchema s, GenericColumn gc, DbObjType type) {
-        var cont = s.getStatementContainer(gc.table);
-        return cont != null ? cont.getChild(gc.column, type) : null;
+        var cont = s.getStatementContainer(gc.table());
+        return cont != null ? cont.getChild(gc.column(), type) : null;
     }
 }

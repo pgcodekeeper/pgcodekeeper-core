@@ -397,7 +397,7 @@ public final class Function extends AbstractExprWithNmspc<Plpgsql_functionContex
                 var columns = tabl.columns();
                 if (columns != null) {
                     for (IdentifierContext id : columns.identifier()) {
-                        addFilteredColumnDepcy(rel.schema, rel.table, id.getText());
+                        addFilteredColumnDepcy(rel.schema(), rel.table(), id.getText());
                     }
                 }
             }

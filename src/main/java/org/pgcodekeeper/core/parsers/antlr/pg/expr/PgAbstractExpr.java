@@ -122,7 +122,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
     }
 
     protected void addDepcy(GenericColumn depcy, ParserRuleContext ctx, Token start) {
-        if (!isSystemSchema(depcy.schema)) {
+        if (!isSystemSchema(depcy.schema())) {
             ObjectLocation loc = new ObjectLocation.Builder()
                     .setObject(depcy)
                     .setCtx(ctx)
@@ -168,7 +168,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
             GenericColumn referencedTable = ref.getValue();
             if (referencedTable != null) {
                 if (schemaNameCtx != null) {
-                    addDependency(new GenericColumn(referencedTable.schema, DbObjType.SCHEMA), schemaNameCtx);
+                    addDependency(new GenericColumn(referencedTable.schema(), DbObjType.SCHEMA), schemaNameCtx);
                 }
 
                 if (referencedTable.getObjName().equals(columnParent)) {
@@ -178,7 +178,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
                 }
 
                 columnType = addFilteredColumnDepcy(
-                        referencedTable.schema, referencedTable.table, columnName);
+                        referencedTable.schema(), referencedTable.table(), columnName);
             } else if ((refComplex = findReferenceComplex(columnParent)) != null) {
                 columnType = refComplex.stream()
                         .filter(entry -> columnName.equals(entry.getFirst()))

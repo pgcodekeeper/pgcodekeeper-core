@@ -31,7 +31,7 @@ import java.io.Serial;
 public final class MetaOperator extends MetaStatement implements IOperator {
 
     @Serial
-    private static final long serialVersionUID = 5893184839623238431L;
+    private static final long serialVersionUID = -1610910953392795647L;
 
     private String left;
     private String right;

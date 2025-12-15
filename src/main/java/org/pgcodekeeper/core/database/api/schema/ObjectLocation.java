@@ -35,7 +35,7 @@ public class ObjectLocation extends ContextLocation {
     // FIXME move DB-specific logic into their packages
 
     @Serial
-    private static final long serialVersionUID = 4428608117292420935L;
+    private static final long serialVersionUID = -1854478368569213500L;
 
     /**
      * Enumeration of location types for database objects.
@@ -156,7 +156,7 @@ public class ObjectLocation extends ContextLocation {
      * @return schema name or null if no object
      */
     public String getSchema() {
-        return obj == null ? null : obj.schema;
+        return obj == null ? null : obj.schema();
     }
 
     /**
@@ -165,7 +165,7 @@ public class ObjectLocation extends ContextLocation {
      * @return table name or null if no object
      */
     public String getTable() {
-        return obj == null ? null : obj.table;
+        return obj == null ? null : obj.table();
     }
 
     /**
@@ -174,7 +174,7 @@ public class ObjectLocation extends ContextLocation {
      * @return column name or null if no object
      */
     public String getColumn() {
-        return obj == null ? null : obj.column;
+        return obj == null ? null : obj.column();
     }
 
     /**
@@ -183,7 +183,7 @@ public class ObjectLocation extends ContextLocation {
      * @return object type or null if no object
      */
     public DbObjType getType() {
-        return obj == null ? null : obj.type;
+        return obj == null ? null : obj.type();
     }
 
     /**
@@ -203,7 +203,7 @@ public class ObjectLocation extends ContextLocation {
             return alias;
         }
         String objName = getObjName();
-        switch (obj.type) {
+        switch (obj.type()) {
             case FUNCTION:
             case PROCEDURE:
             case AGGREGATE:
@@ -234,14 +234,14 @@ public class ObjectLocation extends ContextLocation {
         if (obj == null || col == null) {
             return false;
         }
-        return compareTypes(col.type)
-                && Objects.equals(obj.schema, col.schema)
-                && Objects.equals(obj.column, col.column)
-                && Objects.equals(obj.table, col.table);
+        return compareTypes(col.type())
+                && Objects.equals(obj.schema(), col.schema())
+                && Objects.equals(obj.column(), col.column())
+                && Objects.equals(obj.table(), col.table());
     }
 
     private boolean compareTypes(DbObjType objType) {
-        DbObjType type = obj.type;
+        DbObjType type = obj.type();
         if (type == objType) {
             return true;
         }

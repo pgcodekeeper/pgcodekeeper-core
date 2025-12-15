@@ -314,44 +314,44 @@ public abstract class AbstractDatabase extends AbstractStatement implements IDat
      * @return the resolved statement, or null if not found
      */
     public final AbstractStatement getStatement(GenericColumn gc) {
-        DbObjType type = gc.type;
+        DbObjType type = gc.type();
         if (type == DbObjType.DATABASE) {
             return this;
         }
 
         if (isFirstLevelType(type)) {
-            return (AbstractStatement) getChild(gc.schema, type);
+            return (AbstractStatement) getChild(gc.schema(), type);
         }
 
-        AbstractSchema s = getSchema(gc.schema);
+        AbstractSchema s = getSchema(gc.schema());
         if (s == null) {
             return null;
         }
 
         return switch (type) {
             case DOMAIN, SEQUENCE, VIEW, COLLATION, FTS_PARSER, FTS_TEMPLATE, FTS_DICTIONARY, FTS_CONFIGURATION ->
-                    s.getChild(gc.table, type);
+                    s.getChild(gc.table(), type);
             case STATISTICS -> resolveStatistics(s, gc, type);
-            case TYPE -> (AbstractStatement) resolveTypeCall(s, gc.table);
-            case FUNCTION, PROCEDURE, AGGREGATE -> (AbstractStatement) resolveFunctionCall(s, gc.table);
-            case OPERATOR -> (AbstractStatement) resolveOperatorCall(s, gc.table);
-            case TABLE -> (AbstractStatement) s.getRelation(gc.table);
-            case INDEX -> s.getIndexByName(gc.table);
+            case TYPE -> (AbstractStatement) resolveTypeCall(s, gc.table());
+            case FUNCTION, PROCEDURE, AGGREGATE -> (AbstractStatement) resolveFunctionCall(s, gc.table());
+            case OPERATOR -> (AbstractStatement) resolveOperatorCall(s, gc.table());
+            case TABLE -> (AbstractStatement) s.getRelation(gc.table());
+            case INDEX -> s.getIndexByName(gc.table());
             // handled in getStatement, left here for consistency
             case COLUMN -> {
-                AbstractTable t = s.getTable(gc.table);
-                yield t == null ? null : t.getColumn(gc.column);
+                AbstractTable t = s.getTable(gc.table());
+                yield t == null ? null : t.getColumn(gc.column());
             }
             case CONSTRAINT, TRIGGER, RULE, POLICY -> {
-                var sc = s.getStatementContainer(gc.table);
-                yield sc == null ? null : sc.getChild(gc.column, type);
+                var sc = s.getStatementContainer(gc.table());
+                yield sc == null ? null : sc.getChild(gc.column(), type);
             }
             default -> throw new IllegalStateException("Unhandled DbObjType: " + type);
         };
     }
 
     protected AbstractStatement resolveStatistics(AbstractSchema s, GenericColumn gc, DbObjType type) {
-        return s.getChild(gc.table, type);
+        return s.getChild(gc.table(), type);
     }
 
     private IStatement resolveTypeCall(AbstractSchema s, String table) {

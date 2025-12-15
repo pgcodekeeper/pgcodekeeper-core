@@ -90,8 +90,8 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
             // simple empty check to save some allocations
             // it will almost always be empty
             for (GenericColumn unaliased : unaliasedNamespace) {
-                if (unaliased.table.equalsIgnoreCase(name) &&
-                        (schema == null || unaliased.schema.equalsIgnoreCase(schema))) {
+                if (unaliased.table().equalsIgnoreCase(name) &&
+                        (schema == null || unaliased.schema().equalsIgnoreCase(schema))) {
                     if (dereferenced == null) {
                         dereferenced = unaliased;
                         if (schema != null) {
@@ -149,7 +149,7 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
     public void addRawTableReference(GenericColumn qualifiedTable) {
         boolean exists = !unaliasedNamespace.add(qualifiedTable);
         if (exists) {
-            log(Messages.ChAbstractExprWithNmspc_log_dupl_unaliased_table, qualifiedTable.schema, qualifiedTable.table);
+            log(Messages.ChAbstractExprWithNmspc_log_dupl_unaliased_table, qualifiedTable.schema(), qualifiedTable.table());
         }
     }
 
@@ -165,7 +165,7 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
     private Pair<IRelation, Pair<String, String>> findColumn(String name, Collection<GenericColumn> refs) {
         for (GenericColumn ref : refs) {
             if (ref != null) {
-                IRelation rel = findRelation(ref.schema, ref.table);
+                IRelation rel = findRelation(ref.schema(), ref.table());
                 if (rel == null) {
                     continue;
                 }

@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 public class MetaStatement implements IStatement, Serializable {
 
     @Serial
-    private static final long serialVersionUID = 5744769530265917940L;
+    private static final long serialVersionUID = 8504077236938059732L;
 
     private final ObjectLocation object;
     private String comment = "";

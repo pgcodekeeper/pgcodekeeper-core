@@ -127,8 +127,8 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
             // simple empty check to save some allocations
             // it will almost always be empty
             for (GenericColumn unaliased : unaliasedNamespace) {
-                if (unaliased.table.equals(name) &&
-                        (schema == null || unaliased.schema.equals(schema))) {
+                if (unaliased.table().equals(name) &&
+                        (schema == null || unaliased.schema().equals(schema))) {
                     if (dereferenced == null) {
                         dereferenced = unaliased;
                         if (schema != null) {
@@ -177,7 +177,7 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
             if (ref == null) {
                 continue;
             }
-            IRelation rel = findRelation(ref.schema, ref.table);
+            IRelation rel = findRelation(ref.schema(), ref.table());
             if (rel == null) {
                 continue;
             }
@@ -222,8 +222,8 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
      * @param argType var type
      */
     public void declareNamespaceVar(String alias, String name, GenericColumn argType) {
-        if (Consts.PG_CATALOG.equals(argType.schema)) {
-            String type = argType.table.toLowerCase(Locale.ROOT);
+        if (Consts.PG_CATALOG.equals(argType.schema())) {
+            String type = argType.table().toLowerCase(Locale.ROOT);
 
             int firstParen = type.indexOf('(');
             if (firstParen != -1) {
@@ -236,12 +236,12 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
             }
 
             if (Consts.SYS_TYPES.contains(type.trim())) {
-                addVarToPrims(alias, name, argType.table);
+                addVarToPrims(alias, name, argType.table());
                 return;
             }
         }
 
-        IRelation rel = findRelation(argType.schema, argType.table);
+        IRelation rel = findRelation(argType.schema(), argType.table());
         if (rel != null) {
             GenericColumn ref = new GenericColumn(rel.getSchemaName(), rel.getName(), rel.getStatementType());
             addReference(alias, ref);
@@ -288,7 +288,7 @@ public abstract class AbstractExprWithNmspc<T extends ParserRuleContext> extends
         boolean exists = !unaliasedNamespace.add(qualifiedTable);
         if (exists) {
             log(Messages.AbstractExprWithNmspc_log_dupl_unaliased_table,
-                    qualifiedTable.schema, qualifiedTable.table);
+                    qualifiedTable.schema(), qualifiedTable.table());
         }
     }
 

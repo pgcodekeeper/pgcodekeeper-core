@@ -34,7 +34,7 @@ import java.util.Objects;
 public class SimpleColumn implements Serializable, IHashable {
 
     @Serial
-    private static final long serialVersionUID = 2305486126854181859L;
+    private static final long serialVersionUID = -4183664175731032909L;
 
     private final Map<String, String> opClassParams = new HashMap<>();
     private String collation;

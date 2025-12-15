@@ -33,7 +33,7 @@ import java.util.Map.Entry;
 public final class ChEngine implements Serializable, IHashable {
 
     @Serial
-    private static final long serialVersionUID = -2826863138724898463L;
+    private static final long serialVersionUID = -5376222674912896813L;
 
     private final String name;
     private String body;

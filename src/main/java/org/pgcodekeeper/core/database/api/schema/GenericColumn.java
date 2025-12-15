@@ -17,40 +17,18 @@ package org.pgcodekeeper.core.database.api.schema;
 
 import org.pgcodekeeper.core.PgDiffUtils;
 
-import java.io.Serial;
 import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * Represents a generic database object reference with schema, table, column, and type information.
  * Used for identifying and referencing database objects across different contexts.
+ *
+ * @param schema the schema name
+ * @param table  the table name
+ * @param column the column name
+ * @param type   the database object type
  */
-public class GenericColumn implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = -3196057456408062736L;
-
-    // SONAR-OFF
-    public final String schema;
-    public final String table;
-    public final String column;
-    public final DbObjType type;
-    // SONAR-ON
-
-    /**
-     * Creates a generic column with full specification.
-     *
-     * @param schema the schema name
-     * @param table  the table name
-     * @param column the column name
-     * @param type   the database object type
-     */
-    public GenericColumn(String schema, String table, String column, DbObjType type) {
-        this.schema = schema;
-        this.table = table;
-        this.column = column;
-        this.type = type;
-    }
+public record GenericColumn(String schema, String table, String column, DbObjType type) implements Serializable {
 
     /**
      * Creates a generic column for a database object within a schema.
@@ -92,33 +70,6 @@ public class GenericColumn implements Serializable {
         return "";
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((column == null) ? 0 : column.hashCode());
-        result = prime * result + ((schema == null) ? 0 : schema.hashCode());
-        result = prime * result + ((table == null) ? 0 : table.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj instanceof GenericColumn col) {
-            return Objects.equals(schema, col.schema)
-                    && Objects.equals(table, col.table)
-                    && Objects.equals(column, col.column)
-                    && type == col.type;
-        }
-
-        return false;
-    }
-
     /**
      * Gets the fully qualified name of this object.
      *
@@ -128,7 +79,7 @@ public class GenericColumn implements Serializable {
         return appendQualifiedName(new StringBuilder()).toString();
     }
 
-    protected StringBuilder appendQualifiedName(StringBuilder sb) {
+    public StringBuilder appendQualifiedName(StringBuilder sb) {
         if (type == DbObjType.CAST) {
             sb.append(schema);
             return sb;
@@ -141,14 +92,10 @@ public class GenericColumn implements Serializable {
             if (!sb.isEmpty()) {
                 sb.append('.');
             }
-            switch (type) {
-                case FUNCTION:
-                case PROCEDURE:
-                case AGGREGATE:
-                    sb.append(table);
-                    break;
-                default:
-                    sb.append(PgDiffUtils.getQuotedName(table));
+            if (type.in(DbObjType.FUNCTION, DbObjType.PROCEDURE, DbObjType.AGGREGATE)) {
+                sb.append(table);
+            } else {
+                sb.append(PgDiffUtils.getQuotedName(table));
             }
         }
         if (column != null) {

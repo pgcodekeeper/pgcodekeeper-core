@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 public final class MetaRelation extends MetaStatement implements IRelation {
 
     @Serial
-    private static final long serialVersionUID = -6057721257178245883L;
+    private static final long serialVersionUID = 6064404690366401100L;
 
     /**
      * Contains columns names and types

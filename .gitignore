@@ -1,5 +1,7 @@
 /.project
 /.classpath
 /.idea
+/.settings
 /gen
 /target
+/bin/

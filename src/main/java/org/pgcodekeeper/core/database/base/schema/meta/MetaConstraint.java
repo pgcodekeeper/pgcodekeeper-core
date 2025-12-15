@@ -31,7 +31,7 @@ import java.util.Set;
 public final class MetaConstraint extends MetaStatement implements IConstraint {
 
     @Serial
-    private static final long serialVersionUID = 7375924980206798486L;
+    private static final long serialVersionUID = 1801686478824411463L;
 
     private boolean isPrimaryKey;
     private final Set<String> columns = new HashSet<>();
