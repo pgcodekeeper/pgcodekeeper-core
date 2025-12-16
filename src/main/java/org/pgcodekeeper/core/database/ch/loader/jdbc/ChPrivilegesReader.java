@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.loader.jdbc.ch;
+package org.pgcodekeeper.core.database.ch.loader.jdbc;
 
 import org.pgcodekeeper.core.ChDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.DatabaseType;
