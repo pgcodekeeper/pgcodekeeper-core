@@ -11,6 +11,72 @@ CREATE TABLE public.minmaxtest (
     id bigint
 );
 
+CREATE TABLE public.returning_test_table (
+    c1 integer,
+    c2 text,
+    c3 numeric
+);
+
+CREATE TYPE public.delete_result_type AS (
+    old_c1 INTEGER,
+    old_c2 TEXT,
+    old_c3 NUMERIC,
+    new_c1 INTEGER,
+    new_c2 TEXT,
+    new_c3 NUMERIC
+);
+
+CREATE OR REPLACE FUNCTION public.delete_with_returning_type()
+RETURNS SETOF public.delete_result_type
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    DELETE FROM public.returning_test_table
+    USING (SELECT 1) AS dummy
+    WHERE returning_test_table.c1 > 100
+    RETURNING WITH (OLD AS old, NEW AS new)
+        old.c1, old.c2, old.c3,
+        new.c1, new.c2, new.c3;
+END;
+$$;
+
+CREATE FUNCTION public.delete_with_returning_table()
+RETURNS TABLE (
+    old_c1 INTEGER,
+    old_c2 TEXT,
+    old_c3 NUMERIC,
+    new_c1 INTEGER,
+    new_c2 TEXT,
+    new_c3 NUMERIC
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    DELETE FROM public.returning_test_table
+    USING (SELECT 1) AS dummy
+    WHERE returning_test_table.c1 > 100
+    RETURNING WITH (OLD AS old, NEW AS new)
+        old.c1, old.c2, old.c3,
+        new.c1, new.c2, new.c3;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.delete_with_returning_setof_table()
+RETURNS SETOF public.returning_test_table
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    DELETE FROM public.returning_test_table
+    USING (SELECT 1) AS dummy
+    WHERE returning_test_table.c1 > 100
+    RETURNING WITH (OLD AS old, NEW AS new)
+        old.c1, new.c2, old.c3;
+END;
+$$;
+
 CREATE FUNCTION public.f(p integer) RETURNS integer
     LANGUAGE plpgsql
     AS $_$begin return $1; end;$_$;
@@ -289,3 +355,35 @@ SELECT t.new_id as id, t.new_description as descr, t.* FROM ROWS FROM (
     public.get_simple_record() AS (id_test INT, description_test TEXT, value_test NUMERIC),
     public.get_another_record() AS (id INT, description TEXT, value NUMERIC)
 ) AS t(new_id, new_description, new_value);
+
+CREATE VIEW public.test_returning_type1 AS
+ SELECT * FROM public.delete_with_returning_type();
+
+CREATE VIEW public.test_returning_type2 AS
+ SELECT test_ret.old_c1 as test_old_c1,
+         old_c2 as test_old_c2,
+         old_c3 as test_old_c3,
+         *
+   FROM public.delete_with_returning_type() test_ret;
+
+CREATE VIEW public.test_returning_table1 AS
+ SELECT * FROM public.delete_with_returning_table();
+
+CREATE VIEW public.test_returning_table2 AS
+ SELECT test_ret.old_c1 as test_old_c1,
+         old_c2 as test_old_c2,
+         old_c3 as test_old_c3,
+         *
+   FROM public.delete_with_returning_table() test_ret;
+
+CREATE VIEW public.test_returning_table3 AS
+ SELECT tbl.c1 as old_c1,
+         tbl.c2 as new_c2,
+         tbl.c3 as old_c3,
+         tbl.* 
+   FROM public.delete_with_returning_setof_table() tbl;
+
+CREATE VIEW public.test_from_rows_returning AS
+SELECT t.int_col as al_int_col, * FROM ROWS FROM (
+    public.delete_with_returning_setof_table()
+) AS t(int_col, text_col, numeric_col);

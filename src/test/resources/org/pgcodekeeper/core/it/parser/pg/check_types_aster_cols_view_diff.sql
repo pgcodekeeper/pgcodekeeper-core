@@ -48,11 +48,13 @@ Schema: public
 
   View: asterisk5
     RelationColumns : 
-     d - functionTable
+     f1 - integer
+     f2 - double precision
 
   View: asterisk6
     RelationColumns : 
-     dup3 - functionTable
+     f1 - integer
+     f2 - double precision
 
   View: asterisk7
     RelationColumns : 

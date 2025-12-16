@@ -16,10 +16,12 @@
 package org.pgcodekeeper.core.database.base.schema.meta;
 
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.utils.Pair;
 
 import java.io.Serial;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Represents a PostgreSQL composite type metadata object.
@@ -30,7 +32,7 @@ public final class MetaCompositeType extends MetaStatement {
     @Serial
     private static final long serialVersionUID = 2037382156455950170L;
 
-    private final Map<String, String> attrs = new HashMap<>();
+    private final List<Pair<String, String>> attrs = new ArrayList<>();
 
     /**
      * Creates a new composite type metadata object.
@@ -57,7 +59,7 @@ public final class MetaCompositeType extends MetaStatement {
      * @param type the attribute type
      */
     public void addAttr(String name, String type) {
-        attrs.put(name, type);
+        attrs.add(new Pair<>(name, type));
     }
 
     /**
@@ -67,6 +69,14 @@ public final class MetaCompositeType extends MetaStatement {
      * @return the attribute type, or null if not found
      */
     public String getAttrType(String attrName) {
-        return attrs.get(attrName);
+        return attrs.stream()
+                .filter(pair -> pair.getFirst().equals(attrName))
+                .findAny()
+                .map(Pair::getSecond)
+                .orElse(null);
+    }
+
+    public List<Pair<String, String>> getAttrs() {
+        return Collections.unmodifiableList(attrs);
     }
 }

@@ -121,3 +121,61 @@ Schema: public
      new_id - INT
      new_description - TEXT
      new_value - NUMERIC
+
+  View: test_returning_type1
+    RelationColumns : 
+     old_c1 - INTEGER
+     old_c2 - TEXT
+     old_c3 - NUMERIC
+     new_c1 - INTEGER
+     new_c2 - TEXT
+     new_c3 - NUMERIC
+
+  View: test_returning_type2
+    RelationColumns : 
+     test_old_c1 - INTEGER
+     test_old_c2 - TEXT
+     test_old_c3 - NUMERIC
+     old_c1 - INTEGER
+     old_c2 - TEXT
+     old_c3 - NUMERIC
+     new_c1 - INTEGER
+     new_c2 - TEXT
+     new_c3 - NUMERIC
+
+  View: test_returning_table1
+    RelationColumns : 
+     old_c1 - INTEGER
+     old_c2 - TEXT
+     old_c3 - NUMERIC
+     new_c1 - INTEGER
+     new_c2 - TEXT
+     new_c3 - NUMERIC
+
+  View: test_returning_table2
+    RelationColumns : 
+     test_old_c1 - INTEGER
+     test_old_c2 - TEXT
+     test_old_c3 - NUMERIC
+     old_c1 - INTEGER
+     old_c2 - TEXT
+     old_c3 - NUMERIC
+     new_c1 - INTEGER
+     new_c2 - TEXT
+     new_c3 - NUMERIC
+
+  View: test_returning_table3
+    RelationColumns : 
+     old_c1 - integer
+     new_c2 - text
+     old_c3 - numeric
+     c1 - integer
+     c2 - text
+     c3 - numeric
+
+  View: test_from_rows_returning
+    RelationColumns : 
+     al_int_col - integer
+     int_col - integer
+     text_col - text
+     numeric_col - numeric

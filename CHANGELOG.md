@@ -9,14 +9,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- Added support for new data types in ClickHouse.
-- Added parser support for Refreshable Materialized View in ClickHouse.
-
 ### Changed
 
 - The clickhouse-jdbc driver has been updated. All connections to ClickHouse must now include the required `password` parameter.
 - Increased version of testcontainers library.
 - Improved parser rules for ClickHouse.
+- Improved function analyze in PostgreSQL.
 
 ### Fixed
 

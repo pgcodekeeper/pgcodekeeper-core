@@ -38,6 +38,8 @@ import java.util.*;
  */
 public final class ValueExpr extends PgAbstractExpr {
 
+    private List<Pair<String, String>> returningTableColumns;
+
     /**
      * Creates a ValueExpr parser with meta container.
      *
@@ -921,7 +923,15 @@ public final class ValueExpr extends PgAbstractExpr {
     }
 
     private String getFunctionReturns(IFunction f) {
-        return f.getReturnsColumns().isEmpty() ? f.getReturns() : TypesSetManually.FUNCTION_TABLE;
+        var returnColumns = f.getReturnsColumns();
+        if (returnColumns.isEmpty()) {
+            return f.getReturns();
+        }
+
+        returningTableColumns = returnColumns.entrySet().stream()
+                .map(e -> new Pair<>(e.getKey(), e.getValue()))
+                .toList();
+        return TypesSetManually.FUNCTION_TABLE;
     }
 
     /**
@@ -1051,5 +1061,10 @@ public final class ValueExpr extends PgAbstractExpr {
             return type.substring(0, type.lastIndexOf('('));
         }
         return type;
+    }
+
+    public List<Pair<String, String>> getReturningTableColumns() {
+        return returningTableColumns == null ? Collections.emptyList() :
+                Collections.unmodifiableList(returningTableColumns);
     }
 }

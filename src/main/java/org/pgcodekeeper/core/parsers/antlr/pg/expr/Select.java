@@ -18,16 +18,18 @@ package org.pgcodekeeper.core.parsers.antlr.pg.expr;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.IConstraint;
+import org.pgcodekeeper.core.database.api.schema.IRelation;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaCompositeType;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.SelectOps;
 import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.SelectStmt;
 import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.Vex;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.PgParserAbstract;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.api.schema.IConstraint;
-import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.ModPair;
 import org.pgcodekeeper.core.utils.Pair;
 
@@ -570,7 +572,10 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
         boolean oldLateral = lateralAllowed;
         try {
             if (from.function_call() != null) {
-                function(from.function_call(), from.alias, from.from_function_column_def());
+                var colPairs = function(from.function_call(), from.alias, from.from_function_column_def());
+                if (colPairs != null) {
+                    complexNamespace.put(colPairs.getFirst(), colPairs.getSecond());
+                }
             } else if (from.from_rows_with_alias() != null) {
                 fromRowsFunction(from.from_rows_with_alias());
             }
@@ -588,40 +593,75 @@ public final class Select extends AbstractExprWithNmspc<Select_stmtContext> {
                 addReference(funcName, null);
             }
         }
+        var alias = fromRows.alias.getText();
+        addReference(alias, null);
 
         List<Pair<String, String>> colPairs = new ArrayList<>();
         fromRows.column_alias
                 .forEach(identifier -> colPairs.add(new ModPair<>(identifier.getText(), TypesSetManually.COLUMN)));
 
-        if (!fromRows.from_function_column_def().isEmpty()) {
-            // safe to take any since they all must have the same types
-            var cols = fromRows.from_function_column_def(0);
-            for (int i = 0; i < cols.column_alias.size() && i < colPairs.size(); i++) {
-                colPairs.set(i, new Pair<>(colPairs.get(i).getFirst(), cols.data_type().get(i).getText()));
-            }
+        var definitions = fromRows.from_function_column_def();
+        var definition = definitions.isEmpty() ? null : definitions.get(0);
+        var types = function(fromRows.function_call(0), fromRows.alias, definition);
+        if (types == null) {
+            complexNamespace.put(alias, colPairs);
+            return;
         }
 
-        var alias = fromRows.alias.getText();
-        addReference(alias, null);
+        for (int i = 0; i < colPairs.size() && i < types.getSecond().size(); i++) {
+            colPairs.set(i, new Pair<>(colPairs.get(i).getFirst(), types.getSecond().get(i).getSecond()));
+        }
+
         complexNamespace.put(alias, colPairs);
     }
 
-    private void function(Function_callContext function, IdentifierContext alias,
-                          From_function_column_defContext definition) {
+    private Pair<String, List<Pair<String, String>>> function(Function_callContext function, IdentifierContext alias,
+                                                              From_function_column_defContext definition) {
         ValueExpr vexFunc = new ValueExpr(this);
         Pair<String, String> func = vexFunc.function(function);
         if (func.getFirst() != null) {
             String funcAlias = alias == null ? func.getFirst() : alias.getText();
             addReference(funcAlias, null);
+
+            var returns = func.getSecond();
             List<Pair<String, String>> colPairs = new ArrayList<>();
             if (definition != null) {
                 for (int i = 0; i < definition.column_alias.size(); i++) {
                     colPairs.add(new Pair<>(definition.column_alias.get(i).getText(), definition.data_type().get(i).getText()));
                 }
+            } else if (returns.contains(".")) {
+                colPairs = setOfFunction(funcAlias, returns);
             } else {
-                colPairs.add(new Pair<>(funcAlias, func.getSecond()));
+                List<Pair<String, String>> returnTableCols = vexFunc.getReturningTableColumns();
+                if (returnTableCols.isEmpty()) {
+                    colPairs.add(new Pair<>(funcAlias, func.getSecond()));
+                } else {
+                    colPairs = returnTableCols;
+                }
             }
-            complexNamespace.put(funcAlias, colPairs);
+
+            return new Pair<>(funcAlias, colPairs);
         }
+        return null;
+    }
+
+    private List<Pair<String, String>> setOfFunction(String funcAlias, String returns) {
+        var typeQualifiedName = returns.replace("SETOF ", "");
+        var parsedName = QNameParser.parsePg(typeQualifiedName);
+
+        var schemaName = parsedName.getSchemaName();
+        var objectName = parsedName.getFirstName();
+
+        MetaCompositeType type = meta.findType(schemaName, objectName);
+        if (type != null) {
+            return type.getAttrs();
+        }
+
+        IRelation relation = meta.findRelation(schemaName, objectName);
+        if (relation != null) {
+            return relation.getRelationColumns().toList();
+        }
+
+        return List.of(new Pair<>(funcAlias, returns));
     }
 }
