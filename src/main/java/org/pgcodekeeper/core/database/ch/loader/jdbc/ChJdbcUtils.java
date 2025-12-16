@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.loader.jdbc.ch;
+package org.pgcodekeeper.core.database.ch.loader.jdbc;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.GenericColumn;
@@ -28,13 +28,14 @@ import java.util.function.BiConsumer;
  * Utility class for ClickHouse JDBC operations.
  * Provides helper methods for processing ClickHouse-specific database metadata.
  */
-public final class ChJdbcUtils {
+final class ChJdbcUtils {
 
-    private ChJdbcUtils() {
-    }
+    private ChJdbcUtils() {}
 
     static <T extends AbstractStatement> void addRoles(ResultSet res, String roleCol, String exceptCol, T statement,
-                                                       BiConsumer<T, String> addRoleMethod, BiConsumer<T, String> addExceptMethod) throws SQLException {
+                                                       BiConsumer<T, String> addRoleMethod,
+                                                       BiConsumer<T, String> addExceptMethod)
+            throws SQLException {
         String[] roles = getColArray(res, roleCol);
         if (roles != null) {
             for (String role : roles) {
@@ -50,7 +51,6 @@ public final class ChJdbcUtils {
                 statement.addDependency(new GenericColumn(except, DbObjType.ROLE));
             }
         }
-
     }
 
     static String[] getColArray(ResultSet rs, String columnName) throws SQLException {
@@ -65,5 +65,4 @@ public final class ChJdbcUtils {
         }
         return stringArray;
     }
-
 }
