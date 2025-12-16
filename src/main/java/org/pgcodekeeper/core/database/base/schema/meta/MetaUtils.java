@@ -90,11 +90,11 @@ public final class MetaUtils {
                 yield oper;
             }
             case AGGREGATE, FUNCTION, PROCEDURE -> {
-                IFunction funcion = (IFunction) st;
+                IFunction function = (IFunction) st;
                 MetaFunction func = new MetaFunction(loc, st.getBareName());
-                funcion.getReturnsColumns().forEach(func::addReturnsColumn);
-                funcion.getArguments().forEach(func::addArgument);
-                func.setReturns(funcion.getReturns());
+                function.getReturnsColumns().forEach(func::addReturnsColumn);
+                function.getArguments().forEach(func::addArgument);
+                func.setReturns(function.getReturns());
                 yield func;
             }
             case CONSTRAINT -> {
