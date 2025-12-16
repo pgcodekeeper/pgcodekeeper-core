@@ -16,10 +16,10 @@
 package org.pgcodekeeper.core.database.base.schema.meta;
 
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
-import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
+import org.pgcodekeeper.core.database.pg.loader.jdbc.SupportedPgVersion;
 import org.pgcodekeeper.core.database.pg.schema.PgCompositeType;
 import org.pgcodekeeper.core.utils.Pair;
 
