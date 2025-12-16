@@ -20,9 +20,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.PgCodekeeperException;
 import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
+import org.pgcodekeeper.core.database.pg.loader.jdbc.SupportedPgVersion;
 import org.pgcodekeeper.core.it.jdbc.base.JdbcLoaderTest;
 import org.pgcodekeeper.core.loader.TestContainer;
-import org.pgcodekeeper.core.loader.pg.SupportedPgVersion;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;
