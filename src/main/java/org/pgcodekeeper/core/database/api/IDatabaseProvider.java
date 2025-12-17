@@ -24,9 +24,14 @@ import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 public interface IDatabaseProvider {
 
     /**
-     * @return name of DBMS
+     * @return short name of DBMS
      */
-    String getDatabaseType();
+    String getName();
+
+    /**
+     * @return full name of DBMS
+     */
+    String getFullName();
 
     /**
      * @param stream - char stream

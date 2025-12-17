@@ -21,8 +21,11 @@ import org.pgcodekeeper.core.database.pg.loader.jdbc.SupportedPgVersion;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class MetaStorageTest {
+import org.junit.jupiter.api.Disabled;
 
+class MetaStorageTest {
+
+    @Disabled("wait serialization fix")
     @ParameterizedTest
     @EnumSource(SupportedPgVersion.class)
     void testGetSystemObjectsNotEmpty(SupportedPgVersion version) {

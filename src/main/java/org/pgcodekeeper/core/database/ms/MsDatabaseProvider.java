@@ -27,7 +27,12 @@ import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser;
 public class MsDatabaseProvider implements IDatabaseProvider {
 
     @Override
-    public String getDatabaseType() {
+    public String getName() {
+        return "MS";
+    }
+
+    @Override
+    public String getFullName() {
         return "MS SQL";
     }
 
