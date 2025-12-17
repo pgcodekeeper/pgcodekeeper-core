@@ -27,7 +27,12 @@ import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser;
 public class ChDatabaseProvider implements IDatabaseProvider {
 
     @Override
-    public String getDatabaseType() {
+    public String getName() {
+        return "CH";
+    }
+
+    @Override
+    public String getFullName() {
         return "ClickHouse";
     }
 

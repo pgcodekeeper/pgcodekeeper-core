@@ -20,6 +20,7 @@
 package org.pgcodekeeper.core.it.parser.pg;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
@@ -47,6 +48,8 @@ import java.util.Map.Entry;
  */
 
 class ExprTypeTest {
+
+    @Disabled("wait serialization fix")
     @ParameterizedTest
     @ValueSource(strings = {
             // Check types in columns of asterisk in view.

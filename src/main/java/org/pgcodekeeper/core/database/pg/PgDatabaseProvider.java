@@ -27,7 +27,12 @@ import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
 public class PgDatabaseProvider implements IDatabaseProvider {
 
     @Override
-    public String getDatabaseType() {
+    public String getName() {
+        return "PG";
+    }
+
+    @Override
+    public String getFullName() {
         return "PostgreSQL";
     }
 
