@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Added comments processing for NOT NULL constraints in PostgreSQL.
+
 ### Changed
 
 - The clickhouse-jdbc driver has been updated. All connections to ClickHouse must now include the required `password` parameter.
@@ -23,6 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed parser errors for partitioned tables in MS SQL.
 - Fixed a false difference for the STATISTICS object in MS SQL.
 - Fixed reading of column length and precision for binary, datetime2, datetimeoffset, and time types in MS SQL database.
+- Fixed creating tables with NOT NULL constraints in PostgreSQL.
 
 ### Removed
 

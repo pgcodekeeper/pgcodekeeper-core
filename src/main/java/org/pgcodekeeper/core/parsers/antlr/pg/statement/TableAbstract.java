@@ -31,6 +31,7 @@ import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -94,8 +95,12 @@ public abstract class TableAbstract extends PgParserAbstract {
 
     protected void fillColNotNull(AbstractTable table, Constraint_commonContext tblConstrCtx,
                                   Schema_qualified_nameContext colNameCtx) {
-        var col = (PgColumn) getSafe(AbstractTable::getColumn, table, colNameCtx);
+        var col = table != null ? (PgColumn) table.getColumn(colNameCtx.getText()) : null;
         if (col != null) {
+            fillColNotNull(col, table, tblConstrCtx);
+        } else if (table instanceof PgPartitionTable) {
+            addColumn(colNameCtx.getText(), Collections.singletonList(tblConstrCtx), table, table.getSchemaName());
+            col = (PgColumn) table.getColumn(colNameCtx.getText());
             fillColNotNull(col, table, tblConstrCtx);
         }
     }

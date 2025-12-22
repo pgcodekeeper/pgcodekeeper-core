@@ -235,12 +235,9 @@ public final class PgTablesReader extends JdbcReader {
         Boolean[] colHasDefault = getColArray(res, "col_has_default");
         String[] colDefaults = getColArray(res, "col_defaults");
         String[] colComments = getColArray(res, "col_comments");
-        Boolean[] colNotNull = getColArray(res, "col_notnull");
-        String[] colNotNullConName = null;
-        Boolean[] colNotNullNoInherit = null;
-        if (SupportedPgVersion.VERSION_18.isLE(loader.getVersion())) {
-            colNotNullConName = getColArray(res, "col_notnull_con_name");
-            colNotNullNoInherit = getColArray(res, "col_notnull_no_inherit");
+        Boolean[] colNotNull = null;
+        if (!SupportedPgVersion.VERSION_18.isLE(loader.getVersion())) {
+            colNotNull = getColArray(res, "col_notnull");
         }
 
         Integer[] colStatistics;
@@ -346,15 +343,9 @@ public final class PgTablesReader extends JdbcReader {
                 }
             }
 
-            if (colNotNull[i]) {
-                PgConstraintNotNull notNullConstraint;
-                if (SupportedPgVersion.VERSION_18.isLE(loader.getVersion())) {
-                    notNullConstraint = new PgConstraintNotNull(colNotNullConName[i]);
-                    notNullConstraint.setNoInherit(colNotNullNoInherit[i]);
-                } else {
-                    notNullConstraint = new PgConstraintNotNull(t.getName(), column.getName());
-                }
-
+            // For PG18+ NOT NULL constraints are read in PgConstraintsReader
+            if (colNotNull != null && colNotNull[i]) {
+                var notNullConstraint = new PgConstraintNotNull(t.getName(), column.getName());
                 column.setNotNullConstraint(notNullConstraint);
                 notNullConstraint.setParent(column);
             }
@@ -621,14 +612,6 @@ public final class PgTablesReader extends JdbcReader {
                 .column("pg_catalog.array_agg(d.description ORDER BY a.attnum) AS col_comments")
                 .column("pg_catalog.array_agg(a.atttypid::bigint ORDER BY a.attnum) AS col_type_ids")
                 .column("pg_catalog.array_agg(pg_catalog.format_type(a.atttypid, a.atttypmod) ORDER BY a.attnum) AS col_type_name")
-                // skips not null for column, if parents have not null
-                .column("""
-                        pg_catalog.array_agg(
-                          (CASE WHEN NOT a.attnotnull THEN FALSE
-                                ELSE NOT EXISTS(SELECT 1 FROM inherits inh WHERE inh.inhrelid = a.attrelid AND inh.attname = a.attname)
-                           END
-                          ) ORDER BY a.attnum
-                        ) AS col_notnull""")
                 .column("pg_catalog.array_agg(a.attstattarget ORDER BY a.attnum) AS col_statistics")
                 .column("pg_catalog.array_agg(a.attislocal ORDER BY a.attnum) AS col_local")
                 .column("pg_catalog.array_agg(a.attacl::text ORDER BY a.attnum) AS col_acl")
@@ -656,13 +639,16 @@ public final class PgTablesReader extends JdbcReader {
             subQueryBuilder.column("pg_catalog.array_agg(a.attcompression ORDER BY a.attnum) AS col_compression");
         }
 
-        if (SupportedPgVersion.VERSION_18.isLE(loader.getVersion())) {
-            builder.column("columns.col_notnull_no_inherit");
-            builder.column("columns.col_notnull_con_name");
-            subQueryBuilder
-                    .column("pg_catalog.array_agg(con.conname ORDER BY a.attnum) AS col_notnull_con_name")
-                    .column("pg_catalog.array_agg(con.connoinherit ORDER BY a.attnum) AS col_notnull_no_inherit")
-                    .join("LEFT JOIN pg_catalog.pg_constraint con ON con.contype = 'n' AND con.conkey[1] = a.attnum AND con.conrelid = a.attrelid");
+        if (!SupportedPgVersion.VERSION_18.isLE(loader.getVersion())) {
+            builder.column("columns.col_notnull");
+            // skips not null for column, if parents have not null
+            subQueryBuilder.column("""
+                    pg_catalog.array_agg(
+                      (CASE WHEN NOT a.attnotnull THEN FALSE
+                            ELSE NOT EXISTS(SELECT 1 FROM inherits inh WHERE inh.inhrelid = a.attrelid AND inh.attname = a.attname)
+                       END
+                      ) ORDER BY a.attnum
+                    ) AS col_notnull""");
         }
 
         if (loader.isGreenplumDb()) {
@@ -684,7 +670,6 @@ public final class PgTablesReader extends JdbcReader {
         builder.column("columns.col_comments");
         builder.column("columns.col_type_ids");
         builder.column("columns.col_type_name");
-        builder.column("columns.col_notnull");
         builder.column("columns.col_statistics");
         builder.column("columns.col_local");
         builder.column("columns.col_acl");

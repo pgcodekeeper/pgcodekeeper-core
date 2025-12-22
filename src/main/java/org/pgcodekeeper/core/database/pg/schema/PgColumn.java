@@ -108,7 +108,7 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
                     .append(defaultValue);
         }
 
-        if (notNullConstraint != null) {
+        if (notNullConstraint != null && !notNullConstraint.isNotValid()) {
             notNullConstraint.getDefinitionForColumn(sbDefinition);
         }
     }
@@ -732,6 +732,10 @@ public final class PgColumn extends AbstractColumn implements ISimpleOptionConta
     public void setCompression(String compression) {
         this.compression = compression;
         resetHash();
+    }
+
+    public PgConstraintNotNull getNotNullConstraint() {
+        return notNullConstraint;
     }
 
     public void setNotNullConstraint(PgConstraintNotNull notNullConstraint) {

@@ -614,7 +614,9 @@ class PgDiffTest {
             // Test scenario when primary keys are added
             "add_primary_key",
             // Test scenario when not null constraint is modified
-            "modify_not_null"
+            "modify_not_null",
+            // Test creating tables with not null constraint
+            "create_table_not_null"
     })
     void diffTest(String fileNameTemplate) throws IOException, InterruptedException {
         assertDiff(fileNameTemplate, DatabaseType.PG, PgDiffTest.class);

@@ -140,6 +140,14 @@ public class PgConstraintNotNull extends PgConstraint {
     }
 
     @Override
+    protected void appendCommentSql(SQLScript script) {
+        String sb = "COMMENT ON CONSTRAINT " +
+                PgDiffUtils.getQuotedName(name) + " ON " +
+                getTable().getQualifiedName() + " IS " + (checkComments() ? comment : "NULL");
+        script.addCommentStatement(sb);
+    }
+
+    @Override
     public boolean compare(IStatement obj) {
         if (obj instanceof PgConstraintNotNull con && super.compare(con)) {
             return compareUnalterable(con) && isNoInherit == con.isNoInherit;

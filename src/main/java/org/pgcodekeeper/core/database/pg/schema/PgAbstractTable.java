@@ -82,6 +82,8 @@ public abstract class PgAbstractTable extends AbstractTable {
         script.addStatement(sbSQL);
 
         script.addAllStatements(temp);
+
+        appendNotNullTableConstraints(script);
         appendAlterOptions(script);
 
         appendOwnerSQL(script);
@@ -90,6 +92,21 @@ public abstract class PgAbstractTable extends AbstractTable {
         appendColumnsStatistics(script);
         appendTriggerStates(script);
         appendComments(script);
+    }
+
+    private void appendNotNullTableConstraints(SQLScript script) {
+        columns.forEach(col -> {
+            var notNullConstraint = ((PgColumn) col).getNotNullConstraint();
+            if (notNullConstraint == null ) {
+                return;
+            }
+
+            if (notNullConstraint.isNotValid()) {
+                notNullConstraint.getCreationSQL(script);
+            } else if (notNullConstraint.isComplexNotNull()) {
+                notNullConstraint.appendOptions(script, new StringBuilder(), false);
+            }
+        });
     }
 
     private void compareTriggerStates(PgAbstractTable newTable, SQLScript script) {
@@ -517,6 +534,21 @@ public abstract class PgAbstractTable extends AbstractTable {
         copy.setHasOids(hasOids);
         copy.triggerStates.putAll(triggerStates);
         return copy;
+    }
+
+    @Override
+    public AbstractConstraint getConstraint(final String name) {
+        var constraint = super.getConstraint(name);
+        if (constraint != null) {
+            return constraint;
+        }
+
+        return columns.stream()
+                .map(col -> ((PgColumn) col).getNotNullConstraint())
+                .filter(Objects::nonNull)
+                .filter(notNullConstraint -> notNullConstraint.getName().equals(name))
+                .findAny()
+                .orElse(null);
     }
 
     @Override
