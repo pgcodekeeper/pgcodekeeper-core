@@ -194,9 +194,12 @@ public final class WorkDirs {
                 yield baseDir.resolve(PG_SCHEMA).resolve(schemaName);
             }
             case COLLATION, SEQUENCE, TYPE, DOMAIN, VIEW, TABLE, FUNCTION, PROCEDURE, AGGREGATE, OPERATOR,
-            FTS_TEMPLATE, FTS_PARSER, FTS_DICTIONARY, FTS_CONFIGURATION, STATISTICS -> {
+            FTS_TEMPLATE, FTS_PARSER, FTS_DICTIONARY, FTS_CONFIGURATION, STATISTICS, COLUMN -> {
                 var parentSt = st.getParent();
                 String schemaName = FileUtils.getValidFilename(parentSt.getBareName());
+                if (type == DbObjType.COLUMN) {
+                    type = DbObjType.TABLE;
+                }
                 yield baseDir.resolve(PG_SCHEMA).resolve(schemaName).resolve(getPgDirectoryNameForType(type));
             }
             default -> throw new IllegalStateException(Messages.DbObjType_unsupported_type + type);

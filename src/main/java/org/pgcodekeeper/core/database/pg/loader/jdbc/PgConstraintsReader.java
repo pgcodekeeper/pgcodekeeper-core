@@ -80,6 +80,9 @@ public final class PgConstraintsReader extends JdbcReader {
             case "x":
                 constr = new PgConstraintExclude(constraintName);
                 break;
+            case "n":
+                readNotNullConstraint(res, (PgAbstractTable) cont, constraintName);
+                return;
             default:
                 throw new IllegalArgumentException("Unsupported constraint's type " + type);
         }
@@ -102,6 +105,31 @@ public final class PgConstraintsReader extends JdbcReader {
         loader.setComment(constr, res);
 
         cont.addConstraint(constr);
+    }
+
+    private void readNotNullConstraint(ResultSet res, PgAbstractTable table,
+            String constraintName) throws SQLException {
+        String columnName = res.getString("col_name");
+        PgColumn column = (PgColumn) table.getColumn(columnName);
+        if (column == null) {
+            if (table.hasInherits()) {
+                column = new PgColumn(columnName);
+                if (!(table instanceof PgPartitionTable)) {
+                    column.setInherit(true);
+                }
+                table.addColumn(column);
+            } else {
+                return;
+            }
+        }
+
+        var notNullConstraint = new PgConstraintNotNull(constraintName);
+        notNullConstraint.setNoInherit(res.getBoolean("connoinherit"));
+        notNullConstraint.setNotValid(!res.getBoolean("convalidated"));
+        loader.setComment(notNullConstraint, res);
+
+        column.setNotNullConstraint(notNullConstraint);
+        notNullConstraint.setParent(column);
     }
 
     @Override
@@ -134,11 +162,19 @@ public final class PgConstraintsReader extends JdbcReader {
                 .join("LEFT JOIN pg_catalog.pg_tablespace ts ON ts.oid = ci.reltablespace")
                 .join("LEFT JOIN pg_catalog.pg_index idx ON idx.indexrelid = ci.oid")
                 .where("ccc.relkind IN ('r', 'p', 'f')")
-                .where("res.contype NOT IN ('t', 'n')")
+                .where("res.contype NOT IN ('t')")
                 .where("res.coninhcount = 0");
 
         if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             builder.column("res.conparentid::bigint");
+        }
+
+        if (SupportedPgVersion.VERSION_18.isLE(loader.getVersion())) {
+            builder
+                    .column("a.attname AS col_name")
+                    .column("res.connoinherit")
+                    .column("res.convalidated")
+                    .join("LEFT JOIN pg_catalog.pg_attribute a ON a.attrelid = res.conrelid AND a.attnum = res.conkey[1]");
         }
     }
 }

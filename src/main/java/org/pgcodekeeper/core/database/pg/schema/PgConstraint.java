@@ -85,9 +85,13 @@ public abstract class PgConstraint extends AbstractConstraint {
             sbSQL.append(" NOT ENFORCED");
         }
 
+        appendOptions(script, sbSQL, true);
+    }
+
+    public void appendOptions(SQLScript script, StringBuilder sbSQL, boolean needNotValid) {
         boolean generateNotValid = isGenerateNotValid(script.getSettings());
 
-        if (isNotValid || generateNotValid) {
+        if (needNotValid && (isNotValid || generateNotValid)) {
             sbSQL.append(" NOT VALID");
         }
         sbSQL.append(';');
@@ -108,7 +112,9 @@ public abstract class PgConstraint extends AbstractConstraint {
             script.addStatement(sb);
         } else {
             sbSQL.setLength(sbSQL.length() - 1);
-            script.addStatement(sbSQL);
+            if (!sbSQL.isEmpty()) {
+                script.addStatement(sbSQL);
+            }
         }
         appendComments(script);
     }
