@@ -663,7 +663,25 @@ create table test_graphite
     Version UInt32,
     col UInt64
 ) engine = GraphiteMergeTree('graphite_rollup') order by key;
-
+CREATE TABLE application_logs
+(
+    log_id UUID DEFAULT generateUUIDv4() COMMENT 'Уникальный идентификатор записи лога',
+    timestamp DateTime64(3, 'UTC') COMMENT 'Метка времени события в UTC' CODEC(DoubleDelta, ZSTD) TTL timestamp + INTERVAL 90 DAY,
+    level Enum8('DEBUG' = 1, 'INFO' = 2, 'WARNING' = 3, 'ERROR' = 4, 'CRITICAL' = 5) COMMENT 'Уровень серьезности лога' CODEC(T64, LZ4),
+    message String COMMENT 'Текст сообщения лога' CODEC(ZSTD(3)) TTL timestamp + INTERVAL 180 DAY,
+    source LowCardinality(String) COMMENT 'Источник лога (название сервиса)' CODEC(LZ4HC),
+    user_id Nullable(UInt32) COMMENT 'Идентификатор пользователя, если применимо' CODEC(Delta, LZ4),
+    session_id UUID COMMENT 'Идентификатор сессии' CODEC(LZ4),
+    metadata_json String COMMENT 'Дополнительные метаданные в JSON формате' CODEC(ZSTD(1)) TTL timestamp + INTERVAL 30 DAY,
+    request_body Nullable(String) COMMENT 'Тело HTTP запроса (только для ошибок)' CODEC(ZSTD(5)) TTL timestamp + INTERVAL 7 DAY,
+    stack_trace Nullable(String) COMMENT 'Трейс ошибки для DEBUG уровня' CODEC(ZSTD(10)) TTL timestamp + INTERVAL 365 DAY,
+    ip_address IPv4 COMMENT 'IP адрес клиента' CODEC(Delta, LZ4HC),
+    created_at DateTime DEFAULT now() COMMENT 'Время создания записи в БД' CODEC(DoubleDelta, LZ4)
+) ENGINE = MergeTree()
+PARTITION BY toYYYYMM(timestamp)
+ORDER BY (timestamp, level, source)
+TTL timestamp + INTERVAL 365 DAY
+COMMENT 'Логи приложения с различными сроками хранения для разных полей';
 --Log
 create table m (a int) engine Log;
 CREATE TABLE log ENGINE=Log AS val;
@@ -862,7 +880,21 @@ CREATE TABLE test(start Integer, end Integer) engine = Memory;
 CREATE TABLE h3_indexes (id int, start String, end String) ENGINE = Memory;
 CREATE TABLE mann_whitney_test (left Float64, right UInt8) ENGINE = Memory;
 CREATE TABLE geo (a Point, b Ring, c Polygon, d MultiPolygon) ENGINE=Memory();
--- БД возвращает 
+--replace
+REPLACE TABLE base.t1 (n UInt64)
+ENGINE = MergeTree
+ORDER BY n;
+CREATE OR REPLACE TEMPORARY TABLE IF NOT EXISTS analytics_events
+(
+    event_id UUID DEFAULT generateUUIDv4(),
+    user_id Int32,
+    event_type String,
+    event_time DateTime DEFAULT now(),
+    properties String MATERIALIZED '{}',
+    processed Bool ALIAS false,
+    revenue Nullable(Decimal(12, 2))
+) ENGINE = Memory;
+-- БД возвращает
 create table t02155_t64_tz (a DateTime64(9, 'America/Chicago')) Engine = Memory;
 CREATE TABLE t1 (`n` Int8) ENGINE = Memory COMMENT 'this is a temtorary table';
 CREATE TABLE table_with_cyclic_defaults (a DEFAULT b, b DEFAULT a) ENGINE = Memory;
