@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.formatter;
+package org.pgcodekeeper.core.database.pg.formatter;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.FILES_POSTFIX;
-import org.pgcodekeeper.core.formatter.FormatConfiguration.IndentType;
+import org.pgcodekeeper.core.database.api.formatter.IndentType;
+import org.pgcodekeeper.core.database.base.formatter.FormatConfiguration;
 import org.pgcodekeeper.core.utils.FileUtils;
 
 import java.io.IOException;
 
-class FormatterTest {
+class PgFormatterTest {
+
 
     /**
      * Testing default parameters
@@ -40,7 +41,7 @@ class FormatterTest {
 
         String newFile = "new_Default_config";
         String oldFile = "old_Default_config";
-        testFormatter(oldFile, newFile, config, DatabaseType.PG);
+        testFormatter(oldFile, newFile, config);
     }
 
     /**
@@ -57,7 +58,7 @@ class FormatterTest {
 
         String newFile = "new_Broken";
         String oldFile = "old_Broken";
-        testFormatter(oldFile, newFile, config, DatabaseType.PG);
+        testFormatter(oldFile, newFile, config);
     }
 
     @Test
@@ -67,7 +68,7 @@ class FormatterTest {
 
         String newFile = "new_RemoveTrailingWhitespace";
         String oldFile = "old_RemoveTrailingWhitespace";
-        testFormatter(oldFile, newFile, config, DatabaseType.PG);
+        testFormatter(oldFile, newFile, config);
     }
 
     @Test
@@ -77,7 +78,7 @@ class FormatterTest {
 
         String newFile = "new_AddWhitespaceAfterOp";
         String oldFile = "old_AddWhitespaceOp";
-        testFormatter(oldFile, newFile, config, DatabaseType.PG);
+        testFormatter(oldFile, newFile, config);
     }
 
     @Test
@@ -87,7 +88,7 @@ class FormatterTest {
 
         String newFile = "new_AddWhitespaceBeforeOp";
         String oldFile = "old_AddWhitespaceOp";
-        testFormatter(oldFile, newFile, config, DatabaseType.PG);
+        testFormatter(oldFile, newFile, config);
     }
 
     @Test
@@ -98,7 +99,7 @@ class FormatterTest {
 
         String newFile = "new_SpacesForTabs";
         String oldFile = "old_SpacesForTabs";
-        testFormatter(oldFile, newFile, config, DatabaseType.PG);
+        testFormatter(oldFile, newFile, config);
     }
 
     @Test
@@ -109,7 +110,7 @@ class FormatterTest {
 
         String newFile = "new_IndentSize";
         String oldFile = "old";
-        testFormatter(oldFile, newFile, config, DatabaseType.PG);
+        testFormatter(oldFile, newFile, config);
     }
 
     @Test
@@ -120,7 +121,7 @@ class FormatterTest {
 
         String newFile = "new_indent_type";
         String oldFile = "old";
-        testFormatter(oldFile, newFile, config, DatabaseType.PG);
+        testFormatter(oldFile, newFile, config);
     }
 
     @Test
@@ -131,39 +132,19 @@ class FormatterTest {
 
         String newFile = "new_IndentTypeTab";
         String oldFile = "old";
-        testFormatter(oldFile, newFile, config, DatabaseType.PG);
+        testFormatter(oldFile, newFile, config);
     }
 
-    @Test
-    void testCh() throws IOException {
-        FormatConfiguration config = new FormatConfiguration();
-        config.setIndentSize(2);
-        config.setAddWhitespaceAfterOp(true);
-        config.setAddWhitespaceBeforeOp(true);
-        config.setIndentType(IndentType.WHITESPACE);
-        config.setRemoveTrailingWhitespace(true);
 
-        String newFile = "new_ch";
-        String oldFile = "old_ch";
-        testFormatter(oldFile, newFile, config, DatabaseType.CH);
-    }
-
-    @Test
-    void testFormatSql() throws IOException {
-        String newFile = getFileContent("new_ch_format_sql" + FILES_POSTFIX.SQL);
-        String oldFile = getFileContent("old_ch" + FILES_POSTFIX.SQL);
-        Assertions.assertEquals(newFile, FileFormatter.formatSql(oldFile, DatabaseType.CH));
-    }
-
-    private void testFormatter(String oldFileName, String newFileName, FormatConfiguration config, DatabaseType dbType)
+    private void testFormatter(String oldFileName, String newFileName, FormatConfiguration config)
             throws IOException {
         String newFile = getFileContent(newFileName + FILES_POSTFIX.SQL);
         String oldFile = getFileContent(oldFileName + FILES_POSTFIX.SQL);
-        FileFormatter fileFormatter = new FileFormatter(oldFile, 0, oldFile.length(), config, dbType);
+        PgFormatter fileFormatter = new PgFormatter(oldFile, 0, oldFile.length(), config);
         Assertions.assertEquals(newFile, fileFormatter.formatText(), "Formatted files are different");
     }
 
     private String getFileContent(String fileName) throws IOException {
-        return FileUtils.readResource(FormatterTest.class, fileName);
+        return FileUtils.readResource(PgFormatterTest.class, fileName);
     }
 }

@@ -29,7 +29,7 @@ import java.util.Objects;
  * Represents a Microsoft SQL sequence object.
  * Sequences generate sequential numeric values and are commonly used for primary keys and unique identifiers.
  */
-public final class MsSequence extends AbstractSequence {
+public final class MsSequence extends AbstractSequence implements IMsStatement {
 
     private boolean isCached;
 

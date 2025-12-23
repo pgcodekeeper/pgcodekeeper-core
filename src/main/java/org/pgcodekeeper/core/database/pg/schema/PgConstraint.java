@@ -33,7 +33,7 @@ import org.pgcodekeeper.core.settings.ISettings;
  * Provides common functionality for all PostgreSQL constraint types
  * including deferrable and initially deferred properties.
  */
-public abstract class PgConstraint extends AbstractConstraint {
+public abstract class PgConstraint extends AbstractConstraint implements IPgStatement {
 
     protected boolean deferrable;
     protected boolean initially;

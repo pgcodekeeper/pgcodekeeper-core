@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.formatter.ch;
+package org.pgcodekeeper.core.database.ch.formatter;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
-import org.pgcodekeeper.core.formatter.AbstractFormatter;
-import org.pgcodekeeper.core.formatter.FormatConfiguration;
-import org.pgcodekeeper.core.formatter.FormatItem;
-import org.pgcodekeeper.core.formatter.StatementFormatter;
+import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
+import org.pgcodekeeper.core.database.base.formatter.AbstractFormatter;
+import org.pgcodekeeper.core.database.base.formatter.FormatConfiguration;
+import org.pgcodekeeper.core.database.base.formatter.FormatItem;
+import org.pgcodekeeper.core.database.base.formatter.StatementFormatter;
 import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHLexer;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser;
@@ -42,12 +43,12 @@ public class ChFormatter extends AbstractFormatter {
      * Constructs a new ClickHouse formatter instance.
      *
      * @param source The source SQL text to format
-     * @param start  The starting offset in the source text (inclusive)
-     * @param stop   The ending offset in the source text (exclusive)
-     * @param config The formatting configuration options
+     * @param offset Starting offset in the source text
+     * @param length Length of text to format
+     * @param config Formatting configuration options
      */
-    public ChFormatter(String source, int start, int stop, FormatConfiguration config) {
-        super(source, start, stop, config);
+    public ChFormatter(String source, int offset, int length, IFormatConfiguration config) {
+        super(source, offset, length, config);
     }
 
 
@@ -111,5 +112,9 @@ public class ChFormatter extends AbstractFormatter {
         StatementFormatter sf = new ChStatementFormatter(start, stop, selectStmtCtx, tokenStream, config);
         sf.format();
         changes.addAll(sf.getChanges());
+    }
+
+    public static String formatSql(String sql) {
+        return new ChFormatter(sql, 0, sql.length(), FormatConfiguration.getDefaultConfig()).formatText();
     }
 }

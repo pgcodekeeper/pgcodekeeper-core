@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
+import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
@@ -212,4 +213,15 @@ public interface IStatement {
      */
     boolean canDropBeforeCreate();
 
+
+    /**
+     * Formats string
+     *
+     * @param sql The source SQL text to format
+     * @param offset Starting offset in the source text
+     * @param length Length of text to format
+     * @param formatConfiguration Formatting configuration options
+     * @return formatted string
+     */
+    String formatSql(String sql, int offset, int length, IFormatConfiguration formatConfiguration);
 }

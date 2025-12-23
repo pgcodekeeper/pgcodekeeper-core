@@ -13,27 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.formatter;
+package org.pgcodekeeper.core.database.ms.schema;
+
+import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.ms.formatter.MsFormatter;
 
 /**
- * Enumeration of indentation directions used during SQL formatting.
- * Determines how indentation should be applied to different parts of SQL statements.
+ * Interface for MS SQL statement
  */
-public enum IndentDirection {
-    /**
-     * First token in new block
-     */
-    BLOCK_START,
-    /**
-     * Last token in block
-     */
-    BLOCK_STOP,
-    /**
-     * New line in block
-     */
-    BLOCK_LINE,
-    /**
-     * Forced new line
-     */
-    NEW_LINE
+public interface IMsStatement extends IStatement {
+
+    @Override
+    default String formatSql(String sql, int offset, int length, IFormatConfiguration formatConfiguration) {
+        return new MsFormatter(sql, offset, length, formatConfiguration).formatText();
+    }
 }

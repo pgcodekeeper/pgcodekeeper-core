@@ -13,27 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.formatter;
+package org.pgcodekeeper.core.database.ch.schema;
 
-import java.util.List;
+import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.ch.formatter.ChFormatter;
 
 /**
- * Abstract base class for SQL formatter implementations.
- * Provides common functionality and structure for database-specific formatters.
+ * Interface for ClickHouse statement
  */
-public abstract class AbstractFormatter {
+public interface IChStatement extends IStatement {
 
-    protected final String source;
-    protected final int start;
-    protected final int stop;
-    protected final FormatConfiguration config;
-
-    protected AbstractFormatter(String source, int start, int stop, FormatConfiguration config) {
-        this.source = source;
-        this.start = start;
-        this.stop = stop;
-        this.config = config;
+    @Override
+    default String formatSql(String sql, int offset, int length, IFormatConfiguration formatConfiguration) {
+        return new ChFormatter(sql, offset, length, formatConfiguration).formatText();
     }
-
-    protected abstract List<FormatItem> getFormatItems();
 }

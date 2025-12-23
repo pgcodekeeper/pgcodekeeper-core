@@ -30,7 +30,7 @@ import java.util.Objects;
  * Represents a ClickHouse table index.
  * ClickHouse indexes are used for data skipping and include expression, type, and granularity settings.
  */
-public final class ChIndex extends AbstractIndex {
+public final class ChIndex extends AbstractIndex implements IChStatement {
 
     private String expr;
     private String type;

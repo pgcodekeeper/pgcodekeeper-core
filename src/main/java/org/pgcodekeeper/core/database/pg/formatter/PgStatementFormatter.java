@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.formatter.pg;
+package org.pgcodekeeper.core.database.pg.formatter;
 
 import org.antlr.v4.runtime.*;
-import org.pgcodekeeper.core.formatter.*;
+import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
+import org.pgcodekeeper.core.database.base.formatter.*;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
 import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLLexer;
@@ -47,7 +48,7 @@ public class PgStatementFormatter extends StatementFormatter {
      * @param config             The formatting configuration
      */
     public PgStatementFormatter(int start, int stop, String functionDefinition,
-            int defOffset, String language, FormatConfiguration config) {
+            int defOffset, String language, IFormatConfiguration config) {
         super(start, stop, defOffset, defOffset, config);
         this.tokens = analyzeDefinition(functionDefinition, language);
     }
@@ -62,7 +63,7 @@ public class PgStatementFormatter extends StatementFormatter {
      * @param config      The formatting configuration
      */
     public PgStatementFormatter(int start, int stop, Function_bodyContext definition,
-            CommonTokenStream tokenStream, FormatConfiguration config) {
+            CommonTokenStream tokenStream, IFormatConfiguration config) {
         super(start, stop, 0, 0, config);
         this.tokens = analyzeDefinition(definition, tokenStream);
         if (!tokens.isEmpty()) {
@@ -113,7 +114,7 @@ public class PgStatementFormatter extends StatementFormatter {
      */
     @Override
     protected FormatParseTreeListener getListener(CommonTokenStream tokenStream,
-            Map<Token, Pair<IndentDirection, Integer>> indents, Set<Token> unaryOps) {
+                                                  Map<Token, Pair<IndentDirection, Integer>> indents, Set<Token> unaryOps) {
         return new PgFormatParseTreeListener(tokenStream, indents, unaryOps);
     }
 
@@ -136,5 +137,26 @@ public class PgStatementFormatter extends StatementFormatter {
     protected boolean isOperatorToken(int type, Token t) {
         return PgFormatterUtils.isOperatorToken(type)
                 && PgFormatterUtils.checkOperator(t, type, tokens);
+    }
+
+    /**
+     * This listener checks if there was at least one syntax error while parsing.
+     */
+    private static final class ErrorPresenceListener extends BaseErrorListener {
+
+        private boolean hasError;
+
+        /**
+         * @return true if there was an error, false otherwise.
+         */
+        public boolean isHasError() {
+            return hasError;
+        }
+
+        @Override
+        public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
+                                String msg, RecognitionException e) {
+            hasError = true;
+        }
     }
 }

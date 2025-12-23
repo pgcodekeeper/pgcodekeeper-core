@@ -38,7 +38,7 @@ import java.util.Objects;
  * Supports all PostgreSQL index features including unique constraints,
  * partial indexes, expression indexes, and index inheritance for partitioned tables.
  */
-public final class PgIndex extends AbstractIndex {
+public final class PgIndex extends AbstractIndex implements IPgStatement {
 
     private static final String ALTER_INDEX = "ALTER INDEX ";
     private Inherits inherit;

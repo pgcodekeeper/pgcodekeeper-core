@@ -41,7 +41,7 @@ import java.util.stream.Stream;
  *
  * @author fordfrog
  */
-public abstract class PgAbstractView extends AbstractView implements ISimpleOptionContainer {
+public abstract class PgAbstractView extends AbstractView implements ISimpleOptionContainer, IPgStatement {
 
     private static final String COLUMN_COMMENT = "COMMENT ON COLUMN %s.%s IS %s";
     public static final String CHECK_OPTION = "check_option";

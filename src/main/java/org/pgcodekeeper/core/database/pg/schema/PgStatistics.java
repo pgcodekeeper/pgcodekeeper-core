@@ -37,7 +37,7 @@ import java.util.Objects;
  * Extended statistics collect additional information about column correlations
  * and distributions to improve query planning for multi-column predicates.
  */
-public final class PgStatistics extends AbstractStatistics {
+public final class PgStatistics extends AbstractStatistics implements IPgStatement {
 
     private int statistics = -1;
     private final List<String> kinds = new ArrayList<>();

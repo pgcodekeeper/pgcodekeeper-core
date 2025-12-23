@@ -36,7 +36,7 @@ import java.util.*;
  * Schemas are namespaces that contain database objects like tables, functions, types, and operators.
  * Each schema can have its own set of permissions and provides object organization.
  */
-public final class PgSchema extends AbstractSchema {
+public final class PgSchema extends AbstractSchema implements IPgStatement {
 
     private final Map<String, PgDomain> domains = new LinkedHashMap<>();
     private final Map<String, PgFtsParser> parsers = new LinkedHashMap<>();

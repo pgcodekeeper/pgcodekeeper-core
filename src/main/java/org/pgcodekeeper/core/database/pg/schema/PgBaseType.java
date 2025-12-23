@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Represents user-defined base types with input/output functions,
  * storage properties, and optional Greenplum compression options.
  */
-public final class PgBaseType extends AbstractType implements ICompressOptionContainer {
+public final class PgBaseType extends AbstractType implements ICompressOptionContainer, IPgStatement {
 
     private String inputFunction;
     private String outputFunction;

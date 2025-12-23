@@ -32,7 +32,7 @@ import java.util.Objects;
  * Represents a Microsoft SQL database user that can be associated with a login
  * and have specific schema, language, and encryption settings.
  */
-public final class MsUser extends AbstractStatement {
+public final class MsUser extends AbstractStatement implements IMsStatement {
 
     // TODO PASSWORD, DEFAULT_LANGUAGE, ALLOW_ENCRYPTED_VALUE_MODIFICATIONS
     private String schema;

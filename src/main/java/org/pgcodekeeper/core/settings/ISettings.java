@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.settings;
 
 import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.formatter.FormatConfiguration;
+import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 
 import java.util.Collection;
@@ -187,7 +187,7 @@ public interface ISettings {
      *
      * @return the format configuration instance
      */
-    FormatConfiguration getFormatConfiguration();
+    IFormatConfiguration getFormatConfiguration();
 
     /**
      * Gets the collection of allowed database object types for processing.

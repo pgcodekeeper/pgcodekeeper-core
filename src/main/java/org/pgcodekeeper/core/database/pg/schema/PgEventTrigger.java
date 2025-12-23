@@ -32,7 +32,7 @@ import java.util.Objects;
  * Event triggers fire automatically when specified database events occur,
  * such as DDL commands or user login attempts.
  */
-public final class PgEventTrigger extends AbstractStatement {
+public final class PgEventTrigger extends AbstractStatement implements IPgStatement {
 
     private String executable;
     private final List<String> tags = new ArrayList<>();

@@ -29,7 +29,7 @@ import java.util.Objects;
  * Operators are symbols that represent specific operations (like +, -, *, etc.)
  * and can be customized for user-defined types with associated functions.
  */
-public final class PgOperator extends AbstractStatement implements IOperator, ISearchPath {
+public final class PgOperator extends AbstractStatement implements IOperator, ISearchPath, IPgStatement {
 
     private String procedure;
     private String leftArg;

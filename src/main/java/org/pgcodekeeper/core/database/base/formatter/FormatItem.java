@@ -13,40 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.formatter;
+package org.pgcodekeeper.core.database.base.formatter;
 
 /**
  * Represents a single formatting operation to be applied to SQL text.
  * Immutable class that describes a text modification at a specific position.
+ *
+ * @param start  The starting position in the original text (0-based index)
+ * @param length The number of characters to replace
+ * @param text   The new text to insert at the position
  */
-public class FormatItem {
+public record FormatItem(int start, int length, String text) {
 
-    private final int start;
-    private final int length;
-    private final String text;
-
-    /**
-     * Constructs a new FormatItem describing a text modification.
-     *
-     * @param start  The starting position in the original text (0-based index)
-     * @param length The number of characters to replace
-     * @param text   The new text to insert at the position
-     */
-    public FormatItem(int start, int length, String text) {
-        this.start = start;
-        this.length = length;
-        this.text = text;
-    }
-
-    public int getStart() {
-        return start;
-    }
-
-    public int getLength() {
-        return length;
-    }
-
-    public String getText() {
-        return text;
-    }
 }

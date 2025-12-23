@@ -17,9 +17,8 @@ package org.pgcodekeeper.core.parsers.antlr.ch.statement;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.formatter.FileFormatter;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.ch.formatter.ChFormatter;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.ch.launcher.ChViewAnalysisLauncher;
@@ -115,7 +114,7 @@ public final class CreateChView extends ChParserAbstract {
     private String getQuery(Subquery_clauseContext vQuery, boolean needFormatSql) {
         String sql = getFullCtxText(vQuery);
         if (needFormatSql && null != vQuery.select_stmt()) {
-            return FileFormatter.formatSql(sql, DatabaseType.CH);
+            return ChFormatter.formatSql(sql);
         }
         return sql;
     }

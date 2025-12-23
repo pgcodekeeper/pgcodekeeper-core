@@ -31,7 +31,7 @@ import java.util.Set;
  * Represents a ClickHouse row-level security policy.
  * Supports role-based access control with EXCEPT clauses for role exclusions.
  */
-public final class ChPolicy extends AbstractPolicy {
+public final class ChPolicy extends AbstractPolicy implements IChStatement {
 
     private final Set<String> excepts = new LinkedHashSet<>();
 

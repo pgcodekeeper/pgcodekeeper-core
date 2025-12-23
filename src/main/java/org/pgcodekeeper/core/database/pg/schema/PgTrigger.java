@@ -35,7 +35,7 @@ import java.util.Set;
  * Triggers are functions that are automatically executed in response to database events
  * like INSERT, UPDATE, DELETE, or TRUNCATE on tables or views.
  */
-public final class PgTrigger extends AbstractTrigger {
+public final class PgTrigger extends AbstractTrigger implements IPgStatement {
 
     public enum TgTypes {
         BEFORE, AFTER, INSTEAD_OF

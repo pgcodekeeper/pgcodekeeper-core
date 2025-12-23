@@ -40,7 +40,7 @@ import java.util.Map;
  *
  * @author fordfrog
  */
-public final class PgDatabase extends AbstractDatabase {
+public final class PgDatabase extends AbstractDatabase implements IPgStatement {
 
     private final Map<String, PgExtension> extensions = new LinkedHashMap<>();
     private final Map<String, PgEventTrigger> eventTriggers = new LinkedHashMap<>();

@@ -34,7 +34,7 @@ import java.util.Objects;
  * Represents a ClickHouse user account with authentication and authorization settings.
  * It supports hosts restrictions, role assignments, default database, and grantee configurations.
  */
-public final class ChUser extends AbstractStatement {
+public final class ChUser extends AbstractStatement implements IChStatement {
 
     private static final String DEF_STORAGE = "local_directory";
     private static final String EXCEPT = " EXCEPT ";

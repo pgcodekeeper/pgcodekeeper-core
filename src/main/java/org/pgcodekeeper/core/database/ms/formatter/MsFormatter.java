@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.formatter.ms;
+package org.pgcodekeeper.core.database.ms.formatter;
 
-import org.pgcodekeeper.core.formatter.AbstractFormatter;
-import org.pgcodekeeper.core.formatter.FormatConfiguration;
-import org.pgcodekeeper.core.formatter.FormatItem;
+import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
+import org.pgcodekeeper.core.database.base.formatter.AbstractFormatter;
+import org.pgcodekeeper.core.database.base.formatter.FormatItem;
 
 import java.util.Collections;
 import java.util.List;
@@ -31,13 +31,13 @@ public class MsFormatter extends AbstractFormatter {
     /**
      * Constructs a new Microsoft SQL Server formatter instance.
      *
-     * @param source The source SQL text to be formatted
-     * @param start  The starting offset in the source text for formatting
-     * @param stop   The ending offset in the source text for formatting
-     * @param config The formatting configuration containing style rules
+     * @param source The source SQL text to format
+     * @param offset Starting offset in the source text
+     * @param length Length of text to format
+     * @param config Formatting configuration options
      */
-    public MsFormatter(String source, int start, int stop, FormatConfiguration config) {
-        super(source, start, stop, config);
+    public MsFormatter(String source, int offset, int length, IFormatConfiguration config) {
+        super(source, offset, length, config);
     }
 
     @Override

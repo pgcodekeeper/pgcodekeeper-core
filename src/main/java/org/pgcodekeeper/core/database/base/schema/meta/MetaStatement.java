@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema.meta;
 
+import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.script.SQLScript;
@@ -250,6 +251,11 @@ public class MetaStatement implements IStatement, Serializable {
 
     @Override
     public boolean canDropBeforeCreate() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String formatSql(String sql, int offset, int length, IFormatConfiguration formatConfiguration) {
         throw new UnsupportedOperationException();
     }
 }

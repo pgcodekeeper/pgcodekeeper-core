@@ -28,7 +28,7 @@ import java.util.Objects;
 /**
  * Represents a ClickHouse table constraint (CHECK or ASSUME).
  */
-public final class ChConstraint extends AbstractConstraint {
+public final class ChConstraint extends AbstractConstraint implements IChStatement {
 
     private final boolean isAssume;
     private String expr;

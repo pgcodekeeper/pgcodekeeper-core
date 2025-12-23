@@ -15,14 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.MsDiffUtils;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
@@ -34,7 +34,7 @@ import java.util.Objects;
  * Represents a Microsoft SQL assembly.
  * Assemblies allow running .NET code within SQL Server.
  */
-public final class MsAssembly extends AbstractStatement {
+public final class MsAssembly extends AbstractStatement implements IMsStatement {
 
     private static final int PREVIEW_LENGTH = 256 * 4;
 

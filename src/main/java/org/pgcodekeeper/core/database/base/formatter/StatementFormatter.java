@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.formatter;
+package org.pgcodekeeper.core.database.base.formatter;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.pgcodekeeper.core.formatter.FormatConfiguration.IndentType;
+import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
+import org.pgcodekeeper.core.database.api.formatter.IndentType;
 import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
 import org.pgcodekeeper.core.utils.Pair;
 
@@ -40,7 +41,7 @@ public abstract class StatementFormatter {
      * all other offsets are statement-string-based
      */
     private final int defOffset;
-    private final FormatConfiguration config;
+    private final IFormatConfiguration config;
     /**
      * tab replacement string if tabs are forbidden; null otherwise
      */
@@ -82,7 +83,7 @@ public abstract class StatementFormatter {
     private final List<FormatItem> changes = new ArrayList<>();
 
     protected StatementFormatter(int start, int stop, int defOffset, int lastTokenOffset,
-                                 FormatConfiguration config) {
+                                 IFormatConfiguration config) {
         this.start = start;
         this.stop = stop;
         this.defOffset = defOffset;
@@ -226,9 +227,9 @@ public abstract class StatementFormatter {
     }
 
     private void addChange(FormatItem item) {
-        int itemStart = item.getStart();
-        int length = item.getLength();
-        String text = item.getText();
+        int itemStart = item.start();
+        int length = item.length();
+        String text = item.text();
 
         if (start <= itemStart && itemStart < stop) {
             if (itemStart + length > stop && text.isEmpty()) {

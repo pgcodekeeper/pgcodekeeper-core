@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Represents a composite type consisting of multiple attributes (fields),
  * similar to a table row structure but used as a data type.
  */
-public final class PgCompositeType extends AbstractType {
+public final class PgCompositeType extends AbstractType implements IPgStatement {
 
     private static final String COLLATE = " COLLATE ";
 

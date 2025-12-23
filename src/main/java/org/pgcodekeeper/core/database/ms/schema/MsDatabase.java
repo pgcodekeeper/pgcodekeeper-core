@@ -16,13 +16,13 @@
 package org.pgcodekeeper.core.database.ms.schema;
 
 import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
 
 import java.util.*;
 
@@ -30,7 +30,7 @@ import java.util.*;
  * Represents a Microsoft SQL database with its schemas, assemblies, roles, and users.
  * Provides functionality for managing database-level objects and their relationships.
  */
-public final class MsDatabase extends AbstractDatabase {
+public final class MsDatabase extends AbstractDatabase implements IMsStatement {
 
     private final Map<String, MsAssembly> assemblies = new LinkedHashMap<>();
     private final Map<String, MsRole> roles = new LinkedHashMap<>();

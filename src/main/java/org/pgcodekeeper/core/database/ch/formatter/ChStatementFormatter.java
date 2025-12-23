@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.formatter.ch;
+package org.pgcodekeeper.core.database.ch.formatter;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
-import org.pgcodekeeper.core.formatter.FormatConfiguration;
-import org.pgcodekeeper.core.formatter.FormatParseTreeListener;
-import org.pgcodekeeper.core.formatter.IndentDirection;
-import org.pgcodekeeper.core.formatter.StatementFormatter;
+import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
+import org.pgcodekeeper.core.database.base.formatter.FormatParseTreeListener;
+import org.pgcodekeeper.core.database.base.formatter.IndentDirection;
+import org.pgcodekeeper.core.database.base.formatter.StatementFormatter;
 import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHLexer;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Select_stmtContext;
@@ -48,7 +48,7 @@ public class ChStatementFormatter extends StatementFormatter {
      * @param config        The formatting configuration options
      */
     public ChStatementFormatter(int start, int stop, Select_stmtContext selectStmtCtx,
-            CommonTokenStream tokenStream, FormatConfiguration config) {
+            CommonTokenStream tokenStream, IFormatConfiguration config) {
         super(start, stop, 0, 0, config);
         this.tokens = analyzeDefinition(selectStmtCtx, tokenStream);
         if (!tokens.isEmpty()) {

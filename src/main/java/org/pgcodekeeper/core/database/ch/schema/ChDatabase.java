@@ -33,7 +33,7 @@ import java.util.Map;
  * Contains collections of ClickHouse-specific objects like functions, policies, users, and roles
  * in addition to the standard schemas.
  */
-public final class ChDatabase extends AbstractDatabase {
+public final class ChDatabase extends AbstractDatabase implements IChStatement {
 
     private final Map<String, ChFunction> functions = new LinkedHashMap<>();
     private final Map<String, ChPolicy> policies = new LinkedHashMap<>();
