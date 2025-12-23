@@ -36,7 +36,7 @@ import java.util.Objects;
  * A domain is a user-defined data type that is based on another underlying type,
  * with optional constraints, default values, and NOT NULL specifications.
  */
-public final class PgDomain extends AbstractStatement implements ISearchPath {
+public final class PgDomain extends AbstractStatement implements ISearchPath, IPgStatement {
 
     private String dataType;
     private String collation;

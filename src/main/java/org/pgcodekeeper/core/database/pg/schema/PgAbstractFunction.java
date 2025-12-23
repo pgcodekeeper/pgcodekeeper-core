@@ -30,7 +30,7 @@ import java.util.Map.Entry;
  * Provides common functionality for managing function properties such as language,
  * volatility, security, parallelism, and other PostgreSQL-specific attributes.
  */
-public abstract class PgAbstractFunction extends AbstractFunction {
+public abstract class PgAbstractFunction extends AbstractFunction implements IPgStatement {
 
     /**
      * Constant representing "FROM CURRENT" configuration value for function parameters

@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.formatter.pg;
+package org.pgcodekeeper.core.database.pg.formatter;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.pgcodekeeper.core.formatter.FormatParseTreeListener;
-import org.pgcodekeeper.core.formatter.IndentDirection;
+import org.pgcodekeeper.core.database.base.formatter.FormatParseTreeListener;
+import org.pgcodekeeper.core.database.base.formatter.IndentDirection;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLLexer;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.SelectOps;

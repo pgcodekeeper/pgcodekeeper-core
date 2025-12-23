@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Handles column-specific features like SPARSE, ROWGUIDCOL, PERSISTED, identity columns,
  * generated columns, and data masking functions.
  */
-public final class MsColumn extends AbstractColumn {
+public final class MsColumn extends AbstractColumn implements IMsStatement {
 
     private static final String SPARSE = "SPARSE";
     private static final String ROWGUIDCOL = "ROWGUIDCOL";

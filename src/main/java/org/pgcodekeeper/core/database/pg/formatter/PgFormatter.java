@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.formatter.pg;
+package org.pgcodekeeper.core.database.pg.formatter;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Token;
 import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.formatter.AbstractFormatter;
-import org.pgcodekeeper.core.formatter.FormatConfiguration;
-import org.pgcodekeeper.core.formatter.FormatItem;
-import org.pgcodekeeper.core.formatter.StatementFormatter;
+import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
+import org.pgcodekeeper.core.database.base.formatter.AbstractFormatter;
+import org.pgcodekeeper.core.database.base.formatter.FormatItem;
+import org.pgcodekeeper.core.database.base.formatter.StatementFormatter;
 import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLLexer;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
@@ -44,12 +44,12 @@ public class PgFormatter extends AbstractFormatter {
      * Constructs a new PostgreSQL formatter instance.
      *
      * @param source The source SQL text to format
-     * @param start  The starting offset in the source text
-     * @param stop   The ending offset in the source text
-     * @param config The formatting configuration
+     * @param offset Starting offset in the source text
+     * @param length Length of text to format
+     * @param config Formatting configuration options
      */
-    public PgFormatter(String source, int start, int stop, FormatConfiguration config) {
-        super(source, start, stop, config);
+    public PgFormatter(String source, int offset, int length, IFormatConfiguration config) {
+        super(source, offset, length, config);
     }
 
     /**

@@ -27,7 +27,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Abstract base class for Microsoft SQL table constraints.
  * Provides common functionality for constraint management including disabled state handling.
  */
-public abstract class MsConstraint extends AbstractConstraint {
+public abstract class MsConstraint extends AbstractConstraint implements IMsStatement {
 
     private boolean isDisabled;
 

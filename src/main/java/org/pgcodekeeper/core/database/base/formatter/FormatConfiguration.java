@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.formatter;
+package org.pgcodekeeper.core.database.base.formatter;
+
+import org.pgcodekeeper.core.database.api.formatter.IndentType;
+import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
 
 import java.util.Arrays;
 
@@ -22,11 +25,7 @@ import java.util.Arrays;
  * Controls various aspects of SQL code formatting including indentation,
  * whitespace handling, and operator spacing.
  */
-public class FormatConfiguration {
-
-    public enum IndentType {
-        DISABLE, TAB, WHITESPACE
-    }
+public class FormatConfiguration implements IFormatConfiguration {
 
     private boolean addWhitespaceBeforeOp;
     private boolean addWhitespaceAfterOp;
@@ -75,12 +74,6 @@ public class FormatConfiguration {
         this.indentType = indentType;
     }
 
-    /**
-     * Creates an indentation string based on current configuration.
-     *
-     * @param length desired length of indentation
-     * @return indentation string
-     */
     public String createIndent(int length) {
         return createIndent(length, getIndentType() == IndentType.TAB ? '\t' : ' ');
     }

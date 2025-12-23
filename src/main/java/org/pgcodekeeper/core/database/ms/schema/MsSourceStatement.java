@@ -22,7 +22,7 @@ import org.pgcodekeeper.core.database.api.schema.ISearchPath;
  * The source is separated into two parts by the CREATE/ALTER statement keywords,
  * allowing for flexible SQL generation while preserving the original formatting.
  */
-public interface MsSourceStatement extends ISearchPath {
+public interface MsSourceStatement extends ISearchPath, IMsStatement {
     /**
      * Gets the first part of the source statement (before CREATE/ALTER).
      *

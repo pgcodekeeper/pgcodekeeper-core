@@ -43,7 +43,7 @@ import java.util.stream.Stream;
  * @author galiev_mr
  * @since 5.3.1.
  */
-public abstract class PgAbstractTable extends AbstractTable {
+public abstract class PgAbstractTable extends AbstractTable implements IPgStatement {
 
     private static final String RESTART_SEQUENCE_QUERY = """
             DO LANGUAGE plpgsql $_$

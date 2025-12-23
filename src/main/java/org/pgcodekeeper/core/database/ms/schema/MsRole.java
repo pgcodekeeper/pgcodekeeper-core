@@ -33,7 +33,7 @@ import java.util.Set;
  * Represents a Microsoft SQL database role.
  * Roles are used to group users and manage permissions at the database level.
  */
-public final class MsRole extends AbstractStatement {
+public final class MsRole extends AbstractStatement implements IMsStatement {
 
     private final Set<String> members = new LinkedHashSet<>();
 

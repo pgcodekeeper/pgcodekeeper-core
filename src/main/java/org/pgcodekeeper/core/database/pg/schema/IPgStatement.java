@@ -13,29 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.formatter;
+package org.pgcodekeeper.core.database.pg.schema;
 
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
+import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.pg.formatter.PgFormatter;
 
 /**
- * This listener checks if there was at least one syntax error while parsing.
+ * Interface for PostgreSQL statement
  */
-public final class ErrorPresenceListener extends BaseErrorListener {
-
-    private boolean hasError;
-
-    /**
-     * @return true if there was an error, false otherwise.
-     */
-    public boolean isHasError() {
-       return hasError;
-    }
+public interface IPgStatement extends IStatement {
 
     @Override
-    public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
-                            String msg, RecognitionException e) {
-        hasError = true;
+    default String formatSql(String sql, int offset, int length, IFormatConfiguration formatConfiguration) {
+        return new PgFormatter(sql, offset, length, formatConfiguration).formatText();
     }
 }

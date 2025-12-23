@@ -26,7 +26,7 @@ import java.util.Objects;
  * Range types store ranges of values for a given subtype, such as int4range for integers
  * or tsrange for timestamps. They support inclusion/exclusion bounds and various operations.
  */
-public final class PgRangeType extends AbstractType {
+public final class PgRangeType extends AbstractType implements IPgStatement {
 
     private String subtype;
     private String subtypeOpClass;

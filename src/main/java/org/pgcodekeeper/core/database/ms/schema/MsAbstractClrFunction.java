@@ -28,7 +28,7 @@ import java.util.Objects;
  * Abstract base class for Microsoft SQL CLR (Common Language Runtime) functions.
  * Represents functions implemented in .NET assemblies that can be called from SQL.
  */
-public abstract class MsAbstractClrFunction extends AbstractFunction {
+public abstract class MsAbstractClrFunction extends AbstractFunction implements IMsStatement {
 
     protected final List<String> options = new ArrayList<>();
     protected final String assembly;

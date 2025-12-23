@@ -32,7 +32,7 @@ import java.util.stream.Stream;
  * Represents a ClickHouse database schema (database in ClickHouse terms).
  * Contains tables, views, dictionaries and has an associated engine type.
  */
-public final class ChSchema extends AbstractSchema {
+public final class ChSchema extends AbstractSchema implements IChStatement {
 
     private String engine = "Atomic";
     private final Map<String, ChDictionary> dictionaries = new LinkedHashMap<>();

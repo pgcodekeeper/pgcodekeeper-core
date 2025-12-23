@@ -26,7 +26,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a Microsoft SQL schema that contains database objects like tables, views, functions, and procedures.
  * Provides SQL generation for schema creation and management.
  */
-public final class MsSchema extends AbstractSchema {
+public final class MsSchema extends AbstractSchema implements IMsStatement {
 
     /**
      * Creates a new Microsoft SQL schema.

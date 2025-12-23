@@ -30,7 +30,7 @@ import java.util.Objects;
  * PostgreSQL type cast implementation.
  * Represents a cast that specifies how to perform conversions between two data types.
  */
-public final class PgCast extends AbstractStatement implements ICast {
+public final class PgCast extends AbstractStatement implements ICast, IPgStatement {
 
     /**
      * Enumeration of cast methods

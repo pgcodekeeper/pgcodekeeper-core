@@ -33,7 +33,7 @@ import java.util.Objects;
  *
  * @author Alexander Levsha
  */
-public final class PgExtension extends AbstractStatement {
+public final class PgExtension extends AbstractStatement implements IPgStatement {
 
     private String schema;
     private boolean relocatable;

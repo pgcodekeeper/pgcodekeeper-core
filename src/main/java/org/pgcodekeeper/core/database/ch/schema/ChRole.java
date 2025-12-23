@@ -31,7 +31,7 @@ import java.util.Objects;
  * Represents a ClickHouse role for access control.
  * Roles can be stored in different storage types and have associated privileges.
  */
-public final class ChRole extends AbstractStatement {
+public final class ChRole extends AbstractStatement implements IChStatement {
 
     private static final String DEF_STORAGE = "local_directory";
 

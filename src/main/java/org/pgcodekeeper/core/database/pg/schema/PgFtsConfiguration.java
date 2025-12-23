@@ -34,7 +34,7 @@ import java.util.Objects;
  * Configurations specify which text search parser to use and
  * how to map token types to dictionaries for text processing.
  */
-public final class PgFtsConfiguration extends AbstractStatement implements ISearchPath {
+public final class PgFtsConfiguration extends AbstractStatement implements ISearchPath, IPgStatement {
 
     private static final String ALTER_CONFIGURATION = "ALTER TEXT SEARCH CONFIGURATION ";
     private static final String WITH = "\n\tWITH ";

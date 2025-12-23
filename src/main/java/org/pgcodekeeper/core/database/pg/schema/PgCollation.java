@@ -30,7 +30,7 @@ import java.util.Objects;
  * PostgreSQL collation implementation.
  * Represents a collation object that defines how text values are sorted and compared.
  */
-public final class PgCollation extends AbstractStatement implements ISearchPath {
+public final class PgCollation extends AbstractStatement implements ISearchPath, IPgStatement {
 
     /**
      * Creates a new PostgreSQL collation.

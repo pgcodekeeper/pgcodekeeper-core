@@ -35,7 +35,7 @@ import java.util.Objects;
  * Represents a Microsoft SQL user-defined type that can be an alias type,
  * assembly type, or table type. Each type has specific properties and behaviors.
  */
-public final class MsType extends AbstractType implements IStatementContainer {
+public final class MsType extends AbstractType implements IStatementContainer, IMsStatement {
 
     // base type
     private String baseType;

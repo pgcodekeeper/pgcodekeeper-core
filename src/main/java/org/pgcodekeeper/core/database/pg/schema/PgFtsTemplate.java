@@ -31,7 +31,7 @@ import java.util.Objects;
  * Templates define the interface for FTS dictionaries by specifying
  * the functions that dictionaries must provide for text processing.
  */
-public final class PgFtsTemplate extends AbstractStatement implements ISearchPath {
+public final class PgFtsTemplate extends AbstractStatement implements ISearchPath, IPgStatement {
 
     private String initFunction;
     private String lexizeFunction;

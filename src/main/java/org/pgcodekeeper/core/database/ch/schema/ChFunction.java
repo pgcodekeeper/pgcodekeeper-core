@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  * Represents a ClickHouse user-defined function.
  * ClickHouse functions are lambda expressions with parameters and a body.
  */
-public final class ChFunction extends AbstractStatement implements IFunction {
+public final class ChFunction extends AbstractStatement implements IFunction, IChStatement {
 
     private String body;
     private final List<Argument> arguments = new ArrayList<>();

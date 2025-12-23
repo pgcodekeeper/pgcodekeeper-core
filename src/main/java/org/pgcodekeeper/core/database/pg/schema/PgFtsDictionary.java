@@ -32,7 +32,7 @@ import java.util.Objects;
  * performing operations like stemming, synonym replacement, or filtering.
  */
 public final class PgFtsDictionary extends AbstractStatement
-        implements ISimpleOptionContainer, ISearchPath {
+        implements ISimpleOptionContainer, ISearchPath, IPgStatement {
 
     private String template;
     private final Map<String, String> options = new LinkedHashMap<>();

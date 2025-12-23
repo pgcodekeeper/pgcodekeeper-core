@@ -33,7 +33,7 @@ import java.util.Objects;
  * Extends the base AbstractColumn with support for ClickHouse-specific features like TTL,
  * codecs, and different default types.
  */
-public final class ChColumn extends AbstractColumn {
+public final class ChColumn extends AbstractColumn implements IChStatement {
     private String defaultType;
 
     private String ttl;

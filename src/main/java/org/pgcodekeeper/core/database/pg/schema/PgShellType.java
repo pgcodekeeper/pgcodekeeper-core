@@ -24,7 +24,7 @@ import org.pgcodekeeper.core.database.base.schema.AbstractType;
  * Shell types are placeholder types created before their actual definition,
  * used to resolve forward references in type definitions.
  */
-public final class PgShellType extends AbstractType {
+public final class PgShellType extends AbstractType implements IPgStatement {
 
     /**
      * Creates a new PostgreSQL shell type.

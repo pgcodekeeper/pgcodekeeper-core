@@ -30,7 +30,7 @@ import java.util.Objects;
  * Rules define actions to be performed when certain operations (INSERT, UPDATE, DELETE)
  * are executed on a table, effectively implementing view-like behavior and query rewriting.
  */
-public final class PgRule extends AbstractRule {
+public final class PgRule extends AbstractRule implements IPgStatement {
 
     private EventType event;
     private String condition;

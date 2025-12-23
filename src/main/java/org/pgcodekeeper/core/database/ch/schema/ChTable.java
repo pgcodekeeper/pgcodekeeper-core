@@ -32,7 +32,7 @@ import java.util.Map.Entry;
  * Represents a ClickHouse table with engine configuration and projections.
  * Supports ClickHouse-specific features like table engines, projections, and specialized DDL operations.
  */
-public class ChTable extends AbstractTable {
+public class ChTable extends AbstractTable implements IChStatement {
 
     protected final Map<String, String> projections = new LinkedHashMap<>();
 

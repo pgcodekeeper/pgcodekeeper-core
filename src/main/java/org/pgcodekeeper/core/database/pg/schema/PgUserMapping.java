@@ -34,7 +34,7 @@ import java.util.Objects;
  * User mappings define how to authenticate as a specific user when accessing foreign servers,
  * typically storing connection credentials and options for foreign data wrappers.
  */
-public final class PgUserMapping extends AbstractStatement implements PgForeignOptionContainer {
+public final class PgUserMapping extends AbstractStatement implements PgForeignOptionContainer, IPgStatement {
 
     private final String user;
     private final String server;

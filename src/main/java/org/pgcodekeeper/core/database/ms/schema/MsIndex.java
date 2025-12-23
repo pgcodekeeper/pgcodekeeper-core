@@ -32,7 +32,7 @@ import java.util.Objects;
  * Represents a Microsoft SQL index with support for clustered, non-clustered,
  * and columnstore indexes.
  */
-public final class MsIndex extends AbstractIndex {
+public final class MsIndex extends AbstractIndex implements IMsStatement {
 
     private boolean isColumnstore;
     private final List<String> orderCols = new ArrayList<>();

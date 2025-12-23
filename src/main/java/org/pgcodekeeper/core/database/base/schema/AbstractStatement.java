@@ -15,14 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import org.pgcodekeeper.core.*;
+import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.MsDiffUtils;
+import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.formatter.FileFormatter;
+import org.pgcodekeeper.core.exception.ObjectCreationException;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.hasher.IHashable;
 import org.pgcodekeeper.core.hasher.JavaHasher;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.exception.ObjectCreationException;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
@@ -454,9 +456,7 @@ public abstract class AbstractStatement implements IStatement, IHashable {
         if (!isFormatted || !settings.isAutoFormatObjectCode()) {
             return sql;
         }
-        FileFormatter fileForm = new FileFormatter(sql, 0, sql.length(), settings.getFormatConfiguration(),
-                getDbType());
-        return fileForm.formatText();
+        return formatSql(sql, 0, sql.length(), settings.getFormatConfiguration());
     }
 
     /**

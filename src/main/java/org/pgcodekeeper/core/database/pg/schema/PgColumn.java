@@ -41,7 +41,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Stores column information including data type, constraints, storage parameters,
  * statistics, compression settings, and identity properties.
  */
-public final class PgColumn extends AbstractColumn implements ISimpleOptionContainer, ICompressOptionContainer {
+public final class PgColumn extends AbstractColumn
+        implements ISimpleOptionContainer, ICompressOptionContainer, IPgStatement {
 
     private static final Logger LOG = LoggerFactory.getLogger(PgColumn.class);
 

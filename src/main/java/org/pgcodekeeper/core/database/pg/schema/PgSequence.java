@@ -36,7 +36,7 @@ import java.util.Objects;
  * Sequences generate unique numeric identifiers, commonly used for auto-incrementing primary keys.
  * Supports various data types, caching, cycling, and ownership by table columns.
  */
-public final class PgSequence extends AbstractSequence {
+public final class PgSequence extends AbstractSequence implements IPgStatement {
 
     private static final String ALTER_SEQUENCE = "ALTER SEQUENCE ";
     private GenericColumn ownedBy;

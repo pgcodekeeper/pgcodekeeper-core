@@ -16,10 +16,11 @@
 package org.pgcodekeeper.core.loader;
 
 import java.time.Duration;
+
 import org.testcontainers.clickhouse.ClickHouseContainer;
-import org.testcontainers.containers.MSSQLServerContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.startupcheck.MinimumDurationRunningStartupCheckStrategy;
+import org.testcontainers.mssqlserver.MSSQLServerContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 public final class TestContainer {
 
@@ -40,8 +41,8 @@ public final class TestContainer {
     public static final Integer MS_PORT;
     public static final Integer CH_PORT;
 
-    private static final PostgreSQLContainer<?> PG_DB = new PostgreSQLContainer<>(PG_IMAGE);
-    private static final MSSQLServerContainer<?> MS_DB = new MSSQLServerContainer<>(MS_IMAGE);
+    private static final PostgreSQLContainer PG_DB = new PostgreSQLContainer(PG_IMAGE);
+    private static final MSSQLServerContainer MS_DB = new MSSQLServerContainer(MS_IMAGE);
     private static final ClickHouseContainer CH_DB = new ClickHouseContainer(CH_IMAGE);
 
     static {

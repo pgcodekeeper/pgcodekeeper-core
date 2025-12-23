@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Represents an enumerated type with a fixed set of string values
  * that can be extended but not reordered.
  */
-public final class PgEnumType extends AbstractType {
+public final class PgEnumType extends AbstractType implements IPgStatement {
 
     private final List<String> enums = new ArrayList<>();
 

@@ -18,9 +18,9 @@ package org.pgcodekeeper.core.database.pg.schema;
 import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ISubElement;
+import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.database.base.schema.AbstractPolicy;
 import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -32,7 +32,7 @@ import java.util.Set;
  * Policies control which rows are visible or modifiable for specific users or roles,
  * providing fine-grained access control at the row level.
  */
-public final class PgPolicy extends AbstractPolicy implements ISubElement {
+public final class PgPolicy extends AbstractPolicy implements ISubElement, IPgStatement {
 
     private String check;
 

@@ -27,7 +27,7 @@ import java.util.*;
  * Represents Microsoft SQL table statistics.
  * Statistics are used by the query optimizer to create efficient query execution plans.
  */
-public final class MsStatistics extends AbstractStatistics implements ISubElement {
+public final class MsStatistics extends AbstractStatistics implements ISubElement, IMsStatement {
 
     public static final String SAMPLE = "SAMPLE";
     private String filter;

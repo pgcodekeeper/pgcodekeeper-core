@@ -30,7 +30,7 @@ import java.util.Objects;
  * Represents a ClickHouse view (VIEW, MATERIALIZED VIEW, or LIVE VIEW).
  * Supports various ClickHouse-specific view features like refresh periods, engines, and security settings.
  */
-public final class ChView extends AbstractView {
+public final class ChView extends AbstractView implements IChStatement {
 
     /**
      * Enumeration of ClickHouse view types.

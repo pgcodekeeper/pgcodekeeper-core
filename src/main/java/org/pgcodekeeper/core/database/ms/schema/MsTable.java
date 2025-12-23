@@ -35,7 +35,7 @@ import java.util.Map.Entry;
  * Represents a Microsoft SQL table with support for memory-optimized tables,
  * temporal tables, filestream data, and other Microsoft SQL specific features.
  */
-public final class MsTable extends AbstractTable implements ISimpleOptionContainer {
+public final class MsTable extends AbstractTable implements ISimpleOptionContainer, IMsStatement {
 
     private static final String MEMORY_OPTIMIZED = "MEMORY_OPTIMIZED";
 

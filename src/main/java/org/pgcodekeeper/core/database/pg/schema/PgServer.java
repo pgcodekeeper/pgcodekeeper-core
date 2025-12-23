@@ -34,7 +34,7 @@ import java.util.Objects;
  * Foreign servers define connection information for external data sources
  * that can be accessed through foreign data wrappers (FDWs).
  */
-public final class PgServer extends AbstractStatement implements PgForeignOptionContainer {
+public final class PgServer extends AbstractStatement implements PgForeignOptionContainer, IPgStatement {
 
     private String type;
     private String version;
