@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.model.graph;
 
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;

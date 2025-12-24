@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.api.schema.IOptionContainer;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
@@ -178,11 +177,6 @@ public class ChTable extends AbstractTable implements IChStatement {
         var newEngine = ((ChTable) newTable).engine;
         return !engine.compareUnalterable(newEngine)
                 && !engine.isModifybleSampleBy(newEngine);
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.CH;
     }
 
     @Override

@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.ignorelist;
 
-import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 
 import java.util.EnumSet;

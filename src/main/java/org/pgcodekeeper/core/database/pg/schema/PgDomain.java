@@ -15,8 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.database.api.schema.ISearchPath;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;

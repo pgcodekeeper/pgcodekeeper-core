@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import org.pgcodekeeper.core.database.api.schema.ObjectPrivilege;
+import org.pgcodekeeper.core.database.api.schema.IPrivilege;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,14 +26,14 @@ import java.util.List;
  */
 public class StatementOverride {
     private String owner;
-    private final List<ObjectPrivilege> privileges = new ArrayList<>();
+    private final List<IPrivilege> privileges = new ArrayList<>();
 
     /**
      * Adds a privilege override to this statement.
      *
      * @param privilege the privilege to add
      */
-    public void addPrivilege(ObjectPrivilege privilege) {
+    public void addPrivilege(IPrivilege privilege) {
         privileges.add(privilege);
     }
 
@@ -45,7 +45,7 @@ public class StatementOverride {
         return owner;
     }
 
-    public List<ObjectPrivilege> getPrivileges() {
+    public List<IPrivilege> getPrivileges() {
         return privileges;
     }
 }

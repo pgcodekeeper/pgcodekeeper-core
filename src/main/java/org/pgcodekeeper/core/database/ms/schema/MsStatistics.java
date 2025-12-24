@@ -15,9 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.MsDiffUtils;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.ms.MsDiffUtils;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.ISubElement;
+import org.pgcodekeeper.core.database.api.schema.ObjectState;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatistics;
+import org.pgcodekeeper.core.database.base.schema.StatementUtils;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -51,7 +56,7 @@ public final class MsStatistics extends AbstractStatistics implements ISubElemen
         sb.append(MsDiffUtils.quoteName(name)).append(" ON ").append(parent.getQualifiedName());
         if (!cols.isEmpty()) {
             sb.append(' ');
-            StatementUtils.appendCols(sb, cols, getDbType());
+            StatementUtils.appendCols(sb, cols, getQuoter());
         }
         if (filter != null) {
             sb.append("\nWHERE ").append(filter);
@@ -142,11 +147,6 @@ public final class MsStatistics extends AbstractStatistics implements ISubElemen
         stat.options.putAll(options);
         stat.setParentHasData(isParentHasData);
         return stat;
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.MS;
     }
 
     @Override

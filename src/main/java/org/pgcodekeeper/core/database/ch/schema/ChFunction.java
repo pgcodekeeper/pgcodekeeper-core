@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.ChDiffUtils;
+import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.base.schema.Argument;
@@ -105,11 +105,6 @@ public final class ChFunction extends AbstractStatement implements IFunction, IC
             return ObjectState.RECREATE;
         }
         return ObjectState.NOTHING;
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.CH;
     }
 
     private boolean compareUnalterable(ChFunction newFunc) {

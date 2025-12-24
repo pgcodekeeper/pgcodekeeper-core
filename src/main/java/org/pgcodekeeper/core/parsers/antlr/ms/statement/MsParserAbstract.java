@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.parsers.antlr.ms.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.MsDiffUtils;
+import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.ms.schema.*;
@@ -354,4 +354,8 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
         return new MsSchema(name);
     }
 
+    @Override
+    protected boolean isSystemSchema(String schema) {
+        return MsDiffUtils.isSystemSchema(schema);
+    }
 }

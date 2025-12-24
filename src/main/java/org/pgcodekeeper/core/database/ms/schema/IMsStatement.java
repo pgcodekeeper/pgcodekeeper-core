@@ -15,9 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
+import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.ms.formatter.MsFormatter;
+import org.pgcodekeeper.core.script.SQLScript;
+
+import java.util.function.UnaryOperator;
 
 /**
  * Interface for MS SQL statement
@@ -27,5 +32,20 @@ public interface IMsStatement extends IStatement {
     @Override
     default String formatSql(String sql, int offset, int length, IFormatConfiguration formatConfiguration) {
         return new MsFormatter(sql, offset, length, formatConfiguration).formatText();
+    }
+
+    @Override
+    default DatabaseType getDbType() {
+        return DatabaseType.MS;
+    }
+
+    @Override
+    default UnaryOperator<String> getQuoter() {
+        return MsDiffUtils::quoteName;
+    }
+
+    @Override
+    default void appendDefaultPrivileges(IStatement statement, SQLScript script) {
+        // no imp
     }
 }

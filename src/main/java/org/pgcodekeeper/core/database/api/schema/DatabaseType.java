@@ -24,7 +24,6 @@ import org.pgcodekeeper.core.localizations.Messages;
  * Each enum constant contains information about the database type including:
  * <ul>
  *   <li>Database name</li>
- *   <li>Default connection port</li>
  * </ul>
  */
 public enum DatabaseType {

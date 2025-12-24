@@ -173,11 +173,6 @@ public final class ChDictionary extends AbstractStatement implements IRelation, 
     }
 
     @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.CH;
-    }
-
-    @Override
     public DbObjType getStatementType() {
         return DbObjType.DICTIONARY;
     }

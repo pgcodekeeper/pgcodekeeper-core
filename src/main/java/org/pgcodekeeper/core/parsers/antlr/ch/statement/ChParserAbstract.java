@@ -20,6 +20,7 @@ import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.ch.schema.*;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
@@ -238,5 +239,10 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
     @Override
     protected AbstractSchema createSchema(String name) {
         return new ChSchema(name);
+    }
+
+    @Override
+    protected boolean isSystemSchema(String schema) {
+        return ChDiffUtils.isSystemSchema(schema);
     }
 }

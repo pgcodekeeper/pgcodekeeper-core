@@ -23,6 +23,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.pgcodekeeper.core.*;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.exception.MisplacedObjectException;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
@@ -30,6 +31,7 @@ import org.pgcodekeeper.core.model.exporter.ModelExporter;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -379,13 +381,15 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
 
     protected void addDepSafe(AbstractStatement st, List<? extends ParserRuleContext> ids, DbObjType type, String signature) {
         ObjectLocation loc = getLocation(ids, type, null, true, signature, LocationType.REFERENCE);
-        if (loc != null && !Utils.isSystemSchema(loc.getSchema(), getDbType())) {
+        if (loc != null && !isSystemSchema(loc.getSchema())) {
             if (!refMode) {
                 st.addDependency(loc.getObj());
             }
             db.addReference(fileName, loc);
         }
     }
+
+    protected abstract boolean isSystemSchema(String schema);
 
     protected final DatabaseType getDbType() {
         return db.getDbType();

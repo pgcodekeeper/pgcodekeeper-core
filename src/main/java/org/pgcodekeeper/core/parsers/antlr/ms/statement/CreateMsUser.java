@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.ms.statement;
 
-import org.pgcodekeeper.core.MsDiffUtils;
+import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Create_userContext;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.IdContext;

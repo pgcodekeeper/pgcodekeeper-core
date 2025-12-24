@@ -20,6 +20,7 @@ import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 /**
@@ -114,7 +115,7 @@ public interface IStatement {
      *
      * @return unmodifiable set of privileges
      */
-    Set<ObjectPrivilege> getPrivileges();
+    Set<IPrivilege> getPrivileges();
 
     /**
      * Gets the type of database.
@@ -176,6 +177,14 @@ public interface IStatement {
     ObjectState appendAlterSQL(IStatement newCondition, SQLScript script);
 
     /**
+     * Appends default privileges for statement
+     *
+     * @param statement new object state
+     * @param script    script to collect changes
+     */
+    void appendDefaultPrivileges(IStatement statement, SQLScript script);
+
+    /**
      * Generates the SQL statements needed to create this database object.
      * This is an abstract method that must be implemented by subclasses
      * to provide the specific CREATE SQL for each object type.
@@ -224,4 +233,17 @@ public interface IStatement {
      * @return formatted string
      */
     String formatSql(String sql, int offset, int length, IFormatConfiguration formatConfiguration);
+
+    /**
+     * @param name the name to quote
+     * @return the quoted name
+     */
+    default String getQuotedName(String name) {
+        return getQuoter().apply(name);
+    }
+
+    /**
+     * @return a function that quotes name
+     */
+    UnaryOperator<String> getQuoter();
 }

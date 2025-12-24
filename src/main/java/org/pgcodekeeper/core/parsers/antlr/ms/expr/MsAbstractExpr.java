@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.parsers.antlr.ms.expr;
 
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.base.parser.antlr.AbstractExpr;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
@@ -73,7 +73,7 @@ public abstract class MsAbstractExpr extends AbstractExpr {
     }
 
     protected boolean isSystemSchema(String schema) {
-        return Utils.isMsSystemSchema(schema);
+        return MsDiffUtils.isSystemSchema(schema);
     }
 
     protected void addColumnDepcy(Full_column_nameContext fcn) {

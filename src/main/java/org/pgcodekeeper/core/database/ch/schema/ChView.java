@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.base.schema.AbstractView;
@@ -241,11 +240,6 @@ public final class ChView extends AbstractView implements IChStatement {
     private boolean isViewModified(final ChView newView) {
         return !columns.equals(newView.columns)
                 || (type != ChViewType.MATERIALIZED && !normalizedQuery.equals(newView.normalizedQuery));
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.CH;
     }
 
     @Override

@@ -17,8 +17,9 @@
  *
  * Distributed under MIT license
  *******************************************************************************/
-package org.pgcodekeeper.core;
+package org.pgcodekeeper.core.database.pg;
 
+import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.sql.Keyword;
 import org.pgcodekeeper.core.sql.Keyword.KeywordCategory;
 
@@ -343,5 +344,16 @@ public final class PgDiffUtils {
         }
 
         return length;
+    }
+
+    /**
+     * Checks if a schema is a PostgreSQL system schema.
+     *
+     * @param schema the schema name to check
+     * @return true if the schema is 'pg_catalog' or 'information_schema', false otherwise
+     */
+    public static boolean isSystemSchema(String schema) {
+        return Consts.PG_CATALOG.equalsIgnoreCase(schema)
+                || Consts.INFORMATION_SCHEMA.equalsIgnoreCase(schema);
     }
 }

@@ -15,9 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.pg.formatter.PgFormatter;
+import org.pgcodekeeper.core.script.SQLScript;
+
+import java.util.function.UnaryOperator;
 
 /**
  * Interface for PostgreSQL statement
@@ -27,5 +32,25 @@ public interface IPgStatement extends IStatement {
     @Override
     default String formatSql(String sql, int offset, int length, IFormatConfiguration formatConfiguration) {
         return new PgFormatter(sql, offset, length, formatConfiguration).formatText();
+    }
+
+    @Override
+    default DatabaseType getDbType() {
+        return DatabaseType.PG;
+    }
+
+    @Override
+    default UnaryOperator<String> getQuoter() {
+        return PgDiffUtils::getQuotedName;
+    }
+
+    @Override
+    default void appendDefaultPrivileges(IStatement statement, SQLScript script) {
+        // reset all default privileges
+        // this generates noisier bit more correct scripts
+        // we may have revoked implicit owner GRANT in the previous step, it needs to be restored
+        // any privileges in non-default state will be set to their final state in the next step
+        // this solution also requires the least amount of handling code: no edge cases
+        PgPrivilege.appendDefaultPostgresPrivileges(statement, script);
     }
 }

@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.hasher.IHashable;
 import org.pgcodekeeper.core.hasher.JavaHasher;

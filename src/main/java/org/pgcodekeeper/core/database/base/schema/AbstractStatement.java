@@ -16,10 +16,9 @@
 package org.pgcodekeeper.core.database.base.schema;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.MsDiffUtils;
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.ms.MsDiffUtils;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.exception.ObjectCreationException;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.hasher.IHashable;
@@ -50,7 +49,7 @@ public abstract class AbstractStatement implements IStatement, IHashable {
     protected final String name;
     protected String owner;
     protected String comment;
-    private final Set<ObjectPrivilege> privileges = new LinkedHashSet<>();
+    private final Set<IPrivilege> privileges = new LinkedHashSet<>();
 
     protected AbstractStatement parent;
     protected final Set<GenericColumn> deps = new LinkedHashSet<>();
@@ -68,11 +67,6 @@ public abstract class AbstractStatement implements IStatement, IHashable {
     @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.PG;
     }
 
     @Override
@@ -264,7 +258,7 @@ public abstract class AbstractStatement implements IStatement, IHashable {
      * @return unmodifiable set of privileges
      */
     @Override
-    public Set<ObjectPrivilege> getPrivileges() {
+    public Set<IPrivilege> getPrivileges() {
         return Collections.unmodifiableSet(privileges);
     }
 
@@ -276,7 +270,7 @@ public abstract class AbstractStatement implements IStatement, IHashable {
      * @param privilege the privilege to add
      * @throws IllegalArgumentException if database type is unsupported
      */
-    public void addPrivilege(ObjectPrivilege privilege) {
+    public void addPrivilege(IPrivilege privilege) {
         switch (getDbType()) {
             case PG:
                 String locOwner;
@@ -308,7 +302,7 @@ public abstract class AbstractStatement implements IStatement, IHashable {
         resetHash();
     }
 
-    private void addPrivilegeFiltered(ObjectPrivilege privilege, String locOwner) {
+    private void addPrivilegeFiltered(IPrivilege privilege, String locOwner) {
         if ("PUBLIC".equals(privilege.getRole())) {
             boolean isFunc = switch (getStatementType()) {
                 case FUNCTION, PROCEDURE, AGGREGATE, DOMAIN, TYPE -> true;
@@ -320,7 +314,7 @@ public abstract class AbstractStatement implements IStatement, IHashable {
         }
 
         if (!privilege.isRevoke() && privilege.getRole().equals(locOwner)) {
-            ObjectPrivilege delRevoke = privileges.stream()
+            IPrivilege delRevoke = privileges.stream()
                     .filter(p -> p.isRevoke()
                             && p.getRole().equals(privilege.getRole())
                             && p.getPermission().equals(privilege.getPermission()))
@@ -342,27 +336,27 @@ public abstract class AbstractStatement implements IStatement, IHashable {
     }
 
     protected void appendPrivileges(SQLScript script) {
-        ObjectPrivilege.appendPrivileges(privileges, script);
+        IPrivilege.appendPrivileges(privileges, script);
     }
 
     protected void alterPrivileges(AbstractStatement newObj, SQLScript script) {
-        Set<ObjectPrivilege> newPrivileges = newObj.getPrivileges();
+        Set<IPrivilege> newPrivileges = newObj.getPrivileges();
 
         // if new object has all privileges from old object and if it doesn't have
         // new revokes, then we can just grant difference between new and old privileges
         if (getDbType() == DatabaseType.PG && newPrivileges.containsAll(privileges)
                 && Objects.equals(owner, newObj.owner)) {
-            Set<ObjectPrivilege> diff = new LinkedHashSet<>(newPrivileges);
+            Set<IPrivilege> diff = new LinkedHashSet<>(newPrivileges);
             diff.removeAll(privileges);
-            boolean isGrantOnly = diff.stream().noneMatch(ObjectPrivilege::isRevoke);
+            boolean isGrantOnly = diff.stream().noneMatch(IPrivilege::isRevoke);
             if (isGrantOnly) {
-                ObjectPrivilege.appendPrivileges(diff, script);
+                IPrivilege.appendPrivileges(diff, script);
                 return;
             }
         }
 
         // first drop (revoke) missing grants
-        for (ObjectPrivilege privilege : privileges) {
+        for (IPrivilege privilege : privileges) {
             if (!privilege.isRevoke() && !newPrivileges.contains(privilege)) {
                 script.addStatement(privilege.getDropSQL());
             }
@@ -370,15 +364,8 @@ public abstract class AbstractStatement implements IStatement, IHashable {
 
         // now set all privileges if there are any changes
         if (!privileges.equals(newPrivileges)) {
-            if (newObj.getDbType() == DatabaseType.PG) {
-                // first, reset all default privileges
-                // this generates noisier bit more correct scripts
-                // we may have revoked implicit owner GRANT in the previous step, it needs to be restored
-                // any privileges in non-default state will be set to their final state in the next step
-                // this solution also requires the least amount of handling code: no edge cases
-                ObjectPrivilege.appendDefaultPostgresPrivileges(newObj, script);
-            }
-            ObjectPrivilege.appendPrivileges(newPrivileges, script);
+            appendDefaultPrivileges(newObj, script);
+            IPrivilege.appendPrivileges(newPrivileges, script);
         }
     }
 
@@ -716,7 +703,7 @@ public abstract class AbstractStatement implements IStatement, IHashable {
     @Override
     public String getQualifiedName() {
         if (qualifiedName == null) {
-            UnaryOperator<String> quoter = Utils.getQuoter(getDbType());
+            UnaryOperator<String> quoter = getQuoter();
             StringBuilder sb = new StringBuilder(quoter.apply(name));
 
             AbstractStatement par = this.parent;

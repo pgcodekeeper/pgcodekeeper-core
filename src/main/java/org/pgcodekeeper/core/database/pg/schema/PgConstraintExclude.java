@@ -16,7 +16,6 @@
 package org.pgcodekeeper.core.database.pg.schema;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.api.schema.ISimpleColumnContainer;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
@@ -119,7 +118,7 @@ public final class PgConstraintExclude extends PgConstraint implements PgIndexPa
                 sbSQL.append(' ').append(col.getOpClass());
                 var opClassParams = col.getOpClassParams();
                 if (!opClassParams.isEmpty()) {
-                    StatementUtils.appendOptionsWithParen(sbSQL, opClassParams, getDbType());
+                    StatementUtils.appendOptionsWithParen(sbSQL, opClassParams, "=");
                 }
             }
             if (col.isDesc()) {
@@ -140,11 +139,11 @@ public final class PgConstraintExclude extends PgConstraint implements PgIndexPa
     private void appendIndexParam(StringBuilder sb) {
         if (!includes.isEmpty()) {
             sb.append(" INCLUDE ");
-            StatementUtils.appendCols(sb, includes, DatabaseType.PG);
+            StatementUtils.appendCols(sb, includes, getQuoter());
         }
         if (!params.isEmpty()) {
             sb.append(" WITH");
-            StatementUtils.appendOptionsWithParen(sb, params, getDbType());
+            StatementUtils.appendOptionsWithParen(sb, params, "=");
         }
         if (tablespace != null) {
             sb.append("\n\tUSING INDEX TABLESPACE ").append(tablespace);

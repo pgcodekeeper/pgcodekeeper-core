@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core;
+package org.pgcodekeeper.core.utils;
 
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.DatabaseType;
@@ -49,7 +49,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
-import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 /**
@@ -149,46 +148,6 @@ public final class Utils {
     }
 
     /**
-     * Checks if a schema is a system schema for the given database type.
-     *
-     * @param schema the schema name to check
-     * @param dbType the database type
-     * @return true if the schema is a system schema, false otherwise
-     */
-    public static boolean isSystemSchema(String schema, DatabaseType dbType) {
-        return switch (dbType) {
-            case PG -> isPgSystemSchema(schema);
-            case MS -> isMsSystemSchema(schema);
-            case CH -> isChSystemSchema(schema);
-        };
-    }
-
-    /**
-     * Returns a properly quoted name for the given database type.
-     *
-     * @param name   the name to quote
-     * @param dbType the database type
-     * @return the quoted name
-     */
-    public static String getQuotedName(String name, DatabaseType dbType) {
-        return getQuoter(dbType).apply(name);
-    }
-
-    /**
-     * Returns a quoting function for the given database type.
-     *
-     * @param dbType the database type
-     * @return a function that quotes names appropriately for the database
-     */
-    public static UnaryOperator<String> getQuoter(DatabaseType dbType) {
-        return switch (dbType) {
-            case PG -> PgDiffUtils::getQuotedName;
-            case MS -> MsDiffUtils::quoteName;
-            case CH -> ChDiffUtils::getQuotedName;
-        };
-    }
-
-    /**
      * Returns JdbcConnector for the given database type. Temporary solution until the new API is finished.
      *
      * @param dbType the database type
@@ -201,38 +160,6 @@ public final class Utils {
             case MS -> new MsJdbcConnector(url);
             case CH -> new ChJdbcConnector(url);
         };
-    }
-
-    /**
-     * Checks if a schema is a ClickHouse system schema.
-     *
-     * @param schema the schema name to check
-     * @return true if the schema is 'system' or 'information_schema', false otherwise
-     */
-    public static boolean isChSystemSchema(String schema) {
-        return Consts.SYSTEM.equalsIgnoreCase(schema)
-                || Consts.INFORMATION_SCHEMA.equalsIgnoreCase(schema);
-    }
-
-    /**
-     * Checks if a schema is a PostgreSQL system schema.
-     *
-     * @param schema the schema name to check
-     * @return true if the schema is 'pg_catalog' or 'information_schema', false otherwise
-     */
-    public static boolean isPgSystemSchema(String schema) {
-        return Consts.PG_CATALOG.equalsIgnoreCase(schema)
-                || Consts.INFORMATION_SCHEMA.equalsIgnoreCase(schema);
-    }
-
-    /**
-     * Checks if a schema is a Microsoft SQL Server system schema.
-     *
-     * @param schema the schema name to check
-     * @return true if the schema is 'sys', false otherwise
-     */
-    public static boolean isMsSystemSchema(String schema) {
-        return Consts.SYS.equalsIgnoreCase(schema);
     }
 
     /**

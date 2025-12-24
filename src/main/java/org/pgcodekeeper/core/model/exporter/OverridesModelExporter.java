@@ -19,8 +19,9 @@ import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.PgCodekeeperException;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.api.schema.ObjectPrivilege;
+import org.pgcodekeeper.core.database.api.schema.IPrivilege;
 import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.pg.schema.PgPrivilege;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
 import org.pgcodekeeper.core.script.SQLScript;
@@ -112,16 +113,16 @@ public final class OverridesModelExporter extends ModelExporter {
     @Override
     protected String getDumpSql(IStatement st) {
         SQLScript script = new SQLScript(settings);
-        Set<ObjectPrivilege> privs = st.getPrivileges();
+        Set<IPrivilege> privs = st.getPrivileges();
         st.appendOwnerSQL(script);
-        ObjectPrivilege.appendPrivileges(privs, script);
+        IPrivilege.appendPrivileges(privs, script);
         if (privs.isEmpty() && st.getDbType() == DatabaseType.PG) {
-            ObjectPrivilege.appendDefaultPostgresPrivileges(st, script);
+            PgPrivilege.appendDefaultPostgresPrivileges(st, script);
         }
 
         if (DbObjType.TABLE == st.getStatementType()) {
             for (AbstractColumn col : ((AbstractTable) st).getColumns()) {
-                ObjectPrivilege.appendPrivileges(col.getPrivileges(), script);
+                IPrivilege.appendPrivileges(col.getPrivileges(), script);
             }
         }
         return script.getFullScript();

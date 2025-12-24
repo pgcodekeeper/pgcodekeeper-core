@@ -16,15 +16,15 @@
 package org.pgcodekeeper.core.loader.jdbc;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -183,7 +183,7 @@ public abstract class JdbcReader extends AbstractStatementReader {
         if (function.indexOf('.') != -1) {
             QNameParser<ParserRuleContext> parser = QNameParser.parsePg(function);
             String schemaName = parser.getSchemaName();
-            if (schemaName != null && !Utils.isPgSystemSchema(schemaName)) {
+            if (schemaName != null && !PgDiffUtils.isSystemSchema(schemaName)) {
                 statement.addDependency(new GenericColumn(schemaName, DbObjType.SCHEMA));
                 String name = parser.getFirstName();
                 if (signature != null) {
@@ -196,7 +196,7 @@ public abstract class JdbcReader extends AbstractStatementReader {
     }
 
     protected void addDep(AbstractStatement statement, String schemaName, String name, DbObjType type) {
-        if (schemaName != null && !Utils.isPgSystemSchema(schemaName)) {
+        if (schemaName != null && !PgDiffUtils.isSystemSchema(schemaName)) {
             statement.addDependency(new GenericColumn(schemaName, DbObjType.SCHEMA));
             statement.addDependency(new GenericColumn(schemaName, name, type));
         }

@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.ChDiffUtils;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
@@ -64,11 +62,6 @@ public final class ChUser extends AbstractStatement implements IChStatement {
     }
 
     @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.CH;
-    }
-
-    @Override
     public AbstractDatabase getDatabase() {
         return (ChDatabase) parent;
     }
@@ -78,7 +71,7 @@ public final class ChUser extends AbstractStatement implements IChStatement {
         final StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("CREATE USER ");
         appendIfNotExists(sbSQL, script.getSettings());
-        sbSQL.append(ChDiffUtils.getQuotedName(name));
+        sbSQL.append(getQuotedName(name));
         if (!hosts.isEmpty()) {
             sbSQL.append(DELIM).append("HOST ").append(String.join(", ", hosts));
         }

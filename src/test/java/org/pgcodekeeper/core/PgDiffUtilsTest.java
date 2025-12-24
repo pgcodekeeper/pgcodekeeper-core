@@ -16,6 +16,7 @@
 package org.pgcodekeeper.core;
 
 import org.junit.jupiter.api.Test;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
 

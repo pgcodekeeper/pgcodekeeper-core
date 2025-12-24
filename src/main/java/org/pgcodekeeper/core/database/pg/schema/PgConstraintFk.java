@@ -16,14 +16,12 @@
 package org.pgcodekeeper.core.database.pg.schema;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.Utils;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
 import org.pgcodekeeper.core.database.api.schema.IConstraintFk;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
 import org.pgcodekeeper.core.database.base.schema.StatementUtils;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
 import java.util.ArrayList;
@@ -147,12 +145,12 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
     public String getDefinition() {
         var sbSQL = new StringBuilder();
         sbSQL.append("FOREIGN KEY ");
-        StatementUtils.appendCols(sbSQL, columns, getDbType());
+        StatementUtils.appendCols(sbSQL, columns, getQuoter());
         appendPeriod(sbSQL, periodColumn);
         sbSQL.append(" REFERENCES ").append(PgDiffUtils.getQuotedName(foreignSchema)).append('.')
                 .append(PgDiffUtils.getQuotedName(foreignTable));
         if (!refs.isEmpty()) {
-            StatementUtils.appendCols(sbSQL, refs, getDbType());
+            StatementUtils.appendCols(sbSQL, refs, getQuoter());
             appendPeriod(sbSQL, periodRefcolumn);
         }
         if (match != null) {
@@ -164,7 +162,7 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
         if (delAction != null) {
             sbSQL.append(" ON DELETE ").append(delAction);
             if (!delActCols.isEmpty()) {
-                StatementUtils.appendCols(sbSQL, delActCols, getDbType());
+                StatementUtils.appendCols(sbSQL, delActCols, getQuoter());
             }
         }
         return sbSQL.toString();
@@ -176,7 +174,7 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
             sbSQL.setLength(sbSQL.length() - 1);
             sbSQL
                     .append(", PERIOD ")
-                    .append(Utils.getQuotedName(periodColumn, DatabaseType.PG))
+                    .append(getQuotedName(periodColumn))
                     .append(")");
         }
     }

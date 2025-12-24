@@ -17,14 +17,16 @@ package org.pgcodekeeper.core.loader.jdbc;
 
 import org.antlr.v4.runtime.Parser;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.MsDiffUtils;
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.database.ms.MsDiffUtils;
+import org.pgcodekeeper.core.database.ms.schema.MsPrivilege;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.schema.PgPrivilege;
+import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.api.schema.ISearchPath;
-import org.pgcodekeeper.core.database.api.schema.ObjectPrivilege;
+import org.pgcodekeeper.core.database.api.schema.IPrivilege;
 import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
 import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
@@ -394,15 +396,15 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
         // If "GRANT ALL to PUBLIC" for FUNCTION/TYPE/DOMAIN is absent, then
         // in this case for them explicitly added "REVOKE ALL from PUBLIC".
         if (!metPublicRoleGrants && isFunctionOrTypeOrDomain) {
-            st.addPrivilege(new ObjectPrivilege("REVOKE", "ALL" + column,
-                    stType + " " + qualStSignature, "PUBLIC", false, st.getDbType()));
+            st.addPrivilege(new PgPrivilege("REVOKE", "ALL" + column,
+                    stType + " " + qualStSignature, "PUBLIC", false));
         }
 
         // 'REVOKE ALL' for COLUMN never happened, because of the overlapping
         // privileges from the table.
         if (column.isEmpty() && !metDefaultOwnersGrants) {
-            st.addPrivilege(new ObjectPrivilege("REVOKE", "ALL" + column,
-                    stType + " " + qualStSignature, PgDiffUtils.getQuotedName(owner), false, st.getDbType()));
+            st.addPrivilege(new PgPrivilege("REVOKE", "ALL" + column,
+                    stType + " " + qualStSignature, PgDiffUtils.getQuotedName(owner), false));
         }
 
         for (JdbcPrivilege grant : grants) {
@@ -417,8 +419,8 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
                     (isFunctionOrTypeOrDomain && grant.isGrantAllToPublic()))) {
                 continue;
             }
-            st.addPrivilege(new ObjectPrivilege("GRANT", grant.getGrantString(column),
-                    stType + " " + qualStSignature, grant.getGrantee(), grant.isGO(), st.getDbType()));
+            st.addPrivilege(new PgPrivilege("GRANT", grant.getGrantString(column),
+                    stType + " " + qualStSignature, grant.getGrantee(), grant.isGO()));
         }
     }
 
@@ -455,8 +457,8 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
                 sb.append(st.getStatementType()).append("::").append(MsDiffUtils.quoteName(st.getName()));
             }
 
-            ObjectPrivilege priv = new ObjectPrivilege(state, permission, sb.toString(),
-                    MsDiffUtils.quoteName(role), isWithGrantOption, st.getDbType());
+            IPrivilege priv = new MsPrivilege(state, permission, sb.toString(),
+                    MsDiffUtils.quoteName(role), isWithGrantOption);
 
             if (col != null && st instanceof AbstractTable table) {
                 table.getColumn(col).addPrivilege(priv);
@@ -480,7 +482,7 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
             sb.append(MsDiffUtils.quoteName(schema)).append('.');
         }
 
-        boolean quoteName = isUserDefined || quoteSysTypes || !Utils.isMsSystemSchema(schema);
+        boolean quoteName = isUserDefined || quoteSysTypes || !MsDiffUtils.isSystemSchema(schema);
         sb.append(quoteName ? MsDiffUtils.quoteName(dataType) : dataType);
 
         switch (dataType) {

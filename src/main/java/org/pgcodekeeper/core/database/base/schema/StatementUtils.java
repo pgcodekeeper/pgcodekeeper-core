@@ -15,14 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.localizations.Messages;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
 /**
  * Utility class providing common functionality for database statement operations.
@@ -105,11 +103,10 @@ public final class StatementUtils {
      *
      * @param sbSQL the StringBuilder to append to
      * @param cols the collection of column names
-     * @param dbType the database type for proper quoting
+     * @param quoter quoting operator
      */
-    public static void appendCols(StringBuilder sbSQL, Collection<String> cols, DatabaseType dbType) {
+    public static void appendCols(StringBuilder sbSQL, Collection<String> cols, UnaryOperator<String> quoter) {
         sbSQL.append('(');
-        var quoter = Utils.getQuoter(dbType);
         for (var col : cols) {
             sbSQL.append(quoter.apply(col));
             sbSQL.append(", ");
@@ -123,11 +120,11 @@ public final class StatementUtils {
      *
      * @param sbSQL the StringBuilder to append to
      * @param options the map of options to append
-     * @param dbType the database type for proper formatting
+     * @param delimiter option/value delimiter
      */
-    public static void appendOptionsWithParen(StringBuilder sbSQL, Map<String, String> options, DatabaseType dbType) {
+    public static void appendOptionsWithParen(StringBuilder sbSQL, Map<String, String> options, String delimiter) {
         sbSQL.append(" (");
-        appendOptions(sbSQL, options, dbType);
+        appendOptions(sbSQL, options, delimiter);
         sbSQL.append(')');
     }
 
@@ -159,30 +156,19 @@ public final class StatementUtils {
 
     /**
      * Appends parameters/options at StringBuilder. This StringBuilder used in
-     * schema package Constraint's classes in the method getDifinition()
+     * schema package Constraint's classes in the method getDefinition()
      *
-     * @param sbSQL   the StringBuilder from method getDifinition()
-     * @param options the Map&lt;String, String&gt; where key is parameter/option and
-     *                value is value of this parameter/option
-     * @param dbType  the DatabaseType variable in package schema what's need us for
-     *                correct delimiter, because in postgres and microsoft server is
-     *                different
+     * @param sbSQL      the StringBuilder from method getDefinition()
+     * @param options    the Map&lt;String, String&gt; where key is parameter/option and
+     *                   value is value of this parameter/option
+     * @param delimiter  option/value delimiter
      */
-    public static void appendOptions(StringBuilder sbSQL, Map<String, String> options, DatabaseType dbType) {
+    public static void appendOptions(StringBuilder sbSQL, Map<String, String> options, String delimiter) {
         for (var option : options.entrySet()) {
             sbSQL.append(option.getKey());
             var value = option.getValue();
             if (value != null && !value.isEmpty()) {
-                switch (dbType) {
-                    case PG:
-                        sbSQL.append('=').append(value);
-                        break;
-                    case MS:
-                        sbSQL.append(" = ").append(value);
-                        break;
-                    default:
-                        throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + dbType);
-                }
+                sbSQL.append(delimiter).append(value);
             }
             sbSQL.append(", ");
         }

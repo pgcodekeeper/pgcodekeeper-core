@@ -15,9 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
+import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.ch.formatter.ChFormatter;
+import org.pgcodekeeper.core.script.SQLScript;
+
+import java.util.function.UnaryOperator;
 
 /**
  * Interface for ClickHouse statement
@@ -27,5 +32,20 @@ public interface IChStatement extends IStatement {
     @Override
     default String formatSql(String sql, int offset, int length, IFormatConfiguration formatConfiguration) {
         return new ChFormatter(sql, offset, length, formatConfiguration).formatText();
+    }
+
+    @Override
+    default DatabaseType getDbType() {
+        return DatabaseType.CH;
+    }
+
+    @Override
+    default UnaryOperator<String> getQuoter() {
+        return ChDiffUtils::getQuotedName;
+    }
+
+    @Override
+    default void appendDefaultPrivileges(IStatement statement, SQLScript script) {
+        // no imp
     }
 }

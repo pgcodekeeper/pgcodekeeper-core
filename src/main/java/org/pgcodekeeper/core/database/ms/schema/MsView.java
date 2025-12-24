@@ -15,13 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractView;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractView;
 import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.script.SQLScript;
 
 import java.util.*;
@@ -35,7 +34,7 @@ public final class MsView extends AbstractView implements MsSourceStatement {
     private boolean ansiNulls;
     private boolean quotedIdentified;
     /**
-     * Оption that blocks changes to objects on which the view depends without recreating it. <br>
+     * Option that blocks changes to objects on which the view depends without recreating it. <br>
      * <br>
      * Does not participate in comparison, since it is part of {@link #secondPart}
      */
@@ -206,10 +205,5 @@ public final class MsView extends AbstractView implements MsSourceStatement {
 
     public boolean isSchemaBinding() {
         return schemaBinding;
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.MS;
     }
 }

@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.MsDiffUtils;
+import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IConstraintPk;
 import org.pgcodekeeper.core.database.api.schema.IOptionContainer;
 import org.pgcodekeeper.core.database.api.schema.ISimpleColumnContainer;
@@ -126,7 +126,7 @@ public final class MsConstraintPk extends MsConstraint
         appendSimpleColumns(sbSQL, columns);
         if (!options.isEmpty()) {
             sbSQL.append(" WITH");
-            StatementUtils.appendOptionsWithParen(sbSQL, options, getDbType());
+            StatementUtils.appendOptionsWithParen(sbSQL, options, " = ");
         }
         if (dataSpace != null) {
             sbSQL.append(" ON ").append(dataSpace);
