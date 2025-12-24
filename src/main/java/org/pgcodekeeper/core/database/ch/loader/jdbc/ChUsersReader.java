@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.loader.jdbc;
 
-import org.pgcodekeeper.core.ChDiffUtils;
+import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;

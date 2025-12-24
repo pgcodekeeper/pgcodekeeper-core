@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.utils.Utils;
 
 public class PartialExportTestFileVisitor extends SimpleFileVisitor<Path> {
 

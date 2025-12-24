@@ -15,12 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.MsDiffUtils;
+import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
+import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
+import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
 /**
@@ -133,10 +132,5 @@ public abstract class MsConstraint extends AbstractConstraint implements IMsStat
         MsConstraint con = (MsConstraint) super.shallowCopy();
         con.setDisabled(isDisabled);
         return con;
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.MS;
     }
 }

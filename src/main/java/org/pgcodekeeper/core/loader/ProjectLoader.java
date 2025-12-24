@@ -24,6 +24,7 @@ import org.pgcodekeeper.core.parsers.antlr.base.AntlrTaskManager;
 import org.pgcodekeeper.core.database.ms.schema.MsSchema;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.monitor.IMonitor;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -268,7 +269,7 @@ public class ProjectLoader extends DatabaseLoader {
                         col.clearPrivileges();
                     }
                 }
-                for (ObjectPrivilege privilege : override.getPrivileges()) {
+                for (IPrivilege privilege : override.getPrivileges()) {
                     st.addPrivilege(privilege);
                 }
             }

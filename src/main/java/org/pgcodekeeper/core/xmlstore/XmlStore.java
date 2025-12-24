@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.xmlstore;
 
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

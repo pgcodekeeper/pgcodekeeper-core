@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.parsers.antlr.ch.expr;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.base.parser.antlr.AbstractExpr;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
@@ -50,7 +50,7 @@ public abstract class ChAbstractExpr extends AbstractExpr {
 
     @Override
     protected boolean isSystemSchema(String schema) {
-        return Utils.isChSystemSchema(schema);
+        return ChDiffUtils.isSystemSchema(schema);
     }
 
     protected final GenericColumn addObjectDepcy(Qualified_nameContext qualifiedName) {

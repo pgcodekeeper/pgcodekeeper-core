@@ -15,8 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.MsDiffUtils;
+import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
@@ -481,10 +480,5 @@ public final class MsColumn extends AbstractColumn implements IMsStatement {
         copy.setMaskingFunction(maskingFunction);
         copy.setGenerated(generated);
         return copy;
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.MS;
     }
 }

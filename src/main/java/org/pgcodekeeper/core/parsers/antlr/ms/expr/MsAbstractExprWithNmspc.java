@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.parsers.antlr.ms.expr;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.As_table_aliasContext;

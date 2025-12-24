@@ -16,17 +16,20 @@
 package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.ObjectPrivilege;
-import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
-import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
+import org.pgcodekeeper.core.database.api.schema.IPrivilege;
+import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractTable;
+import org.pgcodekeeper.core.database.base.schema.StatementOverride;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.schema.PgAbstractFunction;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgPrivilege;
 import org.pgcodekeeper.core.database.pg.schema.PgSchema;
+import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
+import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
+import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -184,8 +187,7 @@ public final class GrantPrivilege extends PgParserAbstract {
             func.appendFunctionSignature(sb, false, true);
 
             for (String role : roles) {
-                addPrivilege(func, new ObjectPrivilege(state, permissions,
-                        sb.toString(), role, isGO, DatabaseType.PG));
+                addPrivilege(func, new PgPrivilege(state, permissions, sb.toString(), role, isGO));
             }
         }
     }
@@ -236,8 +238,8 @@ public final class GrantPrivilege extends PgParserAbstract {
             permission.setLength(permission.length() - 1);
 
             for (String role : roles) {
-                ObjectPrivilege priv = new ObjectPrivilege(state, permission.toString(),
-                        "TABLE " + st.getQualifiedName(), role, isGO, DatabaseType.PG);
+                IPrivilege priv = new PgPrivilege(state, permission.toString(),
+                        "TABLE " + st.getQualifiedName(), role, isGO);
                 if (DbObjType.TABLE != st.getStatementType()) {
                     addPrivilege(st, priv);
                 } else {
@@ -276,14 +278,13 @@ public final class GrantPrivilege extends PgParserAbstract {
         if (statement != null) {
             String typeName = type == DbObjType.SERVER ? "FOREIGN SERVER" : type.getTypeName();
             for (String role : roles) {
-                addPrivilege(statement, new ObjectPrivilege(state, permissions,
-                        typeName + " " + statement.getQualifiedName(), role, isGO, DatabaseType.PG));
+                addPrivilege(statement, new PgPrivilege(state, permissions,
+                        typeName + " " + statement.getQualifiedName(), role, isGO));
             }
         }
     }
 
-
-    private void addPrivilege(AbstractStatement st, ObjectPrivilege privilege) {
+    private void addPrivilege(AbstractStatement st, IPrivilege privilege) {
         if (overrides == null) {
             doSafe(AbstractStatement::addPrivilege, st, privilege);
         } else {

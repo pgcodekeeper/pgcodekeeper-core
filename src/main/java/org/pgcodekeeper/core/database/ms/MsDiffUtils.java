@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core;
+package org.pgcodekeeper.core.database.ms;
 
+import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.sql.Keyword;
 import org.pgcodekeeper.core.sql.Keyword.KeywordCategory;
 
@@ -117,6 +118,16 @@ public class MsDiffUtils {
      */
     public static String getUnQuotedName(String name) {
         return name.contains("[") ? name.substring(1).replace("]", "") : name;
+    }
+
+    /**
+     * Checks if a schema is a Microsoft SQL Server system schema.
+     *
+     * @param schema the schema name to check
+     * @return true if the schema is 'sys', false otherwise
+     */
+    public static boolean isSystemSchema(String schema) {
+        return Consts.SYS.equalsIgnoreCase(schema);
     }
 
     private MsDiffUtils() {

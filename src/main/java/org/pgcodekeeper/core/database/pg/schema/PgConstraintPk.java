@@ -16,8 +16,6 @@
 package org.pgcodekeeper.core.database.pg.schema;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.database.api.schema.IConstraintPk;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
@@ -130,12 +128,12 @@ public final class PgConstraintPk extends PgConstraint implements IConstraintPk,
                 sbSQL.append("NULLS NOT DISTINCT ");
             }
         }
-        StatementUtils.appendCols(sbSQL, columns, getDbType());
+        StatementUtils.appendCols(sbSQL, columns, getQuoter());
         if (withoutOverlapsColumn != null) {
             sbSQL.setLength(sbSQL.length() - 1);
             sbSQL
                     .append(", ")
-                    .append(Utils.getQuotedName(withoutOverlapsColumn, DatabaseType.PG))
+                    .append(getQuotedName(withoutOverlapsColumn))
                     .append(" WITHOUT OVERLAPS)");
         }
         appendIndexParam(sbSQL);
@@ -145,11 +143,11 @@ public final class PgConstraintPk extends PgConstraint implements IConstraintPk,
     private void appendIndexParam(StringBuilder sb) {
         if (!includes.isEmpty()) {
             sb.append(" INCLUDE ");
-            StatementUtils.appendCols(sb, includes, DatabaseType.PG);
+            StatementUtils.appendCols(sb, includes, getQuoter());
         }
         if (!params.isEmpty()) {
             sb.append(" WITH");
-            StatementUtils.appendOptionsWithParen(sb, params, getDbType());
+            StatementUtils.appendOptionsWithParen(sb, params, "=");
         }
         if (tablespace != null) {
             sb.append("\n\tUSING INDEX TABLESPACE ").append(tablespace);

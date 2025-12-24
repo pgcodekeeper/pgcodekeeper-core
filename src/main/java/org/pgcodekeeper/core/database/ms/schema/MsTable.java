@@ -15,16 +15,18 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.MsDiffUtils;
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.database.ms.MsDiffUtils;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.utils.Utils;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.ISimpleOptionContainer;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
+import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractTable;
 import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.script.SQLActionType;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -465,11 +467,6 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
             table.pkeys.addAll(pkeys);
         }
         return table;
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.MS;
     }
 
     @Override

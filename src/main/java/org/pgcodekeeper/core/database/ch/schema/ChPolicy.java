@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
@@ -136,11 +135,6 @@ public final class ChPolicy extends AbstractPolicy implements IChStatement {
         ChPolicy policy = new ChPolicy(name);
         policy.excepts.addAll(excepts);
         return policy;
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.CH;
     }
 
     @Override

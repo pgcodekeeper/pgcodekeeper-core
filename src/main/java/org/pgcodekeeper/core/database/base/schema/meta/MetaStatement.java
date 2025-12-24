@@ -24,6 +24,7 @@ import org.pgcodekeeper.core.settings.ISettings;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 /**
@@ -180,7 +181,7 @@ public class MetaStatement implements IStatement, Serializable {
     }
 
     @Override
-    public Set<ObjectPrivilege> getPrivileges() {
+    public Set<IPrivilege> getPrivileges() {
         throw new UnsupportedOperationException();
     }
 
@@ -240,6 +241,11 @@ public class MetaStatement implements IStatement, Serializable {
     }
 
     @Override
+    public void appendDefaultPrivileges(IStatement statement, SQLScript script) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void getCreationSQL(SQLScript script) {
         throw new UnsupportedOperationException();
     }
@@ -256,6 +262,11 @@ public class MetaStatement implements IStatement, Serializable {
 
     @Override
     public String formatSql(String sql, int offset, int length, IFormatConfiguration formatConfiguration) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public UnaryOperator<String> getQuoter() {
         throw new UnsupportedOperationException();
     }
 }

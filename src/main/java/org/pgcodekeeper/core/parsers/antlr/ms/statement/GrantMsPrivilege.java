@@ -16,15 +16,18 @@
 package org.pgcodekeeper.core.parsers.antlr.ms.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IPrivilege;
 import org.pgcodekeeper.core.database.api.schema.ISearchPath;
-import org.pgcodekeeper.core.database.api.schema.ObjectPrivilege;
-import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.*;
-import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractTable;
+import org.pgcodekeeper.core.database.base.schema.StatementOverride;
+import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
+import org.pgcodekeeper.core.database.ms.schema.MsPrivilege;
+import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
+import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.*;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -122,14 +125,14 @@ public final class GrantMsPrivilege extends MsParserAbstract {
             // 1 privilege for each permission
             for (String per : permissions) {
                 if (columns == null) {
-                    addPrivilege(st, new ObjectPrivilege(state, per, name.toString(), role, isGO, DatabaseType.MS));
+                    addPrivilege(st, new MsPrivilege(state, per, name.toString(), role, isGO));
                     continue;
                 }
 
                 // column privileges
                 for (IdContext column : columns.id()) {
                     name.append('(').append(MsDiffUtils.quoteName(column.getText())).append(')');
-                    ObjectPrivilege priv = new ObjectPrivilege(state, per, name.toString(), role, isGO, DatabaseType.MS);
+                    IPrivilege priv = new MsPrivilege(state, per, name.toString(), role, isGO);
                     // table column privileges to columns, other columns to statement
                     if (st instanceof AbstractTable table) {
                         addPrivilege(getSafe(AbstractTable::getColumn, table, column), priv);
@@ -199,7 +202,7 @@ public final class GrantMsPrivilege extends MsParserAbstract {
                 String objectName = st.getQualifiedName() + " (" + MsDiffUtils.quoteName(col.getText()) + ')';
 
                 for (String role : roles) {
-                    ObjectPrivilege priv = new ObjectPrivilege(state, pr, objectName, role, isGO, DatabaseType.MS);
+                    IPrivilege priv = new MsPrivilege(state, pr, objectName, role, isGO);
                     if (st instanceof AbstractTable table) {
                         addPrivilege(getSafe(AbstractTable::getColumn, table, col), priv);
                     } else {
@@ -210,7 +213,7 @@ public final class GrantMsPrivilege extends MsParserAbstract {
         }
     }
 
-    private void addPrivilege(AbstractStatement st, ObjectPrivilege privilege) {
+    private void addPrivilege(AbstractStatement st, IPrivilege privilege) {
         if (overrides == null) {
             st.addPrivilege(privilege);
         } else {

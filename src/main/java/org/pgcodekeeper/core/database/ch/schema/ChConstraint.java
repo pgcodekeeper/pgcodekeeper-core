@@ -15,8 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.ChDiffUtils;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
@@ -86,11 +85,6 @@ public final class ChConstraint extends AbstractConstraint implements IChStateme
     private boolean compareUnalterable(ChConstraint newConstr) {
         return Objects.equals(isAssume, newConstr.isAssume)
                 && Objects.equals(expr, newConstr.expr);
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.CH;
     }
 
     @Override

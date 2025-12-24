@@ -15,11 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.MsDiffUtils;
+import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.script.SQLScript;
 
 /**
@@ -61,10 +60,5 @@ public final class MsSchema extends AbstractSchema implements IMsStatement {
     @Override
     protected AbstractSchema getSchemaCopy() {
         return new MsSchema(name);
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.MS;
     }
 }

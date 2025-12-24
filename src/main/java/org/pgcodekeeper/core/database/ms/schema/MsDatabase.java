@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
@@ -186,11 +185,6 @@ public final class MsDatabase extends AbstractDatabase implements IMsStatement {
     @Override
     protected AbstractDatabase getDatabaseCopy() {
         return new MsDatabase();
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.MS;
     }
 
     @Override

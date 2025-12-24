@@ -21,12 +21,15 @@ package org.pgcodekeeper.core.it.loader.pg;
 
 import org.junit.jupiter.api.Test;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.EventType;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.database.pg.schema.PgTrigger.TgTypes;
 import org.pgcodekeeper.core.loader.ProjectLoader;
 import org.pgcodekeeper.core.model.exporter.ModelExporter;
-import org.pgcodekeeper.core.database.pg.schema.PgTrigger.TgTypes;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.utils.TempDir;
 
@@ -424,10 +427,10 @@ class PgAntlrLoaderTest {
         AbstractDatabase d = createDumpDB(dbType);
         AbstractSchema schema = d.getDefaultSchema();
 
-        schema.addPrivilege(new ObjectPrivilege("REVOKE", "ALL", "SCHEMA public", "PUBLIC", false, dbType));
-        schema.addPrivilege(new ObjectPrivilege("REVOKE", "ALL", "SCHEMA public", POSTGRES, false, dbType));
-        schema.addPrivilege(new ObjectPrivilege("GRANT", "ALL", "SCHEMA public", POSTGRES, false, dbType));
-        schema.addPrivilege(new ObjectPrivilege("GRANT", "ALL", "SCHEMA public", "PUBLIC", false, dbType));
+        schema.addPrivilege(new PgPrivilege("REVOKE", "ALL", "SCHEMA public", "PUBLIC", false));
+        schema.addPrivilege(new PgPrivilege("REVOKE", "ALL", "SCHEMA public", POSTGRES, false));
+        schema.addPrivilege(new PgPrivilege("GRANT", "ALL", "SCHEMA public", POSTGRES, false));
+        schema.addPrivilege(new PgPrivilege("GRANT", "ALL", "SCHEMA public", "PUBLIC", false));
 
         AbstractTable table = new PgSimpleTable("test_table");
         schema.addTable(table);
@@ -760,10 +763,10 @@ class PgAntlrLoaderTest {
         AbstractDatabase d = createDumpDB(dbType);
         AbstractSchema schema = d.getDefaultSchema();
 
-        schema.addPrivilege(new ObjectPrivilege("REVOKE", "ALL", "SCHEMA public", "PUBLIC", false, dbType));
-        schema.addPrivilege(new ObjectPrivilege("REVOKE", "ALL", "SCHEMA public", POSTGRES, false, dbType));
-        schema.addPrivilege(new ObjectPrivilege("GRANT", "ALL", "SCHEMA public", POSTGRES, false, dbType));
-        schema.addPrivilege(new ObjectPrivilege("GRANT", "ALL", "SCHEMA public", "PUBLIC", false, dbType));
+        schema.addPrivilege(new PgPrivilege("REVOKE", "ALL", "SCHEMA public", "PUBLIC", false));
+        schema.addPrivilege(new PgPrivilege("REVOKE", "ALL", "SCHEMA public", POSTGRES, false));
+        schema.addPrivilege(new PgPrivilege("GRANT", "ALL", "SCHEMA public", POSTGRES, false));
+        schema.addPrivilege(new PgPrivilege("GRANT", "ALL", "SCHEMA public", "PUBLIC", false));
 
         // d.setComment("'comments database'")
         // schema.setComment("'public schema'")

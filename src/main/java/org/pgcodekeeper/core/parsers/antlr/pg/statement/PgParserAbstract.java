@@ -18,7 +18,7 @@ package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.schema.*;
@@ -429,5 +429,10 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
     @Override
     protected AbstractSchema createSchema(String name) {
         return new PgSchema(name);
+    }
+
+    @Override
+    protected boolean isSystemSchema(String schema) {
+        return PgDiffUtils.isSystemSchema(schema);
     }
 }

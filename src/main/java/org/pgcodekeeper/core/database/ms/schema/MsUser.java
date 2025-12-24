@@ -16,8 +16,7 @@
 package org.pgcodekeeper.core.database.ms.schema;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.MsDiffUtils;
+import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
@@ -185,10 +184,5 @@ public final class MsUser extends AbstractStatement implements IMsStatement {
                     && allowEncrypted == user.allowEncrypted;
         }
         return false;
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.MS;
     }
 }

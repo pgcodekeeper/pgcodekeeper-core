@@ -25,7 +25,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.loader.FullAnalyze;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
@@ -109,7 +110,7 @@ class ExprTypeTest {
 
         for (Entry<String, Map<String, IRelation>> entry : meta.getRelations().entrySet()) {
             String schemaName = entry.getKey();
-            if (Utils.isPgSystemSchema(schemaName)) {
+            if (PgDiffUtils.isSystemSchema(schemaName)) {
                 continue;
             }
 

@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.database.api.schema.IOptionContainer;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
@@ -294,7 +294,7 @@ public abstract class AbstractTable extends AbstractStatementContainer implement
             return;
         }
 
-        var quoter = Utils.getQuoter(getDbType());
+        var quoter = getQuoter();
         String tblTmpQName = quoter.apply(getSchemaName()) + '.' + quoter.apply(tblTmpBareName);
         String cols = colsForMovingData.stream().map(quoter).collect(Collectors.joining(", "));
         List<String> identityColsForMovingData = identityCols == null ? Collections.emptyList()

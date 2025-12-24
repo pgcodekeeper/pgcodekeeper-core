@@ -15,12 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.ChDiffUtils;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
+import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
+import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
@@ -255,11 +254,6 @@ public final class ChColumn extends AbstractColumn implements IChStatement {
         if (settings.isGenerateExists()) {
             sb.append(IF_EXISTS);
         }
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.CH;
     }
 
     @Override

@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.parsers.antlr.pg.expr;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;

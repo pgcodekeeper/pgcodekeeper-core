@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core;
+package org.pgcodekeeper.core.database.ch;
+
+import org.pgcodekeeper.core.Consts;
 
 /**
  * Utility class for handling quoting and unquoting of identifiers and literals in ClickHouse.
@@ -116,6 +118,17 @@ public class ChDiffUtils {
      */
     public static String unQuoteLiteralName(String name) {
         return name.startsWith("'") ? name.substring(1, name.length() - 1).replace("''", "'") : name;
+    }
+
+    /**
+     * Checks if a schema is a ClickHouse system schema.
+     *
+     * @param schema the schema name to check
+     * @return true if the schema is 'system' or 'information_schema', false otherwise
+     */
+    public static boolean isSystemSchema(String schema) {
+        return Consts.SYSTEM.equalsIgnoreCase(schema)
+                || Consts.INFORMATION_SCHEMA.equalsIgnoreCase(schema);
     }
 
     private ChDiffUtils() {

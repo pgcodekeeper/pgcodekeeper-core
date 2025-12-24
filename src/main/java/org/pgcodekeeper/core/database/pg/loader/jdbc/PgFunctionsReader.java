@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.database.pg.loader.jdbc;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.Consts.FUNC_SIGN;
-import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.ArgMode;
 import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.base.schema.*;

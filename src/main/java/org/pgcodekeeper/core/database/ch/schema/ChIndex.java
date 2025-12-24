@@ -15,13 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.ChDiffUtils;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.database.base.schema.AbstractIndex;
 import org.pgcodekeeper.core.database.base.schema.AbstractTable;
-import org.pgcodekeeper.core.database.api.schema.ObjectState;
+import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
 import java.util.Objects;
@@ -108,11 +107,6 @@ public final class ChIndex extends AbstractIndex implements IChStatement {
         return Objects.equals(expr, newIndex.expr)
                 && Objects.equals(type, newIndex.type)
                 && granVal == newIndex.granVal;
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.CH;
     }
 
     @Override

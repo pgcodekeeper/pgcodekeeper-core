@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.parsers.antlr.pg.statement;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;

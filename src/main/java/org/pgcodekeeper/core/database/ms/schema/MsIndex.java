@@ -15,8 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.MsDiffUtils;
+import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.database.base.schema.*;
@@ -109,11 +108,11 @@ public final class MsIndex extends AbstractIndex implements IMsStatement {
 
         if (!includes.isEmpty()) {
             sb.append(isColumnstore ? " " : " INCLUDE ");
-            StatementUtils.appendCols(sb, includes, getDbType());
+            StatementUtils.appendCols(sb, includes, getQuoter());
         }
         if (!orderCols.isEmpty()) {
             sb.append("\nORDER ");
-            StatementUtils.appendCols(sb, orderCols, getDbType());
+            StatementUtils.appendCols(sb, orderCols, getQuoter());
         }
         appendWhere(sb);
 
@@ -128,7 +127,7 @@ public final class MsIndex extends AbstractIndex implements IMsStatement {
         }
         if (!tmpOptions.isEmpty()) {
             sb.append(isTypeIndex ? ' ' : '\n').append("WITH (").append(isTypeIndex ? ' ' : "");
-            StatementUtils.appendOptions(sb, tmpOptions, getDbType());
+            StatementUtils.appendOptions(sb, tmpOptions, " = ");
             sb.append(')');
         }
 
@@ -204,10 +203,5 @@ public final class MsIndex extends AbstractIndex implements IMsStatement {
         ind.setColumnstore(isColumnstore);
         ind.orderCols.addAll(orderCols);
         return ind;
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.MS;
     }
 }

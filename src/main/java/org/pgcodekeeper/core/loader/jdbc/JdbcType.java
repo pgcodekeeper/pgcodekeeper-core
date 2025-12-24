@@ -16,8 +16,7 @@
 package org.pgcodekeeper.core.loader.jdbc;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
@@ -156,7 +155,7 @@ public class JdbcType {
      * @param st the statement to add the dependency to
      */
     public void addTypeDepcy(AbstractStatement st) {
-        if (oid > lastSysOid && !Utils.isPgSystemSchema(parentSchema)) {
+        if (oid > lastSysOid && !PgDiffUtils.isSystemSchema(parentSchema)) {
             st.addDependency(new GenericColumn(parentSchema, typeName, DbObjType.TYPE));
         }
     }

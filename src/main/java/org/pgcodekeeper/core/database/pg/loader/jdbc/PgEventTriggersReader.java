@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.loader.jdbc;
 
-import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;

@@ -15,9 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.base.schema.AbstractFunction;
+import org.pgcodekeeper.core.hasher.Hasher;
 
 import java.util.Objects;
 
@@ -106,10 +105,5 @@ public abstract class MsAbstractFunction extends AbstractFunction
         functionDst.setFirstPart(firstPart);
         functionDst.setSecondPart(secondPart);
         return functionDst;
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.MS;
     }
 }

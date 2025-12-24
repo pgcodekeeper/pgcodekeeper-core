@@ -19,7 +19,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Token;
-import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
 import org.pgcodekeeper.core.database.base.formatter.AbstractFormatter;
 import org.pgcodekeeper.core.database.base.formatter.FormatItem;

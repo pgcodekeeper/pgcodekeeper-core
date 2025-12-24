@@ -15,10 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.base.schema.AbstractFunction;
 import org.pgcodekeeper.core.database.base.schema.Argument;
+import org.pgcodekeeper.core.hasher.Hasher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,10 +80,5 @@ public abstract class MsAbstractClrFunction extends AbstractFunction implements 
         MsAbstractClrFunction functionDst = (MsAbstractClrFunction) super.shallowCopy();
         functionDst.options.addAll(options);
         return functionDst;
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.MS;
     }
 }

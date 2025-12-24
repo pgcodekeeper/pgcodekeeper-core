@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.utils;
 
-import org.pgcodekeeper.core.Utils;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.database.pg.loader.jdbc;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -94,7 +94,7 @@ public final class PgCastsReader extends AbstractStatementReader {
                 loader.submitAntlrTask(function, SQLParser::function_args_parser, ctx -> {
                     List<ParserRuleContext> ids = PgParserAbstract.getIdentifiers(ctx.schema_qualified_name());
                     String schemaName = QNameParser.getSchemaName(ids);
-                    if (schemaName != null && !Utils.isPgSystemSchema(schemaName)) {
+                    if (schemaName != null && !PgDiffUtils.isSystemSchema(schemaName)) {
                         String funcName = PgParserAbstract.parseSignature(
                                 QNameParser.getFirstName(ids), ctx.function_args());
                         cast.addDependency(new GenericColumn(schemaName, funcName, DbObjType.FUNCTION));
@@ -122,7 +122,7 @@ public final class PgCastsReader extends AbstractStatementReader {
         if (objectName.indexOf('.') != -1) {
             QNameParser<ParserRuleContext> parser = QNameParser.parsePg(objectName);
             String schemaName = parser.getSchemaName();
-            if (schemaName != null && !Utils.isPgSystemSchema(schemaName)) {
+            if (schemaName != null && !PgDiffUtils.isSystemSchema(schemaName)) {
                 statement.addDependency(new GenericColumn(schemaName, parser.getFirstName(), DbObjType.TYPE));
             }
         }

@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc;
 
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.utils.Utils;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 

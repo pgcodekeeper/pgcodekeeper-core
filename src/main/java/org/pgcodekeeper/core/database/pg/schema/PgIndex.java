@@ -20,9 +20,8 @@
 package org.pgcodekeeper.core.database.pg.schema;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.PgDiffUtils;
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.database.base.schema.*;
@@ -116,7 +115,7 @@ public final class PgIndex extends AbstractIndex implements IPgStatement {
                 sbSQL.append(' ').append(col.getOpClass());
                 var opClassParams = col.getOpClassParams();
                 if (!opClassParams.isEmpty()) {
-                    StatementUtils.appendOptionsWithParen(sbSQL, opClassParams, getDbType());
+                    StatementUtils.appendOptionsWithParen(sbSQL, opClassParams, "=");
                 }
             }
             if (col.isDesc()) {
@@ -134,14 +133,14 @@ public final class PgIndex extends AbstractIndex implements IPgStatement {
     private void appendIndexParam(StringBuilder sb) {
         if (!includes.isEmpty()) {
             sb.append(" INCLUDE ");
-            StatementUtils.appendCols(sb, includes, DatabaseType.PG);
+            StatementUtils.appendCols(sb, includes, getQuoter());
         }
         if (!nullsDistinction) {
             sb.append(" NULLS NOT DISTINCT");
         }
         if (!options.isEmpty()) {
             sb.append("\nWITH");
-            StatementUtils.appendOptionsWithParen(sb, options, DatabaseType.PG);
+            StatementUtils.appendOptionsWithParen(sb, options, "=");
         }
         if (tablespace != null) {
             sb.append("\nTABLESPACE ").append(tablespace);

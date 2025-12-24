@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.loader;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.library.PgLibrary;
 import org.pgcodekeeper.core.library.PgLibrarySource;
 import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;

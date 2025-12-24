@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader.jdbc;
 
-import org.pgcodekeeper.core.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
 
 import java.util.ArrayList;

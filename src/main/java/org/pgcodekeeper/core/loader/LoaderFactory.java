@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.loader;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.Utils;
+import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.ch.loader.JdbcChLoader;
 import org.pgcodekeeper.core.database.ms.loader.JdbcMsLoader;

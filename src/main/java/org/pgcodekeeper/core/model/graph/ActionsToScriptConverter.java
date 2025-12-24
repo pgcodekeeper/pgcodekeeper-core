@@ -15,9 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
-import org.pgcodekeeper.core.*;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.ch.ChDiffUtils;
+import org.pgcodekeeper.core.database.ms.MsDiffUtils;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.database.ms.schema.MsColumn;
@@ -383,7 +385,7 @@ public final class ActionsToScriptConverter {
     private void printDropTempTable(AbstractTable table) {
         String tblTmpName = tblTmpNames.get(table.getQualifiedName());
         if (tblTmpName != null) {
-            UnaryOperator<String> quoter = Utils.getQuoter(settings.getDbType());
+            UnaryOperator<String> quoter = table.getQuoter();
             StringBuilder sb = new StringBuilder();
             sb.append("DROP TABLE ")
                     .append(quoter.apply(table.getSchemaName())).append('.').append(quoter.apply(tblTmpName));

@@ -15,15 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.loader.jdbc;
 
-import org.pgcodekeeper.core.ChDiffUtils;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.ch.ChDiffUtils;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.database.ch.schema.ChPrivilege;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.ObjectPrivilege;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -62,8 +61,8 @@ public final class ChPrivilegesReader extends AbstractStatementReader {
         String columnStr = col == null ? "" : '(' + col + ')';
         boolean isGrantOption = result.getBoolean("grant_option");
 
-        st.addPrivilege(new ObjectPrivilege("GRANT", permission + columnStr, fullName,
-                user != null ? user : role, isGrantOption, DatabaseType.CH));
+        st.addPrivilege(new ChPrivilege("GRANT", permission + columnStr, fullName,
+                user != null ? user : role, isGrantOption));
     }
 
     private String getNameOrAsterisk(String name) {
