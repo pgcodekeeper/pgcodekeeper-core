@@ -57,7 +57,7 @@ dml_stmt
     | move_stmt
     | set_stmt
     | SHOW show_stmt
-    | system_stmt
+    | SYSTEM system_stmt
     | use_stmt
     | watch_stmt
     | insert_stmt
@@ -1164,13 +1164,83 @@ from_in_db
     ;
 
 system_stmt
-    : SYSTEM FLUSH DISTRIBUTED qualified_name
-    | SYSTEM FLUSH LOGS
-    | SYSTEM RELOAD DICTIONARIES
-    | SYSTEM RELOAD DICTIONARY qualified_name
-    | SYSTEM (START | STOP) (DISTRIBUTED SENDS | FETCHES | TTL? MERGES) qualified_name
-    | SYSTEM (START | STOP) REPLICATED SENDS
-    | SYSTEM SYNC REPLICA qualified_name
+    : RELOAD reload_system_stmt
+    | DROP drop_system_stmt
+    | FLUSH LOGS cluster_clause? (qualified_name (COMMA qualified_name)*)?
+    | FLUSH DISTRIBUTED qualified_name cluster_clause? settings_clause?
+    | SHUTDOWN
+    | KILL
+    | INSTRUMENT (ADD FUNCTION qualified_name instrument_handler | REMOVE (ID | ALL | LPAREN select_stmt RPAREN))
+    | (START | STOP) start_stop_system_stmt
+    | UNFREEZE WITH NAME STRING_LITERAL
+    | WAIT LOADING PARTS cluster_clause? qualified_name
+    | (LOAD | UNLOAD) PRIMARY KEY qualified_name?
+    | SYNC sync_system_stmt
+    | RESTART (REPLICA cluster_clause? qualified_name | REPLICAS)
+    | RESTORE DATABASE? REPLICA (cluster_clause qualified_name | qualified_name cluster_clause?)
+    | (CANCEL | REFRESH | WAIT) VIEW qualified_name
+    ;
+
+reload_system_stmt
+    : (EMBEDDED? DICTIONARIES | FUNCTIONS | ASYNCHRONOUS METRICS | CONFIG | USERS) cluster_clause?
+    | (DICTIONARY | FUNCTION) cluster_clause? qualified_name
+    | MODEL cluster_clause? STRING_LITERAL
+    ;
+
+drop_system_stmt
+    : (DNS | MARK | ICEBERG METADATA | UNCOMPRESSED | COMPILED EXPRESSION) CACHE
+    | TEXT INDEX (DICTIONARY CACHE | HEADER CACHE | POSTINGS CACHE | CACHES)
+    | QUERY CONDITION? CACHE (TAG STRING_LITERAL)?
+    | FORMAT SCHEMA CACHE (FOR (PROTOBUF | FILES))?
+    | FILESYSTEM CACHE cluster_clause?
+    | REPLICA STRING_LITERAL (FROM (DATABASE qualified_name | TABLE qualified_name | ZKPATH STRING_LITERAL))?
+    | DATABASE REPLICA STRING_LITERAL (FROM SHARD STRING_LITERAL)? (FROM (DATABASE qualified_name | ZKPATH STRING_LITERAL))?
+    ;
+
+start_stop_system_stmt
+    : DISTRIBUTED SENDS qualified_name cluster_clause?
+    | LISTEN cluster_clause? listen_protocol?
+    | MERGES cluster_clause? (ON VOLUME qualified_name | qualified_name)?
+    | start_stop_types cluster_clause? qualified_name?
+    | REPLICATED? VIEW qualified_name
+    | VIEWS
+    ;
+
+start_stop_types
+    : TTL MERGES
+    | MOVES
+    | FETCHES
+    | REPLICATED SENDS
+    | REPLICATION QUEUES
+    | PULLING REPLICATION LOG
+    ;
+
+sync_system_stmt
+    : REPLICA cluster_clause? qualified_name if_exists? (STRICT | LIGHTWEIGHT (FROM string_literal_list)? | PULL)?
+    | DATABASE REPLICA qualified_name
+    | FILE CACHE cluster_clause?
+    ;
+
+listen_protocol
+    : QUERIES (ALL | DEFAULT | CUSTOM) (EXCEPT identifier_list)?
+    | TCP (WITH PROXY)? SECURE?
+    | HTTP SECURE?
+    | HTTPS
+    | MYSQL
+    | GRPC
+    | POSTGRESQL
+    | PROMETHEUS
+    | CUSTOM STRING_LITERAL
+    ;
+
+instrument_handler
+    : LOG entry_or_exit STRING_LITERAL
+    | SLEEP entry_or_exit (NUMBER | NUMBER NUMBER)
+    | PROFILE
+    ;
+
+entry_or_exit
+    : ENTRY | EXIT
     ;
 
 truncate_stmt
@@ -1463,6 +1533,7 @@ tokens_nonreserved
     | ASSUME
     | AST
     | ASYNC
+    | ASYNCHRONOUS
     | ATTACH
     | AUTHENTICATIONS
     | AUTO_INCREMENT
@@ -1482,6 +1553,7 @@ tokens_nonreserved
     | BYTEA
     | CACHE
     | CACHES
+    | CANCEL
     | CASE
     | CAST
     | CHANGED
@@ -1502,7 +1574,9 @@ tokens_nonreserved
     | COLUMNS
     | COMMENT
     | COMMIT
+    | COMPILED
     | COMPRESSION
+    | CONDITION
     | CONFIG
     | CONST
     | CONSTRAINT
@@ -1510,6 +1584,7 @@ tokens_nonreserved
     | CUBE
     | CURRENT
     | CURRENT_USER
+    | CUSTOM
     | DATABASE
     | DATABASES
     | DATE
@@ -1548,6 +1623,7 @@ tokens_nonreserved
     | ENGINES
     | ENUM
     | EMBEDDED
+    | ENTRY
     | EPHEMERAL
     | ESTIMATE
     | EVENTS
@@ -1555,6 +1631,7 @@ tokens_nonreserved
     | EXCHANGE
     | EXECUTION
     | EXISTS
+    | EXIT
     | EXPLAIN
     | EXPRESSION
     | EXTENDED
@@ -1564,6 +1641,7 @@ tokens_nonreserved
     | FETCHES
     | FIELDS
     | FILE
+    | FILES
     | FILESYSTEM
     | FILL
     | FIRST
@@ -1581,11 +1659,16 @@ tokens_nonreserved
     | GRANTEES
     | GRANTS
     | GRANULARITY
+    | GRPC
     | GROUPING
     | HDFS
+    | HEADER
     | HIERARCHICAL
     | HIVE
     | HOST
+    | HTTP
+    | HTTPS
+    | ICEBERG
     | ID
     | IDENTIFIED
     | IF
@@ -1598,6 +1681,7 @@ tokens_nonreserved
     | INJECTIVE
     | INSERT
     | INSERTS
+    | INSTRUMENT
     | INT
     | INT_TYPE
     | INTEGER
@@ -1620,14 +1704,19 @@ tokens_nonreserved
     | KILL
     | LARGE
     | LAST
+    | LIGHTWEIGHT
     | LAYOUT
     | LEVEL
     | LEADING
     | LIFETIME
     | LIMITS
     | LINE_STRING
+    | LISTEN
     | LIVE
+    | LOAD
+    | LOADING
     | LOCAL
+    | LOG
     | LOGS
     | LONGBLOB
     | LONGTEXT
@@ -1646,10 +1735,14 @@ tokens_nonreserved
     | MEDIUMINT
     | MEDIUMTEXT
     | MERGES
+    | METADATA
+    | METRICS
     | MICROSECOND
     | MILLISECOND
     | MIN
     | MOD
+    | MODEL
+    | MODELS
     | MODIFY
     | MONGO
     | MOVE
@@ -1685,6 +1778,7 @@ tokens_nonreserved
     | OVERRIDE
     | PART
     | PARTITION
+    | PARTS
     | PERIODIC
     | PERMANENTLY
     | PERMISSIVE
@@ -1696,6 +1790,8 @@ tokens_nonreserved
     | POLYGIN
     | POPULATE
     | POSTGRES
+    | POSTINGS
+    | POSTGRESQL
     | PRECEDING
     | PRECISION
     | PRIMARY
@@ -1703,9 +1799,15 @@ tokens_nonreserved
     | PROCESSLIST
     | PROFILE
     | PROFILES
+    | PROMETHEUS
     | PROJECTION
+    | PROTOBUF
+    | PROXY
+    | PULL
+    | PULLING
     | QUALIFY
     | QBIT
+    | QUERIES
     | QUERY
     | QUOTA
     | QUOTAS
@@ -1728,11 +1830,13 @@ tokens_nonreserved
     | RENAME
     | REPLACE
     | REPLICA
+    | REPLICAS
     | REPLICATED
     | REPLICATION
     | RECURSIVE
     | RESET
     | RESTART
+    | RESTORE
     | RESTRICTIVE
     | RESULT
     | REVOKE
@@ -1744,6 +1848,7 @@ tokens_nonreserved
     | ROW
     | ROWS
     | SECRETS
+    | SECURE
     | SECURITY
     | SELECT
     | SELECTS
@@ -1758,6 +1863,7 @@ tokens_nonreserved
     | SHUTDOWN
     | SIGNED
     | SINGLE
+    | SLEEP
     | SMALLINT
     | SOURCE
     | SOURCES
@@ -1775,8 +1881,13 @@ tokens_nonreserved
     | SYNTAX
     | SYSTEM
     | S3
+    | SCHEMA
+    | SHARD
+    | STRICT
     | TABLE
     | TABLES
+    | TAG
+    | TCP
     | TEMPORARY
     | TEST
     | TEXT
@@ -1802,6 +1913,7 @@ tokens_nonreserved
     | UNBOUNDED
     | UNFREEZE
     | UNCOMPRESSED
+    | UNLOAD
     | UNDROP
     | UNSIGNED
     | UNTIL
@@ -1818,11 +1930,14 @@ tokens_nonreserved
     | VARIANT
     | VARYING
     | VIEW
+    | VIEWS
     | VOLUME
+    | WAIT
     | WATCH
     | WHEN
     | WRITABLE
     | WRITTEN
+    | ZKPATH
     ;
 
 alias_clause
@@ -1876,6 +1991,10 @@ tokens_reserved
 
 identifier_list
     : identifier (COMMA identifier)*
+    ;
+
+string_literal_list
+    : STRING_LITERAL (COMMA STRING_LITERAL)*
     ;
 
 identifier
