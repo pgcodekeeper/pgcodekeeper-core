@@ -562,6 +562,7 @@ SELECT * FROM `01760_db`.example_complex_key_dictionary;
 SELECT * FROM `01760_db`.example_simple_key_dictionary;
 SELECT * FROM `01765_db`.hashed_dictionary_simple_key_complex_attributes ORDER BY id;
 SELECT * FROM `02538_bf_ngrambf_map_values_test` PREWHERE (map['']) = 'V2V\0V2V2V2V2V2V2' WHERE (map[NULL]) = 'V2V\0V2V2V2V2V2V2V2V\0V2V2V2V2V2V2V2V\0V2V2V2V2V2V2V2V\0V2V2V2V2V2V2' SETTINGS force_data_skipping_indices = 'map_values_ngrambf';
+SELECT count() FROM test.hits PREWHERE UserID IN (SELECT UserID FROM test.hits WHERE CounterID = 800784);
 SELECT * FROM `02668_logical_optimizer` WHERE 3 = a AND b = 'another' AND a = 3;
 select * from `table_00609` prewhere val > 2 format Null;
 SELECT * FROM a ANY LEFT OUTER JOIN j USING id ORDER BY a.id, a.val SETTINGS enable_optimize_predicate_expression = 0;
@@ -708,6 +709,67 @@ SELECT 3 as nelems, [[1,2],[-10,-20],[10,20],[0,0],[-1.5,1]] as arr, arrayResize
 SELECT 3_4e2_1;
 SELECT @@max_allowed_packet FORMAT CSVWithNames;
 SELECT @@Version FORMAT CSVWithNames;
+SELECT number, COUNT() OVER (PARTITION BY number % 3) AS partition_count
+FROM numbers(10)
+QUALIFY partition_count = 4
+ORDER BY number;
+SELECT today() AS current_date, now() AS current_time
+INTO OUTFILE '/tmp/date_output.txt' AND STDOUT;
+SELECT * FROM large_table
+INTO OUTFILE 'data.zst'
+COMPRESSION 'zstd' LEVEL 5;
+SELECT * FROM hits_table
+WHERE EventDate = today()
+INTO OUTFILE '/data/hits_today.csv.gz' AND STDOUT APPEND
+COMPRESSION 'gzip' LEVEL 3
+FORMAT CSVWithNames;
+SELECT number, number * 2 AS doubled
+FROM numbers(10)
+INTO OUTFILE '/tmp/data.tsv' TRUNCATE;
+-- order by clause (STALENESS, INTERPOLATE)
+SELECT number AS key, 5 * number value, 'original' AS source
+FROM numbers(16) WHERE key % 5 == 0
+ORDER BY key WITH FILL STALENESS 3;
+SELECT n, source, inter FROM (
+   SELECT toFloat32(number % 10) AS n, 'original' AS source, number AS inter
+   FROM numbers(10) WHERE number % 3 = 1
+) ORDER BY n WITH FILL FROM 0 TO 5.51 STEP 0.5 INTERPOLATE (inter AS inter + 1);
+SELECT toDateTime('2016-06-15 23:00:00') + number AS a, a as b, number as c FROM numbers(30) WHERE (number % 5) == 0;
+SELECT a, b, c, 'original' as original FROM with_fill_staleness ORDER BY a WITH FILL STALENESS INTERVAL 2 SECOND, b WITH FILL FROM 0 TO 3 INTERPOLATE (c);
+SELECT a, b, c, 'original' as original FROM with_fill_staleness ORDER BY a WITH FILL STALENESS INTERVAL 2 SECOND, b WITH FILL TO toDateTime('2016-06-15 23:01:00') STEP 2 STALENESS 5 INTERPOLATE (c);
+SELECT *, 'original' AS orig FROM test2 ORDER BY a WITH FILL to 20 STALENESS 4, b WITH FILL TO 15 STALENESS 7;
+--replace
+SELECT * REPLACE(i + 1 AS i) from columns_transformers;
+SELECT * REPLACE(
+    (SELECT MAX(value) FROM metrics) AS max_value
+) FROM current_data;
+SELECT * REPLACE(
+    CASE 
+        WHEN age < 18 THEN 'minor'
+        WHEN age BETWEEN 18 AND 65 THEN 'adult'
+        ELSE 'senior'
+    END AS age_group
+) FROM persons;
+SELECT * REPLACE(
+    'hidden' AS email,
+    '***' AS password
+) FROM users 
+WHERE active = 1;
+SELECT id, name, * REPLACE(
+        mask(email) AS email,
+        mask(phone) AS phone
+    )
+FROM customers;
+SELECT * REPLACE(
+    multiIf(
+        country IN ('US', 'CA'), 'North America',
+        country IN ('GB', 'DE', 'FR'), 'Europe',
+        'Other'
+    ) AS region,
+    round(revenue * exchange_rate, 2) AS revenue_usd,
+    ifNull(comments, 'No comments') AS comments
+) FROM sales_data
+WHERE quarter = 'Q1-2024';
 SELECT [ 0 ];
 select [0, 0, 0, 0, 0, 0, 8, 0, 0, 1, 1, 15, 0, 1, 7, 0] = multiSearchAllPositionsCaseInsensitive(materialize('nxwotjpplUAXvoQaHgQzr'), ['ABiEhaADbBLzPwhSfhu', 'TbIqtlkCnFdPgvXAYpUuLjqnnDjDD', 'oPszWpzxuhcyuWxiOyfMBi', 'fLkacEEeHXCYuGYQXbDHKTBntqCQOnD', 'GHGZkWVqyooxtKtFTh', 'CvHcLTbMOQBKNCizyEXIZSgFxJY', 'PlUAxVoQah', 'zrhYwNUzoYjUSswEFEQKvkI', 'c', 'NXWOt', '', 'qAhG', 'JNqCpsMJfOcDxWLVhSSqyNauaRxC', '', 'PpLuaxV', 'DLITYGE']) from system.numbers limit 10;
 select [1, 0, 7, 1, 0, 24, 17, 0, 0, 0, 2, 0, 1, 7, 4, 1, 12, 8] = multiSearchAllPositionsCaseInsensitiveUTF8(materialize('гГБаДнФбпнЩврЩшЩЩМщЕБшЩПЖПчдт'), ['', 'таОХхрзИДжЛСдЖКЧжБВЩжЛкКХУКждАКРеаЗТгч', 'Ф', '', 'ЙЩИФМфАГщХзКЩЧТЙжмуГшСЛ', 'ПЖпчдТ', 'ЩМщЕбшЩПжПч', 'ФгА', 'гУД', 'зУцкжРоППЖчиШйЗЕшаНаЧаЦх', 'гбаДНФбПНЩВРЩШЩщМЩеБшЩпжПЧд', 'РДЧЖАбрФЦ', 'гГ', 'ФбпНщвр', 'адНфБПнщвРщШщщМщЕбШщ', 'ггб', 'ВРЩ', 'бПНщврЩш']) from system.numbers limit 10;

@@ -667,7 +667,7 @@ CREATE TABLE application_logs
 (
     log_id UUID DEFAULT generateUUIDv4() COMMENT 'Уникальный идентификатор записи лога',
     timestamp DateTime64(3, 'UTC') COMMENT 'Метка времени события в UTC' CODEC(DoubleDelta, ZSTD) TTL timestamp + INTERVAL 90 DAY,
-    level Enum8('DEBUG' = 1, 'INFO' = 2, 'WARNING' = 3, 'ERROR' = 4, 'CRITICAL' = 5) COMMENT 'Уровень серьезности лога' CODEC(T64, LZ4),
+    level_1 Enum8('DEBUG' = 1, 'INFO' = 2, 'WARNING' = 3, 'ERROR' = 4, 'CRITICAL' = 5) COMMENT 'Уровень серьезности лога' CODEC(T64, LZ4),
     message String COMMENT 'Текст сообщения лога' CODEC(ZSTD(3)) TTL timestamp + INTERVAL 180 DAY,
     source LowCardinality(String) COMMENT 'Источник лога (название сервиса)' CODEC(LZ4HC),
     user_id Nullable(UInt32) COMMENT 'Идентификатор пользователя, если применимо' CODEC(Delta, LZ4),
@@ -679,7 +679,7 @@ CREATE TABLE application_logs
     created_at DateTime DEFAULT now() COMMENT 'Время создания записи в БД' CODEC(DoubleDelta, LZ4)
 ) ENGINE = MergeTree()
 PARTITION BY toYYYYMM(timestamp)
-ORDER BY (timestamp, level, source)
+ORDER BY (timestamp, level_1, source)
 TTL timestamp + INTERVAL 365 DAY
 COMMENT 'Логи приложения с различными сроками хранения для разных полей';
 --Log
