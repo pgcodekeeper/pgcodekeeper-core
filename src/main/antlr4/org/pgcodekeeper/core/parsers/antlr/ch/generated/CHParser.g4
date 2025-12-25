@@ -25,7 +25,9 @@ expr_eof
     ;
 
 query
-    : stmt (INTO OUTFILE STRING_LITERAL)? (FORMAT (identifier | NULL))?
+    : stmt (INTO OUTFILE STRING_LITERAL)? (AND STDOUT)? (APPEND | TRUNCATE)?
+    (COMPRESSION STRING_LITERAL (LEVEL number_literal)?)?
+    (FORMAT (identifier | NULL))?
     ;
 
 stmt
@@ -959,6 +961,7 @@ select_primary
     from_clause?
     array_join_clause?
     window_clause?
+    qualify_clause?
     prewhere_clause?
     where_clause?
     group_by_clause? (WITH (CUBE | ROLLUP))? (WITH TOTALS)?
@@ -976,7 +979,11 @@ select_list
 select_mode
     : APPLY (LPAREN identifier RPAREN | identifier | function_call | lambda_expr)
     | EXCEPT (LPAREN expr_list RPAREN | identifier | literal)
-    | REPLACE (LPAREN expr AS identifier RPAREN | expr AS identifier)
+    | REPLACE (LPAREN expr_list_with_alias RPAREN | expr_list_with_alias)
+    ;
+
+expr_list_with_alias
+    : expr AS identifier (COMMA expr AS identifier)*
     ;
 
 top_clause
@@ -1012,6 +1019,10 @@ array_join_clause
 
 window_clause
     : WINDOW identifier AS window_expr
+    ;
+
+qualify_clause
+    : QUALIFY expr
     ;
 
 prewhere_clause
@@ -1082,7 +1093,7 @@ order_expr
     ;
 
 with_fill
-    : WITH FILL (FROM expr)? (TO expr)? (STEP expr)? (INTERPOLATE expr_list)?
+    : WITH FILL (FROM expr)? (TO expr)? (STEP expr)? (STALENESS expr)? (INTERPOLATE expr_list)?
     ;
 
 ratio_expr
@@ -1263,8 +1274,6 @@ json_data_type
     | SKIP_ REGEXP STRING_LITERAL
     | (MAX_DYNAMIC_PATHS | MAX_DYNAMIC_TYPES) EQ_SINGLE NUMBER
     ;
-
-
 
 precision
     : LPAREN signed_number_literal (COMMA signed_number_literal)? RPAREN
@@ -1493,6 +1502,7 @@ tokens_nonreserved
     | COLUMNS
     | COMMENT
     | COMMIT
+    | COMPRESSION
     | CONFIG
     | CONST
     | CONSTRAINT
@@ -1611,6 +1621,7 @@ tokens_nonreserved
     | LARGE
     | LAST
     | LAYOUT
+    | LEVEL
     | LEADING
     | LIFETIME
     | LIMITS
@@ -1693,6 +1704,7 @@ tokens_nonreserved
     | PROFILE
     | PROFILES
     | PROJECTION
+    | QUALIFY
     | QBIT
     | QUERY
     | QUOTA
@@ -1751,8 +1763,10 @@ tokens_nonreserved
     | SOURCES
     | SQL
     | SQLITE
+    | STALENESS
     | START
     | STATISTIC
+    | STDOUT
     | STEP
     | STOP
     | STRING

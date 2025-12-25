@@ -86,7 +86,8 @@ public final class ChValueExpr extends ChAbstractExpr {
         }
 
         if (selectMode.REPLACE() != null) {
-            analyze(selectMode.expr());
+            var exprList = selectMode.expr_list_with_alias().expr();
+            analyzeExprs(exprList);
         }
     }
 
