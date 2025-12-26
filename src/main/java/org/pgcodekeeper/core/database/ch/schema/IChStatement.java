@@ -29,6 +29,8 @@ import java.util.function.UnaryOperator;
  */
 public interface IChStatement extends IStatement {
 
+    String RENAME_OBJECT_COMMAND = "RENAME %s %s TO %s;";
+
     @Override
     default String formatSql(String sql, int offset, int length, IFormatConfiguration formatConfiguration) {
         return new ChFormatter(sql, offset, length, formatConfiguration).formatText();
@@ -47,5 +49,10 @@ public interface IChStatement extends IStatement {
     @Override
     default void appendDefaultPrivileges(IStatement statement, SQLScript script) {
         // no imp
+    }
+
+    @Override
+    default String getRenameCommand(String newName) {
+        return RENAME_OBJECT_COMMAND.formatted(getStatementType(), getQualifiedName(), getQuotedName(newName));
     }
 }

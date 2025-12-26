@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.utils;
 
 import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.PgCodekeeperException;
+import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.WorkDirs;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
@@ -125,7 +125,7 @@ public class ProjectUpdater {
         }
     }
 
-    private void updatePartial(Path dirTmp) throws IOException, PgCodekeeperException {
+    private void updatePartial(Path dirTmp) throws IOException, PgCodeKeeperException {
         LOG.info(Messages.ProjectUpdater_log_start_partial_update);
         if (overridesOnly) {
             updateFolder(dirTmp, WorkDirs.OVERRIDES);

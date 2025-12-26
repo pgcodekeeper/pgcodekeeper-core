@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.api.schema.ISearchPath;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
@@ -58,11 +57,6 @@ public final class PgFtsConfiguration extends AbstractStatement implements ISear
     @Override
     public DbObjType getStatementType() {
         return DbObjType.FTS_CONFIGURATION;
-    }
-
-    @Override
-    public AbstractSchema getContainingSchema() {
-        return (AbstractSchema) parent;
     }
 
     @Override

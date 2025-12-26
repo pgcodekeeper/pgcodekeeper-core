@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.api;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.PgCodekeeperException;
+import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.PgDiff;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.ignorelist.IgnoreList;
@@ -172,12 +172,12 @@ public final class PgCodeKeeperApi {
      * @param oldDb           the old database version
      * @param newDb           the new database version with changes
      * @param projectToUpdate path to the project directory to update
-     * @throws PgCodekeeperException if update operation fails or if parsing errors occur
+     * @throws PgCodeKeeperException if update operation fails or if parsing errors occur
      * @throws IOException           if I/O operations fail, if project directory does not exist or if path is a file
      * @throws InterruptedException  if the thread is interrupted during the operation
      */
     public static void update(ISettings settings, AbstractDatabase oldDb, AbstractDatabase newDb, String projectToUpdate)
-            throws PgCodekeeperException, IOException, InterruptedException {
+            throws PgCodeKeeperException, IOException, InterruptedException {
         update(settings, oldDb, newDb, projectToUpdate, Collections.emptyList(), null);
     }
 

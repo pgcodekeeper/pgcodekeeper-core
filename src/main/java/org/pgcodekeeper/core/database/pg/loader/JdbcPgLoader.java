@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.loader;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.pg.loader.jdbc.*;
 import org.pgcodekeeper.core.loader.JdbcQueries;
@@ -25,6 +24,7 @@ import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +72,7 @@ public final class JdbcPgLoader extends JdbcLoaderBase {
             connection.setAutoCommit(false);
             getRunner().run(statement, "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY");
             getRunner().run(statement, "SET search_path TO pg_catalog;");
-            getRunner().run(statement, "SET timezone = " + PgDiffUtils.quoteString(timezone));
+            getRunner().run(statement, "SET timezone = " + Utils.quoteString(timezone));
 
             queryCheckGreenplumDb();
             queryCheckPgVersion();

@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.schema.AbstractFunction;
@@ -90,9 +89,9 @@ public final class MsClrFunction extends MsAbstractClrFunction {
         }
 
         sbSQL.append("AS\nEXTERNAL NAME ");
-        sbSQL.append(MsDiffUtils.quoteName(assembly)).append('.');
-        sbSQL.append(MsDiffUtils.quoteName(assemblyClass)).append('.');
-        sbSQL.append(MsDiffUtils.quoteName(assemblyMethod));
+        sbSQL.append(getQuotedName(assembly)).append('.');
+        sbSQL.append(getQuotedName(assemblyClass)).append('.');
+        sbSQL.append(getQuotedName(assemblyMethod));
     }
 
     public void setFuncType(MsFunctionTypes funcType) {

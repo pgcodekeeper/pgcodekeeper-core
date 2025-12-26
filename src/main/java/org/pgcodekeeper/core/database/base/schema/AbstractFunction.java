@@ -15,10 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.api.schema.IArgument;
 import org.pgcodekeeper.core.database.api.schema.IFunction;
-import org.pgcodekeeper.core.database.api.schema.ISearchPath;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.hasher.Hasher;
@@ -33,17 +31,12 @@ import java.util.Map;
  * Abstract base class for database functions, procedures, and aggregates.
  * Provides common functionality for callable database objects across different database types.
  */
-public abstract class AbstractFunction extends AbstractStatement implements IFunction, ISearchPath {
+public abstract class AbstractFunction extends AbstractStatement implements IFunction {
 
     protected final List<Argument> arguments = new ArrayList<>();
 
     protected AbstractFunction(String name) {
         super(name);
-    }
-
-    @Override
-    public AbstractSchema getContainingSchema() {
-        return (AbstractSchema) parent;
     }
 
     @Override
@@ -89,7 +82,7 @@ public abstract class AbstractFunction extends AbstractStatement implements IFun
                 return ObjectState.RECREATE;
             }
 
-            isNeedDepcies = getDbType() == DatabaseType.MS || !deps.equals(newFunction.deps);
+            isNeedDepcies = isNeedDepcies(newFunction);
 
             StringBuilder sbSQL = new StringBuilder();
             newFunction.appendFunctionFullSQL(sbSQL, false);
@@ -101,6 +94,10 @@ public abstract class AbstractFunction extends AbstractStatement implements IFun
         appendAlterComments(newFunction, script);
 
         return getObjectState(isNeedDepcies, script, startSize);
+    }
+
+    protected boolean isNeedDepcies(AbstractFunction newFunction) {
+        return !deps.equals(newFunction.deps);
     }
 
     protected abstract void appendFunctionFullSQL(StringBuilder sb, boolean isCreate);

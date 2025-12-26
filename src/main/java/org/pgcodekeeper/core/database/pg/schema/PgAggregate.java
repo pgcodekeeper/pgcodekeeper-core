@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.schema.AbstractFunction;
@@ -202,9 +201,9 @@ public final class PgAggregate extends PgAbstractFunction {
     }
 
     @Override
-    public StringBuilder appendFullName(StringBuilder sb) {
-        sb.append(PgDiffUtils.getQuotedName(getSchemaName())).append('.');
-        sb.append(PgDiffUtils.getQuotedName(name)).append('(');
+    public void appendFullName(StringBuilder sb) {
+        sb.append(getQuotedName(getSchemaName())).append('.');
+        sb.append(getQuotedName(name)).append('(');
         if (arguments.isEmpty()) {
             sb.append('*');
         } else {
@@ -226,8 +225,6 @@ public final class PgAggregate extends PgAbstractFunction {
             }
         }
         sb.append(')');
-
-        return sb;
     }
 
     @Override

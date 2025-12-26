@@ -175,9 +175,4 @@ public abstract class AbstractIndex extends AbstractStatement
     }
 
     protected abstract AbstractIndex getIndexCopy();
-
-    @Override
-    public AbstractSchema getContainingSchema() {
-        return (AbstractSchema) parent.parent;
-    }
 }

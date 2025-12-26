@@ -19,7 +19,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
@@ -77,7 +76,7 @@ public final class PgColumn extends AbstractColumn
     @Override
     public String getFullDefinition() {
         final StringBuilder sbDefinition = new StringBuilder();
-        String cName = PgDiffUtils.getQuotedName(name);
+        String cName = getQuotedName(name);
         sbDefinition.append(cName);
 
         if (type == null) {
@@ -86,7 +85,7 @@ public final class PgColumn extends AbstractColumn
             sbDefinition.append(' ');
             sbDefinition.append(type);
             if (compression != null) {
-                sbDefinition.append(COMPRESSION).append(PgDiffUtils.getQuotedName(compression));
+                sbDefinition.append(COMPRESSION).append(getQuotedName(compression));
             }
 
             if (collation != null) {
@@ -135,11 +134,11 @@ public final class PgColumn extends AbstractColumn
             sb.append(getAlterTable(false));
             sb.append("\n\tADD COLUMN ");
             appendIfNotExists(sb, script.getSettings());
-            sb.append(PgDiffUtils.getQuotedName(name))
+            sb.append(getQuotedName(name))
                     .append(' ')
                     .append(type);
             if (compression != null) {
-                sb.append(COMPRESSION).append(PgDiffUtils.getQuotedName(compression));
+                sb.append(COMPRESSION).append(getQuotedName(compression));
             }
             if (collation != null) {
                 sb.append(COLLATE).append(collation);
@@ -205,7 +204,7 @@ public final class PgColumn extends AbstractColumn
         if (needAlterTable) {
             sb.append(getAlterTable(only));
         }
-        sb.append(ALTER_COLUMN).append(PgDiffUtils.getQuotedName(column));
+        sb.append(ALTER_COLUMN).append(getQuotedName(column));
         return sb.toString();
     }
 
@@ -217,7 +216,7 @@ public final class PgColumn extends AbstractColumn
             if (optionExists) {
                 dropSb.append(IF_EXISTS);
             }
-            dropSb.append(PgDiffUtils.getQuotedName(name));
+            dropSb.append(getQuotedName(name));
             script.addStatement(dropSb);
             return;
         }
@@ -355,7 +354,7 @@ public final class PgColumn extends AbstractColumn
                 !Objects.equals(oldSequence, newSequence)) {
             var newName = newSequence.getName();
             if (!oldSequence.getName().equals(newName)) {
-                oldSequence.rename(newName, script);
+                script.addStatement(oldSequence.getRenameCommand(newName));
             }
 
             oldSequence.appendAlterSQL(newSequence, script);
@@ -425,7 +424,7 @@ public final class PgColumn extends AbstractColumn
             }
 
             if (settings.isPrintUsing() && !(parent instanceof IForeignTable)) {
-                sb.append(" USING ").append(PgDiffUtils.getQuotedName(newColumn.name))
+                sb.append(" USING ").append(getQuotedName(newColumn.name))
                         .append("::").append(newType);
             }
             sb.append(isLastColumn ? ";" : ",");
@@ -494,8 +493,8 @@ public final class PgColumn extends AbstractColumn
         if (!isOldNotNull) {
             if (newColumn.defaultValue != null) {
                 String sql = "UPDATE " + parent.getQualifiedName() +
-                        "\n\tSET " + PgDiffUtils.getQuotedName(name) +
-                        " = DEFAULT WHERE " + PgDiffUtils.getQuotedName(name) +
+                        "\n\tSET " + getQuotedName(name) +
+                        " = DEFAULT WHERE " + getQuotedName(name) +
                         " IS" + NULL;
                 script.addStatement(sql);
             }
@@ -511,7 +510,7 @@ public final class PgColumn extends AbstractColumn
         // ALTER
         var newName = newNotNullConstraint.getName();
         if (!notNullConstraint.getName().equals(newName)) {
-            notNullConstraint.rename(newName, script);
+            script.addStatement(notNullConstraint.getRenameCommand(newName));
         }
 
         notNullConstraint.appendAlterSQL(newNotNullConstraint, script);
@@ -589,7 +588,7 @@ public final class PgColumn extends AbstractColumn
         if (newCompression == null || newCompression.equalsIgnoreCase(oldCompression)) {
             return;
         }
-        script.addStatement(getAlterTableColumn(true, name) + " SET COMPRESSION " + PgDiffUtils.getQuotedName(newCompression));
+        script.addStatement(getAlterTableColumn(true, name) + " SET COMPRESSION " + getQuotedName(newCompression));
     }
 
     /**

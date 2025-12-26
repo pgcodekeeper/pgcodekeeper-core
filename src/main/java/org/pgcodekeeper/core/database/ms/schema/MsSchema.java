@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
@@ -40,9 +39,9 @@ public final class MsSchema extends AbstractSchema implements IMsStatement {
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("CREATE SCHEMA ");
-        sbSQL.append(MsDiffUtils.quoteName(name));
+        sbSQL.append(getQuotedName(name));
         if (owner != null) {
-            sbSQL.append("\nAUTHORIZATION ").append(MsDiffUtils.quoteName(owner));
+            sbSQL.append("\nAUTHORIZATION ").append(getQuotedName(owner));
         }
         script.addStatement(sbSQL);
         appendPrivileges(script);

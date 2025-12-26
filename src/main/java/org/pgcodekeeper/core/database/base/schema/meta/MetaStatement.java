@@ -269,4 +269,9 @@ public class MetaStatement implements IStatement, Serializable {
     public UnaryOperator<String> getQuoter() {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public String getRenameCommand(String newName) {
+        throw new UnsupportedOperationException();
+    }
 }

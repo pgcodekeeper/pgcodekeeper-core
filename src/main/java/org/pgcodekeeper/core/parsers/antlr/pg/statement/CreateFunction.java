@@ -33,6 +33,7 @@ import org.pgcodekeeper.core.database.pg.schema.PgFunction;
 import org.pgcodekeeper.core.database.pg.schema.PgProcedure;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Pair;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -141,10 +142,10 @@ public final class CreateFunction extends PgParserAbstract {
                     String probin = unquoteQuotedString(funcDef.definition).getFirst();
                     String symbol = unquoteQuotedString(funcDef.symbol).getFirst();
 
-                    sb.append(PgDiffUtils.quoteString(probin)).append(", ");
+                    sb.append(Utils.quoteString(probin)).append(", ");
 
                     if (!symbol.contains("'") && !symbol.contains("\\")) {
-                        sb.append(PgDiffUtils.quoteString(symbol));
+                        sb.append(Utils.quoteString(symbol));
                     } else {
                         sb.append(PgDiffUtils.quoteStringDollar(symbol));
                     }
@@ -209,7 +210,7 @@ public final class CreateFunction extends PgParserAbstract {
         if (setOpts.ROLE() != null) {
             String role = setOpts.role_param.getText();
             String val = role.equalsIgnoreCase("none") ? "none" : role;
-            function.addConfiguration("role", PgDiffUtils.quoteString(val));
+            function.addConfiguration("role", Utils.quoteString(val));
             return;
         }
 
@@ -218,7 +219,7 @@ public final class CreateFunction extends PgParserAbstract {
             if (setOpts.sconst() != null) {
                 val = setOpts.sconst().getText();
             } else if (setOpts.session_param != null) {
-                val = PgDiffUtils.quoteString(setOpts.session_param.getText());
+                val = Utils.quoteString(setOpts.session_param.getText());
             } else {
                 return;
             }

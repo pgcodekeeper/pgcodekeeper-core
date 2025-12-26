@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
@@ -54,7 +53,7 @@ public final class PgCompositeType extends AbstractType implements IPgStatement 
     protected void appendDef(StringBuilder sb) {
         sb.append(" AS (");
         for (AbstractColumn attr : attrs) {
-            sb.append("\n\t").append(PgDiffUtils.getQuotedName(attr.getName()))
+            sb.append("\n\t").append(getQuotedName(attr.getName()))
                     .append(' ').append(attr.getType());
 
             if (attr.getCollation() != null) {
@@ -135,7 +134,7 @@ public final class PgCompositeType extends AbstractType implements IPgStatement 
     private void appendAlterAttribute(StringBuilder attrSb, String action, String delimiter,
                                       AbstractColumn attr) {
         attrSb.append("\n\t").append(action).append(" ATTRIBUTE ")
-                .append(PgDiffUtils.getQuotedName(attr.getName()))
+                .append(getQuotedName(attr.getName()))
                 .append(delimiter);
         if (!"DROP".equals(action)) {
             attrSb.append(attr.getType());

@@ -20,4 +20,8 @@ package org.pgcodekeeper.core.database.api.schema;
  */
 public interface ISubElement extends ISearchPath {
 
+    @Override
+    default ISchema getContainingSchema() {
+        return (ISchema) getParent().getParent();
+    }
 }

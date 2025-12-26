@@ -256,9 +256,4 @@ public abstract class AbstractStatementContainer extends AbstractStatement
     }
 
     protected abstract AbstractStatementContainer getCopy();
-
-    @Override
-    public AbstractSchema getContainingSchema() {
-        return (AbstractSchema) this.getParent();
-    }
 }

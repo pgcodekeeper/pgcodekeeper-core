@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.it.jdbc.base;
 
 import org.junit.jupiter.api.Assertions;
-import org.pgcodekeeper.core.PgCodekeeperException;
+import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.DatabaseFactory;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
@@ -39,14 +39,14 @@ public abstract class JdbcLoaderTest {
 
     protected void jdbcLoaderTest(String dumpFileName, String ignoreListName, String url, IJdbcConnector connector,
                                   CoreSettings settings, SupportedPgVersion version, Class<?> clazz)
-            throws PgCodekeeperException, SQLException, IOException, URISyntaxException, InterruptedException{
+            throws PgCodeKeeperException, SQLException, IOException, URISyntaxException, InterruptedException{
         settings.setAddTransaction(true);
         jdbcLoaderTest(dumpFileName, ignoreListName, url, connector, settings, version, clazz, false);
     }
 
     protected void jdbcLoaderTest(String dumpFileName, String ignoreListName, String url, IJdbcConnector connector,
                                   CoreSettings settings, SupportedPgVersion version, Class<?> clazz, boolean isMemoryOptimized)
-            throws PgCodekeeperException, SQLException, IOException, URISyntaxException, InterruptedException {
+            throws PgCodeKeeperException, SQLException, IOException, URISyntaxException, InterruptedException {
         settings.setEnableFunctionBodiesDependencies(true);
         var df = new DatabaseFactory(settings);
         List<String> ignoreLists = new ArrayList<>() ;
@@ -79,7 +79,7 @@ public abstract class JdbcLoaderTest {
 
     private void clearDb(CoreSettings settings, AbstractDatabase startConfDb, DatabaseFactory df,
                                IJdbcConnector connector, String url)
-            throws PgCodekeeperException, IOException, InterruptedException, SQLException {
+            throws PgCodeKeeperException, IOException, InterruptedException, SQLException {
         var oldDb = df.loadFromJdbc(url);
         var dropScript = PgCodeKeeperApi.diff(settings, oldDb, startConfDb);
         new JdbcRunner(new NullMonitor())

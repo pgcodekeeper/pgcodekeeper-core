@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.base.schema.AbstractTable;
@@ -64,7 +63,7 @@ public abstract class PgAbstractForeignTable extends PgAbstractTable implements 
 
     @Override
     public void appendOptions(StringBuilder sqlOption) {
-        sqlOption.append("\nSERVER ").append(PgDiffUtils.getQuotedName(serverName));
+        sqlOption.append("\nSERVER ").append(getQuotedName(serverName));
         if (!options.isEmpty()) {
             sqlOption.append('\n');
         }

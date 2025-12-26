@@ -210,7 +210,7 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
                     StringBuilder sql = new StringBuilder();
                     sql.append(getAlterTable(true));
                     sql.append(ALTER_COLUMN);
-                    sql.append(PgDiffUtils.getQuotedName(column.getName()));
+                    sql.append(getQuotedName(column.getName()));
                     sql.append(" SET STATISTICS ");
                     sql.append(column.getStatistics());
                     script.addStatement(sql);
@@ -221,7 +221,7 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
         PgSequence sequence = column.getSequence();
         sbOption.append(getAlterTable(false))
                 .append(ALTER_COLUMN)
-                .append(PgDiffUtils.getQuotedName(column.getName()))
+                .append(getQuotedName(column.getName()))
                 .append(" ADD GENERATED ")
                 .append(column.getIdentityType())
                 .append(" AS IDENTITY (");
@@ -425,7 +425,7 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
             StringBuilder sql = new StringBuilder();
             sql.append(getAlterTable(isInherit))
                     .append(ALTER_COLUMN)
-                    .append(PgDiffUtils.getQuotedName(column.getName()))
+                    .append(getQuotedName(column.getName()))
                     .append(" SET STORAGE ")
                     .append(column.getStorage());
             script.addStatement(sql);
@@ -438,7 +438,7 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
             if (script.getSettings().isGenerateExistDoBlock()) {
                 StringBuilder tmpSb = new StringBuilder();
                 writeSequences(column, tmpSb);
-                PgDiffUtils.appendSqlWrappedInDo(sbSeq, tmpSb, Consts.DUPLICATE_RELATION);
+                appendSqlWrappedInDo(sbSeq, tmpSb, Consts.DUPLICATE_RELATION);
             } else {
                 writeSequences(column, sbSeq);
                 sbSeq.setLength(sbSeq.length() - 1);
@@ -457,7 +457,7 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
     }
 
     private String getAlterColumn(AbstractColumn column) {
-        return getAlterTable(true) + ALTER_COLUMN + PgDiffUtils.getQuotedName(column.getName());
+        return getAlterTable(true) + ALTER_COLUMN + getQuotedName(column.getName());
     }
 
     private void writeOptions(PgColumn column, SQLScript script, boolean isInherit) {
@@ -468,7 +468,7 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
             StringBuilder sb = new StringBuilder();
             sb.append(getAlterTable(isInherit))
                     .append(ALTER_COLUMN)
-                    .append(PgDiffUtils.getQuotedName(column.getName()))
+                    .append(getQuotedName(column.getName()))
                     .append(" SET (");
 
             for (Entry<String, String> option : opts.entrySet()) {
@@ -487,7 +487,7 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
             StringBuilder sb = new StringBuilder();
             sb.append(getAlterTable(isInherit))
                     .append(ALTER_COLUMN)
-                    .append(PgDiffUtils.getQuotedName(column.getName()))
+                    .append(getQuotedName(column.getName()))
                     .append(" OPTIONS (");
 
             for (Entry<String, String> option : fOpts.entrySet()) {
@@ -564,7 +564,7 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
         script.addStatement(sbInsert);
 
         for (String colName : identityColsForMovingData) {
-            String quotedCol = PgDiffUtils.getQuotedName(colName);
+            String quotedCol = getQuotedName(colName);
             script.addStatement(RESTART_SEQUENCE_QUERY.formatted(tblTmpQName, quotedCol, tblQName));
         }
     }

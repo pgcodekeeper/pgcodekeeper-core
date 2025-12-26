@@ -246,4 +246,12 @@ public interface IStatement {
      * @return a function that quotes name
      */
     UnaryOperator<String> getQuoter();
+
+    /**
+     * Returns sql command to rename the given object.
+     *
+     * @param newName the new name for given object
+     * @return sql command to rename the given object
+     */
+    String getRenameCommand(String newName);
 }

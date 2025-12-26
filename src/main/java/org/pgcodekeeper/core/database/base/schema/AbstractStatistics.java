@@ -42,9 +42,4 @@ public abstract class AbstractStatistics extends AbstractStatement implements IS
     }
 
     protected abstract AbstractStatistics getStatisticsCopy();
-
-    @Override
-    public ISchema getContainingSchema() {
-        return (AbstractSchema) parent;
-    }
 }

@@ -15,12 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.ms.MsDiffUtils;
-import org.pgcodekeeper.core.database.api.schema.ISchema;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ISubElement;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatistics;
 import org.pgcodekeeper.core.database.base.schema.StatementUtils;
 import org.pgcodekeeper.core.hasher.Hasher;
@@ -53,7 +50,7 @@ public final class MsStatistics extends AbstractStatistics implements ISubElemen
     @Override
     public void getCreationSQL(SQLScript script) {
         var sb = new StringBuilder("CREATE STATISTICS ");
-        sb.append(MsDiffUtils.quoteName(name)).append(" ON ").append(parent.getQualifiedName());
+        sb.append(getQuotedName(name)).append(" ON ").append(parent.getQualifiedName());
         if (!cols.isEmpty()) {
             sb.append(' ');
             StatementUtils.appendCols(sb, cols, getQuoter());
@@ -147,11 +144,6 @@ public final class MsStatistics extends AbstractStatistics implements ISubElemen
         stat.options.putAll(options);
         stat.setParentHasData(isParentHasData);
         return stat;
-    }
-
-    @Override
-    public ISchema getContainingSchema() {
-        return (AbstractSchema) parent.getParent();
     }
 
     public void setFilter(String filter) {

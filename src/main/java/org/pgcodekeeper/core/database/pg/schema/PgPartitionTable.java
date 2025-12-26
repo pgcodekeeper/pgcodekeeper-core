@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IPartitionTable;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
@@ -113,9 +112,9 @@ public final class PgPartitionTable extends PgAbstractRegularTable implements IP
     private StringBuilder appendTablePartiton(String tableName, String state) {
         return new StringBuilder(ALTER_TABLE).append(tableName)
                 .append("\n\t%s PARTITION ".formatted(state))
-                .append(PgDiffUtils.getQuotedName(parent.getName()))
+                .append(getQuotedName(parent.getName()))
                 .append('.')
-                .append(PgDiffUtils.getQuotedName(getName()));
+                .append(getQuotedName(name));
     }
 
     @Override

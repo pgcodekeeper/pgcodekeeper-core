@@ -81,4 +81,9 @@ public abstract class MsAbstractClrFunction extends AbstractFunction implements 
         functionDst.options.addAll(options);
         return functionDst;
     }
+
+    @Override
+    protected boolean isNeedDepcies(AbstractFunction newFunction) {
+        return true;
+    }
 }

@@ -16,21 +16,23 @@
 package org.pgcodekeeper.core.model.graph;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.database.ch.ChDiffUtils;
+import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
+import org.pgcodekeeper.core.database.base.schema.AbstractSequence;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractTable;
 import org.pgcodekeeper.core.database.ms.MsDiffUtils;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
-import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.database.ms.schema.MsColumn;
 import org.pgcodekeeper.core.database.ms.schema.MsConstraintPk;
 import org.pgcodekeeper.core.database.ms.schema.MsTable;
 import org.pgcodekeeper.core.database.ms.schema.MsView;
-import org.pgcodekeeper.core.database.pg.schema.PgPartitionTable;
 import org.pgcodekeeper.core.database.pg.schema.PgColumn;
+import org.pgcodekeeper.core.database.pg.schema.PgPartitionTable;
 import org.pgcodekeeper.core.database.pg.schema.PgSequence;
+import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -62,10 +64,6 @@ public final class ActionsToScriptConverter {
     private static final String DROP_COMMENT = "-- DEPCY: This %s %s depends on the %s: %s";
     private static final String CREATE_COMMENT = "-- DEPCY: This %s %s is a dependency of %s: %s";
     private static final String HIDDEN_OBJECT = "-- HIDDEN: Object %s of type %s (action: %s, reason: %s)";
-
-    private static final String RENAME_PG_OBJECT = "ALTER %s %s RENAME TO %s";
-    private static final String RENAME_MS_OBJECT = "EXEC sp_rename %s, %s";
-    private static final String RENAME_CH_OBJECT = "RENAME %s %s TO %s;";
 
     private final SQLScript script;
     private final ISettings settings;
@@ -162,7 +160,7 @@ public final class ActionsToScriptConverter {
                     // refreshes for other objects serve as markers
                     // that allow us to skip unmodified drop+create pairs
                     script.addStatement(REFRESH_MODULE.formatted(
-                            PgDiffUtils.quoteString(obj.getQualifiedName())));
+                            Utils.quoteString(obj.getQualifiedName())));
                     refreshed.add(obj);
                 }
             } else if (!hideAction(action, selected)) {
@@ -182,7 +180,7 @@ public final class ActionsToScriptConverter {
                 .toArray(IStatement[]::new);
         for (int i = orphanRefreshes.length - 1; i >= 0; --i) {
             script.addStatement(REFRESH_MODULE.formatted(
-                    PgDiffUtils.quoteString(orphanRefreshes[i].getQualifiedName())));
+                    Utils.quoteString(orphanRefreshes[i].getQualifiedName())));
         }
     }
 
@@ -496,7 +494,7 @@ public final class ActionsToScriptConverter {
         String qname = oldTbl.getQualifiedName();
         String tmpTblName = getTempName(oldTbl);
 
-        script.addStatement(getRenameCommand(oldTbl, tmpTblName));
+        script.addStatement(oldTbl.getRenameCommand(tmpTblName));
         tblTmpNames.put(qname, tmpTblName);
 
         DatabaseType dbtype = settings.getDbType();
@@ -509,7 +507,7 @@ public final class ActionsToScriptConverter {
                     if (newPgCol != null && newPgCol.getSequence() != null) {
                         AbstractSequence seq = oldPgCol.getSequence();
                         if (seq != null) {
-                            script.addStatement(getRenameCommand(seq, getTempName(seq)));
+                            script.addStatement(seq.getRenameCommand(getTempName(seq)));
                         }
                         identityCols.add(oldPgCol.getName());
                     }
@@ -546,23 +544,5 @@ public final class ActionsToScriptConverter {
         }
 
         return name + tmpSuffix;
-    }
-
-    /**
-     * Returns sql command to rename the given object.
-     *
-     * @param st      object for rename
-     * @param newName the new name for given object
-     * @return sql command to rename the given object
-     */
-    private String getRenameCommand(AbstractStatement st, String newName) {
-        return switch (settings.getDbType()) {
-            case PG -> RENAME_PG_OBJECT.formatted(
-                    st.getStatementType(), st.getQualifiedName(), PgDiffUtils.getQuotedName(newName));
-            case MS -> RENAME_MS_OBJECT.formatted(
-                    PgDiffUtils.quoteString(st.getQualifiedName()), PgDiffUtils.quoteString(newName));
-            case CH -> RENAME_CH_OBJECT.formatted(
-                    st.getStatementType(), st.getQualifiedName(), ChDiffUtils.getQuotedName(newName));
-        };
     }
 }

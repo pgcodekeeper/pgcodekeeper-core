@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
@@ -102,7 +101,7 @@ public final class PgExtension extends AbstractStatement implements IPgStatement
             }
             StringBuilder sql = new StringBuilder();
             sql.append("ALTER EXTENSION ")
-                    .append(PgDiffUtils.getQuotedName(name))
+                    .append(getQuotedName(name))
                     .append(" SET SCHEMA ")
                     .append(newExt.getSchema());
             script.addStatement(sql);

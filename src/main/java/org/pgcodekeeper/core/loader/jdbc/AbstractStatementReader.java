@@ -19,6 +19,7 @@ import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -60,7 +61,7 @@ public abstract class AbstractStatementReader {
     protected AbstractStatementReader(JdbcLoaderBase loader) {
         this.loader = loader;
         String tmpClassId = getClassId();
-        this.classId = tmpClassId == null ? null : PgDiffUtils.quoteString(PG_CATALOG + tmpClassId);
+        this.classId = tmpClassId == null ? null : Utils.quoteString(PG_CATALOG + tmpClassId);
     }
 
     /**

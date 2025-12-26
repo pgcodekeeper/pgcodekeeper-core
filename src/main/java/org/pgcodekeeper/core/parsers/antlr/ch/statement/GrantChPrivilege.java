@@ -19,7 +19,6 @@ import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IPrivilege;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.base.schema.StatementOverride;
-import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.database.ch.schema.ChPrivilege;
 import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
@@ -95,7 +94,7 @@ public final class GrantChPrivilege extends ChParserAbstract {
                 // 1 privilege for each permission
                 for (String per : permissions) {
                     addPrivilege(st, new ChPrivilege(state, per, objectName,
-                            ChDiffUtils.getQuotedName(userName), isGrantOption));
+                            st.getQuotedName(userName), isGrantOption));
                 }
             }
         }

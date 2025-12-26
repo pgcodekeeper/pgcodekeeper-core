@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.database.base.schema.AbstractTrigger;
@@ -70,9 +69,9 @@ public final class MsTrigger extends AbstractTrigger implements MsSourceStatemen
 
     @Override
     public StringBuilder appendName(StringBuilder sb) {
-        sb.append(MsDiffUtils.quoteName(getSchemaName()))
+        sb.append(getQuotedName(getSchemaName()))
                 .append('.')
-                .append(MsDiffUtils.quoteName(name))
+                .append(getQuotedName(name))
                 .append(" ON ")
                 .append(parent.getQualifiedName());
         return sb;
@@ -103,11 +102,8 @@ public final class MsTrigger extends AbstractTrigger implements MsSourceStatemen
     }
 
     @Override
-    protected StringBuilder appendFullName(StringBuilder sb) {
-        sb.append(MsDiffUtils.quoteName(getSchemaName()))
-                .append('.')
-                .append(MsDiffUtils.quoteName(name));
-        return sb;
+    protected void appendFullName(StringBuilder sb) {
+        sb.append(getQuotedName(getSchemaName())).append('.').append(getQuotedName(name));
     }
 
     @Override

@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.loader;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.ch.loader.jdbc.*;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -25,6 +24,7 @@ import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +93,7 @@ public final class JdbcChLoader extends JdbcLoaderBase {
     @Override
     public String getSchemas() {
         return schemaIds.keySet().stream()
-                .map(e -> PgDiffUtils.quoteString(e.toString()))
+                .map(e -> Utils.quoteString(e.toString()))
                 .collect(Collectors.joining(", ")); //$NON-NLS-1$
     }
 }

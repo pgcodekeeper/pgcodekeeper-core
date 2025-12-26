@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
@@ -48,7 +47,7 @@ public abstract class MsConstraint extends AbstractConstraint implements IMsStat
         }
         sbSQL.append("\n\tADD ");
         if (!name.isEmpty()) {
-            sbSQL.append("CONSTRAINT ").append(MsDiffUtils.quoteName(name)).append(' ');
+            sbSQL.append("CONSTRAINT ").append(getQuotedName(name)).append(' ');
         }
         sbSQL.append(getDefinition());
         script.addStatement(sbSQL);
@@ -62,7 +61,7 @@ public abstract class MsConstraint extends AbstractConstraint implements IMsStat
             if (isDisabled) {
                 sb.append("NO");
             }
-            sb.append("CHECK CONSTRAINT ").append(MsDiffUtils.quoteName(name));
+            sb.append("CHECK CONSTRAINT ").append(getQuotedName(name));
             script.addStatement(sb);
         }
     }
@@ -87,7 +86,7 @@ public abstract class MsConstraint extends AbstractConstraint implements IMsStat
             if (newConstr.isDisabled) {
                 sb.append("NO");
             }
-            sb.append("CHECK CONSTRAINT ").append(MsDiffUtils.quoteName(newConstr.name));
+            sb.append("CHECK CONSTRAINT ").append(getQuotedName(newConstr.name));
             script.addStatement(sb);
         }
 
@@ -104,7 +103,7 @@ public abstract class MsConstraint extends AbstractConstraint implements IMsStat
         if (optionExists) {
             sbSQL.append(IF_EXISTS);
         }
-        sbSQL.append(MsDiffUtils.quoteName(name));
+        sbSQL.append(getQuotedName(name));
         script.addStatement(sbSQL);
     }
 

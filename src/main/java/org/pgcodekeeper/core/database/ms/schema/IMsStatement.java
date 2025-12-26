@@ -21,6 +21,7 @@ import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.ms.formatter.MsFormatter;
 import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.util.function.UnaryOperator;
 
@@ -28,6 +29,8 @@ import java.util.function.UnaryOperator;
  * Interface for MS SQL statement
  */
 public interface IMsStatement extends IStatement {
+
+    String RENAME_OBJECT_COMMAND = "EXEC sp_rename %s, %s";
 
     @Override
     default String formatSql(String sql, int offset, int length, IFormatConfiguration formatConfiguration) {
@@ -47,5 +50,10 @@ public interface IMsStatement extends IStatement {
     @Override
     default void appendDefaultPrivileges(IStatement statement, SQLScript script) {
         // no imp
+    }
+
+    @Override
+    default String getRenameCommand(String newName) {
+        return RENAME_OBJECT_COMMAND.formatted(Utils.quoteString(getQualifiedName()), Utils.quoteString(newName));
     }
 }

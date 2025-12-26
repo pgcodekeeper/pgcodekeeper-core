@@ -19,7 +19,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.base.schema.AbstractTrigger;
@@ -93,7 +92,7 @@ public final class PgTrigger extends AbstractTrigger implements IPgStatement {
             sbSQL.append(" CONSTRAINT");
         }
         sbSQL.append(" TRIGGER ");
-        sbSQL.append(PgDiffUtils.getQuotedName(name));
+        sbSQL.append(getQuotedName(name));
         sbSQL.append("\n\t");
         sbSQL.append(tgType == TgTypes.INSTEAD_OF ? "INSTEAD OF" : tgType);
 
@@ -116,7 +115,7 @@ public final class PgTrigger extends AbstractTrigger implements IPgStatement {
             if (!updateColumns.isEmpty()) {
                 sbSQL.append(" OF ");
                 for (String updateColumn : updateColumns) {
-                    sbSQL.append(PgDiffUtils.getQuotedName(updateColumn));
+                    sbSQL.append(getQuotedName(updateColumn));
                     sbSQL.append(", ");
                 }
                 sbSQL.setLength(sbSQL.length() - 2);
@@ -213,7 +212,7 @@ public final class PgTrigger extends AbstractTrigger implements IPgStatement {
                 .append(' ')
                 .append(enabledState.getValue())
                 .append(" TRIGGER ")
-                .append(PgDiffUtils.getQuotedName(trigger.name));
+                .append(getQuotedName(trigger.name));
         script.addStatement(sql);
     }
 
@@ -223,10 +222,8 @@ public final class PgTrigger extends AbstractTrigger implements IPgStatement {
     }
 
     @Override
-    protected StringBuilder appendFullName(StringBuilder sb) {
-        sb.append(PgDiffUtils.getQuotedName(name)).append(" ON ");
-        sb.append(parent.getQualifiedName());
-        return sb;
+    protected void appendFullName(StringBuilder sb) {
+        sb.append(getQuotedName(name)).append(" ON ").append(parent.getQualifiedName());
     }
 
     public void setType(final TgTypes tgType) {

@@ -16,7 +16,6 @@
 package org.pgcodekeeper.core.database.pg.schema;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
@@ -49,11 +48,6 @@ public final class PgFtsDictionary extends AbstractStatement
     @Override
     public DbObjType getStatementType() {
         return DbObjType.FTS_DICTIONARY;
-    }
-
-    @Override
-    public AbstractSchema getContainingSchema() {
-        return (AbstractSchema) parent;
     }
 
     @Override

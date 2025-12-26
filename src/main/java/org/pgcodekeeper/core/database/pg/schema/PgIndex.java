@@ -20,7 +20,6 @@
 package org.pgcodekeeper.core.database.pg.schema;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
@@ -80,14 +79,14 @@ public final class PgIndex extends AbstractIndex implements IPgStatement {
         if (inherit != null || settings.isGenerateExists()) {
             sbSQL.append("IF NOT EXISTS ");
         }
-        sbSQL.append(PgDiffUtils.getQuotedName(name))
+        sbSQL.append(getQuotedName(name))
                 .append(" ON ");
         if (parent instanceof PgAbstractRegularTable regTable && regTable.getPartitionBy() != null) {
             sbSQL.append("ONLY ");
         }
         sbSQL.append(parent.getQualifiedName());
         if (method != null) {
-            sbSQL.append(" USING ").append(PgDiffUtils.getQuotedName(method));
+            sbSQL.append(" USING ").append(getQuotedName(method));
         }
         appendSimpleColumns(sbSQL, columns);
         appendIndexParam(sbSQL);
@@ -150,7 +149,7 @@ public final class PgIndex extends AbstractIndex implements IPgStatement {
     @Override
     public String getQualifiedName() {
         if (qualifiedName == null) {
-            qualifiedName = PgDiffUtils.getQuotedName(getSchemaName()) + '.' + PgDiffUtils.getQuotedName(name);
+            qualifiedName = getQuotedName(getSchemaName()) + '.' + getQuotedName(name);
         }
         return qualifiedName;
     }
@@ -169,11 +168,11 @@ public final class PgIndex extends AbstractIndex implements IPgStatement {
                 getDropSQL(script);
                 StringBuilder sql = new StringBuilder();
                 sql.append(ALTER_INDEX)
-                        .append(PgDiffUtils.getQuotedName(getSchemaName()))
+                        .append(getQuotedName(getSchemaName()))
                         .append('.')
-                        .append(PgDiffUtils.getQuotedName(tmpName))
+                        .append(getQuotedName(tmpName))
                         .append(" RENAME TO ")
-                        .append(PgDiffUtils.getQuotedName(getName()));
+                        .append(getQuotedName(getName()));
                 script.addStatement(sql);
 
                 newIndex.appendComments(script);

@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.AbstractRule;
 import org.pgcodekeeper.core.hasher.Hasher;
@@ -84,7 +83,7 @@ public final class PgRule extends AbstractRule implements IPgStatement {
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("CREATE RULE ");
-        sbSQL.append(PgDiffUtils.getQuotedName(name));
+        sbSQL.append(getQuotedName(name));
         sbSQL.append(" AS\n    ON ").append(event);
         sbSQL.append(" TO ").append(parent.getQualifiedName());
         if (condition != null && !condition.isEmpty()) {
@@ -144,15 +143,13 @@ public final class PgRule extends AbstractRule implements IPgStatement {
                 .append(' ')
                 .append(enabledState)
                 .append(" RULE ")
-                .append(PgDiffUtils.getQuotedName(rule.name));
+                .append(getQuotedName(rule.name));
         script.addStatement(sql);
     }
 
     @Override
-    protected StringBuilder appendFullName(StringBuilder sb) {
-        sb.append(PgDiffUtils.getQuotedName(name)).append(" ON ");
-        sb.append(parent.getQualifiedName());
-        return sb;
+    protected void appendFullName(StringBuilder sb) {
+        sb.append(getQuotedName(name)).append(" ON ").append(parent.getQualifiedName());
     }
 
     @Override

@@ -127,14 +127,14 @@ public final class PgServer extends AbstractStatement implements PgForeignOption
         final StringBuilder sb = new StringBuilder();
         sb.append("CREATE SERVER ");
         appendIfNotExists(sb, script.getSettings());
-        sb.append(PgDiffUtils.getQuotedName(name));
+        sb.append(getQuotedName(name));
         if (type != null) {
             sb.append(" TYPE ").append(type);
         }
         if (version != null) {
             sb.append(" VERSION ").append(version);
         }
-        sb.append(" FOREIGN DATA WRAPPER ").append(PgDiffUtils.getQuotedName(fdw));
+        sb.append(" FOREIGN DATA WRAPPER ").append(getQuotedName(fdw));
         if (!options.isEmpty()) {
             sb.append(' ');
         }

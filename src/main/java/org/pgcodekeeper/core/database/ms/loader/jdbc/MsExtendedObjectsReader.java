@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.loader.jdbc;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.ArgMode;
 import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.base.schema.*;
@@ -26,6 +25,7 @@ import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReader;
 import org.pgcodekeeper.core.loader.jdbc.XmlReaderException;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -128,7 +128,7 @@ public class MsExtendedObjectsReader extends JdbcReader {
                     defValue = "NULL";
                 } else if ("varbinary".equals(baseType) || "nvarchar".equals(baseType)
                         || "varchar".equals(baseType)) {
-                    defValue = 'N' + PgDiffUtils.quoteString(def);
+                    defValue = 'N' + Utils.quoteString(def);
                 } else if ("bit".equals(baseType)) {
                     defValue = "1".equals(def) ? "True" : "False";
                 } else if ("real".equals(baseType) || "float".equals(baseType)) {

@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
@@ -59,9 +58,9 @@ public final class MsRole extends AbstractStatement implements IMsStatement {
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("CREATE ROLE ");
-        sbSQL.append(MsDiffUtils.quoteName(name));
+        sbSQL.append(getQuotedName(name));
         if (owner != null) {
-            sbSQL.append("\nAUTHORIZATION ").append(MsDiffUtils.quoteName(owner));
+            sbSQL.append("\nAUTHORIZATION ").append(getQuotedName(owner));
         }
         script.addStatement(sbSQL);
 
@@ -108,8 +107,8 @@ public final class MsRole extends AbstractStatement implements IMsStatement {
 
     private void appendAlterRole(String member, SQLScript script, boolean needAddMember) {
         StringBuilder sql = new StringBuilder();
-        sql.append("ALTER ROLE ").append(MsDiffUtils.quoteName(name));
-        sql.append(needAddMember ? " ADD " : " DROP ").append("MEMBER ").append(MsDiffUtils.quoteName(member));
+        sql.append("ALTER ROLE ").append(getQuotedName(name));
+        sql.append(needAddMember ? " ADD " : " DROP ").append("MEMBER ").append(getQuotedName(member));
         script.addStatement(sql);
     }
 

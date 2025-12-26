@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
@@ -75,9 +74,9 @@ public final class MsAssembly extends AbstractStatement implements IMsStatement 
     private void getAssemblyFullSQL(boolean isPreview, SQLScript script) {
         StringBuilder sql = new StringBuilder();
 
-        sql.append("CREATE ASSEMBLY ").append(MsDiffUtils.quoteName(name));
+        sql.append("CREATE ASSEMBLY ").append(getQuotedName(name));
         if (owner != null) {
-            sql.append("\nAUTHORIZATION ").append(MsDiffUtils.quoteName(owner));
+            sql.append("\nAUTHORIZATION ").append(getQuotedName(owner));
         }
 
         sql.append("\nFROM ");
@@ -106,8 +105,7 @@ public final class MsAssembly extends AbstractStatement implements IMsStatement 
         if (optionExists) {
             dropSb.append(IF_EXISTS);
         }
-        dropSb.append(MsDiffUtils.quoteName(name))
-                .append(" WITH NO DEPENDENTS");
+        dropSb.append(getQuotedName(name)).append(" WITH NO DEPENDENTS");
         script.addStatement(dropSb);
     }
 
@@ -140,7 +138,7 @@ public final class MsAssembly extends AbstractStatement implements IMsStatement 
     }
 
     private String getAlterAssebly() {
-        return "ALTER ASSEMBLY " + MsDiffUtils.quoteName(name);
+        return "ALTER ASSEMBLY " + getQuotedName(name);
     }
 
     @Override

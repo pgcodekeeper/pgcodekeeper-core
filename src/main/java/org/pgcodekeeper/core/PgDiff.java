@@ -22,16 +22,18 @@ package org.pgcodekeeper.core;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.database.base.schema.AbstractTable;
 import org.pgcodekeeper.core.ignorelist.IgnoreList;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.model.difftree.*;
+import org.pgcodekeeper.core.model.difftree.CompareTree;
+import org.pgcodekeeper.core.model.difftree.DiffTree;
+import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
+import org.pgcodekeeper.core.model.difftree.TreeFlattener;
 import org.pgcodekeeper.core.model.graph.ActionContainer;
 import org.pgcodekeeper.core.model.graph.ActionsToScriptConverter;
 import org.pgcodekeeper.core.model.graph.DbObject;
 import org.pgcodekeeper.core.model.graph.DepcyResolver;
-import org.pgcodekeeper.core.database.base.schema.AbstractTable;
 import org.pgcodekeeper.core.script.SQLActionType;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -125,7 +127,7 @@ public class PgDiff {
         }
 
         if (settings.getTimeZone() != null) {
-            script.addStatement("SET TIMEZONE TO " + PgDiffUtils.quoteString(settings.getTimeZone()), //$NON-NLS-1$
+            script.addStatement("SET TIMEZONE TO " + Utils.quoteString(settings.getTimeZone()), //$NON-NLS-1$
                     SQLActionType.BEGIN);
         }
 

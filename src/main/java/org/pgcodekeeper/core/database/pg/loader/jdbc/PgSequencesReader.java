@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.loader.jdbc;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.loader.JdbcQueries;
@@ -27,6 +26,7 @@ import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.database.pg.schema.PgColumn;
 import org.pgcodekeeper.core.database.pg.schema.PgSequence;
+import org.pgcodekeeper.core.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -185,7 +185,7 @@ public final class PgSequencesReader extends JdbcReader {
                         }
                         sbUnionQuery.append(JdbcQueries.QUERY_SEQUENCES_DATA)
                                 .append(',')
-                                .append(PgDiffUtils.quoteString(qname))
+                                .append(Utils.quoteString(qname))
                                 .append(" qname FROM ")
                                 .append(qname);
                     } else {

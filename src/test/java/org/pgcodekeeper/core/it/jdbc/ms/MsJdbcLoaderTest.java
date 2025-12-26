@@ -19,7 +19,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.FILES_POSTFIX;
-import org.pgcodekeeper.core.PgCodekeeperException;
+import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.database.ms.jdbc.MsJdbcConnector;
 import org.pgcodekeeper.core.it.jdbc.base.JdbcLoaderTest;
 import org.pgcodekeeper.core.loader.TestContainer;
@@ -44,7 +44,7 @@ class MsJdbcLoaderTest extends JdbcLoaderTest {
             "ms_trigger",
             "ms_view",
     })
-    void msJdbcLoaderTest(String fileName) throws PgCodekeeperException, IOException, InterruptedException, SQLException, URISyntaxException {
+    void msJdbcLoaderTest(String fileName) throws PgCodeKeeperException, IOException, InterruptedException, SQLException, URISyntaxException {
         var settings = new CoreSettings();
         settings.setDbType(DatabaseType.MS);
         jdbcLoaderTest(fileName + FILES_POSTFIX.SQL, "ms.pgcodekeeperignore",
@@ -55,7 +55,7 @@ class MsJdbcLoaderTest extends JdbcLoaderTest {
     @CsvSource({
             "ms_table_type",
     })
-    void msJdbcLoaderWithMemomyOptimizedTest(String fileName) throws PgCodekeeperException, IOException, InterruptedException, SQLException, URISyntaxException {
+    void msJdbcLoaderWithMemomyOptimizedTest(String fileName) throws PgCodeKeeperException, IOException, InterruptedException, SQLException, URISyntaxException {
         var settings = new CoreSettings();
         settings.setDbType(DatabaseType.MS);
         jdbcLoaderTest(fileName + "_memory_optimized" + FILES_POSTFIX.SQL, "ms.pgcodekeeperignore",

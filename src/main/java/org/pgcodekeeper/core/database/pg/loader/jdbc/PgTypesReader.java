@@ -29,6 +29,7 @@ import org.pgcodekeeper.core.loader.jdbc.JdbcType;
 import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
 import org.pgcodekeeper.core.parsers.antlr.pg.statement.CreateDomain;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -100,7 +101,7 @@ public final class PgTypesReader extends JdbcReader {
         if (def == null) {
             def = res.getString("typdefault");
             if (def != null) {
-                def = PgDiffUtils.quoteString(def);
+                def = Utils.quoteString(def);
             }
         } else {
             loader.submitAntlrTask(def, p -> p.vex_eof().vex().get(0),
@@ -130,7 +131,7 @@ public final class PgTypesReader extends JdbcReader {
 
                 d.addConstraint(constrCheck);
                 if (concomments[i] != null && !concomments[i].isEmpty()) {
-                    constrCheck.setComment(getTextWithCheckNewLines(PgDiffUtils.quoteString(concomments[i])));
+                    constrCheck.setComment(getTextWithCheckNewLines(Utils.quoteString(concomments[i])));
                 }
             }
         }
@@ -237,7 +238,7 @@ public final class PgTypesReader extends JdbcReader {
 
         String cat = res.getString("typcategory");
         if (cat != null && !"U".equals(cat)) {
-            t.setCategory(PgDiffUtils.quoteString(cat));
+            t.setCategory(Utils.quoteString(cat));
         }
 
         if (res.getBoolean("typispreferred")) {
@@ -248,7 +249,7 @@ public final class PgTypesReader extends JdbcReader {
         if (def == null) {
             def = res.getString("typdefault");
             if (def != null) {
-                def = PgDiffUtils.quoteString(def);
+                def = Utils.quoteString(def);
             }
         }
         t.setDefaultValue(def);
@@ -264,7 +265,7 @@ public final class PgTypesReader extends JdbcReader {
 
         String delim = res.getString("typdelim");
         if (delim != null && !",".equals(delim)) {
-            t.setDelimiter(PgDiffUtils.quoteString(delim));
+            t.setDelimiter(Utils.quoteString(delim));
         }
 
         if (res.getLong("typcollation") != 0) {
@@ -310,7 +311,7 @@ public final class PgTypesReader extends JdbcReader {
             }
             t.addAttr(a);
             if (attcomments[i] != null && !attcomments[i].isEmpty()) {
-                a.setComment(getTextWithCheckNewLines(PgDiffUtils.quoteString(attcomments[i])));
+                a.setComment(getTextWithCheckNewLines(Utils.quoteString(attcomments[i])));
             }
         }
 
@@ -322,7 +323,7 @@ public final class PgTypesReader extends JdbcReader {
         String[] enums = getColArray(res, "enums", true);
         if (enums != null) {
             for (String enum_ : enums) {
-                t.addEnum(PgDiffUtils.quoteString(enum_));
+                t.addEnum(Utils.quoteString(enum_));
             }
         }
 

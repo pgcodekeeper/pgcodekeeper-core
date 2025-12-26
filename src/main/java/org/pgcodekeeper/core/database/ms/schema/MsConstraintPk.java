@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IConstraintPk;
 import org.pgcodekeeper.core.database.api.schema.IOptionContainer;
 import org.pgcodekeeper.core.database.api.schema.ISimpleColumnContainer;
@@ -137,7 +136,7 @@ public final class MsConstraintPk extends MsConstraint
     private void appendSimpleColumns(StringBuilder sbSQL, List<SimpleColumn> columns) {
         sbSQL.append(" (");
         for (var col : columns) {
-            sbSQL.append(MsDiffUtils.quoteName(col.getName()));
+            sbSQL.append(getQuotedName(col.getName()));
             if (col.isDesc()) {
                 sbSQL.append(" DESC");
             }

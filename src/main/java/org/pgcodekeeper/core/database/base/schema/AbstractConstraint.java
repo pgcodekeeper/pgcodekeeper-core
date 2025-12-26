@@ -105,11 +105,6 @@ public abstract class AbstractConstraint extends AbstractStatement implements IC
     protected abstract AbstractConstraint getConstraintCopy();
 
     @Override
-    public AbstractSchema getContainingSchema() {
-        return (AbstractSchema) parent.parent;
-    }
-
-    @Override
     public String getTableName() {
         return parent.name;
     }

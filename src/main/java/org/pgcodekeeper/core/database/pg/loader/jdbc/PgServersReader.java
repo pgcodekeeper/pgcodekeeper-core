@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.loader.jdbc;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -25,6 +24,7 @@ import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.schema.PgServer;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -57,12 +57,12 @@ public final class PgServersReader extends AbstractStatementReader {
         srv.addDependency(new GenericColumn(srv.getFdw(), DbObjType.FOREIGN_DATA_WRAPPER));
         String srvType = res.getString("srvtype");
         if (srvType != null) {
-            srv.setType(PgDiffUtils.quoteString(srvType));
+            srv.setType(Utils.quoteString(srvType));
         }
 
         String srvVersion = res.getString("srvversion");
         if (srvVersion != null) {
-            srv.setVersion(PgDiffUtils.quoteString(srvVersion));
+            srv.setVersion(Utils.quoteString(srvVersion));
         }
 
         String[] options = JdbcReader.getColArray(res, "srvoptions", true);

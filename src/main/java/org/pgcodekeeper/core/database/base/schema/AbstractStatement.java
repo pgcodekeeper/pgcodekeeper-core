@@ -202,8 +202,8 @@ public abstract class AbstractStatement implements IStatement, IHashable {
         return getStatementType().getTypeName();
     }
 
-    protected StringBuilder appendFullName(StringBuilder sb) {
-        return sb.append(getQualifiedName());
+    protected void appendFullName(StringBuilder sb) {
+        sb.append(getQualifiedName());
     }
 
     /**

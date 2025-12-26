@@ -178,11 +178,6 @@ public final class ChDictionary extends AbstractStatement implements IRelation, 
     }
 
     @Override
-    public ISchema getContainingSchema() {
-        return (ChSchema) parent;
-    }
-
-    @Override
     public Stream<Pair<String, String>> getRelationColumns() {
         return columns.stream().filter(c -> c.getType() != null)
                 .map(c -> new Pair<>(c.getName(), c.getType()));
