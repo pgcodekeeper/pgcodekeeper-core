@@ -44,8 +44,7 @@ public final class CreateChRole extends ChParserAbstract {
 
     @Override
     public void parseObject() {
-        for (var roleNameWithCluster : ctx.name_with_cluster()) {
-            var roleNameCtx = roleNameWithCluster.identifier();
+        for (var roleNameCtx : ctx.identifier_list().identifier()) {
             ChRole role = new ChRole(roleNameCtx.getText());
             var storageType = ctx.identifier();
             if (storageType != null) {

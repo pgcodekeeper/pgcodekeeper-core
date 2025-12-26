@@ -45,8 +45,7 @@ public final class CreateChUser extends ChParserAbstract {
 
     @Override
     public void parseObject() {
-        for (var userNameWithCluster : ctx.name_with_cluster()) {
-            var userNameCtx = userNameWithCluster.identifier();
+        for (var userNameCtx : ctx.identifier_list().identifier()) {
             ChUser user = new ChUser(userNameCtx.getText());
 
             var host = ctx.host();

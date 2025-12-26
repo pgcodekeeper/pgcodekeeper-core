@@ -75,14 +75,14 @@ public final class AlterChOther extends ChParserAbstract {
     }
 
     private void alterUser(Alter_user_stmtContext ctx) {
-        for (var userNameCtx : ctx.name_with_cluster()) {
-            addObjReference(Collections.singletonList(userNameCtx.identifier()), DbObjType.USER, ACTION_ALTER);
+        for (var userNameCtx : ctx.identifier()) {
+            addObjReference(Collections.singletonList(userNameCtx), DbObjType.USER, ACTION_ALTER);
         }
     }
 
     private void alterRole(Alter_role_stmtContext ctx) {
-        for (var roleCtx : ctx.name_with_cluster()) {
-            addObjReference(Collections.singletonList(roleCtx.identifier()), DbObjType.ROLE, ACTION_ALTER);
+        for (var roleCtx : ctx.identifier()) {
+            addObjReference(Collections.singletonList(roleCtx), DbObjType.ROLE, ACTION_ALTER);
         }
     }
 

@@ -57,147 +57,178 @@ Reference: Object = jack (ROLE), action = null, offset = 1775, line number = 38,
 Reference: Object = hugo (ROLE), action = null, offset = 1781, line number = 38, charPositionInLine = 55
 Reference: Object = user6 (USER), action = CREATE, offset = 1799, line number = 39, charPositionInLine = 12
 Reference: Object = user7 (USER), action = CREATE, offset = 1888, line number = 40, charPositionInLine = 12
-Reference: Object = host_user_local (USER), action = ALTER, offset = 1969, line number = 42, charPositionInLine = 11
-Reference: Object = "user" (USER), action = ALTER, offset = 2114, line number = 43, charPositionInLine = 11
-Reference: Object = "user" (USER), action = ALTER, offset = 2157, line number = 44, charPositionInLine = 11
-Reference: Object = "user" (USER), action = ALTER, offset = 2191, line number = 45, charPositionInLine = 11
-Reference: Object = john (USER), action = ALTER, offset = 2245, line number = 46, charPositionInLine = 11
-Reference: Object = john2 (USER), action = ALTER, offset = 2276, line number = 47, charPositionInLine = 11
-Reference: Object = host_user_local (USER), action = ALTER, offset = 2328, line number = 48, charPositionInLine = 11
-Reference: Object = user6 (USER), action = ALTER, offset = 2423, line number = 49, charPositionInLine = 11
-Reference: Object = user7 (USER), action = ALTER, offset = 2511, line number = 50, charPositionInLine = 11
-Reference: Object = default_roles_2 (USER), action = ALTER, offset = 2591, line number = 51, charPositionInLine = 11
-Reference: Object = default_roles_2 (USER), action = ALTER, offset = 2636, line number = 52, charPositionInLine = 11
-Reference: Object = "test 01119" (USER), action = ALTER, offset = 2698, line number = 53, charPositionInLine = 11
-Reference: Object = test_user_01075 (USER), action = ALTER, offset = 2744, line number = 54, charPositionInLine = 11
-Reference: Object = test_user_01075 (USER), action = ALTER, offset = 2796, line number = 55, charPositionInLine = 11
-Reference: Object = test_user_01075 (USER), action = ALTER, offset = 2879, line number = 56, charPositionInLine = 11
-Reference: Object = test_user_01075 (USER), action = ALTER, offset = 2934, line number = 57, charPositionInLine = 11
-Reference: Object = test_user_01075 (USER), action = ALTER, offset = 2971, line number = 58, charPositionInLine = 11
-Reference: Object = test_user_01075 (USER), action = ALTER, offset = 3023, line number = 59, charPositionInLine = 11
-Reference: Object = test_user_01075 (USER), action = ALTER, offset = 3101, line number = 60, charPositionInLine = 11
-Reference: Object = test_user_01075 (USER), action = ALTER, offset = 3156, line number = 61, charPositionInLine = 11
-Reference: Object = test_user_01075 (USER), action = ALTER, offset = 3195, line number = 62, charPositionInLine = 11
-Reference: Object = test_user_01075 (USER), action = ALTER, offset = 3233, line number = 63, charPositionInLine = 11
-Reference: Object = test_user_01075 (USER), action = ALTER, offset = 3329, line number = 64, charPositionInLine = 11
-Reference: Object = test_user_01075 (USER), action = ALTER, offset = 3429, line number = 65, charPositionInLine = 11
-Reference: Object = u1_01292 (USER), action = ALTER, offset = 3492, line number = 66, charPositionInLine = 11
-Reference: Object = u1_01292 (USER), action = ALTER, offset = 3535, line number = 67, charPositionInLine = 11
-Reference: Object = u1_01292 (USER), action = ALTER, offset = 3566, line number = 68, charPositionInLine = 11
-Reference: Object = u1_01292 (USER), action = ALTER, offset = 3610, line number = 69, charPositionInLine = 11
-Reference: Object = u1_01292 (USER), action = ALTER, offset = 3718, line number = 70, charPositionInLine = 11
-Reference: Object = u1_01292 (USER), action = ALTER, offset = 3759, line number = 71, charPositionInLine = 11
-Reference: Object = u2_01292 (USER), action = ALTER, offset = 3769, line number = 71, charPositionInLine = 21
-Reference: Object = u2_01292 (USER), action = ALTER, offset = 3810, line number = 72, charPositionInLine = 11
-Reference: Object = u2_01292 (USER), action = ALTER, offset = 3864, line number = 73, charPositionInLine = 11
-Reference: Object = u2_01292 (USER), action = ALTER, offset = 3908, line number = 74, charPositionInLine = 11
-Reference: Object = u2_01292 (USER), action = ALTER, offset = 3952, line number = 75, charPositionInLine = 11
-Reference: Object = u3_01292 (USER), action = ALTER, offset = 3993, line number = 76, charPositionInLine = 11
-Reference: Object = u3_01292 (USER), action = ALTER, offset = 4041, line number = 77, charPositionInLine = 11
-Reference: Object = u3_01292 (USER), action = ALTER, offset = 4085, line number = 78, charPositionInLine = 11
-Reference: Object = u4_01292 (USER), action = ALTER, offset = 4120, line number = 79, charPositionInLine = 11
-Reference: Object = u4_01292 (USER), action = ALTER, offset = 4169, line number = 80, charPositionInLine = 11
-Reference: Object = u5_01292 (USER), action = ALTER, offset = 4237, line number = 81, charPositionInLine = 11
-Reference: Object = "    " (USER), action = DROP, offset = 4273, line number = 83, charPositionInLine = 10
-Reference: Object = " spaces " (USER), action = DROP, offset = 4291, line number = 84, charPositionInLine = 10
-Reference: Object = "Вася Пупкин" (USER), action = DROP, offset = 4313, line number = 85, charPositionInLine = 10
-Reference: Object = "无名氏 " (USER), action = DROP, offset = 4338, line number = 86, charPositionInLine = 10
-Reference: Object = "🙈 🙉 🙊" (USER), action = DROP, offset = 4356, line number = 87, charPositionInLine = 10
-Reference: Object = "  spaces" (USER), action = DROP, offset = 4378, line number = 88, charPositionInLine = 10
-Reference: Object = "spaces  " (USER), action = DROP, offset = 4400, line number = 89, charPositionInLine = 10
-Reference: Object = test_01605 (USER), action = DROP, offset = 4422, line number = 90, charPositionInLine = 10
-Reference: Object = "test_user_01075_x@192.168.23.15" (USER), action = DROP, offset = 4446, line number = 91, charPositionInLine = 10
-Reference: Object = "02911_user" (USER), action = DROP, offset = 4491, line number = 92, charPositionInLine = 10
-Reference: Object = " spaces " (USER), action = DROP, offset = 4557, line number = 93, charPositionInLine = 20
-Reference: Object = "test 01119" (USER), action = DROP, offset = 4589, line number = 94, charPositionInLine = 20
-Reference: Object = "Вася Пупкин" (USER), action = DROP, offset = 4623, line number = 95, charPositionInLine = 20
-Reference: Object = "无名氏 " (USER), action = DROP, offset = 4658, line number = 96, charPositionInLine = 20
-Reference: Object = "🙈 🙉 🙊" (USER), action = DROP, offset = 4686, line number = 97, charPositionInLine = 20
-Reference: Object = "  spaces" (USER), action = DROP, offset = 4718, line number = 98, charPositionInLine = 20
-Reference: Object = "'spaces  '" (USER), action = DROP, offset = 4750, line number = 99, charPositionInLine = 20
-Reference: Object = "02911_user" (USER), action = DROP, offset = 4784, line number = 100, charPositionInLine = 20
-Reference: Object = sqllt_user (USER), action = DROP, offset = 4850, line number = 101, charPositionInLine = 20
-Reference: Object = test_user_01073 (USER), action = DROP, offset = 4882, line number = 102, charPositionInLine = 20
-Reference: Object = test_user_01074 (USER), action = DROP, offset = 4919, line number = 103, charPositionInLine = 20
-Reference: Object = test_user_01999 (USER), action = DROP, offset = 4956, line number = 104, charPositionInLine = 20
-Reference: Object = u10_01292 (USER), action = DROP, offset = 4993, line number = 105, charPositionInLine = 20
-Reference: Object = u11_01292 (USER), action = DROP, offset = 5004, line number = 105, charPositionInLine = 31
-Reference: Object = u12_01292 (USER), action = DROP, offset = 5015, line number = 105, charPositionInLine = 42
-Reference: Object = u13_01292 (USER), action = DROP, offset = 5026, line number = 105, charPositionInLine = 53
-Reference: Object = u14_01292 (USER), action = DROP, offset = 5037, line number = 105, charPositionInLine = 64
-Reference: Object = u15_01292 (USER), action = DROP, offset = 5048, line number = 105, charPositionInLine = 75
-Reference: Object = u16_01292 (USER), action = DROP, offset = 5059, line number = 105, charPositionInLine = 86
-Reference: Object = "u1_01292@'%', 'u2_01292@%.myhost.com'" (USER), action = DROP, offset = 5090, line number = 106, charPositionInLine = 20
-Reference: Object = "u3_01292@'192.168.%.%'" (USER), action = DROP, offset = 5131, line number = 106, charPositionInLine = 61
-Reference: Object = "'u4_01292@::1'" (USER), action = DROP, offset = 5157, line number = 106, charPositionInLine = 87
-Reference: Object = "u5_01292@'65:ff0c::/96'" (USER), action = DROP, offset = 5175, line number = 106, charPositionInLine = 105
-Reference: Object = u1_01294 (USER), action = DROP, offset = 5222, line number = 107, charPositionInLine = 20
-Reference: Object = u1_01295 (USER), action = DROP, offset = 5252, line number = 108, charPositionInLine = 20
-Reference: Object = u1_01296 (USER), action = DROP, offset = 5282, line number = 109, charPositionInLine = 20
-Reference: Object = u1_01297 (USER), action = DROP, offset = 5312, line number = 110, charPositionInLine = 20
-Reference: Object = u1_02703 (USER), action = DROP, offset = 5342, line number = 111, charPositionInLine = 20
-Reference: Object = u2_01292_renamed (USER), action = DROP, offset = 5372, line number = 112, charPositionInLine = 20
-Reference: Object = "u5_01292@'%.host.com'" (USER), action = DROP, offset = 5410, line number = 113, charPositionInLine = 20
-Reference: Object = "u6_01292@'%.host.com'" (USER), action = DROP, offset = 5435, line number = 113, charPositionInLine = 45
-Reference: Object = "u7_01292@'%.host.com'" (USER), action = DROP, offset = 5460, line number = 113, charPositionInLine = 70
-Reference: Object = "u8_01292@'%.otherhost.com'" (USER), action = DROP, offset = 5485, line number = 113, charPositionInLine = 95
-Reference: Object = u_02001 (USER), action = DROP, offset = 5535, line number = 114, charPositionInLine = 20
-Reference: Object = test_user_01073 (USER), action = DROP, offset = 5554, line number = 115, charPositionInLine = 10
-Reference: Object = test_user_01074 (USER), action = DROP, offset = 5581, line number = 116, charPositionInLine = 10
-Reference: Object = test_user_01075 (USER), action = DROP, offset = 5608, line number = 117, charPositionInLine = 10
-Reference: Object = test_user_02867 (USER), action = DROP, offset = 5635, line number = 118, charPositionInLine = 10
-Reference: Object = u10_01292 (USER), action = DROP, offset = 5662, line number = 119, charPositionInLine = 10
-Reference: Object = u11_01292 (USER), action = DROP, offset = 5673, line number = 119, charPositionInLine = 21
-Reference: Object = u12_01292 (USER), action = DROP, offset = 5684, line number = 119, charPositionInLine = 32
-Reference: Object = u13_01292 (USER), action = DROP, offset = 5695, line number = 119, charPositionInLine = 43
-Reference: Object = u14_01292 (USER), action = DROP, offset = 5706, line number = 119, charPositionInLine = 54
-Reference: Object = u15_01292 (USER), action = DROP, offset = 5717, line number = 119, charPositionInLine = 65
-Reference: Object = u16_01292 (USER), action = DROP, offset = 5728, line number = 119, charPositionInLine = 76
-Reference: Object = u1_01292 (USER), action = DROP, offset = 5749, line number = 120, charPositionInLine = 10
-Reference: Object = u2_01292 (USER), action = DROP, offset = 5759, line number = 120, charPositionInLine = 20
-Reference: Object = u3_01292 (USER), action = DROP, offset = 5769, line number = 120, charPositionInLine = 30
-Reference: Object = u4_01292 (USER), action = DROP, offset = 5779, line number = 120, charPositionInLine = 40
-Reference: Object = u5_01292 (USER), action = DROP, offset = 5789, line number = 120, charPositionInLine = 50
-Reference: Object = u6_01292 (USER), action = DROP, offset = 5799, line number = 120, charPositionInLine = 60
-Reference: Object = u7_01292 (USER), action = DROP, offset = 5809, line number = 120, charPositionInLine = 70
-Reference: Object = u8_01292 (USER), action = DROP, offset = 5819, line number = 120, charPositionInLine = 80
-Reference: Object = u9_01292 (USER), action = DROP, offset = 5829, line number = 120, charPositionInLine = 90
-Reference: Object = u1_01292 (USER), action = DROP, offset = 5849, line number = 121, charPositionInLine = 10
-Reference: Object = u2_01292 (USER), action = DROP, offset = 5859, line number = 121, charPositionInLine = 20
-Reference: Object = u3_01292 (USER), action = DROP, offset = 5869, line number = 121, charPositionInLine = 30
-Reference: Object = u4_01292 (USER), action = DROP, offset = 5879, line number = 121, charPositionInLine = 40
-Reference: Object = u5_01292 (USER), action = DROP, offset = 5889, line number = 121, charPositionInLine = 50
-Reference: Object = u6_01292 (USER), action = DROP, offset = 5899, line number = 121, charPositionInLine = 60
-Reference: Object = u1_01292 (USER), action = DROP, offset = 5919, line number = 122, charPositionInLine = 10
-Reference: Object = u2_01292 (USER), action = DROP, offset = 5929, line number = 122, charPositionInLine = 20
-Reference: Object = u3_01292 (USER), action = DROP, offset = 5939, line number = 122, charPositionInLine = 30
-Reference: Object = u4_01292 (USER), action = DROP, offset = 5949, line number = 122, charPositionInLine = 40
-Reference: Object = u5_01292 (USER), action = DROP, offset = 5959, line number = 122, charPositionInLine = 50
-Reference: Object = u1_01292 (USER), action = DROP, offset = 5979, line number = 123, charPositionInLine = 10
-Reference: Object = u2_01292 (USER), action = DROP, offset = 5989, line number = 123, charPositionInLine = 20
-Reference: Object = u3_01292 (USER), action = DROP, offset = 5999, line number = 123, charPositionInLine = 30
-Reference: Object = u4_01292 (USER), action = DROP, offset = 6009, line number = 123, charPositionInLine = 40
-Reference: Object = "u5_01292@'%.host.com'" (USER), action = DROP, offset = 6019, line number = 123, charPositionInLine = 50
-Reference: Object = "u6_01292@'%.host.com'" (USER), action = DROP, offset = 6044, line number = 123, charPositionInLine = 75
-Reference: Object = u1_01292 (USER), action = DROP, offset = 6079, line number = 124, charPositionInLine = 10
-Reference: Object = u2_01292 (USER), action = DROP, offset = 6089, line number = 124, charPositionInLine = 20
-Reference: Object = u3_01292 (USER), action = DROP, offset = 6099, line number = 124, charPositionInLine = 30
-Reference: Object = u4_01292 (USER), action = DROP, offset = 6109, line number = 124, charPositionInLine = 40
-Reference: Object = u1_01292 (USER), action = DROP, offset = 6129, line number = 125, charPositionInLine = 10
-Reference: Object = u2_01292 (USER), action = DROP, offset = 6139, line number = 125, charPositionInLine = 20
-Reference: Object = u1_01292 (USER), action = DROP, offset = 6159, line number = 126, charPositionInLine = 10
-Reference: Object = u2_01292_renamed (USER), action = DROP, offset = 6169, line number = 126, charPositionInLine = 20
-Reference: Object = u3_01292 (USER), action = DROP, offset = 6187, line number = 126, charPositionInLine = 38
-Reference: Object = u1_01292 (USER), action = DROP, offset = 6207, line number = 127, charPositionInLine = 10
-Reference: Object = "u1_01292@'%'" (USER), action = DROP, offset = 6227, line number = 128, charPositionInLine = 10
-Reference: Object = "'u2_01292@%.myhost.com'" (USER), action = DROP, offset = 6243, line number = 128, charPositionInLine = 26
-Reference: Object = "u3_01292@'192.168.%.%'" (USER), action = DROP, offset = 6270, line number = 128, charPositionInLine = 53
-Reference: Object = "'u4_01292@::1'" (USER), action = DROP, offset = 6296, line number = 128, charPositionInLine = 79
-Reference: Object = "u5_01292@'65:ff0c::/96'" (USER), action = DROP, offset = 6314, line number = 128, charPositionInLine = 97
-Reference: Object = u1_01294 (USER), action = DROP, offset = 6351, line number = 129, charPositionInLine = 10
-Reference: Object = u1_01295 (USER), action = DROP, offset = 6371, line number = 130, charPositionInLine = 10
-Reference: Object = u1_01296 (USER), action = DROP, offset = 6391, line number = 131, charPositionInLine = 10
-Reference: Object = u1_01297 (USER), action = DROP, offset = 6411, line number = 132, charPositionInLine = 10
-Reference: Object = u1_02703 (USER), action = DROP, offset = 6431, line number = 133, charPositionInLine = 10
-Reference: Object = "u7_01292@'%.host.com'" (USER), action = DROP, offset = 6451, line number = 134, charPositionInLine = 10
-Reference: Object = "u8_01292@'%.otherhost.com'" (USER), action = DROP, offset = 6476, line number = 134, charPositionInLine = 35
+Reference: Object = u1_01292 (USER), action = CREATE, offset = 1969, line number = 41, charPositionInLine = 12
+Reference: Object = u1_01292 (USER), action = CREATE, offset = 2019, line number = 42, charPositionInLine = 12
+Reference: Object = u1_01292 (USER), action = CREATE, offset = 2088, line number = 43, charPositionInLine = 12
+Reference: Object = u1_01292 (USER), action = CREATE, offset = 2154, line number = 44, charPositionInLine = 12
+Reference: Object = u1_01292 (USER), action = CREATE, offset = 2201, line number = 45, charPositionInLine = 12
+Reference: Object = u1_01292 (USER), action = CREATE, offset = 2261, line number = 46, charPositionInLine = 12
+Reference: Object = u1_01292 (USER), action = CREATE, offset = 2332, line number = 47, charPositionInLine = 12
+Reference: Object = u1_01292 (USER), action = CREATE, offset = 2393, line number = 48, charPositionInLine = 12
+Reference: Object = u1_01292 (USER), action = CREATE, offset = 2458, line number = 49, charPositionInLine = 12
+Reference: Object = u1_01292 (USER), action = CREATE, offset = 2524, line number = 50, charPositionInLine = 12
+Reference: Object = u1_01292 (USER), action = CREATE, offset = 2584, line number = 51, charPositionInLine = 12
+Reference: Object = u1_01292 (USER), action = CREATE, offset = 2648, line number = 52, charPositionInLine = 12
+Reference: Object = u1_01292 (USER), action = CREATE, offset = 2723, line number = 53, charPositionInLine = 12
+Reference: Object = u1_01292 (USER), action = CREATE, offset = 2804, line number = 54, charPositionInLine = 12
+Reference: Object = u1_01292 (USER), action = CREATE, offset = 2868, line number = 55, charPositionInLine = 12
+Reference: Object = u1_01292 (USER), action = CREATE, offset = 2947, line number = 56, charPositionInLine = 12
+Reference: Object = ldap_user (USER), action = CREATE, offset = 3003, line number = 57, charPositionInLine = 23
+Reference: Object = readonly (ROLE), action = null, offset = 3117, line number = 61, charPositionInLine = 13
+Reference: Object = web_app (USER), action = CREATE, offset = 3139, line number = 62, charPositionInLine = 12
+Reference: Object = reporting_user (USER), action = CREATE, offset = 3270, line number = 66, charPositionInLine = 12
+Reference: Object = report_viewer (ROLE), action = null, offset = 3394, line number = 70, charPositionInLine = 13
+Reference: Object = host_user_local (USER), action = ALTER, offset = 3457, line number = 72, charPositionInLine = 11
+Reference: Object = "user" (USER), action = ALTER, offset = 3602, line number = 73, charPositionInLine = 11
+Reference: Object = "user" (USER), action = ALTER, offset = 3645, line number = 74, charPositionInLine = 11
+Reference: Object = "user" (USER), action = ALTER, offset = 3679, line number = 75, charPositionInLine = 11
+Reference: Object = john (USER), action = ALTER, offset = 3733, line number = 76, charPositionInLine = 11
+Reference: Object = john2 (USER), action = ALTER, offset = 3764, line number = 77, charPositionInLine = 11
+Reference: Object = host_user_local (USER), action = ALTER, offset = 3816, line number = 78, charPositionInLine = 11
+Reference: Object = user7 (USER), action = ALTER, offset = 3911, line number = 79, charPositionInLine = 11
+Reference: Object = user7 (USER), action = ALTER, offset = 3976, line number = 80, charPositionInLine = 11
+Reference: Object = default_roles_2 (USER), action = ALTER, offset = 4044, line number = 81, charPositionInLine = 11
+Reference: Object = default_roles_2 (USER), action = ALTER, offset = 4089, line number = 82, charPositionInLine = 11
+Reference: Object = "test 01119" (USER), action = ALTER, offset = 4151, line number = 83, charPositionInLine = 11
+Reference: Object = " spaces " (USER), action = ALTER, offset = 4174, line number = 83, charPositionInLine = 34
+Reference: Object = test_user_01075 (USER), action = ALTER, offset = 4197, line number = 84, charPositionInLine = 11
+Reference: Object = test_user_01075 (USER), action = ALTER, offset = 4249, line number = 85, charPositionInLine = 11
+Reference: Object = test_user_01075 (USER), action = ALTER, offset = 4332, line number = 86, charPositionInLine = 11
+Reference: Object = test_user_01075 (USER), action = ALTER, offset = 4387, line number = 87, charPositionInLine = 11
+Reference: Object = test_user_01075 (USER), action = ALTER, offset = 4424, line number = 88, charPositionInLine = 11
+Reference: Object = test_user_01075 (USER), action = ALTER, offset = 4476, line number = 89, charPositionInLine = 11
+Reference: Object = test_user_01075 (USER), action = ALTER, offset = 4554, line number = 90, charPositionInLine = 11
+Reference: Object = test_user_01075 (USER), action = ALTER, offset = 4609, line number = 91, charPositionInLine = 11
+Reference: Object = test_user_01075 (USER), action = ALTER, offset = 4648, line number = 92, charPositionInLine = 11
+Reference: Object = test_user_01075 (USER), action = ALTER, offset = 4686, line number = 93, charPositionInLine = 11
+Reference: Object = test_user_01075 (USER), action = ALTER, offset = 4782, line number = 94, charPositionInLine = 11
+Reference: Object = test_user_01075 (USER), action = ALTER, offset = 4882, line number = 95, charPositionInLine = 11
+Reference: Object = u1_01292 (USER), action = ALTER, offset = 4945, line number = 96, charPositionInLine = 11
+Reference: Object = u1_01292 (USER), action = ALTER, offset = 4988, line number = 97, charPositionInLine = 11
+Reference: Object = u1_01292 (USER), action = ALTER, offset = 5019, line number = 98, charPositionInLine = 11
+Reference: Object = u1_01292 (USER), action = ALTER, offset = 5063, line number = 99, charPositionInLine = 11
+Reference: Object = u1_01292 (USER), action = ALTER, offset = 5167, line number = 100, charPositionInLine = 11
+Reference: Object = rabbit (USER), action = ALTER, offset = 5208, line number = 101, charPositionInLine = 11
+Reference: Object = fox (USER), action = ALTER, offset = 5216, line number = 101, charPositionInLine = 19
+Reference: Object = tom_riddl (USER), action = ALTER, offset = 5256, line number = 102, charPositionInLine = 11
+Reference: Object = volandemort (USER), action = ALTER, offset = 5276, line number = 102, charPositionInLine = 31
+Reference: Object = cat (USER), action = ALTER, offset = 5327, line number = 103, charPositionInLine = 11
+Reference: Object = cat_2 (USER), action = ALTER, offset = 5361, line number = 104, charPositionInLine = 11
+Reference: Object = cat_3 (USER), action = ALTER, offset = 5397, line number = 105, charPositionInLine = 11
+Reference: Object = u2_01292 (USER), action = ALTER, offset = 5441, line number = 106, charPositionInLine = 11
+Reference: Object = u2_01292 (USER), action = ALTER, offset = 5495, line number = 107, charPositionInLine = 11
+Reference: Object = u2_01292 (USER), action = ALTER, offset = 5539, line number = 108, charPositionInLine = 11
+Reference: Object = u2_01292 (USER), action = ALTER, offset = 5583, line number = 109, charPositionInLine = 11
+Reference: Object = u3_01292 (USER), action = ALTER, offset = 5624, line number = 110, charPositionInLine = 11
+Reference: Object = u3_01292 (USER), action = ALTER, offset = 5672, line number = 111, charPositionInLine = 11
+Reference: Object = u3_01292 (USER), action = ALTER, offset = 5716, line number = 112, charPositionInLine = 11
+Reference: Object = u4_01292 (USER), action = ALTER, offset = 5751, line number = 113, charPositionInLine = 11
+Reference: Object = u4_01292 (USER), action = ALTER, offset = 5800, line number = 114, charPositionInLine = 11
+Reference: Object = u5_01292 (USER), action = ALTER, offset = 5868, line number = 115, charPositionInLine = 11
+Reference: Object = user1 (USER), action = ALTER, offset = 5904, line number = 116, charPositionInLine = 11
+Reference: Object = user1 (USER), action = ALTER, offset = 5958, line number = 117, charPositionInLine = 11
+Reference: Object = student (USER), action = ALTER, offset = 6008, line number = 118, charPositionInLine = 11
+Reference: Object = worker (USER), action = ALTER, offset = 6017, line number = 118, charPositionInLine = 20
+Reference: Object = "    " (USER), action = DROP, offset = 6092, line number = 120, charPositionInLine = 10
+Reference: Object = " spaces " (USER), action = DROP, offset = 6110, line number = 121, charPositionInLine = 10
+Reference: Object = "Вася Пупкин" (USER), action = DROP, offset = 6132, line number = 122, charPositionInLine = 10
+Reference: Object = "无名氏 " (USER), action = DROP, offset = 6157, line number = 123, charPositionInLine = 10
+Reference: Object = "🙈 🙉 🙊" (USER), action = DROP, offset = 6175, line number = 124, charPositionInLine = 10
+Reference: Object = "  spaces" (USER), action = DROP, offset = 6197, line number = 125, charPositionInLine = 10
+Reference: Object = "spaces  " (USER), action = DROP, offset = 6219, line number = 126, charPositionInLine = 10
+Reference: Object = test_01605 (USER), action = DROP, offset = 6241, line number = 127, charPositionInLine = 10
+Reference: Object = "test_user_01075_x@192.168.23.15" (USER), action = DROP, offset = 6265, line number = 128, charPositionInLine = 10
+Reference: Object = "02911_user" (USER), action = DROP, offset = 6310, line number = 129, charPositionInLine = 10
+Reference: Object = " spaces " (USER), action = DROP, offset = 6376, line number = 130, charPositionInLine = 20
+Reference: Object = "test 01119" (USER), action = DROP, offset = 6408, line number = 131, charPositionInLine = 20
+Reference: Object = "Вася Пупкин" (USER), action = DROP, offset = 6442, line number = 132, charPositionInLine = 20
+Reference: Object = "无名氏 " (USER), action = DROP, offset = 6477, line number = 133, charPositionInLine = 20
+Reference: Object = "🙈 🙉 🙊" (USER), action = DROP, offset = 6505, line number = 134, charPositionInLine = 20
+Reference: Object = "  spaces" (USER), action = DROP, offset = 6537, line number = 135, charPositionInLine = 20
+Reference: Object = "'spaces  '" (USER), action = DROP, offset = 6569, line number = 136, charPositionInLine = 20
+Reference: Object = "02911_user" (USER), action = DROP, offset = 6603, line number = 137, charPositionInLine = 20
+Reference: Object = sqllt_user (USER), action = DROP, offset = 6669, line number = 138, charPositionInLine = 20
+Reference: Object = test_user_01073 (USER), action = DROP, offset = 6701, line number = 139, charPositionInLine = 20
+Reference: Object = test_user_01074 (USER), action = DROP, offset = 6738, line number = 140, charPositionInLine = 20
+Reference: Object = test_user_01999 (USER), action = DROP, offset = 6775, line number = 141, charPositionInLine = 20
+Reference: Object = u10_01292 (USER), action = DROP, offset = 6812, line number = 142, charPositionInLine = 20
+Reference: Object = u11_01292 (USER), action = DROP, offset = 6823, line number = 142, charPositionInLine = 31
+Reference: Object = u12_01292 (USER), action = DROP, offset = 6834, line number = 142, charPositionInLine = 42
+Reference: Object = u13_01292 (USER), action = DROP, offset = 6845, line number = 142, charPositionInLine = 53
+Reference: Object = u14_01292 (USER), action = DROP, offset = 6856, line number = 142, charPositionInLine = 64
+Reference: Object = u15_01292 (USER), action = DROP, offset = 6867, line number = 142, charPositionInLine = 75
+Reference: Object = u16_01292 (USER), action = DROP, offset = 6878, line number = 142, charPositionInLine = 86
+Reference: Object = "u1_01292@'%', 'u2_01292@%.myhost.com'" (USER), action = DROP, offset = 6909, line number = 143, charPositionInLine = 20
+Reference: Object = "u3_01292@'192.168.%.%'" (USER), action = DROP, offset = 6950, line number = 143, charPositionInLine = 61
+Reference: Object = "'u4_01292@::1'" (USER), action = DROP, offset = 6976, line number = 143, charPositionInLine = 87
+Reference: Object = "u5_01292@'65:ff0c::/96'" (USER), action = DROP, offset = 6994, line number = 143, charPositionInLine = 105
+Reference: Object = u1_01294 (USER), action = DROP, offset = 7041, line number = 144, charPositionInLine = 20
+Reference: Object = u1_01295 (USER), action = DROP, offset = 7071, line number = 145, charPositionInLine = 20
+Reference: Object = u1_01296 (USER), action = DROP, offset = 7101, line number = 146, charPositionInLine = 20
+Reference: Object = u1_01297 (USER), action = DROP, offset = 7131, line number = 147, charPositionInLine = 20
+Reference: Object = u1_02703 (USER), action = DROP, offset = 7161, line number = 148, charPositionInLine = 20
+Reference: Object = u2_01292_renamed (USER), action = DROP, offset = 7191, line number = 149, charPositionInLine = 20
+Reference: Object = "u5_01292@'%.host.com'" (USER), action = DROP, offset = 7229, line number = 150, charPositionInLine = 20
+Reference: Object = "u6_01292@'%.host.com'" (USER), action = DROP, offset = 7254, line number = 150, charPositionInLine = 45
+Reference: Object = "u7_01292@'%.host.com'" (USER), action = DROP, offset = 7279, line number = 150, charPositionInLine = 70
+Reference: Object = "u8_01292@'%.otherhost.com'" (USER), action = DROP, offset = 7304, line number = 150, charPositionInLine = 95
+Reference: Object = u_02001 (USER), action = DROP, offset = 7354, line number = 151, charPositionInLine = 20
+Reference: Object = test_user_01073 (USER), action = DROP, offset = 7373, line number = 152, charPositionInLine = 10
+Reference: Object = test_user_01074 (USER), action = DROP, offset = 7400, line number = 153, charPositionInLine = 10
+Reference: Object = test_user_01075 (USER), action = DROP, offset = 7427, line number = 154, charPositionInLine = 10
+Reference: Object = test_user_02867 (USER), action = DROP, offset = 7454, line number = 155, charPositionInLine = 10
+Reference: Object = u10_01292 (USER), action = DROP, offset = 7481, line number = 156, charPositionInLine = 10
+Reference: Object = u11_01292 (USER), action = DROP, offset = 7492, line number = 156, charPositionInLine = 21
+Reference: Object = u12_01292 (USER), action = DROP, offset = 7503, line number = 156, charPositionInLine = 32
+Reference: Object = u13_01292 (USER), action = DROP, offset = 7514, line number = 156, charPositionInLine = 43
+Reference: Object = u14_01292 (USER), action = DROP, offset = 7525, line number = 156, charPositionInLine = 54
+Reference: Object = u15_01292 (USER), action = DROP, offset = 7536, line number = 156, charPositionInLine = 65
+Reference: Object = u16_01292 (USER), action = DROP, offset = 7547, line number = 156, charPositionInLine = 76
+Reference: Object = u1_01292 (USER), action = DROP, offset = 7568, line number = 157, charPositionInLine = 10
+Reference: Object = u2_01292 (USER), action = DROP, offset = 7578, line number = 157, charPositionInLine = 20
+Reference: Object = u3_01292 (USER), action = DROP, offset = 7588, line number = 157, charPositionInLine = 30
+Reference: Object = u4_01292 (USER), action = DROP, offset = 7598, line number = 157, charPositionInLine = 40
+Reference: Object = u5_01292 (USER), action = DROP, offset = 7608, line number = 157, charPositionInLine = 50
+Reference: Object = u6_01292 (USER), action = DROP, offset = 7618, line number = 157, charPositionInLine = 60
+Reference: Object = u7_01292 (USER), action = DROP, offset = 7628, line number = 157, charPositionInLine = 70
+Reference: Object = u8_01292 (USER), action = DROP, offset = 7638, line number = 157, charPositionInLine = 80
+Reference: Object = u9_01292 (USER), action = DROP, offset = 7648, line number = 157, charPositionInLine = 90
+Reference: Object = u1_01292 (USER), action = DROP, offset = 7668, line number = 158, charPositionInLine = 10
+Reference: Object = u2_01292 (USER), action = DROP, offset = 7678, line number = 158, charPositionInLine = 20
+Reference: Object = u3_01292 (USER), action = DROP, offset = 7688, line number = 158, charPositionInLine = 30
+Reference: Object = u4_01292 (USER), action = DROP, offset = 7698, line number = 158, charPositionInLine = 40
+Reference: Object = u5_01292 (USER), action = DROP, offset = 7708, line number = 158, charPositionInLine = 50
+Reference: Object = u6_01292 (USER), action = DROP, offset = 7718, line number = 158, charPositionInLine = 60
+Reference: Object = u1_01292 (USER), action = DROP, offset = 7738, line number = 159, charPositionInLine = 10
+Reference: Object = u2_01292 (USER), action = DROP, offset = 7748, line number = 159, charPositionInLine = 20
+Reference: Object = u3_01292 (USER), action = DROP, offset = 7758, line number = 159, charPositionInLine = 30
+Reference: Object = u4_01292 (USER), action = DROP, offset = 7768, line number = 159, charPositionInLine = 40
+Reference: Object = u5_01292 (USER), action = DROP, offset = 7778, line number = 159, charPositionInLine = 50
+Reference: Object = u1_01292 (USER), action = DROP, offset = 7798, line number = 160, charPositionInLine = 10
+Reference: Object = u2_01292 (USER), action = DROP, offset = 7808, line number = 160, charPositionInLine = 20
+Reference: Object = u3_01292 (USER), action = DROP, offset = 7818, line number = 160, charPositionInLine = 30
+Reference: Object = u4_01292 (USER), action = DROP, offset = 7828, line number = 160, charPositionInLine = 40
+Reference: Object = "u5_01292@'%.host.com'" (USER), action = DROP, offset = 7838, line number = 160, charPositionInLine = 50
+Reference: Object = "u6_01292@'%.host.com'" (USER), action = DROP, offset = 7863, line number = 160, charPositionInLine = 75
+Reference: Object = u1_01292 (USER), action = DROP, offset = 7898, line number = 161, charPositionInLine = 10
+Reference: Object = u2_01292 (USER), action = DROP, offset = 7908, line number = 161, charPositionInLine = 20
+Reference: Object = u3_01292 (USER), action = DROP, offset = 7918, line number = 161, charPositionInLine = 30
+Reference: Object = u4_01292 (USER), action = DROP, offset = 7928, line number = 161, charPositionInLine = 40
+Reference: Object = u1_01292 (USER), action = DROP, offset = 7948, line number = 162, charPositionInLine = 10
+Reference: Object = u2_01292 (USER), action = DROP, offset = 7958, line number = 162, charPositionInLine = 20
+Reference: Object = u1_01292 (USER), action = DROP, offset = 7978, line number = 163, charPositionInLine = 10
+Reference: Object = u2_01292_renamed (USER), action = DROP, offset = 7988, line number = 163, charPositionInLine = 20
+Reference: Object = u3_01292 (USER), action = DROP, offset = 8006, line number = 163, charPositionInLine = 38
+Reference: Object = u1_01292 (USER), action = DROP, offset = 8026, line number = 164, charPositionInLine = 10
+Reference: Object = "u1_01292@'%'" (USER), action = DROP, offset = 8046, line number = 165, charPositionInLine = 10
+Reference: Object = "'u2_01292@%.myhost.com'" (USER), action = DROP, offset = 8062, line number = 165, charPositionInLine = 26
+Reference: Object = "u3_01292@'192.168.%.%'" (USER), action = DROP, offset = 8089, line number = 165, charPositionInLine = 53
+Reference: Object = "'u4_01292@::1'" (USER), action = DROP, offset = 8115, line number = 165, charPositionInLine = 79
+Reference: Object = "u5_01292@'65:ff0c::/96'" (USER), action = DROP, offset = 8133, line number = 165, charPositionInLine = 97
+Reference: Object = u1_01294 (USER), action = DROP, offset = 8170, line number = 166, charPositionInLine = 10
+Reference: Object = u1_01295 (USER), action = DROP, offset = 8190, line number = 167, charPositionInLine = 10
+Reference: Object = u1_01296 (USER), action = DROP, offset = 8210, line number = 168, charPositionInLine = 10
+Reference: Object = u1_01297 (USER), action = DROP, offset = 8230, line number = 169, charPositionInLine = 10
+Reference: Object = u1_02703 (USER), action = DROP, offset = 8250, line number = 170, charPositionInLine = 10
+Reference: Object = "u7_01292@'%.host.com'" (USER), action = DROP, offset = 8270, line number = 171, charPositionInLine = 10
+Reference: Object = "u8_01292@'%.otherhost.com'" (USER), action = DROP, offset = 8295, line number = 171, charPositionInLine = 35

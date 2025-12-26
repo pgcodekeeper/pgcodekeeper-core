@@ -245,9 +245,8 @@ users
     ;
 
 alter_role_stmt
-    : ALTER ROLE if_exists? name_with_cluster rename_to?
-    (COMMA name_with_cluster rename_to?)*
-    user_settings?
+    : ALTER ROLE if_exists? identifier (RENAME TO identifier | (COMMA identifier)+)?
+     cluster_clause? alter_settings_profile_actions*
     ;
 
 alter_quota_stmt
@@ -256,11 +255,12 @@ alter_quota_stmt
 
 alter_quota_action
     : quota_stmt_body
-    | identifier RENAME TO idetifier_or_string
+    | identifier RENAME TO identifier_or_string
     ;
 
 alter_settings_profile
-    : ALTER SETTINGS? PROFILE if_exists? identifier (RENAME TO identifier | (COMMA identifier)+)? cluster_clause? alter_settings_profile_actions*
+    : ALTER SETTINGS? PROFILE if_exists? identifier (RENAME TO identifier | (COMMA identifier)+)?
+     cluster_clause? alter_settings_profile_actions*
     ;
 
 alter_settings_profile_actions
@@ -268,7 +268,11 @@ alter_settings_profile_actions
     | DROP (PROFILES | SETTINGS) identifier_list
     | (ADD | MODIFY)? profile_setting
     | to_user_role_clause
-    | ADD PROFILES identifier_list
+    | ADD PROFILES identifier_or_string_list
+    ;
+
+identifier_or_string_list
+    : identifier_or_string (COMMA identifier_or_string)*
     ;
 
 select_stmt
@@ -311,10 +315,10 @@ create_named_collection_stmt
     ;
 
 create_user_stmt
-    : CREATE USER if_not_exists_or_replace? name_with_cluster (COMMA name_with_cluster)*
-    (NOT IDENTIFIED | IDENTIFIED identification)?
+    : CREATE USER if_not_exists_or_replace? identifier_list cluster_clause?
+    (NOT IDENTIFIED | identification_with_list valid_datetime?)?
     (HOST host)?
-    (VALID UNTIL STRING_LITERAL)?
+    valid_datetime?
     (IN storage=identifier)?
     (DEFAULT ROLE role=users)?
     (DEFAULT DATABASE (database=identifier | NONE))?
@@ -322,16 +326,27 @@ create_user_stmt
     user_settings?
     ;
 
+identification_with_list
+    : IDENTIFIED identification (COMMA identification)*
+    ;
+
 identification
     : (WITH auth_type=identifier)? BY STRING_LITERAL
     | WITH auth_type=identifier auth_params
+    | WITH NO_PASSWORD
+    | auth_params
+    ;
+
+valid_datetime
+    : VALID UNTIL STRING_LITERAL?
     ;
 
 auth_params
-    : SERVER literal
+    : SERVER literal (SCHEME STRING_LITERAL)?
     | REALM STRING_LITERAL?
     | CN STRING_LITERAL
     | BY KEY STRING_LITERAL TYPE STRING_LITERAL
+    | SAN STRING_LITERAL
     ;
 
 host
@@ -346,7 +361,7 @@ host_type
     ;
 
 create_role_stmt
-     : CREATE ROLE if_not_exists_or_replace? name_with_cluster (COMMA name_with_cluster)*
+     : CREATE ROLE if_not_exists_or_replace? identifier_list cluster_clause?
      (IN identifier)? user_settings?
      ;
 
@@ -373,7 +388,7 @@ profile_inherit_list
     ;
 
 profile_inherit
-    : INHERIT idetifier_or_string (COMMA idetifier_or_string)*
+    : INHERIT identifier_or_string_list
     ;
 
 quota_stmt_body
@@ -388,7 +403,7 @@ to_user_role_clause
     ;
 
 quota_stmt_body_values
-    : (KEY | KEYED) BY idetifier_or_string (COMMA idetifier_or_string)*
+    : (KEY | KEYED) BY identifier_or_string_list
     | NOT KEYED
     | quota_with_interval_param (COMMA quota_with_interval_param)*
     ;
@@ -451,15 +466,14 @@ named_collection_pair
     ;
 
 alter_user_stmt
-    : ALTER USER if_exists? name_with_cluster rename_to?
-    (COMMA name_with_cluster rename_to?)*
-    (NOT IDENTIFIED | IDENTIFIED identification)?
+    : ALTER USER if_exists? identifier (RENAME TO identifier | (COMMA identifier)+)? cluster_clause?
+    (NOT IDENTIFIED | RESET AUTHENTICATION METHODS TO NEW | ADD? identification_with_list valid_datetime?)?
     ((ADD | DROP)? HOST host)*
-    (VALID UNTIL STRING_LITERAL)?
+    valid_datetime?
     (DEFAULT ROLE role=users)?
     (DEFAULT DATABASE (database=identifier | NONE))?
     (GRANTEES grantees=users)?
-    user_settings?
+    alter_settings_profile_actions*
     ;
 
 create_policy_stmt
@@ -729,10 +743,10 @@ dictionary_arg_value
     ;
 
 cluster_clause
-    : ON CLUSTER idetifier_or_string
+    : ON CLUSTER identifier_or_string
     ;
 
-idetifier_or_string
+identifier_or_string
     : identifier
     | STRING_LITERAL
     ;
@@ -1535,6 +1549,7 @@ tokens_nonreserved
     | ASYNC
     | ASYNCHRONOUS
     | ATTACH
+    | AUTHENTICATION
     | AUTHENTICATIONS
     | AUTO_INCREMENT
     | AZURE
@@ -1736,6 +1751,7 @@ tokens_nonreserved
     | MEDIUMTEXT
     | MERGES
     | METADATA
+    | METHODS
     | METRICS
     | MICROSECOND
     | MILLISECOND
@@ -1756,9 +1772,11 @@ tokens_nonreserved
     | NATS
     | NATIONAL
     | NCHAR
+    | NEW
     | NESTED
     | NO
     | NONE
+    | NO_PASSWORD
     | NOTHING
     | NULLABLE
     | NULLS
@@ -1847,6 +1865,8 @@ tokens_nonreserved
     | ROLLUP
     | ROW
     | ROWS
+    | SAN
+    | SCHEME
     | SECRETS
     | SECURE
     | SECURITY
