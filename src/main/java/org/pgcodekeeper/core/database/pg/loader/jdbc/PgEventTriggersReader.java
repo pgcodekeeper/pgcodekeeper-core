@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.loader.jdbc;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.AbstractStatementReader;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
@@ -24,6 +23,7 @@ import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.schema.PgEventTrigger;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -70,7 +70,7 @@ public final class PgEventTriggersReader extends AbstractStatementReader {
         String[] tags = JdbcReader.getColArray(res, "evttags", true);
         if (tags != null) {
             for (String tag : tags) {
-                evt.addTag(PgDiffUtils.quoteString(tag));
+                evt.addTag(Utils.quoteString(tag));
             }
         }
 

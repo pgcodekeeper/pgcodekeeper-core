@@ -19,7 +19,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
@@ -71,7 +70,7 @@ public abstract class PgConstraint extends AbstractConstraint implements IPgStat
         appendAlterTable(sbSQL);
         sbSQL.append("\n\tADD");
         if (!name.isEmpty()) {
-            sbSQL.append(" CONSTRAINT ").append(PgDiffUtils.getQuotedName(name));
+            sbSQL.append(" CONSTRAINT ").append(getQuotedName(name));
         }
         sbSQL.append(' ');
         sbSQL.append(getDefinition());
@@ -100,7 +99,7 @@ public abstract class PgConstraint extends AbstractConstraint implements IPgStat
             sbSQL.append("\n\n");
             appendAlterTable(sbSQL);
             sbSQL.append(" VALIDATE CONSTRAINT ")
-                    .append(PgDiffUtils.getQuotedName(name))
+                    .append(getQuotedName(name))
                     .append(';');
         }
 
@@ -108,7 +107,7 @@ public abstract class PgConstraint extends AbstractConstraint implements IPgStat
 
         if (script.getSettings().isGenerateExistDoBlock()) {
             StringBuilder sb = new StringBuilder();
-            PgDiffUtils.appendSqlWrappedInDo(sb, sbSQL, getErrorCode());
+            appendSqlWrappedInDo(sb, sbSQL, getErrorCode());
             script.addStatement(sb);
         } else {
             sbSQL.setLength(sbSQL.length() - 1);
@@ -141,7 +140,7 @@ public abstract class PgConstraint extends AbstractConstraint implements IPgStat
         if (optionExists) {
             sbSQL.append(IF_EXISTS);
         }
-        sbSQL.append(PgDiffUtils.getQuotedName(name));
+        sbSQL.append(getQuotedName(name));
         script.addStatement(sbSQL);
     }
 
@@ -157,7 +156,7 @@ public abstract class PgConstraint extends AbstractConstraint implements IPgStat
         if (isNotValid && !newConstr.isNotValid) {
             StringBuilder sbSQL = new StringBuilder();
             appendAlterTable(sbSQL);
-            sbSQL.append("\n\tVALIDATE CONSTRAINT ").append(PgDiffUtils.getQuotedName(name));
+            sbSQL.append("\n\tVALIDATE CONSTRAINT ").append(getQuotedName(name));
             script.addStatement(sbSQL);
         }
 
@@ -178,7 +177,7 @@ public abstract class PgConstraint extends AbstractConstraint implements IPgStat
     protected void appendCommentSql(SQLScript script) {
         StringBuilder sb = new StringBuilder();
         sb.append("COMMENT ON CONSTRAINT ");
-        sb.append(PgDiffUtils.getQuotedName(name)).append(" ON ");
+        sb.append(getQuotedName(name)).append(" ON ");
         if (parent.getStatementType() == DbObjType.DOMAIN) {
             sb.append("DOMAIN ");
         }

@@ -20,7 +20,6 @@ import org.pgcodekeeper.core.database.api.schema.IConstraintFk;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
 import org.pgcodekeeper.core.database.base.schema.StatementUtils;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -147,8 +146,8 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
         sbSQL.append("FOREIGN KEY ");
         StatementUtils.appendCols(sbSQL, columns, getQuoter());
         appendPeriod(sbSQL, periodColumn);
-        sbSQL.append(" REFERENCES ").append(PgDiffUtils.getQuotedName(foreignSchema)).append('.')
-                .append(PgDiffUtils.getQuotedName(foreignTable));
+        sbSQL.append(" REFERENCES ").append(getQuotedName(foreignSchema)).append('.')
+                .append(getQuotedName(foreignTable));
         if (!refs.isEmpty()) {
             StatementUtils.appendCols(sbSQL, refs, getQuoter());
             appendPeriod(sbSQL, periodRefcolumn);
@@ -184,7 +183,7 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
         if (!compareCommonFields(newConstr)) {
             StringBuilder sb = new StringBuilder();
             appendAlterTable(sb);
-            sb.append("\n\tALTER CONSTRAINT ").append(PgDiffUtils.getQuotedName(name));
+            sb.append("\n\tALTER CONSTRAINT ").append(getQuotedName(name));
 
             if (deferrable != newConstr.deferrable && !newConstr.deferrable) {
                 sb.append(" NOT DEFERRABLE");

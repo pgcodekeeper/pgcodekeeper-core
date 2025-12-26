@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.database.base.schema.*;
@@ -95,7 +94,7 @@ public final class MsIndex extends AbstractIndex implements IMsStatement {
                 sb.append(')');
             }
         } else {
-            sb.append(MsDiffUtils.quoteName(name));
+            sb.append(getQuotedName(name));
             sb.append(' ');
             appendClustered(sb);
             if (options.keySet().stream().anyMatch("BUCKET_COUNT"::equalsIgnoreCase)) {
@@ -136,7 +135,7 @@ public final class MsIndex extends AbstractIndex implements IMsStatement {
 
     private void appendSimpleColumns(StringBuilder sbSQL, List<SimpleColumn> columns) {
         for (var col : columns) {
-            sbSQL.append(MsDiffUtils.quoteName(col.getName()));
+            sbSQL.append(getQuotedName(col.getName()));
             if (col.isDesc()) {
                 sbSQL.append(" DESC");
             }
@@ -173,11 +172,8 @@ public final class MsIndex extends AbstractIndex implements IMsStatement {
     }
 
     @Override
-    protected StringBuilder appendFullName(StringBuilder sb) {
-        sb.append(MsDiffUtils.quoteName(name))
-                .append(" ON ")
-                .append(parent.getQualifiedName());
-        return sb;
+    protected void appendFullName(StringBuilder sb) {
+        sb.append(getQuotedName(name)).append(" ON ").append(parent.getQualifiedName());
     }
 
     @Override

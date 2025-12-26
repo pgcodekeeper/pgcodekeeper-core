@@ -42,9 +42,4 @@ public abstract class AbstractTrigger extends AbstractStatement implements ISubE
     }
 
     protected abstract AbstractTrigger getTriggerCopy();
-
-    @Override
-    public AbstractSchema getContainingSchema() {
-        return (AbstractSchema) parent.parent;
-    }
 }

@@ -31,6 +31,7 @@ import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.api.schema.ICompressOptionContainer;
 import org.pgcodekeeper.core.utils.Pair;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -372,7 +373,7 @@ public final class PgTablesReader extends JdbcReader {
 
             String comment = colComments[i];
             if (comment != null && !comment.isEmpty()) {
-                column.setComment(getTextWithCheckNewLines(PgDiffUtils.quoteString(comment)));
+                column.setComment(getTextWithCheckNewLines(Utils.quoteString(comment)));
             }
 
             // COLUMNS PRIVILEGES
@@ -415,13 +416,13 @@ public final class PgTablesReader extends JdbcReader {
             }
 
             for (String urLocation : PgDiffUtils.unquoteQuotedString(rowUrLoc, 1).split(",")) {
-                extTable.addUrLocation(PgDiffUtils.quoteString(urLocation));
+                extTable.addUrLocation(Utils.quoteString(urLocation));
             }
         }
 
         String exLoc = PgDiffUtils.unquoteQuotedName(res.getString("exloc"));
         if (exLoc.startsWith("HOST:")) {
-            extTable.setExLocation("ON HOST " + PgDiffUtils.quoteString(exLoc.substring("ON HOST:".length())));
+            extTable.setExLocation("ON HOST " + Utils.quoteString(exLoc.substring("ON HOST:".length())));
         } else if (exLoc.startsWith("PER_HOST")) {
             extTable.setExLocation("ON HOST");
         } else if (exLoc.startsWith("MASTER_ONLY")) {
@@ -437,7 +438,7 @@ public final class PgTablesReader extends JdbcReader {
         String command = res.getString("command");
         if (command != null && !command.isBlank()) {
             extTable.setWeb(true);
-            extTable.setCommand(PgDiffUtils.quoteString(command));
+            extTable.setCommand(Utils.quoteString(command));
         }
 
         switch (res.getString("fmttype")) {
@@ -484,7 +485,7 @@ public final class PgTablesReader extends JdbcReader {
             extTable.setIsLogErrors(res.getBoolean("logerrors"));
             extTable.setRowReject(!"p".equals(rejtype));
         }
-        extTable.setEncoding(PgDiffUtils.quoteString(res.getString("enc")));
+        extTable.setEncoding(Utils.quoteString(res.getString("enc")));
         extTable.setWritable(res.getBoolean("writable"));
 
         String distribution = res.getString("distribution");

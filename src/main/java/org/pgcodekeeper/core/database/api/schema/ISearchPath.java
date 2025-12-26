@@ -25,7 +25,9 @@ public interface ISearchPath extends IStatement {
      *
      * @return the containing schema
      */
-    ISchema getContainingSchema();
+    default ISchema getContainingSchema() {
+        return (ISchema) getParent();
+    }
 
     /**
      * Gets the name of the schema that contains this object.

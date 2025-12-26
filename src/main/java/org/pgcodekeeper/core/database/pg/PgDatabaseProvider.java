@@ -52,12 +52,6 @@ public class PgDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public boolean isSystemSchema(String schema) {
-        return Consts.PG_CATALOG.equalsIgnoreCase(schema)
-                || Consts.INFORMATION_SCHEMA.equalsIgnoreCase(schema);
-    }
-
-    @Override
     public IJdbcConnector getJdbcConnector(String url) {
         return new PgJdbcConnector(url);
     }

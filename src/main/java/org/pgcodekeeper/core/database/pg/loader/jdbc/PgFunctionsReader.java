@@ -41,6 +41,7 @@ import org.pgcodekeeper.core.database.pg.schema.PgFunction;
 import org.pgcodekeeper.core.database.pg.schema.PgProcedure;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Pair;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -218,7 +219,7 @@ public final class PgFunctionsReader extends JdbcReader {
                             ctx -> {
                                 StringBuilder sb = new StringBuilder();
                                 for (VexContext vex : ctx.vex()) {
-                                    sb.append(PgDiffUtils.quoteString(vex.getText()));
+                                    sb.append(Utils.quoteString(vex.getText()));
                                     sb.append(", ");
                                 }
                                 sb.setLength(sb.length() - 2);
@@ -226,7 +227,7 @@ public final class PgFunctionsReader extends JdbcReader {
                             });
                     break;
                 default:
-                    val = PgDiffUtils.quoteString(val);
+                    val = Utils.quoteString(val);
                     function.addConfiguration(PgDiffUtils.getQuotedName(par), val);
                     break;
             }
@@ -241,11 +242,11 @@ public final class PgFunctionsReader extends JdbcReader {
         String probin = res.getString("probin");
         if (probin != null && !probin.isEmpty()) {
             StringBuilder sb = new StringBuilder();
-            sb.append(PgDiffUtils.quoteString(probin));
+            sb.append(Utils.quoteString(probin));
             if (!"-".equals(definition)) {
                 sb.append(", ");
                 if (!definition.contains("'") && !definition.contains("\\")) {
-                    sb.append(PgDiffUtils.quoteString(definition));
+                    sb.append(Utils.quoteString(definition));
                 } else {
                     sb.append(PgDiffUtils.quoteStringDollar(definition));
                 }
@@ -386,7 +387,7 @@ public final class PgFunctionsReader extends JdbcReader {
 
         String initCond = res.getString("initcond");
         if (initCond != null) {
-            aggregate.setInitCond(PgDiffUtils.quoteString(initCond));
+            aggregate.setInitCond(Utils.quoteString(initCond));
         }
 
         // The parameter 'MSTYPE' must be processed before parameters 'MSFUNC',
@@ -413,7 +414,7 @@ public final class PgFunctionsReader extends JdbcReader {
 
         String mInitCond = res.getString("minitcond");
         if (mInitCond != null) {
-            aggregate.setMInitCond(PgDiffUtils.quoteString(mInitCond));
+            aggregate.setMInitCond(Utils.quoteString(mInitCond));
         }
 
         String sortOpName = res.getString("sortop");

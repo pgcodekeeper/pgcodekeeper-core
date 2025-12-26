@@ -455,7 +455,7 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
             if (!isQuoted && (forceQuote || !PgDiffUtils.isValidId(value, false, false))) {
                 // only quote non-ids, do not quote columns
                 // pg_dump behavior
-                value = PgDiffUtils.quoteString(value);
+                value = Utils.quoteString(value);
             }
             fillOptionParams(value, option, isToast, c);
         }

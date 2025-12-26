@@ -106,9 +106,4 @@ public abstract class AbstractType extends AbstractStatement implements ISearchP
     }
 
     protected abstract AbstractType getTypeCopy();
-
-    @Override
-    public AbstractSchema getContainingSchema() {
-        return (AbstractSchema) parent;
-    }
 }

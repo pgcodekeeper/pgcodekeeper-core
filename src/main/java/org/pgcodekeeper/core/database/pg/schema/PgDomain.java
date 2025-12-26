@@ -15,12 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.database.api.schema.ISearchPath;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
@@ -125,7 +123,7 @@ public final class PgDomain extends AbstractStatement implements ISearchPath, IP
             if (constr.isNotValid()) {
                 notValids.add(constr);
             } else {
-                sql.append("\n\tCONSTRAINT ").append(PgDiffUtils.getQuotedName(constr.getName()))
+                sql.append("\n\tCONSTRAINT ").append(getQuotedName(constr.getName()))
                         .append(' ').append(constr.getDefinition());
             }
         }
@@ -244,10 +242,5 @@ public final class PgDomain extends AbstractStatement implements ISearchPath, IP
         hasher.put(defaultValue);
         hasher.put(notNull);
         hasher.putUnordered(constraints);
-    }
-
-    @Override
-    public AbstractSchema getContainingSchema() {
-        return (AbstractSchema) parent;
     }
 }

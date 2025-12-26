@@ -16,7 +16,6 @@
 package org.pgcodekeeper.core.database.pg.loader.jdbc;
 
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
@@ -32,6 +31,7 @@ import org.pgcodekeeper.core.database.pg.schema.PgAbstractView;
 import org.pgcodekeeper.core.database.pg.schema.PgMaterializedView;
 import org.pgcodekeeper.core.database.pg.schema.PgView;
 import org.pgcodekeeper.core.utils.Pair;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -120,7 +120,7 @@ public final class PgViewsReader extends JdbcReader {
                 }
                 String colComment = colComments[i];
                 if (colComment != null) {
-                    v.addColumnComment(colName, getTextWithCheckNewLines(PgDiffUtils.quoteString(colComment)));
+                    v.addColumnComment(colName, getTextWithCheckNewLines(Utils.quoteString(colComment)));
                 }
                 String colAcl = colACLs[i];
                 // Привилегии на столбцы view записываются в саму view

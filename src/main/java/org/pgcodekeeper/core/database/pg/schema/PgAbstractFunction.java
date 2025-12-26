@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.base.schema.AbstractFunction;
 import org.pgcodekeeper.core.database.api.schema.ArgMode;
@@ -70,7 +69,7 @@ public abstract class PgAbstractFunction extends AbstractFunction implements IPg
         sbSQL.append("CREATE OR REPLACE ");
         sbSQL.append(getStatementType());
         sbSQL.append(' ');
-        sbSQL.append(PgDiffUtils.getQuotedName(getSchemaName())).append('.');
+        sbSQL.append(getQuotedName(getSchemaName())).append('.');
         appendFunctionSignature(sbSQL, true, true);
         if (getReturns() != null) {
             sbSQL.append(' ');
@@ -80,7 +79,7 @@ public abstract class PgAbstractFunction extends AbstractFunction implements IPg
         sbSQL.append("\n    ");
 
         if (language != null) {
-            sbSQL.append("LANGUAGE ").append(PgDiffUtils.getQuotedName(language));
+            sbSQL.append("LANGUAGE ").append(getQuotedName(language));
         }
 
         if (!transforms.isEmpty()) {
@@ -165,10 +164,9 @@ public abstract class PgAbstractFunction extends AbstractFunction implements IPg
     }
 
     @Override
-    protected StringBuilder appendFullName(StringBuilder sb) {
-        sb.append(PgDiffUtils.getQuotedName(parent.getName())).append('.');
+    protected void appendFullName(StringBuilder sb) {
+        sb.append(getQuotedName(parent.getName())).append('.');
         appendFunctionSignature(sb, false, true);
-        return sb;
     }
 
     /**
@@ -187,7 +185,7 @@ public abstract class PgAbstractFunction extends AbstractFunction implements IPg
         }
         final int sigStart = sb.length();
 
-        sb.append(PgDiffUtils.getQuotedName(name)).append('(');
+        sb.append(getQuotedName(name)).append('(');
         boolean addComma = false;
         for (final var argument : arguments) {
             if (!includeArgNames && ArgMode.OUT == argument.getMode()) {

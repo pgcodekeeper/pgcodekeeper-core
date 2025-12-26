@@ -17,6 +17,7 @@ package org.pgcodekeeper.core.ignorelist;
 
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.util.EnumSet;
 import java.util.Objects;
@@ -243,7 +244,7 @@ public class IgnoredObject {
             return id;
         }
 
-        return quoteWithDq(id) ? PgDiffUtils.quoteName(id) : PgDiffUtils.quoteString(id);
+        return quoteWithDq(id) ? PgDiffUtils.quoteName(id) : Utils.quoteString(id);
     }
 
     private static boolean isKeyword(String id) {

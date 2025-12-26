@@ -163,6 +163,16 @@ public final class Utils {
     }
 
     /**
+     * Quotes string with single quotes for SQL.
+     *
+     * @param s the string to quote
+     * @return quoted string
+     */
+    public static String quoteString(String s) {
+        return '\'' + s.replace("'", "''") + '\'';
+    }
+
+    /**
      * Checks if a string contains any of the items in a list.
      *
      * @param input the string to search

@@ -20,7 +20,6 @@
 package org.pgcodekeeper.core.database.pg.schema;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.base.schema.AbstractView;
@@ -52,7 +51,7 @@ public final class PgMaterializedView extends PgAbstractView {
     @Override
     protected void appendOptions(StringBuilder sbSQL) {
         if (!Consts.HEAP.equals(method)) {
-            sbSQL.append("\nUSING ").append(PgDiffUtils.getQuotedName(method));
+            sbSQL.append("\nUSING ").append(getQuotedName(method));
         }
 
         super.appendOptions(sbSQL);

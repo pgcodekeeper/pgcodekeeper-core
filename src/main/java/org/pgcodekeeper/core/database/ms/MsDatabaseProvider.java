@@ -52,11 +52,6 @@ public class MsDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public boolean isSystemSchema(String schema) {
-        return Consts.SYS.equalsIgnoreCase(schema);
-    }
-
-    @Override
     public IJdbcConnector getJdbcConnector(String url) {
         return new MsJdbcConnector(url);
     }

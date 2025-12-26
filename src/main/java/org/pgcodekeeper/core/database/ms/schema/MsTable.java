@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.ms.MsDiffUtils;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
-import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.ISimpleOptionContainer;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
@@ -29,6 +26,7 @@ import org.pgcodekeeper.core.database.base.schema.AbstractTable;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLActionType;
 import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -127,7 +125,7 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
                 sbSQL.append("\t");
                 String name = con.getName();
                 if (!name.isEmpty()) {
-                    sbSQL.append("CONSTRAINT ").append(MsDiffUtils.quoteName(name)).append(' ');
+                    sbSQL.append("CONSTRAINT ").append(getQuotedName(name)).append(' ');
                 }
                 sbSQL.append(con.getDefinition());
                 sbSQL.append(",\n");
@@ -141,8 +139,8 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
     private void appendPeriodSystem(StringBuilder sb) {
         if (periodStartCol != null && periodEndCol != null) {
             sb.append(",\n\tPERIOD FOR SYSTEM_TIME (");
-            sb.append(MsDiffUtils.quoteName(periodStartCol.getName())).append(", ");
-            sb.append(MsDiffUtils.quoteName(periodEndCol.getName()));
+            sb.append(getQuotedName(periodStartCol.getName())).append(", ");
+            sb.append(getQuotedName(periodEndCol.getName()));
             sb.append(")");
         }
     }
@@ -176,11 +174,11 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
         }
 
         if (textImage != null) {
-            sbSQL.append("TEXTIMAGE_ON ").append(MsDiffUtils.quoteName(textImage)).append(' ');
+            sbSQL.append("TEXTIMAGE_ON ").append(getQuotedName(textImage)).append(' ');
         }
 
         if (fileStream != null) {
-            sbSQL.append("FILESTREAM_ON ").append(MsDiffUtils.quoteName(fileStream)).append(' ');
+            sbSQL.append("FILESTREAM_ON ").append(getQuotedName(fileStream)).append(' ');
         }
 
         if (sbSQL.length() > startLength) {
@@ -401,9 +399,9 @@ public final class MsTable extends AbstractTable implements ISimpleOptionContain
             // use the largest numeric type to fit any possible identity value
             StringBuilder sbSql = new StringBuilder();
             sbSql.append("DECLARE @restart_var numeric(38,0) = (SELECT IDENT_CURRENT (")
-                    .append(PgDiffUtils.quoteString(tblTmpQName))
+                    .append(Utils.quoteString(tblTmpQName))
                     .append("));\nDBCC CHECKIDENT (")
-                    .append(PgDiffUtils.quoteString(tblQName))
+                    .append(Utils.quoteString(tblQName))
                     .append(", RESEED, @restart_var);");
             script.addStatement(sbSql);
         }

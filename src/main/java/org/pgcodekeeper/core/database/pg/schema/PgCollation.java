@@ -52,11 +52,6 @@ public final class PgCollation extends AbstractStatement implements ISearchPath,
         return DbObjType.COLLATION;
     }
 
-    @Override
-    public AbstractSchema getContainingSchema() {
-        return (AbstractSchema) parent;
-    }
-
     public void setDeterministic(boolean deterministic) {
         this.deterministic = deterministic;
         resetHash();

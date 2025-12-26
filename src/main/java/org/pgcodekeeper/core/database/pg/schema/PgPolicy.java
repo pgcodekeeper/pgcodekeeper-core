@@ -122,10 +122,8 @@ public final class PgPolicy extends AbstractPolicy implements ISubElement, IPgSt
     }
 
     @Override
-    protected StringBuilder appendFullName(StringBuilder sb) {
-        sb.append(PgDiffUtils.getQuotedName(name));
-        sb.append(" ON ").append(parent.getQualifiedName());
-        return sb;
+    protected void appendFullName(StringBuilder sb) {
+        sb.append(getQuotedName(name)).append(" ON ").append(parent.getQualifiedName());
     }
 
     @Override
@@ -165,10 +163,5 @@ public final class PgPolicy extends AbstractPolicy implements ISubElement, IPgSt
     public void computeHash(Hasher hasher) {
         super.computeHash(hasher);
         hasher.put(check);
-    }
-
-    @Override
-    public AbstractSchema getContainingSchema() {
-        return (AbstractSchema) parent.getParent();
     }
 }

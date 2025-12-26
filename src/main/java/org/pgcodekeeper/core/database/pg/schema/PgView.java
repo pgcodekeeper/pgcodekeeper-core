@@ -19,7 +19,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.base.schema.AbstractView;
@@ -57,7 +56,7 @@ public final class PgView extends PgAbstractView {
             sql.append("ALTER VIEW ");
             sql.append(getQualifiedName());
             sql.append(ALTER_COLUMN);
-            sql.append(PgDiffUtils.getQuotedName(defaultValue.getKey()));
+            sql.append(getQuotedName(defaultValue.getKey()));
             sql.append(" SET DEFAULT ");
             sql.append(defaultValue.getValue());
             script.addStatement(sql);
@@ -119,7 +118,7 @@ public final class PgView extends PgAbstractView {
     private StringBuilder addAlterTable(String column, String state) {
         return new StringBuilder(ALTER_TABLE).append(getQualifiedName())
                 .append(ALTER_COLUMN)
-                .append(PgDiffUtils.getQuotedName(column))
+                .append(getQuotedName(column))
                 .append(state).append(" DEFAULT");
     }
 

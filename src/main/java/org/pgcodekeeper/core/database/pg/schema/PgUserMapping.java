@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
@@ -64,7 +63,7 @@ public final class PgUserMapping extends AbstractStatement implements PgForeignO
     @Override
     public String getQualifiedName() {
         if (qualifiedName == null) {
-            qualifiedName = PgDiffUtils.getQuotedName(user) + " SERVER " + PgDiffUtils.getQuotedName(server);
+            qualifiedName = getQuotedName(user) + " SERVER " + getQuotedName(server);
         }
 
         return qualifiedName;

@@ -19,7 +19,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.base.schema.AbstractSequence;
@@ -238,17 +237,6 @@ public final class PgSequence extends AbstractSequence implements IPgStatement {
             setStartWith(Objects.requireNonNullElseGet(this.minValue, () -> inc < 0 ? "-1" : "1"));
         }
         resetHash();
-    }
-
-    /**
-     * Append rename command to sql script
-     *
-     * @param newName - new constrain name
-     * @param script - sql script
-     */
-    public void rename(String newName, SQLScript script) {
-        var command = "ALTER SEQUENCE " + getQualifiedName() + " RENAME TO " + PgDiffUtils.getQuotedName(newName);
-        script.addStatement(command);
     }
 
     @Override

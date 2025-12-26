@@ -15,9 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
@@ -71,7 +69,7 @@ public final class PgOperator extends AbstractStatement implements IOperator, IS
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("CREATE OPERATOR ");
-        sbSQL.append(PgDiffUtils.getQuotedName(getSchemaName())).append('.');
+        sbSQL.append(getQuotedName(getSchemaName())).append('.');
         sbSQL.append(getBareName());
         sbSQL.append(" (\n\tPROCEDURE = ");
         sbSQL.append(procedure);
@@ -323,10 +321,5 @@ public final class PgOperator extends AbstractStatement implements IOperator, IS
         operatorDst.setRestrict(restrict);
         operatorDst.setJoin(join);
         return operatorDst;
-    }
-
-    @Override
-    public AbstractSchema getContainingSchema() {
-        return (AbstractSchema) parent;
     }
 }

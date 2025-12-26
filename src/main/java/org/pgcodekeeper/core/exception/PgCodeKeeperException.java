@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core;
+package org.pgcodekeeper.core.exception;
 
 import java.io.Serial;
 
@@ -22,15 +22,15 @@ import java.io.Serial;
  * <p>
  * This exception should be used for all application-specific error conditions.
  */
-public class PgCodekeeperException extends Exception {
+public class PgCodeKeeperException extends Exception {
 
     @Serial
-    private static final long serialVersionUID = 8958777207045999192L;
+    private static final long serialVersionUID = -5239226908208221629L;
 
     /**
      * Constructs a new pgCodeKeeper exception with no detail message.
      */
-    public PgCodekeeperException() {
+    public PgCodeKeeperException() {
         super();
     }
 
@@ -39,7 +39,7 @@ public class PgCodekeeperException extends Exception {
      *
      * @param message the detail message
      */
-    public PgCodekeeperException(String message) {
+    public PgCodeKeeperException(String message) {
         super(message);
     }
 
@@ -48,7 +48,7 @@ public class PgCodekeeperException extends Exception {
      *
      * @param cause the cause
      */
-    public PgCodekeeperException(Throwable cause) {
+    public PgCodeKeeperException(Throwable cause) {
         super(cause);
     }
 
@@ -58,7 +58,7 @@ public class PgCodekeeperException extends Exception {
      * @param message the detail message
      * @param cause   the cause
      */
-    public PgCodekeeperException(String message, Throwable cause) {
+    public PgCodeKeeperException(String message, Throwable cause) {
         super(message, cause);
     }
 }

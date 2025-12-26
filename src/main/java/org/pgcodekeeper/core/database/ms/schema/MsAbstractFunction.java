@@ -106,4 +106,9 @@ public abstract class MsAbstractFunction extends AbstractFunction
         functionDst.setSecondPart(secondPart);
         return functionDst;
     }
+
+    @Override
+    protected boolean isNeedDepcies(AbstractFunction newFunction) {
+        return true;
+    }
 }

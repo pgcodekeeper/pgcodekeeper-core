@@ -18,7 +18,7 @@ package org.pgcodekeeper.core.it.jdbc.pg;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
-import org.pgcodekeeper.core.PgCodekeeperException;
+import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
 import org.pgcodekeeper.core.database.pg.loader.jdbc.SupportedPgVersion;
 import org.pgcodekeeper.core.it.jdbc.base.JdbcLoaderTest;
@@ -38,7 +38,7 @@ class PgJdbcLoaderTest extends JdbcLoaderTest {
             "pg_statistics",
             "pg_view",
     })
-    void pgJdbcLoaderTest(String fileName) throws PgCodekeeperException, IOException, InterruptedException, SQLException, URISyntaxException {
+    void pgJdbcLoaderTest(String fileName) throws PgCodeKeeperException, IOException, InterruptedException, SQLException, URISyntaxException {
         jdbcLoaderTest(fileName + FILES_POSTFIX.SQL, "pg.pgcodekeeperignore",
                 TestContainer.PG_URL, new PgJdbcConnector(TestContainer.PG_URL), new CoreSettings(),
                 SupportedPgVersion.VERSION_16, getClass());

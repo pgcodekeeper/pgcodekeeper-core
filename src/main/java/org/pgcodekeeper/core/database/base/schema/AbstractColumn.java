@@ -137,9 +137,4 @@ public abstract class AbstractColumn extends AbstractStatement implements ISubEl
     }
 
     protected abstract AbstractColumn getColumnCopy();
-
-    @Override
-    public AbstractSchema getContainingSchema() {
-        return (AbstractSchema) parent.parent;
-    }
 }

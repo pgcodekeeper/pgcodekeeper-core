@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
@@ -111,7 +110,7 @@ public final class PgForeignDataWrapper extends AbstractStatement
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sb = new StringBuilder();
         sb.append("CREATE FOREIGN DATA WRAPPER ");
-        sb.append(PgDiffUtils.getQuotedName(name));
+        sb.append(getQuotedName(name));
         if (handler != null) {
             sb.append(" HANDLER ").append(handler);
         }

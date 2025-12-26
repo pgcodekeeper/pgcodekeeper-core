@@ -16,7 +16,6 @@
 package org.pgcodekeeper.core.database.ms.schema;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
@@ -62,14 +61,14 @@ public final class MsUser extends AbstractStatement implements IMsStatement {
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("CREATE USER ");
-        sbSQL.append(MsDiffUtils.quoteName(name));
+        sbSQL.append(getQuotedName(name));
         if (login != null) {
-            sbSQL.append(" FOR LOGIN ").append(MsDiffUtils.quoteName(login));
+            sbSQL.append(" FOR LOGIN ").append(getQuotedName(login));
         }
         if (schema != null || language != null || allowEncrypted) {
             sbSQL.append(" WITH ");
             if (schema != null) {
-                sbSQL.append("DEFAULT_SCHEMA = ").append(MsDiffUtils.quoteName(schema)).append(", ");
+                sbSQL.append("DEFAULT_SCHEMA = ").append(getQuotedName(schema)).append(", ");
             }
             if (language != null) {
                 sbSQL.append("DEFAULT_LANGUAGE = ").append(language).append(", ");
@@ -91,7 +90,7 @@ public final class MsUser extends AbstractStatement implements IMsStatement {
         StringBuilder sbSql = new StringBuilder();
 
         if (!Objects.equals(login, newUser.login)) {
-            sbSql.append("LOGIN = ").append(MsDiffUtils.quoteName(newUser.login)).append(", ");
+            sbSql.append("LOGIN = ").append(getQuotedName(newUser.login)).append(", ");
         }
 
         String newSchema = newUser.schema;
@@ -99,7 +98,7 @@ public final class MsUser extends AbstractStatement implements IMsStatement {
             if (newSchema == null) {
                 newSchema = Consts.DBO;
             }
-            sbSql.append("DEFAULT_SCHEMA = ").append(MsDiffUtils.quoteName(newSchema)).append(", ");
+            sbSql.append("DEFAULT_SCHEMA = ").append(getQuotedName(newSchema)).append(", ");
         }
         if (!Objects.equals(language, newUser.language)) {
             sbSql.append("DEFAULT_LANGUAGE = ")
@@ -114,7 +113,7 @@ public final class MsUser extends AbstractStatement implements IMsStatement {
         if (!sbSql.isEmpty()) {
             sbSql.setLength(sbSql.length() - 2);
             StringBuilder sql = new StringBuilder();
-            sql.append("ALTER USER ").append(MsDiffUtils.quoteName(name))
+            sql.append("ALTER USER ").append(getQuotedName(name))
                     .append(" WITH ").append(sbSql);
             script.addStatement(sql);
         }

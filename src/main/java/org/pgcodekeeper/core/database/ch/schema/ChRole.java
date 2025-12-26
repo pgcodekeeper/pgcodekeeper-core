@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
@@ -50,7 +49,7 @@ public final class ChRole extends AbstractStatement implements IChStatement {
         final StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("CREATE ROLE ");
         appendIfNotExists(sbSQL, script.getSettings());
-        sbSQL.append(ChDiffUtils.getQuotedName(name));
+        sbSQL.append(getQuotedName(name));
         if (!DEF_STORAGE.equals(storageType)) {
             sbSQL.append("\n\tIN ").append(storageType);
         }

@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.pgcodekeeper.core.PgCodekeeperException;
+import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.settings.CoreSettings;
@@ -54,7 +54,7 @@ public class PgCodeKeeperApiTest {
     @ValueSource(strings = {
             "test_diff"
     })
-    void diffTest(String testName) throws PgCodekeeperException, IOException, InterruptedException {
+    void diffTest(String testName) throws PgCodeKeeperException, IOException, InterruptedException {
         var df = new DatabaseFactory(settings);
         var oldDb = df.loadFromDump(getFilePath(testName + ORIGINAL));
         var newDb = df.loadFromDump(getFilePath(testName + NEW));
@@ -69,7 +69,7 @@ public class PgCodeKeeperApiTest {
     @ValueSource(strings = {
             "test_ignore"
     })
-    void diffWithIgnoreListTest(String testName) throws PgCodekeeperException, IOException, InterruptedException {
+    void diffWithIgnoreListTest(String testName) throws PgCodeKeeperException, IOException, InterruptedException {
         var df = new DatabaseFactory(settings);
         var oldDb = df.loadFromDump(getFilePath(testName + ORIGINAL));
         var newDb = df.loadFromDump(getFilePath(testName + NEW));
@@ -82,7 +82,7 @@ public class PgCodeKeeperApiTest {
     }
 
     @Test
-    void exportTest(@TempDir Path tempDir) throws PgCodekeeperException, IOException, InterruptedException {
+    void exportTest(@TempDir Path tempDir) throws PgCodeKeeperException, IOException, InterruptedException {
         var dumpFileName = "test_export.sql";
         var df = new DatabaseFactory(settings);
         var db = df.loadFromDump(getFilePath(dumpFileName));
@@ -95,7 +95,7 @@ public class PgCodeKeeperApiTest {
     }
 
     @Test
-    void exportWithIgnoreListTest(@TempDir Path tempDir) throws PgCodekeeperException, IOException, InterruptedException {
+    void exportWithIgnoreListTest(@TempDir Path tempDir) throws PgCodeKeeperException, IOException, InterruptedException {
         var df = new DatabaseFactory(settings);
         var db = df.loadFromDump(getFilePath("test_export_with_ignore_list.sql"));
         var exportedTableFile = tempDir.resolve(TABLES_DIRECTORY + "test_table.sql");
@@ -110,7 +110,7 @@ public class PgCodeKeeperApiTest {
     }
 
     @Test
-    void updateProjectTest(@TempDir Path tempDir) throws PgCodekeeperException, IOException, InterruptedException {
+    void updateProjectTest(@TempDir Path tempDir) throws PgCodeKeeperException, IOException, InterruptedException {
         // Setup project structure with initial tables
         setupUpdateProjectStructure(tempDir);
         var df = new DatabaseFactory(settings);
@@ -130,7 +130,7 @@ public class PgCodeKeeperApiTest {
     }
 
     @Test
-    void updateProjectWithIgnoreListTest(@TempDir Path tempDir) throws PgCodekeeperException, IOException, InterruptedException {
+    void updateProjectWithIgnoreListTest(@TempDir Path tempDir) throws PgCodeKeeperException, IOException, InterruptedException {
         // Setup project structure with initial tables
         setupUpdateProjectStructure(tempDir);
         var df = new DatabaseFactory(settings);

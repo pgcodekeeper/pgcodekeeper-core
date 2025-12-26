@@ -19,7 +19,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.FILES_POSTFIX;
-import org.pgcodekeeper.core.PgCodekeeperException;
+import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;
 import org.pgcodekeeper.core.it.jdbc.base.JdbcLoaderTest;
 import org.pgcodekeeper.core.loader.TestContainer;
@@ -39,7 +39,7 @@ class ChJdbcLoaderTest extends JdbcLoaderTest {
             "ch_table",
             "ch_view"
     })
-    void chJdbcLoaderTest(String fileName) throws PgCodekeeperException, IOException, InterruptedException, SQLException, URISyntaxException {
+    void chJdbcLoaderTest(String fileName) throws PgCodeKeeperException, IOException, InterruptedException, SQLException, URISyntaxException {
         var settings = new CoreSettings();
         settings.setDbType(DatabaseType.CH);
         jdbcLoaderTest(fileName + FILES_POSTFIX.SQL, "ch.pgcodekeeperignore",

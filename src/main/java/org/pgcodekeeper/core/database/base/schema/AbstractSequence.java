@@ -173,9 +173,4 @@ public abstract class AbstractSequence extends AbstractStatement implements IRel
      * @param sbSQL the StringBuilder to append the sequence body to
      */
     public abstract void fillSequenceBody(StringBuilder sbSQL);
-
-    @Override
-    public AbstractSchema getContainingSchema() {
-        return (AbstractSchema) parent;
-    }
 }

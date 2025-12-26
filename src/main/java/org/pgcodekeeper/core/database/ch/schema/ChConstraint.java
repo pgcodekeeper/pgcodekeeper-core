@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
@@ -57,7 +56,7 @@ public final class ChConstraint extends AbstractConstraint implements IChStateme
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sb = new StringBuilder();
         appendAlterTable(sb);
-        sb.append(" ADD CONSTRAINT ").append(ChDiffUtils.getQuotedName(name)).append(' ').append(getDefinition());
+        sb.append(" ADD CONSTRAINT ").append(getQuotedName(name)).append(' ').append(getDefinition());
         script.addStatement(sb);
     }
 
@@ -78,7 +77,7 @@ public final class ChConstraint extends AbstractConstraint implements IChStateme
         if (optionExists) {
             sb.append(IF_EXISTS);
         }
-        sb.append(ChDiffUtils.getQuotedName(name));
+        sb.append(getQuotedName(name));
         script.addStatement(sb);
     }
 

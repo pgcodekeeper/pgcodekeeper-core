@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
@@ -63,7 +62,7 @@ public final class MsColumn extends AbstractColumn implements IMsStatement {
     @Override
     public String getFullDefinition() {
         final StringBuilder sbDefinition = new StringBuilder();
-        sbDefinition.append(MsDiffUtils.quoteName(name));
+        sbDefinition.append(getQuotedName(name));
         sbDefinition.append(' ');
         if (expression != null) {
             sbDefinition.append("AS ").append(expression);
@@ -109,7 +108,7 @@ public final class MsColumn extends AbstractColumn implements IMsStatement {
         if (defaultValue != null) {
             if (defaultName != null) {
                 sbDefinition.append(" CONSTRAINT ");
-                sbDefinition.append(MsDiffUtils.quoteName(defaultName));
+                sbDefinition.append(getQuotedName(defaultName));
             }
             sbDefinition.append(" DEFAULT ");
             sbDefinition.append(defaultValue);
@@ -122,7 +121,7 @@ public final class MsColumn extends AbstractColumn implements IMsStatement {
     public void getCreationSQL(SQLScript script) {
         StringBuilder sql = new StringBuilder();
         sql.append(getAlterTable(false));
-        sql.append("\n\tADD ").append(MsDiffUtils.quoteName(name)).append(' ');
+        sql.append("\n\tADD ").append(getQuotedName(name)).append(' ');
         if (expression != null) {
             sql.append("AS ").append(expression);
         } else {
@@ -261,7 +260,7 @@ public final class MsColumn extends AbstractColumn implements IMsStatement {
         }
 
         if (oldDefault != null) {
-            script.addStatement(getAlterTable(false) + "\n\tDROP CONSTRAINT " + MsDiffUtils.quoteName(oldDefaultName));
+            script.addStatement(getAlterTable(false) + "\n\tDROP CONSTRAINT " + getQuotedName(oldDefaultName));
         }
 
         if (newDefault != null) {
@@ -269,10 +268,10 @@ public final class MsColumn extends AbstractColumn implements IMsStatement {
             sql.append(getAlterTable(false));
             sql.append("\n\tADD");
             if (newDefaultName != null) {
-                sql.append(" CONSTRAINT ").append(MsDiffUtils.quoteName(newDefaultName));
+                sql.append(" CONSTRAINT ").append(getQuotedName(newDefaultName));
             }
             sql.append(" DEFAULT ").append(newDefault);
-            sql.append(" FOR ").append(MsDiffUtils.quoteName(name));
+            sql.append(" FOR ").append(getQuotedName(name));
             script.addStatement(sql);
         }
     }
@@ -330,14 +329,14 @@ public final class MsColumn extends AbstractColumn implements IMsStatement {
     private void addUpdateStatement(SQLScript script) {
         StringBuilder sb = new StringBuilder();
         sb.append("UPDATE ").append(parent.getQualifiedName())
-                .append("\n\tSET ").append(MsDiffUtils.quoteName(name))
+                .append("\n\tSET ").append(getQuotedName(name))
                 .append(" = DEFAULT WHERE ")
-                .append(MsDiffUtils.quoteName(name)).append(" IS").append(NULL);
+                .append(getQuotedName(name)).append(" IS").append(NULL);
         script.addStatement(sb);
     }
 
     private String getAlterColumn(String column) {
-        return ((AbstractTable) parent).getAlterTable(false) + ALTER_COLUMN + MsDiffUtils.quoteName(column);
+        return ((AbstractTable) parent).getAlterTable(false) + ALTER_COLUMN + getQuotedName(column);
     }
 
     @Override
@@ -349,7 +348,7 @@ public final class MsColumn extends AbstractColumn implements IMsStatement {
         if (optionExists) {
             sb.append(IF_EXISTS);
         }
-        sb.append(MsDiffUtils.quoteName(name));
+        sb.append(getQuotedName(name));
         script.addStatement(sb);
     }
 

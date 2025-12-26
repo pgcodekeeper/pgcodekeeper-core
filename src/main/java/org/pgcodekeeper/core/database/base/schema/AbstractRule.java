@@ -60,9 +60,4 @@ public abstract class AbstractRule extends AbstractStatement implements ISubElem
 
         return obj instanceof AbstractRule rule && super.compare(rule);
     }
-
-    @Override
-    public AbstractSchema getContainingSchema() {
-        return (AbstractSchema) parent.getParent();
-    }
 }

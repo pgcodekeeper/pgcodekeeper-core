@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IConstraint;
@@ -67,8 +66,8 @@ public final class MsType extends AbstractType implements IStatementContainer, I
                 sb.append(" NOT NULL");
             }
         } else if (assemblyName != null) {
-            sb.append("\nEXTERNAL NAME ").append(MsDiffUtils.quoteName(assemblyName))
-                    .append('.').append(MsDiffUtils.quoteName(assemblyClass));
+            sb.append("\nEXTERNAL NAME ").append(getQuotedName(assemblyName))
+                    .append('.').append(getQuotedName(assemblyClass));
         } else {
             sb.append(" AS TABLE(");
             for (String col : columns) {

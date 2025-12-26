@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
 import org.pgcodekeeper.core.database.base.schema.AbstractTable;
@@ -46,7 +45,7 @@ public final class ChTableLog extends ChTable {
     protected void appendTableBody(StringBuilder sb) {
         super.appendTableBody(sb);
         for (var constr : constrs) {
-            sb.append("\n\tCONSTRAINT ").append(ChDiffUtils.getQuotedName(constr.getName())).append(' ')
+            sb.append("\n\tCONSTRAINT ").append(getQuotedName(constr.getName())).append(' ')
                     .append(constr.getDefinition()).append(',');
         }
     }

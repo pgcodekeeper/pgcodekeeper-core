@@ -15,14 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.loader.jdbc;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.pg.schema.PgCollation;
 import org.pgcodekeeper.core.loader.QueryBuilder;
 import org.pgcodekeeper.core.loader.jdbc.JdbcLoaderBase;
 import org.pgcodekeeper.core.loader.jdbc.JdbcReader;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.pg.schema.PgCollation;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -52,11 +52,11 @@ public final class PgCollationsReader extends JdbcReader {
 
         String lcCollate = res.getString("collcollate");
         if (lcCollate != null) {
-            coll.setLcCollate(PgDiffUtils.quoteString(lcCollate));
+            coll.setLcCollate(Utils.quoteString(lcCollate));
         }
         String lcCtype = res.getString("collctype");
         if (lcCtype != null) {
-            coll.setLcCtype(PgDiffUtils.quoteString(lcCtype));
+            coll.setLcCtype(Utils.quoteString(lcCtype));
         }
 
         loader.setComment(coll, res);
@@ -76,7 +76,7 @@ public final class PgCollationsReader extends JdbcReader {
                         locale = res.getString("colliculocale");
                     }
                     if (locale != null) {
-                        String quotedLocale = PgDiffUtils.quoteString(locale);
+                        String quotedLocale = Utils.quoteString(locale);
                         coll.setLcCollate(quotedLocale);
                         coll.setLcCtype(quotedLocale);
                     }
@@ -92,7 +92,7 @@ public final class PgCollationsReader extends JdbcReader {
         if (SupportedPgVersion.VERSION_16.isLE(loader.getVersion())) {
             String rules = res.getString("collicurules");
             if (rules != null) {
-                coll.setRules(PgDiffUtils.quoteString(rules));
+                coll.setRules(Utils.quoteString(rules));
             }
         }
 

@@ -51,14 +51,6 @@ public interface IDatabaseProvider {
     ANTLRErrorStrategy getErrorHandler();
 
     /**
-     * Checks if a schema is a system schema for the given database type.
-     *
-     * @param schema the schema name to check
-     * @return true if the schema is a system schema, false otherwise
-     */
-    boolean isSystemSchema(String schema);
-
-    /**
      * @param url full jdbc url
      * @return jdbc connector for DBMS
      */

@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.base.schema.Argument;
@@ -80,7 +79,7 @@ public final class ChFunction extends AbstractStatement implements IFunction, IC
     @Override
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sb = new StringBuilder();
-        sb.append("CREATE FUNCTION ").append(ChDiffUtils.getQuotedName(name)).append(" AS ");
+        sb.append("CREATE FUNCTION ").append(getQuotedName(name)).append(" AS ");
         fillArgs(sb);
         sb.append(" -> ").append(body);
         script.addStatement(sb);
@@ -90,12 +89,6 @@ public final class ChFunction extends AbstractStatement implements IFunction, IC
         sb.append("(");
         sb.append(arguments.stream().map(Argument::getName).collect(Collectors.joining(", ")));
         sb.append(")");
-    }
-
-    @Override
-    protected StringBuilder appendFullName(StringBuilder sb) {
-        sb.append(getQualifiedName());
-        return sb;
     }
 
     @Override

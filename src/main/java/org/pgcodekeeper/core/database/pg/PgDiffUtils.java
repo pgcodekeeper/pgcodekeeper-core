@@ -126,16 +126,6 @@ public final class PgDiffUtils {
     }
 
     /**
-     * Quotes string with single quotes for SQL.
-     *
-     * @param s the string to quote
-     * @return quoted string
-     */
-    public static String quoteString(String s) {
-        return '\'' + s.replace("'", "''") + '\'';
-    }
-
-    /**
      * Quotes string using dollar-quoting ($$) syntax.
      * <p>
      * Function equivalent to appendStringLiteralDQ in pgdump's dumputils.c
@@ -206,30 +196,6 @@ public final class PgDiffUtils {
      */
     public static boolean isValidLanguage(String language) {
         return "PLPGSQL".equalsIgnoreCase(language) || "SQL".equalsIgnoreCase(language);
-    }
-
-    /**
-     * Wraps SQL in DO block with error handling.
-     *
-     * @param sbResult        the StringBuilder to append to
-     * @param sbSQL           the SQL to wrap
-     * @param expectedErrCode the expected error code to handle
-     */
-    public static void appendSqlWrappedInDo(StringBuilder sbResult, StringBuilder sbSQL, String expectedErrCode) {
-        String body = sbSQL.toString().replace("\n", "\n\t");
-
-        sbResult
-                .append("DO $$")
-                .append("\nBEGIN")
-                .append("\n\t").append(body)
-                .append("\nEXCEPTION WHEN OTHERS THEN")
-                .append("\n\tIF (SQLSTATE = ").append(expectedErrCode).append(") THEN")
-                .append("\n\t\tRAISE NOTICE '%, skip', SQLERRM;")
-                .append("\n\tELSE")
-                .append("\n\t\tRAISE;")
-                .append("\n\tEND IF;")
-                .append("\nEND; $$")
-                .append("\nLANGUAGE 'plpgsql'");
     }
 
     private PgDiffUtils() {

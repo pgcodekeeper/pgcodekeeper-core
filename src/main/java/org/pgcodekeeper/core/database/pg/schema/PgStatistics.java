@@ -19,7 +19,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
@@ -65,9 +64,9 @@ public final class PgStatistics extends AbstractStatistics implements IPgStateme
         StatementUtils.appendCollection(sb, expressions, ", ", false);
         sb.append(" FROM ");
         if (foreignSchema != null) {
-            sb.append(PgDiffUtils.getQuotedName(foreignSchema)).append('.');
+            sb.append(getQuotedName(foreignSchema)).append('.');
         }
-        sb.append(PgDiffUtils.getQuotedName(foreignTable));
+        sb.append(getQuotedName(foreignTable));
         script.addStatement(sb);
 
         if (statistics >= 0) {

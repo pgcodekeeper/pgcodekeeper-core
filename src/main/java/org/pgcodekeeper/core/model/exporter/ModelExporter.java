@@ -17,6 +17,7 @@ package org.pgcodekeeper.core.model.exporter;
 
 import org.pgcodekeeper.core.*;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
@@ -165,13 +166,13 @@ public class ModelExporter {
      * Handles object additions, deletions, and modifications.
      *
      * @throws IOException           if export operation fails
-     * @throws PgCodekeeperException if old database is null or directory issues occur
+     * @throws PgCodeKeeperException if old database is null or directory issues occur
      */
-    public void exportPartial() throws IOException, PgCodekeeperException {
+    public void exportPartial() throws IOException, PgCodeKeeperException {
         if (oldDb == null) {
             String msg = Messages.ModelExporter_log_old_database_not_null;
             LOG.error(msg);
-            throw new PgCodekeeperException(msg);
+            throw new PgCodeKeeperException(msg);
         }
         if (Files.notExists(outDir) || !Files.isDirectory(outDir)) {
             throw new DirectoryException(Messages.ModelExporter_log_output_dir_no_exist_err.formatted(

@@ -51,7 +51,7 @@ public class PgConstraintNotNull extends PgConstraint {
     @Override
     public String getDefinition() {
         var sb = new StringBuilder(NOT_NULL);
-        sb.append(" ").append(PgDiffUtils.getQuotedName(getParent().getName()));
+        sb.append(" ").append(getQuotedName(getParent().getName()));
         if (isNoInherit){
             sb.append(NO_INHERIT);
         }
@@ -61,7 +61,7 @@ public class PgConstraintNotNull extends PgConstraint {
 
     public void getDefinitionForColumn(StringBuilder sb) {
         if (hasCustomName() || comment != null) {
-            sb.append(" CONSTRAINT ").append(name);
+            sb.append(" CONSTRAINT ").append(getQuotedName(name));
         }
         sb.append(" ").append(NOT_NULL);
         if (isNoInherit) {
@@ -69,17 +69,12 @@ public class PgConstraintNotNull extends PgConstraint {
         }
     }
 
-    /**
-     * Append rename command to sql script
-     *
-     * @param newName - new constrain name
-     * @param script - sql script
-     */
-    public void rename(String newName, SQLScript script) {
+    @Override
+    public String getRenameCommand(String newName) {
         var sb = new StringBuilder();
         appendAlterTable(sb);
-        sb.append("\n\tRENAME CONSTRAINT ").append(name).append(" TO ").append(newName);
-        script.addStatement(sb);
+        sb.append("\n\tRENAME CONSTRAINT ").append(getQuotedName(name)).append(" TO ").append(getQuotedName(newName));
+        return sb.toString();
     }
 
     @Override
@@ -93,7 +88,7 @@ public class PgConstraintNotNull extends PgConstraint {
         var sb = new StringBuilder();
         appendAlterTable(sb);
         sb.append("\n\tALTER CONSTRAINT ");
-        sb.append(newConstr.name);
+        sb.append(getQuotedName(newConstr.name));
         sb.append(newNoInherit ? NO_INHERIT : " INHERIT");
         script.addStatement(sb);
     }
@@ -142,7 +137,7 @@ public class PgConstraintNotNull extends PgConstraint {
     @Override
     protected void appendCommentSql(SQLScript script) {
         String sb = "COMMENT ON CONSTRAINT " +
-                PgDiffUtils.getQuotedName(name) + " ON " +
+                getQuotedName(name) + " ON " +
                 getTable().getQualifiedName() + " IS " + (checkComments() ? comment : "NULL");
         script.addCommentStatement(sb);
     }

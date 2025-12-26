@@ -52,12 +52,6 @@ public class ChDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public boolean isSystemSchema(String schema) {
-        return Consts.SYSTEM.equalsIgnoreCase(schema)
-                || Consts.INFORMATION_SCHEMA.equalsIgnoreCase(schema);
-    }
-
-    @Override
     public IJdbcConnector getJdbcConnector(String url) {
         return new ChJdbcConnector(url);
     }

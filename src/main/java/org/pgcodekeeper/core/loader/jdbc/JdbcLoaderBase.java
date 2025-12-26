@@ -235,7 +235,7 @@ public abstract class JdbcLoaderBase extends DatabaseLoader {
     public final void setComment(AbstractStatement f, ResultSet res) throws SQLException {
         String comment = res.getString("description");
         if (comment != null && !comment.isEmpty()) {
-            f.setComment(Utils.checkNewLines(PgDiffUtils.quoteString(comment), settings.isKeepNewlines()));
+            f.setComment(Utils.checkNewLines(Utils.quoteString(comment), settings.isKeepNewlines()));
         }
     }
 

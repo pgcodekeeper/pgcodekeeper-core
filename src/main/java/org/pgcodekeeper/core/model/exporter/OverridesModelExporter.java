@@ -16,12 +16,13 @@
 package org.pgcodekeeper.core.model.exporter;
 
 import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.PgCodekeeperException;
+import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.IPrivilege;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.schema.PgPrivilege;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
 import org.pgcodekeeper.core.script.SQLScript;
@@ -68,12 +69,12 @@ public final class OverridesModelExporter extends ModelExporter {
      * Only processes objects with BOTH side differences, ignoring structural changes.
      *
      * @throws IOException           if export operation fails
-     * @throws PgCodekeeperException if old database is null
+     * @throws PgCodeKeeperException if old database is null
      */
     @Override
-    public void exportPartial() throws IOException, PgCodekeeperException {
+    public void exportPartial() throws IOException, PgCodeKeeperException {
         if (oldDb == null) {
-            throw new PgCodekeeperException("Old database should not be null for partial export.");
+            throw new PgCodeKeeperException(Messages.ModelExporter_log_old_database_not_null);
         }
         if (Files.notExists(outDir)) {
             Files.createDirectories(outDir);
