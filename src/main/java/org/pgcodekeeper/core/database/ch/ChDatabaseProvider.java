@@ -16,13 +16,20 @@
 package org.pgcodekeeper.core.database.ch;
 
 import org.antlr.v4.runtime.*;
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;
+import org.pgcodekeeper.core.database.ch.loader.ChJdbcLoader;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
+import org.pgcodekeeper.core.loader.FullAnalyze;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.parsers.antlr.ch.CustomChSQLAntlrErrorStrategy;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHLexer;
 import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser;
+import org.pgcodekeeper.core.settings.ISettings;
+
+import java.io.IOException;
 
 public class ChDatabaseProvider implements IDatabaseProvider {
 
@@ -54,5 +61,13 @@ public class ChDatabaseProvider implements IDatabaseProvider {
     @Override
     public IJdbcConnector getJdbcConnector(String url) {
         return new ChJdbcConnector(url);
+    }
+
+    @Override
+    public ChDatabase getDatabaseFromJdbc(String url, ISettings settings, IMonitor monitor, IgnoreSchemaList ignoreSchemaList) throws IOException, InterruptedException {
+        var loader = new ChJdbcLoader(getJdbcConnector(url), settings, monitor, ignoreSchemaList);
+        var db = loader.load();
+        FullAnalyze.fullAnalyze(db, loader.getErrors());
+        return db;
     }
 }

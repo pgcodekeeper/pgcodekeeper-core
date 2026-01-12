@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.database.base.schema.meta;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.pgcodekeeper.core.database.pg.loader.jdbc.SupportedPgVersion;
+import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 

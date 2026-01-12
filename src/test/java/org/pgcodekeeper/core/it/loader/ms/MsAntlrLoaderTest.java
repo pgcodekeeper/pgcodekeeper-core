@@ -83,7 +83,7 @@ class MsAntlrLoaderTest {
         settings.setDbType(DatabaseType.MS);
         AbstractDatabase dbFromFile = loadTestDump(fileName, MsAntlrLoaderTest.class, settings);
 
-        Path exportDir = null;
+        Path exportDir;
         try (TempDir dir = new TempDir("pgCodekeeper-test-files")) {
             exportDir = dir.get();
             new ModelExporter(exportDir, dbPredefined, DatabaseType.MS, ENCODING, settings).exportFull();

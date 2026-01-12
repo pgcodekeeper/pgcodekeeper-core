@@ -17,17 +17,13 @@ package org.pgcodekeeper.core.it.jdbc.ch;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.FILES_POSTFIX;
-import org.pgcodekeeper.core.exception.PgCodeKeeperException;
+import org.pgcodekeeper.core.TestContainer;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.ch.ChDatabaseProvider;
 import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;
 import org.pgcodekeeper.core.it.jdbc.base.JdbcLoaderTest;
-import org.pgcodekeeper.core.loader.TestContainer;
 import org.pgcodekeeper.core.settings.CoreSettings;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.sql.SQLException;
 
 class ChJdbcLoaderTest extends JdbcLoaderTest {
 
@@ -39,10 +35,10 @@ class ChJdbcLoaderTest extends JdbcLoaderTest {
             "ch_table",
             "ch_view"
     })
-    void chJdbcLoaderTest(String fileName) throws PgCodeKeeperException, IOException, InterruptedException, SQLException, URISyntaxException {
+    void chJdbcLoaderTest(String fileName) throws Exception {
         var settings = new CoreSettings();
         settings.setDbType(DatabaseType.CH);
         jdbcLoaderTest(fileName + FILES_POSTFIX.SQL, "ch.pgcodekeeperignore",
-                TestContainer.CH_URL, new ChJdbcConnector(TestContainer.CH_URL), settings, null, getClass());
+                TestContainer.CH_URL, new ChJdbcConnector(TestContainer.CH_URL), settings, null, getClass(), new ChDatabaseProvider());
     }
 }
