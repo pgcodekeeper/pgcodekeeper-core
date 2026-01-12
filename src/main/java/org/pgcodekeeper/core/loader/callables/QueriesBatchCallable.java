@@ -19,7 +19,7 @@ import com.microsoft.sqlserver.jdbc.SQLServerError;
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.reporter.IProgressReporter;
-import org.pgcodekeeper.core.loader.jdbc.JdbcType;
+import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcType;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.postgresql.util.PSQLException;
@@ -219,7 +219,7 @@ public class QueriesBatchCallable extends StatementCallable<String> {
             List<Object> names = new ArrayList<>(count);
             for (int i = 1; i <= count; i++) {
                 String type = meta.getColumnTypeName(i);
-                String dealias = JdbcType.DATA_TYPE_ALIASES.get(type);
+                String dealias = PgJdbcType.DATA_TYPE_ALIASES.get(type);
                 names.add(meta.getColumnLabel(i) + ' ' +
                         (dealias == null ? type : dealias));
             }

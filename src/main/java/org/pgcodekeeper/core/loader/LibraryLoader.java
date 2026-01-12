@@ -78,7 +78,7 @@ public final class LibraryLoader extends DatabaseLoader {
      * @throws IllegalStateException always, as this operation is not supported
      */
     @Override
-    public AbstractDatabase load() throws IOException, InterruptedException {
+    public AbstractDatabase load() {
         throw new IllegalStateException("Unsupported operation for LibraryLoader");
     }
 
@@ -144,7 +144,7 @@ public final class LibraryLoader extends DatabaseLoader {
 
         switch (PgLibrarySource.getSource(path)) {
             case JDBC:
-                return loadJdbc(copySettings, path);
+//                return loadJdbc(copySettings, path);
             case URL:
                 try {
                     return loadURI(new URI(path), copySettings, isIgnorePrivileges);
@@ -201,17 +201,17 @@ public final class LibraryLoader extends DatabaseLoader {
         return getLibrary(FileUtils.unzip(path, dir), settings, isIgnorePrivileges);
     }
 
-    private AbstractDatabase loadJdbc(ISettings settings, String path) throws IOException, InterruptedException {
-        DatabaseLoader loader = LoaderFactory.createJdbcLoader(settings, path, null);
-        AbstractDatabase db;
-        try {
-            db = loader.load();
-        } finally {
-            errors.addAll(loader.getErrors());
-        }
-
-        return db;
-    }
+//    private AbstractDatabase loadJdbc(ISettings settings, String path) throws IOException, InterruptedException {
+//        DatabaseLoader loader = LoaderFactory.createJdbcLoader(settings, path, null);
+//        AbstractDatabase db;
+//        try {
+//            db = loader.load();
+//        } finally {
+//            errors.addAll(loader.getErrors());
+//        }
+//
+//        return db;
+//    }
 
     private AbstractDatabase loadURI(URI uri, ISettings settings, boolean isIgnorePrivileges)
             throws InterruptedException, IOException {

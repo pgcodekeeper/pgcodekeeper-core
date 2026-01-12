@@ -16,11 +16,14 @@
 package org.pgcodekeeper.core.database.base.loader;
 
 import org.pgcodekeeper.core.database.api.loader.IDumpLoader;
+import org.pgcodekeeper.core.settings.ISettings;
 
 /**
  * Base database dump loader
  */
 public abstract class AbstractDumpLoader extends AbstractLoader implements IDumpLoader {
 
-
+    protected AbstractDumpLoader(ISettings settings) {
+        super(settings);
+    }
 }

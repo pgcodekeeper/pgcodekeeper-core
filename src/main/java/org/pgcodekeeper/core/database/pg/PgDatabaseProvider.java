@@ -20,9 +20,17 @@ import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
+import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
+import org.pgcodekeeper.core.loader.FullAnalyze;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.parsers.antlr.pg.CustomSQLAntlrErrorStrategy;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLLexer;
 import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
+import org.pgcodekeeper.core.settings.ISettings;
+
+import java.io.IOException;
 
 public class PgDatabaseProvider implements IDatabaseProvider {
 
@@ -54,5 +62,15 @@ public class PgDatabaseProvider implements IDatabaseProvider {
     @Override
     public IJdbcConnector getJdbcConnector(String url) {
         return new PgJdbcConnector(url);
+    }
+
+    @Override
+    public PgDatabase getDatabaseFromJdbc(String url, ISettings settings, IMonitor monitor, IgnoreSchemaList ignoreSchemaList)
+            throws IOException, InterruptedException {
+        String timezone = settings.getTimeZone() == null ? Consts.UTC : settings.getTimeZone();
+        var loader = new PgJdbcLoader(getJdbcConnector(url), timezone, settings, monitor, ignoreSchemaList);
+        var db = loader.load();
+        FullAnalyze.fullAnalyze(db, loader.getErrors());
+        return db;
     }
 }

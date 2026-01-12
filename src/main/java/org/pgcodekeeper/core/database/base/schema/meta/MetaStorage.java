@@ -15,13 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema.meta;
 
-import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.utils.Utils;
-import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
-import org.pgcodekeeper.core.database.pg.loader.JdbcSystemLoader;
-import org.pgcodekeeper.core.database.pg.loader.jdbc.SupportedPgVersion;
+import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -136,20 +131,5 @@ public final class MetaStorage implements Serializable {
             LOG.debug(Messages.Utils_log_err_deserialize, e);
         }
         return null;
-    }
-
-    /**
-     * Serializes system objects from a database connection to a file.
-     *
-     * @param path the output file path
-     * @param url  the database connection URL
-     * @throws IOException          if an I/O error occurs
-     * @throws InterruptedException if the operation is interrupted
-     */
-    public static void serialize(String path, String url) throws IOException, InterruptedException {
-        var jdbcConnector = new PgJdbcConnector(url);
-        Serializable storage = new JdbcSystemLoader(jdbcConnector, Consts.UTC,
-                new NullMonitor()).getStorageFromJdbc();
-        Utils.serialize(path, storage);
     }
 }

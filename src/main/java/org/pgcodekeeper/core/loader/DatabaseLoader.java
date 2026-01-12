@@ -34,6 +34,7 @@ import java.util.Queue;
  * Provides common functionality for loading database schemas with ANTLR task management
  * and error collection. Supports loading with or without full analysis.
  */
+@Deprecated
 public abstract class DatabaseLoader {
 
     protected final List<Object> errors;

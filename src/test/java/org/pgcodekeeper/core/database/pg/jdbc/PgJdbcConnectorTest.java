@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.database.pg.jdbc;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.pgcodekeeper.core.loader.TestContainer;
+import org.pgcodekeeper.core.TestContainer;
 
 import java.io.IOException;
 import java.sql.SQLException;

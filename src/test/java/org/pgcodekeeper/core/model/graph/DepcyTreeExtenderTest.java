@@ -58,19 +58,16 @@ interface TreeElementCreator {
  */
 
 class DepcyTreeExtenderTest {
+
     /**
      * Тестирует зависимости от новых(и возможных edit) объектов, полученные из dte
-     *
-     * @throws IOException
-     * @throws InterruptedException
      */
     @ParameterizedTest
     @MethodSource("generator")
     void testGetDependencies(TreeElementCreator predefined, int fileIndex) throws IOException, InterruptedException {
-        /**
+        /*
          * Index of the file that should be tested.
          */
-
         var settings = new CoreSettings();
 
         String fileName = "depcy_schema_" + fileIndex + ".sql";

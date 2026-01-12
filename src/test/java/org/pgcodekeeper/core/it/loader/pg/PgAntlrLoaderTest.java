@@ -75,7 +75,7 @@ class PgAntlrLoaderTest {
         settings.setKeepNewlines(true);
         AbstractDatabase dbFromFile = loadTestDump(fileName, PgAntlrLoaderTest.class, settings);
 
-        Path exportDir = null;
+        Path exportDir;
         try (TempDir dir = new TempDir("pgCodekeeper-test-files")) {
             exportDir = dir.get();
             new ModelExporter(exportDir, dbPredefined, DatabaseType.PG, Consts.UTF_8, settings).exportFull();

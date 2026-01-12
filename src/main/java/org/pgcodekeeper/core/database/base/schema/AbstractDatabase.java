@@ -20,7 +20,7 @@
 package org.pgcodekeeper.core.database.base.schema;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.pg.loader.jdbc.SupportedPgVersion;
+import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.parsers.antlr.base.launcher.AbstractAnalysisLauncher;
 import org.pgcodekeeper.core.script.SQLScript;

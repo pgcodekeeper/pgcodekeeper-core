@@ -44,7 +44,7 @@ class CompareTreeTest {
         DiffSide prevSide = DiffSide.LEFT;
         DbObjType prevType = DbObjType.values()[DbObjType.values().length - 1];
 
-        Collections.sort(list, new CompareTree());
+        list.sort(new CompareTree());
         for (TreeElement el : list) {
             if (el.getSide() == DiffSide.LEFT
                     && prevSide != DiffSide.LEFT) {

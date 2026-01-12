@@ -15,17 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.api;
 
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.exception.PgCodeKeeperException;
-import org.pgcodekeeper.core.ignorelist.IIgnoreList;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.loader.DatabaseLoader;
-import org.pgcodekeeper.core.loader.LoaderFactory;
 import org.pgcodekeeper.core.loader.PgDumpLoader;
 import org.pgcodekeeper.core.loader.ProjectLoader;
 import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.ignorelist.IIgnoreList;
+import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.monitor.NullMonitor;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.io.IOException;
@@ -79,37 +78,6 @@ public final class DatabaseFactory {
         this.ignoreErrors = ignoreErrors;
         this.needAnalyze = needAnalyze;
         this.monitor = monitor;
-    }
-
-    /**
-     * Loads database from a JDBC connection.
-     *
-     * @param url the JDBC connection URL
-     * @return the loaded database
-     * @throws IOException           if I/O operations fail
-     * @throws PgCodeKeeperException if parsing errors occur
-     * @throws InterruptedException  if operation is cancelled
-     */
-    public AbstractDatabase loadFromJdbc(String url)
-            throws IOException, PgCodeKeeperException, InterruptedException {
-        return loadFromJdbc(url, null);
-    }
-
-    /**
-     * Loads database from a JDBC connection with schema filtering and monitoring.
-     *
-     * @param url                  the JDBC connection URL
-     * @param ignoreSchemaListPath path to file containing schemas to ignore, or null for no filtering
-     * @return the loaded database
-     * @throws IOException           if I/O operations fail
-     * @throws PgCodeKeeperException if parsing errors occur
-     * @throws InterruptedException  if operation is cancelled
-     */
-    public AbstractDatabase loadFromJdbc(String url, String ignoreSchemaListPath)
-            throws IOException, PgCodeKeeperException, InterruptedException {
-        var ignoreSchemaList = IIgnoreList.parseIgnoreList(ignoreSchemaListPath, new IgnoreSchemaList());
-        var loader = LoaderFactory.createJdbcLoader(settings, url, ignoreSchemaList, monitor);
-        return loadDatabaseFromLoader(loader);
     }
 
     /**

@@ -16,6 +16,9 @@
 package org.pgcodekeeper.core.database.api.loader;
 
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.settings.ISettings;
+
+import java.io.IOException;
 
 /**
  * Interface for database loader
@@ -27,5 +30,10 @@ public interface ILoader {
      *
      * @return database
      */
-    IDatabase load();
+    IDatabase load() throws IOException, InterruptedException;
+
+    /**
+     * @return configuration settings
+     */
+    ISettings getSettings();
 }

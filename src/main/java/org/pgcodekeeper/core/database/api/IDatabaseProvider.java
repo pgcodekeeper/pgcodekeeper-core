@@ -17,6 +17,13 @@ package org.pgcodekeeper.core.database.api;
 
 import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
+import org.pgcodekeeper.core.monitor.IMonitor;
+import org.pgcodekeeper.core.settings.ISettings;
+
+import java.io.IOException;
 
 /**
  * Interface for DBMS
@@ -53,6 +60,22 @@ public interface IDatabaseProvider {
     /**
      * @param url full jdbc url
      * @return jdbc connector for DBMS
+     * @see IJdbcConnector
      */
     IJdbcConnector getJdbcConnector(String url);
+
+    /**
+     * @param url full jdbc url
+     * @param settings configuration settings for database comparison and migration operations
+     * @param monitor progress monitor
+     * @param ignoreSchemaList list of ignored schema
+     * @return a database
+     *
+     * @see IDatabase
+     * @see ISettings
+     * @see IMonitor
+     * @see IgnoreSchemaList
+     */
+    AbstractDatabase getDatabaseFromJdbc(String url, ISettings settings, IMonitor monitor, IgnoreSchemaList ignoreSchemaList)
+            throws IOException, InterruptedException;
 }

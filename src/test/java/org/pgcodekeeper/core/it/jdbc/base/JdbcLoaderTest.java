@@ -16,20 +16,19 @@
 package org.pgcodekeeper.core.it.jdbc.base;
 
 import org.junit.jupiter.api.Assertions;
-import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.DatabaseFactory;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
+import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
-import org.pgcodekeeper.core.database.pg.loader.jdbc.SupportedPgVersion;
-import org.pgcodekeeper.core.loader.JdbcRunner;
+import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
+import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.parsers.antlr.base.ScriptParser;
 import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -37,18 +36,20 @@ import java.util.List;
 
 public abstract class JdbcLoaderTest {
 
+
     protected void jdbcLoaderTest(String dumpFileName, String ignoreListName, String url, IJdbcConnector connector,
-                                  CoreSettings settings, SupportedPgVersion version, Class<?> clazz)
-            throws PgCodeKeeperException, SQLException, IOException, URISyntaxException, InterruptedException{
+                                  CoreSettings settings, SupportedPgVersion version, Class<?> clazz, IDatabaseProvider databaseProvider)
+            throws Exception {
         settings.setAddTransaction(true);
-        jdbcLoaderTest(dumpFileName, ignoreListName, url, connector, settings, version, clazz, false);
+        jdbcLoaderTest(dumpFileName, ignoreListName, url, connector, settings, version, clazz, false, databaseProvider);
     }
 
     protected void jdbcLoaderTest(String dumpFileName, String ignoreListName, String url, IJdbcConnector connector,
-                                  CoreSettings settings, SupportedPgVersion version, Class<?> clazz, boolean isMemoryOptimized)
-            throws PgCodeKeeperException, SQLException, IOException, URISyntaxException, InterruptedException {
+                                  CoreSettings settings, SupportedPgVersion version, Class<?> clazz,
+                                  boolean isMemoryOptimized, IDatabaseProvider databaseProvider)
+            throws Exception {
         settings.setEnableFunctionBodiesDependencies(true);
-        var df = new DatabaseFactory(settings);
+        DatabaseFactory df = new DatabaseFactory(settings);
         List<String> ignoreLists = new ArrayList<>() ;
         ignoreLists.add(TestUtils.getFilePath(ignoreListName, clazz));
 
@@ -61,7 +62,7 @@ public abstract class JdbcLoaderTest {
         ScriptParser parser = new ScriptParser(dumpFileName,
                 Files.readString(TestUtils.getPathToResource(dumpFileName, clazz)), settings);
 
-        var startConfDb = df.loadFromJdbc(url);
+        var startConfDb = databaseProvider.getDatabaseFromJdbc(url, settings, new NullMonitor(), null);
         try {
             var runner = new JdbcRunner(new NullMonitor());
             if (isMemoryOptimized) {
@@ -69,22 +70,22 @@ public abstract class JdbcLoaderTest {
             } else {
                 runner.runBatches(connector, parser.batch(), null);
             }
-            var remoteDb = df.loadFromJdbc(url);
+            var remoteDb = databaseProvider.getDatabaseFromJdbc(url, settings, new NullMonitor(), null);
             var actual = PgCodeKeeperApi.diff(settings, dumpDb, remoteDb, ignoreLists);
             Assertions.assertEquals("", actual, "Incorrect run dump %s on Database".formatted(dumpFileName));
         } finally {
-            clearDb(settings, startConfDb, df, connector, url);
+            clearDb(settings, startConfDb, connector, url, databaseProvider);
         }
     }
 
-    private void clearDb(CoreSettings settings, AbstractDatabase startConfDb, DatabaseFactory df,
-                               IJdbcConnector connector, String url)
-            throws PgCodeKeeperException, IOException, InterruptedException, SQLException {
-        var oldDb = df.loadFromJdbc(url);
+    private void clearDb(CoreSettings settings, AbstractDatabase startConfDb,
+                               IJdbcConnector connector, String url, IDatabaseProvider databaseProvider)
+            throws IOException, InterruptedException, SQLException {
+        var oldDb = databaseProvider.getDatabaseFromJdbc(url, settings, new NullMonitor(), null);
         var dropScript = PgCodeKeeperApi.diff(settings, oldDb, startConfDb);
         new JdbcRunner(new NullMonitor())
                 .runBatches(connector, new ScriptParser("clean db script", dropScript, settings).batch(), null);
-        var diff = PgCodeKeeperApi.diff(settings, startConfDb, df.loadFromJdbc(url));
+        var diff = PgCodeKeeperApi.diff(settings, startConfDb, databaseProvider.getDatabaseFromJdbc(url, settings, new NullMonitor(), null));
         if (!diff.isEmpty()) {
             throw new IllegalStateException("Database cleared incorrect. in database:\n\n" + diff);
         }

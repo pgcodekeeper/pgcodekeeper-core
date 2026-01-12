@@ -16,13 +16,20 @@
 package org.pgcodekeeper.core.database.ms;
 
 import org.antlr.v4.runtime.*;
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.ms.jdbc.MsJdbcConnector;
+import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
+import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
+import org.pgcodekeeper.core.loader.FullAnalyze;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.parsers.antlr.ms.CustomTSQLAntlrErrorStrategy;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLLexer;
 import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser;
+import org.pgcodekeeper.core.settings.ISettings;
+
+import java.io.IOException;
 
 public class MsDatabaseProvider implements IDatabaseProvider {
 
@@ -54,5 +61,13 @@ public class MsDatabaseProvider implements IDatabaseProvider {
     @Override
     public IJdbcConnector getJdbcConnector(String url) {
         return new MsJdbcConnector(url);
+    }
+
+    @Override
+    public MsDatabase getDatabaseFromJdbc(String url, ISettings settings, IMonitor monitor, IgnoreSchemaList ignoreSchemaList) throws IOException, InterruptedException {
+        var loader = new MsJdbcLoader(getJdbcConnector(url), settings, monitor, ignoreSchemaList);
+        var db = loader.load();
+        FullAnalyze.fullAnalyze(db, loader.getErrors());
+        return db;
     }
 }

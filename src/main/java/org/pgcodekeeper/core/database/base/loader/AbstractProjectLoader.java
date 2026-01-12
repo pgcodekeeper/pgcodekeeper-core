@@ -16,10 +16,14 @@
 package org.pgcodekeeper.core.database.base.loader;
 
 import org.pgcodekeeper.core.database.api.loader.IProjectLoader;
+import org.pgcodekeeper.core.settings.ISettings;
 
 /**
  * Base project loader
  */
 public abstract class AbstractProjectLoader extends AbstractLoader implements IProjectLoader {
 
+    protected AbstractProjectLoader(ISettings settings) {
+        super(settings);
+    }
 }

@@ -20,7 +20,7 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.pgcodekeeper.core.loader.TestContainer;
+import org.pgcodekeeper.core.TestContainer;
 
 class MsJdbcConnectorTest {
 
