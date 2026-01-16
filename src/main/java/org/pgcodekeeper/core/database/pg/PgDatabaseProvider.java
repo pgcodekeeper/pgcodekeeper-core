@@ -19,6 +19,7 @@ import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
@@ -31,6 +32,7 @@ import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 public class PgDatabaseProvider implements IDatabaseProvider {
 
@@ -72,5 +74,10 @@ public class PgDatabaseProvider implements IDatabaseProvider {
         var db = loader.load();
         FullAnalyze.fullAnalyze(db, loader.getErrors());
         return db;
+    }
+
+    @Override
+    public IDatabase getDatabaseFromDump(Path path, ISettings settings, IMonitor monitor) {
+        return null;
     }
 }

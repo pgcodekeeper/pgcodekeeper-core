@@ -21,11 +21,11 @@ import org.pgcodekeeper.core.api.DatabaseFactory;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
 import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.parsers.antlr.base.ScriptParser;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;
@@ -78,14 +78,15 @@ public abstract class JdbcLoaderTest {
         }
     }
 
-    private void clearDb(CoreSettings settings, AbstractDatabase startConfDb,
+    private void clearDb(CoreSettings settings, IDatabase startConfDb,
                                IJdbcConnector connector, String url, IDatabaseProvider databaseProvider)
             throws IOException, InterruptedException, SQLException {
         var oldDb = databaseProvider.getDatabaseFromJdbc(url, settings, new NullMonitor(), null);
         var dropScript = PgCodeKeeperApi.diff(settings, oldDb, startConfDb);
         new JdbcRunner(new NullMonitor())
                 .runBatches(connector, new ScriptParser("clean db script", dropScript, settings).batch(), null);
-        var diff = PgCodeKeeperApi.diff(settings, startConfDb, databaseProvider.getDatabaseFromJdbc(url, settings, new NullMonitor(), null));
+        var newDb = databaseProvider.getDatabaseFromJdbc(url, settings, new NullMonitor(), null);
+        var diff = PgCodeKeeperApi.diff(settings, startConfDb, newDb);
         if (!diff.isEmpty()) {
             throw new IllegalStateException("Database cleared incorrect. in database:\n\n" + diff);
         }

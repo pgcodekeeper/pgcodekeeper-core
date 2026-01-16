@@ -18,6 +18,7 @@ package org.pgcodekeeper.core.database.ms;
 import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.ms.jdbc.MsJdbcConnector;
 import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
@@ -30,6 +31,7 @@ import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 public class MsDatabaseProvider implements IDatabaseProvider {
 
@@ -69,5 +71,10 @@ public class MsDatabaseProvider implements IDatabaseProvider {
         var db = loader.load();
         FullAnalyze.fullAnalyze(db, loader.getErrors());
         return db;
+    }
+
+    @Override
+    public IDatabase getDatabaseFromDump(Path path, ISettings settings, IMonitor monitor) {
+        return null;
     }
 }

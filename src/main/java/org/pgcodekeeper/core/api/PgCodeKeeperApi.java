@@ -16,6 +16,7 @@
 package org.pgcodekeeper.core.api;
 
 import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.PgDiff;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
@@ -23,7 +24,6 @@ import org.pgcodekeeper.core.ignorelist.IgnoreList;
 import org.pgcodekeeper.core.ignorelist.IgnoreParser;
 import org.pgcodekeeper.core.model.difftree.*;
 import org.pgcodekeeper.core.model.exporter.ModelExporter;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.utils.ProjectUpdater;
@@ -50,7 +50,7 @@ public final class PgCodeKeeperApi {
      * @throws IOException          if I/O operations fail
      * @throws InterruptedException if the thread is interrupted during the operation
      */
-    public static String diff(ISettings settings, AbstractDatabase oldDb, AbstractDatabase newDb)
+    public static String diff(ISettings settings, IDatabase oldDb, IDatabase newDb)
             throws IOException, InterruptedException {
         return diff(settings, oldDb, newDb, Collections.emptyList());
     }
@@ -67,8 +67,8 @@ public final class PgCodeKeeperApi {
      * @throws InterruptedException if the thread is interrupted during the operation
      */
     public static String diff(ISettings settings,
-                              AbstractDatabase oldDb,
-                              AbstractDatabase newDb,
+                              IDatabase oldDb,
+                              IDatabase newDb,
                               Collection<String> ignoreLists)
             throws IOException, InterruptedException {
         return diff(settings, oldDb, newDb, null, null, ignoreLists);
@@ -88,8 +88,8 @@ public final class PgCodeKeeperApi {
      * @throws InterruptedException if the thread is interrupted during the operation
      */
     public static String diff(ISettings settings,
-                              AbstractDatabase oldDb,
-                              AbstractDatabase newDb,
+                              IDatabase oldDb,
+                              IDatabase newDb,
                               List<Map.Entry<IStatement, IStatement>> additionalDependenciesOldDb,
                               List<Map.Entry<IStatement, IStatement>> additionalDependenciesNewDb,
                               Collection<String> ignoreLists)
@@ -114,8 +114,8 @@ public final class PgCodeKeeperApi {
      */
     public static String diff(ISettings settings,
                               TreeElement root,
-                              AbstractDatabase oldDb,
-                              AbstractDatabase newDb,
+                              IDatabase oldDb,
+                              IDatabase newDb,
                               List<Map.Entry<IStatement, IStatement>> additionalDependenciesOldDb,
                               List<Map.Entry<IStatement, IStatement>> additionalDependenciesNewDb,
                               Collection<String> ignoreLists)
@@ -135,7 +135,7 @@ public final class PgCodeKeeperApi {
      *                              if export directory is not empty or if path is a file
      * @throws InterruptedException if the thread is interrupted during the operation
      */
-    public static void export(ISettings settings, AbstractDatabase dbToExport, String exportTo)
+    public static void export(ISettings settings, IDatabase dbToExport, String exportTo)
             throws IOException, InterruptedException {
         export(settings, dbToExport, exportTo, Collections.emptyList(), null);
     }
@@ -153,7 +153,7 @@ public final class PgCodeKeeperApi {
      *                              or if ignore list file cannot be read
      * @throws InterruptedException if the thread is interrupted during the operation
      */
-    public static void export(ISettings settings, AbstractDatabase dbToExport, String exportTo,
+    public static void export(ISettings settings, IDatabase dbToExport, String exportTo,
                               Collection<String> ignoreLists, IMonitor monitor)
             throws IOException, InterruptedException {
         IgnoreList ignoreList = IgnoreParser.parseLists(ignoreLists);
@@ -176,7 +176,7 @@ public final class PgCodeKeeperApi {
      * @throws IOException           if I/O operations fail, if project directory does not exist or if path is a file
      * @throws InterruptedException  if the thread is interrupted during the operation
      */
-    public static void update(ISettings settings, AbstractDatabase oldDb, AbstractDatabase newDb, String projectToUpdate)
+    public static void update(ISettings settings, IDatabase oldDb, IDatabase newDb, String projectToUpdate)
             throws PgCodeKeeperException, IOException, InterruptedException {
         update(settings, oldDb, newDb, projectToUpdate, Collections.emptyList(), null);
     }
@@ -194,7 +194,7 @@ public final class PgCodeKeeperApi {
      *                               or if ignore list files cannot be read
      * @throws InterruptedException  if the thread is interrupted during the operation
      */
-    public static void update(ISettings settings, AbstractDatabase oldDb, AbstractDatabase newDb,
+    public static void update(ISettings settings, IDatabase oldDb, IDatabase newDb,
                               String projectToUpdate, Collection<String> ignoreLists, IMonitor monitor)
             throws IOException, InterruptedException {
         IgnoreList ignoreList = IgnoreParser.parseLists(ignoreLists);
