@@ -16,13 +16,13 @@
 package org.pgcodekeeper.core.utils;
 
 import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.WorkDirs;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.exporter.ModelExporter;
 import org.pgcodekeeper.core.model.exporter.OverridesModelExporter;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +41,8 @@ public class ProjectUpdater {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProjectUpdater.class);
 
-    private final AbstractDatabase dbNew;
-    private final AbstractDatabase dbOld;
+    private final IDatabase dbNew;
+    private final IDatabase dbOld;
 
     private final Collection<TreeElement> changedObjects;
     private final String encoding;
@@ -63,7 +63,7 @@ public class ProjectUpdater {
      * @param overridesOnly  whether to update only overrides
      * @param settings       the application settings
      */
-    public ProjectUpdater(AbstractDatabase dbNew, AbstractDatabase dbOld, Collection<TreeElement> changedObjects,
+    public ProjectUpdater(IDatabase dbNew, IDatabase dbOld, Collection<TreeElement> changedObjects,
                           DatabaseType dbType, String encoding, Path dirExport, boolean overridesOnly, ISettings settings) {
         this.dbNew = dbNew;
         this.dbOld = dbOld;

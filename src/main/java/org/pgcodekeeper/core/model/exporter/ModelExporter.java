@@ -20,7 +20,6 @@ import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.FileUtils;
@@ -61,12 +60,12 @@ public class ModelExporter {
     /**
      * Database to export
      */
-    protected final AbstractDatabase newDb;
+    protected final IDatabase newDb;
 
     /**
      * Old state db to fetch filenames from
      */
-    protected final AbstractDatabase oldDb;
+    protected final IDatabase oldDb;
 
     /**
      * SQL files encoding
@@ -94,7 +93,7 @@ public class ModelExporter {
      * @param sqlEncoding  SQL file encoding
      * @param settings     export settings
      */
-    public ModelExporter(Path outDir, AbstractDatabase db, DatabaseType databaseType, String sqlEncoding,
+    public ModelExporter(Path outDir, IDatabase db, DatabaseType databaseType, String sqlEncoding,
                          ISettings settings) {
         this(outDir, db, null, databaseType, null, sqlEncoding, settings);
     }
@@ -110,8 +109,9 @@ public class ModelExporter {
      * @param sqlEncoding    SQL file encoding
      * @param settings       export settings
      */
-    public ModelExporter(Path outDir, AbstractDatabase newDb, AbstractDatabase oldDb,
-                         DatabaseType databaseType, Collection<TreeElement> changedObjects, String sqlEncoding, ISettings settings) {
+    public ModelExporter(Path outDir, IDatabase newDb, IDatabase oldDb,
+                         DatabaseType databaseType, Collection<TreeElement> changedObjects,
+                         String sqlEncoding, ISettings settings) {
         this.outDir = outDir;
         this.newDb = newDb;
         this.oldDb = oldDb;

@@ -16,6 +16,7 @@
 package org.pgcodekeeper.core.model.difftree;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.diff.Comparison;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
 import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
@@ -42,7 +43,7 @@ public final class DiffTree {
      * @return the root TreeElement representing the diff tree
      * @throws InterruptedException if the operation is interrupted
      */
-    public static TreeElement create(ISettings settings, AbstractDatabase left, AbstractDatabase right)
+    public static TreeElement create(ISettings settings, IDatabase left, IDatabase right)
             throws InterruptedException {
         return create(settings, left, right, null);
     }
@@ -57,9 +58,9 @@ public final class DiffTree {
      * @return the root TreeElement representing the diff tree
      * @throws InterruptedException if the operation is interrupted
      */
-    public static TreeElement create(ISettings settings, AbstractDatabase left, AbstractDatabase right, IMonitor monitor)
+    public static TreeElement create(ISettings settings, IDatabase left, IDatabase right, IMonitor monitor)
             throws InterruptedException {
-        return new DiffTree(settings, monitor).createTree(left, right);
+        return new DiffTree(settings, monitor).createTree((AbstractDatabase) left, (AbstractDatabase) right);
     }
 
     /**

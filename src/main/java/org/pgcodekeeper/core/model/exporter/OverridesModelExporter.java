@@ -15,11 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.exporter;
 
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.exception.PgCodeKeeperException;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.api.schema.IPrivilege;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.schema.PgPrivilege;
 import org.pgcodekeeper.core.localizations.Messages;
@@ -54,8 +51,8 @@ public final class OverridesModelExporter extends ModelExporter {
      * @param dbType         database type
      * @param settings       export settings
      */
-    public OverridesModelExporter(Path outDir, AbstractDatabase newDb, AbstractDatabase oldDb,
-                                  Collection<TreeElement> changedObjects, String sqlEncoding, DatabaseType dbType, ISettings settings) {
+    public OverridesModelExporter(Path outDir, IDatabase newDb, IDatabase oldDb, Collection<TreeElement> changedObjects,
+                                  String sqlEncoding, DatabaseType dbType, ISettings settings) {
         super(outDir, newDb, oldDb, dbType, changedObjects, sqlEncoding, settings);
     }
 
