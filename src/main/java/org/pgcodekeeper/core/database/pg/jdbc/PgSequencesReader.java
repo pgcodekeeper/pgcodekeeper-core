@@ -15,27 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import java.sql.*;
+import java.util.*;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
+import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.database.pg.schema.PgColumn;
-import org.pgcodekeeper.core.database.pg.schema.PgSequence;
 import org.pgcodekeeper.core.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.Array;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Reader for PostgreSQL sequences.

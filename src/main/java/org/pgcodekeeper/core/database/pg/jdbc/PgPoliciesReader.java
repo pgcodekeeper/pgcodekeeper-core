@@ -15,17 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import org.pgcodekeeper.core.database.api.schema.EventType;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import java.sql.*;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
+import org.pgcodekeeper.core.database.pg.parser.launcher.PgVexAnalysisLauncher;
 import org.pgcodekeeper.core.database.pg.schema.PgPolicy;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * Reader for PostgreSQL policies.
@@ -87,14 +84,14 @@ public class PgPoliciesReader extends PgAbstractSearchPathJdbcReader {
         if (using != null) {
             p.setUsing('(' + using + ')');
             loader.submitAntlrTask(using, parser -> parser.vex_eof().vex().get(0),
-                    ctx -> db.addAnalysisLauncher(new VexAnalysisLauncher(p, ctx, loader.getCurrentLocation())));
+                    ctx -> db.addAnalysisLauncher(new PgVexAnalysisLauncher(p, ctx, loader.getCurrentLocation())));
         }
 
         String check = res.getString("polwithcheck");
         if (check != null) {
             p.setCheck('(' + check + ')');
             loader.submitAntlrTask(check, parser -> parser.vex_eof().vex().get(0),
-                    ctx -> db.addAnalysisLauncher(new VexAnalysisLauncher(p, ctx, loader.getCurrentLocation())));
+                    ctx -> db.addAnalysisLauncher(new PgVexAnalysisLauncher(p, ctx, loader.getCurrentLocation())));
         }
 
         loader.setAuthor(p, res);

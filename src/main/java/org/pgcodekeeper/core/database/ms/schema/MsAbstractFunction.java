@@ -15,10 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
+import java.util.Objects;
+
 import org.pgcodekeeper.core.database.base.schema.AbstractFunction;
 import org.pgcodekeeper.core.hasher.Hasher;
-
-import java.util.Objects;
 
 /**
  * Abstract base class for Microsoft SQL functions.

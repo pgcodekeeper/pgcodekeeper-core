@@ -15,19 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.pg.statement.CreateIndex;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
-import org.pgcodekeeper.core.database.pg.schema.PgIndex;
-import org.pgcodekeeper.core.utils.Pair;
+import java.sql.*;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateIndex;
+import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.utils.Pair;
 
 /**
  * Reader for PostgreSQL indices.
@@ -62,7 +59,7 @@ public final class PgIndicesReader extends PgAbstractSearchPathJdbcReader {
         loader.submitAntlrTask(definition,
                 p -> new Pair<>(p.sql().statement(0).schema_statement().schema_create().create_index_statement().index_rest(),
                         (CommonTokenStream) p.getTokenStream()),
-                pair -> CreateIndex.parseIndex(pair.getFirst(), tablespace, schemaName, tableName, i,
+                pair -> PgCreateIndex.parseIndex(pair.getFirst(), tablespace, schemaName, tableName, i,
                         (PgDatabase) schema.getDatabase(), loader.getCurrentLocation(), pair.getSecond(),
                         loader.getSettings()));
         loader.setAuthor(i, res);

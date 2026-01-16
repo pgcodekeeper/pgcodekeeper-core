@@ -15,17 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrTask;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrTaskManager;
-import org.pgcodekeeper.core.parsers.antlr.base.launcher.AbstractAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.pg.launcher.AggregateAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.pg.launcher.OperatorAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.pg.launcher.ViewAnalysisLauncher;
+import org.pgcodekeeper.core.database.base.parser.AntlrTask;
+import org.pgcodekeeper.core.database.base.parser.AntlrTaskManager;
+import org.pgcodekeeper.core.database.base.parser.launcher.AbstractAnalysisLauncher;
 import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.database.api.schema.IRelation;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.database.base.schema.meta.MetaUtils;
+import org.pgcodekeeper.core.database.pg.parser.launcher.PgAggregateAnalysisLauncher;
+import org.pgcodekeeper.core.database.pg.parser.launcher.PgOperatorAnalysisLauncher;
+import org.pgcodekeeper.core.database.pg.parser.launcher.PgViewAnalysisLauncher;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -111,7 +111,7 @@ public final class FullAnalyze {
         List<AbstractAnalysisLauncher> launchers = db.getAnalysisLaunchers();
         for (int i = 0; i < launchers.size(); ++i) {
             AbstractAnalysisLauncher l = launchers.get(i);
-            if (l instanceof ViewAnalysisLauncher v
+            if (l instanceof PgViewAnalysisLauncher v
                     && (rel == null
                     || (rel.getSchemaName().equals(l.getSchemaName())
                     && rel.getName().equals(l.getStmt().getName())))) {
@@ -131,7 +131,7 @@ public final class FullAnalyze {
         List<AbstractAnalysisLauncher> launchers = db.getAnalysisLaunchers();
         for (int i = 0; i < launchers.size(); ++i) {
             AbstractAnalysisLauncher l = launchers.get(i);
-            if (l instanceof OperatorAnalysisLauncher) {
+            if (l instanceof PgOperatorAnalysisLauncher) {
                 // allow GC to reclaim context memory immediately
                 launchers.set(i, null);
                 l.launchAnalyze(errors, meta);
@@ -143,7 +143,7 @@ public final class FullAnalyze {
         List<AbstractAnalysisLauncher> launchers = db.getAnalysisLaunchers();
         for (int i = 0; i < launchers.size(); ++i) {
             AbstractAnalysisLauncher l = launchers.get(i);
-            if (l instanceof AggregateAnalysisLauncher) {
+            if (l instanceof PgAggregateAnalysisLauncher) {
                 // allow GC to reclaim context memory immediately
                 launchers.set(i, null);
                 l.launchAnalyze(errors, meta);

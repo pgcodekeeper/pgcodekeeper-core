@@ -19,13 +19,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
+import java.util.Objects;
+
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.base.schema.AbstractView;
+import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
-
-import java.util.Objects;
 
 /**
  * PostgreSQL materialized view implementation.

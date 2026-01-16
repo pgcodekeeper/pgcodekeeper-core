@@ -15,19 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.utils.Utils;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.IConstraint;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
-import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractType;
-import org.pgcodekeeper.core.hasher.Hasher;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.utils.Utils;
 
 /**
  * Represents a Microsoft SQL user-defined type that can be an alias type,

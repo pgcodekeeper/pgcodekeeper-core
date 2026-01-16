@@ -1,0 +1,659 @@
+/*******************************************************************************
+ * Copyright 2017-2026 TAXTELECOM, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+package org.pgcodekeeper.core.database.pg.parser.expr;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Predicate;
+
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.parser.QNameParser;
+import org.pgcodekeeper.core.database.base.schema.meta.*;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
+import org.pgcodekeeper.core.database.pg.parser.rulectx.*;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
+import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.utils.*;
+
+/**
+ * Parser for SELECT statements with namespace support.
+ */
+public final class PgSelect extends PgAbstractExprWithNmspc<Select_stmtContext> {
+
+    /**
+     * Flags for proper FROM (subquery) analysis.<br>
+     * {@link #findReference(String, String, String)} assumes that when inFrom is set the FROM clause
+     * of that query is analyzed and skips that namespace entirely unless {@link #lateralAllowed} is also set
+     * (when analyzing a lateral FROM subquery or a function call).<br>
+     * This assumes that {@link #from(From_itemContext)} is the first method to fill the namespace.<br>
+     * Note: caller of {@link #from(From_itemContext)} is responsible for setting #inFrom flag.
+     */
+    private boolean inFrom;
+    /**
+     * @see #inFrom
+     */
+    private boolean lateralAllowed;
+
+    /**
+     * Creates a Select parser with meta container.
+     *
+     * @param db the meta container with schema information
+     */
+    public PgSelect(MetaContainer db) {
+        super(db);
+    }
+
+    PgSelect(PgAbstractExpr parent) {
+        super(parent);
+    }
+
+    @Override
+    protected boolean namespaceAccessible() {
+        return !inFrom || lateralAllowed;
+    }
+
+    @Override
+    public List<ModPair<String, String>> analyze(Select_stmtContext ruleCtx) {
+        return analyze(new PgSelectStmt(ruleCtx));
+    }
+
+    /**
+     * Analyzes a SELECT statement without parentheses and returns the result types.
+     *
+     * @param ruleCtx the SELECT statement context to analyze
+     * @return list of modified pairs containing analyzed results
+     */
+    public List<ModPair<String, String>> analyze(Select_stmt_no_parensContext ruleCtx) {
+        return analyze(new PgSelectStmt(ruleCtx));
+    }
+
+    /**
+     * Analyzes a SELECT statement wrapper and returns the result types.
+     *
+     * @param select the SELECT statement wrapper to analyze
+     * @return list of modified pairs containing analyzed results
+     */
+    public List<ModPair<String, String>> analyze(PgSelectStmt select) {
+        return analyze(select, null);
+    }
+
+    List<ModPair<String, String>> analyze(PgSelectStmt select, With_queryContext recursiveCteCtx) {
+        With_clauseContext with = select.withClause();
+        if (with != null) {
+            analyzeCte(with);
+        }
+
+        List<ModPair<String, String>> ret = selectOps(select.selectOps(), recursiveCteCtx);
+
+        selectAfterOps(select.afterOps());
+
+        return ret;
+    }
+
+    /**
+     * Analyzes a PERFORM statement and returns the result types.
+     *
+     * @param perform the PERFORM statement context to analyze
+     * @return list of modified pairs containing analyzed results
+     */
+    public List<ModPair<String, String>> analyze(Perform_stmtContext perform) {
+        List<ModPair<String, String>> ret = perform(perform);
+
+        Select_opsContext ops = perform.select_ops();
+        if (ops != null) {
+            new PgSelect(this).selectOps(new PgSelectOps(ops));
+        }
+        selectAfterOps(perform.after_ops());
+        return ret;
+    }
+
+    private List<ModPair<String, String>> perform(Perform_stmtContext perform) {
+        // from defines the namespace so it goes before everything else
+        if (perform.FROM() != null) {
+            from(perform.from_item());
+        }
+
+        PgValueExpr vex = new PgValueExpr(this);
+        List<ModPair<String, String>> ret = sublist(perform.select_list().select_sublist(), vex);
+
+        if ((perform.set_qualifier() != null && perform.ON() != null)
+                || perform.WHERE() != null || perform.HAVING() != null) {
+            for (VexContext v : perform.vex()) {
+                vex.analyze(new PgVex(v));
+            }
+        }
+
+        Groupby_clauseContext groupBy = perform.groupby_clause();
+        if (groupBy != null) {
+            groupBy(groupBy.grouping_element_list(), vex);
+        }
+
+        if (perform.WINDOW() != null) {
+            for (Window_definitionContext window : perform.window_definition()) {
+                vex.window(window);
+            }
+        }
+
+        return ret;
+    }
+
+    private void selectAfterOps(List<After_opsContext> ops) {
+        PgValueExpr vex = new PgValueExpr(this);
+
+        for (After_opsContext after : ops) {
+            VexContext vexCtx = after.vex();
+            if (vexCtx != null) {
+                vex.analyze(new PgVex(vexCtx));
+            }
+
+            Orderby_clauseContext orderBy = after.orderby_clause();
+            if (orderBy != null) {
+                vex.orderBy(orderBy);
+            }
+
+            for (Schema_qualified_nameContext tableLock : after.schema_qualified_name()) {
+                addRelationDepcy(PgParserAbstract.getIdentifiers(tableLock));
+            }
+        }
+    }
+
+    private List<ModPair<String, String>> selectOps(PgSelectOps selectOps) {
+        return selectOps(selectOps, null);
+    }
+
+    private List<ModPair<String, String>> selectOps(PgSelectOps selectOps, With_queryContext recursiveCteCtx) {
+        List<ModPair<String, String>> ret;
+        Select_stmtContext selectStmt = selectOps.selectStmt();
+        Select_primaryContext primary = selectOps.selectPrimary();
+
+        if (selectOps.intersect() != null || selectOps.union() != null || selectOps.except() != null) {
+            // analyze each in a separate scope
+            // use column names from the first one
+            ret = new PgSelect(this).selectOps(selectOps.selectOps(0));
+
+            // when a recursive CTE is encountered, its SELECT is guaranteed
+            // to have a "SelectOps" on top level
+            //
+            // WITH RECURSIVE a(b) AS (select1 UNION select2) SELECT a.b FROM a
+            //
+            // CTE analysis creates a new child namespace to recurse through SelectOps
+            // and this is where we are now.
+            // Since current namespace is independent of its parent and SelectOps operands
+            // will be analyzed on further separate child namespaces
+            // we can safely store "select1"s signature as a CTE on the current pseudo-namespace
+            // so that it's visible to the recursive "select2" and doesn't pollute any other namespaces.
+            //
+            // Results of select1 (non-recursive part) analysis are used
+            // as CTE by select2's (potentially recursive part) analysis.
+            // This way types of recursive references in select2 will be known from select1.
+            // Lastly select1 signature is used for the entire CTE.
+            if (recursiveCteCtx != null) {
+                addCteSignature(recursiveCteCtx, ret);
+            }
+
+            PgSelect select = new PgSelect(this);
+            PgSelectOps ops = selectOps.selectOps(1);
+            if (ops != null) {
+                select.selectOps(ops);
+            } else if (primary != null) {
+                select.primary(primary);
+            } else if (selectStmt != null) {
+                select.analyze(selectStmt);
+            } else {
+                log(Messages.Select_log_not_alter_right_part);
+            }
+        } else if (primary != null) {
+            ret = primary(primary);
+        } else if (selectOps.leftParen() != null && selectOps.rightParen() != null && selectStmt != null) {
+            ret = analyze(selectStmt);
+        } else {
+            log(Messages.Select_log_not_alter_selectops);
+            ret = Collections.emptyList();
+        }
+        return ret;
+    }
+
+    private List<ModPair<String, String>> primary(Select_primaryContext primary) {
+        List<ModPair<String, String>> ret;
+        Values_stmtContext values;
+        if (primary.SELECT() != null) {
+            // from defines the namespace so it goes before everything else
+            if (primary.FROM() != null) {
+                from(primary.from_item());
+            }
+
+            PgValueExpr vex = new PgValueExpr(this);
+
+            Select_listContext list = primary.select_list();
+            if (list != null) {
+                ret = sublist(list.select_sublist(), vex);
+            } else {
+                ret = Collections.emptyList();
+            }
+
+
+            if ((primary.set_qualifier() != null && primary.ON() != null)
+                    || primary.WHERE() != null || primary.HAVING() != null) {
+                for (VexContext v : primary.vex()) {
+                    vex.analyze(new PgVex(v));
+                }
+            }
+
+            Groupby_clauseContext groupBy = primary.groupby_clause();
+            if (groupBy != null) {
+                groupBy(groupBy.grouping_element_list(), vex);
+            }
+
+            if (primary.WINDOW() != null) {
+                for (Window_definitionContext window : primary.window_definition()) {
+                    vex.window(window);
+                }
+            }
+        } else if (primary.TABLE() != null) {
+            Schema_qualified_nameContext table = primary.schema_qualified_name();
+            addNameReference(table, null);
+            ret = new ArrayList<>();
+            qualAster(PgParserAbstract.getIdentifiers(table), ret);
+        } else if ((values = primary.values_stmt()) != null) {
+            ret = new ArrayList<>();
+            PgValueExpr vex = new PgValueExpr(this);
+            for (Values_valuesContext vals : values.values_values()) {
+                for (VexContext v : vals.vex()) {
+                    ret.add(vex.analyze(new PgVex(v)));
+                }
+            }
+        } else {
+            log(primary, Messages.Select_log_not_alter_select);
+            ret = Collections.emptyList();
+        }
+        return ret;
+    }
+
+    List<ModPair<String, String>> sublist(List<Select_sublistContext> sublist, PgValueExpr vex) {
+        List<ModPair<String, String>> ret = new ArrayList<>(sublist.size());
+        for (Select_sublistContext target : sublist) {
+            PgVex selectSublistVex = new PgVex(target.vex());
+            // analyze all before parse asterisk
+            ModPair<String, String> columnPair = vex.analyze(selectSublistVex);
+
+            if (IPgTypesSetManually.QUALIFIED_ASTERISK.equals(columnPair.getSecond())
+                    && analyzeAster(selectSublistVex, ret)) {
+                continue;
+            }
+
+            ParserRuleContext aliasCtx = target.col_label();
+            if (aliasCtx == null) {
+                aliasCtx = target.bare_col_label();
+            }
+
+            if (aliasCtx != null) {
+                columnPair.setFirst(aliasCtx.getText());
+            }
+
+            ret.add(columnPair);
+        }
+        return ret;
+    }
+
+    private boolean analyzeAster(PgVex vex, List<ModPair<String, String>> columns) {
+        Value_expression_primaryContext primary = vex.primary();
+        if (primary != null && primary.MULTIPLY() != null) {
+            unqualAster(columns);
+            return true;
+        }
+
+        if (primary != null) {
+            Indirection_varContext ind = primary.indirection_var();
+            if (ind != null) {
+                return indirectionAsQualAster(ind, columns);
+            }
+        }
+
+        return false;
+    }
+
+    private boolean indirectionAsQualAster(Indirection_varContext ctx, List<ModPair<String, String>> cols) {
+        Indirection_listContext indList = ctx.indirection_list();
+        if (indList == null || indList.MULTIPLY() == null) {
+            // this shouldn't happen, crash hard
+            throw new IllegalStateException("Qualified asterisk without the asterisk!");
+        }
+
+        ParserRuleContext id = ctx.identifier();
+        if (id == null) {
+            id = ctx.dollar_number();
+        }
+
+        List<IndirectionContext> ind = indList.indirection();
+        switch (ind.size()) {
+            case 0:
+                return qualAster(Collections.singletonList(id), cols);
+            case 1:
+                IndirectionContext second = ind.get(0);
+                if (second.LEFT_BRACKET() == null) {
+                    return qualAster(Arrays.asList(id, second.col_label()), cols);
+                }
+                // cannot handle asterisk indirection from an array element
+                //$FALL-THROUGH$
+            default:
+                // long indirections are unsupported
+                return false;
+        }
+    }
+
+    private void groupBy(Grouping_element_listContext list, PgValueExpr vex) {
+        PgValueExpr child = new PgValueExpr(this, new HashSet<>());
+
+        for (Grouping_elementContext el : list.grouping_element()) {
+            VexContext vexCtx = el.vex();
+            Grouping_element_listContext sub;
+            if (vexCtx != null) {
+                child.analyze(new PgVex(vexCtx));
+            } else if ((sub = el.grouping_element_list()) != null) {
+                groupingSet(sub, vex);
+            }
+        }
+
+        // add dependencies to primary key
+        for (ObjectLocation dep : child.getDependencies()) {
+            vex.addDepcy(dep);
+            addPrimaryKeyDepcy(dep, vex);
+        }
+    }
+
+    private void addPrimaryKeyDepcy(ObjectLocation dep, PgValueExpr vex) {
+        if (dep.getType() != DbObjType.COLUMN) {
+            return;
+        }
+
+        for (IConstraint con : meta.getConstraints(dep.getSchema(), dep.getTable())) {
+            if (con.isPrimaryKey() && con.containsColumn(dep.getObjName())) {
+                // implicit reference
+                vex.addDependency(new GenericColumn(con.getSchemaName(),
+                        con.getTableName(), con.getName(), DbObjType.CONSTRAINT), null);
+            }
+        }
+    }
+
+    private void groupingSet(Grouping_element_listContext list, PgValueExpr vex) {
+        for (Grouping_elementContext el : list.grouping_element()) {
+            VexContext vexCtx = el.vex();
+            Grouping_element_listContext sub;
+            if (vexCtx != null) {
+                vex.analyze(new PgVex(vexCtx));
+            } else if ((sub = el.grouping_element_list()) != null) {
+                groupingSet(sub, vex);
+            }
+        }
+    }
+
+    private static final Predicate<String> ANY = s -> true;
+
+    private void unqualAster(List<ModPair<String, String>> cols) {
+        for (GenericColumn gc : unaliasedNamespace) {
+            addFilteredRelationColumnsDepcies(gc.schema(), gc.table(), ANY)
+                    .map(Pair::copyMod)
+                    .forEach(cols::add);
+        }
+
+        for (GenericColumn gc : namespace.values()) {
+            if (gc != null) {
+                addFilteredRelationColumnsDepcies(gc.schema(), gc.table(), ANY)
+                        .map(Pair::copyMod)
+                        .forEach(cols::add);
+            }
+        }
+
+        complexNamespace.values().stream()
+                .flatMap(List::stream)
+                .map(Pair::copyMod)
+                .forEach(cols::add);
+    }
+
+    private boolean qualAster(List<? extends ParserRuleContext> ids, List<ModPair<String, String>> cols) {
+        ParserRuleContext schemaCtx = QNameParser.getSecondNameCtx(ids);
+        String schema = schemaCtx == null ? null : schemaCtx.getText();
+        ParserRuleContext relationCtx = QNameParser.getFirstNameCtx(ids);
+        String relation = relationCtx.getText();
+
+        Entry<String, GenericColumn> ref = findReference(schema, relation, null);
+        if (ref == null) {
+            log(Messages.Select_log_aster_qual_not_found, schema, relation);
+            return false;
+        }
+        GenericColumn relationGc = ref.getValue();
+        if (relationGc != null) {
+            if (schemaCtx != null) {
+                addDependency(new GenericColumn(relationGc.schema(), DbObjType.SCHEMA), schemaCtx);
+            }
+
+            if (relationGc.getObjName().equals(relation)) {
+                addDependency(relationGc, relationCtx);
+            } else {
+                addReference(relationGc, relationCtx);
+            }
+
+            addFilteredRelationColumnsDepcies(relationGc.schema(), relationGc.table(), ANY)
+                    .map(Pair::copyMod)
+                    .forEach(cols::add);
+            return true;
+        }
+        List<Pair<String, String>> complexNsp = findReferenceComplex(relation);
+        if (complexNsp != null) {
+            complexNsp.stream()
+                    .map(Pair::copyMod)
+                    .forEach(cols::add);
+            return true;
+        }
+        log(Messages.AbstractExpr_log_complex_not_found, relation);
+        return false;
+    }
+
+    void from(List<From_itemContext> items) {
+        boolean oldFrom = inFrom;
+        try {
+            inFrom = true;
+            for (From_itemContext fromItem : items) {
+                from(fromItem);
+            }
+        } finally {
+            inFrom = oldFrom;
+        }
+    }
+
+    private void from(From_itemContext fromItem) {
+        From_primaryContext primary;
+
+        if (fromItem.LEFT_PAREN() != null && fromItem.RIGHT_PAREN() != null) {
+            Alias_clauseContext joinAlias = fromItem.alias_clause();
+            if (joinAlias != null) {
+                // we simplify this case by analyzing joined ranges in an isolated scope
+                // this way we get dependencies and don't pollute this scope with names hidden by the join alias
+                // the only name this form of FROM clause exposes is the join alias
+
+                // consequence of this method: no way to connect column references with the tables inside the join
+                // that would require analyzing the table schemas and actually "performing" the join
+                PgSelect fromProcessor = new PgSelect(this);
+                fromProcessor.inFrom = true;
+                fromProcessor.from(fromItem.from_item(0));
+                addReference(joinAlias.alias.getText(), null);
+            } else {
+                from(fromItem.from_item(0));
+            }
+        } else if (fromItem.JOIN() != null) {
+            from(fromItem.from_item(0));
+            from(fromItem.from_item(1));
+
+            if (fromItem.ON() != null) {
+                VexContext joinOn = fromItem.vex();
+                boolean oldLateral = lateralAllowed;
+                // technically incorrect simplification
+                // joinOn expr only does not have access to anything in this FROM
+                // except JOIN operand subtrees
+                // but since we're not doing expression validity checks
+                // we pretend that joinOn has access to everything
+                // that a usual LATERAL expr has access to
+                // this greatly simplifies analysis logic here
+                try {
+                    lateralAllowed = true;
+                    PgValueExpr vexOn = new PgValueExpr(this);
+                    vexOn.analyze(new PgVex(joinOn));
+                } finally {
+                    lateralAllowed = oldLateral;
+                }
+            }
+        } else if ((primary = fromItem.from_primary()) != null) {
+            Alias_clauseContext alias = primary.alias_clause();
+            Schema_qualified_nameContext table;
+            Table_subqueryContext subquery;
+
+            if (primary.function_call() != null
+                    || primary.from_function_column_def() != null
+                    || primary.from_rows_with_alias() != null) {
+                fromFunctionCommon(primary);
+            } else if ((table = primary.schema_qualified_name()) != null) {
+                addNameReference(table, alias);
+                if (primary.TABLESAMPLE() != null) {
+                    PgValueExpr vex = new PgValueExpr(this);
+                    for (VexContext v : primary.vex()) {
+                        vex.analyze(new PgVex(v));
+                    }
+                }
+            } else if ((subquery = primary.table_subquery()) != null) {
+                boolean oldLateral = lateralAllowed;
+                try {
+                    lateralAllowed = primary.LATERAL() != null;
+                    List<ModPair<String, String>> columnList = new PgSelect(this).analyze(subquery.select_stmt());
+
+                    String tableSubQueryAlias = alias.alias.getText();
+                    addReference(tableSubQueryAlias, null);
+
+                    var columnAliases = alias.column_alias;
+                    for (int i = 0; i < columnAliases.size() && i < columnList.size(); i++) {
+                        columnList.set(i, new ModPair<>(columnAliases.get(i).getText(),
+                                columnList.get(i).getSecond()));
+                    }
+
+                    complexNamespace.put(tableSubQueryAlias, new ArrayList<>(columnList));
+                } finally {
+                    lateralAllowed = oldLateral;
+                }
+            } else {
+                log(primary, Messages.Select_log_not_alter_prim);
+            }
+        } else {
+            log(fromItem, Messages.Select_log_not_alter_item);
+        }
+    }
+
+    private void fromFunctionCommon(From_primaryContext from) {
+        boolean oldLateral = lateralAllowed;
+        try {
+            if (from.function_call() != null) {
+                var colPairs = function(from.function_call(), from.alias, from.from_function_column_def());
+                if (colPairs != null) {
+                    complexNamespace.put(colPairs.getFirst(), colPairs.getSecond());
+                }
+            } else if (from.from_rows_with_alias() != null) {
+                fromRowsFunction(from.from_rows_with_alias());
+            }
+        } finally {
+            lateralAllowed = oldLateral;
+        }
+    }
+
+    private void fromRowsFunction(From_rows_with_aliasContext fromRows) {
+        for (var function : fromRows.function_call()) {
+            PgValueExpr vexFunc = new PgValueExpr(this);
+            Pair<String, String> func = vexFunc.function(function);
+            if (func.getFirst() != null) {
+                String funcName = func.getFirst();
+                addReference(funcName, null);
+            }
+        }
+        var alias = fromRows.alias.getText();
+        addReference(alias, null);
+
+        List<Pair<String, String>> colPairs = new ArrayList<>();
+        fromRows.column_alias
+                .forEach(identifier -> colPairs.add(new ModPair<>(identifier.getText(), IPgTypesSetManually.COLUMN)));
+
+        var definitions = fromRows.from_function_column_def();
+        var definition = definitions.isEmpty() ? null : definitions.get(0);
+        var types = function(fromRows.function_call(0), fromRows.alias, definition);
+        if (types == null) {
+            complexNamespace.put(alias, colPairs);
+            return;
+        }
+
+        for (int i = 0; i < colPairs.size() && i < types.getSecond().size(); i++) {
+            colPairs.set(i, new Pair<>(colPairs.get(i).getFirst(), types.getSecond().get(i).getSecond()));
+        }
+
+        complexNamespace.put(alias, colPairs);
+    }
+
+    private Pair<String, List<Pair<String, String>>> function(Function_callContext function, IdentifierContext alias,
+                                                              From_function_column_defContext definition) {
+        PgValueExpr vexFunc = new PgValueExpr(this);
+        Pair<String, String> func = vexFunc.function(function);
+        if (func.getFirst() != null) {
+            String funcAlias = alias == null ? func.getFirst() : alias.getText();
+            addReference(funcAlias, null);
+
+            var returns = func.getSecond();
+            List<Pair<String, String>> colPairs = new ArrayList<>();
+            if (definition != null) {
+                for (int i = 0; i < definition.column_alias.size(); i++) {
+                    colPairs.add(new Pair<>(definition.column_alias.get(i).getText(), definition.data_type().get(i).getText()));
+                }
+            } else if (returns.contains(".")) {
+                colPairs = setOfFunction(funcAlias, returns);
+            } else {
+                List<Pair<String, String>> returnTableCols = vexFunc.getReturningTableColumns();
+                if (returnTableCols.isEmpty()) {
+                    colPairs.add(new Pair<>(funcAlias, func.getSecond()));
+                } else {
+                    colPairs = returnTableCols;
+                }
+            }
+
+            return new Pair<>(funcAlias, colPairs);
+        }
+        return null;
+    }
+
+    private List<Pair<String, String>> setOfFunction(String funcAlias, String returns) {
+        var typeQualifiedName = returns.replace("SETOF ", "");
+        var parsedName = QNameParser.parsePg(typeQualifiedName);
+
+        var schemaName = parsedName.getSchemaName();
+        var objectName = parsedName.getFirstName();
+
+        MetaCompositeType type = meta.findType(schemaName, objectName);
+        if (type != null) {
+            return type.getAttrs();
+        }
+
+        IRelation relation = meta.findRelation(schemaName, objectName);
+        if (relation != null) {
+            return relation.getRelationColumns().toList();
+        }
+
+        return List.of(new Pair<>(funcAlias, returns));
+    }
+}

@@ -17,10 +17,10 @@ package org.pgcodekeeper.core.loader;
 
 import org.pgcodekeeper.core.*;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.parser.AntlrTaskManager;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrTaskManager;
 import org.pgcodekeeper.core.database.ms.schema.MsSchema;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.monitor.IMonitor;

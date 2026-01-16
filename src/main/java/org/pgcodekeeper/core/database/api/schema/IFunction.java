@@ -15,8 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Interface for database functions, procedures, and aggregates.

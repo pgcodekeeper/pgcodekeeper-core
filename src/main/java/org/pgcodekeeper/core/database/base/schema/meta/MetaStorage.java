@@ -15,17 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema.meta;
 
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.*;
+
 import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Storage and management system for database metadata objects.

@@ -15,37 +15,25 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
+import java.sql.*;
+import java.util.*;
+
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.Consts.FUNC_SIGN;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
-import org.pgcodekeeper.core.database.api.schema.ArgMode;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.VexContext;
-import org.pgcodekeeper.core.parsers.antlr.pg.launcher.FuncProcAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.pg.statement.CreateAggregate;
-import org.pgcodekeeper.core.database.pg.schema.PgAbstractFunction;
-import org.pgcodekeeper.core.database.pg.schema.PgAggregate;
-import org.pgcodekeeper.core.database.pg.schema.PgAggregate.AggFuncs;
-import org.pgcodekeeper.core.database.pg.schema.PgAggregate.AggKinds;
-import org.pgcodekeeper.core.database.pg.schema.PgAggregate.ModifyType;
-import org.pgcodekeeper.core.database.pg.schema.PgFunction;
-import org.pgcodekeeper.core.database.pg.schema.PgProcedure;
+import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.VexContext;
+import org.pgcodekeeper.core.database.pg.parser.launcher.*;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateAggregate;
+import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.database.pg.schema.PgAggregate.*;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.Pair;
-import org.pgcodekeeper.core.utils.Utils;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
+import org.pgcodekeeper.core.utils.*;
 
 /**
  * Reader for PostgreSQL functions, procedures and aggregates.
@@ -188,7 +176,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
                         if (a.getMode().isIn()) {
                             VexContext vx = vexCtxListIterator.previous();
                             a.setDefaultExpression(ParserAbstract.getFullCtxText(vx));
-                            db.addAnalysisLauncher(new VexAnalysisLauncher(
+                            db.addAnalysisLauncher(new PgVexAnalysisLauncher(
                                     function, vx, loader.getCurrentLocation()));
                         }
                     }
@@ -266,15 +254,15 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
         // Parsing the function definition and adding its result context for analysis.
         if (function.isInStatementBody()) {
             loader.submitAntlrTask(body, SQLParser::function_body, ctx -> db.addAnalysisLauncher(
-                    new FuncProcAnalysisLauncher(function, ctx, loader.getCurrentLocation(), argsQualTypes,
+                    new PgFuncProcAnalysisLauncher(function, ctx, loader.getCurrentLocation(), argsQualTypes,
                             settings.isEnableFunctionBodiesDependencies())));
         } else if (!"-".equals(definition) && "SQL".equalsIgnoreCase(function.getLanguage())) {
             loader.submitAntlrTask(definition, SQLParser::sql, ctx -> db.addAnalysisLauncher(
-                    new FuncProcAnalysisLauncher(function, ctx, loader.getCurrentLocation(), argsQualTypes,
+                    new PgFuncProcAnalysisLauncher(function, ctx, loader.getCurrentLocation(), argsQualTypes,
                             settings.isEnableFunctionBodiesDependencies())));
         } else if (!"-".equals(definition) && "PLPGSQL".equalsIgnoreCase(function.getLanguage())) {
             loader.submitPlpgsqlTask(definition, SQLParser::plpgsql_function, ctx -> db.addAnalysisLauncher(
-                    new FuncProcAnalysisLauncher(function, ctx, loader.getCurrentLocation(), argsQualTypes,
+                    new PgFuncProcAnalysisLauncher(function, ctx, loader.getCurrentLocation(), argsQualTypes,
                             settings.isEnableFunctionBodiesDependencies())));
         }
     }
@@ -420,7 +408,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
             String operSchemaName = res.getString("sortop_nsp");
             aggregate.setSortOp("OPERATOR(" + PgDiffUtils.getQuotedName(operSchemaName) + '.' + sortOpName + ')');
 
-            String operName = sortOpName + CreateAggregate.getSortOperSign(aggregate);
+            String operName = sortOpName + PgCreateAggregate.getSortOperSign(aggregate);
             addDep(aggregate, operSchemaName, operName, DbObjType.OPERATOR);
         }
     }
@@ -431,7 +419,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
         }
         StringBuilder sb = new StringBuilder();
         if (!Consts.PG_CATALOG.equalsIgnoreCase(schemaName)) {
-            addDep(agg, schemaName, funcName + CreateAggregate.getParamFuncSignature(agg, funcType),
+            addDep(agg, schemaName, funcName + PgCreateAggregate.getParamFuncSignature(agg, funcType),
                     DbObjType.FUNCTION);
             sb.append(PgDiffUtils.getQuotedName(schemaName)).append('.');
         }

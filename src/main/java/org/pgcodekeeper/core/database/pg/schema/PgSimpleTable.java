@@ -15,8 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractTable;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 
 /**

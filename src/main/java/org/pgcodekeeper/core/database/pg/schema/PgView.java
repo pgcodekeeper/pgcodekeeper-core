@@ -19,17 +19,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
+import java.util.*;
+import java.util.Map.Entry;
+
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.base.schema.AbstractView;
+import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
-
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
 
 /**
  * PostgreSQL view implementation.

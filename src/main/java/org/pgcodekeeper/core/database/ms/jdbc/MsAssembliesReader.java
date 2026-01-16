@@ -15,18 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.jdbc;
 
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcReader;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
-import org.pgcodekeeper.core.database.ms.schema.MsAssembly;
-import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
-import org.pgcodekeeper.core.exception.XmlReaderException;
-import org.pgcodekeeper.core.parsers.antlr.ms.statement.CreateMsAssembly;
+import java.sql.*;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.*;
+import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
+import org.pgcodekeeper.core.database.ms.parser.statement.MsCreateAssembly;
+import org.pgcodekeeper.core.database.ms.schema.*;
+import org.pgcodekeeper.core.exception.XmlReaderException;
 
 /**
  * Reader for Microsoft SQL assemblies.
@@ -54,7 +50,7 @@ public class MsAssembliesReader extends AbstractJdbcReader<MsJdbcLoader> impleme
 
         MsAssembly ass = new MsAssembly(name);
         for (MsXmlReader bin : MsXmlReader.readXML(res.getString("binaries"))) {
-            ass.addBinary(CreateMsAssembly.formatBinary(bin.getString("b")));
+            ass.addBinary(MsCreateAssembly.formatBinary(bin.getString("b")));
         }
 
         ass.setVisible(res.getBoolean("is_visible"));

@@ -16,15 +16,11 @@
 
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractTable;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.script.SQLScript;
+import java.util.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.script.SQLScript;
 
 /**
  * Greenplum partition table implementation.

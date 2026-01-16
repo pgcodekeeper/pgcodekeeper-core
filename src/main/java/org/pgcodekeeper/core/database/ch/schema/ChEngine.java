@@ -15,15 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.hasher.IHashable;
-import org.pgcodekeeper.core.hasher.JavaHasher;
-import org.pgcodekeeper.core.script.SQLScript;
-
-import java.io.Serial;
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
+
+import org.pgcodekeeper.core.hasher.*;
+import org.pgcodekeeper.core.script.SQLScript;
 
 /**
  * Represents a ClickHouse table engine configuration.

@@ -15,15 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.jdbc;
 
+import java.sql.*;
+
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcReader;
 import org.pgcodekeeper.core.database.base.loader.AbstractJdbcLoader;
 import org.pgcodekeeper.core.exception.XmlReaderException;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * Abstract base class for JDBC statement readers that process database metadata.

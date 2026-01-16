@@ -15,17 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.jdbc;
 
-import org.pgcodekeeper.core.database.base.jdbc.AbstractSearchPathJdbcReader;
-import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
-import org.pgcodekeeper.core.exception.XmlReaderException;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.ms.schema.MsStatistics;
+import java.sql.*;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
+import org.pgcodekeeper.core.database.ms.schema.MsStatistics;
+import org.pgcodekeeper.core.exception.XmlReaderException;
 
 /**
  * Reader for Microsoft SQL statistics.

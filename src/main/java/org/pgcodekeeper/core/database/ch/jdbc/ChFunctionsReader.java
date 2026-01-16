@@ -15,17 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.jdbc;
 
-import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcReader;
-import org.pgcodekeeper.core.database.ch.loader.ChJdbcLoader;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.ch.statement.CreateChFunction;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
-import org.pgcodekeeper.core.database.ch.schema.ChFunction;
+import java.sql.*;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.*;
+import org.pgcodekeeper.core.database.ch.loader.ChJdbcLoader;
+import org.pgcodekeeper.core.database.ch.parser.statement.ChCreateFunction;
+import org.pgcodekeeper.core.database.ch.schema.*;
 
 /**
  * Reader for ClickHouse functions.
@@ -56,7 +52,7 @@ public final class ChFunctionsReader extends AbstractJdbcReader<ChJdbcLoader> {
 
         loader.submitChAntlrTask(definition,
                 p -> p.ch_file().query(0).stmt().ddl_stmt().create_stmt().create_function_stmt(),
-                ctx -> new CreateChFunction(ctx, db, loader.getSettings()).parseObject(function));
+                ctx -> new ChCreateFunction(ctx, db, loader.getSettings()).parseObject(function));
 
         db.addChild(function);
     }

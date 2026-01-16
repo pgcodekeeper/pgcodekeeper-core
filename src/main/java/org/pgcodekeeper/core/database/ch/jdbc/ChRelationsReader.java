@@ -15,23 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.jdbc;
 
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.pgcodekeeper.core.database.base.jdbc.AbstractSearchPathJdbcReader;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.ch.loader.ChJdbcLoader;
-import org.pgcodekeeper.core.database.ch.schema.*;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.ch.statement.CreateChDictionary;
-import org.pgcodekeeper.core.parsers.antlr.ch.statement.CreateChTable;
-import org.pgcodekeeper.core.parsers.antlr.ch.statement.CreateChView;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.utils.Pair;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Locale;
+
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.*;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.ch.loader.ChJdbcLoader;
+import org.pgcodekeeper.core.database.ch.parser.statement.*;
+import org.pgcodekeeper.core.database.ch.schema.*;
+import org.pgcodekeeper.core.utils.Pair;
 
 /**
  * Reader for ClickHouse relations.
@@ -75,7 +69,7 @@ public final class ChRelationsReader extends AbstractSearchPathJdbcReader<ChJdbc
         ChDictionary dict = new ChDictionary(name);
         loader.submitChAntlrTask(definition,
                 p -> p.ch_file().query(0).stmt().ddl_stmt().create_stmt().create_dictinary_stmt(),
-                ctx -> new CreateChDictionary(ctx, (ChDatabase) schema.getDatabase(), loader.getSettings())
+                ctx -> new ChCreateDictionary(ctx, (ChDatabase) schema.getDatabase(), loader.getSettings())
                         .parseObject(dict));
         return dict;
     }
@@ -87,7 +81,7 @@ public final class ChRelationsReader extends AbstractSearchPathJdbcReader<ChJdbc
                 p -> new Pair<>(
                         p.ch_file().query(0).stmt().ddl_stmt().create_stmt().create_view_stmt(),
                         (CommonTokenStream) p.getTokenStream()),
-                pair -> new CreateChView(pair.getFirst(), (ChDatabase) schema.getDatabase(), pair.getSecond(),
+                pair -> new ChCreateView(pair.getFirst(), (ChDatabase) schema.getDatabase(), pair.getSecond(),
                         loader.getSettings())
                         .parseObject(view, true));
         return view;
@@ -103,7 +97,7 @@ public final class ChRelationsReader extends AbstractSearchPathJdbcReader<ChJdbc
         }
         loader.submitChAntlrTask(definition,
                 p -> p.ch_file().query(0).stmt().ddl_stmt().create_stmt().create_table_stmt(),
-                ctx -> new CreateChTable(ctx, (ChDatabase) schema.getDatabase(), loader.getSettings())
+                ctx -> new ChCreateTable(ctx, (ChDatabase) schema.getDatabase(), loader.getSettings())
                         .parseObject(table));
         return table;
     }

@@ -15,18 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
+import java.util.*;
+
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.IConstraintFk;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
-import org.pgcodekeeper.core.database.base.schema.StatementUtils;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * PostgreSQL FOREIGN KEY constraint implementation.

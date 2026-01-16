@@ -15,12 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.hasher.IHashable;
-import org.pgcodekeeper.core.hasher.JavaHasher;
-
 import java.util.Objects;
+
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.hasher.*;
 
 /**
  * Represents a table inheritance relationship in PostgreSQL.

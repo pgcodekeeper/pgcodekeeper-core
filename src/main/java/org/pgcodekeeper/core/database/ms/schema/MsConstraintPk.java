@@ -15,17 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.api.schema.IConstraintPk;
-import org.pgcodekeeper.core.database.api.schema.IOptionContainer;
-import org.pgcodekeeper.core.database.api.schema.ISimpleColumnContainer;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
-import org.pgcodekeeper.core.database.base.schema.SimpleColumn;
-import org.pgcodekeeper.core.database.base.schema.StatementUtils;
+import java.util.*;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
-
-import java.util.*;
 
 /**
  * Represents a Microsoft SQL PRIMARY KEY or UNIQUE constraint.

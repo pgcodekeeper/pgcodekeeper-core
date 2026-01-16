@@ -15,10 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
-import org.pgcodekeeper.core.script.SQLScript;
+import java.util.*;
 
-import java.util.List;
-import java.util.Map;
+import org.pgcodekeeper.core.script.SQLScript;
 
 /**
  * Interface for database objects that support storage and configuration options.

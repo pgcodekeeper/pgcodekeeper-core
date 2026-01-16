@@ -15,14 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.utils.Utils;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.hasher.IHashable;
-import org.pgcodekeeper.core.hasher.JavaHasher;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import org.pgcodekeeper.core.hasher.*;
+import org.pgcodekeeper.core.utils.Utils;
 
 /**
  * Container for Greenplum partition template information.

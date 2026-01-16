@@ -15,16 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.base.jdbc.AbstractSearchPathJdbcReader;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
+import java.util.function.BiConsumer;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.*;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.utils.Utils;
-
-import java.util.function.BiConsumer;
 
 public abstract class PgAbstractSearchPathJdbcReader extends AbstractSearchPathJdbcReader<PgJdbcLoader> implements IPgJdbcReader {
 

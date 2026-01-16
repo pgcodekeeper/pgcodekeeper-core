@@ -15,14 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import java.util.function.UnaryOperator;
+
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.formatter.PgFormatter;
 import org.pgcodekeeper.core.script.SQLScript;
-
-import java.util.function.UnaryOperator;
 
 /**
  * Interface for PostgreSQL statement

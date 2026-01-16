@@ -15,19 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
-import org.pgcodekeeper.core.database.pg.schema.*;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
-import org.pgcodekeeper.core.parsers.antlr.pg.statement.AlterTable;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.utils.Pair;
+import java.sql.*;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
+import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgAlterTable;
+import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.utils.Pair;
 
 /**
  * Reader for PostgreSQL constraints.
@@ -96,7 +94,7 @@ public final class PgConstraintsReader extends PgAbstractSearchPathJdbcReader {
         loader.submitAntlrTask(ADD_CONSTRAINT + definition + ';',
                 p -> new Pair<>(p.sql().statement(0).schema_statement().schema_alter()
                         .alter_table_statement().table_action(0), (CommonTokenStream) p.getTokenStream()),
-                pair -> new AlterTable(null, (PgDatabase) schema.getDatabase(), tablespace, pair.getSecond(),
+                pair -> new PgAlterTable(null, (PgDatabase) schema.getDatabase(), tablespace, pair.getSecond(),
                         loader.getSettings())
                         .parseAlterTableConstraint(
                                 pair.getFirst(), constr, schemaName, tableName, loader.getCurrentLocation()));

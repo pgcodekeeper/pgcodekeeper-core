@@ -15,19 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.jdbc;
 
+import java.sql.*;
+
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcReader;
 import org.pgcodekeeper.core.database.base.loader.AbstractJdbcLoader;
 import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.exception.ConcurrentModificationException;
-import org.pgcodekeeper.core.exception.XmlReaderException;
+import org.pgcodekeeper.core.exception.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public abstract class AbstractSearchPathJdbcReader<T extends AbstractJdbcLoader> implements IJdbcReader {
 
@@ -39,6 +36,7 @@ public abstract class AbstractSearchPathJdbcReader<T extends AbstractJdbcLoader>
         this.loader = loader;
     }
 
+    @Override
     public void read() throws SQLException, InterruptedException, XmlReaderException {
         loader.setCurrentOperation(Messages.AbstractStatementReader_start + getClass().getSimpleName());
         QueryBuilder builder = makeQuery();

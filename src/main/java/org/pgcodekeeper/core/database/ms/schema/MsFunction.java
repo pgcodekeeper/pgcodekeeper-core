@@ -15,11 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.hasher.Hasher;
+import java.util.Objects;
+
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.schema.AbstractFunction;
-
-import java.util.Objects;
+import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
  * Represents a Microsoft SQL user-defined function.

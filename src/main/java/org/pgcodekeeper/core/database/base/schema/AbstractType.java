@@ -15,13 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.ISearchPath;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.api.schema.ObjectState;
-import org.pgcodekeeper.core.script.SQLScript;
-
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.script.SQLScript;
 
 /**
  * Abstract base class for database user-defined types.

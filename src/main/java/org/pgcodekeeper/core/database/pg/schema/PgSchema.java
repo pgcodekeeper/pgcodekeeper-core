@@ -19,17 +19,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.api.schema.IOperator;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.base.schema.AbstractType;
-import org.pgcodekeeper.core.database.api.schema.ObjectState;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.script.SQLScript;
-
 import java.util.*;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.script.SQLScript;
 
 /**
  * PostgreSQL schema implementation.

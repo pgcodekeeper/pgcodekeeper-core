@@ -15,16 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
-import org.pgcodekeeper.core.database.api.schema.ArgMode;
-import org.pgcodekeeper.core.database.api.schema.IArgument;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.hasher.IHashable;
-import org.pgcodekeeper.core.hasher.JavaHasher;
-
-import java.io.Serial;
-import java.io.Serializable;
+import java.io.*;
 import java.util.Objects;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.hasher.*;
 
 /**
  * Represents a function argument with its mode, name, data type, and default value.

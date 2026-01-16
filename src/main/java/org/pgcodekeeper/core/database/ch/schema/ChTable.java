@@ -15,17 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.database.api.schema.IOptionContainer;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractTable;
-import org.pgcodekeeper.core.database.api.schema.ObjectState;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.script.SQLScript;
-
 import java.util.*;
 import java.util.Map.Entry;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.script.SQLScript;
 
 /**
  * Represents a ClickHouse table with engine configuration and projections.

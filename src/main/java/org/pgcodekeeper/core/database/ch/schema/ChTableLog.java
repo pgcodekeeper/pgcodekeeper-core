@@ -15,14 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
-import org.pgcodekeeper.core.database.base.schema.AbstractTable;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
  * Represents a ClickHouse Log family table that supports constraints.

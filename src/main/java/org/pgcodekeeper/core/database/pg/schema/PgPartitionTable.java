@@ -15,17 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.api.schema.IPartitionTable;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractTable;
-import org.pgcodekeeper.core.database.base.schema.Inherits;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import java.util.*;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
-
-import java.util.List;
-import java.util.Objects;
 
 /**
  * Partition regular table object for PostgreSQL.

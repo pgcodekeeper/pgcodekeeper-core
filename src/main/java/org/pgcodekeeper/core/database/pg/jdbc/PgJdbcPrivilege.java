@@ -15,14 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import org.pgcodekeeper.core.database.base.parser.AntlrParser;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 
 /**
  * Parser for aclItem arrays

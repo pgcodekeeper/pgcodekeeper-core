@@ -15,12 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.jdbc;
 
-import com.microsoft.sqlserver.jdbc.SQLServerDriver;
+import java.sql.SQLException;
+import java.util.Properties;
+
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
 
-import java.sql.SQLException;
-import java.util.Properties;
+import com.microsoft.sqlserver.jdbc.SQLServerDriver;
 
 /**
  * JDBC database connector implementation for MS SQL.

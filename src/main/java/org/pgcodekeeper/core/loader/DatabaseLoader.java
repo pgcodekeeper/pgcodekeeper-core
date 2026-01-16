@@ -15,8 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.loader;
 
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrTask;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrTaskManager;
+import org.pgcodekeeper.core.database.base.parser.AntlrTask;
+import org.pgcodekeeper.core.database.base.parser.AntlrTaskManager;
 import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;

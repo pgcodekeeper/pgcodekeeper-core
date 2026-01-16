@@ -15,12 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.base.schema.AbstractFunction;
-import org.pgcodekeeper.core.database.api.schema.ArgMode;
-import org.pgcodekeeper.core.database.base.schema.Argument;
-
 import java.util.stream.Collectors;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.*;
 
 /**
  * Represents a Microsoft SQL CLR stored procedure.

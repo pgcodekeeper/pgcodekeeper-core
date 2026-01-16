@@ -15,13 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import java.sql.*;
+
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.schema.PgFtsTemplate;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * Reader for PostgreSQL full-text search templates.

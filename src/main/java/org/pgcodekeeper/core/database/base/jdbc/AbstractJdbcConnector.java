@@ -15,15 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.jdbc;
 
-import org.pgcodekeeper.core.utils.Utils;
+import java.io.IOException;
+import java.sql.*;
+import java.util.Properties;
+
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.localizations.Messages;
-
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Properties;
+import org.pgcodekeeper.core.utils.Utils;
 
 /**
  * Abstract base class for JDBC database connectors.

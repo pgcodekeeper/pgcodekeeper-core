@@ -15,10 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import org.pgcodekeeper.core.database.api.schema.IPrivilege;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.pgcodekeeper.core.database.api.schema.IPrivilege;
 
 /**
  * Contains override information for database statements including owner and privileges.

@@ -15,16 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.ContextLocation;
-import org.pgcodekeeper.core.DangerStatement;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
-import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
-import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
-import org.pgcodekeeper.core.parsers.antlr.pg.statement.PgParserAbstract;
-
 import java.io.Serial;
 import java.util.Objects;
+
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.pgcodekeeper.core.*;
+import org.pgcodekeeper.core.database.base.parser.*;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
 
 /**
  * Represents the location of a database object in source code.

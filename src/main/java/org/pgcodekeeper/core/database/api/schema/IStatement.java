@@ -15,13 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
-import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
-import org.pgcodekeeper.core.script.SQLScript;
-import org.pgcodekeeper.core.settings.ISettings;
-
 import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
+
+import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
+import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.settings.ISettings;
 
 /**
  * Base interface for all database statements and objects.

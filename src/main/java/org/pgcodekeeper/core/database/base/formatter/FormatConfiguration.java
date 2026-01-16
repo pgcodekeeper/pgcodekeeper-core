@@ -15,10 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.formatter;
 
-import org.pgcodekeeper.core.database.api.formatter.IndentType;
-import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
-
 import java.util.Arrays;
+
+import org.pgcodekeeper.core.database.api.formatter.*;
 
 /**
  * Configuration class for SQL formatting options.

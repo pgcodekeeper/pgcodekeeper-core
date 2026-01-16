@@ -15,20 +15,25 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg;
 
-import org.antlr.v4.runtime.*;
+import java.io.IOException;
+
+import org.antlr.v4.runtime.ANTLRErrorStrategy;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.Parser;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.parser.PgCustomAntlrErrorStrategy;
+import org.pgcodekeeper.core.database.pg.parser.generated.*;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.loader.FullAnalyze;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.parsers.antlr.pg.CustomSQLAntlrErrorStrategy;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLLexer;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.io.IOException;
@@ -58,7 +63,7 @@ public class PgDatabaseProvider implements IDatabaseProvider {
 
     @Override
     public ANTLRErrorStrategy getErrorHandler() {
-        return new CustomSQLAntlrErrorStrategy();
+        return new PgCustomAntlrErrorStrategy();
     }
 
     @Override

@@ -15,13 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema.meta;
 
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.api.schema.IOperator;
-import org.pgcodekeeper.core.database.api.schema.ISchema;
-import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
-
 import java.io.Serial;
+
+import org.pgcodekeeper.core.database.api.schema.*;
 
 /**
  * Represents a database operator metadata object.

@@ -15,16 +15,15 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
+import java.sql.*;
+
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
+import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.pg.schema.PgFtsDictionary;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * Reader for PostgreSQL full-text search dictionaries.

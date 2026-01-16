@@ -15,25 +15,21 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
+import java.sql.*;
+import java.util.List;
+
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.ICast.CastContext;
+import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
+import org.pgcodekeeper.core.database.base.parser.QNameParser;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.base.QNameParser;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
-import org.pgcodekeeper.core.parsers.antlr.pg.statement.PgParserAbstract;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.api.schema.ICast.CastContext;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.pg.schema.PgCast;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
+import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.database.pg.schema.PgCast.CastMethod;
-import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
 
 /**
  * Reader for PostgreSQL casts.
@@ -54,6 +50,7 @@ public final class PgCastsReader extends PgAbstractJdbcReader {
         this.db = db;
     }
 
+    @Override
     protected void processResult(ResultSet res) throws SQLException {
         String source = res.getString("source");
         IPgJdbcReader.checkTypeValidity(source);

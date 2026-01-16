@@ -15,15 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.ISimpleColumnContainer;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
-import org.pgcodekeeper.core.database.base.schema.SimpleColumn;
-import org.pgcodekeeper.core.database.base.schema.StatementUtils;
-import org.pgcodekeeper.core.hasher.Hasher;
-
 import java.util.*;
+
+import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
  * PostgreSQL EXCLUDE constraint implementation.

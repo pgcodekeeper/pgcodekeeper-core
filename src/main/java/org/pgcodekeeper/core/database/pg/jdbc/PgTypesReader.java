@@ -15,22 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
+import java.sql.*;
+
 import org.pgcodekeeper.core.Consts.FUNC_SIGN;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.api.schema.ICompressOptionContainer;
-import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
-import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.pg.statement.CreateDomain;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.parser.launcher.PgVexAnalysisLauncher;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateDomain;
+import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Utils;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * Reader for PostgreSQL types and domains.
@@ -104,7 +101,7 @@ public final class PgTypesReader extends PgAbstractSearchPathJdbcReader {
         } else {
             loader.submitAntlrTask(def, p -> p.vex_eof().vex().get(0),
                     ctx -> dataBase.addAnalysisLauncher(
-                            new VexAnalysisLauncher(d, ctx, loader.getCurrentLocation())));
+                            new PgVexAnalysisLauncher(d, ctx, loader.getCurrentLocation())));
         }
 
         d.setDefaultValue(def);
@@ -124,7 +121,7 @@ public final class PgTypesReader extends PgAbstractSearchPathJdbcReader {
                 loader.submitAntlrTask(ADD_CONSTRAINT + definition + ';',
                         p -> p.sql().statement(0).schema_statement().schema_alter()
                                 .alter_domain_statement().dom_constraint,
-                        ctx -> CreateDomain.parseDomainConstraint(d, constrCheck, ctx, dataBase,
+                        ctx -> PgCreateDomain.parseDomainConstraint(d, constrCheck, ctx, dataBase,
                                 loader.getCurrentLocation(), settings));
 
                 d.addConstraint(constrCheck);

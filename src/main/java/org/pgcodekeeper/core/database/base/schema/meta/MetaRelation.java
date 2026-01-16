@@ -15,17 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema.meta;
 
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.api.schema.IRelation;
-import org.pgcodekeeper.core.database.api.schema.ISchema;
-import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
-import org.pgcodekeeper.core.utils.Pair;
-
 import java.io.Serial;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.utils.Pair;
 
 /**
  * Represents a database relation metadata object (table, view, sequence, etc.).

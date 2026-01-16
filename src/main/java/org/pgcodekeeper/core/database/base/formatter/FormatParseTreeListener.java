@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.formatter;
 
+import java.util.*;
+
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -22,9 +24,6 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pgcodekeeper.core.utils.Pair;
-
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Abstract base class for parse tree listeners that handle code formatting.

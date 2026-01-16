@@ -15,10 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
+import java.util.Objects;
+
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
-
-import java.util.Objects;
 
 /**
  * Abstract base class for database column definitions.

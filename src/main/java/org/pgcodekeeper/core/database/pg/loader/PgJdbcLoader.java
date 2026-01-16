@@ -15,39 +15,27 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.loader;
 
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractTable;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
-import org.pgcodekeeper.core.database.pg.jdbc.*;
-import org.pgcodekeeper.core.database.pg.schema.PgAbstractFunction;
-import org.pgcodekeeper.core.database.pg.schema.PgPrivilege;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
+import java.io.IOException;
+import java.sql.*;
+import java.util.*;
+import java.util.function.*;
+
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.loader.AbstractJdbcLoader;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.parser.*;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.jdbc.*;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser;
+import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Utils;
-
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * JDBC-based database schema loader for PostgreSQL databases.

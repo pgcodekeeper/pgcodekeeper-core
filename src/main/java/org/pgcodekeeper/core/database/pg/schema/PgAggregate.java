@@ -15,12 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.base.schema.AbstractFunction;
-import org.pgcodekeeper.core.database.base.schema.Argument;
-
 import java.util.Objects;
+
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
  * PostgreSQL aggregate function implementation.

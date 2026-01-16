@@ -15,19 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.pg.statement.CreateStatistics;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
-import org.pgcodekeeper.core.database.pg.schema.PgStatistics;
-import org.pgcodekeeper.core.utils.Pair;
+import java.sql.*;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateStatistics;
+import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.utils.Pair;
 
 /**
  * Reader for PostgreSQL extended statistics.
@@ -57,7 +54,7 @@ public final class PgStatisticsReader extends PgAbstractSearchPathJdbcReader {
         loader.submitAntlrTask(definition + ';',
                 p -> new Pair<>(p.sql().statement(0).schema_statement().schema_create()
                         .create_statistics_statement(), (CommonTokenStream) p.getTokenStream()),
-                pair -> new CreateStatistics(pair.getFirst(), (PgDatabase) schema.getDatabase(), pair.getSecond(),
+                pair -> new PgCreateStatistics(pair.getFirst(), (PgDatabase) schema.getDatabase(), pair.getSecond(),
                         loader.getSettings())
                         .parseStatistics(stat));
 

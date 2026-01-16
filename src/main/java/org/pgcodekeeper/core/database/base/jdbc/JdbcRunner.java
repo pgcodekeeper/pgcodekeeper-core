@@ -15,23 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.jdbc;
 
-import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
-import org.pgcodekeeper.core.utils.DaemonThreadFactory;
-import org.pgcodekeeper.core.reporter.IProgressReporter;
-import org.pgcodekeeper.core.loader.callables.QueriesBatchCallable;
-import org.pgcodekeeper.core.loader.callables.QueryCallable;
-import org.pgcodekeeper.core.loader.callables.ResultSetCallable;
-import org.pgcodekeeper.core.loader.callables.StatementCallable;
-import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.monitor.NullMonitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.sql.*;
 import java.util.List;
 import java.util.concurrent.*;
+
+import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.loader.callables.*;
+import org.pgcodekeeper.core.monitor.*;
+import org.pgcodekeeper.core.reporter.IProgressReporter;
+import org.pgcodekeeper.core.utils.DaemonThreadFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JDBC statement execution runner with progress monitoring and cancellation support.

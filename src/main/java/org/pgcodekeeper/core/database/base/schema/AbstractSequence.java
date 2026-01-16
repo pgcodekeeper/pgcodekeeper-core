@@ -15,18 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import org.pgcodekeeper.core.database.api.schema.IRelation;
-import org.pgcodekeeper.core.database.api.schema.ISearchPath;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
+import java.util.*;
+import java.util.stream.Stream;
+
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
 
 /**
  * Abstract base class for database sequences.

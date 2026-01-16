@@ -15,14 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.base.schema.Argument;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.script.SQLScript;
-
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.script.SQLScript;
 
 /**
  * Represents a ClickHouse user-defined function.

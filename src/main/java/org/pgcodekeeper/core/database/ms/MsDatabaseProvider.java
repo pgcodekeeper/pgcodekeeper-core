@@ -15,19 +15,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms;
 
+import java.io.IOException;
+
 import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.ms.jdbc.MsJdbcConnector;
 import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
+import org.pgcodekeeper.core.database.ms.parser.MsCustomAntlrErrorStrategy;
+import org.pgcodekeeper.core.database.ms.parser.generated.*;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.loader.FullAnalyze;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.parsers.antlr.ms.CustomTSQLAntlrErrorStrategy;
-import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLLexer;
-import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.io.IOException;
@@ -57,7 +58,7 @@ public class MsDatabaseProvider implements IDatabaseProvider {
 
     @Override
     public ANTLRErrorStrategy getErrorHandler() {
-        return new CustomTSQLAntlrErrorStrategy();
+        return new MsCustomAntlrErrorStrategy();
     }
 
     @Override

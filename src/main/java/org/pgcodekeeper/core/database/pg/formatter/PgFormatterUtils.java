@@ -15,10 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.formatter;
 
-import org.antlr.v4.runtime.Token;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLLexer;
-
 import java.util.List;
+
+import org.antlr.v4.runtime.Token;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLLexer;
 
 /**
  * Utility class containing PostgreSQL-specific formatting helper methods.

@@ -15,12 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema.meta;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.Argument;
-
 import java.io.Serial;
 import java.util.*;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.Argument;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 
 /**
  * Represents a database function metadata object.

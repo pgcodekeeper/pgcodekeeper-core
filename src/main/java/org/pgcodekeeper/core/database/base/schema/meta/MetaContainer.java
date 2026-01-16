@@ -15,11 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema.meta;
 
+import java.util.*;
+
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.ICast.CastContext;
 import org.pgcodekeeper.core.database.ch.schema.ChFunction;
-
-import java.util.*;
 
 /**
  * Container for database metadata objects organized by type and schema.

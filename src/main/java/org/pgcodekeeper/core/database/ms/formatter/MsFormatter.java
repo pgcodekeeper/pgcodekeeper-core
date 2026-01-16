@@ -15,12 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.formatter;
 
+import java.util.*;
+
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
 import org.pgcodekeeper.core.database.base.formatter.AbstractFormatter;
 import org.pgcodekeeper.core.database.base.formatter.FormatItem;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Microsoft SQL Server specific SQL formatter implementation.

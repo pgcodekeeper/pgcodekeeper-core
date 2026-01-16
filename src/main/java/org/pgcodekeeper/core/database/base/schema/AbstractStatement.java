@@ -15,21 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
+import java.util.*;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
+
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.exception.ObjectCreationException;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.hasher.IHashable;
-import org.pgcodekeeper.core.hasher.JavaHasher;
+import org.pgcodekeeper.core.hasher.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
-
-import java.util.*;
-import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
 
 /**
  * Abstract base class for all database statements and objects.

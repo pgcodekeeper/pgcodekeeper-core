@@ -15,10 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.formatter;
 
-import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
+import java.util.*;
 
-import java.util.Collections;
-import java.util.List;
+import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
 
 /**
  * Abstract base class for SQL formatter implementations.

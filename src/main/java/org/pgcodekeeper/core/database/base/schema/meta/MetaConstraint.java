@@ -15,14 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema.meta;
 
-import org.pgcodekeeper.core.database.api.schema.IConstraint;
-import org.pgcodekeeper.core.database.api.schema.ISchema;
-import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
-
 import java.io.Serial;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+
+import org.pgcodekeeper.core.database.api.schema.*;
 
 /**
  * Represents a database constraint metadata object.

@@ -19,17 +19,15 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
+import java.util.*;
+
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.utils.Utils;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.api.schema.ObjectState;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
-
-import java.util.List;
-import java.util.Objects;
+import org.pgcodekeeper.core.utils.Utils;
 
 /**
  * PostgreSQL index implementation.

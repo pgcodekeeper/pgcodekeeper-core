@@ -15,15 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import java.util.*;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 
 /**
  * Represents a PostgreSQL data type with schema qualification and array type handling.

@@ -15,22 +15,26 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch;
 
-import org.antlr.v4.runtime.*;
+import java.io.IOException;
+
+import org.antlr.v4.runtime.ANTLRErrorStrategy;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.Parser;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;
 import org.pgcodekeeper.core.database.ch.loader.ChJdbcLoader;
+import org.pgcodekeeper.core.database.ch.parser.ChCustomAntlrErrorStrategy;
+import org.pgcodekeeper.core.database.ch.parser.generated.*;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.loader.FullAnalyze;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.parsers.antlr.ch.CustomChSQLAntlrErrorStrategy;
-import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHLexer;
-import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser;
 import org.pgcodekeeper.core.settings.ISettings;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 public class ChDatabaseProvider implements IDatabaseProvider {
@@ -57,7 +61,7 @@ public class ChDatabaseProvider implements IDatabaseProvider {
 
     @Override
     public ANTLRErrorStrategy getErrorHandler() {
-        return new CustomChSQLAntlrErrorStrategy();
+        return new ChCustomAntlrErrorStrategy();
     }
 
     @Override

@@ -19,14 +19,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.sql.Keyword;
 import org.pgcodekeeper.core.sql.Keyword.KeywordCategory;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
 
 /**
  * Utility class for handling quoting and unquoting of identifiers and literals in PostgreSQL.

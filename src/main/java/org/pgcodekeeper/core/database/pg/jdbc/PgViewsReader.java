@@ -15,26 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
+import java.sql.*;
+
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
-import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.pg.launcher.ViewAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.pg.schema.PgAbstractView;
-import org.pgcodekeeper.core.database.pg.schema.PgMaterializedView;
-import org.pgcodekeeper.core.database.pg.schema.PgView;
+import org.pgcodekeeper.core.database.base.parser.AntlrUtils;
+import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.parser.launcher.*;
+import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.utils.Pair;
 import org.pgcodekeeper.core.utils.Utils;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * Reader for PostgreSQL views and materialized views.
@@ -94,7 +87,7 @@ public final class PgViewsReader extends PgAbstractSearchPathJdbcReader {
                         p.sql().statement(0).data_statement().select_stmt(),
                         (CommonTokenStream) p.getTokenStream()),
                 pair -> {
-                    dataBase.addAnalysisLauncher(new ViewAnalysisLauncher(
+                    dataBase.addAnalysisLauncher(new PgViewAnalysisLauncher(
                             v, pair.getFirst(), loader.getCurrentLocation()));
                     v.setQuery(query, AntlrUtils.normalizeWhitespaceUnquoted(
                             pair.getFirst(), pair.getSecond()));
@@ -115,7 +108,7 @@ public final class PgViewsReader extends PgAbstractSearchPathJdbcReader {
                     ((PgView) v).addColumnDefaultValue(colName, colDefault);
                     loader.submitAntlrTask(colDefault, p -> p.vex_eof().vex().get(0),
                             ctx -> dataBase.addAnalysisLauncher(
-                                    new VexAnalysisLauncher(v, ctx, loader.getCurrentLocation())));
+                                    new PgVexAnalysisLauncher(v, ctx, loader.getCurrentLocation())));
                 }
                 String colComment = colComments[i];
                 if (colComment != null) {

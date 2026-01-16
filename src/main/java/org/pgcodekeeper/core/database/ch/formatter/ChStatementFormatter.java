@@ -15,20 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.formatter;
 
+import java.util.*;
+
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
-import org.pgcodekeeper.core.database.base.formatter.FormatParseTreeListener;
-import org.pgcodekeeper.core.database.base.formatter.IndentDirection;
-import org.pgcodekeeper.core.database.base.formatter.StatementFormatter;
-import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
-import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHLexer;
-import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Select_stmtContext;
+import org.pgcodekeeper.core.database.base.formatter.*;
+import org.pgcodekeeper.core.database.base.parser.CodeUnitToken;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHLexer;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.Select_stmtContext;
 import org.pgcodekeeper.core.utils.Pair;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * ClickHouse-specific implementation of SQL statement formatting.

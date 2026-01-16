@@ -15,14 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.base.schema.AbstractType;
-import org.pgcodekeeper.core.database.api.schema.ICompressOptionContainer;
-import org.pgcodekeeper.core.script.SQLScript;
-
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractType;
+import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.script.SQLScript;
 
 /**
  * PostgreSQL base type implementation.
