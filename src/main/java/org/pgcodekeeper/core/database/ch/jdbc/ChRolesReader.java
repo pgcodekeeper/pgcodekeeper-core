@@ -15,16 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.jdbc;
 
-import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcReader;
-import org.pgcodekeeper.core.database.ch.loader.ChJdbcLoader;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
-import org.pgcodekeeper.core.database.ch.schema.ChRole;
+import java.sql.*;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.*;
+import org.pgcodekeeper.core.database.ch.loader.ChJdbcLoader;
+import org.pgcodekeeper.core.database.ch.schema.*;
 
 /**
  * Reader for ClickHouse roles.

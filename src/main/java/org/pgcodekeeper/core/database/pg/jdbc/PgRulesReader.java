@@ -15,17 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.pg.statement.CreateRule;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.api.schema.EventType;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.pg.schema.PgRule;
+import java.sql.*;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateRule;
+import org.pgcodekeeper.core.database.pg.schema.PgRule;
 
 /**
  * Reader for PostgreSQL rules.
@@ -93,7 +90,7 @@ public final class PgRulesReader extends PgAbstractSearchPathJdbcReader {
 
         loader.submitAntlrTask(command, p -> p.sql().statement(0)
                         .schema_statement().schema_create().create_rewrite_statement(),
-                ctx -> CreateRule.setConditionAndAddCommands(ctx, r,
+                ctx -> PgCreateRule.setConditionAndAddCommands(ctx, r,
                         schema.getDatabase(), loader.getCurrentLocation(), loader.getSettings()));
 
         loader.setAuthor(r, res);

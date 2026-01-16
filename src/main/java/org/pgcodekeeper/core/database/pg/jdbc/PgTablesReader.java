@@ -15,26 +15,21 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
+import java.sql.*;
+import java.util.*;
+
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
+import org.pgcodekeeper.core.database.base.parser.AntlrUtils;
+import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.parser.launcher.PgVexAnalysisLauncher;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgAlterTable;
 import org.pgcodekeeper.core.database.pg.schema.*;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
-import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
-import org.pgcodekeeper.core.parsers.antlr.pg.launcher.VexAnalysisLauncher;
-import org.pgcodekeeper.core.parsers.antlr.pg.statement.AlterTable;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.api.schema.ICompressOptionContainer;
-import org.pgcodekeeper.core.utils.Pair;
-import org.pgcodekeeper.core.utils.Utils;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import org.pgcodekeeper.core.utils.*;
 
 /**
  * Reader for PostgreSQL tables.
@@ -180,7 +175,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
                                 p.sql().statement(0).schema_statement().schema_alter().alter_table_statement()
                                         .alter_partition_gp(),
                                 (CommonTokenStream) p.getTokenStream()),
-                        pair -> AlterTable.parseGpPartitionTemplate(table, pair.getFirst(), pair.getSecond()));
+                        pair -> PgAlterTable.parseGpPartitionTemplate(table, pair.getFirst(), pair.getSecond()));
             }
         }
 
@@ -338,7 +333,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
                     column.setDefaultValue(columnDefault);
                     loader.submitAntlrTask(columnDefault, p -> p.vex_eof().vex().get(0),
                             ctx -> schema.getDatabase().addAnalysisLauncher(
-                                    new VexAnalysisLauncher(column, ctx, loader.getCurrentLocation())));
+                                    new PgVexAnalysisLauncher(column, ctx, loader.getCurrentLocation())));
                 }
             }
 

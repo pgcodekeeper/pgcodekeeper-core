@@ -19,16 +19,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.base.schema.AbstractSequence;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.api.schema.ObjectState;
-import org.pgcodekeeper.core.script.SQLActionType;
-import org.pgcodekeeper.core.script.SQLScript;
+import java.util.*;
 
-import java.util.Locale;
-import java.util.Objects;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractSequence;
+import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.script.*;
 
 /**
  * PostgreSQL sequence implementation.

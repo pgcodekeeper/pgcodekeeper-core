@@ -15,23 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.formatter;
 
+import java.util.*;
+
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
-import org.pgcodekeeper.core.database.base.formatter.AbstractFormatter;
-import org.pgcodekeeper.core.database.base.formatter.FormatConfiguration;
+import org.pgcodekeeper.core.database.base.formatter.*;
 import org.pgcodekeeper.core.database.base.formatter.FormatItem;
-import org.pgcodekeeper.core.database.base.formatter.StatementFormatter;
-import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
-import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHLexer;
-import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser;
-import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.Ddl_stmtContext;
-import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.QueryContext;
-import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.StmtContext;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.pgcodekeeper.core.database.base.parser.CodeUnitToken;
+import org.pgcodekeeper.core.database.ch.parser.generated.*;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
 
 /**
  * ClickHouse-specific SQL formatter implementation.

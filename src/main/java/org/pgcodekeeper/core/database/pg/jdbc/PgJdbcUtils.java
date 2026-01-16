@@ -15,11 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import org.pgcodekeeper.core.localizations.Messages;
+import java.sql.*;
 
-import java.sql.Array;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.pgcodekeeper.core.localizations.Messages;
 
 public final class PgJdbcUtils {
 

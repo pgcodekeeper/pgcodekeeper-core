@@ -15,12 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.UnaryOperator;
+
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 
 /**
  * Utility class providing common functionality for database statement operations.

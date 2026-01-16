@@ -15,9 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.api.schema.ISubElement;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 
 /**

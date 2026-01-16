@@ -15,13 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema.meta;
 
+import java.io.Serial;
+import java.util.*;
+
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.utils.Pair;
-
-import java.io.Serial;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Represents a PostgreSQL composite type metadata object.

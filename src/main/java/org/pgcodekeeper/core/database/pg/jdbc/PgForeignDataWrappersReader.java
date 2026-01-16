@@ -15,17 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
-import org.pgcodekeeper.core.parsers.antlr.pg.statement.CreateFdw;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
-import org.pgcodekeeper.core.database.pg.schema.PgForeignDataWrapper;
+import java.sql.*;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
+import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
+import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateFdw;
+import org.pgcodekeeper.core.database.pg.schema.*;
 
 /**
  * Reader for PostgreSQL foreign data wrappers.
@@ -54,12 +51,12 @@ public final class PgForeignDataWrappersReader extends PgAbstractJdbcReader{
 
         String fdwHandler = res.getString("fdwhandler");
         if (!"-".equals(fdwHandler)) {
-            setFunctionWithDep(PgForeignDataWrapper::setHandler, f, fdwHandler, CreateFdw.HANDLER_SIGNATURE);
+            setFunctionWithDep(PgForeignDataWrapper::setHandler, f, fdwHandler, PgCreateFdw.HANDLER_SIGNATURE);
         }
 
         String fdwValidator = res.getString("fdwvalidator");
         if (!"-".equals(fdwValidator)) {
-            setFunctionWithDep(PgForeignDataWrapper::setValidator, f, fdwValidator, CreateFdw.VALIDATOR_SIGNATURE);
+            setFunctionWithDep(PgForeignDataWrapper::setValidator, f, fdwValidator, PgCreateFdw.VALIDATOR_SIGNATURE);
         }
 
         String[] options = PgJdbcUtils.getColArray(res, "fdwoptions", true);

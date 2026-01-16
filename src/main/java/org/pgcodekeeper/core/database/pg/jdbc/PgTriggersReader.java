@@ -15,22 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
+import java.nio.charset.StandardCharsets;
+import java.sql.*;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.pg.statement.CreateTrigger;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatementContainer;
-import org.pgcodekeeper.core.database.pg.schema.PgAbstractTable;
-import org.pgcodekeeper.core.database.pg.schema.PgTrigger;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateTrigger;
+import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.database.pg.schema.PgTrigger.TgTypes;
-import org.pgcodekeeper.core.database.pg.schema.PgTriggerState;
-
-import java.nio.charset.StandardCharsets;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * Reader for PostgreSQL triggers.
@@ -171,7 +166,7 @@ public final class PgTriggersReader extends PgAbstractSearchPathJdbcReader {
         IPgJdbcReader.checkObjectValidity(definition, DbObjType.TRIGGER, triggerName);
         loader.submitAntlrTask(definition, p -> p.sql().statement(0).schema_statement()
                         .schema_create().create_trigger_statement().when_trigger(),
-                ctx -> CreateTrigger.parseWhen(ctx, t, schema.getDatabase(), loader.getCurrentLocation()));
+                ctx -> PgCreateTrigger.parseWhen(ctx, t, schema.getDatabase(), loader.getCurrentLocation()));
 
         loader.setAuthor(t, res);
         loader.setComment(t, res);

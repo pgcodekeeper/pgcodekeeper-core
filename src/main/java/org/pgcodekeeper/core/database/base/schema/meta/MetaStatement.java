@@ -15,17 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema.meta;
 
+import java.io.*;
+import java.util.Set;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
+
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Set;
-import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
 
 /**
  * Base class for all database metadata statement objects.

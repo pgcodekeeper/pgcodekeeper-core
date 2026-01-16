@@ -19,11 +19,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
+import java.util.*;
+
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
-
-import java.util.Collection;
-import java.util.Collections;
 
 /**
  * Abstract base class for database table constraints.

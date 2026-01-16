@@ -15,14 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.base.schema.AbstractFunction;
-import org.pgcodekeeper.core.database.api.schema.ArgMode;
-import org.pgcodekeeper.core.database.base.schema.Argument;
-
 import java.io.Serial;
 import java.util.*;
 import java.util.Map.Entry;
+
+import org.pgcodekeeper.core.database.api.schema.ArgMode;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
  * Base implementation of PostgreSQL functions and procedures.

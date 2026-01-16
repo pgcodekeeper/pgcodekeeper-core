@@ -15,18 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import org.pgcodekeeper.core.utils.Utils;
-import org.pgcodekeeper.core.database.api.schema.IOptionContainer;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
+import java.util.*;
+import java.util.stream.*;
+
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.Pair;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import org.pgcodekeeper.core.utils.*;
 
 /**
  * Abstract base class for database tables.

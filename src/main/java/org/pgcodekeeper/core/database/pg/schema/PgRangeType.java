@@ -15,11 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.base.schema.AbstractType;
-
 import java.util.Objects;
+
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractType;
+import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
  * PostgreSQL range type implementation.

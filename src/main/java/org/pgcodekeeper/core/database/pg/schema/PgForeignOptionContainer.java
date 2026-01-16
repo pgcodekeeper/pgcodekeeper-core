@@ -15,12 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
+import java.util.*;
+import java.util.Map.Entry;
+
 import org.pgcodekeeper.core.database.api.schema.IOptionContainer;
 import org.pgcodekeeper.core.script.SQLScript;
-
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
 
 /**
  * Interface for PostgreSQL objects that support foreign table options.

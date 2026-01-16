@@ -15,14 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.database.ch.ChDiffUtils;
+import java.util.function.UnaryOperator;
+
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.ch.formatter.ChFormatter;
 import org.pgcodekeeper.core.script.SQLScript;
-
-import java.util.function.UnaryOperator;
 
 /**
  * Interface for ClickHouse statement

@@ -15,25 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.jdbc;
 
-import org.pgcodekeeper.core.database.base.jdbc.AbstractSearchPathJdbcReader;
+import java.sql.*;
+import java.util.*;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.*;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
+import org.pgcodekeeper.core.database.ms.parser.launcher.MsExpressionAnalysisLauncher;
+import org.pgcodekeeper.core.database.ms.schema.*;
 import org.pgcodekeeper.core.exception.XmlReaderException;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.ms.launcher.MsExpressionAnalysisLauncher;
-import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.ms.schema.MsGeneratedType;
-import org.pgcodekeeper.core.database.ms.schema.MsColumn;
-import org.pgcodekeeper.core.database.ms.schema.MsTable;
-import org.pgcodekeeper.core.database.ms.schema.MsType;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * Reader for Microsoft SQL tables.

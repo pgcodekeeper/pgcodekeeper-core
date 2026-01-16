@@ -15,16 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
-import org.pgcodekeeper.core.database.base.schema.AbstractPolicy;
-import org.pgcodekeeper.core.database.api.schema.ObjectState;
-import org.pgcodekeeper.core.script.SQLScript;
+import java.util.*;
 
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.script.SQLScript;
 
 /**
  * Represents a ClickHouse row-level security policy.

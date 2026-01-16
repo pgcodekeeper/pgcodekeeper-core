@@ -15,23 +15,18 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.formatter;
 
+import java.util.*;
+
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.pgcodekeeper.core.database.base.formatter.FormatParseTreeListener;
-import org.pgcodekeeper.core.database.base.formatter.IndentDirection;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLLexer;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
-import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.SelectOps;
-import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.SelectStmt;
-import org.pgcodekeeper.core.parsers.antlr.pg.rulectx.Vex;
+import org.pgcodekeeper.core.database.base.formatter.*;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLLexer;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
+import org.pgcodekeeper.core.database.pg.parser.rulectx.*;
 import org.pgcodekeeper.core.utils.Pair;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * PostgreSQL-specific parse tree listener for SQL code formatting.
@@ -54,9 +49,9 @@ public class PgFormatParseTreeListener extends FormatParseTreeListener {
     @Override
     public void exitEveryRule(ParserRuleContext ctx) {
         if (ctx instanceof VexContext vexCtx) {
-            formatOperators(new Vex(vexCtx));
+            formatOperators(new PgVex(vexCtx));
         } else if (ctx instanceof Vex_bContext vexbCtx) {
-            formatOperators(new Vex(vexbCtx));
+            formatOperators(new PgVex(vexbCtx));
         } else if (ctx instanceof Function_blockContext funcBlockCtx) {
             formatFunctionBlock(funcBlockCtx);
         } else if (ctx instanceof Function_bodyContext funcBodyCtx) {
@@ -84,15 +79,15 @@ public class PgFormatParseTreeListener extends FormatParseTreeListener {
         } else if (ctx instanceof Exception_statementContext excCtx) {
             formatExceptionStatement(excCtx);
         } else if (ctx instanceof Select_stmt_no_parensContext selectNoParensCtx) {
-            formatSubselect(new SelectStmt(selectNoParensCtx));
+            formatSubselect(new PgSelectStmt(selectNoParensCtx));
         } else if (ctx instanceof Select_stmtContext selectCtx
                 && !(ctx.parent.parent.parent instanceof Function_statementContext)) {
             // non-top-level select, assume subselect
-            formatSubselect(new SelectStmt(selectCtx));
+            formatSubselect(new PgSelectStmt(selectCtx));
         } else if (ctx instanceof Select_opsContext selectOpsCtx) {
-            formatSelectOps(new SelectOps(selectOpsCtx));
+            formatSelectOps(new PgSelectOps(selectOpsCtx));
         } else if (ctx instanceof Select_ops_no_parensContext selectOpsNoParensCtx) {
-            formatSelectOps(new SelectOps(selectOpsNoParensCtx));
+            formatSelectOps(new PgSelectOps(selectOpsNoParensCtx));
         } else if (ctx instanceof After_opsContext) {
             putIndent(ctx.getStart(), IndentDirection.BLOCK_LINE);
         } else if (ctx instanceof StatementContext stCtx) {
@@ -104,7 +99,7 @@ public class PgFormatParseTreeListener extends FormatParseTreeListener {
         }
     }
 
-    private void formatOperators(Vex vex) {
+    private void formatOperators(PgVex vex) {
         TerminalNode node = vex.plus();
         if (node == null) {
             node = vex.minus();
@@ -214,7 +209,7 @@ public class PgFormatParseTreeListener extends FormatParseTreeListener {
         }
     }
 
-    private void formatSelectOps(SelectOps selectOps) {
+    private void formatSelectOps(PgSelectOps selectOps) {
         TerminalNode op = selectOps.union();
         if (op == null) {
             op = selectOps.except();
@@ -227,7 +222,7 @@ public class PgFormatParseTreeListener extends FormatParseTreeListener {
         }
     }
 
-    private void formatSubselect(SelectStmt select) {
+    private void formatSubselect(PgSelectStmt select) {
         // TODO improve sub/select formatting, make an option
         if (!isSelectComplex(select)) {
             return;
@@ -373,7 +368,7 @@ public class PgFormatParseTreeListener extends FormatParseTreeListener {
         putIndent(ctx.getStop(), IndentDirection.BLOCK_STOP);
     }
 
-    private boolean isSelectComplex(SelectStmt select) {
+    private boolean isSelectComplex(PgSelectStmt select) {
         ParserRuleContext ctx = select.getCtx();
         if (ctx.children.size() > 1) {
             // WITH or after_ops present

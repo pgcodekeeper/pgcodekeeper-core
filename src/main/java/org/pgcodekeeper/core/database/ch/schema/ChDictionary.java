@@ -15,15 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
+import java.util.*;
+import java.util.stream.Stream;
+
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.utils.Pair;
-
-import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * Represents a ClickHouse dictionary object.

@@ -15,19 +15,15 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema.meta;
 
+import java.util.*;
+import java.util.stream.Stream;
+
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
 import org.pgcodekeeper.core.database.pg.schema.PgCompositeType;
 import org.pgcodekeeper.core.utils.Pair;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * Utility class for creating and managing database metadata objects.

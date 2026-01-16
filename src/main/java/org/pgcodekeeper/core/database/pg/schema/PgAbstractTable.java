@@ -15,24 +15,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
+
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.ISchema;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.api.schema.ObjectState;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.script.SQLActionType;
-import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.script.*;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.Stream;
 
 /**
  * Base PostgreSQL table class providing common functionality for all PostgreSQL table types.

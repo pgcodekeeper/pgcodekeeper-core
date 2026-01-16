@@ -1,0 +1,45 @@
+/*******************************************************************************
+ * Copyright 2017-2026 TAXTELECOM, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+package org.pgcodekeeper.core.database.pg.parser.expr;
+
+import java.util.List;
+
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
+
+/**
+ * Parser for SQL statements with namespace support.
+ */
+public class PgSql extends PgAbstractStatements<SqlContext> {
+
+    protected PgSql(PgAbstractExpr parent) {
+        super(parent);
+    }
+
+    /**
+     * Creates a Sql parser with meta container.
+     *
+     * @param meta the meta container with schema information
+     */
+    public PgSql(MetaContainer meta) {
+        super(meta);
+    }
+
+    @Override
+    protected List<StatementContext> getStatements(SqlContext ctx) {
+        return ctx.statement();
+    }
+}

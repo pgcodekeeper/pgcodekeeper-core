@@ -16,8 +16,7 @@
 package org.pgcodekeeper.core.database.base.loader;
 
 import org.pgcodekeeper.core.database.api.loader.ILoader;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrTask;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrTaskManager;
+import org.pgcodekeeper.core.database.base.parser.*;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

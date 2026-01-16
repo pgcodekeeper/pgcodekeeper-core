@@ -15,12 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
+import java.util.Objects;
+
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
-
-import java.util.Objects;
+import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
  * PostgreSQL CHECK constraint implementation.

@@ -1,0 +1,1069 @@
+/*******************************************************************************
+ * Copyright 2017-2026 TAXTELECOM, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+package org.pgcodekeeper.core.database.pg.parser.expr;
+
+import java.util.*;
+
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.parser.QNameParser;
+import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
+import org.pgcodekeeper.core.database.pg.parser.rulectx.PgVex;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
+import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.utils.*;
+
+/**
+ * Parser for value expressions with namespace support.
+ */
+public final class PgValueExpr extends PgAbstractExpr {
+
+    private List<Pair<String, String>> returningTableColumns;
+
+    /**
+     * Creates a ValueExpr parser with meta container.
+     *
+     * @param meta the meta container with schema information
+     */
+    public PgValueExpr(MetaContainer meta) {
+        super(meta);
+    }
+
+    PgValueExpr(PgAbstractExpr parent) {
+        super(parent);
+    }
+
+    PgValueExpr(PgAbstractExpr parent, Set<ObjectLocation> depcies) {
+        super(parent, depcies);
+    }
+
+    /**
+     * Analyzes a value expression and returns its type information.
+     * <p>
+     * Alternative checks are ordered for performance according to their usage frequency in real code.
+     * Statistics gathered on the internal DB codebase as of 2019-10-16.
+     * Also note that some checks are constrained by the grammar to go before others.
+     * Otherwise, some alternatives would be mis-processed as a wrong kind.
+     */
+    public ModPair<String, String> analyze(PgVex vex) {
+        List<PgVex> operandVexs = vex.vex();
+        if (operandVexs.isEmpty()) {
+            Value_expression_primaryContext primary = vex.primary();
+            if (primary != null) {
+                return primary(primary);
+            }
+        }
+
+        List<ModPair<String, String>> operandsList = new ArrayList<>(operandVexs.size());
+        for (PgVex operand : operandVexs) {
+            operandsList.add(analyze(operand));
+        }
+
+        Data_typeContext dataType = vex.dataType();
+        if (dataType != null) {
+            cast(operandVexs.get(0), dataType);
+            ModPair<String, String> ret = operandsList.get(0);
+            ret.setSecond(ParserAbstract.getFullCtxText(dataType));
+            return ret;
+        }
+
+        if (vex.eq() != null || vex.and() != null) {
+            // BETWEEN is handled as AND, no separate processing required
+            return new ModPair<>(NONAME, IPgTypesSetManually.BOOLEAN);
+        }
+
+        OpContext op = vex.op();
+        String operator = null;
+        if (op != null || (operator = getOperatorToken(vex)) != null) {
+            return op(vex, operandsList, operator, op);
+        }
+
+        if (vex.leftParen() != null) {
+            if (vex.in() != null) {
+                Select_stmt_no_parensContext selectStmt = vex.selectStmt();
+                if (selectStmt != null) {
+                    new PgSelect(this).analyze(selectStmt);
+                }
+                return new ModPair<>(NONAME, IPgTypesSetManually.BOOLEAN);
+            }
+
+            Type_listContext typeList = vex.typeList();
+            if (typeList != null) {
+                for (Data_typeContext type : typeList.data_type()) {
+                    addTypeDepcy(type);
+                }
+                return new ModPair<>(NONAME, IPgTypesSetManually.BOOLEAN);
+            }
+
+            if (operandsList.size() == 1) {
+                ModPair<String, String> ret = operandsList.get(0);
+                Indirection_listContext indir = vex.indirectionList();
+                if (indir != null) {
+                    indirection(indir.indirection(), ret);
+                    if (indir.MULTIPLY() != null) {
+                        ret = new ModPair<>(NONAME, IPgTypesSetManually.QUALIFIED_ASTERISK);
+                    }
+                }
+                return ret;
+            }
+            // TODO add record type placeholder?
+            return new ModPair<>("row", IPgTypesSetManually.UNKNOWN);
+        }
+
+        if (vex.is() != null
+                || vex.or() != null
+                || vex.notEqual() != null
+                || vex.gth() != null
+                || vex.lth() != null
+                || vex.geq() != null
+                || vex.leq() != null
+                || vex.like() != null
+                || vex.ilike() != null
+                || vex.similar() != null
+                || vex.isNull() != null
+                || vex.not() != null
+                || vex.notNull() != null) {
+            // check IS after "OF ( type_list )"
+            // check unary NOT after all NOT-containing alternatives
+            return new ModPair<>(NONAME, IPgTypesSetManually.BOOLEAN);
+        }
+
+        if (vex.collateIdentifier() != null) {
+            var collationCtx = vex.collateIdentifier().collation;
+            var ids = PgParserAbstract.getIdentifiers(collationCtx);
+            addDepcy(ids, DbObjType.COLLATION, collationCtx.getStart());
+            return operandsList.get(0);
+        }
+
+        if (vex.timeZone() != null) {
+            return operandsList.get(0);
+        }
+
+        log(vex.getVexCtx(), Messages.ValueExpr_log_no_vex_alternative);
+        return new ModPair<>(NONAME, IPgTypesSetManually.UNKNOWN);
+    }
+
+    private void cast(PgVex operand, Data_typeContext dataType) {
+        addTypeDepcy(dataType);
+        Schema_qualified_name_nontypeContext customType = dataType.predefined_type().schema_qualified_name_nontype();
+        IdentifierContext typeSchema = customType == null ? null : customType.identifier();
+        // TODO remove when tokens are refactored
+        if (customType != null && (typeSchema == null || Consts.PG_CATALOG.equals(typeSchema.getText()))
+                && dataType.ARRAY() == null && dataType.array_type().isEmpty() && dataType.SETOF() == null) {
+            // check simple built-in types for reg*** casts
+            Value_expression_primaryContext castPrimary = operand.primary();
+            if (castPrimary == null) {
+                return;
+            }
+            Expr_constContext exprConst = castPrimary.expr_const();
+            if (exprConst == null) {
+                return;
+            }
+
+            SconstContext stringConst = exprConst.sconst();
+            if (stringConst != null) {
+                regCast(stringConst, customType.getText());
+            }
+        }
+    }
+
+    private ModPair<String, String> op(PgVex vex, List<ModPair<String, String>> operandsList,
+                                       String operator, OpContext op) {
+        String schema = Consts.PG_CATALOG;
+        ParserRuleContext ctx = null;
+        if (op != null) {
+            IdentifierContext opSchemaCtx = op.identifier();
+            if (opSchemaCtx == null) {
+                ctx = op.op_chars();
+            } else {
+                schema = opSchemaCtx.getText();
+                addDependency(new GenericColumn(schema, DbObjType.SCHEMA), opSchemaCtx);
+                ctx = op.all_simple_op();
+            }
+            operator = ctx.getText();
+        }
+
+        String larg = null;
+        String rarg = null;
+        if (operandsList.size() == 2) {
+            larg = operandsList.get(0).getSecond();
+            rarg = operandsList.get(1).getSecond();
+        } else if (op == null || vex.getVexCtx().getChild(0) instanceof OpContext) {
+            rarg = operandsList.get(0).getSecond();
+        } else {
+            larg = operandsList.get(0).getSecond();
+        }
+        IOperator resultOperFunction = resolveOperatorsCall(operator, larg, rarg,
+                availableOperators(schema));
+
+        if (resultOperFunction != null) {
+            addDependency(new GenericColumn(resultOperFunction.getSchemaName(),
+                    resultOperFunction.getName(), DbObjType.OPERATOR), ctx);
+
+            String returns = resultOperFunction.getReturns();
+            if (returns == null) {
+                returns = IPgTypesSetManually.FUNCTION_COLUMN;
+            }
+
+            return new ModPair<>(NONAME, returns);
+        }
+
+        return new ModPair<>(NONAME, IPgTypesSetManually.FUNCTION_COLUMN);
+    }
+
+    /*
+        Usage frequency in internal DB codebase.
+        coercion            54
+        asterisk           306
+        array              392
+        compmod            399
+        select             516
+        exists             551
+        case              2281
+        NULL              5507
+        function         25665
+        unsigned         39816
+        indirection     117397
+     */
+    private ModPair<String, String> primary(Value_expression_primaryContext primary) {
+        ModPair<String, String> ret;
+        Indirection_varContext indirection = primary.indirection_var();
+        Expr_constContext unsignedValue;
+        Select_stmt_no_parensContext subSelectStmt;
+        Case_expressionContext caseExpr;
+        Comparison_modContext compMod;
+        Table_subqueryContext subquery;
+        Function_callContext function;
+        Array_expressionContext array;
+        Type_coercionContext typeCoercion;
+        Datetime_overlapsContext overlaps;
+
+        if (indirection != null) {
+            ret = indirectionVar(indirection);
+        } else if ((unsignedValue = primary.expr_const()) != null) {
+            ret = new ModPair<>(NONAME, literal(unsignedValue));
+        } else if ((function = primary.function_call()) != null) {
+            ret = function(function);
+        } else if (primary.NULL() != null) {
+            ret = new ModPair<>(NONAME, IPgTypesSetManually.ANYTYPE);
+        } else if ((caseExpr = primary.case_expression()) != null) {
+            ret = null;
+            for (VexContext v : caseExpr.vex()) {
+                // we need the Pair of the last expression (ELSE)
+                ret = analyze(new PgVex(v));
+            }
+            if (ret != null && (ret.getFirst() == null || caseExpr.ELSE() == null)) {
+                // CASE inherits its name only from the ELSE expression
+                // if it is missing or doesn't carry any name, the name becomes "case"
+                ret.setFirst("case");
+            }
+        } else if ((subquery = primary.table_subquery()) != null) {
+            new PgSelect(this).analyze(subquery.select_stmt());
+            ret = new ModPair<>("exists", IPgTypesSetManually.BOOLEAN);
+        } else if ((subSelectStmt = primary.select_stmt_no_parens()) != null) {
+            PgSelect select = new PgSelect(this);
+            ret = getSubselectColumn(select.analyze(subSelectStmt));
+            Indirection_listContext indir = primary.indirection_list();
+            if (indir != null) {
+                indirection(indir.indirection(), ret);
+                if (indir.MULTIPLY() != null) {
+                    ret = new ModPair<>(NONAME, IPgTypesSetManually.QUALIFIED_ASTERISK);
+                }
+            }
+        } else if ((compMod = primary.comparison_mod()) != null) {
+            // type doesn't matter since this is not a real expression
+            // this is always an operand of comparison operator, which will reset the type
+            ret = new ModPair<>(NONAME, IPgTypesSetManually.UNKNOWN);
+            VexContext compModVex = compMod.vex();
+            if (compModVex != null) {
+                analyze(new PgVex(compModVex));
+            } else {
+                new PgSelect(this).analyze(compMod.select_stmt_no_parens());
+            }
+        } else if ((array = primary.array_expression()) != null) {
+            Array_elementsContext elements = array.array_elements();
+            if (elements != null) {
+                ret = arrayElements(elements);
+            } else {
+                PgSelect select = new PgSelect(this);
+                ret = getSubselectColumn(select.analyze(array.table_subquery().select_stmt()));
+            }
+            ret.setFirst("array");
+            ret.setSecond(ret.getSecond() + "[]");
+        } else if (primary.MULTIPLY() != null) {
+            // handled in Select analyzer
+            ret = new ModPair<>(NONAME, IPgTypesSetManually.QUALIFIED_ASTERISK);
+        } else if ((typeCoercion = primary.type_coercion()) != null) {
+            String type;
+            if (typeCoercion.INTERVAL() != null) {
+                type = "interval";
+            } else {
+                Data_typeContext coercionDataType = typeCoercion.data_type();
+                addTypeDepcy(coercionDataType);
+                type = PgParserAbstract.getTypeName(coercionDataType);
+            }
+            // since this cast can only convert string literals into a type
+            // column name here will always be derived from type name
+            ret = new ModPair<>(type, type);
+        } else if ((overlaps = primary.datetime_overlaps()) != null) {
+            for (VexContext v : overlaps.vex()) {
+                analyze(new PgVex(v));
+            }
+            ret = new ModPair<>("overlaps", IPgTypesSetManually.BOOLEAN);
+        } else {
+            log(primary, Messages.ValueExpr_log_no_primary_alternative);
+            ret = new ModPair<>(NONAME, IPgTypesSetManually.UNKNOWN);
+        }
+        return ret;
+    }
+
+    private ModPair<String, String> getSubselectColumn(
+            List<ModPair<String, String>> list) {
+        if (list.isEmpty()) {
+            log(Messages.ValueExpr_log_subselect_empty);
+            return new ModPair<>(NONAME, IPgTypesSetManually.UNKNOWN);
+        }
+        return list.get(0);
+    }
+
+    private ModPair<String, String> indirectionVar(Indirection_varContext indirection) {
+        ParserRuleContext id = indirection.identifier();
+        if (id == null) {
+            id = indirection.dollar_number();
+        }
+
+        Indirection_listContext indirList = indirection.indirection_list();
+        if (indirList == null) {
+            return processTablelessColumn(id);
+        }
+
+        List<IndirectionContext> indir = indirList.indirection();
+        if (indirList.MULTIPLY() != null) {
+            indirection(indir, null);
+            return new ModPair<>(NONAME, IPgTypesSetManually.QUALIFIED_ASTERISK);
+        }
+        /*
+        String columnName = id.getText();
+        String columnParent = null;
+        String schemaName = null;
+        int i = 0;
+        for (; i < indir.size(); ++i) {
+            switch (i) {
+
+            }
+        }
+         */
+        // reserve space for longest-yet-still-common case
+        // this list has minimal size of 1, may as well reserve 3
+        List<ParserRuleContext> ids = new ArrayList<>(3);
+        ids.add(id);
+
+        for (IndirectionContext ind : indir) {
+            Col_labelContext label = ind.col_label();
+            if (label == null) {
+                break;
+            }
+            ids.add(label);
+        }
+
+        ModPair<String, String> ret;
+        if (ids.size() > 3) {
+            log(indirection, Messages.ValueExpr_log_long_indirection);
+            ret = new ModPair<>(NONAME, IPgTypesSetManually.UNKNOWN);
+        } else {
+            ret = processColumn(ids);
+        }
+
+        int consumedIndirs = ids.size() - 1;
+        if (consumedIndirs != indir.size()) {
+            indirection(indir.subList(consumedIndirs, indir.size()), ret);
+        }
+
+        return ret;
+    }
+
+    /**
+     * @param left signature of the expression on which the indirection is executed <br>
+     *             modified by each step in indirection analysis <br>
+     *             may be null if indirection result is not interesting (e.g. predetermined)
+     */
+    private void indirection(List<IndirectionContext> indirection, ModPair<String, String> left) {
+        for (IndirectionContext ind : indirection) {
+            if (ind.LEFT_BRACKET() != null) {
+                for (VexContext v : ind.vex()) {
+                    analyze(new PgVex(v));
+                }
+                if (left != null) {
+                    left.setSecond(stripBrackets(left.getSecond()));
+                }
+            } else if (left != null) {
+                var compositeName = left.getSecond().split("\\.");
+
+                if (compositeName.length == 2) {
+                    var composite = findType(compositeName[0], compositeName[1]);
+                    if (composite != null) {
+                        var attrName = ind.col_label().getText();
+                        var type = composite.getAttrType(attrName);
+                        if (type != null) {
+                            left.setFirst(attrName);
+                            left.setSecond(type);
+                            continue;
+                        }
+                    }
+                }
+
+                left.setFirst(null);
+                left.setSecond(IPgTypesSetManually.UNKNOWN);
+            }
+        }
+    }
+
+    private ModPair<String, String> arrayElements(Array_elementsContext elements) {
+        ModPair<String, String> ret = null;
+        for (Array_elementsContext sub : elements.array_elements()) {
+            ret = arrayElements(sub);
+        }
+
+        for (VexContext vex : elements.vex()) {
+            ret = analyze(new PgVex(vex));
+        }
+
+        return ret != null ? ret : new ModPair<>(NONAME, IPgTypesSetManually.UNKNOWN);
+    }
+
+    /**
+     * Analyzes a function call and returns its type information.
+     *
+     * @param function the function call context to analyze
+     * @return pair containing the function name and return type
+     */
+    public ModPair<String, String> function(Function_callContext function) {
+        Schema_qualified_name_nontypeContext funcNameCtx = function.schema_qualified_name_nontype();
+        if (funcNameCtx == null) {
+            return functionSpecial(function);
+        }
+
+        for (Orderby_clauseContext orderBy : function.orderby_clause()) {
+            orderBy(orderBy);
+        }
+        Filter_clauseContext filter = function.filter_clause();
+        if (filter != null) {
+            analyze(new PgVex(filter.vex()));
+        }
+        Window_definitionContext window = function.window_definition();
+        if (window != null) {
+            window(window);
+        }
+
+        String schemaName = null;
+        List<ParserRuleContext> ids = PgParserAbstract.getIdentifiers(funcNameCtx);
+        String functionName = QNameParser.getFirstName(ids);
+
+        ParserRuleContext id = QNameParser.getSchemaNameCtx(ids);
+        if (id != null) {
+            schemaName = id.getText();
+            addDependency(new GenericColumn(schemaName, DbObjType.SCHEMA), id);
+        }
+
+        List<Vex_or_named_notationContext> args = function.vex_or_named_notation();
+
+        // all sequential args go before named args
+        // so we can ignore the order of latter and collect them into a map
+        List<String> argsType = new ArrayList<>(args.size());
+        Map<String, String> argsName = new HashMap<>();
+        for (Vex_or_named_notationContext arg : args) {
+            String argType = analyze(new PgVex(arg.vex())).getSecond();
+            // strip once before calling resolveCall
+            argType = stripParens(argType);
+
+            IdentifierContext argnameCtx = arg.identifier();
+            if (argnameCtx != null) {
+                String argname = argnameCtx.getText();
+                if (argsName.put(argname, argType) != null) {
+                    log(argnameCtx, Messages.ValueExpr_log_duplicate_named_arg, argname);
+                }
+            } else {
+                argsType.add(argType);
+            }
+        }
+
+        Collection<IFunction> functions = availableFunctions(schemaName);
+
+        if (args.size() == 1 && argsType.size() == 1
+                && IPgTypesSetManually.QUALIFIED_ASTERISK.equals(argsType.get(0))) {
+            //// In this case function's argument is '*' or 'source.*'.
+
+            IFunction func = null;
+            for (IFunction f : functions) {
+                if (f.getArguments().size() == 1
+                        && f.getArguments().get(0).getMode().isIn()
+                        && f.getBareName().equals(functionName)) {
+                    if (func != null) {
+                        // ambiguous call
+                        func = null;
+                        break;
+                    }
+                    func = f;
+                }
+            }
+
+            return new ModPair<>(functionName, func != null ?
+                    getFunctionReturns(func) : IPgTypesSetManually.FUNCTION_COLUMN);
+        }
+
+        IFunction resultFunction = resolveCall(functionName, argsType, argsName, functions);
+        if (resultFunction != null) {
+            addFunctionDepcy(resultFunction, QNameParser.getFirstNameCtx(ids));
+            return new ModPair<>(functionName, getFunctionReturns(resultFunction));
+        }
+
+        return new ModPair<>(functionName, IPgTypesSetManually.FUNCTION_COLUMN);
+    }
+
+    private ModPair<String, String> functionSpecial(Function_callContext function) {
+        ModPair<String, String> ret;
+        List<VexContext> args = null;
+
+        Extract_functionContext extract;
+        System_functionContext system;
+        Date_time_functionContext datetime;
+        String_value_functionContext string;
+        Xml_functionContext xml;
+        Json_functionContext json;
+        Function_constructContext con;
+        Merge_support_functionContext mer;
+
+        if ((extract = function.extract_function()) != null) {
+            analyze(new PgVex(extract.vex()));
+            // parser defines this as a call to an overload of pg_catalog.date_part
+            ret = new ModPair<>("date_part", IPgTypesSetManually.DOUBLE);
+        } else if ((system = function.system_function()) != null) {
+            Cast_specificationContext cast = system.cast_specification();
+            if (cast != null) {
+                ret = analyze(new PgVex(cast.vex()));
+                Data_typeContext dataTypeCtx = cast.data_type();
+                ret.setSecond(PgParserAbstract.getTypeName(dataTypeCtx));
+                addTypeDepcy(dataTypeCtx);
+            } else {
+                ret = new ModPair<>(system.USER() != null ? "current_user"
+                        : system.getChild(0).getText().toLowerCase(Locale.ROOT),
+                        IPgTypesSetManually.NAME);
+            }
+        } else if ((datetime = function.date_time_function()) != null) {
+            ret = analyzeDate(datetime);
+        } else if ((string = function.string_value_function()) != null) {
+            args = string.vex();
+            ret = analyzeString(string);
+        } else if ((xml = function.xml_function()) != null) {
+            args = xml.vex();
+            ret = analyzeXml(args, xml);
+        } else if ((json = function.json_function()) != null) {
+            args = new ArrayList<>();
+            ret = analyzeJson(args, json);
+        } else if ((mer = function.merge_support_function()) != null) {
+            String colname = mer.getChild(0).getText().toLowerCase(Locale.ROOT);
+            ret = new ModPair<>(colname, IPgTypesSetManually.TEXT);
+        } else if ((con = function.function_construct()) != null) {
+            args = con.vex();
+
+            String colname = con.getChild(0).getText().toLowerCase(Locale.ROOT);
+            String coltype;
+            if (con.XMLCONCAT() != null) {
+                coltype = IPgTypesSetManually.XML;
+            } else if (con.ROW() != null) {
+                coltype = IPgTypesSetManually.UNKNOWN;
+            } else if (con.GROUPING() != null) {
+                coltype = IPgTypesSetManually.INTEGER;
+            } else {
+                VexContext vex = args.get(0);
+                args = args.subList(1, args.size());
+                coltype = analyze(new PgVex(vex)).getSecond();
+            }
+            ret = new ModPair<>(colname, coltype);
+        } else {
+            log(function, Messages.ValueExpr_log_no_function_special_alternative);
+            ret = new ModPair<>(NONAME, IPgTypesSetManually.UNKNOWN);
+        }
+
+        if (args != null) {
+            for (VexContext arg : args) {
+                analyze(new PgVex(arg));
+            }
+        }
+        return ret;
+    }
+
+    private ModPair<String, String> analyzeString(String_value_functionContext string) {
+        Vex_bContext vexB = string.vex_b();
+        if (vexB != null) {
+            analyze(new PgVex(vexB));
+        }
+
+        String colname = string.getChild(0).getText().toLowerCase(Locale.ROOT);
+        String coltype = IPgTypesSetManually.TEXT;
+        if (string.TRIM() != null) {
+            if (string.LEADING() != null) {
+                colname = "ltrim";
+            } else if (string.TRAILING() != null) {
+                colname = "rtrim";
+            } else {
+                colname = "btrim";
+            }
+        } else if (string.POSITION() != null) {
+            coltype = IPgTypesSetManually.INTEGER;
+        }
+
+        return new ModPair<>(colname, coltype);
+    }
+
+    private ModPair<String, String> analyzeXml(List<VexContext> args, Xml_functionContext xml) {
+        String coltype = IPgTypesSetManually.XML;
+        if (xml.XMLEXISTS() != null) {
+            coltype = IPgTypesSetManually.BOOLEAN;
+        } else if (xml.XMLSERIALIZE() != null) {
+            Data_typeContext type = xml.data_type();
+            coltype = PgParserAbstract.getTypeName(type);
+            addTypeDepcy(type);
+        } else if (xml.XMLTABLE() != null) {
+            for (Xml_table_columnContext col : xml.xml_table_column()) {
+                args.addAll(col.vex());
+                Data_typeContext type = col.data_type();
+                if (type != null) {
+                    addTypeDepcy(col.data_type());
+                }
+            }
+            coltype = IPgTypesSetManually.FUNCTION_TABLE;
+        }
+
+        String colname = xml.getChild(0).getText().toLowerCase(Locale.ROOT);
+        return new ModPair<>(colname, coltype);
+    }
+
+    private ModPair<String, String> analyzeDate(Date_time_functionContext datetime) {
+        String colname;
+        String coltype;
+        if (datetime.CURRENT_DATE() != null) {
+            colname = "date";
+            coltype = IPgTypesSetManually.DATE;
+        } else if (datetime.CURRENT_TIME() != null) {
+            colname = "timetz";
+            coltype = IPgTypesSetManually.TIMETZ;
+        } else if (datetime.CURRENT_TIMESTAMP() != null) {
+            colname = "now";
+            coltype = IPgTypesSetManually.TIMESTAMPTZ;
+        } else if (datetime.LOCALTIME() != null) {
+            colname = "time";
+            coltype = IPgTypesSetManually.TIME;
+        } else if (datetime.LOCALTIMESTAMP() != null) {
+            colname = "timestamp";
+            coltype = IPgTypesSetManually.TIMESTAMP;
+        } else {
+            log(datetime, Messages.ValueExpr_log_no_datetime_alternative);
+            colname = NONAME;
+            coltype = IPgTypesSetManually.UNKNOWN;
+        }
+        return new ModPair<>(colname, coltype);
+    }
+
+    private ModPair<String, String> analyzeJson(List<VexContext> args, Json_functionContext json) {
+        Json_return_clauseContext retClause = json.json_return_clause();
+        if (retClause == null && json.json_object_content() != null) {
+            retClause = json.json_object_content().json_return_clause();
+        }
+
+        String coltype = IPgTypesSetManually.JSON;
+        if (retClause != null) {
+            Data_typeContext type = retClause.data_type();
+            coltype = PgParserAbstract.getTypeName(type);
+            addTypeDepcy(type);
+        } else if (json.JSON_ARRAY() != null || json.JSON_ARRAYAGG() != null) {
+            coltype = IPgTypesSetManually.JSON + "[]";
+        } else if (json.JSON_EXISTS() != null) {
+            coltype = IPgTypesSetManually.BOOLEAN;
+        } else if (json.JSON_QUERY() != null) {
+            coltype = IPgTypesSetManually.JSONB;
+        } else if (json.JSON_VALUE() != null) {
+            coltype = IPgTypesSetManually.TEXT;
+        } else if (json.JSON_SERIALIZE() != null) {
+            coltype = IPgTypesSetManually.TEXT;
+        } else if (json.JSON_TABLE() != null) {
+            analyzeJsonColumns(args, json.json_columns());
+            coltype = IPgTypesSetManually.FUNCTION_TABLE;
+        } else if (json.JSON_SCALAR() != null) {
+            var inputType = analyze(new PgVex(json.vex())).getSecond();
+            if (IPgTypesSetManually.BOOLEAN.equals(inputType)) {
+                coltype = IPgTypesSetManually.BOOLEAN;
+            } else if (IPgTypesSetManually.TEXT.equals(inputType)) {
+                coltype = IPgTypesSetManually.TEXT;
+            }
+        }
+
+        var array = json.json_array_element();
+        if (array != null) {
+            var select = array.select_stmt_no_parens();
+            if (select != null) {
+                new PgSelect(this).analyze(select);
+            }
+        }
+
+        var vex = json.vex();
+        if (vex != null) {
+            args.add(vex);
+        }
+
+        String colname = json.getChild(0).getText().toLowerCase(Locale.ROOT);
+        return new ModPair<>(colname, coltype);
+    }
+
+    private void analyzeJsonColumns(List<VexContext> args, Json_columnsContext columns) {
+        for (var col : columns.json_table_column()) {
+            if (col.NESTED() == null) {
+                args.add(col.vex());
+                Data_typeContext type = col.data_type();
+                if (type != null) {
+                    addTypeDepcy(col.data_type());
+                }
+            } else {
+                analyzeJsonColumns(args, col.json_columns());
+            }
+        }
+    }
+
+    /**
+     * @param functionName       called function bare name
+     * @param sourceTypes        call sequential argument types
+     * @param sourceNames        call named argument types (Name => Type map)
+     * @param availableFunctions functions from applicable schemas
+     * @return most suitable function to call or null,
+     * if none were found or an ambiguity was detected
+     */
+    private IFunction resolveCall(String functionName, List<String> sourceTypes,
+                                  Map<String, String> sourceNames, Collection<? extends IFunction> availableFunctions) {
+        // save each applicable function with the number of exact type matches
+        // between input args and function parameters
+        // function that has more exact matches (less casts) wins
+        List<Pair<IFunction, Integer>> matches = new ArrayList<>();
+        for (IFunction f : availableFunctions) {
+            if (!f.getBareName().equals(functionName)) {
+                continue;
+            }
+
+            int argN = 0;
+            int namedArgN = 0;
+            int exactMatches = 0;
+            boolean signatureApplicable = true;
+            for (IArgument arg : f.getArguments()) {
+                if (!arg.getMode().isIn()) {
+                    continue;
+                }
+
+                String sourceType = null;
+                boolean hasNamedArg = namedArgN < sourceNames.size();
+                if (argN < sourceTypes.size()) {
+                    sourceType = sourceTypes.get(argN);
+                    ++argN;
+                } else if (hasNamedArg) {
+                    sourceType = sourceNames.get(arg.getName());
+                    if (sourceType != null) {
+                        ++namedArgN;
+                    }
+                }
+
+                if (sourceType == null) {
+                    // supplied fewer arguments than function requires
+                    // current (unsatisfied) parameter having a default value
+                    // means that all the rest of parameters will also have default values
+                    // because of ordering imposed by the standard
+                    // thus, the function is applicable if the first unsatisfied parameter
+                    // has a default value, and otherwise it is not
+                    signatureApplicable = arg.getDefaultExpression() != null;
+                    if (!signatureApplicable || !hasNamedArg) {
+                        break;
+                    }
+                    // continue checking if more named (out-of-order) args are available
+                    continue;
+                }
+
+                var type = arg.getDataType();
+                String argDataType = "\"any\"".equalsIgnoreCase(type) ? IPgTypesSetManually.ANY : type;
+                if (sourceType.equals(argDataType)) {
+                    ++exactMatches;
+                } else if (!typesMatch(sourceType, argDataType)) {
+                    signatureApplicable = false;
+                    break;
+                }
+            }
+            if (signatureApplicable) {
+                if (exactMatches == (argN + namedArgN) && argN == sourceTypes.size()
+                        && namedArgN == sourceNames.size()) {
+                    // all args matched types exactly with no casts
+                    // fast path for exact signature match
+                    return f;
+                }
+                matches.add(new Pair<>(f, exactMatches));
+            }
+        }
+
+        if (matches.isEmpty()) {
+            return null;
+        }
+        return Collections.max(matches, Comparator.comparing(Pair::getSecond))
+                .getFirst();
+    }
+
+    private IOperator resolveOperatorsCall(String operatorName, String left, String right,
+                                           Collection<IOperator> availableOperators) {
+        // save each applicable operators with the number of exact type matches
+        // between input args and operator parameters
+        // function that has more exact matches (less casts) wins
+
+        left = convertType(left);
+        right = convertType(right);
+
+        List<Pair<IOperator, Integer>> matches = new ArrayList<>();
+        for (IOperator oper : availableOperators) {
+            if (!oper.getBareName().equals(operatorName)) {
+                continue;
+            }
+            int exactMatches = 0;
+            String leftArg = oper.getLeftArg();
+            String rightArg = oper.getRightArg();
+
+            if (Objects.equals(leftArg, left)) {
+                ++exactMatches;
+            } else if (leftArg == null || left == null || !typesMatch(left, leftArg)) {
+                continue;
+            }
+
+            if (Objects.equals(rightArg, right)) {
+                ++exactMatches;
+            } else if (rightArg == null || right == null || !typesMatch(right, rightArg)) {
+                continue;
+            }
+
+            if (exactMatches == 2) {
+                // fast path for exact signature match
+                return oper;
+            }
+
+            matches.add(new Pair<>(oper, exactMatches));
+        }
+
+        if (matches.isEmpty()) {
+            return null;
+        }
+
+        return Collections.max(matches, Comparator.comparingInt(Pair::getSecond))
+                .getFirst();
+
+    }
+
+    private String convertType(String arg) {
+        if (arg == null) {
+            return null;
+        }
+        arg = arg.toLowerCase(Locale.ROOT);
+
+        arg = switch (arg) {
+            case IPgTypesSetManually.SERIAL -> IPgTypesSetManually.INTEGER;
+            case IPgTypesSetManually.SMALLSERIAL -> IPgTypesSetManually.SMALLINT;
+            case IPgTypesSetManually.BIGSERIAL -> IPgTypesSetManually.BIGINT;
+            default -> arg.startsWith(IPgTypesSetManually.NUMERIC) ? IPgTypesSetManually.NUMERIC : arg;
+        };
+
+        return arg;
+    }
+
+    private boolean typesMatch(String source, String target) {
+        if (isAnyTypes(source) || isAnyTypes(target)) {
+            return true;
+        }
+        return meta.containsCastImplicit(source, target);
+    }
+
+    private static boolean isAnyTypes(String type) {
+        return IPgTypesSetManually.ANYTYPE.equalsIgnoreCase(type)
+                || IPgTypesSetManually.ANY.equalsIgnoreCase(type)
+                || IPgTypesSetManually.ANYARRAY.equalsIgnoreCase(type)
+                || IPgTypesSetManually.ANYRANGE.equalsIgnoreCase(type)
+                || IPgTypesSetManually.ANYENUM.equalsIgnoreCase(type)
+                || IPgTypesSetManually.ANYNOARRAY.equalsIgnoreCase(type);
+    }
+
+    private String getOperatorToken(PgVex vex) {
+        TerminalNode token = vex.getVexCtx().getChild(TerminalNode.class, 0);
+        if (token == null) {
+            return null;
+        }
+        return switch (token.getSymbol().getType()) {
+            case SQLParser.PLUS, SQLParser.MINUS, SQLParser.EXP, SQLParser.MULTIPLY, SQLParser.DIVIDE,
+                 SQLParser.MODULAR -> token.getText();
+            default -> null;
+        };
+    }
+
+    private String getFunctionReturns(IFunction f) {
+        var returnColumns = f.getReturnsColumns();
+        if (returnColumns.isEmpty()) {
+            return f.getReturns();
+        }
+
+        returningTableColumns = returnColumns.entrySet().stream()
+                .map(e -> new Pair<>(e.getKey(), e.getValue()))
+                .toList();
+        return IPgTypesSetManually.FUNCTION_TABLE;
+    }
+
+    /**
+     * Processes an ORDER BY clause.
+     *
+     * @param orderBy the ORDER BY clause context
+     */
+    public void orderBy(Orderby_clauseContext orderBy) {
+        for (Sort_specifierContext sort : orderBy.sort_specifier()) {
+            analyze(new PgVex(sort.vex()));
+        }
+    }
+
+    /**
+     * Processes a WINDOW definition.
+     *
+     * @param window the WINDOW definition context
+     */
+    public void window(Window_definitionContext window) {
+        Partition_by_columnsContext partition = window.partition_by_columns();
+        if (partition != null) {
+            for (VexContext v : partition.vex()) {
+                analyze(new PgVex(v));
+            }
+        }
+
+        Orderby_clauseContext orderBy = window.orderby_clause();
+        if (orderBy != null) {
+            orderBy(orderBy);
+        }
+
+        Frame_clauseContext frame = window.frame_clause();
+        if (frame != null) {
+            for (Frame_boundContext bound : frame.frame_bound()) {
+                VexContext vex = bound.vex();
+                if (vex != null) {
+                    analyze(new PgVex(vex));
+                }
+            }
+        }
+    }
+
+    private void regCast(SconstContext strCtx, String regcast) {
+        if (!regcast.startsWith("reg")) {
+            return;
+        }
+
+        Pair<String, Token> pair = PgParserAbstract.unquoteQuotedString(strCtx);
+        String s = pair.getFirst();
+        Token start = pair.getSecond();
+
+        switch (regcast) {
+            case "regproc":
+                // In this case, the function is not overloaded.
+                addFunctionDepcyNotOverloaded(QNameParser.parsePg(s).getIds(), start, DbObjType.FUNCTION);
+                break;
+            case "regclass":
+                addDepcy(QNameParser.parsePg(s).getIds(), DbObjType.TABLE, start);
+                break;
+            case "regtype":
+                addDepcy(QNameParser.parsePg(s).getIds(), DbObjType.TYPE, start);
+                break;
+            case "regnamespace":
+                addSchemaDepcy(QNameParser.parsePg(s).getIds(), start);
+                break;
+            case "regprocedure":
+                addFunctionSigDepcy(s, start, DbObjType.FUNCTION);
+                break;
+            case "regoper":
+                // In this case, the operator is not overloaded.
+                addFunctionDepcyNotOverloaded(QNameParser.parsePgOperator(s).getIds(), start, DbObjType.OPERATOR);
+                break;
+            case "regoperator":
+                addFunctionSigDepcy(s, start, DbObjType.OPERATOR);
+                break;
+            case "regconfig":
+                addDepcy(QNameParser.parsePg(s).getIds(), DbObjType.FTS_CONFIGURATION, start);
+                break;
+            case "regdictionary":
+                addDepcy(QNameParser.parsePg(s).getIds(), DbObjType.FTS_DICTIONARY, start);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private String literal(Expr_constContext constCtx) {
+        String ret;
+        SconstContext charString;
+        Truth_valueContext truthValue;
+
+        if (constCtx.iconst() != null) {
+            ret = IPgTypesSetManually.INTEGER;
+        } else if (constCtx.fconst() != null) {
+            ret = IPgTypesSetManually.NUMERIC;
+        } else if ((charString = constCtx.sconst()) != null) {
+            String text = charString.getText();
+            if (text.regionMatches(true, 0, "B", 0, 1) || text.regionMatches(true, 0, "X", 0, 1)) {
+                ret = IPgTypesSetManually.BIT;
+            } else if (text.regionMatches(true, 0, "N", 0, 1)) {
+                ret = IPgTypesSetManually.BPCHAR;
+            } else {
+                ret = IPgTypesSetManually.TEXT;
+            }
+        } else if ((truthValue = constCtx.truth_value()) != null) {
+            if (truthValue.TRUE() != null || truthValue.FALSE() != null) {
+                ret = IPgTypesSetManually.BOOLEAN;
+            } else {
+                ret = IPgTypesSetManually.TEXT;
+            }
+        } else {
+            log(constCtx, Messages.ValueExpr_log_no_literal_alternative);
+            ret = IPgTypesSetManually.UNKNOWN;
+        }
+        return ret;
+    }
+
+    private String stripBrackets(String type) {
+        if (type.endsWith("[]")) {
+            return type.substring(0, type.length() - 2);
+        }
+        return type;
+    }
+
+    private String stripParens(String type) {
+        if (type.endsWith(")")) {
+            return type.substring(0, type.lastIndexOf('('));
+        }
+        return type;
+    }
+
+    public List<Pair<String, String>> getReturningTableColumns() {
+        return returningTableColumns == null ? Collections.emptyList() :
+                Collections.unmodifiableList(returningTableColumns);
+    }
+}

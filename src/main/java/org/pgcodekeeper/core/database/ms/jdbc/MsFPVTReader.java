@@ -15,28 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.jdbc;
 
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.pgcodekeeper.core.database.base.jdbc.AbstractSearchPathJdbcReader;
-import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.exception.XmlReaderException;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.ms.generated.TSQLParser.Batch_statementContext;
-import org.pgcodekeeper.core.parsers.antlr.ms.statement.CreateMsFunction;
-import org.pgcodekeeper.core.parsers.antlr.ms.statement.CreateMsProcedure;
-import org.pgcodekeeper.core.parsers.antlr.ms.statement.CreateMsTrigger;
-import org.pgcodekeeper.core.parsers.antlr.ms.statement.CreateMsView;
-import org.pgcodekeeper.core.database.base.schema.AbstractFunction;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
-import org.pgcodekeeper.core.database.ms.schema.MsTrigger;
-import org.pgcodekeeper.core.database.ms.schema.MsView;
-import org.pgcodekeeper.core.settings.ISettings;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
+
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.*;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Batch_statementContext;
+import org.pgcodekeeper.core.database.ms.parser.statement.*;
+import org.pgcodekeeper.core.database.ms.schema.*;
+import org.pgcodekeeper.core.exception.XmlReaderException;
+import org.pgcodekeeper.core.settings.ISettings;
 
 /**
  * Reader for Microsoft SQL functions, procedures, views, and triggers.
@@ -89,7 +80,7 @@ public final class MsFPVTReader extends AbstractSearchPathJdbcReader<MsJdbcLoade
         if (tt == DbObjType.TRIGGER) {
             loader.submitMsAntlrTask(def, p -> {
                 Batch_statementContext ctx = p.tsql_file().batch(0).batch_statement();
-                return new CreateMsTrigger(ctx, db, an, qi, (CommonTokenStream) p.getInputStream(), settings);
+                return new MsCreateTrigger(ctx, db, an, qi, (CommonTokenStream) p.getInputStream(), settings);
             }, creator -> {
                 MsTrigger tr = creator.getObject(schema, true);
                 tr.setDisable(isDisable);
@@ -102,12 +93,12 @@ public final class MsFPVTReader extends AbstractSearchPathJdbcReader<MsJdbcLoade
 
             loader.submitMsAntlrTask(def, p -> {
                 Batch_statementContext ctx = p.tsql_file().batch(0).batch_statement();
-                return new CreateMsView(ctx, db, an, qi, (CommonTokenStream) p.getInputStream(), settings);
+                return new MsCreateView(ctx, db, an, qi, (CommonTokenStream) p.getInputStream(), settings);
             }, creator -> creator.fillObject(view));
         } else if (tt == DbObjType.PROCEDURE) {
             loader.submitMsAntlrTask(def, p -> {
                 Batch_statementContext ctx = p.tsql_file().batch(0).batch_statement();
-                return new CreateMsProcedure(ctx, db, an, qi, (CommonTokenStream) p.getInputStream(), settings);
+                return new MsCreateProcedure(ctx, db, an, qi, (CommonTokenStream) p.getInputStream(), settings);
             }, creator -> {
                 AbstractFunction st = creator.getObject(schema, true);
                 loader.setOwner(st, owner);
@@ -116,7 +107,7 @@ public final class MsFPVTReader extends AbstractSearchPathJdbcReader<MsJdbcLoade
         } else {
             loader.submitMsAntlrTask(def, p -> {
                 Batch_statementContext ctx = p.tsql_file().batch(0).batch_statement();
-                return new CreateMsFunction(ctx, db, an, qi, (CommonTokenStream) p.getInputStream(), settings);
+                return new MsCreateFunction(ctx, db, an, qi, (CommonTokenStream) p.getInputStream(), settings);
             }, creator -> {
                 AbstractFunction st = creator.getObject(schema, true);
                 loader.setOwner(st, owner);

@@ -31,8 +31,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
+import org.pgcodekeeper.core.database.base.parser.AntlrParser;
+import org.pgcodekeeper.core.database.base.parser.AntlrUtils;
 
 /**
  * Tests for plpgsql function bodies.

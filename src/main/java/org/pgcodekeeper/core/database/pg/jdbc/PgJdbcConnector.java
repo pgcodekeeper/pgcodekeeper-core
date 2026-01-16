@@ -15,10 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
+import java.sql.SQLException;
+
 import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
 import org.postgresql.Driver;
-
-import java.sql.SQLException;
 
 /**
  *  JDBC database connector implementation for PostgreSQL.

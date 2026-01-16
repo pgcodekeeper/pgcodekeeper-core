@@ -22,24 +22,24 @@ package org.pgcodekeeper.core.loader;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.parser.AntlrParser;
+import org.pgcodekeeper.core.database.base.parser.AntlrTask;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrTask;
-import org.pgcodekeeper.core.parsers.antlr.ch.ChSQLOverridesListener;
-import org.pgcodekeeper.core.parsers.antlr.ch.ChSqlContextProcessor;
-import org.pgcodekeeper.core.parsers.antlr.ch.CustomChSQLParserListener;
-import org.pgcodekeeper.core.parsers.antlr.ms.CustomTSQLParserListener;
-import org.pgcodekeeper.core.parsers.antlr.ms.TSQLOverridesListener;
-import org.pgcodekeeper.core.parsers.antlr.ms.TSqlContextProcessor;
-import org.pgcodekeeper.core.parsers.antlr.pg.CustomSQLParserListener;
-import org.pgcodekeeper.core.parsers.antlr.pg.SQLOverridesListener;
-import org.pgcodekeeper.core.parsers.antlr.pg.SqlContextProcessor;
+import org.pgcodekeeper.core.database.ch.parser.ChOverridesListener;
+import org.pgcodekeeper.core.database.ch.parser.IChContextProcessor;
+import org.pgcodekeeper.core.database.ch.parser.ChCustomParserListener;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.database.ch.schema.ChSchema;
+import org.pgcodekeeper.core.database.ms.parser.MsCustomParserListener;
+import org.pgcodekeeper.core.database.ms.parser.MsOverridesListener;
+import org.pgcodekeeper.core.database.ms.parser.IMsContextProcessor;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.ms.schema.MsSchema;
+import org.pgcodekeeper.core.database.pg.parser.PgCustomParserListener;
+import org.pgcodekeeper.core.database.pg.parser.PgOverridesListener;
+import org.pgcodekeeper.core.database.pg.parser.IPgContextProcessor;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.schema.PgSchema;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -210,12 +210,12 @@ public class PgDumpLoader extends DatabaseLoader {
         IMonitor.checkCancelled(monitor);
         switch (settings.getDbType()) {
             case PG:
-                SqlContextProcessor sqlListener;
+                IPgContextProcessor sqlListener;
                 if (overrides != null) {
-                    sqlListener = new SQLOverridesListener((PgDatabase) intoDb, inputObjectName, mode, errors, monitor,
+                    sqlListener = new PgOverridesListener((PgDatabase) intoDb, inputObjectName, mode, errors, monitor,
                             overrides, settings);
                 } else {
-                    sqlListener = new CustomSQLParserListener((PgDatabase) intoDb, inputObjectName, mode, errors,
+                    sqlListener = new PgCustomParserListener((PgDatabase) intoDb, inputObjectName, mode, errors,
                             antlrTasks, monitor, settings);
                 }
 
@@ -223,24 +223,24 @@ public class PgDumpLoader extends DatabaseLoader {
                         monitor, monitoringLevel, sqlListener, antlrTasks);
                 break;
             case MS:
-                TSqlContextProcessor tsqlListener;
+                IMsContextProcessor tsqlListener;
                 if (overrides != null) {
-                    tsqlListener = new TSQLOverridesListener((MsDatabase) intoDb, inputObjectName, mode, errors, monitor,
+                    tsqlListener = new MsOverridesListener((MsDatabase) intoDb, inputObjectName, mode, errors, monitor,
                             overrides, settings);
                 } else {
-                    tsqlListener = new CustomTSQLParserListener((MsDatabase) intoDb, inputObjectName, mode, errors, monitor,
+                    tsqlListener = new MsCustomParserListener((MsDatabase) intoDb, inputObjectName, mode, errors, monitor,
                             settings);
                 }
                 AntlrParser.parseTSqlStream(input, settings.getInCharsetName(), inputObjectName, errors,
                         monitor, monitoringLevel, tsqlListener, antlrTasks);
                 break;
             case CH:
-                ChSqlContextProcessor chSqlListener;
+                IChContextProcessor chSqlListener;
                 if (overrides != null) {
-                    chSqlListener = new ChSQLOverridesListener((ChDatabase) intoDb, inputObjectName, mode, errors, monitor,
+                    chSqlListener = new ChOverridesListener((ChDatabase) intoDb, inputObjectName, mode, errors, monitor,
                             overrides, settings);
                 } else {
-                    chSqlListener = new CustomChSQLParserListener((ChDatabase) intoDb, inputObjectName, mode, errors,
+                    chSqlListener = new ChCustomParserListener((ChDatabase) intoDb, inputObjectName, mode, errors,
                             monitor, settings);
                 }
                 AntlrParser.parseChSqlStream(input, settings.getInCharsetName(), inputObjectName, errors,

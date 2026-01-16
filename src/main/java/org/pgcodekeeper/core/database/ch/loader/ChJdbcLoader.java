@@ -15,28 +15,25 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.loader;
 
+import java.io.IOException;
+import java.sql.*;
+import java.util.List;
+import java.util.function.*;
+import java.util.stream.Collectors;
+
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.base.loader.AbstractJdbcLoader;
+import org.pgcodekeeper.core.database.base.parser.AntlrParser;
 import org.pgcodekeeper.core.database.ch.jdbc.*;
-import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
-import org.pgcodekeeper.core.monitor.IMonitor;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHParser;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
-import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser;
+import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
+import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * JDBC-based database schema loader for ClickHouse databases.

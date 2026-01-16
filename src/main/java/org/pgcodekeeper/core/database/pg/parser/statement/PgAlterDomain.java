@@ -1,0 +1,73 @@
+/*******************************************************************************
+ * Copyright 2017-2026 TAXTELECOM, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+package org.pgcodekeeper.core.database.pg.parser.statement;
+
+import java.util.List;
+
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.base.parser.QNameParser;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
+import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.settings.ISettings;
+
+/**
+ * Parser for PostgreSQL ALTER DOMAIN statements.
+ * <p>
+ * This class handles parsing of domain alterations, primarily focused on
+ * adding check constraints to existing domains.
+ */
+public final class PgAlterDomain extends PgParserAbstract {
+
+    private final Alter_domain_statementContext ctx;
+
+    /**
+     * Constructs a new AlterDomain parser.
+     *
+     * @param ctx      the ALTER DOMAIN statement context
+     * @param db       the PostgreSQL database object
+     * @param settings the ISettings object
+     */
+    public PgAlterDomain(Alter_domain_statementContext ctx, PgDatabase db, ISettings settings) {
+        super(db, settings);
+        this.ctx = ctx;
+    }
+
+    @Override
+    public void parseObject() {
+        List<ParserRuleContext> ids = getIdentifiers(ctx.name);
+        PgDomain domain = getSafe(PgSchema::getDomain,
+                getSchemaSafe(ids), QNameParser.getFirstNameCtx(ids));
+
+        Domain_constraintContext constrCtx = ctx.dom_constraint;
+        if (constrCtx != null && constrCtx.CHECK() != null) {
+            IdentifierContext name = constrCtx.name;
+            var constrCheck = new PgConstraintCheck(name != null ? name.getText() : "");
+            PgCreateDomain.parseDomainConstraint(domain, constrCheck, constrCtx, db, fileName, settings);
+            if (ctx.not_valid != null) {
+                constrCheck.setNotValid(true);
+            }
+            doSafe(PgDomain::addConstraint, domain, constrCheck);
+        }
+
+        addObjReference(ids, DbObjType.DOMAIN, ACTION_ALTER);
+    }
+
+    @Override
+    protected String getStmtAction() {
+        return getStrForStmtAction(ACTION_ALTER, DbObjType.DOMAIN, getIdentifiers(ctx.name));
+    }
+}

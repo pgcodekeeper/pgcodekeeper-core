@@ -15,14 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import org.pgcodekeeper.core.database.api.schema.EventType;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import java.util.*;
 
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
  * Abstract base class for database row-level security policies.

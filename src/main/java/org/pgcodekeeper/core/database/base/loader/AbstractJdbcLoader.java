@@ -15,34 +15,24 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.loader;
 
-import org.pgcodekeeper.core.database.api.schema.ISchema;
-import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
+import java.sql.*;
+import java.util.*;
+import java.util.function.*;
+import java.util.stream.Collectors;
+
 import org.antlr.v4.runtime.Parser;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.loader.IJdbcLoader;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
+import org.pgcodekeeper.core.database.base.parser.AntlrTaskManager;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.exception.MonitorCancelledRuntimeException;
+import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrTaskManager;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Utils;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Base JDBC database loader

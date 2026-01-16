@@ -15,15 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.ms.MsDiffUtils;
+import java.util.function.UnaryOperator;
+
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.ms.formatter.MsFormatter;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.utils.Utils;
-
-import java.util.function.UnaryOperator;
 
 /**
  * Interface for MS SQL statement

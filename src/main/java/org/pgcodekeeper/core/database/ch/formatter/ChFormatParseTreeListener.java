@@ -15,19 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.formatter;
 
+import java.util.*;
+
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.pgcodekeeper.core.database.base.formatter.FormatParseTreeListener;
-import org.pgcodekeeper.core.database.base.formatter.IndentDirection;
-import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHLexer;
-import org.pgcodekeeper.core.parsers.antlr.ch.generated.CHParser.*;
-import org.pgcodekeeper.core.parsers.antlr.ch.rulectx.ChSelectOps;
+import org.pgcodekeeper.core.database.base.formatter.*;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHLexer;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
+import org.pgcodekeeper.core.database.ch.parser.rulectx.ChSelectOps;
 import org.pgcodekeeper.core.utils.Pair;
-
-import java.util.Map;
-import java.util.Set;
 
 /**
  * ClickHouse-specific parse tree listener for SQL code formatting.

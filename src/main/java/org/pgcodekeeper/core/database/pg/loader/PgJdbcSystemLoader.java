@@ -15,39 +15,28 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.loader;
 
+import java.io.*;
+import java.sql.*;
+import java.util.*;
+import java.util.stream.IntStream;
+
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
-import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcUtils;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.ICast.CastContext;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
+import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
+import org.pgcodekeeper.core.database.base.schema.Argument;
 import org.pgcodekeeper.core.database.base.schema.meta.*;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
-import org.pgcodekeeper.core.database.pg.jdbc.IPgJdbcReader;
-import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
+import org.pgcodekeeper.core.database.pg.jdbc.*;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
-import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcType;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.monitor.NullMonitor;
-import org.pgcodekeeper.core.parsers.antlr.base.statement.ParserAbstract;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Function_argsContext;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Function_argumentsContext;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Identifier_nontypeContext;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.VexContext;
-import org.pgcodekeeper.core.database.base.schema.Argument;
-import org.pgcodekeeper.core.database.api.schema.ICast.CastContext;
-import org.pgcodekeeper.core.utils.Pair;
-import org.pgcodekeeper.core.utils.Utils;
+import org.pgcodekeeper.core.monitor.*;
+import org.pgcodekeeper.core.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.IntStream;
 
 /**
  * JDBC-based system metadata loader for PostgreSQL databases.

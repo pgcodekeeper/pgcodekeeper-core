@@ -15,19 +15,15 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.formatter;
 
+import java.util.*;
+
 import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
 import org.pgcodekeeper.core.database.base.formatter.*;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrUtils;
-import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLLexer;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.Function_bodyContext;
+import org.pgcodekeeper.core.database.base.parser.*;
+import org.pgcodekeeper.core.database.pg.parser.generated.*;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Function_bodyContext;
 import org.pgcodekeeper.core.utils.Pair;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * PostgreSQL-specific implementation of SQL statement formatting.

@@ -32,7 +32,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
+import org.pgcodekeeper.core.database.base.parser.AntlrParser;
 
 /**
  * Tests for MS SQL parser rules.

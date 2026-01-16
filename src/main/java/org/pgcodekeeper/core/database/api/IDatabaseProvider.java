@@ -15,7 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api;
 
-import org.antlr.v4.runtime.*;
+import java.io.IOException;
+
+import org.antlr.v4.runtime.ANTLRErrorStrategy;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.Parser;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;

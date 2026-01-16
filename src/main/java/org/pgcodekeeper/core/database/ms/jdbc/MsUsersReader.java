@@ -15,17 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.jdbc;
 
-import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcReader;
-import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
-import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.exception.XmlReaderException;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
-import org.pgcodekeeper.core.database.ms.schema.MsUser;
+import java.sql.*;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.jdbc.*;
+import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
+import org.pgcodekeeper.core.database.ms.schema.*;
+import org.pgcodekeeper.core.exception.XmlReaderException;
 
 /**
  * Reader for Microsoft SQL users.

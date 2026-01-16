@@ -15,13 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.utils.Pair;
-
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.utils.Pair;
 
 /**
  * Abstract base class for database views.

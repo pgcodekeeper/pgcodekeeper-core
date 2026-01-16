@@ -15,22 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.ignorelist;
 
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.antlr.v4.runtime.RuleContext;
-import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.parsers.antlr.base.AntlrParser;
-import org.pgcodekeeper.core.parsers.antlr.base.generated.IgnoreListParser;
-import org.pgcodekeeper.core.parsers.antlr.base.generated.IgnoreListParser.*;
+import org.pgcodekeeper.core.database.base.parser.AntlrParser;
+import org.pgcodekeeper.core.database.base.parser.generated.IgnoreListParser;
+import org.pgcodekeeper.core.database.base.parser.generated.IgnoreListParser.*;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Parser for ignore list files that determine which database objects

@@ -15,18 +15,15 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
-import org.pgcodekeeper.core.database.base.schema.AbstractTable;
-import org.pgcodekeeper.core.database.api.schema.ISimpleOptionContainer;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.script.SQLActionType;
-import org.pgcodekeeper.core.script.SQLScript;
-import org.pgcodekeeper.core.settings.ISettings;
-
 import java.util.Map.Entry;
 import java.util.Objects;
+
+import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.database.api.schema.ISimpleOptionContainer;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.script.*;
+import org.pgcodekeeper.core.settings.ISettings;
 
 /**
  * Base PostgreSQL regular table implementation.

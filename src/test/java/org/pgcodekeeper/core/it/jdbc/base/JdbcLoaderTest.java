@@ -24,8 +24,8 @@ import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
 import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
+import org.pgcodekeeper.core.database.base.parser.ScriptParser;
 import org.pgcodekeeper.core.monitor.NullMonitor;
-import org.pgcodekeeper.core.parsers.antlr.base.ScriptParser;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;

@@ -15,12 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.jdbc;
 
-import com.clickhouse.jdbc.Driver;
+import java.io.IOException;
+import java.sql.*;
+
 import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
+import com.clickhouse.jdbc.Driver;
 
 /**
  * JDBC database connector implementation for ClickHouse.

@@ -15,16 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.hasher.IHashable;
-import org.pgcodekeeper.core.hasher.JavaHasher;
+import java.io.*;
+import java.util.*;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import org.pgcodekeeper.core.hasher.*;
 
 /**
  * Represents a simple column reference with ordering and operator class information.

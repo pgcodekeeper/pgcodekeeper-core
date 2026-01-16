@@ -15,11 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.hasher.Hasher;
-
 import java.util.*;
 import java.util.stream.Stream;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
  * Abstract base class representing a database schema.

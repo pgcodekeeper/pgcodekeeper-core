@@ -15,17 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.formatter;
 
+import java.util.*;
+
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
-import org.pgcodekeeper.core.database.api.formatter.IndentType;
-import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
+import org.pgcodekeeper.core.database.api.formatter.*;
+import org.pgcodekeeper.core.database.base.parser.CodeUnitToken;
 import org.pgcodekeeper.core.utils.Pair;
-
-import java.util.*;
 
 /**
  * Abstract base class for SQL statement formatting.

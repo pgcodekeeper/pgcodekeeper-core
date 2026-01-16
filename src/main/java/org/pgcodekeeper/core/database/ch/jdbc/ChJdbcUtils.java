@@ -15,14 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.jdbc;
 
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-
-import java.sql.Array;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.function.BiConsumer;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 
 /**
  * Utility class for ClickHouse JDBC operations.

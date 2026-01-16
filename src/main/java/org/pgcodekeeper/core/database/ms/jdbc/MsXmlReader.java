@@ -15,21 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.jdbc;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.pgcodekeeper.core.exception.XmlReaderException;
 import org.pgcodekeeper.core.utils.Utils;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
-
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * XML reader for parsing Microsoft SQL Server XML query results.

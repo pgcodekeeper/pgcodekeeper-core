@@ -15,10 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
+import java.util.*;
+
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
-
-import java.util.*;
 
 /**
  * Abstract base class for database objects that can contain other statements.

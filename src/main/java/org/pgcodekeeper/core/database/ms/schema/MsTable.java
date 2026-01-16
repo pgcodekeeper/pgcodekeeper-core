@@ -15,21 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.ISimpleOptionContainer;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.api.schema.ObjectState;
-import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractTable;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.script.SQLActionType;
-import org.pgcodekeeper.core.script.SQLScript;
-import org.pgcodekeeper.core.utils.Utils;
-
 import java.util.*;
 import java.util.Map.Entry;
+
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.script.*;
+import org.pgcodekeeper.core.utils.Utils;
 
 /**
  * Represents a Microsoft SQL table with support for memory-optimized tables,

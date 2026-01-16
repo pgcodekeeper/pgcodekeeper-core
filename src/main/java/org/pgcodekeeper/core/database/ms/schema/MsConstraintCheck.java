@@ -15,11 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
-
 import java.util.Objects;
+
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
+import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
  * Represents a Microsoft SQL CHECK constraint that validates column values against a boolean expression.

@@ -15,24 +15,21 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.formatter;
 
+import java.util.*;
+
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Token;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.antlr.v4.runtime.Lexer;
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
-import org.pgcodekeeper.core.database.base.formatter.AbstractFormatter;
+import org.pgcodekeeper.core.database.base.formatter.*;
 import org.pgcodekeeper.core.database.base.formatter.FormatItem;
-import org.pgcodekeeper.core.database.base.formatter.StatementFormatter;
-import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLLexer;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser;
-import org.pgcodekeeper.core.parsers.antlr.pg.generated.SQLParser.*;
-import org.pgcodekeeper.core.parsers.antlr.pg.statement.PgParserAbstract;
+import org.pgcodekeeper.core.database.base.parser.CodeUnitToken;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.parser.generated.*;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
 import org.pgcodekeeper.core.utils.Pair;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * PostgreSQL-specific SQL formatter implementation.

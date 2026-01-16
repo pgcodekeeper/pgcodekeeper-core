@@ -15,20 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.parser.antlr;
 
+import java.util.*;
+
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.parsers.antlr.base.CodeUnitToken;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.api.schema.IRelation;
-import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation.*;
+import org.pgcodekeeper.core.database.base.parser.CodeUnitToken;
 import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-
-import static org.pgcodekeeper.core.database.api.schema.ObjectLocation.Builder;
-import static org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 
 /**
  * Abstract base class for SQL expression analysis.
