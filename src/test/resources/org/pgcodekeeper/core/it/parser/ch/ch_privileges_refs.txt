@@ -57,3 +57,6 @@ Reference: action = GRANT, offset = 3039, line number = 56, charPositionInLine =
 Reference: action = GRANT, offset = 3095, line number = 57, charPositionInLine = 0
 Reference: action = GRANT, offset = 3144, line number = 58, charPositionInLine = 0
 Reference: action = GRANT, offset = 3432, line number = 59, charPositionInLine = 0
+Reference: action = GRANT, offset = 3594, line number = 60, charPositionInLine = 0
+Reference: action = GRANT, offset = 3633, line number = 61, charPositionInLine = 0
+Reference: action = REVOKE, offset = 3691, line number = 62, charPositionInLine = 0

@@ -522,3 +522,21 @@ Reference: action = OPTIMIZE, offset = 55564, line number = 1203, charPositionIn
 Reference: action = OPTIMIZE, offset = 55623, line number = 1204, charPositionInLine = 0
 Reference: action = OPTIMIZE, offset = 55695, line number = 1205, charPositionInLine = 0
 Reference: action = OPTIMIZE, offset = 55779, line number = 1206, charPositionInLine = 0
+Reference: Object = t_empty_tuple (TABLE), action = CREATE, offset = 55884, line number = 1207, charPositionInLine = 13
+Reference: Object = t_empty_tuple2 (TABLE), action = CREATE, offset = 55960, line number = 1208, charPositionInLine = 13
+Reference: Object = test_table (TABLE), action = ALTER, offset = 56052, line number = 1209, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, offset = 56115, line number = 1210, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, offset = 56194, line number = 1211, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, offset = 56292, line number = 1212, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, offset = 56387, line number = 1213, charPositionInLine = 12
+Reference: Object = test_table.c1 (CONSTRAINT), action = CREATE, offset = 56427, line number = 1213, charPositionInLine = 52
+Reference: Object = test_table (TABLE), action = ALTER, offset = 56455, line number = 1214, charPositionInLine = 12
+Reference: Object = test_table.c1 (CONSTRAINT), action = CREATE, offset = 56495, line number = 1214, charPositionInLine = 52
+Reference: Object = t_constraint_new (TABLE), action = CREATE, offset = 56526, line number = 1215, charPositionInLine = 13
+Reference: Object = test_table (TABLE), action = ALTER, offset = 56661, line number = 1216, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, offset = 56712, line number = 1217, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, offset = 56765, line number = 1218, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, offset = 56803, line number = 1219, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, offset = 56864, line number = 1220, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, offset = 56927, line number = 1221, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, offset = 57017, line number = 1222, charPositionInLine = 12

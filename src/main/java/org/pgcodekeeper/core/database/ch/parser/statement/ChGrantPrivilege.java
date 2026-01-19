@@ -64,7 +64,7 @@ public final class ChGrantPrivilege extends ChParserAbstract {
         boolean isGrantOption = ctx.with_option().stream().anyMatch(el -> el.GRANT() != null);
 
         for (var priv : ctx.privileges().privilege()) {
-            String objectName = getFullCtxText(priv.names_references());
+            String objectName = getFullCtxText(priv.privilege_target());
 
             //parsed columns
             Columns_permissionsContext columnsCtx = priv.columns_permissions();
