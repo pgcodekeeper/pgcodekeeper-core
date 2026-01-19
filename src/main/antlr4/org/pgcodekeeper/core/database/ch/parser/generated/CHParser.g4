@@ -25,9 +25,13 @@ expr_eof
     ;
 
 query
-    : stmt (INTO OUTFILE STRING_LITERAL)? (AND STDOUT)? (APPEND | TRUNCATE)?
+    : stmt parallel_with* (INTO OUTFILE STRING_LITERAL)? (AND STDOUT)? (APPEND | TRUNCATE)?
     (COMPRESSION STRING_LITERAL (LEVEL number_literal)?)?
     (FORMAT (identifier | NULL))?
+    ;
+
+parallel_with
+    : PARALLEL WITH stmt
     ;
 
 stmt
@@ -49,8 +53,9 @@ ddl_stmt
     ;
 
 dml_stmt
-    : check_stmt
+    : CHECK check_stmt
     | describe_stmt
+    | execute_as_stmt
     | exists_stmt
     | exchange_stmt
     | explain_stmt
@@ -65,6 +70,10 @@ dml_stmt
     | delete_stmt
     | select_stmt
     | transaction_stmt
+    ;
+
+execute_as_stmt
+    : EXECUTE AS identifier select_stmt?
     ;
 
 delete_stmt
@@ -96,12 +105,17 @@ create_stmt
 
 alter_stmt
     : alter_table_stmt
+    | alter_database_stmt
     | alter_policy_stmt
     | alter_named_collection_stmt
     | alter_user_stmt
     | alter_role_stmt
     | alter_quota_stmt
     | alter_settings_profile
+    ;
+
+alter_database_stmt
+    : ALTER DATABASE qualified_name cluster_clause? MODIFY comment_expr
     ;
 
 privilegy_stmt
@@ -114,11 +128,11 @@ privileges
     ;
 
 privilege
-    : (permissions | columns_permissions) ON names_references
+    : (permissions | columns_permissions) ON privilege_target
     ;
 
-names_references
-    : qualified_name (DOT ASTERISK)?
+privilege_target
+    : identifier ASTERISK? (DOT (identifier ASTERISK? | ASTERISK))?
     | ASTERISK (DOT ASTERISK)?
     ;
 
@@ -158,6 +172,7 @@ permission
     | DISPLAY_SECRETS_IN_SHOW_AND_SELECT
     | DROP (object_type | DICTIONARY | FUNCTION)?
     | source_privilige
+    | IMPERSONATE
     | INSERT
     | INTROSPECTION (ADDRESS_TO_LINE | ADDRESS_TO_LINE_WITH_IN_LINES | ADDRESS_TO_SYMBOL | DEMANGLE)?
     | KILL (QUERY | TRANSACTION)
@@ -510,7 +525,7 @@ alter_table_actions
 
 alter_table_action
     : ADD alter_table_add_action
-    | ALTER COLUMN if_not_exists? qualified_name TYPE (data_type not_null?)? table_column_property_expr? codec_arg_expr? ttl_clause? settings_clause? position?
+    | ALTER COLUMN if_exists? qualified_name TYPE (data_type not_null?)? table_column_property_expr? codec_arg_expr? ttl_clause? settings_clause? position?
     | APPLY DELETED MASK (IN partition_clause)?
     | ATTACH partition_clause (FROM qualified_name)?
     | CLEAR alter_table_clear_action
@@ -519,6 +534,7 @@ alter_table_action
     | DETACH partition_clause
     | DROP alter_table_drop_action
     | FETCH partition_clause FROM expr
+    | FORGET partition_clause
     | FREEZE partition_clause? (WITH NAME identifier)?
     | MATERIALIZE alter_table_mat_action
     | MODIFY alter_table_modify_action
@@ -527,6 +543,7 @@ alter_table_action
     | RENAME COLUMN if_exists? qualified_name TO qualified_name
     | REPLACE partition_clause FROM qualified_name
     | RESET SETTING (identifier | pair) (COMMA (identifier | pair))*
+    | REWRITE PARTS (IN partition_clause)?
     | UNFREEZE partition_clause? WITH NAME identifier
     | UPDATE assignment_expr_list (IN partition_clause)? where_clause settings_clause?
     ;
@@ -539,7 +556,7 @@ alter_table_add_action
     : COLUMN if_not_exists? table_column_def position?
     | INDEX if_not_exists? table_index_def position?
     | PROJECTION if_not_exists? table_projection_def position?
-    | table_constraint_def
+    | CONSTRAINT if_not_exists? table_constraint_def
     | alter_statistic
     ;
 
@@ -572,7 +589,7 @@ alter_table_modify_action
     ;
 
 modify_column_expr
-    : if_exists? qualified_name data_type? table_column_property_expr? codec_expr? ttl_clause? pair? position?
+    : if_exists? qualified_name data_type? table_column_property_expr? codec_expr? ttl_clause? pair? settings_clause? position?
     | identifier MODIFY SETTING pairs
     | qualified_name REMOVE (ALIAS | CODEC | COMMENT | DEFAULT | MATERIALIZED | EPHEMERAL | TTL | SETTINGS)
     ;
@@ -594,8 +611,9 @@ attach_stmt
     ;
 
 attach_table_stmt
-    : TABLE if_not_exists? qualified_name (uuid_clause | from_file_clause)?
-    cluster_clause? table_body_expr? comment_expr? settings_clause?
+    : TABLE if_not_exists? qualified_name
+    (AS NOT? REPLICATED | (uuid_clause | from_file_clause)? cluster_clause? table_body_expr?)
+    comment_expr? settings_clause?
     ;
 
 from_file_clause
@@ -603,7 +621,9 @@ from_file_clause
     ;
 
 check_stmt
-    : CHECK TABLE qualified_name partition_clause? settings_clause?
+    : TABLE qualified_name partition_clause? settings_clause?
+    | ALL TABLES
+    | GRANT privilege (COMMA privilege)*
     ;
 
 create_database_stmt
@@ -813,13 +833,13 @@ engine_expr
 table_element_expr
     : primary_key_clause
     | table_column_def
-    | table_constraint_def
+    | CONSTRAINT table_constraint_def
     | INDEX table_index_def
     | PROJECTION table_projection_def
     ;
 
 table_constraint_def
-    : CONSTRAINT identifier (CHECK | ASSUME) expr
+    : identifier (CHECK | ASSUME) expr
     ;
 
 table_column_def
@@ -934,7 +954,7 @@ json_value
     ;
 
 insert_stmt
-    : INSERT INTO TABLE? (qualified_name | FUNCTION table_function_expr) settings_clause? columns_clause? data_clause
+    : with_clause? INSERT INTO TABLE? (qualified_name | FUNCTION table_function_expr) settings_clause? columns_clause? data_clause
     ;
 
 columns_clause
@@ -943,7 +963,8 @@ columns_clause
     ;
 
 data_clause
-    : FORMAT identifier
+    : FROM INFILE STRING_LITERAL (COMPRESSION identifier)? settings_clause?
+    | FORMAT identifier
     | VALUES values_values (COMMA values_values)*
     | select_stmt
     ;
@@ -965,7 +986,7 @@ optimize_by_expr
     ;
 
 rename_stmt
-    : RENAME (TABLE | DATABASE | DICTIONARY) qualified_name TO qualified_name (COMMA qualified_name TO qualified_name)* cluster_clause?
+    : RENAME (TABLE | DATABASE | DICTIONARY)? qualified_name TO qualified_name (COMMA qualified_name TO qualified_name)* cluster_clause?
     ;
 
 select_primary
@@ -1057,7 +1078,6 @@ grouping_element_list
 
 grouping_element
     : expr
-    | blank_paren
     | (ROLLUP | CUBE | GROUPING SETS) LPAREN grouping_element_list RPAREN
     ;
 
@@ -1066,7 +1086,7 @@ having_clause
     ;
 
 order_by_clause
-    : ORDER BY (order_expr_list | blank_paren)
+    : ORDER BY (order_expr_list)
     ;
 
 limit_by_clause
@@ -1258,11 +1278,13 @@ entry_or_exit
     ;
 
 truncate_stmt
-    : TRUNCATE TEMPORARY? TABLE? if_exists? qualified_name cluster_clause?
+    : TRUNCATE TEMPORARY? TABLE? if_exists? qualified_name cluster_clause? SYNC?
+    | TRUNCATE ALL? TABLES FROM if_exists? identifier like_expr? cluster_clause?
+    | TRUNCATE DATABASE if_exists? identifier cluster_clause?
     ;
 
 use_stmt
-    : USE identifier
+    : USE DATABASE? identifier
     ;
 
 watch_stmt
@@ -1334,7 +1356,7 @@ data_type
     | TIMESTAMP
     | TINYBLOB
     | TINYTEXT
-    | TUPLE LPAREN tuple_element (COMMA tuple_element)* RPAREN
+    | TUPLE LPAREN (tuple_element (COMMA tuple_element)*)? RPAREN
     | UUID
     | VARBINARY
     | VARCHAR
@@ -1399,6 +1421,7 @@ expr_primary
     | DATE STRING_LITERAL
     | function_call
     | lambda_expr
+    | blank_paren
     | LPAREN select_stmt_no_parens RPAREN
     | LPAREN expr_list COMMA? RPAREN
     | LBRACKET expr_list? RBRACKET
@@ -1645,6 +1668,7 @@ tokens_nonreserved
     | EVERY
     | EXCHANGE
     | EXECUTION
+    | EXECUTE
     | EXISTS
     | EXIT
     | EXPLAIN
@@ -1666,6 +1690,7 @@ tokens_nonreserved
     | FLUSH
     | FOLLOWING
     | FOR
+    | FORGET
     | FREEZE
     | FUNCTION
     | FUNCTIONS
@@ -1688,10 +1713,12 @@ tokens_nonreserved
     | IDENTIFIED
     | IF
     | IMPLICIT
+    | IMPERSONATE
     | IN
     | INDEX
     | INDEXES
     | INDICES
+    | INFILE
     | INHERIT
     | INJECTIVE
     | INSERT
@@ -1794,6 +1821,7 @@ tokens_nonreserved
     | OVER
     | OVERRIDABLE
     | OVERRIDE
+    | PARALLEL
     | PART
     | PARTITION
     | PARTS
@@ -1857,6 +1885,7 @@ tokens_nonreserved
     | RESTORE
     | RESTRICTIVE
     | RESULT
+    | REWRITE
     | REVOKE
     | RING
     | ROLE

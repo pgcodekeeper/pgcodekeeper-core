@@ -13,6 +13,6 @@ GRANT SHOW ON *.* TO timon;
 CREATE ROLE admin;
 
 GRANT SELECT(c1) ON default.table1 TO admin;
-GRANT SHOW TABLES ON default.t2_1.ch1 TO admin WITH GRANT OPTION;
+GRANT SHOW TABLES ON default.t2_1 TO admin WITH GRANT OPTION;
 GRANT SELECT ON test_function1 TO admin;
 GRANT SHOW ON test.* TO admin;

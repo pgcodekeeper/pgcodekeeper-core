@@ -1405,3 +1405,7 @@ SELECT 1 FROM t GROUP BY CUBE(1) HAVING grouping(1);
 SELECT not (acos(1) <> atan(1));
 SELECT * FROM system.mutations WHERE NOT is_done;
 select arrayMap( x -> x % 3 ? 1 : null, range(3)) as k from system.numbers_mt limit 10;
+SELECT () as empty_tuple;
+SELECT ((), 1, 'test');
+SELECT * FROM t WHERE x = ();
+SELECT ifNull(x, ()) FROM t;
