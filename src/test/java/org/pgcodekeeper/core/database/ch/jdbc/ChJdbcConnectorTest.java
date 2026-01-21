@@ -22,13 +22,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.pgcodekeeper.core.TestContainer;
+import org.pgcodekeeper.core.utils.testcontainer.TestContainerType;
 
 class ChJdbcConnectorTest {
 
     @Test
     void chConnectionTest() throws IOException, SQLException {
-        var connector = new ChJdbcConnector(TestContainer.CH_URL);
+        var connector = new ChJdbcConnector(TestContainerType.CH_24.getUrl());
         try (var connection = connector.getConnection();
              var statement = connection.createStatement();
              var rs = statement.executeQuery("SELECT 1")) {

@@ -17,8 +17,8 @@ package org.pgcodekeeper.core.it.jdbc.ch;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.pgcodekeeper.core.utils.testcontainer.TestContainerType;
 import org.pgcodekeeper.core.FILES_POSTFIX;
-import org.pgcodekeeper.core.TestContainer;
 import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.ch.ChDatabaseProvider;
 import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;
@@ -38,7 +38,8 @@ class ChJdbcLoaderTest extends JdbcLoaderTest {
     void chJdbcLoaderTest(String fileName) throws Exception {
         var settings = new CoreSettings();
         settings.setDbType(DatabaseType.CH);
+        var url = TestContainerType.CH_24.getUrl();
         jdbcLoaderTest(fileName + FILES_POSTFIX.SQL, "ch.pgcodekeeperignore",
-                TestContainer.CH_URL, new ChJdbcConnector(TestContainer.CH_URL), settings, null, getClass(), new ChDatabaseProvider());
+                url, new ChJdbcConnector(url), settings, null, getClass(), new ChDatabaseProvider());
     }
 }

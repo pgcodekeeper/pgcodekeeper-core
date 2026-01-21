@@ -1,0 +1,4 @@
+SHOW ALL
+HIDE NONE plpgsql type=EXTENSION
+HIDE NONE gp_exttable_fdw type=EXTENSION
+HIDE NONE gp_toolkit type=EXTENSION

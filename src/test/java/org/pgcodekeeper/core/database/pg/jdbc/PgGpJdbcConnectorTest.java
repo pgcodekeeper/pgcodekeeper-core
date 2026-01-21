@@ -17,19 +17,23 @@ package org.pgcodekeeper.core.database.pg.jdbc;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.pgcodekeeper.core.TestContainer;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.pgcodekeeper.core.utils.testcontainer.TestContainerType;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
-class PgJdbcConnectorTest {
 
-    @Test
-    void pgConnectionTest() throws IOException, SQLException {
-        var connector = new PgJdbcConnector(TestContainer.PG_URL);
+class PgGpJdbcConnectorTest {
+
+    @ParameterizedTest
+    @EnumSource(value = TestContainerType.class, names = {"PG_16", "GP_6", "GP_7"})
+    void pgGpConnectionTest(TestContainerType contType) throws IOException, SQLException {
+        var connector = new PgJdbcConnector(contType.getUrl());
         try (var connection = connector.getConnection();
-             var statement = connection.createStatement();
-             var rs = statement.executeQuery("SELECT 1 LIMIT 1")) {
+            var statement = connection.createStatement();
+            var rs = statement.executeQuery("SELECT 1 LIMIT 1")) {
             Assertions.assertTrue(rs.next());
         }
     }

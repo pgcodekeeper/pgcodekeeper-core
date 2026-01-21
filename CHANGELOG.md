@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Added comments processing for NOT NULL constraints in PostgreSQL.
+- Added connection test with Greenplum.
 
 ### Changed
 
@@ -502,7 +503,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- Fixed a script generation bug with the DISTRIBUTED option for partitions in GreenPlum 7.
+- Fixed a script generation bug with the DISTRIBUTED option for partitions in Greenplum 7.
 - Fixed missing quotes in POLICY name in ClickHouse.
 
 ## [9.6.0] - 2024-05-14
@@ -544,14 +545,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- Fixed code generation for partition tables with access method in GreenPlum 7.
+- Fixed code generation for partition tables with access method in Greenplum 7.
 - Fixed bug when loading libraries at the same time.
 
 ## [9.4.1] - 2024-03-11
 
 ### Fixed
 
-- Fixed error when reading tables in GreenPlum 7.
+- Fixed error when reading tables in Greenplum 7.
 
 ## [9.4.0] - 2024-03-05
 

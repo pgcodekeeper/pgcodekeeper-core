@@ -20,13 +20,13 @@ import java.sql.SQLException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.pgcodekeeper.core.TestContainer;
+import org.pgcodekeeper.core.utils.testcontainer.TestContainerType;
 
 class MsJdbcConnectorTest {
 
     @Test
     void msConnectionTest() throws IOException, SQLException {
-        var connector = new MsJdbcConnector(TestContainer.MS_URL);
+        var connector = new MsJdbcConnector(TestContainerType.MS_16.getMsUrl(false));
         try (var connection = connector.getConnection();
              var statement = connection.createStatement();
              var rs = statement.executeQuery("SELECT TOP 1 1")) {
