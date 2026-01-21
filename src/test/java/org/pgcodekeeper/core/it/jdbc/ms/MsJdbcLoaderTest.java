@@ -17,8 +17,8 @@ package org.pgcodekeeper.core.it.jdbc.ms;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.pgcodekeeper.core.utils.testcontainer.TestContainerType;
 import org.pgcodekeeper.core.FILES_POSTFIX;
-import org.pgcodekeeper.core.TestContainer;
 import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.ms.MsDatabaseProvider;
 import org.pgcodekeeper.core.database.ms.jdbc.MsJdbcConnector;
@@ -43,8 +43,9 @@ class MsJdbcLoaderTest extends JdbcLoaderTest {
     void msJdbcLoaderTest(String fileName) throws Exception {
         var settings = new CoreSettings();
         settings.setDbType(DatabaseType.MS);
+        var url = TestContainerType.MS_16.getMsUrl(false);
         jdbcLoaderTest(fileName + FILES_POSTFIX.SQL, "ms.pgcodekeeperignore",
-                TestContainer.MS_URL, new MsJdbcConnector(TestContainer.MS_URL), settings, null, getClass(), new MsDatabaseProvider());
+                url, new MsJdbcConnector(url), settings, null, getClass(), new MsDatabaseProvider());
     }
 
     @ParameterizedTest
@@ -54,8 +55,9 @@ class MsJdbcLoaderTest extends JdbcLoaderTest {
     void msJdbcLoaderWithMemomyOptimizedTest(String fileName) throws Exception {
         var settings = new CoreSettings();
         settings.setDbType(DatabaseType.MS);
+        var url = TestContainerType.MS_16.getMsUrl(true);
         jdbcLoaderTest(fileName + "_memory_optimized" + FILES_POSTFIX.SQL, "ms.pgcodekeeperignore",
-                TestContainer.MS_URL_MEMORY_OPTIMIZED, new MsJdbcConnector(TestContainer.MS_URL_MEMORY_OPTIMIZED),
+                url, new MsJdbcConnector(url),
                 settings, null, getClass(), true, new MsDatabaseProvider());
     }
 }

@@ -17,26 +17,37 @@ package org.pgcodekeeper.core.it.jdbc.pg;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.pgcodekeeper.core.utils.testcontainer.TestContainerType;
 import org.pgcodekeeper.core.FILES_POSTFIX;
-import org.pgcodekeeper.core.TestContainer;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
-import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
 import org.pgcodekeeper.core.it.jdbc.base.JdbcLoaderTest;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
-class PgJdbcLoaderTest extends JdbcLoaderTest {
+import java.util.Locale;
+
+class PgGpJdbcLoaderTest extends JdbcLoaderTest {
 
     @ParameterizedTest
     @CsvSource({
-            "pg_dump_test",
-            "pg_operator",
-            "pg_statistics",
-            "pg_view",
+            "dump_test, PG_16",
+            "operator, PG_16",
+            "statistics, PG_16",
+            "view, PG_16",
+            "dump_test, GP_6",
+            "operator, GP_6",
+            "view, GP_6",
+            "dump_test, GP_7",
+            "operator, GP_7",
+            "statistics, GP_7",
+            "view, GP_7",
     })
-    void pgJdbcLoaderTest(String fileName) throws Exception {
-        jdbcLoaderTest(fileName + FILES_POSTFIX.SQL, "pg.pgcodekeeperignore",
-                TestContainer.PG_URL, new PgJdbcConnector(TestContainer.PG_URL), new CoreSettings(),
-                SupportedPgVersion.VERSION_16, getClass(), new PgDatabaseProvider());
+    void pgGpJdbcLoaderTest(String fileName, String contTypeName) throws Exception {
+        var contType = TestContainerType.valueOf(contTypeName);
+        var lowerCaseTypeName = contTypeName.toLowerCase(Locale.ROOT);
+        var url = contType.getUrl();
+        jdbcLoaderTest(lowerCaseTypeName + "_" + fileName + FILES_POSTFIX.SQL,
+                lowerCaseTypeName + ".pgcodekeeperignore", url, new PgJdbcConnector(url),
+                new CoreSettings(), contType.getVersion(), getClass(), new PgDatabaseProvider());
     }
 }

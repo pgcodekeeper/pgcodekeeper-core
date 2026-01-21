@@ -1,0 +1,3 @@
+SHOW ALL
+HIDE NONE plpgsql type=EXTENSION
+HIDE CONTENT gp_toolkit type=SCHEMA
