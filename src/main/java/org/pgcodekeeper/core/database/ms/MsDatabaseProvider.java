@@ -22,6 +22,7 @@ import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.ms.jdbc.MsJdbcConnector;
+import org.pgcodekeeper.core.database.ms.loader.MsDumpLoader;
 import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
 import org.pgcodekeeper.core.database.ms.parser.MsCustomAntlrErrorStrategy;
 import org.pgcodekeeper.core.database.ms.parser.generated.*;
@@ -31,7 +32,6 @@ import org.pgcodekeeper.core.loader.FullAnalyze;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.ISettings;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 public class MsDatabaseProvider implements IDatabaseProvider {
@@ -75,7 +75,11 @@ public class MsDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public IDatabase getDatabaseFromDump(Path path, ISettings settings, IMonitor monitor) {
-        return null;
+    public IDatabase getDatabaseFromDump(Path path, ISettings settings, IMonitor monitor)
+            throws IOException, InterruptedException {
+        var loader = new MsDumpLoader(path, settings, monitor);
+        var db = loader.load();
+        FullAnalyze.fullAnalyze(db, loader.getErrors());
+        return db;
     }
 }

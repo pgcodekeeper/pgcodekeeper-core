@@ -16,23 +16,25 @@
 package org.pgcodekeeper.core.it;
 
 import org.junit.jupiter.api.Assertions;
-import org.pgcodekeeper.core.*;
+import org.pgcodekeeper.core.ContextLocation;
+import org.pgcodekeeper.core.FILES_POSTFIX;
+import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
 import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.loader.DatabaseLoader;
-import org.pgcodekeeper.core.loader.PgDumpLoader;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.model.difftree.DiffTree;
-import org.pgcodekeeper.core.model.difftree.TreeElement;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
-import org.pgcodekeeper.core.database.ch.schema.ChSchema;
-import org.pgcodekeeper.core.database.ms.schema.MsSchema;
-import org.pgcodekeeper.core.database.pg.schema.PgSchema;
+import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.ch.loader.ChDumpLoader;
+import org.pgcodekeeper.core.database.ms.loader.MsDumpLoader;
+import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
+import org.pgcodekeeper.core.loader.FullAnalyze;
+import org.pgcodekeeper.core.model.difftree.DiffTree;
+import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -57,9 +59,12 @@ public final class IntegrationTestUtils {
 
     public static AbstractDatabase loadTestDump(String resource, Class<?> c, ISettings settings, boolean analysis)
             throws IOException, InterruptedException {
-        PgDumpLoader loader = new PgDumpLoader(() -> c.getResourceAsStream(resource),
+        var loader = createDumpLoader(() -> c.getResourceAsStream(resource),
                 "test/" + c.getName() + '/' + resource, settings);
-        AbstractDatabase db = analysis ? loader.loadAndAnalyze() : loader.load();
+        AbstractDatabase db = loader.load();
+        if (analysis) {
+            FullAnalyze.fullAnalyze(db, loader.getErrors());
+        }
         Assertions.assertEquals("[]", loader.getErrors().toString(), "Test resource caused loader errors!");
         return db;
     }
@@ -67,19 +72,7 @@ public final class IntegrationTestUtils {
     public static AbstractDatabase createDumpDB(DatabaseType dbType) {
         var settings = new CoreSettings();
         settings.setDbType(dbType);
-        AbstractDatabase db = DatabaseLoader.createDb(settings);
-        AbstractSchema schema = switch (dbType) {
-            case PG -> new PgSchema(Consts.PUBLIC);
-            case MS -> new MsSchema(Consts.DBO);
-            case CH -> new ChSchema(Consts.CH_DEFAULT_DB);
-        };
-        db.addSchema(schema);
-        db.setDefaultSchema(schema.getName());
-        ObjectLocation loc = new ObjectLocation.Builder()
-                .setObject(new GenericColumn(schema.getName(), DbObjType.SCHEMA))
-                .build();
-        schema.setLocation(loc);
-        return db;
+        return createDumpLoader(() -> null, null, settings).createDatabaseWithSchema();
     }
 
     public static void assertDiffSame(AbstractDatabase db, String template, ISettings settings)
@@ -198,6 +191,15 @@ public final class IntegrationTestUtils {
         }
 
         return sb.toString();
+    }
+
+    public static AbstractDumpLoader<?> createDumpLoader(InputStreamProvider input, String inputObjectName,
+                                                         ISettings settings) {
+        return switch (settings.getDbType()) {
+            case PG -> new PgDumpLoader(input, inputObjectName, settings);
+            case MS -> new MsDumpLoader(input, inputObjectName, settings);
+            case CH -> new ChDumpLoader(input, inputObjectName, settings);
+        };
     }
 
     private IntegrationTestUtils() {

@@ -15,6 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core;
 
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.ch.loader.ChDumpLoader;
+import org.pgcodekeeper.core.database.ms.loader.MsDumpLoader;
+import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
+import org.pgcodekeeper.core.settings.ISettings;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -53,6 +59,16 @@ public final class TestUtils {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Invalid resource URI: " + resourceName, e);
         }
+    }
+
+    public static IDatabase loadDatabaseFromDump(String pathToFile, ISettings settings)
+            throws IOException, InterruptedException {
+        var path = Path.of(pathToFile);
+        return (switch (settings.getDbType()) {
+            case PG -> new PgDumpLoader(path, settings);
+            case MS -> new MsDumpLoader(path, settings);
+            case CH -> new ChDumpLoader(path, settings);
+        }).load();
     }
 
     private TestUtils() {

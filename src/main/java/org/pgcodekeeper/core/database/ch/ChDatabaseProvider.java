@@ -26,6 +26,7 @@ import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;
+import org.pgcodekeeper.core.database.ch.loader.ChDumpLoader;
 import org.pgcodekeeper.core.database.ch.loader.ChJdbcLoader;
 import org.pgcodekeeper.core.database.ch.parser.ChCustomAntlrErrorStrategy;
 import org.pgcodekeeper.core.database.ch.parser.generated.*;
@@ -78,7 +79,11 @@ public class ChDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public IDatabase getDatabaseFromDump(Path path, ISettings settings, IMonitor monitor) {
-        return null;
+    public IDatabase getDatabaseFromDump(Path path, ISettings settings, IMonitor monitor)
+            throws IOException, InterruptedException {
+        var loader = new ChDumpLoader(path, settings, monitor);
+        var db = loader.load();
+        FullAnalyze.fullAnalyze(db, loader.getErrors());
+        return db;
     }
 }
