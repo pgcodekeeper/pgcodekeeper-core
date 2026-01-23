@@ -17,18 +17,21 @@ package org.pgcodekeeper.core.it.jdbc.base;
 
 import org.junit.jupiter.api.Assertions;
 import org.pgcodekeeper.core.TestUtils;
-import org.pgcodekeeper.core.api.DatabaseFactory;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
 import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
 import org.pgcodekeeper.core.database.base.parser.ScriptParser;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
+import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -36,6 +39,7 @@ import java.util.List;
 
 public abstract class JdbcLoaderTest {
 
+    public static final String CLEAN_DB_SCRIPT = "clean db script";
 
     protected void jdbcLoaderTest(String dumpFileName, String ignoreListName, String url, IJdbcConnector connector,
                                   CoreSettings settings, SupportedPgVersion version, Class<?> clazz, IDatabaseProvider databaseProvider)
@@ -49,18 +53,18 @@ public abstract class JdbcLoaderTest {
                                   boolean isMemoryOptimized, IDatabaseProvider databaseProvider)
             throws Exception {
         settings.setEnableFunctionBodiesDependencies(true);
-        DatabaseFactory df = new DatabaseFactory(settings);
-        List<String> ignoreLists = new ArrayList<>() ;
+        List<String> ignoreLists = new ArrayList<>();
         ignoreLists.add(TestUtils.getFilePath(ignoreListName, clazz));
 
-        var dumpDb = df.loadFromDump(TestUtils.getFilePath(dumpFileName, clazz));
-        if (null != version) {
-            dumpDb.setVersion(version);
+        var dumpDb = TestUtils.loadDatabaseFromDump(TestUtils.getFilePath(dumpFileName, clazz), settings);
+        if (null != version && dumpDb instanceof AbstractDatabase abstractDatabase) {
+            abstractDatabase.setVersion(version);
         }
         var script = Files.readString(TestUtils.getPathToResource(dumpFileName, clazz));
 
-        ScriptParser parser = new ScriptParser(dumpFileName,
-                Files.readString(TestUtils.getPathToResource(dumpFileName, clazz)), settings);
+        var loader = IntegrationTestUtils.createDumpLoader(
+                () -> new ByteArrayInputStream(script.getBytes(StandardCharsets.UTF_8)), dumpFileName, settings);
+        ScriptParser parser = new ScriptParser(loader, dumpFileName, script);
 
         var startConfDb = databaseProvider.getDatabaseFromJdbc(url, settings, new NullMonitor(), null);
         try {
@@ -79,12 +83,16 @@ public abstract class JdbcLoaderTest {
     }
 
     private void clearDb(CoreSettings settings, IDatabase startConfDb,
-                               IJdbcConnector connector, String url, IDatabaseProvider databaseProvider)
+                         IJdbcConnector connector, String url, IDatabaseProvider databaseProvider)
             throws IOException, InterruptedException, SQLException {
         var oldDb = databaseProvider.getDatabaseFromJdbc(url, settings, new NullMonitor(), null);
         var dropScript = PgCodeKeeperApi.diff(settings, oldDb, startConfDb);
-        new JdbcRunner(new NullMonitor())
-                .runBatches(connector, new ScriptParser("clean db script", dropScript, settings).batch(), null);
+
+        var loader = IntegrationTestUtils.createDumpLoader(
+                () -> new ByteArrayInputStream(dropScript.getBytes(StandardCharsets.UTF_8)), CLEAN_DB_SCRIPT, settings);
+        new JdbcRunner(new NullMonitor()).runBatches(connector,
+                new ScriptParser(loader, CLEAN_DB_SCRIPT, dropScript).batch(), null);
+
         var newDb = databaseProvider.getDatabaseFromJdbc(url, settings, new NullMonitor(), null);
         var diff = PgCodeKeeperApi.diff(settings, startConfDb, newDb);
         if (!diff.isEmpty()) {

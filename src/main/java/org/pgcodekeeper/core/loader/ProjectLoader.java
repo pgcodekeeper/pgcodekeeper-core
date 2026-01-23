@@ -232,7 +232,7 @@ public class ProjectLoader extends DatabaseLoader {
                 .filter(f -> filterFile(f, checkFilename))
                 .sorted()) {
             for (Path f : Utils.streamIterator(files)) {
-                PgDumpLoader loader = new PgDumpLoader(f, settings, monitor);
+                DumpLoader loader = new DumpLoader(f, settings, monitor);
                 if (isOverrideMode) {
                     loader.setOverridesMap(overrides);
                 }

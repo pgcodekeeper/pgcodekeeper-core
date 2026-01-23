@@ -188,7 +188,7 @@ public final class LibraryLoader extends DatabaseLoader {
         }
 
         AbstractDatabase db = createDb(copySettings);
-        PgDumpLoader loader = new PgDumpLoader(p, copySettings);
+        DumpLoader loader = new DumpLoader(p, copySettings);
         loader.loadAsync(db, antlrTasks);
         launchedLoaders.add(loader);
         finishLoaders();
@@ -250,7 +250,7 @@ public final class LibraryLoader extends DatabaseLoader {
         if (filePath.endsWith(".zip")) {
             db.addLib(getLibrary(filePath, settings, settings.isIgnorePrivileges()), null, null);
         } else if (filePath.endsWith(".sql")) {
-            PgDumpLoader loader = new PgDumpLoader(sub, settings);
+            DumpLoader loader = new DumpLoader(sub, settings);
             loader.loadDatabase(db, antlrTasks);
             launchedLoaders.add(loader);
         }

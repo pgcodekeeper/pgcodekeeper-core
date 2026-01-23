@@ -23,7 +23,6 @@ import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.loader.ParserListenerMode;
-import org.pgcodekeeper.core.loader.PgDumpLoader;
 import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
@@ -137,7 +136,7 @@ class PgObjReferencesTest {
         settings.setDbType(DatabaseType.PG);
 
         String resource = fileNameTemplate + FILES_POSTFIX.SQL;
-        PgDumpLoader loader = new PgDumpLoader(() -> getClass().getResourceAsStream(resource), resource, settings);
+        var loader = IntegrationTestUtils.createDumpLoader(() -> getClass().getResourceAsStream(resource), resource, settings);
         loader.setMode(ParserListenerMode.REF);
         AbstractDatabase db = loader.load();
 

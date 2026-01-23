@@ -16,16 +16,14 @@
 package org.pgcodekeeper.core.database.base.parser;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.loader.*;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.monitor.NullMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,19 +43,16 @@ public final class ScriptParser {
     /**
      * Creates a new script parser and immediately processes the script.
      *
+     * @param loader   the dump loader to use for parsing
      * @param name     name of the script (for error reporting)
      * @param script   the SQL script content to parse
-     * @param settings application settings to use for parsing
      * @throws IOException          if there's an error reading the script
      * @throws InterruptedException if parsing is interrupted
      */
-    public ScriptParser(String name, String script, ISettings settings)
+    public ScriptParser(AbstractDumpLoader<?> loader, String name, String script)
             throws IOException, InterruptedException {
         this.script = script;
         LOG.info(Messages.ScriptParser_log_load_dump);
-        PgDumpLoader loader = new PgDumpLoader(
-                () -> new ByteArrayInputStream(script.getBytes(StandardCharsets.UTF_8)),
-                name, settings, new NullMonitor(), 0);
         loader.setMode(ParserListenerMode.SCRIPT);
         // script mode collects only references
         batches = new ArrayList<>(loader.load().getObjReferences(name));

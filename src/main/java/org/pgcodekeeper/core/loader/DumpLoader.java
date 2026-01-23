@@ -60,7 +60,7 @@ import java.util.Queue;
  *
  * @author fordfrog
  */
-public class PgDumpLoader extends DatabaseLoader {
+public class DumpLoader extends DatabaseLoader {
 
     private final InputStreamProvider input;
     private final String inputObjectName;
@@ -99,8 +99,8 @@ public class PgDumpLoader extends DatabaseLoader {
      * @param monitor         progress monitor for tracking parsing progress
      * @param monitoringLevel level of progress monitoring detail
      */
-    public PgDumpLoader(InputStreamProvider input, String inputObjectName,
-                        ISettings settings, IMonitor monitor, int monitoringLevel) {
+    public DumpLoader(InputStreamProvider input, String inputObjectName,
+                      ISettings settings, IMonitor monitor, int monitoringLevel) {
         this.input = input;
         this.inputObjectName = inputObjectName;
         this.settings = settings;
@@ -116,8 +116,8 @@ public class PgDumpLoader extends DatabaseLoader {
      * @param settings        loader settings and configuration
      * @param monitor         progress monitor for tracking parsing progress
      */
-    public PgDumpLoader(InputStreamProvider input, String inputObjectName,
-                        ISettings settings, IMonitor monitor) {
+    public DumpLoader(InputStreamProvider input, String inputObjectName,
+                      ISettings settings, IMonitor monitor) {
         this(input, inputObjectName, settings, monitor, 1);
     }
 
@@ -128,14 +128,14 @@ public class PgDumpLoader extends DatabaseLoader {
      * @param inputObjectName name of the input object for error reporting
      * @param settings        loader settings and configuration
      */
-    public PgDumpLoader(InputStreamProvider input, String inputObjectName, ISettings settings) {
+    public DumpLoader(InputStreamProvider input, String inputObjectName, ISettings settings) {
         this(input, inputObjectName, settings, new NullMonitor(), 0);
     }
 
     /**
      * This constructor creates {@link InputStreamProvider} using inputFile parameter.
      */
-    public PgDumpLoader(Path inputFile, ISettings settings, IMonitor monitor, int monitoringLevel) {
+    public DumpLoader(Path inputFile, ISettings settings, IMonitor monitor, int monitoringLevel) {
         this(() -> Files.newInputStream(inputFile), inputFile.toString(), settings, monitor, monitoringLevel);
     }
 
@@ -146,7 +146,7 @@ public class PgDumpLoader extends DatabaseLoader {
      * @param settings  loader settings and configuration
      * @param monitor   progress monitor for tracking parsing progress
      */
-    public PgDumpLoader(Path inputFile, ISettings settings, IMonitor monitor) {
+    public DumpLoader(Path inputFile, ISettings settings, IMonitor monitor) {
         this(inputFile, settings, monitor, 1);
     }
 
@@ -156,7 +156,7 @@ public class PgDumpLoader extends DatabaseLoader {
      * @param inputFile the path to the SQL dump file
      * @param settings  loader settings and configuration
      */
-    public PgDumpLoader(Path inputFile, ISettings settings) {
+    public DumpLoader(Path inputFile, ISettings settings) {
         this(inputFile, settings, new NullMonitor(), 0);
     }
 

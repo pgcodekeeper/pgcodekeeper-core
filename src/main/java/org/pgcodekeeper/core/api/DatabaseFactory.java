@@ -17,7 +17,6 @@ package org.pgcodekeeper.core.api;
 
 import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.loader.DatabaseLoader;
-import org.pgcodekeeper.core.loader.PgDumpLoader;
 import org.pgcodekeeper.core.loader.ProjectLoader;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.ignorelist.IIgnoreList;
@@ -28,7 +27,6 @@ import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -87,7 +85,7 @@ public final class DatabaseFactory {
      * @return the loaded database
      * @throws PgCodeKeeperException if parsing errors occur
      * @throws IOException           if I/O operations fail
-     * @throws InterruptedException  if operation is cancelled
+     * @throws InterruptedException  if operation is canceled
      */
     public AbstractDatabase loadFromProject(String projectPath)
             throws PgCodeKeeperException, IOException, InterruptedException {
@@ -102,27 +100,12 @@ public final class DatabaseFactory {
      * @return the loaded database
      * @throws PgCodeKeeperException if parsing errors occur
      * @throws IOException           if I/O operations fail
-     * @throws InterruptedException  if operation is cancelled
+     * @throws InterruptedException  if operation is canceled
      */
     public AbstractDatabase loadFromProject(String projectPath, String ignoreSchemaListPath)
             throws PgCodeKeeperException, IOException, InterruptedException {
         var ignoreSchemaList = IIgnoreList.parseIgnoreList(ignoreSchemaListPath, new IgnoreSchemaList());
         var loader = new ProjectLoader(projectPath, settings, monitor, new ArrayList<>(), ignoreSchemaList);
-        return loadDatabaseFromLoader(loader);
-    }
-
-    /**
-     * Loads database from a database dump file and monitoring.
-     *
-     * @param dumpPath path to the database dump file
-     * @return the loaded database
-     * @throws IOException           if I/O operations fail
-     * @throws PgCodeKeeperException if parsing errors occur
-     * @throws InterruptedException  if operation is cancelled
-     */
-    public AbstractDatabase loadFromDump(String dumpPath)
-            throws IOException, PgCodeKeeperException, InterruptedException {
-        var loader = new PgDumpLoader(Path.of(dumpPath), settings);
         return loadDatabaseFromLoader(loader);
     }
 
