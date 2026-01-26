@@ -23,8 +23,8 @@ import java.util.stream.Collectors;
 
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.base.loader.AbstractJdbcLoader;
-import org.pgcodekeeper.core.database.base.parser.AntlrParser;
 import org.pgcodekeeper.core.database.ch.jdbc.*;
+import org.pgcodekeeper.core.database.ch.parser.ChParserUtils;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
@@ -101,7 +101,7 @@ public final class ChJdbcLoader extends AbstractJdbcLoader {
 
     public <T> void submitChAntlrTask(String sql, Function<CHParser, T> parserCtxReader, Consumer<T> finalizer) {
         BiFunction<List<Object>, String, CHParser> createFunction =
-                (list, location) -> AntlrParser.createCHParser(sql, location, list);
+                (list, location) -> ChParserUtils.createParser(sql, location, list);
         submitAntlrTask(createFunction, parserCtxReader, finalizer);
     }
 }

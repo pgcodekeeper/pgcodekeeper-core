@@ -20,10 +20,10 @@ import java.sql.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.parser.AntlrUtils;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.launcher.*;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.utils.Pair;
@@ -89,8 +89,7 @@ public final class PgViewsReader extends PgAbstractSearchPathJdbcReader {
                 pair -> {
                     dataBase.addAnalysisLauncher(new PgViewAnalysisLauncher(
                             v, pair.getFirst(), loader.getCurrentLocation()));
-                    v.setQuery(query, AntlrUtils.normalizeWhitespaceUnquoted(
-                            pair.getFirst(), pair.getSecond()));
+                    v.setQuery(query, PgParserUtils.normalizeWhitespaceUnquoted(pair.getFirst(), pair.getSecond()));
                 });
 
 

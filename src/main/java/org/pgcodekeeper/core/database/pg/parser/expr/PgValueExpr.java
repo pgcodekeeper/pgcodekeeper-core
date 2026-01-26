@@ -25,6 +25,7 @@ import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.rulectx.PgVex;
@@ -985,32 +986,32 @@ public final class PgValueExpr extends PgAbstractExpr {
         switch (regcast) {
             case "regproc":
                 // In this case, the function is not overloaded.
-                addFunctionDepcyNotOverloaded(QNameParser.parsePg(s).getIds(), start, DbObjType.FUNCTION);
+                addFunctionDepcyNotOverloaded(PgParserUtils.parseQName(s).getIds(), start, DbObjType.FUNCTION);
                 break;
             case "regclass":
-                addDepcy(QNameParser.parsePg(s).getIds(), DbObjType.TABLE, start);
+                addDepcy(PgParserUtils.parseQName(s).getIds(), DbObjType.TABLE, start);
                 break;
             case "regtype":
-                addDepcy(QNameParser.parsePg(s).getIds(), DbObjType.TYPE, start);
+                addDepcy(PgParserUtils.parseQName(s).getIds(), DbObjType.TYPE, start);
                 break;
             case "regnamespace":
-                addSchemaDepcy(QNameParser.parsePg(s).getIds(), start);
+                addSchemaDepcy(PgParserUtils.parseQName(s).getIds(), start);
                 break;
             case "regprocedure":
                 addFunctionSigDepcy(s, start, DbObjType.FUNCTION);
                 break;
             case "regoper":
                 // In this case, the operator is not overloaded.
-                addFunctionDepcyNotOverloaded(QNameParser.parsePgOperator(s).getIds(), start, DbObjType.OPERATOR);
+                addFunctionDepcyNotOverloaded(PgParserUtils.parsePgOperator(s).getIds(), start, DbObjType.OPERATOR);
                 break;
             case "regoperator":
                 addFunctionSigDepcy(s, start, DbObjType.OPERATOR);
                 break;
             case "regconfig":
-                addDepcy(QNameParser.parsePg(s).getIds(), DbObjType.FTS_CONFIGURATION, start);
+                addDepcy(PgParserUtils.parseQName(s).getIds(), DbObjType.FTS_CONFIGURATION, start);
                 break;
             case "regdictionary":
-                addDepcy(QNameParser.parsePg(s).getIds(), DbObjType.FTS_DICTIONARY, start);
+                addDepcy(PgParserUtils.parseQName(s).getIds(), DbObjType.FTS_DICTIONARY, start);
                 break;
             default:
                 break;

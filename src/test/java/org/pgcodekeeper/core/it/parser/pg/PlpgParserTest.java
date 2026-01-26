@@ -31,8 +31,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
-import org.pgcodekeeper.core.database.base.parser.AntlrParser;
-import org.pgcodekeeper.core.database.base.parser.AntlrUtils;
+import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 
 /**
  * Tests for plpgsql function bodies.
@@ -51,8 +50,8 @@ class PlpgParserTest {
         AtomicInteger ambiguity = new AtomicInteger();
 
         String sql = TestUtils.readResource(fileNameTemplate + FILES_POSTFIX.SQL, getClass());
-        var parser = AntlrParser.createSQLParser(sql, fileNameTemplate, errors);
-        AntlrUtils.removeIntoStatements(parser);
+        var parser = PgParserUtils.createSqlParser(sql, fileNameTemplate, errors);
+        PgParserUtils.removeIntoStatements(parser);
         parser.getInterpreter().setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
         parser.addErrorListener(new BaseErrorListener() {
 

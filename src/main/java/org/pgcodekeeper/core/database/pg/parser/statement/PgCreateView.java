@@ -21,6 +21,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.parser.*;
+import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.launcher.PgViewAnalysisLauncher;
 import org.pgcodekeeper.core.database.pg.schema.*;
@@ -98,12 +99,12 @@ public final class PgCreateView extends PgParserAbstract {
             String sql = RECURSIVE_PATTERN.formatted(
                     getFullCtxText(name), getFullCtxText(ctx.column_names.identifier()), getFullCtxText(ctx.v_query));
 
-            var parser = AntlrParser.createSQLParser(sql, "recursive view", null);
+            var parser = PgParserUtils.createSqlParser(sql, "recursive view", null);
             ctx = parser.sql().statement(0).schema_statement().schema_create().create_view_statement();
         }
         Select_stmtContext vQuery = ctx.v_query;
         if (vQuery != null) {
-            view.setQuery(getFullCtxText(vQuery), AntlrUtils.normalizeWhitespaceUnquoted(vQuery, stream));
+            view.setQuery(getFullCtxText(vQuery), PgParserUtils.normalizeWhitespaceUnquoted(vQuery, stream));
             db.addAnalysisLauncher(new PgViewAnalysisLauncher(view, vQuery, fileName));
         }
         if (ctx.column_names != null) {

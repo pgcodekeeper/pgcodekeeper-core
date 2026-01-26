@@ -21,7 +21,7 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.pgcodekeeper.core.database.base.parser.AntlrParser;
+import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.sql.Keyword;
 import org.pgcodekeeper.core.sql.Keyword.LabelCategory;
 
@@ -42,7 +42,7 @@ class KeywordAliasParseTest {
         String select = sb.toString();
 
         List<Object> errors = new ArrayList<>();
-        AntlrParser.createSQLParser(select, labelCategory.name(), errors).sql();
+        PgParserUtils.createSqlParser(select, labelCategory.name(), errors).sql();
         Assertions.assertTrue(errors.isEmpty(), "KeywordAliasParseTest: " + labelCategory + " - ANTLR Error");
     }
 }

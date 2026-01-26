@@ -25,6 +25,7 @@ import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.*;
 import org.pgcodekeeper.core.database.base.schema.Argument;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.launcher.*;
 import org.pgcodekeeper.core.database.pg.schema.*;
@@ -275,7 +276,7 @@ public final class PgCreateFunction extends PgParserAbstract {
 
         if ("SQL".equalsIgnoreCase(language)) {
             AntlrTaskManager.submit(antlrTasks,
-                    () -> AntlrParser.createSQLParser(def, name, err, start).sql(),
+                    () -> PgParserUtils.createSqlParser(def, name, err, start).sql(),
                     funcCtx -> {
                         errors.addAll(err);
                         PgFuncProcAnalysisLauncher launcher = new PgFuncProcAnalysisLauncher(
@@ -286,8 +287,8 @@ public final class PgCreateFunction extends PgParserAbstract {
         } else if ("PLPGSQL".equalsIgnoreCase(language)) {
             AntlrTaskManager.submit(antlrTasks,
                     () -> {
-                        var parser = AntlrParser.createSQLParser(def, name, err, start);
-                        AntlrUtils.removeIntoStatements(parser);
+                        var parser = PgParserUtils.createSqlParser(def, name, err, start);
+                        PgParserUtils.removeIntoStatements(parser);
                         return parser.plpgsql_function();
                     },
                     funcCtx -> {

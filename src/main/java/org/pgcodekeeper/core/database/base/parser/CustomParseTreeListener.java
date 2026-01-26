@@ -26,7 +26,7 @@ import org.pgcodekeeper.core.monitor.IMonitor;
  * Custom ANTLR parse tree listener that monitors parsing progress and checks for cancellation.
  * Provides basic progress tracking during parsing operations.
  */
-final class CustomParseTreeListener implements ParseTreeListener {
+public final class CustomParseTreeListener implements ParseTreeListener {
     private final int monitoringLevel;
     private final IMonitor monitor;
 

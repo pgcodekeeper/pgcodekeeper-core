@@ -21,6 +21,7 @@ import java.util.Objects;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.*;
 import org.pgcodekeeper.core.database.base.parser.*;
+import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
 
 /**
@@ -211,7 +212,7 @@ public class ObjectLocation extends ContextLocation {
         if (objName.indexOf('(') == -1) {
             return objName;
         }
-        var p = AntlrParser.createSQLParser(objName, "function signature", null);
+        var p = PgParserUtils.createSqlParser(objName, "function signature", null);
         var ids = PgParserAbstract.getIdentifiers(p.function_args_parser().schema_qualified_name());
         return QNameParser.getFirstName(ids);
     }

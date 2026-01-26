@@ -309,19 +309,12 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
                                          LocationType locationType) {
         ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
         switch (type) {
-            case ASSEMBLY:
-            case EXTENSION:
-            case EVENT_TRIGGER:
-            case FOREIGN_DATA_WRAPPER:
-            case SERVER:
-            case SCHEMA:
-            case ROLE:
-            case USER:
-            case DATABASE:
-                return buildLocation(nameCtx, action, locationType, new GenericColumn(nameCtx.getText(), type));
-            default:
-                break;
-        }
+        case ASSEMBLY, EXTENSION, EVENT_TRIGGER, FOREIGN_DATA_WRAPPER,
+             SERVER, SCHEMA, ROLE, USER, DATABASE:
+            return buildLocation(nameCtx, action, locationType, new GenericColumn(nameCtx.getText(), type));
+        default:
+            break;
+    }
 
         ParserRuleContext schemaCtx = QNameParser.getSchemaNameCtx(ids);
         String schemaName;

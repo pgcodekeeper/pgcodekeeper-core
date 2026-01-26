@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.database.parser.antlr.base;
+package org.pgcodekeeper.core.database.pg.parser;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.pgcodekeeper.core.database.base.parser.QNameParser;
 
-class QNameParserTest {
+/**
+ * parseQName method test
+ */
+class PgParserUtilsTest {
 
     private static final String SCHEMA = "schema";
     private static final String TABLE = "table";
@@ -27,50 +29,50 @@ class QNameParserTest {
 
     @Test
     void testParseSchemaBothQuoted() {
-        Assertions.assertEquals(SCHEMA, QNameParser.parsePg("\"schema\".\"table\"").getSchemaName());
+        Assertions.assertEquals(SCHEMA, PgParserUtils.parseQName("\"schema\".\"table\"").getSchemaName());
     }
 
     @Test
     void testParseSchemaFirstQuoted() {
-        Assertions.assertEquals(SCHEMA, QNameParser.parsePg("\"schema\".table").getSchemaName());
+        Assertions.assertEquals(SCHEMA, PgParserUtils.parseQName("\"schema\".table").getSchemaName());
     }
 
     @Test
     void testParseSchemaSecondQuoted() {
-        Assertions.assertEquals(SCHEMA, QNameParser.parsePg("schema.\"table\"").getSchemaName());
+        Assertions.assertEquals(SCHEMA, PgParserUtils.parseQName("schema.\"table\"").getSchemaName());
     }
 
     @Test
     void testParseSchemaNoneQuoted() {
-        Assertions.assertEquals(SCHEMA, QNameParser.parsePg("schema.table").getSchemaName());
+        Assertions.assertEquals(SCHEMA, PgParserUtils.parseQName("schema.table").getSchemaName());
     }
 
     @Test
     void testParseSchemaThreeQuoted() {
-        Assertions.assertEquals(SCHEMA, QNameParser.parsePg("\"schema\".\"table\".\"column\"").getSchemaName());
+        Assertions.assertEquals(SCHEMA, PgParserUtils.parseQName("\"schema\".\"table\".\"column\"").getSchemaName());
     }
 
     @Test
     void testParseObjectBothQuoted() {
-        Assertions.assertEquals(TABLE, QNameParser.parsePg("\"schema\".\"table\"").getFirstName());
+        Assertions.assertEquals(TABLE, PgParserUtils.parseQName("\"schema\".\"table\"").getFirstName());
     }
 
     void testParseObjectFirstQuoted() {
-        Assertions.assertEquals(TABLE, QNameParser.parsePg("\"schema\".table").getFirstName());
+        Assertions.assertEquals(TABLE, PgParserUtils.parseQName("\"schema\".table").getFirstName());
     }
 
     @Test
     void testParseObjectSecondQuoted() {
-        Assertions.assertEquals(TABLE, QNameParser.parsePg("schema.\"table\"").getFirstName());
+        Assertions.assertEquals(TABLE, PgParserUtils.parseQName("schema.\"table\"").getFirstName());
     }
 
     @Test
     void testParseObjectNoneQuoted() {
-        Assertions.assertEquals(TABLE, QNameParser.parsePg("schema.table").getFirstName());
+        Assertions.assertEquals(TABLE, PgParserUtils.parseQName("schema.table").getFirstName());
     }
 
     @Test
     void testParseObjectThreeQuoted() {
-        Assertions.assertEquals(COLUMN, QNameParser.parsePg("\"schema\".\"table\".\"column\"").getFirstName());
+        Assertions.assertEquals(COLUMN, PgParserUtils.parseQName("\"schema\".\"table\".\"column\"").getFirstName());
     }
 }

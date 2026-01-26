@@ -21,6 +21,7 @@ import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
 import org.pgcodekeeper.core.database.base.formatter.*;
 import org.pgcodekeeper.core.database.base.parser.*;
+import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Function_bodyContext;
 import org.pgcodekeeper.core.utils.Pair;
@@ -88,7 +89,7 @@ public class PgStatementFormatter extends StatementFormatter {
             ctx = parser.sql();
             currentIndent = 0;
         } else {
-            AntlrUtils.removeIntoStatements(parser);
+            PgParserUtils.removeIntoStatements(parser);
             ctx = parser.plpgsql_function();
         }
 

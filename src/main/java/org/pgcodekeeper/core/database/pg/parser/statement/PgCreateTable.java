@@ -22,6 +22,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.parser.*;
 import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -134,11 +135,10 @@ public final class PgCreateTable extends PgTableAbstract {
 
         String distribution = parseDistribution(ctx.distributed_clause());
         table.setDistribution(distribution);
-
         if (table instanceof GpPartitionTable partTable) {
             var partitionGP = ctx.partition_gp();
             partTable.setPartitionGpBound(getFullCtxText(partitionGP),
-                    AntlrUtils.normalizeWhitespaceUnquoted(partitionGP, stream));
+                    PgParserUtils.normalizeWhitespaceUnquoted(partitionGP, stream));
         }
 
         boolean explicitOids = false;

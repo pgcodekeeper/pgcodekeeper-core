@@ -24,38 +24,8 @@ public class QNameParserWrapper {
 
     private final QNameParser<?> parser;
 
-    private QNameParserWrapper(QNameParser<?> parser) {
+    public QNameParserWrapper(QNameParser<?> parser) {
         this.parser = parser;
-    }
-
-    /**
-     * Creates a wrapper for parsing PostgreSQL qualified names.
-     *
-     * @param fullName the qualified name string to parse (e.g. "schema.table")
-     * @return wrapper containing parsed name components
-     */
-    public static QNameParserWrapper parsePg(String fullName) {
-        return new QNameParserWrapper(QNameParser.parsePg(fullName));
-    }
-
-    /**
-     * Creates a wrapper for parsing ClickHouse qualified names.
-     *
-     * @param fullName the qualified name string to parse
-     * @return wrapper containing parsed name components
-     */
-    public static QNameParserWrapper parseCh(String fullName) {
-        return new QNameParserWrapper(QNameParser.parseCh(fullName));
-    }
-
-    /**
-     * Creates a wrapper for parsing PostgreSQL operator names.
-     *
-     * @param fullName the operator name string to parse
-     * @return wrapper containing parsed name components
-     */
-    public static QNameParserWrapper parsePgOperator(String fullName) {
-        return new QNameParserWrapper(QNameParser.parsePgOperator(fullName));
     }
 
     public String getFirstName() {

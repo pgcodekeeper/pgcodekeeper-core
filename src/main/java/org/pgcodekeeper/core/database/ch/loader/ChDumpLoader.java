@@ -17,12 +17,9 @@ package org.pgcodekeeper.core.database.ch.loader;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
-import org.pgcodekeeper.core.database.base.parser.AntlrParser;
 import org.pgcodekeeper.core.database.base.parser.AntlrTask;
 import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.ch.parser.ChCustomParserListener;
-import org.pgcodekeeper.core.database.ch.parser.ChOverridesListener;
-import org.pgcodekeeper.core.database.ch.parser.IChContextProcessor;
+import org.pgcodekeeper.core.database.ch.parser.*;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.database.ch.schema.ChSchema;
 import org.pgcodekeeper.core.monitor.IMonitor;
@@ -69,7 +66,7 @@ public class ChDumpLoader extends AbstractDumpLoader<ChDatabase> {
             listener = new ChCustomParserListener(db, inputObjectName, mode, errors,
                     monitor, settings);
         }
-        AntlrParser.parseChSqlStream(input, settings.getInCharsetName(), inputObjectName,
+        ChParserUtils.parseSqlStream(input, settings.getInCharsetName(), inputObjectName,
                 errors, monitor, monitoringLevel, listener, antlrTasks);
     }
 }

@@ -26,6 +26,7 @@ import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
 import org.pgcodekeeper.core.database.pg.schema.*;
@@ -114,7 +115,7 @@ public final class PgCastsReader extends PgAbstractJdbcReader {
 
     private void addDep(AbstractStatement statement, String objectName) {
         if (objectName.indexOf('.') != -1) {
-            QNameParser<ParserRuleContext> parser = QNameParser.parsePg(objectName);
+            QNameParser<ParserRuleContext> parser = PgParserUtils.parseQName(objectName);
             String schemaName = parser.getSchemaName();
             if (schemaName != null && !PgDiffUtils.isSystemSchema(schemaName)) {
                 statement.addDependency(new GenericColumn(schemaName, parser.getFirstName(), DbObjType.TYPE));
