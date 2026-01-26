@@ -23,6 +23,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.schema.meta.*;
+import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.rulectx.*;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
@@ -639,7 +640,7 @@ public final class PgSelect extends PgAbstractExprWithNmspc<Select_stmtContext> 
 
     private List<Pair<String, String>> setOfFunction(String funcAlias, String returns) {
         var typeQualifiedName = returns.replace("SETOF ", "");
-        var parsedName = QNameParser.parsePg(typeQualifiedName);
+        var parsedName = PgParserUtils.parseQName(typeQualifiedName);
 
         var schemaName = parsedName.getSchemaName();
         var objectName = parsedName.getFirstName();

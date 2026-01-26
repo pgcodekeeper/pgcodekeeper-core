@@ -23,6 +23,7 @@ import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.exception.ConcurrentModificationException;
 
 public interface IPgJdbcReader {
@@ -52,7 +53,7 @@ public interface IPgJdbcReader {
     default <T extends AbstractStatement> void setFunctionWithDep(
             BiConsumer<T, String> setter, T statement, String function, String signature) {
         if (function.indexOf('.') != -1) {
-            QNameParser<ParserRuleContext> parser = QNameParser.parsePg(function);
+            QNameParser<ParserRuleContext> parser = PgParserUtils.parseQName(function);
             String schemaName = parser.getSchemaName();
             if (schemaName != null && !PgDiffUtils.isSystemSchema(schemaName)) {
                 statement.addDependency(new GenericColumn(schemaName, DbObjType.SCHEMA));

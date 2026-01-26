@@ -23,6 +23,7 @@ import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.*;
 import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.launcher.PgVexAnalysisLauncher;
 import org.pgcodekeeper.core.database.pg.schema.*;
@@ -218,7 +219,7 @@ public final class PgAlterTable extends PgTableAbstract {
         var subpartitions = partitionAction.template_spec().part_element();
         for (var subpartElem : subpartitions) {
             template.setSubElems(getFullCtxText(subpartElem),
-                    AntlrUtils.normalizeWhitespaceUnquoted(subpartElem, stream));
+                    PgParserUtils.normalizeWhitespaceUnquoted(subpartElem, stream));
         }
         if (template.hasSubElements()) {
             tabl.addTemplate(template);

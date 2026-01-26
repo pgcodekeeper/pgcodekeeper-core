@@ -31,14 +31,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
-import org.pgcodekeeper.core.database.base.parser.AntlrParser;
+import org.pgcodekeeper.core.database.ch.parser.ChParserUtils;
 
 /**
  * Tests for ClickHouse parser rules.
  *
  * @author khazieva_gr
  */
-class CHParserTest {
+class ChParserTest {
 
     @ParameterizedTest
     @CsvSource({
@@ -66,7 +66,7 @@ class CHParserTest {
         AtomicInteger ambiguity = new AtomicInteger();
 
         String sql = TestUtils.readResource(fileNameTemplate + FILES_POSTFIX.SQL, getClass());
-        var parser = AntlrParser.createCHParser(sql, fileNameTemplate, errors);
+        var parser = ChParserUtils.createParser(sql, fileNameTemplate, errors);
 
         parser.getInterpreter().setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
         parser.addErrorListener(new BaseErrorListener() {

@@ -22,6 +22,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.parser.*;
 import org.pgcodekeeper.core.database.ch.formatter.ChFormatter;
+import org.pgcodekeeper.core.database.ch.parser.ChParserUtils;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
 import org.pgcodekeeper.core.database.ch.parser.launcher.ChViewAnalysisLauncher;
 import org.pgcodekeeper.core.database.ch.schema.*;
@@ -85,7 +86,8 @@ public final class ChCreateView extends ChParserAbstract {
     public void parseObject(ChView view, boolean needFormatSql) {
         var vQuery = ctx.subquery_clause();
         if (vQuery != null) {
-            view.setQuery(getQuery(vQuery, needFormatSql), AntlrUtils.normalizeWhitespaceUnquoted(vQuery, stream, getDbType()));
+            view.setQuery(getQuery(vQuery, needFormatSql),
+                    ChParserUtils.normalizeWhitespaceUnquoted(vQuery, stream));
             db.addAnalysisLauncher(new ChViewAnalysisLauncher(view, vQuery, fileName));
         }
 

@@ -24,10 +24,10 @@ import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.loader.AbstractJdbcLoader;
-import org.pgcodekeeper.core.database.base.parser.AntlrParser;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.ms.jdbc.*;
+import org.pgcodekeeper.core.database.ms.parser.MsParserUtils;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser;
 import org.pgcodekeeper.core.database.ms.schema.*;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
@@ -128,7 +128,7 @@ public final class MsJdbcLoader extends AbstractJdbcLoader {
 
     public <T> void submitMsAntlrTask(String sql, Function<TSQLParser, T> parserCtxReader, Consumer<T> finalizer) {
         BiFunction<List<Object>, String, TSQLParser> createFunction =
-                (list, location) -> AntlrParser.createTSQLParser(sql, location, list);
+                (list, location) -> MsParserUtils.createSqlParser(sql, location, list);
         submitAntlrTask(createFunction, parserCtxReader, finalizer);
     }
 

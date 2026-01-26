@@ -19,8 +19,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.pgcodekeeper.core.database.base.parser.AntlrParser;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 
 /**
  * Parser for aclItem arrays
@@ -134,7 +134,7 @@ public final class PgJdbcPrivilege {
             return privileges;
         }
 
-        var ctx = AntlrParser.createPrivilegesParser(aclArrayAsString).privileges();
+        var ctx = PgParserUtils.createPrivilegesParser(aclArrayAsString).privileges();
         for (var acl : ctx.acls) {
             String grantor;
             String grantee = "";

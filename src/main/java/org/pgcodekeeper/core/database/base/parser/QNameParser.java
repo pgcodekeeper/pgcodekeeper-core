@@ -20,8 +20,6 @@ import java.util.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.pgcodekeeper.core.database.ch.parser.statement.ChParserAbstract;
-import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
 
 /**
  * Utility class for parsing and processing qualified names (schema.object names)
@@ -149,46 +147,7 @@ public final class QNameParser<T extends ParserRuleContext> {
         return Collections.unmodifiableList(parts);
     }
 
-    /**
-     * Parses a PostgreSQL qualified name into its components.
-     *
-     * @param schemaQualifiedName the qualified name string to parse
-     * @return QNameParser instance containing parsed components
-     */
-    public static QNameParser<ParserRuleContext> parsePg(String schemaQualifiedName) {
-        List<Object> errors = new ArrayList<>();
-        var parser = AntlrParser.createSQLParser(schemaQualifiedName, "qname: " + schemaQualifiedName, errors);
-        var parts = PgParserAbstract.getIdentifiers(parser.qname_parser().schema_qualified_name());
-        return new QNameParser<>(parts, errors);
-    }
-
-    /**
-     * Parses a ClickHouse qualified name into its components.
-     *
-     * @param schemaQualifiedName the qualified name string to parse
-     * @return QNameParser instance containing parsed components
-     */
-    public static QNameParser<ParserRuleContext> parseCh(String schemaQualifiedName) {
-        List<Object> errors = new ArrayList<>();
-        var parser = AntlrParser.createCHParser(schemaQualifiedName, "qname: " + schemaQualifiedName, errors);
-        var parts = ChParserAbstract.getIdentifiers(parser.qname_parser().qualified_name());
-        return new QNameParser<>(parts, errors);
-    }
-
-    /**
-     * Parses a PostgreSQL operator name into its components.
-     *
-     * @param schemaQualifiedName the operator name string to parse
-     * @return QNameParser instance containing parsed components
-     */
-    public static QNameParser<ParserRuleContext> parsePgOperator(String schemaQualifiedName) {
-        List<Object> errors = new ArrayList<>();
-        var parser = AntlrParser.createSQLParser(schemaQualifiedName, "qname: " + schemaQualifiedName, errors);
-        var parts = PgParserAbstract.getIdentifiers(parser.operator_args_parser().operator_name());
-        return new QNameParser<>(parts, errors);
-    }
-
-    private QNameParser(List<T> parts, List<Object> errors) {
+    public QNameParser(List<T> parts, List<Object> errors) {
         this.errors = errors;
         this.parts = parts;
     }

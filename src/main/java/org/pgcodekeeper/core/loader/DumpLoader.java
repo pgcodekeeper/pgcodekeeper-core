@@ -22,24 +22,17 @@ package org.pgcodekeeper.core.loader;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
-import org.pgcodekeeper.core.database.base.parser.AntlrParser;
 import org.pgcodekeeper.core.database.base.parser.AntlrTask;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.ch.parser.ChOverridesListener;
-import org.pgcodekeeper.core.database.ch.parser.IChContextProcessor;
-import org.pgcodekeeper.core.database.ch.parser.ChCustomParserListener;
+import org.pgcodekeeper.core.database.ch.parser.*;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.database.ch.schema.ChSchema;
-import org.pgcodekeeper.core.database.ms.parser.MsCustomParserListener;
-import org.pgcodekeeper.core.database.ms.parser.MsOverridesListener;
-import org.pgcodekeeper.core.database.ms.parser.IMsContextProcessor;
+import org.pgcodekeeper.core.database.ms.parser.*;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.ms.schema.MsSchema;
-import org.pgcodekeeper.core.database.pg.parser.PgCustomParserListener;
-import org.pgcodekeeper.core.database.pg.parser.PgOverridesListener;
-import org.pgcodekeeper.core.database.pg.parser.IPgContextProcessor;
+import org.pgcodekeeper.core.database.pg.parser.*;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.schema.PgSchema;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -219,7 +212,7 @@ public class DumpLoader extends DatabaseLoader {
                             antlrTasks, monitor, settings);
                 }
 
-                AntlrParser.parseSqlStream(input, settings.getInCharsetName(), inputObjectName, errors,
+                PgParserUtils.parseSqlStream(input, settings.getInCharsetName(), inputObjectName, errors,
                         monitor, monitoringLevel, sqlListener, antlrTasks);
                 break;
             case MS:
@@ -231,7 +224,7 @@ public class DumpLoader extends DatabaseLoader {
                     tsqlListener = new MsCustomParserListener((MsDatabase) intoDb, inputObjectName, mode, errors, monitor,
                             settings);
                 }
-                AntlrParser.parseTSqlStream(input, settings.getInCharsetName(), inputObjectName, errors,
+                MsParserUtils.parseSqlStream(input, settings.getInCharsetName(), inputObjectName, errors,
                         monitor, monitoringLevel, tsqlListener, antlrTasks);
                 break;
             case CH:
@@ -243,7 +236,7 @@ public class DumpLoader extends DatabaseLoader {
                     chSqlListener = new ChCustomParserListener((ChDatabase) intoDb, inputObjectName, mode, errors,
                             monitor, settings);
                 }
-                AntlrParser.parseChSqlStream(input, settings.getInCharsetName(), inputObjectName, errors,
+                ChParserUtils.parseSqlStream(input, settings.getInCharsetName(), inputObjectName, errors,
                         monitor, monitoringLevel, chSqlListener, antlrTasks);
                 break;
             default:

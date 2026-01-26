@@ -21,11 +21,11 @@ import java.util.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.parser.AntlrUtils;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.launcher.PgVexAnalysisLauncher;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgAlterTable;
 import org.pgcodekeeper.core.database.pg.schema.*;
@@ -166,7 +166,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
                         p.sql().statement(0).schema_statement().schema_create().create_table_statement().partition_gp(),
                         (CommonTokenStream) p.getTokenStream()),
                 pair -> table.setPartitionGpBound(partitionGpBound,
-                        AntlrUtils.normalizeWhitespaceUnquoted(pair.getFirst(), pair.getSecond())));
+                        PgParserUtils.normalizeWhitespaceUnquoted(pair.getFirst(), pair.getSecond())));
 
         if (partitionGpTemplate != null && !partitionGpTemplate.isEmpty()) {
             for (String template : partitionGpTemplate.split(";")) {

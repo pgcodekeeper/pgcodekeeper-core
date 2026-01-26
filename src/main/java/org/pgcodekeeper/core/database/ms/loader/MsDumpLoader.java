@@ -17,12 +17,9 @@ package org.pgcodekeeper.core.database.ms.loader;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
-import org.pgcodekeeper.core.database.base.parser.AntlrParser;
 import org.pgcodekeeper.core.database.base.parser.AntlrTask;
 import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.database.ms.parser.IMsContextProcessor;
-import org.pgcodekeeper.core.database.ms.parser.MsCustomParserListener;
-import org.pgcodekeeper.core.database.ms.parser.MsOverridesListener;
+import org.pgcodekeeper.core.database.ms.parser.*;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.ms.schema.MsSchema;
 import org.pgcodekeeper.core.monitor.IMonitor;
@@ -69,7 +66,7 @@ public class MsDumpLoader extends AbstractDumpLoader<MsDatabase> {
             listener = new MsCustomParserListener(db, inputObjectName, mode, errors,
                     monitor, settings);
         }
-        AntlrParser.parseTSqlStream(input, settings.getInCharsetName(), inputObjectName,
+        MsParserUtils.parseSqlStream(input, settings.getInCharsetName(), inputObjectName,
                 errors, monitor, monitoringLevel, listener, antlrTasks);
     }
 }

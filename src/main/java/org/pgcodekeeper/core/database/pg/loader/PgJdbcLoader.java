@@ -25,10 +25,10 @@ import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.loader.AbstractJdbcLoader;
-import org.pgcodekeeper.core.database.base.parser.*;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.jdbc.*;
+import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
@@ -299,14 +299,14 @@ public class PgJdbcLoader extends AbstractJdbcLoader {
 
     public <T> void submitAntlrTask(String sql, Function<SQLParser, T> parserCtxReader, Consumer<T> finalizer) {
         BiFunction<List<Object>, String, SQLParser> createFunction =
-                (list, location) -> AntlrParser.createSQLParser(sql, location, list);
+                (list, location) -> PgParserUtils.createSqlParser(sql, location, list);
         submitAntlrTask(createFunction, parserCtxReader, finalizer);
     }
 
     public <T> void submitPlpgsqlTask(String sql, Function<SQLParser, T> parserCtxReader, Consumer<T> finalizer) {
         BiFunction<List<Object>, String, SQLParser> createFunction = (list, location) -> {
-            var parser = AntlrParser.createSQLParser(sql, location, list);
-            AntlrUtils.removeIntoStatements(parser);
+            var parser = PgParserUtils.createSqlParser(sql, location, list);
+            PgParserUtils.removeIntoStatements(parser);
             return parser;
         };
 

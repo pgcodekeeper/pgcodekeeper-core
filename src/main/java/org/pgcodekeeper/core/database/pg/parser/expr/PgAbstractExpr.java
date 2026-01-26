@@ -28,6 +28,7 @@ import org.pgcodekeeper.core.database.base.parser.*;
 import org.pgcodekeeper.core.database.base.parser.antlr.AbstractExpr;
 import org.pgcodekeeper.core.database.base.schema.meta.*;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
 import org.pgcodekeeper.core.loader.FullAnalyze;
@@ -338,7 +339,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
     }
 
     protected void addFunctionSigDepcy(String signature, Token start, DbObjType type) {
-        var parser = AntlrParser.createSQLParser(signature, "signature parser", null, start);
+        var parser = PgParserUtils.createSqlParser(signature, "signature parser", null, start);
 
         List<ParserRuleContext> ids;
         UnaryOperator<String> fullNameOperator;

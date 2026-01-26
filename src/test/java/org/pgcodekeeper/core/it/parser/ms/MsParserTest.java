@@ -32,7 +32,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
-import org.pgcodekeeper.core.database.base.parser.AntlrParser;
+import org.pgcodekeeper.core.database.ms.parser.MsParserUtils;
 
 /**
  * Tests for MS SQL parser rules.
@@ -99,7 +99,7 @@ class MsParserTest {
         AtomicInteger ambiguity = new AtomicInteger();
 
         String sql = TestUtils.readResource(fileNameTemplate + FILES_POSTFIX.SQL, getClass());
-        var parser = AntlrParser.createTSQLParser(sql, fileNameTemplate, errors);
+        var parser = MsParserUtils.createSqlParser(sql, fileNameTemplate, errors);
 
         parser.getInterpreter().setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
         parser.addErrorListener(new BaseErrorListener() {
