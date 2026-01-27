@@ -219,7 +219,7 @@ public final class PgTrigger extends AbstractTrigger implements IPgStatement {
     }
 
     @Override
-    protected void appendFullName(StringBuilder sb) {
+    public void appendFullName(StringBuilder sb) {
         sb.append(getQuotedName(name)).append(" ON ").append(parent.getQualifiedName());
     }
 

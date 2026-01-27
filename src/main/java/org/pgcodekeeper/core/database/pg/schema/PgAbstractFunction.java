@@ -163,7 +163,7 @@ public abstract class PgAbstractFunction extends AbstractFunction implements IPg
     }
 
     @Override
-    protected void appendFullName(StringBuilder sb) {
+    public void appendFullName(StringBuilder sb) {
         sb.append(getQuotedName(parent.getName())).append('.');
         appendFunctionSignature(sb, false, true);
     }

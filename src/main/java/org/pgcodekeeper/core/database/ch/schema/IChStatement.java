@@ -46,6 +46,11 @@ public interface IChStatement extends IStatement {
     }
 
     @Override
+    default void appendOwnerSQL(SQLScript script) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     default void appendDefaultPrivileges(IStatement statement, SQLScript script) {
         // no imp
     }
