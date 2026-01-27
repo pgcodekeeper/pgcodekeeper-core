@@ -146,7 +146,7 @@ public final class PgRule extends AbstractRule implements IPgStatement {
     }
 
     @Override
-    protected void appendFullName(StringBuilder sb) {
+    public void appendFullName(StringBuilder sb) {
         sb.append(getQuotedName(name)).append(" ON ").append(parent.getQualifiedName());
     }
 

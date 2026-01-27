@@ -30,6 +30,7 @@ import org.pgcodekeeper.core.utils.Utils;
 public interface IMsStatement extends IStatement {
 
     String RENAME_OBJECT_COMMAND = "EXEC sp_rename %s, %s";
+    String GO = "\nGO";
 
     @Override
     default String formatSql(String sql, int offset, int length, IFormatConfiguration formatConfiguration) {
@@ -44,6 +45,31 @@ public interface IMsStatement extends IStatement {
     @Override
     default UnaryOperator<String> getQuoter() {
         return MsDiffUtils::quoteName;
+    }
+
+    @Override
+    default void appendOwnerSQL(SQLScript script) {
+        var owner = getOwner();
+        if (owner == null || !isOwned()) {
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("ALTER AUTHORIZATION ON ");
+
+        DbObjType type = getStatementType();
+        if (type.in(DbObjType.TYPE, DbObjType.SCHEMA, DbObjType.ASSEMBLY)) {
+            sb.append(type).append("::");
+        }
+
+        sb.append(getQualifiedName()).append(" TO ").append(getQuotedName(owner));
+
+        script.addStatement(sb);
+    }
+
+    @Override
+    default boolean isOwned() {
+        return getStatementType().in(DbObjType.TABLE, DbObjType.VIEW, DbObjType.SCHEMA, DbObjType.FUNCTION,
+                DbObjType.PROCEDURE, DbObjType.SEQUENCE, DbObjType.TYPE, DbObjType.ASSEMBLY, DbObjType.STATISTICS);
     }
 
     @Override

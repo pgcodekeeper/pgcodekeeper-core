@@ -21,8 +21,6 @@ import java.util.stream.Stream;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.ms.MsDiffUtils;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.exception.ObjectCreationException;
 import org.pgcodekeeper.core.hasher.*;
 import org.pgcodekeeper.core.localizations.Messages;
@@ -42,8 +40,6 @@ public abstract class AbstractStatement implements IStatement, IHashable {
     protected static final String IF_EXISTS = "IF EXISTS ";
     protected static final String ALTER_TABLE = "ALTER TABLE ";
 
-    //TODO move to MS SQL statement abstract class.
-    public static final String GO = "\nGO";
     protected final String name;
     protected String owner;
     protected String comment;
@@ -70,20 +66,6 @@ public abstract class AbstractStatement implements IStatement, IHashable {
     @Override
     public boolean canDrop() {
         return true;
-    }
-
-    /**
-     * Checks if this statement type supports ownership.
-     *
-     * @return true if the statement can have an owner
-     */
-    public boolean isOwned() {
-        return switch (getStatementType()) {
-            case FOREIGN_DATA_WRAPPER, SERVER, EVENT_TRIGGER, FTS_CONFIGURATION, FTS_DICTIONARY, TABLE, VIEW, SCHEMA,
-                 FUNCTION, OPERATOR, PROCEDURE, AGGREGATE, SEQUENCE, COLLATION, TYPE, DOMAIN, ASSEMBLY, STATISTICS ->
-                    true;
-            default -> false;
-        };
     }
 
     /**
@@ -189,19 +171,6 @@ public abstract class AbstractStatement implements IStatement, IHashable {
     public void setComment(String comment) {
         this.comment = comment;
         resetHash();
-    }
-
-    /**
-     * Gets the type name of this statement for SQL generation.
-     *
-     * @return the type name
-     */
-    public String getTypeName() {
-        return getStatementType().getTypeName();
-    }
-
-    protected void appendFullName(StringBuilder sb) {
-        sb.append(getQualifiedName());
     }
 
     /**
@@ -399,38 +368,6 @@ public abstract class AbstractStatement implements IStatement, IHashable {
         } else {
             appendOwnerSQL(script);
         }
-    }
-
-    @Override
-    public void appendOwnerSQL(SQLScript script) {
-        if (owner == null || !isOwned()) {
-            return;
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append("ALTER ");
-
-        switch (getDbType()) {
-            case PG:
-                sb.append(getTypeName()).append(' ');
-                appendFullName(sb);
-                sb.append(" OWNER TO ")
-                        .append(PgDiffUtils.getQuotedName(owner));
-                break;
-            case MS:
-                sb.append("AUTHORIZATION ON ");
-                DbObjType type = getStatementType();
-                if (DbObjType.TYPE == type || DbObjType.SCHEMA == type
-                        || DbObjType.ASSEMBLY == type) {
-                    sb.append(type).append("::");
-                }
-
-                sb.append(getQualifiedName()).append(" TO ")
-                        .append(MsDiffUtils.quoteName(owner));
-                break;
-            default:
-                throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + getDbType());
-        }
-        script.addStatement(sb);
     }
 
     @Override

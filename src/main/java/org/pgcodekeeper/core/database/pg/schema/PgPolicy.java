@@ -117,7 +117,7 @@ public final class PgPolicy extends AbstractPolicy implements ISubElement, IPgSt
     }
 
     @Override
-    protected void appendFullName(StringBuilder sb) {
+    public void appendFullName(StringBuilder sb) {
         sb.append(getQuotedName(name)).append(" ON ").append(parent.getQualifiedName());
     }
 

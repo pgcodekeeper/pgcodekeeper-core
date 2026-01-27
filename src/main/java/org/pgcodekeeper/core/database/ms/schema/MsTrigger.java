@@ -101,7 +101,7 @@ public final class MsTrigger extends AbstractTrigger implements MsSourceStatemen
     }
 
     @Override
-    protected void appendFullName(StringBuilder sb) {
+    public void appendFullName(StringBuilder sb) {
         sb.append(getQuotedName(getSchemaName())).append('.').append(getQuotedName(name));
     }
 

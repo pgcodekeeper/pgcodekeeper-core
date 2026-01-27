@@ -46,6 +46,28 @@ public interface IPgStatement extends IStatement {
     }
 
     @Override
+    default void appendOwnerSQL(SQLScript script) {
+        var owner = getOwner();
+        if (owner == null || !isOwned()) {
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("ALTER ").append(getTypeName()).append(' ');
+        appendFullName(sb);
+        sb.append(" OWNER TO ").append(getQuotedName(owner));
+
+        script.addStatement(sb);
+    }
+
+    @Override
+    default boolean isOwned() {
+        return getStatementType().in(DbObjType.FOREIGN_DATA_WRAPPER, DbObjType.SERVER, DbObjType.EVENT_TRIGGER,
+            DbObjType.FTS_CONFIGURATION, DbObjType.FTS_DICTIONARY, DbObjType.TABLE, DbObjType.VIEW, DbObjType.SCHEMA,
+            DbObjType.FUNCTION, DbObjType.OPERATOR, DbObjType.PROCEDURE, DbObjType.AGGREGATE, DbObjType.SEQUENCE,
+            DbObjType.COLLATION, DbObjType.TYPE, DbObjType.DOMAIN, DbObjType.STATISTICS);
+   }
+
+    @Override
     default void appendDefaultPrivileges(IStatement statement, SQLScript script) {
         // reset all default privileges
         // this generates noisier bit more correct scripts

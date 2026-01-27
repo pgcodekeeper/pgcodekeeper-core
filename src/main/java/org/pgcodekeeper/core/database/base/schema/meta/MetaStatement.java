@@ -273,4 +273,9 @@ public class MetaStatement implements IStatement, Serializable {
     public String getRenameCommand(String newName) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void appendFullName(StringBuilder sb) {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -50,6 +50,28 @@ public interface IStatement {
     IDatabase getDatabase();
 
     /**
+     * Gets the type name of this statement for SQL generation.
+     *
+     * @return the type name
+     */
+     default String getTypeName() {
+        return getStatementType().getTypeName();
+    }
+
+    default void appendFullName(StringBuilder sb) {
+        sb.append(getQualifiedName());
+    }
+
+    /**
+     * Checks if this statement type supports ownership.
+     *
+     * @return true if the statement can have an owner
+     */
+    default boolean isOwned() {
+        return false;
+    }
+
+    /**
      * Gets the parent statement that contains this statement.
      *
      * @return the parent statement, or null if this is a top-level object
