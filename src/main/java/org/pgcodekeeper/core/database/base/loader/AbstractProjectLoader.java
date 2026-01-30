@@ -16,14 +16,17 @@
 package org.pgcodekeeper.core.database.base.loader;
 
 import org.pgcodekeeper.core.database.api.loader.IProjectLoader;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.ISettings;
 
 /**
  * Base project loader
  */
-public abstract class AbstractProjectLoader extends AbstractLoader implements IProjectLoader {
+public abstract class AbstractProjectLoader<T extends AbstractDatabase> extends AbstractLoader<T>
+        implements IProjectLoader {
 
-    protected AbstractProjectLoader(ISettings settings) {
-        super(settings);
+    protected AbstractProjectLoader(ISettings settings, IMonitor monitor) {
+        super(settings, monitor);
     }
 }

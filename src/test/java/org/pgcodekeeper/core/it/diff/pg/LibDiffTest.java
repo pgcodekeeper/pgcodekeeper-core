@@ -22,14 +22,15 @@ import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
-import org.pgcodekeeper.core.loader.DatabaseLoader;
-import org.pgcodekeeper.core.loader.LibraryLoader;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.monitor.NullMonitor;
+import org.pgcodekeeper.core.database.pg.loader.PgLibraryLoader;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 class LibDiffTest {
@@ -68,11 +69,11 @@ class LibDiffTest {
         for (String lib : libList) {
             libs.add(TestUtils.getPathToResource(lib, getClass()).toString());
         }
-        AbstractDatabase dbOld = DatabaseLoader.createDb(settings);
-        AbstractDatabase dbNew = IntegrationTestUtils.loadTestDump(fileNameTemplate + FILES_POSTFIX.NEW_SQL, getClass(), settings);
-        LibraryLoader loader = new LibraryLoader(dbNew, null, null);
+        PgDatabase dbOld = new PgDatabase();
+        PgDatabase dbNew = (PgDatabase) IntegrationTestUtils.loadTestDump(fileNameTemplate + FILES_POSTFIX.NEW_SQL, getClass(), settings);
+        PgLibraryLoader loader = new PgLibraryLoader(dbNew, null, new HashSet<>(), settings, new NullMonitor());
 
-        loader.loadLibraries(settings, isIgnorePrivileges, libs);
+        loader.loadLibraries(isIgnorePrivileges, libs);
 
         String script = PgCodeKeeperApi.diff(settings, dbOld, dbNew);
 

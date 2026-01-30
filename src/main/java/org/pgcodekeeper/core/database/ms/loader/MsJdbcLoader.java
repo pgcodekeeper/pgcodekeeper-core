@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * Reads database schemas, tables, functions, procedures, views, types, assemblies, roles, users and other objects from a Microsoft SQL Server database.
  * Extends JdbcLoaderBase to provide Microsoft SQL Server-specific loading functionality.
  */
-public final class MsJdbcLoader extends AbstractJdbcLoader {
+public final class MsJdbcLoader extends AbstractJdbcLoader<MsDatabase> {
 
     private static final Logger LOG = LoggerFactory.getLogger(MsJdbcLoader.class);
 
@@ -65,7 +65,7 @@ public final class MsJdbcLoader extends AbstractJdbcLoader {
 
     @Override
     public MsDatabase load() throws IOException, InterruptedException {
-        MsDatabase d = new MsDatabase();
+        MsDatabase d = createDatabase();
 
         LOG.info(Messages.JdbcLoader_log_reading_db_jdbc);
         setCurrentOperation(Messages.JdbcChLoader_log_connection_db);
@@ -212,5 +212,10 @@ public final class MsJdbcLoader extends AbstractJdbcLoader {
                 st.addPrivilege(priv);
             }
         }
+    }
+
+    @Override
+    protected MsDatabase createDatabase() {
+        return new MsDatabase();
     }
 }

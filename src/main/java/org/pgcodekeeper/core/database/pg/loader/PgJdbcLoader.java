@@ -43,7 +43,7 @@ import org.pgcodekeeper.core.utils.Utils;
  * Supports timezone configuration and Greenplum database detection.
  * Extends JdbcLoaderBase to provide PostgreSQL-specific loading functionality.
  */
-public class PgJdbcLoader extends AbstractJdbcLoader {
+public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
 
     private static final String QUERY_CHECK_GREENPLUM = new QueryBuilder()
             .column("version()")
@@ -123,7 +123,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader {
 
     @Override
     public PgDatabase load() throws IOException, InterruptedException {
-        PgDatabase d = new PgDatabase();
+        PgDatabase d = createDatabase();
 
         info(Messages.JdbcLoader_log_reading_db_jdbc);
         setCurrentOperation(Messages.JdbcChLoader_log_connection_db);
@@ -509,5 +509,10 @@ public class PgJdbcLoader extends AbstractJdbcLoader {
             return null;
         }
         return oid == 0 ? "PUBLIC" : cachedRolesNamesByOid.get(oid);
+    }
+
+    @Override
+    protected PgDatabase createDatabase() {
+        return new PgDatabase();
     }
 }

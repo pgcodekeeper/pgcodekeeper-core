@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.xmlstore;
+package org.pgcodekeeper.core.library;
 
-import org.pgcodekeeper.core.library.PgLibrary;
+import org.pgcodekeeper.core.xmlstore.XmlStore;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -34,7 +34,7 @@ import java.util.List;
  * doing that won't save additional library options.<br>
  * Call {@link #writeDependencies(List, boolean)} instead.
  */
-public class DependenciesXmlStore extends XmlStore<PgLibrary> {
+public class LibraryXmlStore extends XmlStore<Library> {
 
     public static final String FILE_NAME = ".dependencies"; //$NON-NLS-1$
 
@@ -53,7 +53,7 @@ public class DependenciesXmlStore extends XmlStore<PgLibrary> {
      *
      * @param path the path to the dependencies XML file
      */
-    public DependenciesXmlStore(Path path) {
+    public LibraryXmlStore(Path path) {
         super(path.getFileName().toString(), ROOT_TAG);
         this.xmlPath = path;
     }
@@ -80,7 +80,7 @@ public class DependenciesXmlStore extends XmlStore<PgLibrary> {
      * @param list the list parameter (ignored)
      */
     @Override
-    public void writeObjects(List<PgLibrary> list) {
+    public void writeObjects(List<Library> list) {
         throw new IllegalStateException();
     }
 
@@ -91,26 +91,26 @@ public class DependenciesXmlStore extends XmlStore<PgLibrary> {
      * @param loadNestedFlag whether to enable nested loading
      * @throws IOException if writing fails
      */
-    public void writeDependencies(List<PgLibrary> dependencies, boolean loadNestedFlag) throws IOException {
+    public void writeDependencies(List<Library> dependencies, boolean loadNestedFlag) throws IOException {
         Document xml = createDocument(dependencies);
         xml.getDocumentElement().setAttribute(LOAD_NESTED, Boolean.toString(loadNestedFlag));
         writeDocument(xml);
     }
 
     @Override
-    protected PgLibrary parseElement(Node node) {
+    protected Library parseElement(Node node) {
         NamedNodeMap attr = node.getAttributes();
         Node owner = attr.getNamedItem(OWNER);
         Node name = attr.getNamedItem(NAME);
-        return new PgLibrary(name == null ? "" : name.getTextContent(),
+        return new Library(name == null ? "" : name.getTextContent(),
                 attr.getNamedItem(PATH).getTextContent(),
                 Boolean.parseBoolean(attr.getNamedItem(IGNORE_PRIV).getTextContent()),
                 owner == null ? "" : owner.getTextContent());
     }
 
     @Override
-    protected void appendChildren(Document xml, Element root, List<PgLibrary> list) {
-        for (PgLibrary lib : list) {
+    protected void appendChildren(Document xml, Element root, List<Library> list) {
+        for (Library lib : list) {
             Element newElement = xml.createElement(ENTRY);
             String name = lib.name();
             if (!name.isBlank()) {
