@@ -37,9 +37,8 @@ import org.pgcodekeeper.core.utils.Utils;
 /**
  * Base JDBC database loader
  */
-public abstract class AbstractJdbcLoader extends AbstractLoader implements IJdbcLoader {
+public abstract class AbstractJdbcLoader<T extends AbstractDatabase> extends AbstractLoader<T> implements IJdbcLoader {
 
-    protected final IMonitor monitor;
     protected final JdbcRunner runner;
     protected final IJdbcConnector connector;
     protected final IgnoreSchemaList ignoreSchemaList;
@@ -52,15 +51,14 @@ public abstract class AbstractJdbcLoader extends AbstractLoader implements IJdbc
     protected Statement statement;
 
     protected AbstractJdbcLoader(IJdbcConnector connector, IMonitor monitor, ISettings settings, IgnoreSchemaList ignoreSchemaList) {
-        super(settings);
-        this.monitor = monitor;
+        super(settings, monitor);
         this.connector = connector;
         this.runner = new JdbcRunner(monitor);
         this.ignoreSchemaList = ignoreSchemaList;
     }
 
-    protected <T, P extends Parser> void submitAntlrTask(BiFunction<List<Object>, String, P> parserCreateFunction,
-                                                         Function<P, T> parserCtxReader, Consumer<T> finalizer) {
+    protected <P extends Parser, R> void submitAntlrTask(BiFunction<List<Object>, String, P> parserCreateFunction,
+                                                         Function<P, R> parserCtxReader, Consumer<R> finalizer) {
         String location = getCurrentLocation();
         GenericColumn object = this.currentObject;
         List<Object> list = new ArrayList<>();
@@ -68,13 +66,13 @@ public abstract class AbstractJdbcLoader extends AbstractLoader implements IJdbc
             IMonitor.checkCancelled(monitor);
             P p = parserCreateFunction.apply(list, location);
             return parserCtxReader.apply(p);
-        }, t -> {
+        }, r -> {
             errors.addAll(list);
             if (monitor.isCanceled()) {
                 throw new MonitorCancelledRuntimeException();
             }
             setCurrentObject(object);
-            finalizer.accept(t);
+            finalizer.accept(r);
         });
     }
 
@@ -174,10 +172,5 @@ public abstract class AbstractJdbcLoader extends AbstractLoader implements IJdbc
      */
     public AbstractSchema getSchema(Object schemaId) {
         return schemaIds.get(schemaId);
-    }
-
-    @Override
-    protected void prepare() {
-        // no imp
     }
 }

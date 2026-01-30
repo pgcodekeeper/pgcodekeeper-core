@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * Reads database schemas, functions, relations, policies, users, roles, and privileges from a ClickHouse database.
  * Extends JdbcLoaderBase to provide ClickHouse-specific loading functionality.
  */
-public final class ChJdbcLoader extends AbstractJdbcLoader {
+public final class ChJdbcLoader extends AbstractJdbcLoader<ChDatabase> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ChJdbcLoader.class);
 
@@ -59,7 +59,7 @@ public final class ChJdbcLoader extends AbstractJdbcLoader {
 
     @Override
     public ChDatabase load() throws IOException, InterruptedException {
-        ChDatabase d = new ChDatabase();
+        ChDatabase d = createDatabase();
 
         LOG.info(Messages.JdbcLoader_log_reading_db_jdbc);
         setCurrentOperation(Messages.JdbcChLoader_log_connection_db);
@@ -103,5 +103,10 @@ public final class ChJdbcLoader extends AbstractJdbcLoader {
         BiFunction<List<Object>, String, CHParser> createFunction =
                 (list, location) -> ChParserUtils.createParser(sql, location, list);
         submitAntlrTask(createFunction, parserCtxReader, finalizer);
+    }
+
+    @Override
+    protected ChDatabase createDatabase() {
+        return new ChDatabase();
     }
 }

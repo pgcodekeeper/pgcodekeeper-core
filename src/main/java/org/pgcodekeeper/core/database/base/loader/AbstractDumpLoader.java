@@ -39,11 +39,10 @@ import java.util.Queue;
 /**
  * Base database dump loader
  */
-public abstract class AbstractDumpLoader<T extends AbstractDatabase> extends AbstractLoader implements IDumpLoader {
+public abstract class AbstractDumpLoader<T extends AbstractDatabase> extends AbstractLoader<T> implements IDumpLoader {
 
     protected final InputStreamProvider input;
     protected final String inputObjectName;
-    protected final IMonitor monitor;
     protected final int monitoringLevel;
 
     protected ParserListenerMode mode = ParserListenerMode.NORMAL;
@@ -51,10 +50,9 @@ public abstract class AbstractDumpLoader<T extends AbstractDatabase> extends Abs
 
     protected AbstractDumpLoader(InputStreamProvider input, String inputObjectName,
             ISettings settings, IMonitor monitor, int monitoringLevel) {
-        super(settings);
+        super(settings, monitor);
         this.input = input;
         this.inputObjectName = inputObjectName;
-        this.monitor = monitor;
         this.monitoringLevel = monitoringLevel;
     }
 

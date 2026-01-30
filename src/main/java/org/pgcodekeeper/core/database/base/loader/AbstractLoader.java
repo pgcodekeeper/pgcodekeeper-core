@@ -17,6 +17,8 @@ package org.pgcodekeeper.core.database.base.loader;
 
 import org.pgcodekeeper.core.database.api.loader.ILoader;
 import org.pgcodekeeper.core.database.base.parser.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,23 +29,28 @@ import java.util.*;
 /**
  * Base database loader
  */
-public abstract class AbstractLoader implements ILoader {
+public abstract class AbstractLoader<T extends AbstractDatabase> implements ILoader {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractLoader.class);
 
     protected final List<Object> errors = new ArrayList<>();
     protected final Queue<AntlrTask<?>> antlrTasks = new ArrayDeque<>();
-    protected final Queue<AbstractLoader> launchedLoaders = new ArrayDeque<>();
+    protected final Queue<AbstractLoader<T>> launchedLoaders = new ArrayDeque<>();
 
     protected final ISettings settings;
+    protected final IMonitor monitor;
 
     protected String currentOperation;
     protected int version;
 
-    protected AbstractLoader(ISettings settings) {
+    protected AbstractLoader(ISettings settings, IMonitor monitor) {
         this.settings = settings;
+        this.monitor = monitor;
         prepare();
     }
+
+    @Override
+    public abstract T load() throws IOException, InterruptedException;
 
     public List<Object> getErrors() {
         return errors;
@@ -53,17 +60,19 @@ public abstract class AbstractLoader implements ILoader {
         errors.add(error);
     }
 
-    protected abstract void prepare();
+    protected void prepare() {
+        // subclasses will override if needed
+    }
 
     protected void finishLoaders() throws InterruptedException, IOException {
         AntlrTaskManager.finish(antlrTasks);
-        AbstractLoader l;
+        AbstractLoader<T> l;
         while ((l = launchedLoaders.poll()) != null) {
             finishLoader(l);
         }
     }
 
-    protected void finishLoader(AbstractLoader l) {
+    protected void finishLoader(AbstractLoader<T> l) {
         errors.addAll(l.getErrors());
     }
 
@@ -78,6 +87,14 @@ public abstract class AbstractLoader implements ILoader {
         var msg = message.formatted(args);
         LOG.info(msg);
     }
+
+    /**
+     * Creates a new database instance.
+     *
+     * @return new database instance of the appropriate type
+     */
+    protected abstract T createDatabase();
+
 
     @Override
     public ISettings getSettings() {

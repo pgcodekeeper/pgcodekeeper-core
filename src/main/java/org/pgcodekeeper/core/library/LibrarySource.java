@@ -22,7 +22,7 @@ import java.net.URISyntaxException;
  * Enumerates possible source types for PostgreSQL libraries.
  * Determines how a library is accessed and where it's located.
  */
-public enum PgLibrarySource {
+public enum LibrarySource {
     LOCAL,
     JDBC,
     URL;
@@ -33,18 +33,18 @@ public enum PgLibrarySource {
      * @param libPath the path/URL to analyze
      * @return the determined source type (LOCAL if path doesn't match JDBC or URL patterns)
      */
-    public static PgLibrarySource getSource(String libPath) {
+    public static LibrarySource getSource(String libPath) {
         if (libPath.startsWith("jdbc:")) {
-            return PgLibrarySource.JDBC;
+            return LibrarySource.JDBC;
         }
         try {
             URI uri = new URI(libPath);
             if (uri.getScheme() != null) {
-                return PgLibrarySource.URL;
+                return LibrarySource.URL;
             }
         } catch (URISyntaxException e) {
             // not URI, try to folder or file
         }
-        return PgLibrarySource.LOCAL;
+        return LibrarySource.LOCAL;
     }
 }

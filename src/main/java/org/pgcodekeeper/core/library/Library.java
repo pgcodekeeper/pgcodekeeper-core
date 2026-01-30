@@ -27,7 +27,7 @@ import java.util.Objects;
  * @param isIgnorePrivileges whether to ignore privileges for this library
  * @param owner              the owner of the library
  */
-public record PgLibrary(String name, String path, boolean isIgnorePrivileges, String owner) {
+public record Library(String name, String path, boolean isIgnorePrivileges, String owner) {
 
     /**
      * Gets the display title for the library.
@@ -65,9 +65,8 @@ public record PgLibrary(String name, String path, boolean isIgnorePrivileges, St
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof PgLibrary other)) {
-            return false;
-        }
-        return Objects.equals(getTitle(), other.getTitle());
+
+        return obj instanceof Library other
+                && Objects.equals(getTitle(), other.getTitle());
     }
 }
