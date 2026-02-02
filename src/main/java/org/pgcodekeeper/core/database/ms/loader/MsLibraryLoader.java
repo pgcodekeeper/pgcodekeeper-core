@@ -17,7 +17,6 @@ package org.pgcodekeeper.core.database.ms.loader;
 
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.base.loader.AbstractLibraryLoader;
-import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
 import org.pgcodekeeper.core.database.ms.jdbc.MsJdbcConnector;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.monitor.IMonitor;
@@ -29,7 +28,7 @@ import java.util.Set;
 public class MsLibraryLoader extends AbstractLibraryLoader<MsDatabase> {
 
     public MsLibraryLoader(MsDatabase database, Path metaPath, Set<String> loadedPaths,
-            ISettings settings, IMonitor monitor) {
+                           ISettings settings, IMonitor monitor) {
         super(database, metaPath, loadedPaths, settings, monitor);
     }
 
@@ -51,9 +50,8 @@ public class MsLibraryLoader extends AbstractLibraryLoader<MsDatabase> {
     }
 
     @Override
-    protected AbstractProjectLoader getProjectLoader(Path p, ISettings copySettings) {
-        // FIXME wait project loader
-        return null;
+    protected MsProjectLoader getProjectLoader(Path p, ISettings copySettings) {
+        return new MsProjectLoader(p, copySettings, monitor, null);
     }
 
     @Override

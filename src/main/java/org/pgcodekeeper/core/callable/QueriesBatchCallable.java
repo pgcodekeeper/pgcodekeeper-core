@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.loader.callables;
+package org.pgcodekeeper.core.callable;
 
 import com.microsoft.sqlserver.jdbc.SQLServerError;
 import com.microsoft.sqlserver.jdbc.SQLServerException;

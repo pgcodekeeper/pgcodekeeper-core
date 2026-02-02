@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.loader;
+package org.pgcodekeeper.core.database.base.parser;
 
 /**
  * Enumeration of parser listener modes for controlling SQL parsing behavior.

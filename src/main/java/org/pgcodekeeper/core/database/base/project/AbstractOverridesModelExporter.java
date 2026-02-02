@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.model.exporter;
+package org.pgcodekeeper.core.database.base.project;
 
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.IPrivilege;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
+import org.pgcodekeeper.core.database.base.schema.AbstractTable;
 import org.pgcodekeeper.core.exception.PgCodeKeeperException;
-import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.database.pg.schema.PgPrivilege;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
@@ -34,11 +37,13 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 /**
- * Model exporter for database object overrides.
+ * Abstract base class for database object override exporters.
  * Exports only ownership and privileges information for changed objects,
  * used for partial exports that focus on access control modifications.
+ * <p>
+ * Subclasses must implement database-specific methods for directory structure and file paths.
  */
-public final class OverridesModelExporter extends ModelExporter {
+public abstract class AbstractOverridesModelExporter extends AbstractModelExporter {
 
     /**
      * Creates a new overrides model exporter.
@@ -48,12 +53,12 @@ public final class OverridesModelExporter extends ModelExporter {
      * @param oldDb          old database schema
      * @param changedObjects collection of changed tree elements
      * @param sqlEncoding    SQL file encoding
-     * @param dbType         database type
      * @param settings       export settings
      */
-    public OverridesModelExporter(Path outDir, IDatabase newDb, IDatabase oldDb, Collection<TreeElement> changedObjects,
-                                  String sqlEncoding, DatabaseType dbType, ISettings settings) {
-        super(outDir, newDb, oldDb, dbType, changedObjects, sqlEncoding, settings);
+    protected AbstractOverridesModelExporter(Path outDir, IDatabase newDb, IDatabase oldDb,
+                                             Collection<TreeElement> changedObjects,
+                                             String sqlEncoding, ISettings settings) {
+        super(outDir, newDb, oldDb, changedObjects, sqlEncoding, settings);
     }
 
     @Override
@@ -114,9 +119,7 @@ public final class OverridesModelExporter extends ModelExporter {
         Set<IPrivilege> privs = st.getPrivileges();
         st.appendOwnerSQL(script);
         IPrivilege.appendPrivileges(privs, script);
-        if (privs.isEmpty() && st.getDbType() == DatabaseType.PG) {
-            PgPrivilege.appendDefaultPostgresPrivileges(st, script);
-        }
+        appendDefaultPrivileges(st, privs, script);
 
         if (DbObjType.TABLE == st.getStatementType()) {
             for (AbstractColumn col : ((AbstractTable) st).getColumns()) {
@@ -124,5 +127,9 @@ public final class OverridesModelExporter extends ModelExporter {
             }
         }
         return script.getFullScript();
+    }
+
+    protected void appendDefaultPrivileges(IStatement st, Set<IPrivilege> privileges, SQLScript script) {
+        // subclasses will override if needed
     }
 }

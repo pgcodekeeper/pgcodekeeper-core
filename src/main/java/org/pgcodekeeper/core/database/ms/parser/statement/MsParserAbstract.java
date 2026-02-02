@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.parser.statement;
 
-import java.util.*;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
@@ -25,8 +23,16 @@ import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
 import org.pgcodekeeper.core.database.ms.parser.launcher.MsExpressionAnalysisLauncher;
+import org.pgcodekeeper.core.database.ms.project.MsWorkDirs;
 import org.pgcodekeeper.core.database.ms.schema.*;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.FileUtils;
+
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Abstract base class for Microsoft SQL statement parsers.
@@ -354,5 +360,24 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
     @Override
     protected boolean isSystemSchema(String schema) {
         return MsDiffUtils.isSystemSchema(schema);
+    }
+
+    @Override
+    protected Path getRelativeFolderPath(IStatement st, Path baseDir) {
+        return MsWorkDirs.getRelativeFolderPath(st, baseDir);
+    }
+
+    @Override
+    protected List<String> getDirectoryNames() {
+        return MsWorkDirs.getDirectoryNames();
+    }
+
+    @Override
+    protected String getExportedFileName(IStatement st) {
+        String fileName = super.getExportedFileName(st);
+        if (st instanceof ISearchPath sp) {
+            return FileUtils.getValidFilename(sp.getSchemaName()) + '.' + fileName;
+        }
+        return fileName;
     }
 }

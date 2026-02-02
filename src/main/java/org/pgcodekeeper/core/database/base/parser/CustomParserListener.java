@@ -25,7 +25,6 @@ import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.exception.*;
-import org.pgcodekeeper.core.loader.ParserListenerMode;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;

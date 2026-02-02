@@ -19,8 +19,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
-import org.pgcodekeeper.core.it.IntegrationTestUtils;
-import org.pgcodekeeper.core.loader.FullAnalyze;
+import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
+import org.pgcodekeeper.core.database.base.parser.FullAnalyze;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;
@@ -36,7 +36,7 @@ class BrokenScriptTest {
         var settings = new CoreSettings();
 
         String resource = fileNameTemplate + FILES_POSTFIX.SQL;
-        var loader = IntegrationTestUtils.createDumpLoader(() -> getClass().getResourceAsStream(resource), resource, settings);
+        var loader = new PgDumpLoader(() -> getClass().getResourceAsStream(resource), resource, settings);
         var db = loader.load();
         FullAnalyze.fullAnalyze(db, loader.getErrors());
         var errors = loader.getErrors();

@@ -22,17 +22,26 @@ import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
+import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.parser.ScriptParser;
 import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.ch.ChDatabaseProvider;
+import org.pgcodekeeper.core.database.ch.loader.ChDumpLoader;
+import org.pgcodekeeper.core.database.ms.MsDatabaseProvider;
+import org.pgcodekeeper.core.database.ms.loader.MsDumpLoader;
+import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
-import org.pgcodekeeper.core.it.IntegrationTestUtils;
+import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,14 +65,16 @@ public abstract class JdbcLoaderTest {
         List<String> ignoreLists = new ArrayList<>();
         ignoreLists.add(TestUtils.getFilePath(ignoreListName, clazz));
 
-        var dumpDb = TestUtils.loadDatabaseFromDump(TestUtils.getFilePath(dumpFileName, clazz), settings);
+        String pathToFile = TestUtils.getFilePath(dumpFileName, clazz);
+        var path = Path.of(pathToFile);
+        var dumpDb = databaseProvider.getDatabaseFromDump(path, settings, new NullMonitor());
         if (null != version && dumpDb instanceof AbstractDatabase abstractDatabase) {
             abstractDatabase.setVersion(version);
         }
         var script = Files.readString(TestUtils.getPathToResource(dumpFileName, clazz));
 
-        var loader = IntegrationTestUtils.createDumpLoader(
-                () -> new ByteArrayInputStream(script.getBytes(StandardCharsets.UTF_8)), dumpFileName, settings);
+        var loader = createDumpLoader(() -> new ByteArrayInputStream(script.getBytes(StandardCharsets.UTF_8)),
+                dumpFileName, settings, databaseProvider);
         ScriptParser parser = new ScriptParser(loader, dumpFileName, script);
 
         var startConfDb = databaseProvider.getDatabaseFromJdbc(url, settings, new NullMonitor(), null);
@@ -88,8 +99,8 @@ public abstract class JdbcLoaderTest {
         var oldDb = databaseProvider.getDatabaseFromJdbc(url, settings, new NullMonitor(), null);
         var dropScript = PgCodeKeeperApi.diff(settings, oldDb, startConfDb);
 
-        var loader = IntegrationTestUtils.createDumpLoader(
-                () -> new ByteArrayInputStream(dropScript.getBytes(StandardCharsets.UTF_8)), CLEAN_DB_SCRIPT, settings);
+        var loader = createDumpLoader(() -> new ByteArrayInputStream(dropScript.getBytes(StandardCharsets.UTF_8)),
+                CLEAN_DB_SCRIPT, settings, databaseProvider);
         new JdbcRunner(new NullMonitor()).runBatches(connector,
                 new ScriptParser(loader, CLEAN_DB_SCRIPT, dropScript).batch(), null);
 
@@ -99,4 +110,18 @@ public abstract class JdbcLoaderTest {
             throw new IllegalStateException("Database cleared incorrect. in database:\n\n" + diff);
         }
     }
+
+    public static AbstractDumpLoader<?> createDumpLoader(InputStreamProvider input, String inputObjectName,
+                                                         ISettings settings, IDatabaseProvider databaseProvider) {
+        if (databaseProvider instanceof PgDatabaseProvider) {
+            return new PgDumpLoader(input, inputObjectName, settings);
+        } else if (databaseProvider instanceof MsDatabaseProvider) {
+            return new MsDumpLoader(input, inputObjectName, settings);
+        } else if (databaseProvider instanceof ChDatabaseProvider) {
+            return new ChDumpLoader(input, inputObjectName, settings);
+        } else {
+            throw new IllegalStateException("Unknown database type");
+        }
+    }
+
 }

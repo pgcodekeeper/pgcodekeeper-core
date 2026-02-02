@@ -24,7 +24,7 @@ import org.pgcodekeeper.core.database.base.schema.meta.*;
 import org.pgcodekeeper.core.database.pg.parser.expr.PgSelect;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Select_stmtContext;
 import org.pgcodekeeper.core.database.pg.schema.PgAbstractView;
-import org.pgcodekeeper.core.loader.FullAnalyze;
+import org.pgcodekeeper.core.database.base.parser.FullAnalyze;
 
 /**
  * Launcher for analyzing PostgreSQL view definitions.

@@ -28,7 +28,7 @@ import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.statement.*;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
-import org.pgcodekeeper.core.loader.ParserListenerMode;
+import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.ISettings;
 

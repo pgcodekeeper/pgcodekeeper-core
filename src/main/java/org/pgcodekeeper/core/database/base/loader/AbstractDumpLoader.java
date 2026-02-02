@@ -24,7 +24,7 @@ import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.base.schema.StatementOverride;
-import org.pgcodekeeper.core.loader.ParserListenerMode;
+import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -49,7 +49,7 @@ public abstract class AbstractDumpLoader<T extends AbstractDatabase> extends Abs
     protected Map<AbstractStatement, StatementOverride> overrides;
 
     protected AbstractDumpLoader(InputStreamProvider input, String inputObjectName,
-            ISettings settings, IMonitor monitor, int monitoringLevel) {
+                                 ISettings settings, IMonitor monitor, int monitoringLevel) {
         super(settings, monitor);
         this.input = input;
         this.inputObjectName = inputObjectName;
@@ -91,6 +91,10 @@ public abstract class AbstractDumpLoader<T extends AbstractDatabase> extends Abs
 
     public void setMode(ParserListenerMode mode) {
         this.mode = mode;
+    }
+
+    public void setOverridesMap(Map<AbstractStatement, StatementOverride> overrides) {
+        this.overrides = overrides;
     }
 
     public abstract void loadWithoutAnalyze(T db, Queue<AntlrTask<?>> antlrTasks);

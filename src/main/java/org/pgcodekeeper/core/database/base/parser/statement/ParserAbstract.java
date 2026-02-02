@@ -15,27 +15,34 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.parser.statement;
 
-import java.nio.file.*;
-import java.util.*;
-import java.util.function.*;
-import java.util.stream.Collectors;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.pgcodekeeper.core.*;
+import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.base.project.AbstractModelExporter;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
-import org.pgcodekeeper.core.exception.*;
-import org.pgcodekeeper.core.loader.ParserListenerMode;
-import org.pgcodekeeper.core.model.exporter.ModelExporter;
+import org.pgcodekeeper.core.exception.MisplacedObjectException;
+import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
+import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Utils;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Locale;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 /**
  * Abstract base class for database object parsers that provides common parsing functionality
@@ -276,16 +283,29 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
             return;
         }
 
-        String filePath = ModelExporter.getRelativeFilePath(statement).toString();
-        if (!Utils.endsWithIgnoreCase(fileName, filePath)
-                && isInProject(statement.getDbType())) {
+        String filePath = getRelativeFilePath(statement).toString();
+        if (!Utils.endsWithIgnoreCase(fileName, filePath) && isInProject()) {
             throw new MisplacedObjectException(LOCATION_ERROR.formatted(
                     statement.getBareName(), filePath), errToken);
         }
     }
 
-    private boolean isInProject(DatabaseType dbType) {
-        List<String> dirs = WorkDirs.getDirectoryNames(dbType);
+    private Path getRelativeFilePath(IStatement st) {
+        if (st instanceof ISubElement) {
+            st = st.getParent();
+        }
+        Path path = getRelativeFolderPath(st, Paths.get("")); //$NON-NLS-1$
+        return path.resolve(getExportedFileName(st));
+    }
+
+    protected String getExportedFileName(IStatement st) {
+        return AbstractModelExporter.getExportedFilenameSql(AbstractModelExporter.getExportedFilename(st));
+    }
+
+    protected abstract Path getRelativeFolderPath(IStatement st, Path baseDir);
+
+    private boolean isInProject() {
+        List<String> dirs = getDirectoryNames();
         Path parent = Paths.get(fileName).toAbsolutePath().getParent();
         while (true) {
             Path folder = parent.getFileName();
@@ -304,17 +324,19 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
         }
     }
 
+    protected abstract List<String> getDirectoryNames();
+
     protected ObjectLocation getLocation(List<? extends ParserRuleContext> ids,
                                          DbObjType type, String action, boolean isDep, String signature,
                                          LocationType locationType) {
         ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
         switch (type) {
-        case ASSEMBLY, EXTENSION, EVENT_TRIGGER, FOREIGN_DATA_WRAPPER,
-             SERVER, SCHEMA, ROLE, USER, DATABASE:
-            return buildLocation(nameCtx, action, locationType, new GenericColumn(nameCtx.getText(), type));
-        default:
-            break;
-    }
+            case ASSEMBLY, EXTENSION, EVENT_TRIGGER, FOREIGN_DATA_WRAPPER,
+                 SERVER, SCHEMA, ROLE, USER, DATABASE:
+                return buildLocation(nameCtx, action, locationType, new GenericColumn(nameCtx.getText(), type));
+            default:
+                break;
+        }
 
         ParserRuleContext schemaCtx = QNameParser.getSchemaNameCtx(ids);
         String schemaName;

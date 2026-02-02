@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
-import org.pgcodekeeper.core.loader.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

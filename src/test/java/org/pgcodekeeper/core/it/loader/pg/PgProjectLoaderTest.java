@@ -18,18 +18,18 @@ package org.pgcodekeeper.core.it.loader.pg;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
 import org.pgcodekeeper.core.ignorelist.IgnoreList;
 import org.pgcodekeeper.core.ignorelist.IgnoreParser;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
-import org.pgcodekeeper.core.loader.ProjectLoader;
-import org.pgcodekeeper.core.model.difftree.*;
-import org.pgcodekeeper.core.model.exporter.ModelExporter;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.model.difftree.DiffTree;
+import org.pgcodekeeper.core.model.difftree.TreeElement;
+import org.pgcodekeeper.core.model.difftree.TreeFlattener;
 import org.pgcodekeeper.core.monitor.NullMonitor;
+import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.utils.TempDir;
 
 import java.io.IOException;
@@ -48,7 +48,7 @@ class PgProjectLoaderTest {
 
             AbstractDatabase dbDump = loadTestDump(RESOURCE_DUMP, IntegrationTestUtils.class, settings);
 
-            new ModelExporter(dir, dbDump, DatabaseType.PG, Consts.UTF_8, settings).exportFull();
+            new PgModelExporter(dir, dbDump, Consts.UTF_8, settings).exportFull();
 
             createIgnoredSchemaFile(dir);
             Path listFile = dir.resolve(".pgcodekeeperignoreschema");
@@ -58,8 +58,8 @@ class PgProjectLoaderTest {
             IgnoreParser ignoreParser = new IgnoreParser(ignoreSchemaList);
             ignoreParser.parse(listFile);
 
-            AbstractDatabase loader = new ProjectLoader(dir.toString(), settings, new NullMonitor(), null,
-                    ignoreSchemaList).load();
+            AbstractDatabase loader = IntegrationTestUtils.createProjectLoader(dir, settings,
+                    dbDump, new NullMonitor(), ignoreSchemaList).load();
 
             for (AbstractSchema dbSchema : loader.getSchemas()) {
                 if (IGNORED_SCHEMAS_LIST.contains(dbSchema.getName())) {
@@ -95,10 +95,10 @@ class PgProjectLoaderTest {
                     .onlyTypes(settings.getAllowedTypes())
                     .flatten(root);
 
-            new ModelExporter(dir, dbDump, null, DatabaseType.PG, selected, Consts.UTF_8, settings)
+            new PgModelExporter(dir, dbDump, null, selected, Consts.UTF_8, settings)
                     .exportProject();
 
-            AbstractDatabase loader = new ProjectLoader(dir.toString(), settings).load();
+            AbstractDatabase loader = IntegrationTestUtils.createProjectLoader(dir, settings, dbDump).load();
             var objects = loader.getDescendants().toList();
             var ignoredObj = "people";
             for (var st : objects) {

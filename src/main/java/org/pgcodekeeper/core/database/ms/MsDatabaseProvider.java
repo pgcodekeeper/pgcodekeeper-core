@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms;
 
-import java.io.IOException;
-
 import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
@@ -24,14 +22,16 @@ import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.ms.jdbc.MsJdbcConnector;
 import org.pgcodekeeper.core.database.ms.loader.MsDumpLoader;
 import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
+import org.pgcodekeeper.core.database.ms.loader.MsProjectLoader;
 import org.pgcodekeeper.core.database.ms.parser.MsCustomAntlrErrorStrategy;
-import org.pgcodekeeper.core.database.ms.parser.generated.*;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLLexer;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
-import org.pgcodekeeper.core.loader.FullAnalyze;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 public class MsDatabaseProvider implements IDatabaseProvider {
@@ -67,19 +67,20 @@ public class MsDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public MsDatabase getDatabaseFromJdbc(String url, ISettings settings, IMonitor monitor, IgnoreSchemaList ignoreSchemaList) throws IOException, InterruptedException {
-        var loader = new MsJdbcLoader(getJdbcConnector(url), settings, monitor, ignoreSchemaList);
-        var db = loader.load();
-        FullAnalyze.fullAnalyze(db, loader.getErrors());
-        return db;
+    public MsDatabase getDatabaseFromJdbc(String url, ISettings settings, IMonitor monitor,
+                                          IgnoreSchemaList ignoreSchemaList) throws IOException, InterruptedException {
+        return new MsJdbcLoader(getJdbcConnector(url), settings, monitor, ignoreSchemaList).loadAndAnalyze();
     }
 
     @Override
     public IDatabase getDatabaseFromDump(Path path, ISettings settings, IMonitor monitor)
             throws IOException, InterruptedException {
-        var loader = new MsDumpLoader(path, settings, monitor);
-        var db = loader.load();
-        FullAnalyze.fullAnalyze(db, loader.getErrors());
-        return db;
+        return new MsDumpLoader(path, settings, monitor).loadAndAnalyze();
+    }
+
+    @Override
+    public IDatabase getDatabaseFromProject(Path path, ISettings settings, IMonitor monitor,
+                                            IgnoreSchemaList ignoreSchemaList) throws IOException, InterruptedException {
+        return new MsProjectLoader(path, settings, monitor, ignoreSchemaList).loadAndAnalyze();
     }
 }

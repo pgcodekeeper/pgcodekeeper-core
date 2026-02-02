@@ -13,13 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.model.exporter;
+package org.pgcodekeeper.core.database.base.project;
 
-import org.pgcodekeeper.core.*;
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.ISubElement;
 import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
+import org.pgcodekeeper.core.exception.DirectoryException;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.FileUtils;
@@ -31,23 +35,22 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.NotDirectoryException;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Exports database model as directory tree with SQL files containing object definitions.
- * Supports full, partial, and project exports with configurable encoding and database type support.
+ * Abstract base class for database model exporters that provides common export functionality
+ * for different database types (PostgreSQL, MS SQL, ClickHouse).
  * <p>
- * For historical reasons we expect a filtered user-selection-only list in {@link #exportPartial()} but we use the new
- * API {@link TreeElement#isSelected()} for selection checks instead of calling {@link Collection#contains(Object)} for
- * performance reasons.
- *
- * @author Alexander Levsha
+ * Subclasses must implement database-specific methods for directory structure and file paths.
  */
-public class ModelExporter {
+public abstract class AbstractModelExporter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ModelExporter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractModelExporter.class);
 
     public static final String GROUP_DELIMITER =
             "\n\n--------------------------------------------------------------------------------\n\n"; //$NON-NLS-1$
@@ -77,52 +80,73 @@ public class ModelExporter {
      */
     protected final Collection<TreeElement> changeList;
 
-    /**
-     * Database type for defining directory structure
-     */
-    private final DatabaseType databaseType;
-
     protected final ISettings settings;
 
     /**
-     * Creates a new ModelExporter for full database export.
+     * Creates a new AbstractModelExporter for full database export.
      *
-     * @param outDir       output directory, should be empty or not exist
-     * @param db           database to export
-     * @param databaseType database type for directory structure
-     * @param sqlEncoding  SQL file encoding
-     * @param settings     export settings
+     * @param outDir      output directory, should be empty or not exist
+     * @param db          database to export
+     * @param sqlEncoding SQL file encoding
+     * @param settings    export settings
      */
-    public ModelExporter(Path outDir, IDatabase db, DatabaseType databaseType, String sqlEncoding,
-                         ISettings settings) {
-        this(outDir, db, null, databaseType, null, sqlEncoding, settings);
+    protected AbstractModelExporter(Path outDir, IDatabase db, String sqlEncoding, ISettings settings) {
+        this(outDir, db, null, null, sqlEncoding, settings);
     }
 
     /**
-     * Creates a new ModelExporter for partial or project export.
+     * Creates a new AbstractModelExporter for partial or project export.
      *
      * @param outDir         output directory
      * @param newDb          new database schema
      * @param oldDb          old database schema, can be null for project export
-     * @param databaseType   database type for directory structure
      * @param changedObjects collection of changed objects
      * @param sqlEncoding    SQL file encoding
      * @param settings       export settings
      */
-    public ModelExporter(Path outDir, IDatabase newDb, IDatabase oldDb,
-                         DatabaseType databaseType, Collection<TreeElement> changedObjects,
-                         String sqlEncoding, ISettings settings) {
+    protected AbstractModelExporter(Path outDir, IDatabase newDb, IDatabase oldDb,
+                                    Collection<TreeElement> changedObjects,
+                                    String sqlEncoding, ISettings settings) {
         this.outDir = outDir;
         this.newDb = newDb;
         this.oldDb = oldDb;
         this.sqlEncoding = sqlEncoding;
         this.changeList = changedObjects;
-        this.databaseType = databaseType;
 
         // we should create new settings to get correct script in project files
         var copySettings = new CoreSettings();
         copySettings.setDbType(settings.getDbType());
         this.settings = copySettings;
+    }
+
+    /**
+     * Gets the list of top-level directory names for this database type.
+     *
+     * @return list of directory names
+     */
+    protected abstract List<String> getDirectoryNames();
+
+    /**
+     * Gets the relative folder path for a database statement.
+     *
+     * @param st the database statement
+     * @return relative folder path where the statement should be stored
+     */
+    protected abstract Path getRelativeFolderPath(IStatement st);
+
+    /**
+     * Gets the relative file path for a database statement within project structure.
+     *
+     * @param st the database statement
+     * @return relative path for the statement's file
+     */
+    public Path getRelativeFilePath(IStatement st) {
+        if (st instanceof ISubElement) {
+            st = st.getParent();
+        }
+        Path path = getRelativeFolderPath(st);
+        String fileName = getExportedFilenameSql(getExportedFilename(st));
+        return path.resolve(fileName);
     }
 
     /**
@@ -149,7 +173,7 @@ public class ModelExporter {
                 throw new NotDirectoryException(outDir.toString());
             }
 
-            for (String subdirName : WorkDirs.getDirectoryNames(databaseType)) {
+            for (String subdirName : getDirectoryNames()) {
                 if (Files.exists(outDir.resolve(subdirName))) {
                     String msg = Messages.ModelExporter_log_create_dir_err_contains_dir.formatted(subdirName);
                     LOG.error(msg);
@@ -327,55 +351,37 @@ public class ModelExporter {
     }
 
     /**
-     * Gets the relative file path for a database statement within project structure.
-     *
-     * @param st the database statement
-     * @return relative path for the statement's file
+     * Comparator for ordering database statements during export.
+     * Orders table sub-elements (indexes, triggers, rules, constraints, policies, statistics)
+     * in a consistent order to ensure deterministic output.
      */
-    public static Path getRelativeFilePath(IStatement st) {
-        if (st instanceof ISubElement) {
-            st = st.getParent();
-        }
-        Path path = WorkDirs.getRelativeFolderPath(st, Paths.get("")); //$NON-NLS-1$
+    private static class ExportTableOrder implements Comparator<IStatement> {
 
-        String fileName = getExportedFilenameSql(getExportedFilename(st));
-        if (st.getDbType() == DatabaseType.MS && st instanceof ISearchPath sp) {
-            fileName = FileUtils.getValidFilename(sp.getSchemaName()) + '.' + fileName;
-        }
+        static final ExportTableOrder INSTANCE = new ExportTableOrder();
 
-        return path.resolve(fileName);
-    }
-}
+        @Override
+        public int compare(IStatement o1, IStatement o2) {
+            int result = Integer.compare(getTableSubElementRank(o1), getTableSubElementRank(o2));
+            if (result != 0) {
+                return result;
+            }
 
-/**
- * Sets fixed order for table subelements export as historically defined by DiffTree.create().
- */
-final class ExportTableOrder implements Comparator<IStatement> {
-
-    static final ExportTableOrder INSTANCE = new ExportTableOrder();
-
-    @Override
-    public int compare(IStatement o1, IStatement o2) {
-        int result = Integer.compare(getTableSubElementRank(o1), getTableSubElementRank(o2));
-        if (result != 0) {
-            return result;
+            return o1.getBareName().compareTo(o2.getBareName());
         }
 
-        return o1.getBareName().compareTo(o2.getBareName());
-    }
+        private int getTableSubElementRank(IStatement el) {
+            return switch (el.getStatementType()) {
+                case INDEX -> 1;
+                case TRIGGER -> 2;
+                case RULE -> 3;
+                case CONSTRAINT -> 4;
+                case POLICY -> 5;
+                case STATISTICS -> 6;
+                default -> 0;
+            };
+        }
 
-    private int getTableSubElementRank(IStatement el) {
-        return switch (el.getStatementType()) {
-            case INDEX -> 1;
-            case TRIGGER -> 2;
-            case RULE -> 3;
-            case CONSTRAINT -> 4;
-            case POLICY -> 5;
-            case STATISTICS -> 6;
-            default -> 0;
-        };
-    }
-
-    private ExportTableOrder() {
+        private ExportTableOrder() {
+        }
     }
 }

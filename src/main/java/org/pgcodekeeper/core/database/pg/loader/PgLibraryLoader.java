@@ -18,10 +18,10 @@ package org.pgcodekeeper.core.database.pg.loader;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.base.loader.AbstractLibraryLoader;
-import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
 import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.monitor.IMonitor;
+import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.nio.file.Path;
@@ -30,7 +30,7 @@ import java.util.Set;
 public class PgLibraryLoader extends AbstractLibraryLoader<PgDatabase> {
 
     public PgLibraryLoader(PgDatabase database, Path metaPath, Set<String> loadedPaths,
-            ISettings settings, IMonitor monitor) {
+                           ISettings settings, IMonitor monitor) {
         super(database, metaPath, loadedPaths, settings, monitor);
     }
 
@@ -52,9 +52,8 @@ public class PgLibraryLoader extends AbstractLibraryLoader<PgDatabase> {
     }
 
     @Override
-    protected AbstractProjectLoader getProjectLoader(Path p, ISettings copySettings) {
-        // FIXME wait project loader
-        return null;
+    protected PgProjectLoader getProjectLoader(Path p, ISettings copySettings) {
+        return new PgProjectLoader(p, copySettings, new NullMonitor(), null);
     }
 
     @Override

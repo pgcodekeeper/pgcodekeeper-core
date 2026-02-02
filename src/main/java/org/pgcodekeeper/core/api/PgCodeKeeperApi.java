@@ -16,19 +16,30 @@
 package org.pgcodekeeper.core.api;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.PgDiff;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.base.project.AbstractModelExporter;
+import org.pgcodekeeper.core.database.base.project.AbstractProjectUpdater;
+import org.pgcodekeeper.core.database.ch.project.ChModelExporter;
+import org.pgcodekeeper.core.database.ch.project.ChProjectUpdater;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.database.ms.project.MsModelExporter;
+import org.pgcodekeeper.core.database.ms.project.MsProjectUpdater;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
+import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
+import org.pgcodekeeper.core.database.pg.project.PgProjectUpdater;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.ignorelist.IgnoreList;
 import org.pgcodekeeper.core.ignorelist.IgnoreParser;
-import org.pgcodekeeper.core.model.difftree.*;
-import org.pgcodekeeper.core.model.exporter.ModelExporter;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.model.difftree.DiffTree;
+import org.pgcodekeeper.core.model.difftree.TreeElement;
+import org.pgcodekeeper.core.model.difftree.TreeFlattener;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.utils.ProjectUpdater;
+import org.pgcodekeeper.core.settings.ISettings;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
@@ -58,10 +69,10 @@ public final class PgCodeKeeperApi {
     /**
      * Compares two databases and generates a migration script with filtering.
      *
-     * @param settings       ISettings object
-     * @param oldDb          the old database version to compare from
-     * @param newDb          the new database version to compare to
-     * @param ignoreLists    collection of paths to files containing objects to ignore
+     * @param settings    ISettings object
+     * @param oldDb       the old database version to compare from
+     * @param newDb       the new database version to compare to
+     * @param ignoreLists collection of paths to files containing objects to ignore
      * @return the generated migration script as a string
      * @throws IOException          if I/O operations fail or ignore list file cannot be read
      * @throws InterruptedException if the thread is interrupted during the operation
@@ -143,11 +154,11 @@ public final class PgCodeKeeperApi {
     /**
      * Exports database schema to project files with filtering and progress tracking.
      *
-     * @param settings       ISettings object
-     * @param dbToExport     the database to export
-     * @param exportTo       path to the target project directory
-     * @param ignoreLists    collection of paths to files containing objects to ignore
-     * @param monitor        progress monitor for tracking the operation
+     * @param settings    ISettings object
+     * @param dbToExport  the database to export
+     * @param exportTo    path to the target project directory
+     * @param ignoreLists collection of paths to files containing objects to ignore
+     * @param monitor     progress monitor for tracking the operation
      * @throws IOException          if I/O operations fail, if export directory does not exist,
      *                              if export directory is not empty, if path is a file,
      *                              or if ignore list file cannot be read
@@ -161,8 +172,21 @@ public final class PgCodeKeeperApi {
         root.setAllChecked();
 
         List<TreeElement> selected = getSelectedElements(settings, root, ignoreList);
-        new ModelExporter(Paths.get(exportTo), dbToExport, null, settings.getDbType(), selected,
-                Consts.UTF_8, settings).exportProject();
+        createModelExporter(Paths.get(exportTo), dbToExport, selected,
+                settings).exportProject();
+    }
+
+    private static AbstractModelExporter createModelExporter(Path outDir, IDatabase newDb,
+                                                             List<TreeElement> changedObjects,
+                                                             ISettings settings) {
+        if (newDb instanceof ChDatabase) {
+            return new ChModelExporter(outDir, newDb, null, changedObjects, Consts.UTF_8, settings);
+        } else if (newDb instanceof MsDatabase) {
+            return new MsModelExporter(outDir, newDb, null, changedObjects, Consts.UTF_8, settings);
+        } else if (newDb instanceof PgDatabase) {
+            return new PgModelExporter(outDir, newDb, null, changedObjects, Consts.UTF_8, settings);
+        }
+        throw new IllegalArgumentException("Unsupported database type: " + newDb.getClass().getName());
     }
 
     /**
@@ -172,27 +196,26 @@ public final class PgCodeKeeperApi {
      * @param oldDb           the old database version
      * @param newDb           the new database version with changes
      * @param projectToUpdate path to the project directory to update
-     * @throws PgCodeKeeperException if update operation fails or if parsing errors occur
-     * @throws IOException           if I/O operations fail, if project directory does not exist or if path is a file
-     * @throws InterruptedException  if the thread is interrupted during the operation
+     * @throws IOException          if I/O operations fail, if project directory does not exist or if path is a file
+     * @throws InterruptedException if the thread is interrupted during the operation
      */
     public static void update(ISettings settings, IDatabase oldDb, IDatabase newDb, String projectToUpdate)
-            throws PgCodeKeeperException, IOException, InterruptedException {
+            throws IOException, InterruptedException {
         update(settings, oldDb, newDb, projectToUpdate, Collections.emptyList(), null);
     }
 
     /**
      * Updates project with changes from database with filtering and progress tracking.
      *
-     * @param settings             ISettings object
-     * @param oldDb                the old database version
-     * @param newDb                the new database version with changes
-     * @param projectToUpdate      path to the project directory to update
-     * @param ignoreLists          collection of paths to files containing objects to ignore
-     * @param monitor              progress monitor for tracking the operation
-     * @throws IOException           if I/O operations fail, if project directory does not exist, if path is a file,
-     *                               or if ignore list files cannot be read
-     * @throws InterruptedException  if the thread is interrupted during the operation
+     * @param settings        ISettings object
+     * @param oldDb           the old database version
+     * @param newDb           the new database version with changes
+     * @param projectToUpdate path to the project directory to update
+     * @param ignoreLists     collection of paths to files containing objects to ignore
+     * @param monitor         progress monitor for tracking the operation
+     * @throws IOException          if I/O operations fail, if project directory does not exist, if path is a file,
+     *                              or if ignore list files cannot be read
+     * @throws InterruptedException if the thread is interrupted during the operation
      */
     public static void update(ISettings settings, IDatabase oldDb, IDatabase newDb,
                               String projectToUpdate, Collection<String> ignoreLists, IMonitor monitor)
@@ -202,8 +225,20 @@ public final class PgCodeKeeperApi {
         root.setAllChecked();
         List<TreeElement> selected = getSelectedElements(settings, root, ignoreList);
 
-        new ProjectUpdater(newDb, oldDb, selected, settings.getDbType(), Consts.UTF_8, Paths.get(projectToUpdate),
-                false, settings).updatePartial();
+        createProjectUpdater(newDb, oldDb, selected, Paths.get(projectToUpdate), settings).updatePartial();
+    }
+
+    private static AbstractProjectUpdater createProjectUpdater(IDatabase newDb, IDatabase oldDb,
+                                                               List<TreeElement> changedObjects,
+                                                               Path projectPath, ISettings settings) {
+        if (newDb instanceof ChDatabase) {
+            return new ChProjectUpdater(newDb, oldDb, changedObjects, Consts.UTF_8, projectPath, false, settings);
+        } else if (newDb instanceof MsDatabase) {
+            return new MsProjectUpdater(newDb, oldDb, changedObjects, Consts.UTF_8, projectPath, false, settings);
+        } else if (newDb instanceof PgDatabase) {
+            return new PgProjectUpdater(newDb, oldDb, changedObjects, Consts.UTF_8, projectPath, false, settings);
+        }
+        throw new IllegalArgumentException("Unsupported database type: " + newDb.getClass().getName());
     }
 
     private static List<TreeElement> getSelectedElements(ISettings settings, TreeElement root, IgnoreList ignoreList) {

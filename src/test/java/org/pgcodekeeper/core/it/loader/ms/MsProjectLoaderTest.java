@@ -19,15 +19,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.ignorelist.IgnoreParser;
-import org.pgcodekeeper.core.it.IntegrationTestUtils;
-import org.pgcodekeeper.core.loader.ProjectLoader;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
-import org.pgcodekeeper.core.model.exporter.ModelExporter;
 import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
-import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.database.ms.project.MsModelExporter;
+import org.pgcodekeeper.core.ignorelist.IgnoreParser;
+import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
+import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.monitor.NullMonitor;
+import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.utils.TempDir;
 
 import java.io.IOException;
@@ -46,7 +45,7 @@ class MsProjectLoaderTest {
 
             AbstractDatabase msDbDump = loadTestDump(RESOURCE_MS_DUMP, IntegrationTestUtils.class, settings);
 
-            new ModelExporter(dir, msDbDump, DatabaseType.MS, Consts.UTF_8, settings).exportFull();
+            new MsModelExporter(dir, msDbDump, Consts.UTF_8, settings).exportFull();
 
             createIgnoredSchemaFile(dir);
             Path listFile = dir.resolve(".pgcodekeeperignoreschema");
@@ -56,8 +55,8 @@ class MsProjectLoaderTest {
             IgnoreParser ignoreParser = new IgnoreParser(ignoreSchemaList);
             ignoreParser.parse(listFile);
 
-            AbstractDatabase loader = new ProjectLoader(dir.toString(), settings, new NullMonitor(), null,
-                    ignoreSchemaList).load();
+            AbstractDatabase loader = IntegrationTestUtils.createProjectLoader(dir, settings, msDbDump,
+                    new NullMonitor(), ignoreSchemaList).load();
 
             for (AbstractSchema dbSchema : loader.getSchemas()) {
                 if (IGNORED_SCHEMAS_LIST.contains(dbSchema.getName())) {
