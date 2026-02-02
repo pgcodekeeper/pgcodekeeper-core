@@ -15,13 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api;
 
-import java.io.IOException;
-
-import org.antlr.v4.runtime.ANTLRErrorStrategy;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Lexer;
-import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
@@ -71,12 +65,11 @@ public interface IDatabaseProvider {
     IJdbcConnector getJdbcConnector(String url);
 
     /**
-     * @param url full jdbc url
-     * @param settings configuration settings for database comparison and migration operations
-     * @param monitor progress monitor
+     * @param url              full jdbc url
+     * @param settings         configuration settings for database comparison and migration operations
+     * @param monitor          progress monitor
      * @param ignoreSchemaList list of ignored schema
      * @return a database
-     *
      * @see IDatabase
      * @see ISettings
      * @see IMonitor
@@ -86,15 +79,28 @@ public interface IDatabaseProvider {
             throws IOException, InterruptedException;
 
     /**
-     * @param path path to dump
+     * @param path     path to dump
      * @param settings configuration settings for database comparison and migration operations
-     * @param monitor progress monitor
+     * @param monitor  progress monitor
      * @return a database
-     *
      * @see IDatabase
      * @see ISettings
      * @see IMonitor
      */
     IDatabase getDatabaseFromDump(Path path, ISettings settings, IMonitor monitor)
+            throws IOException, InterruptedException;
+
+    /**
+     * @param path             path to project directory
+     * @param settings         configuration settings for database comparison and migration operations
+     * @param monitor          progress monitor
+     * @param ignoreSchemaList list of ignored schema
+     * @return a database
+     * @see IDatabase
+     * @see ISettings
+     * @see IMonitor
+     * @see IgnoreSchemaList
+     */
+    IDatabase getDatabaseFromProject(Path path, ISettings settings, IMonitor monitor, IgnoreSchemaList ignoreSchemaList)
             throws IOException, InterruptedException;
 }

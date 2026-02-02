@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.model.exporter;
+package org.pgcodekeeper.core.database.base.project;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.Assertions;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,8 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
-import org.pgcodekeeper.core.utils.Utils;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PartialExportTestFileVisitor extends SimpleFileVisitor<Path> {
 
@@ -42,8 +42,8 @@ public class PartialExportTestFileVisitor extends SimpleFileVisitor<Path> {
     private final boolean isInSource;
 
     public PartialExportTestFileVisitor(Path pathToBeCompared, Path pathToCompareTo,
-            Map<String, String> modifiedFiles, List<String> newFiles, List<String> deletedFiles,
-            boolean isInSource) {
+                                        Map<String, String> modifiedFiles, List<String> newFiles, List<String> deletedFiles,
+                                        boolean isInSource) {
         this.pathToBeCompared = pathToBeCompared;
         this.pathToCompareTo = pathToCompareTo;
 

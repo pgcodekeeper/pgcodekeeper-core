@@ -18,12 +18,13 @@ package org.pgcodekeeper.core.it.parser.ms;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
-import org.pgcodekeeper.core.it.IntegrationTestUtils;
-import org.pgcodekeeper.core.loader.ParserListenerMode;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.ms.loader.MsDumpLoader;
+import org.pgcodekeeper.core.it.IntegrationTestUtils;
+import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;
@@ -80,7 +81,7 @@ class MsObjReferencesTest {
         settings.setDbType(DatabaseType.MS);
 
         String resource = fileNameTemplate + FILES_POSTFIX.SQL;
-        var loader = IntegrationTestUtils.createDumpLoader(() -> getClass().getResourceAsStream(resource), resource, settings);
+        var loader = new MsDumpLoader(() -> getClass().getResourceAsStream(resource), resource, settings);
         loader.setMode(ParserListenerMode.REF);
         AbstractDatabase db = loader.load();
 

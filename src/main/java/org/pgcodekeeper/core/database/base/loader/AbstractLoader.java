@@ -16,15 +16,20 @@
 package org.pgcodekeeper.core.database.base.loader;
 
 import org.pgcodekeeper.core.database.api.loader.ILoader;
-import org.pgcodekeeper.core.database.base.parser.*;
+import org.pgcodekeeper.core.database.base.parser.AntlrTask;
+import org.pgcodekeeper.core.database.base.parser.AntlrTaskManager;
 import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.base.parser.FullAnalyze;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
 
 /**
  * Base database loader
@@ -58,6 +63,19 @@ public abstract class AbstractLoader<T extends AbstractDatabase> implements ILoa
 
     public void addError(Object error) {
         errors.add(error);
+    }
+
+    /**
+     * Loads the database and performs full expression analysis.
+     *
+     * @return fully loaded and analyzed database
+     * @throws IOException          if database loading fails
+     * @throws InterruptedException if the loading process is interrupted
+     */
+    public T loadAndAnalyze() throws IOException, InterruptedException {
+        T db = load();
+        FullAnalyze.fullAnalyze(db, errors);
+        return db;
     }
 
     protected void prepare() {

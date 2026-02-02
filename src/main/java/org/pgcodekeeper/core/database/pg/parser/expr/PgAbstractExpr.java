@@ -31,7 +31,7 @@ import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
-import org.pgcodekeeper.core.loader.FullAnalyze;
+import org.pgcodekeeper.core.database.base.parser.FullAnalyze;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.utils.*;
 

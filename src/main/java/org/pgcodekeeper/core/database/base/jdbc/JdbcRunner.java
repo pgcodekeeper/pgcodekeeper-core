@@ -20,9 +20,12 @@ import java.sql.*;
 import java.util.List;
 import java.util.concurrent.*;
 
+import org.pgcodekeeper.core.callable.QueriesBatchCallable;
+import org.pgcodekeeper.core.callable.QueryCallable;
+import org.pgcodekeeper.core.callable.ResultSetCallable;
+import org.pgcodekeeper.core.callable.StatementCallable;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
-import org.pgcodekeeper.core.loader.callables.*;
 import org.pgcodekeeper.core.monitor.*;
 import org.pgcodekeeper.core.reporter.IProgressReporter;
 import org.pgcodekeeper.core.utils.DaemonThreadFactory;

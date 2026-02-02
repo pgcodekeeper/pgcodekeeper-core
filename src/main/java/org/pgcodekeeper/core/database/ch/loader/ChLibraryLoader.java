@@ -17,7 +17,6 @@ package org.pgcodekeeper.core.database.ch.loader;
 
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.base.loader.AbstractLibraryLoader;
-import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
 import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.monitor.IMonitor;
@@ -29,7 +28,7 @@ import java.util.Set;
 public class ChLibraryLoader extends AbstractLibraryLoader<ChDatabase> {
 
     public ChLibraryLoader(ChDatabase database, Path metaPath, Set<String> loadedPaths,
-            ISettings settings, IMonitor monitor) {
+                           ISettings settings, IMonitor monitor) {
         super(database, metaPath, loadedPaths, settings, monitor);
     }
 
@@ -51,9 +50,8 @@ public class ChLibraryLoader extends AbstractLibraryLoader<ChDatabase> {
     }
 
     @Override
-    protected AbstractProjectLoader getProjectLoader(Path p, ISettings copySettings) {
-        // FIXME wait project loader
-        return null;
+    protected ChProjectLoader getProjectLoader(Path p, ISettings copySettings) {
+        return new ChProjectLoader(p, copySettings, monitor, null);
     }
 
     @Override

@@ -15,13 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg;
 
-import java.io.IOException;
-
-import org.antlr.v4.runtime.ANTLRErrorStrategy;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Lexer;
-import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
@@ -29,14 +23,16 @@ import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
 import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.loader.PgProjectLoader;
 import org.pgcodekeeper.core.database.pg.parser.PgCustomAntlrErrorStrategy;
-import org.pgcodekeeper.core.database.pg.parser.generated.*;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLLexer;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
-import org.pgcodekeeper.core.loader.FullAnalyze;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.ISettings;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 public class PgDatabaseProvider implements IDatabaseProvider {
@@ -75,18 +71,18 @@ public class PgDatabaseProvider implements IDatabaseProvider {
     public PgDatabase getDatabaseFromJdbc(String url, ISettings settings, IMonitor monitor, IgnoreSchemaList ignoreSchemaList)
             throws IOException, InterruptedException {
         String timezone = settings.getTimeZone() == null ? Consts.UTC : settings.getTimeZone();
-        var loader = new PgJdbcLoader(getJdbcConnector(url), timezone, settings, monitor, ignoreSchemaList);
-        var db = loader.load();
-        FullAnalyze.fullAnalyze(db, loader.getErrors());
-        return db;
+        return new PgJdbcLoader(getJdbcConnector(url), timezone, settings, monitor, ignoreSchemaList).loadAndAnalyze();
     }
 
     @Override
     public IDatabase getDatabaseFromDump(Path path, ISettings settings, IMonitor monitor)
             throws IOException, InterruptedException {
-        var loader = new PgDumpLoader(path, settings, monitor);
-        var db = loader.load();
-        FullAnalyze.fullAnalyze(db, loader.getErrors());
-        return db;
+        return new PgDumpLoader(path, settings, monitor).loadAndAnalyze();
+    }
+
+    @Override
+    public IDatabase getDatabaseFromProject(Path path, ISettings settings, IMonitor monitor,
+                                            IgnoreSchemaList ignoreSchemaList) throws IOException, InterruptedException {
+        return new PgProjectLoader(path, settings, monitor, ignoreSchemaList).loadAndAnalyze();
     }
 }

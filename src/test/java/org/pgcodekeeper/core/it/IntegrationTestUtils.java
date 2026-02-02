@@ -20,18 +20,23 @@ import org.pgcodekeeper.core.ContextLocation;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
-import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
 import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.database.ch.loader.ChDumpLoader;
+import org.pgcodekeeper.core.database.ch.loader.ChProjectLoader;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.database.ms.loader.MsDumpLoader;
+import org.pgcodekeeper.core.database.ms.loader.MsProjectLoader;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
-import org.pgcodekeeper.core.loader.FullAnalyze;
+import org.pgcodekeeper.core.database.pg.loader.PgProjectLoader;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
+import org.pgcodekeeper.core.database.base.parser.FullAnalyze;
 import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
@@ -59,20 +64,19 @@ public final class IntegrationTestUtils {
 
     public static AbstractDatabase loadTestDump(String resource, Class<?> c, ISettings settings, boolean analysis)
             throws IOException, InterruptedException {
-        var loader = createDumpLoader(() -> c.getResourceAsStream(resource),
-                "test/" + c.getName() + '/' + resource, settings);
+        InputStreamProvider input = () -> c.getResourceAsStream(resource);
+        String inputObjectName = "test/" + c.getName() + '/' + resource;
+        var loader = switch (settings.getDbType()) {
+            case PG -> new PgDumpLoader(input, inputObjectName, settings);
+            case MS -> new MsDumpLoader(input, inputObjectName, settings);
+            case CH -> new ChDumpLoader(input, inputObjectName, settings);
+        };
         AbstractDatabase db = loader.load();
         if (analysis) {
             FullAnalyze.fullAnalyze(db, loader.getErrors());
         }
         Assertions.assertEquals("[]", loader.getErrors().toString(), "Test resource caused loader errors!");
         return db;
-    }
-
-    public static AbstractDatabase createDumpDB(DatabaseType dbType) {
-        var settings = new CoreSettings();
-        settings.setDbType(dbType);
-        return createDumpLoader(() -> null, null, settings).createDatabaseWithSchema();
     }
 
     public static void assertDiffSame(AbstractDatabase db, String template, ISettings settings)
@@ -193,13 +197,24 @@ public final class IntegrationTestUtils {
         return sb.toString();
     }
 
-    public static AbstractDumpLoader<?> createDumpLoader(InputStreamProvider input, String inputObjectName,
-                                                         ISettings settings) {
-        return switch (settings.getDbType()) {
-            case PG -> new PgDumpLoader(input, inputObjectName, settings);
-            case MS -> new MsDumpLoader(input, inputObjectName, settings);
-            case CH -> new ChDumpLoader(input, inputObjectName, settings);
-        };
+    public static AbstractProjectLoader<?> createProjectLoader(Path dirPath, ISettings settings, IDatabase database) {
+        return createProjectLoader(dirPath, settings, database, null, null);
+    }
+
+    public static AbstractProjectLoader<?> createProjectLoader(Path dirPath, ISettings settings, IDatabase database,
+                                                               IMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
+        AbstractProjectLoader<?> loader;
+        if (database instanceof PgDatabase) {
+            loader = new PgProjectLoader(dirPath, settings, monitor, ignoreSchemaList);
+        } else if (database instanceof MsDatabase) {
+            loader = new MsProjectLoader(dirPath, settings, monitor, ignoreSchemaList);
+        } else if (database instanceof ChDatabase) {
+            loader = new ChProjectLoader(dirPath, settings, monitor, ignoreSchemaList);
+        } else {
+            throw new IllegalStateException("Unknown database type");
+        }
+
+        return loader;
     }
 
     private IntegrationTestUtils() {

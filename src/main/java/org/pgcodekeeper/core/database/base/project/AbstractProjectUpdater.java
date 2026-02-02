@@ -13,17 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.utils;
+package org.pgcodekeeper.core.database.base.project;
 
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.exception.PgCodeKeeperException;
-import org.pgcodekeeper.core.WorkDirs;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
-import org.pgcodekeeper.core.model.exporter.ModelExporter;
-import org.pgcodekeeper.core.model.exporter.OverridesModelExporter;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.FileUtils;
+import org.pgcodekeeper.core.utils.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,25 +29,30 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
+import java.util.List;
 
 /**
- * Database project update and export management utility.
+ * Abstract base class for database project updaters that provides common update functionality
+ * for different database types (PostgreSQL, MS SQL, ClickHouse).
+ * <p>
  * Handles partial and full updates of database projects with safe backup and restore functionality.
  * Supports overrides-only updates and manages temporary directories for safe atomic operations.
+ * <p>
+ * Subclasses must implement database-specific methods for directory structure and model exporters.
  */
-public class ProjectUpdater {
+public abstract class AbstractProjectUpdater {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ProjectUpdater.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractProjectUpdater.class);
+    private static final String OVERRIDES = "OVERRIDES";
 
     private final IDatabase dbNew;
     private final IDatabase dbOld;
-
     private final Collection<TreeElement> changedObjects;
     private final String encoding;
     private final Path dirExport;
-    private final DatabaseType dbType;
     private final boolean overridesOnly;
-    private final ISettings settings;
+
+    protected final ISettings settings;
 
     /**
      * Creates a new project updater with specified configuration.
@@ -57,26 +60,66 @@ public class ProjectUpdater {
      * @param dbNew          the new database schema
      * @param dbOld          the old database schema for comparison
      * @param changedObjects collection of changed tree elements
-     * @param dbType         the database type
      * @param encoding       the file encoding to use
      * @param dirExport      the export directory path
      * @param overridesOnly  whether to update only overrides
      * @param settings       the application settings
      */
-    public ProjectUpdater(IDatabase dbNew, IDatabase dbOld, Collection<TreeElement> changedObjects,
-                          DatabaseType dbType, String encoding, Path dirExport, boolean overridesOnly, ISettings settings) {
+    protected AbstractProjectUpdater(IDatabase dbNew, IDatabase dbOld, Collection<TreeElement> changedObjects,
+                                     String encoding, Path dirExport, boolean overridesOnly, ISettings settings) {
         this.dbNew = dbNew;
         this.dbOld = dbOld;
-
         this.changedObjects = changedObjects;
-
         this.encoding = encoding;
         this.dirExport = dirExport;
-
-        this.dbType = dbType;
         this.overridesOnly = overridesOnly;
         this.settings = settings;
     }
+
+    /**
+     * Gets the list of top-level directory names for this database type.
+     *
+     * @return list of directory names
+     */
+    protected abstract List<String> getDirectoryNames();
+
+    /**
+     * Creates a model exporter for full database export.
+     *
+     * @param outDir      output directory
+     * @param db          database to export
+     * @param sqlEncoding SQL file encoding
+     * @return model exporter instance
+     */
+    protected abstract AbstractModelExporter createModelExporter(Path outDir, IDatabase db, String sqlEncoding);
+
+    /**
+     * Creates a model exporter for partial export.
+     *
+     * @param outDir         output directory
+     * @param newDb          new database schema
+     * @param oldDb          old database schema
+     * @param changedObjects collection of changed objects
+     * @param sqlEncoding    SQL file encoding
+     * @return model exporter instance
+     */
+    protected abstract AbstractModelExporter createModelExporter(Path outDir, IDatabase newDb, IDatabase oldDb,
+                                                                 Collection<TreeElement> changedObjects,
+                                                                 String sqlEncoding);
+
+    /**
+     * Creates an overrides model exporter for partial export.
+     *
+     * @param outDir         output directory
+     * @param newDb          new database schema
+     * @param oldDb          old database schema
+     * @param changedObjects collection of changed objects
+     * @param sqlEncoding    SQL file encoding
+     * @return overrides model exporter instance
+     */
+    protected abstract AbstractModelExporter createOverridesModelExporter(Path outDir, IDatabase newDb, IDatabase oldDb,
+                                                                          Collection<TreeElement> changedObjects,
+                                                                          String sqlEncoding);
 
     /**
      * Performs partial update of database project.
@@ -95,7 +138,7 @@ public class ProjectUpdater {
             Path dirTmp = tmp.get();
 
             try {
-                updatePartial(dirTmp);
+                updatePartialInternal(dirTmp);
             } catch (Exception ex) {
                 caughtProcessingEx = true;
                 tryToRestore(dirTmp, ex);
@@ -104,14 +147,12 @@ public class ProjectUpdater {
             }
         } catch (IOException ex) {
             if (caughtProcessingEx) {
-                // exception & err msg are already formed in the inner catch
                 throw ex;
             }
             throw new IOException(
                     Messages.ProjectUpdater_error_no_tempdir.formatted(ex.getLocalizedMessage()), ex);
         }
     }
-
 
     private void tryToRestore(Path dirTmp, Exception ex) throws IOException {
         LOG.error(Messages.ProjectUpdater_log_update_err_restore_proj, ex);
@@ -125,20 +166,20 @@ public class ProjectUpdater {
         }
     }
 
-    private void updatePartial(Path dirTmp) throws IOException, PgCodeKeeperException {
+    private void updatePartialInternal(Path dirTmp) throws IOException, PgCodeKeeperException {
         LOG.info(Messages.ProjectUpdater_log_start_partial_update);
         if (overridesOnly) {
-            updateFolder(dirTmp, WorkDirs.OVERRIDES);
-            new OverridesModelExporter(dirExport.resolve(WorkDirs.OVERRIDES),
-                    dbNew, dbOld, changedObjects, encoding, dbType, settings).exportPartial();
+            updateFolder(dirTmp, OVERRIDES);
+            createOverridesModelExporter(dirExport.resolve(OVERRIDES),
+                    dbNew, dbOld, changedObjects, encoding).exportPartial();
             return;
         }
 
-        for (String subdirName : WorkDirs.getDirectoryNames(dbType)) {
+        for (String subdirName : getDirectoryNames()) {
             updateFolder(dirTmp, subdirName);
         }
 
-        new ModelExporter(dirExport, dbNew, dbOld, dbType, changedObjects, encoding, settings).exportPartial();
+        createModelExporter(dirExport, dbNew, dbOld, changedObjects, encoding).exportPartial();
     }
 
     private void updateFolder(Path dirTmp, String folder) throws IOException {
@@ -148,13 +189,15 @@ public class ProjectUpdater {
 
             Files.walkFileTree(sourcePath, new SimpleFileVisitor<>() {
                 @Override
-                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+                        throws IOException {
                     Files.createDirectories(targetPath.resolve(sourcePath.relativize(dir)));
                     return FileVisitResult.CONTINUE;
                 }
 
                 @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                        throws IOException {
                     Files.copy(file, targetPath.resolve(sourcePath.relativize(file)));
                     return FileVisitResult.CONTINUE;
                 }
@@ -177,9 +220,9 @@ public class ProjectUpdater {
 
             try {
                 safeCleanProjectDir(dirTmp);
-                new ModelExporter(dirExport, dbNew, dbType, encoding, settings).exportFull();
+                createModelExporter(dirExport, dbNew, encoding).exportFull();
                 if (projectOnly) {
-                    restoreFolder(dirTmp, WorkDirs.OVERRIDES);
+                    restoreFolder(dirTmp, OVERRIDES);
                 }
             } catch (Exception ex) {
                 caughtProcessingEx = true;
@@ -190,7 +233,6 @@ public class ProjectUpdater {
             }
         } catch (IOException ex) {
             if (caughtProcessingEx) {
-                // exception & err msg are already formed in the inner catch
                 throw ex;
             }
             throw new IOException(
@@ -199,11 +241,11 @@ public class ProjectUpdater {
     }
 
     private void safeCleanProjectDir(Path dirTmp) throws IOException {
-        for (String subdirName : WorkDirs.getDirectoryNames(dbType)) {
+        for (String subdirName : getDirectoryNames()) {
             moveFolder(dirTmp, subdirName);
         }
 
-        moveFolder(dirTmp, WorkDirs.OVERRIDES);
+        moveFolder(dirTmp, OVERRIDES);
     }
 
     private void moveFolder(Path dirTmp, String folder) throws IOException {
@@ -214,11 +256,11 @@ public class ProjectUpdater {
     }
 
     private void restoreProjectDir(Path dirTmp) throws IOException {
-        for (String subdirName : WorkDirs.getDirectoryNames(dbType)) {
+        for (String subdirName : getDirectoryNames()) {
             restoreFolder(dirTmp, subdirName);
         }
 
-        restoreFolder(dirTmp, WorkDirs.OVERRIDES);
+        restoreFolder(dirTmp, OVERRIDES);
     }
 
     private void restoreFolder(Path dirTmp, String folder) throws IOException {

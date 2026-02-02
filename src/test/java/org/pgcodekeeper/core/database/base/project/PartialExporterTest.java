@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.model.exporter;
+package org.pgcodekeeper.core.database.base.project;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -21,11 +21,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
 import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeFlattener;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.utils.TempDir;
 
@@ -36,7 +36,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static org.pgcodekeeper.core.it.IntegrationTestUtils.*;
+import static org.pgcodekeeper.core.it.IntegrationTestUtils.loadTestDump;
 
 /**
  * Test for partial export
@@ -124,9 +124,9 @@ public class PartialExporterTest {
             Path exportDirPartial = dirPartial.get();
 
             // full export of source
-            new ModelExporter(exportDirFull, dbSource, DatabaseType.PG, Consts.UTF_8, settings).exportFull();
+            new PgModelExporter(exportDirFull, dbSource, Consts.UTF_8, settings).exportFull();
             // full export of source to target directory
-            new ModelExporter(exportDirPartial, dbSource, DatabaseType.PG, Consts.UTF_8, settings).exportFull();
+            new PgModelExporter(exportDirPartial, dbSource, Consts.UTF_8, settings).exportFull();
 
             // get new db with selected changes
             info.setUserSelection(tree);
@@ -135,7 +135,7 @@ public class PartialExporterTest {
                     .onlyEdits(dbSource, dbTarget)
                     .flatten(tree);
             // apply partial changes to the full database
-            new ModelExporter(exportDirPartial, dbTarget, dbSource, DatabaseType.PG, list, Consts.UTF_8, settings)
+            new PgModelExporter(exportDirPartial, dbTarget, dbSource, list, Consts.UTF_8, settings)
                     .exportPartial();
 
             walkAndCompare(exportDirFull, exportDirPartial, info);

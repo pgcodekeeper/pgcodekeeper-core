@@ -15,20 +15,29 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.parser.statement;
 
-import java.util.*;
-import java.util.function.BiConsumer;
-
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
 import org.pgcodekeeper.core.database.ch.parser.launcher.ChExpressionAnalysisLauncher;
+import org.pgcodekeeper.core.database.ch.project.ChWorkDirs;
 import org.pgcodekeeper.core.database.ch.schema.*;
 import org.pgcodekeeper.core.settings.ISettings;
+
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.BiConsumer;
 
 /**
  * Abstract base class for ClickHouse SQL statement parsers.
@@ -240,5 +249,15 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
     @Override
     protected boolean isSystemSchema(String schema) {
         return ChDiffUtils.isSystemSchema(schema);
+    }
+
+    @Override
+    protected Path getRelativeFolderPath(IStatement st, Path baseDir) {
+        return ChWorkDirs.getRelativeFolderPath(st, baseDir);
+    }
+
+    @Override
+    protected List<String> getDirectoryNames() {
+        return ChWorkDirs.getDirectoryNames();
     }
 }

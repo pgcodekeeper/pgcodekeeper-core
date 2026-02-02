@@ -15,22 +15,31 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.parser.statement;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
-import org.pgcodekeeper.core.database.base.parser.*;
+import org.pgcodekeeper.core.database.base.parser.CodeUnitToken;
+import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.Argument;
+import org.pgcodekeeper.core.database.base.schema.SimpleColumn;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
+import org.pgcodekeeper.core.database.pg.project.PgWorkDirs;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Pair;
+
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Abstract base class for PostgreSQL statement parsers that provides common
@@ -430,5 +439,15 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
     @Override
     protected boolean isSystemSchema(String schema) {
         return PgDiffUtils.isSystemSchema(schema);
+    }
+
+    @Override
+    protected Path getRelativeFolderPath(IStatement st, Path baseDir) {
+        return PgWorkDirs.getRelativeFolderPath(st, baseDir);
+    }
+
+    @Override
+    protected List<String> getDirectoryNames() {
+        return PgWorkDirs.getDirectoryNames();
     }
 }
