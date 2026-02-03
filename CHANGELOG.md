@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Added comments processing for NOT NULL constraints in PostgreSQL.
 - Added connection test with Greenplum.
+- Added a setting for adding in migration script ON CLUSTER syntax to ClickHouse (experimentally).
 
 ### Changed
 

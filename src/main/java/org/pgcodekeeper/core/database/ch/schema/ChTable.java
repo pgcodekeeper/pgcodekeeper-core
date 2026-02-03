@@ -67,8 +67,14 @@ public class ChTable extends AbstractTable implements IChStatement {
     public void getCreationSQL(SQLScript script) {
         var sb = new StringBuilder();
         sb.append("CREATE TABLE ");
-        appendIfNotExists(sb, script.getSettings());
-        sb.append(getQualifiedName()).append("\n(");
+        var settings = script.getSettings();
+        appendIfNotExists(sb, settings);
+        sb.append(getQualifiedName());
+        var clusterName = settings.getClusterName();
+        if (null != clusterName && !clusterName.isBlank()) {
+            sb.append(" ON CLUSTER ").append(clusterName);
+        }
+        sb.append("\n(");
         appendTableBody(sb);
         if (isNotEmptyTable()) {
             sb.setLength(sb.length() - 1);

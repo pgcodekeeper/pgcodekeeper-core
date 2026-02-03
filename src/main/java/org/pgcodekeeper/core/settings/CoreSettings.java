@@ -55,6 +55,7 @@ public class CoreSettings implements ISettings {
     private boolean stopNotAllowed;
     private boolean selectedOnly;
     private boolean ignoreConcurrentModification;
+    private String clusterName;
 
     @Override
     public DatabaseType getDbType() {
@@ -283,6 +284,15 @@ public class CoreSettings implements ISettings {
         this.postFilePath = postFilePath;
     }
 
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
+    }
+
+    @Override
+    public String getClusterName() {
+        return clusterName;
+    }
+
     @Override
     public CoreSettings copy() {
         var settings = new CoreSettings();
@@ -310,6 +320,7 @@ public class CoreSettings implements ISettings {
         settings.stopNotAllowed = stopNotAllowed;
         settings.timeZone = timeZone;
         settings.printUsing = printUsing;
+        settings.clusterName = clusterName;
         return settings;
     }
 }

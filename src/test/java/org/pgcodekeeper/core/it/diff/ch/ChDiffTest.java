@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.it.diff.ch;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.database.api.schema.DatabaseType;
@@ -77,6 +78,19 @@ class ChDiffTest {
     void ignorePrivilegesTest(String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         settings.setIgnorePrivileges(true);
+        settings.setDbType(DatabaseType.CH);
+        String script = getScript(fileNameTemplate, settings, ChDiffTest.class);
+        assertResult(script, fileNameTemplate, ChDiffTest.class);
+    }
+
+    /**
+     * test case when option ON CLUSTER is ON
+     */
+    @Test
+    void onClusterTableTest() throws IOException, InterruptedException {
+        var fileNameTemplate = "ch_create_table_with_on_cluster";
+        var settings = new CoreSettings();
+        settings.setClusterName("test");
         settings.setDbType(DatabaseType.CH);
         String script = getScript(fileNameTemplate, settings, ChDiffTest.class);
         assertResult(script, fileNameTemplate, ChDiffTest.class);
