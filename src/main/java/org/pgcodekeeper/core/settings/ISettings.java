@@ -223,4 +223,11 @@ public interface ISettings {
      * @param ignorePrivileges true to ignore privileges
      */
     void setIgnorePrivileges(boolean ignorePrivileges);
+
+    /**
+     * Get the cluster name for ClickHouse
+     *
+     * @return cluster name
+     */
+    String getClusterName();
 }
