@@ -26,7 +26,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a Microsoft SQL database role.
  * Roles are used to group users and manage permissions at the database level.
  */
-public final class MsRole extends AbstractStatement implements IMsStatement {
+public final class MsRole extends MsAbstractStatement {
 
     private final Set<String> members = new LinkedHashSet<>();
 

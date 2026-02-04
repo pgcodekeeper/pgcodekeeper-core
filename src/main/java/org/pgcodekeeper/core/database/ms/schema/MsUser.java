@@ -27,7 +27,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a Microsoft SQL database user that can be associated with a login
  * and have specific schema, language, and encryption settings.
  */
-public final class MsUser extends AbstractStatement implements IMsStatement {
+public final class MsUser extends MsAbstractStatement {
 
     // TODO PASSWORD, DEFAULT_LANGUAGE, ALLOW_ENCRYPTED_VALUE_MODIFICATIONS
     private String schema;
