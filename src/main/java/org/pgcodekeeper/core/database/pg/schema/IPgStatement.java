@@ -26,6 +26,7 @@ import org.pgcodekeeper.core.script.SQLScript;
 /**
  * Interface for PostgreSQL statement
  */
+@Deprecated
 public interface IPgStatement extends IStatement {
 
     String RENAME_OBJECT_COMMAND = "ALTER %s %s RENAME TO %s";

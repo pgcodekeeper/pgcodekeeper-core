@@ -27,6 +27,7 @@ import org.pgcodekeeper.core.utils.Utils;
 /**
  * Interface for MS SQL statement
  */
+@Deprecated
 public interface IMsStatement extends IStatement {
 
     String RENAME_OBJECT_COMMAND = "EXEC sp_rename %s, %s";

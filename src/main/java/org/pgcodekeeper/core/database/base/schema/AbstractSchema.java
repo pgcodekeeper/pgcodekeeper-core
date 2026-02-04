@@ -26,6 +26,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
  * Contains tables, views, functions, sequences, types and other database objects.
  * Provides common functionality for schemas across different database types including.
  */
+@Deprecated
 public abstract class AbstractSchema extends AbstractStatement implements ISchema {
 
     private final Map<String, AbstractFunction> functions = new LinkedHashMap<>();

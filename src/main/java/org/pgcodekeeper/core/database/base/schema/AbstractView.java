@@ -25,6 +25,7 @@ import org.pgcodekeeper.core.utils.Pair;
  * Abstract base class for database views.
  * Provides common functionality for views across different database types including.
  */
+@Deprecated
 public abstract class AbstractView extends AbstractStatementContainer {
 
     @Override

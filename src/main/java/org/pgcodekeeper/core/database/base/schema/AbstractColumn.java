@@ -24,6 +24,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
  * Abstract base class for database column definitions.
  * Provides common functionality for columns across different database types.
  */
+@Deprecated
 public abstract class AbstractColumn extends AbstractStatement implements ISubElement {
 
     protected static final String ALTER_COLUMN = "\n\tALTER COLUMN ";

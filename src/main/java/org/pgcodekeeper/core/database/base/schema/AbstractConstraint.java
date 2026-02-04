@@ -29,6 +29,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
  * Provides common functionality for constraints across different database types including
  * primary keys, foreign keys, unique constraints, and check constraints.
  */
+@Deprecated
 public abstract class AbstractConstraint extends AbstractStatement implements IConstraint, ISubElement {
 
     protected boolean isNotValid;

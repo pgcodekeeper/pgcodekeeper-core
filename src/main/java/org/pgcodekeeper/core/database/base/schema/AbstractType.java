@@ -25,6 +25,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Provides common functionality for types across different database types including
  * composite types, enums, domains, and other user-defined data types.
  */
+@Deprecated
 public abstract class AbstractType extends AbstractStatement implements ISearchPath {
 
     protected AbstractType(String name) {
