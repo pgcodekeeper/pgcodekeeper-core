@@ -27,7 +27,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Event triggers fire automatically when specified database events occur,
  * such as DDL commands or user login attempts.
  */
-public final class PgEventTrigger extends AbstractStatement implements IPgStatement {
+public final class PgEventTrigger extends PgAbstractStatement {
 
     private String executable;
     private final List<String> tags = new ArrayList<>();

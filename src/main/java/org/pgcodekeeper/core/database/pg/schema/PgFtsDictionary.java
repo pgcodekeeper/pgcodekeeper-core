@@ -27,8 +27,8 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Dictionaries are used to process tokens during full-text search,
  * performing operations like stemming, synonym replacement, or filtering.
  */
-public final class PgFtsDictionary extends AbstractStatement
-        implements ISimpleOptionContainer, ISearchPath, IPgStatement {
+public final class PgFtsDictionary extends PgAbstractStatement
+        implements ISimpleOptionContainer, ISearchPath {
 
     private String template;
     private final Map<String, String> options = new LinkedHashMap<>();

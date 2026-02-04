@@ -27,7 +27,7 @@ import org.pgcodekeeper.core.settings.ISettings;
  * Represents a Microsoft SQL assembly.
  * Assemblies allow running .NET code within SQL Server.
  */
-public final class MsAssembly extends AbstractStatement implements IMsStatement {
+public final class MsAssembly extends MsAbstractStatement {
 
     private static final int PREVIEW_LENGTH = 256 * 4;
 

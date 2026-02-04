@@ -29,7 +29,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  *
  * @author Alexander Levsha
  */
-public final class PgExtension extends AbstractStatement implements IPgStatement {
+public final class PgExtension extends PgAbstractStatement {
 
     private String schema;
     private boolean relocatable;

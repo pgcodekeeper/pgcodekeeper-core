@@ -27,7 +27,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * User mappings define how to authenticate as a specific user when accessing foreign servers,
  * typically storing connection credentials and options for foreign data wrappers.
  */
-public final class PgUserMapping extends AbstractStatement implements PgForeignOptionContainer, IPgStatement {
+public final class PgUserMapping extends PgAbstractStatement implements PgForeignOptionContainer {
 
     private final String user;
     private final String server;

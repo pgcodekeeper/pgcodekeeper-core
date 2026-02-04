@@ -29,7 +29,7 @@ import org.pgcodekeeper.core.utils.Pair;
  * Dictionaries in ClickHouse are used for storing key-value data for fast lookups
  * and can have various sources and layouts.
  */
-public final class ChDictionary extends AbstractStatement implements IRelation, IChStatement {
+public final class ChDictionary extends ChAbstractStatement implements IRelation {
 
     private String sourceType;
     private String lifeTime;

@@ -26,7 +26,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * PostgreSQL type cast implementation.
  * Represents a cast that specifies how to perform conversions between two data types.
  */
-public final class PgCast extends AbstractStatement implements ICast, IPgStatement {
+public final class PgCast extends PgAbstractStatement implements ICast {
 
     /**
      * Enumeration of cast methods

@@ -27,7 +27,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Foreign servers define connection information for external data sources
  * that can be accessed through foreign data wrappers (FDWs).
  */
-public final class PgServer extends AbstractStatement implements PgForeignOptionContainer, IPgStatement {
+public final class PgServer extends PgAbstractStatement implements PgForeignOptionContainer {
 
     private String type;
     private String version;

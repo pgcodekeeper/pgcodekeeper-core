@@ -27,7 +27,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Parsers break down documents into tokens and classify them into types.
  * Each parser consists of several functions that handle different parsing phases.
  */
-public final class PgFtsParser extends AbstractStatement implements ISearchPath, IPgStatement {
+public final class PgFtsParser extends PgAbstractStatement implements ISearchPath {
 
     private static final String NEW_LINE = ",\n\t";
 
