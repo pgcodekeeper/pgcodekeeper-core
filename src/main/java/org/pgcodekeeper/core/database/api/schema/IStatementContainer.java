@@ -19,6 +19,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Interface for database objects that can contain other statements as children.
  * Provides functionality for adding and retrieving child statements.
@@ -40,4 +43,15 @@ public interface IStatementContainer extends IStatement {
      * @return the child statement, or null if not found
      */
     IStatement getChild(String name, DbObjType type);
+
+    /**
+     * Gets a list of child statements by type.
+     *
+     * @param type the type of the children to find
+     * @return the list of child statement, or empty list if not found
+     */
+    default List<IStatement> getChildren(DbObjType type) {
+        // FIXME remove after refactoring
+        return Collections.emptyList();
+    }
 }

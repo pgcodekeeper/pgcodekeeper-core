@@ -15,19 +15,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import java.util.*;
-
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractRule;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * PostgreSQL table rule implementation.
  * Rules define actions to be performed when certain operations (INSERT, UPDATE, DELETE)
  * are executed on a table, effectively implementing view-like behavior and query rewriting.
  */
-public final class PgRule extends AbstractRule implements IPgStatement {
+public class PgRule extends PgAbstractStatement implements IRule {
 
     private EventType event;
     private String condition;
@@ -37,6 +38,20 @@ public final class PgRule extends AbstractRule implements IPgStatement {
      * null is default (ENABLED), otherwise contains "{ENABLE|DISABLE} [ALWAYS|REPLICA]" string
      */
     private String enabledState;
+
+    /**
+     * Creates a new PostgreSQL rule.
+     *
+     * @param name rule name
+     */
+    public PgRule(String name) {
+        super(name);
+    }
+
+    @Override
+    public DbObjType getStatementType() {
+        return DbObjType.RULE;
+    }
 
     public void setEvent(EventType event) {
         this.event = event;
@@ -66,15 +81,6 @@ public final class PgRule extends AbstractRule implements IPgStatement {
     public void setEnabledState(String enabledState) {
         this.enabledState = enabledState;
         resetHash();
-    }
-
-    /**
-     * Creates a new PostgreSQL rule.
-     *
-     * @param name rule name
-     */
-    public PgRule(String name) {
-        super(name);
     }
 
     @Override
@@ -156,7 +162,13 @@ public final class PgRule extends AbstractRule implements IPgStatement {
     }
 
     @Override
-    protected AbstractRule getRuleCopy() {
+    public PgRule shallowCopy() {
+        PgRule copy = getRuleCopy();
+        copyBaseFields(copy);
+        return copy;
+    }
+
+    protected PgRule getRuleCopy() {
         PgRule ruleDst = new PgRule(name);
         ruleDst.setEvent(event);
         ruleDst.setCondition(condition);

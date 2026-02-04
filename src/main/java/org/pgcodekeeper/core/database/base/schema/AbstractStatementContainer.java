@@ -18,6 +18,7 @@ package org.pgcodekeeper.core.database.base.schema;
 import java.util.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.pg.schema.PgRule;
 import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
@@ -30,7 +31,7 @@ public abstract class AbstractStatementContainer extends AbstractStatement
 
     private final Map<String, AbstractIndex> indexes = new LinkedHashMap<>();
     private final Map<String, AbstractTrigger> triggers = new LinkedHashMap<>();
-    private final Map<String, AbstractRule> rules = new LinkedHashMap<>();
+    private final Map<String, PgRule> rules = new LinkedHashMap<>();
     private final Map<String, AbstractPolicy> policies = new LinkedHashMap<>();
 
     protected AbstractStatementContainer(String name) {
@@ -71,7 +72,7 @@ public abstract class AbstractStatementContainer extends AbstractStatement
                 addTrigger((AbstractTrigger) st);
                 break;
             case RULE:
-                addRule((AbstractRule) st);
+                addRule((PgRule) st);
                 break;
             case POLICY:
                 addPolicy((AbstractPolicy) st);
@@ -134,7 +135,7 @@ public abstract class AbstractStatementContainer extends AbstractStatement
      * @param name name of the rule to be searched
      * @return found rule or null if no such rule has been found
      */
-    public AbstractRule getRule(final String name) {
+    public PgRule getRule(final String name) {
         return getChildByName(rules, name);
     }
 
@@ -166,15 +167,6 @@ public abstract class AbstractStatementContainer extends AbstractStatement
      */
     public Collection<AbstractTrigger> getTriggers() {
         return Collections.unmodifiableCollection(triggers.values());
-    }
-
-    /**
-     * Getter for {@link #rules}. The list cannot be modified.
-     *
-     * @return {@link #rules}
-     */
-    public Collection<AbstractRule> getRules() {
-        return Collections.unmodifiableCollection(rules.values());
     }
 
     /**
@@ -216,7 +208,7 @@ public abstract class AbstractStatementContainer extends AbstractStatement
      *
      * @param rule the rule to add
      */
-    public void addRule(final AbstractRule rule) {
+    public void addRule(final PgRule rule) {
         addUnique(rules, rule);
     }
 
