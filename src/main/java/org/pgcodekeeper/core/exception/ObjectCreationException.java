@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.exception;
 
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 
 import java.io.Serial;
 
@@ -84,7 +84,7 @@ public class ObjectCreationException extends RuntimeException {
      *
      * @param st the statement that already exists
      */
-    public ObjectCreationException(AbstractStatement st) {
+    public ObjectCreationException(IStatement st) {
         super(WITHOUT_PARENT.formatted(st.getStatementType(), st.getName()));
     }
 
@@ -94,7 +94,7 @@ public class ObjectCreationException extends RuntimeException {
      * @param st     the statement that already exists
      * @param parent the parent statement context
      */
-    public ObjectCreationException(AbstractStatement st, AbstractStatement parent) {
+    public ObjectCreationException(IStatement st, IStatement parent) {
         super(WITH_PARENT.formatted(st.getStatementType(), st.getName(),
                 parent.getStatementType(), parent.getName()));
     }

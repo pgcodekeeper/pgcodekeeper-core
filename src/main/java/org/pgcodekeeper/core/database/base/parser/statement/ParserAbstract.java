@@ -254,7 +254,53 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
                     + name, errToken);
         }
 
-        checkLocation((AbstractStatement) statement, errToken);
+        checkLocation(statement, errToken);
+
+        return statement;
+    }
+
+    /**
+     * Safely retrieves a database statement with validation.
+     * <p>
+     * Note: Always returns null if parser is in ref mode.
+     *
+     * @param container the containing statement
+     * @param type      the type of the statement to find
+     * @param ctx       the parse tree context
+     * @return the found statement or null if parser is in ref mode
+     * @throws UnresolvedReferenceException if statement not found
+     */
+    public IStatement getChildSafe(
+            IStatementContainer container,
+            DbObjType type, ParserRuleContext ctx) {
+        return getChildSafe(container, type, ctx.getText(), ctx.start);
+    }
+
+    /**
+     * Safely retrieves a database statement by name with validation.
+     * <p>
+     * Note: Always returns null if parser is in ref mode.
+     *
+     * @param container the containing statement
+     * @param type      the type of the statement to find
+     * @param name      the name of the statement to find
+     * @param errToken  the token for error reporting
+     * @return the found statement
+     * @throws UnresolvedReferenceException if statement not found
+     */
+    public IStatement getChildSafe(IStatementContainer container,
+                                   DbObjType type,
+                                   String name, Token errToken) {
+        if (isRefMode()) {
+            return null;
+        }
+        IStatement statement = container.getChild(name, type);
+        if (statement == null) {
+            throw new UnresolvedReferenceException("Cannot find object in database: "
+                    + name, errToken);
+        }
+
+        checkLocation(statement, errToken);
 
         return statement;
     }
@@ -278,7 +324,7 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
         checkLocation(child, QNameParser.getFirstNameCtx(ids).getStart());
     }
 
-    protected void checkLocation(AbstractStatement statement, Token errToken) {
+    protected void checkLocation(IStatement statement, Token errToken) {
         if (isRefMode() || fileName == null) {
             return;
         }

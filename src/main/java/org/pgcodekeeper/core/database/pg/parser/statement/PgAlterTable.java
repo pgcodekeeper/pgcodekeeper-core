@@ -333,7 +333,7 @@ public final class PgAlterTable extends PgTableAbstract {
     }
 
     private void createRule(PgAbstractTable tabl, Table_actionContext tablAction) {
-        PgRule rule = (PgRule) getSafe(AbstractTable::getRule, tabl, getIdentifiers(tablAction.rewrite_rule_name).get(0));
+        PgRule rule = (PgRule) getChildSafe(tabl, DbObjType.RULE, getIdentifiers(tablAction.rewrite_rule_name).get(0));
         if (rule != null) {
             if (tablAction.DISABLE() != null) {
                 rule.setEnabledState("DISABLE");

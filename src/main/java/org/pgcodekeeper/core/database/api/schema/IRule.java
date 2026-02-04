@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.database.pg.schema;
+package org.pgcodekeeper.core.database.api.schema;
 
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+/**
+ * Interface for rule type.
+ */
+public interface IRule extends ISubElement {
 
-public abstract class PgAbstractStatement extends AbstractStatement implements IPgStatement {
-
-    protected PgAbstractStatement(String name) {
-        super(name);
-    }
 }
