@@ -15,11 +15,74 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
+import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.ms.MsDiffUtils;
+import org.pgcodekeeper.core.database.ms.formatter.MsFormatter;
+import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.utils.Utils;
+
+import java.util.function.UnaryOperator;
 
 public abstract class MsAbstractStatement extends AbstractStatement {
 
+    private String RENAME_OBJECT_COMMAND = "EXEC sp_rename %s, %s";
+    private String GO = "\nGO";
+
     protected MsAbstractStatement(String name) {
         super(name);
+    }
+
+    @Override
+    public String formatSql(String sql, int offset, int length, IFormatConfiguration formatConfiguration) {
+        return new MsFormatter(sql, offset, length, formatConfiguration).formatText();
+    }
+
+    @Override
+    public DatabaseType getDbType() {
+        return DatabaseType.MS;
+    }
+
+    @Override
+    public UnaryOperator<String> getQuoter() {
+        return MsDiffUtils::quoteName;
+    }
+
+    @Override
+    public void appendOwnerSQL(SQLScript script) {
+        var owner = getOwner();
+        if (owner == null || !isOwned()) {
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("ALTER AUTHORIZATION ON ");
+
+        DbObjType type = getStatementType();
+        if (type.in(DbObjType.TYPE, DbObjType.SCHEMA, DbObjType.ASSEMBLY)) {
+            sb.append(type).append("::");
+        }
+
+        sb.append(getQualifiedName()).append(" TO ").append(getQuotedName(owner));
+
+        script.addStatement(sb);
+    }
+
+    @Override
+    public boolean isOwned() {
+        return getStatementType().in(DbObjType.TABLE, DbObjType.VIEW, DbObjType.SCHEMA, DbObjType.FUNCTION,
+                DbObjType.PROCEDURE, DbObjType.SEQUENCE, DbObjType.TYPE, DbObjType.ASSEMBLY, DbObjType.STATISTICS);
+    }
+
+    @Override
+    public void appendDefaultPrivileges(IStatement statement, SQLScript script) {
+        // no imp
+    }
+
+    @Override
+    public String getRenameCommand(String newName) {
+        return RENAME_OBJECT_COMMAND.formatted(Utils.quoteString(getQualifiedName()), Utils.quoteString(newName));
     }
 }

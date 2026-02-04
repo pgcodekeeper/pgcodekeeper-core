@@ -26,7 +26,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a ClickHouse role for access control.
  * Roles can be stored in different storage types and have associated privileges.
  */
-public final class ChRole extends AbstractStatement implements IChStatement {
+public final class ChRole extends ChAbstractStatement {
 
     private static final String DEF_STORAGE = "local_directory";
 

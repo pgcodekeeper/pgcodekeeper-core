@@ -26,7 +26,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a ClickHouse user account with authentication and authorization settings.
  * It supports hosts restrictions, role assignments, default database, and grantee configurations.
  */
-public final class ChUser extends AbstractStatement implements IChStatement {
+public final class ChUser extends ChAbstractStatement {
 
     private static final String DEF_STORAGE = "local_directory";
     private static final String EXCEPT = " EXCEPT ";
