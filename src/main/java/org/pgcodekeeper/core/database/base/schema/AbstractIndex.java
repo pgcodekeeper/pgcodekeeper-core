@@ -176,4 +176,9 @@ public abstract class AbstractIndex extends AbstractStatement
     }
 
     protected abstract AbstractIndex getIndexCopy();
+
+    @Override
+    public GenericColumn toGenericColumn(DbObjType type) {
+        return new GenericColumn(getContainingSchema().getName(), getName(), type);
+    }
 }

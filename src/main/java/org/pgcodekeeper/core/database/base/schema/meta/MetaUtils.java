@@ -132,64 +132,7 @@ public final class MetaUtils {
         if (loc != null && loc.getType() == type) {
             return loc;
         }
-        GenericColumn gc;
-        switch (type) {
-            case CAST:
-            case USER_MAPPING:
-            case SCHEMA:
-            case EXTENSION:
-            case EVENT_TRIGGER:
-            case FOREIGN_DATA_WRAPPER:
-            case SERVER:
-            case ROLE:
-            case USER:
-            case ASSEMBLY:
-                gc = new GenericColumn(st.getName(), type);
-                break;
-            case COLLATION:
-            case AGGREGATE:
-            case DOMAIN:
-            case FTS_CONFIGURATION:
-            case FTS_DICTIONARY:
-            case FTS_PARSER:
-            case FTS_TEMPLATE:
-            case OPERATOR:
-            case PROCEDURE:
-            case SEQUENCE:
-            case TABLE:
-            case DICTIONARY:
-            case TYPE:
-            case VIEW:
-            case STATISTICS:
-                gc = new GenericColumn(st.getParent().getName(), st.getName(), type);
-                break;
-            case INDEX:
-                gc = new GenericColumn(st.getParent().getParent().getName(), st.getName(), type);
-                break;
-            case CONSTRAINT:
-            case RULE:
-            case TRIGGER:
-                IStatement parent = st.getParent();
-                gc = new GenericColumn(parent.getParent().getName(), parent.getName(), st.getName(), type);
-                break;
-            case POLICY:
-                if (st.getDbType() == DatabaseType.CH) {
-                    gc = new GenericColumn(st.getName(), type);
-                } else {
-                    parent = st.getParent();
-                    gc = new GenericColumn(parent.getParent().getName(), parent.getName(), st.getName(), type);
-                }
-                break;
-            case FUNCTION:
-                if (st.getDbType() == DatabaseType.CH) {
-                    gc = new GenericColumn(st.getName(), type);
-                } else {
-                    gc = new GenericColumn(st.getParent().getName(), st.getName(), type);
-                }
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported type " + type);
-        }
+        GenericColumn gc = st.toGenericColumn(type);
 
         return new ObjectLocation.Builder()
                 .setObject(gc)

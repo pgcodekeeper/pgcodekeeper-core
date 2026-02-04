@@ -244,6 +244,9 @@ public interface IStatement {
      */
     boolean canDropBeforeCreate();
 
+     default GenericColumn toGenericColumn(DbObjType type) {
+         return new GenericColumn(getName(), type);
+     }
 
     /**
      * Formats string

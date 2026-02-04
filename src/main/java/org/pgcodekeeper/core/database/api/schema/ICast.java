@@ -66,4 +66,9 @@ public interface ICast extends IStatement {
     static String getSimpleName(String source, String target) {
         return CAST_NAME.formatted(source, target);
     }
+
+    @Override
+    default GenericColumn toGenericColumn(DbObjType type) {
+        return new GenericColumn(getSimpleName(getSource(), getTarget()), type);
+    }
 }
