@@ -137,4 +137,9 @@ public final class ChPolicy extends AbstractPolicy implements IChStatement {
     public AbstractDatabase getDatabase() {
         return (AbstractDatabase) parent;
     }
+
+    @Override
+    public GenericColumn toGenericColumn(DbObjType type) {
+        return new GenericColumn(getName(), type);
+    }
 }

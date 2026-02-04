@@ -153,4 +153,9 @@ public final class ChFunction extends AbstractStatement implements IFunction, IC
     public ISchema getContainingSchema() {
         return null;
     }
+
+    @Override
+    public GenericColumn toGenericColumn(DbObjType type) {
+        return new GenericColumn(getName(), type);
+    }
 }

@@ -47,4 +47,9 @@ public interface ISearchPath extends IStatement {
     default IDatabase getDatabase() {
         return (IDatabase) getContainingSchema().getParent();
     }
+
+    @Override
+    default GenericColumn toGenericColumn(DbObjType type) {
+        return new GenericColumn(getSchemaName(), getName(), type);
+    }
 }
