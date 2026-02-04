@@ -27,7 +27,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Operators are symbols that represent specific operations (like +, -, *, etc.)
  * and can be customized for user-defined types with associated functions.
  */
-public final class PgOperator extends AbstractStatement implements IOperator, ISearchPath, IPgStatement {
+public final class PgOperator extends PgAbstractStatement implements IOperator, ISearchPath {
 
     private String procedure;
     private String leftArg;

@@ -27,8 +27,8 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Foreign data wrappers are libraries that provide access to external data sources,
  * allowing PostgreSQL to query data from other databases or systems.
  */
-public final class PgForeignDataWrapper extends AbstractStatement
-        implements PgForeignOptionContainer, IPgStatement {
+public final class PgForeignDataWrapper extends PgAbstractStatement
+        implements PgForeignOptionContainer {
 
     private String handler;
     private String validator;

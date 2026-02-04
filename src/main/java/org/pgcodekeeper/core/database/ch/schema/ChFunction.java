@@ -27,7 +27,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a ClickHouse user-defined function.
  * ClickHouse functions are lambda expressions with parameters and a body.
  */
-public final class ChFunction extends AbstractStatement implements IFunction, IChStatement {
+public final class ChFunction extends ChAbstractStatement implements IFunction {
 
     private String body;
     private final List<Argument> arguments = new ArrayList<>();

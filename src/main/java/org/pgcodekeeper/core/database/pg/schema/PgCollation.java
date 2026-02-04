@@ -26,7 +26,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * PostgreSQL collation implementation.
  * Represents a collation object that defines how text values are sorted and compared.
  */
-public final class PgCollation extends AbstractStatement implements ISearchPath, IPgStatement {
+public final class PgCollation extends PgAbstractStatement implements ISearchPath {
 
     /**
      * Creates a new PostgreSQL collation.

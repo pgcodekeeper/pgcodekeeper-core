@@ -27,7 +27,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Templates define the interface for FTS dictionaries by specifying
  * the functions that dictionaries must provide for text processing.
  */
-public final class PgFtsTemplate extends AbstractStatement implements ISearchPath, IPgStatement {
+public final class PgFtsTemplate extends PgAbstractStatement implements ISearchPath {
 
     private String initFunction;
     private String lexizeFunction;
