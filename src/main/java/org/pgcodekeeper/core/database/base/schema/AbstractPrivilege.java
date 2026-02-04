@@ -25,6 +25,7 @@ import org.pgcodekeeper.core.hasher.*;
  * Handles privilege operations including creation, dropping, and SQL generation
  * for different database types.
  */
+@Deprecated
 public abstract class AbstractPrivilege implements IPrivilege {
 
     private final String state;

@@ -25,6 +25,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Abstract base class for database functions, procedures, and aggregates.
  * Provides common functionality for callable database objects across different database types.
  */
+@Deprecated
 public abstract class AbstractFunction extends AbstractStatement implements IFunction {
 
     protected final List<Argument> arguments = new ArrayList<>();

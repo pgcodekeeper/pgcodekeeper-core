@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
  * Abstract base class for database sequences.
  * Provides common functionality for auto-incrementing sequences across different database types.
  */
+@Deprecated
 public abstract class AbstractSequence extends AbstractStatement implements IRelation, ISearchPath {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractSequence.class);

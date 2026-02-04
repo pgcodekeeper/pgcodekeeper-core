@@ -21,6 +21,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
 /**
  * Abstract table rule implementation.
  */
+@Deprecated
 public abstract class AbstractRule extends AbstractStatement implements ISubElement {
 
     @Override

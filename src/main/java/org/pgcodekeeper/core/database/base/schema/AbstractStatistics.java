@@ -21,6 +21,7 @@ import org.pgcodekeeper.core.database.api.schema.*;
  * Abstract base class for database statistics objects.
  * Provides common functionality for extended statistics across different database types.
  */
+@Deprecated
 public abstract class AbstractStatistics extends AbstractStatement implements ISearchPath {
 
     protected AbstractStatistics(String name) {

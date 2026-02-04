@@ -29,6 +29,7 @@ import org.pgcodekeeper.core.utils.*;
  * Contains columns, constraints, indexes, triggers, and other table-related objects.
  * Provides common functionality for tables across different database types.
  */
+@Deprecated
 public abstract class AbstractTable extends AbstractStatementContainer implements IOptionContainer {
 
     protected static final String ALTER_COLUMN = " ALTER COLUMN ";

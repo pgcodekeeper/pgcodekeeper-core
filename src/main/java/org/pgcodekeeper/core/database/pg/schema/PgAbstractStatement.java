@@ -13,33 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.database.base.schema;
+package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 
-/**
- * Abstract base class for database triggers.
- * Provides common functionality for triggers across different database types including
- * PostgreSQL, Microsoft SQL, and ClickHouse.
- */
-@Deprecated
-public abstract class AbstractTrigger extends AbstractStatement implements ISubElement {
+public abstract class PgAbstractStatement extends AbstractStatement {
 
-    @Override
-    public DbObjType getStatementType() {
-        return DbObjType.TRIGGER;
-    }
-
-    protected AbstractTrigger(String name) {
+    protected PgAbstractStatement(String name) {
         super(name);
     }
-
-    @Override
-    public AbstractTrigger shallowCopy() {
-        AbstractTrigger triggerDst = getTriggerCopy();
-        copyBaseFields(triggerDst);
-        return triggerDst;
-    }
-
-    protected abstract AbstractTrigger getTriggerCopy();
 }

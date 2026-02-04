@@ -26,6 +26,7 @@ import org.pgcodekeeper.core.script.SQLScript;
 /**
  * Interface for ClickHouse statement
  */
+@Deprecated
 public interface IChStatement extends IStatement {
 
     String RENAME_OBJECT_COMMAND = "RENAME %s %s TO %s;";

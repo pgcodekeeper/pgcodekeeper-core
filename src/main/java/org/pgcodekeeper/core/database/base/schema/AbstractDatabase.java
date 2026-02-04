@@ -32,6 +32,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Contains schemas, handles database-specific operations, and manages object references
  * and analysis launchers for PostgreSQL, Microsoft SQL, and ClickHouse databases.
  */
+@Deprecated
 public abstract class AbstractDatabase extends AbstractStatement implements IDatabase {
 
     private SupportedPgVersion version;

@@ -29,6 +29,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
  * Provides common functionality for indexes across different database types including
  * unique indexes, clustered indexes, and partial indexes with WHERE clauses.
  */
+@Deprecated
 public abstract class AbstractIndex extends AbstractStatement
         implements ISimpleOptionContainer, ISimpleColumnContainer, ISubElement {
 

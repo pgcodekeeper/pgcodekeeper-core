@@ -25,6 +25,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
  * Provides common functionality for policies that control access to table rows
  * based on events, roles, and conditions.
  */
+@Deprecated
 public abstract class AbstractPolicy extends AbstractStatement {
 
     protected EventType event;
