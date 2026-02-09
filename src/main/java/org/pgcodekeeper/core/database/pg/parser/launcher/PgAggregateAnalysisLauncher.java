@@ -51,7 +51,6 @@ public class PgAggregateAnalysisLauncher extends AbstractAnalysisLauncher {
         IFunction func = meta.findFunction(function.schema(), function.table());
         IFunction aggr = meta.findFunction(getSchemaName(), stmt.getName());
 
-
         if (aggr != null && func != null) {
             aggr.setReturns(func.getReturns());
         }

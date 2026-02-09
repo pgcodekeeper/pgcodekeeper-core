@@ -54,5 +54,4 @@ public class PgOperatorAnalysisLauncher extends AbstractAnalysisLauncher {
 
         return Collections.emptySet();
     }
-
 }

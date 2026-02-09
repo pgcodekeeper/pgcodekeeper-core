@@ -135,7 +135,6 @@ public final class ChValueExpr extends ChAbstractExpr {
             // and columnName will be relationName
             if (findRelation(tableName, columnName) != null) {
                 addObjectDepcy(qualNameCtx);
-                return;
             }
             return;
         }

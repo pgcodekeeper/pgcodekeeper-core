@@ -645,7 +645,7 @@ public final class PgSelect extends PgAbstractExprWithNmspc<Select_stmtContext> 
         var schemaName = parsedName.getSchemaName();
         var objectName = parsedName.getFirstName();
 
-        MetaCompositeType type = meta.findType(schemaName, objectName);
+        ICompositeType type = meta.findType(schemaName, objectName);
         if (type != null) {
             return type.getAttrs();
         }

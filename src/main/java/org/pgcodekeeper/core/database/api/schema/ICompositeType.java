@@ -15,5 +15,34 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
-public interface IType extends IStatement {
+import java.util.List;
+
+import org.pgcodekeeper.core.utils.Pair;
+
+/**
+ * Represents composite type metadata object.
+ * Stores information about composite type attributes including their names and types.
+ *
+ * @see IType Base interface for all type metadata objects
+ */
+public interface ICompositeType extends IType {
+
+    public default String getSchemaName() {
+        return getParent().getName();
+    }
+
+    /**
+     * Returns the type of the specified attribute.
+     *
+     * @param attrName the attribute name
+     * @return the attribute type, or null if not found
+     */
+    String getAttrType(String attrName);
+
+    /**
+     * Returns list of all attributes.
+     *
+     * @return list of attributes
+     */
+    List<Pair<String, String>> getAttrs();
 }
