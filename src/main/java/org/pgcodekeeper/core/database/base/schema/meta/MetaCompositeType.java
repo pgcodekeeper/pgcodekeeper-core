@@ -18,14 +18,14 @@ package org.pgcodekeeper.core.database.base.schema.meta;
 import java.io.Serial;
 import java.util.*;
 
-import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.utils.Pair;
 
 /**
- * Represents a PostgreSQL composite type metadata object.
+ * Represents composite type metadata object.
  * Stores information about composite type attributes including their names and types.
  */
-public final class MetaCompositeType extends MetaStatement {
+public final class MetaCompositeType extends MetaStatement implements ICompositeType {
 
     @Serial
     private static final long serialVersionUID = 2037382156455950170L;
@@ -46,6 +46,7 @@ public final class MetaCompositeType extends MetaStatement {
      *
      * @return the schema name
      */
+    @Override
     public String getSchemaName() {
         return getObject().getSchema();
     }
@@ -66,6 +67,7 @@ public final class MetaCompositeType extends MetaStatement {
      * @param attrName the attribute name
      * @return the attribute type, or null if not found
      */
+    @Override
     public String getAttrType(String attrName) {
         return attrs.stream()
                 .filter(pair -> pair.getFirst().equals(attrName))
@@ -74,6 +76,7 @@ public final class MetaCompositeType extends MetaStatement {
                 .orElse(null);
     }
 
+    @Override
     public List<Pair<String, String>> getAttrs() {
         return Collections.unmodifiableList(attrs);
     }

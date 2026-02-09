@@ -383,7 +383,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
         return meta.availableOperators(getSchemaName(schemaName));
     }
 
-    protected MetaCompositeType findType(String schemaName, String typeName) {
+    protected ICompositeType findType(String schemaName, String typeName) {
         return meta.findType(getSchemaName(schemaName), typeName);
     }
 

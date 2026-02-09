@@ -22,7 +22,6 @@ import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
-import org.pgcodekeeper.core.database.pg.schema.PgCompositeType;
 import org.pgcodekeeper.core.utils.Pair;
 
 /**
@@ -72,58 +71,57 @@ public final class MetaUtils {
     private static MetaStatement createMetaFromStatement(AbstractStatement st) {
         DbObjType type = st.getStatementType();
         ObjectLocation loc = getLocation(st, type);
-        MetaStatement meta = switch (type) {
-            case CAST -> {
-                ICast cast = (ICast) st;
-                yield new MetaCast(cast.getSource(), cast.getTarget(), cast.getContext(), loc);
-            }
-            case OPERATOR -> {
-                IOperator operator = (IOperator) st;
-                MetaOperator oper = new MetaOperator(loc);
-                oper.setLeftArg(operator.getLeftArg());
-                oper.setRightArg(operator.getRightArg());
-                oper.setReturns(operator.getReturns());
-                yield oper;
-            }
-            case AGGREGATE, FUNCTION, PROCEDURE -> {
-                IFunction function = (IFunction) st;
-                MetaFunction func = new MetaFunction(loc, st.getBareName());
-                function.getReturnsColumns().forEach(func::addReturnsColumn);
-                function.getArguments().forEach(func::addArgument);
-                func.setReturns(function.getReturns());
-                yield func;
-            }
-            case CONSTRAINT -> {
-                MetaConstraint con = new MetaConstraint(loc);
-                con.setPrimaryKey(((IConstraint) st).isPrimaryKey());
-                ((IConstraint) st).getColumns().forEach(con::addColumn);
-                yield con;
-            }
-            case SEQUENCE, TABLE, DICTIONARY, VIEW -> {
-                MetaRelation rel = new MetaRelation(loc);
-                Stream<Pair<String, String>> columns = ((IRelation) st).getRelationColumns();
-                if (columns != null) {
-                    rel.addColumns(columns.toList());
-                }
-                yield rel;
-            }
-            case TYPE -> {
-                if (st instanceof PgCompositeType compositeType) {
-                    MetaCompositeType composite = new MetaCompositeType(loc);
-                    compositeType.getAttrs().forEach(e -> composite.addAttr(e.getName(), e.getType()));
-                    yield composite;
-                }
-                yield new MetaStatement(loc);
-            }
-            default -> new MetaStatement(loc);
-        };
+        var meta = createMeta(st, loc);
 
-        String commnent = st.getComment();
-        if (commnent != null) {
-            meta.setComment(commnent);
+        String comment = st.getComment();
+        if (comment != null) {
+            meta.setComment(comment);
         }
 
         return meta;
+    }
+
+    private static MetaStatement createMeta(AbstractStatement st, ObjectLocation loc) {
+        if (st instanceof ICast cast) {
+            return new MetaCast(cast.getSource(), cast.getTarget(), cast.getContext(), loc);
+        }
+        if (st instanceof IOperator op) {
+            MetaOperator oper = new MetaOperator(loc);
+            oper.setLeftArg(op.getLeftArg());
+            oper.setRightArg(op.getRightArg());
+            oper.setReturns(op.getReturns());
+            return oper;
+        }
+        if (st instanceof IFunction function) {
+            MetaFunction func = new MetaFunction(loc, st.getBareName());
+            function.getReturnsColumns().forEach(func::addReturnsColumn);
+            function.getArguments().forEach(func::addArgument);
+            func.setReturns(function.getReturns());
+            return func;
+        }
+
+        if (st instanceof IConstraintPk c) {
+            MetaConstraint con = new MetaConstraint(loc);
+            con.setPrimaryKey(c.isPrimaryKey());
+            c.getColumns().forEach(con::addColumn);
+            return con;
+        }
+
+        if (st instanceof IRelation r) {
+            MetaRelation rel = new MetaRelation(loc);
+            Stream<Pair<String, String>> columns = r.getRelationColumns();
+            if (columns != null) {
+                rel.addColumns(columns.toList());
+            }
+            return rel;
+        }
+
+        if (st instanceof ICompositeType t) {
+            MetaCompositeType composite = new MetaCompositeType(loc);
+            t.getAttrs().forEach(e -> composite.addAttr(e.getFirst(), e.getSecond()));
+            return composite;
+        }
+        return new MetaStatement(loc);
     }
 
     private static ObjectLocation getLocation(AbstractStatement st, DbObjType type) {

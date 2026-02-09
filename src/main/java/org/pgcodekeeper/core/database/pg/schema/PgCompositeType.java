@@ -18,17 +18,18 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.utils.Pair;
 
 /**
  * PostgreSQL composite type implementation.
  * Represents a composite type consisting of multiple attributes (fields),
  * similar to a table row structure but used as a data type.
  */
-public final class PgCompositeType extends AbstractType implements IPgStatement {
+public final class PgCompositeType extends AbstractType implements IPgStatement, ICompositeType {
 
     private static final String COLLATE = " COLLATE ";
 
@@ -155,13 +156,13 @@ public final class PgCompositeType extends AbstractType implements IPgStatement 
         return null;
     }
 
-    /**
-     * Returns an unmodifiable list of all attributes.
-     *
-     * @return list of attributes
-     */
-    public List<AbstractColumn> getAttrs() {
-        return Collections.unmodifiableList(attrs);
+    @Override
+    public List<Pair<String, String>> getAttrs() {
+        List<Pair<String, String>> result = new ArrayList<>();
+        for (AbstractColumn column : attrs) {
+            result.add(new Pair<>(column.getName(), column.getType()));
+        }
+        return Collections.unmodifiableList(result);
     }
 
     /**
@@ -195,5 +196,17 @@ public final class PgCompositeType extends AbstractType implements IPgStatement 
     @Override
     public void computeHash(Hasher hasher) {
         hasher.putOrdered(attrs);
+    }
+    @Override
+    public String getSchemaName() {
+        return super.getSchemaName();
+    }
+
+    @Override
+    public String getAttrType(String attrName) {
+        return attrs.stream()
+                    .filter(column -> attrName.equals(column.getName()))
+                    .findFirst()
+                    .map(AbstractColumn::getType).orElse(null);
     }
 }

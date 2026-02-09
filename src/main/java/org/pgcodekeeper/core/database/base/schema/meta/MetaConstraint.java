@@ -24,7 +24,7 @@ import org.pgcodekeeper.core.database.api.schema.*;
  * Represents a database constraint metadata object.
  * Provides information about table constraints including primary keys and column references.
  */
-public final class MetaConstraint extends MetaStatement implements IConstraint {
+public final class MetaConstraint extends MetaStatement implements IConstraintPk {
 
     @Serial
     private static final long serialVersionUID = 1801686478824411463L;
@@ -111,5 +111,10 @@ public final class MetaConstraint extends MetaStatement implements IConstraint {
     @Override
     public String getDefinition() {
         throw new IllegalStateException("Unsupported operation");
+    }
+
+    @Override
+    public boolean isClustered() {
+        return false;
     }
 }

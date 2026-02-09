@@ -27,7 +27,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a ClickHouse user-defined function.
  * ClickHouse functions are lambda expressions with parameters and a body.
  */
-public final class ChFunction extends ChAbstractStatement implements IFunction {
+public final class ChFunction extends ChAbstractStatement {
 
     private String body;
     private final List<Argument> arguments = new ArrayList<>();
@@ -53,11 +53,6 @@ public final class ChFunction extends ChAbstractStatement implements IFunction {
     public void setBody(String body) {
         this.body = body;
         resetHash();
-    }
-
-    @Override
-    public List<IArgument> getArguments() {
-        return Collections.unmodifiableList(arguments);
     }
 
     /**
@@ -132,26 +127,6 @@ public final class ChFunction extends ChAbstractStatement implements IFunction {
         copy.arguments.addAll(arguments);
         copy.setBody(body);
         return copy;
-    }
-
-    @Override
-    public String getReturns() {
-        return null;
-    }
-
-    @Override
-    public Map<String, String> getReturnsColumns() {
-        return Collections.emptyMap();
-    }
-
-    @Override
-    public void setReturns(String returns) {
-        //unused
-    }
-
-    @Override
-    public ISchema getContainingSchema() {
-        return null;
     }
 
     @Override

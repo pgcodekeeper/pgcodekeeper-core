@@ -19,7 +19,6 @@ import java.util.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.ICast.CastContext;
-import org.pgcodekeeper.core.database.ch.schema.ChFunction;
 
 /**
  * Container for database metadata objects organized by type and schema.
@@ -34,11 +33,6 @@ public final class MetaContainer {
      * Functions grouped by schema name
      */
     private final Map<String, Map<String, IFunction>> functions = new LinkedHashMap<>();
-
-    /**
-     * ClickHouse functions
-     */
-    private final Map<String, IFunction> chFunctions = new LinkedHashMap<>();
 
     /**
      * Operators grouped by schema name
@@ -56,9 +50,9 @@ public final class MetaContainer {
     private final Map<String, Map<String, List<IConstraint>>> constraints = new LinkedHashMap<>();
 
     /**
-     * PostgreSQL composite types grouped by schema name
+     * Composite types grouped by schema name
      */
-    private final Map<String, Map<String, MetaCompositeType>> pgCompositeTypes = new LinkedHashMap<>();
+    private final Map<String, Map<String, ICompositeType>> types = new LinkedHashMap<>();
 
     /**
      * Adds a statement to the appropriate collection based on its type.
@@ -66,40 +60,31 @@ public final class MetaContainer {
      * @param st the statement to add
      */
     public void addStatement(IStatement st) {
-        switch (st.getStatementType()) {
-            case CAST:
-                casts.add((ICast) st);
-                break;
-            case FUNCTION, PROCEDURE, AGGREGATE:
-                if (st instanceof ChFunction f) {
-                    chFunctions.put(f.getName(), f);
-                    break;
-                }
-                IFunction f = (IFunction) st;
-                functions.computeIfAbsent(f.getSchemaName(), e -> new LinkedHashMap<>()).put(f.getName(), f);
-                break;
-            case OPERATOR:
-                IOperator op = (IOperator) st;
-                operators.computeIfAbsent(op.getSchemaName(), e -> new LinkedHashMap<>()).put(op.getName(), op);
-                break;
-            case TABLE, DICTIONARY, VIEW, SEQUENCE:
-                IRelation rel = (IRelation) st;
-                relations.computeIfAbsent(rel.getSchemaName(), e -> new LinkedHashMap<>()).put(rel.getName(), rel);
-                break;
-            case CONSTRAINT:
-                IConstraint con = (IConstraint) st;
-                constraints
-                        .computeIfAbsent(con.getSchemaName(), e -> new LinkedHashMap<>())
-                        .computeIfAbsent(con.getTableName(), e -> new ArrayList<>())
-                        .add(con);
-                break;
-            case TYPE:
-                if (st instanceof MetaCompositeType t) {
-                    pgCompositeTypes.computeIfAbsent(t.getSchemaName(), e -> new LinkedHashMap<>()).put(t.getName(), t);
-                }
-                break;
-            default:
-                break;
+        if (st instanceof IFunction f) {
+            functions.computeIfAbsent(f.getSchemaName(), e -> new LinkedHashMap<>()).put(f.getName(), f);
+            return;
+        }
+        if (st instanceof ICast cast) {
+            casts.add(cast);
+            return;
+        }
+        if (st instanceof IOperator oper) {
+            operators.computeIfAbsent(oper.getSchemaName(), e -> new LinkedHashMap<>()).put(oper.getName(), oper);
+            return;
+        }
+        if (st instanceof IRelation rel) {
+            relations.computeIfAbsent(rel.getSchemaName(), e -> new LinkedHashMap<>()).put(rel.getName(), rel);
+            return;
+        }
+        if (st instanceof IConstraintPk con) {
+            constraints
+                    .computeIfAbsent(con.getSchemaName(), e -> new LinkedHashMap<>())
+                    .computeIfAbsent(con.getTableName(), e -> new ArrayList<>())
+                    .add(con);
+            return;
+        }
+        if (st instanceof ICompositeType t) {
+            types.computeIfAbsent(t.getSchemaName(), e -> new LinkedHashMap<>()).put(t.getName(), t);
         }
     }
 
@@ -153,25 +138,6 @@ public final class MetaContainer {
     }
 
     /**
-     * Checks if a ClickHouse function exists.
-     *
-     * @param functionName the function name
-     * @return true if the function exists, false otherwise
-     */
-    public boolean findChFunction(String functionName) {
-        return chFunctions.containsKey(functionName);
-    }
-
-    /**
-     * Returns all available ClickHouse functions.
-     *
-     * @return unmodifiable collection of ClickHouse functions
-     */
-    public Collection<IFunction> availableChFunctions() {
-        return Collections.unmodifiableCollection(chFunctions.values());
-    }
-
-    /**
      * Returns available functions in the specified schema.
      *
      * @param schemaName the schema name
@@ -194,14 +160,14 @@ public final class MetaContainer {
     }
 
     /**
-     * Finds a PostgreSQL composite type by schema and name.
+     * Finds composite type by schema and name.
      *
      * @param schemaName the schema name
      * @param typeName   the type name
      * @return the composite type, or null if not found
      */
-    public MetaCompositeType findType(String schemaName, String typeName) {
-        return pgCompositeTypes.getOrDefault(schemaName, Collections.emptyMap()).get(typeName);
+    public ICompositeType findType(String schemaName, String typeName) {
+        return types.getOrDefault(schemaName, Collections.emptyMap()).get(typeName);
     }
 
     /**
