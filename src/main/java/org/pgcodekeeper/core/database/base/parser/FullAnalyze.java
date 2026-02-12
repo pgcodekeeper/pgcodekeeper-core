@@ -15,8 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.parser;
 
-import org.pgcodekeeper.core.database.base.parser.launcher.AbstractAnalysisLauncher;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.api.launcher.IAnalysisLauncher;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IRelation;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
@@ -40,10 +40,10 @@ public final class FullAnalyze {
     private final List<Object> errors;
     private final List<ObjectLocation> refs = new ArrayList<>();
     private final Queue<AntlrTask<?>> antlrTasks = new ArrayDeque<>();
-    private final AbstractDatabase db;
+    private final IDatabase db;
     private final MetaContainer meta;
 
-    private FullAnalyze(AbstractDatabase db, MetaContainer meta, List<Object> errors) {
+    private FullAnalyze(IDatabase db, MetaContainer meta, List<Object> errors) {
         this.db = db;
         this.meta = meta;
         this.errors = errors;
@@ -57,7 +57,7 @@ public final class FullAnalyze {
      * @throws InterruptedException if analysis is interrupted
      * @throws IOException          if analysis fails
      */
-    public static void fullAnalyze(AbstractDatabase db, List<Object> errors)
+    public static void fullAnalyze(IDatabase db, List<Object> errors)
             throws InterruptedException, IOException {
         fullAnalyze(db, MetaUtils.createTreeFromDb(db), errors);
     }
@@ -71,7 +71,7 @@ public final class FullAnalyze {
      * @throws InterruptedException if analysis is interrupted
      * @throws IOException          if analysis fails
      */
-    public static void fullAnalyze(AbstractDatabase db, MetaContainer metaDb, List<Object> errors)
+    public static void fullAnalyze(IDatabase db, MetaContainer metaDb, List<Object> errors)
             throws InterruptedException, IOException {
         new FullAnalyze(db, metaDb, errors).fullAnalyze();
     }
@@ -81,7 +81,7 @@ public final class FullAnalyze {
         analyzeAggregate();
         analyzeView(null);
 
-        for (AbstractAnalysisLauncher l : db.getAnalysisLaunchers()) {
+        for (IAnalysisLauncher l : db.getAnalysisLaunchers()) {
             if (l != null) {
                 AntlrTaskManager.submit(antlrTasks,
                         () -> l.launchAnalyze(errors, meta),
@@ -106,9 +106,9 @@ public final class FullAnalyze {
      * @param rel the specific relation to analyze, or null to analyze all views
      */
     public void analyzeView(IRelation rel) {
-        List<AbstractAnalysisLauncher> launchers = db.getAnalysisLaunchers();
+        List<IAnalysisLauncher> launchers = db.getAnalysisLaunchers();
         for (int i = 0; i < launchers.size(); ++i) {
-            AbstractAnalysisLauncher l = launchers.get(i);
+            var l = launchers.get(i);
             if (l instanceof PgViewAnalysisLauncher v
                     && (rel == null
                     || (rel.getSchemaName().equals(l.getSchemaName())
@@ -126,9 +126,9 @@ public final class FullAnalyze {
     }
 
     private void analyzeOperators() {
-        List<AbstractAnalysisLauncher> launchers = db.getAnalysisLaunchers();
+        List<IAnalysisLauncher> launchers = db.getAnalysisLaunchers();
         for (int i = 0; i < launchers.size(); ++i) {
-            AbstractAnalysisLauncher l = launchers.get(i);
+            var l = launchers.get(i);
             if (l instanceof PgOperatorAnalysisLauncher) {
                 // allow GC to reclaim context memory immediately
                 launchers.set(i, null);
@@ -138,9 +138,9 @@ public final class FullAnalyze {
     }
 
     private void analyzeAggregate() {
-        List<AbstractAnalysisLauncher> launchers = db.getAnalysisLaunchers();
+        List<IAnalysisLauncher> launchers = db.getAnalysisLaunchers();
         for (int i = 0; i < launchers.size(); ++i) {
-            AbstractAnalysisLauncher l = launchers.get(i);
+            var l = launchers.get(i);
             if (l instanceof PgAggregateAnalysisLauncher) {
                 // allow GC to reclaim context memory immediately
                 launchers.set(i, null);

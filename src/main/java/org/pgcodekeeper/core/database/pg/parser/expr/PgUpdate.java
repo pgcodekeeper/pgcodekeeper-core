@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.database.pg.parser.expr;
 
 import java.util.List;
 
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.rulectx.PgVex;
 import org.pgcodekeeper.core.utils.ModPair;
@@ -36,7 +36,7 @@ public class PgUpdate extends PgAbstractExprWithNmspc<Update_stmt_for_psqlContex
      *
      * @param meta the meta container with schema information
      */
-    public PgUpdate(MetaContainer meta) {
+    public PgUpdate(IMetaContainer meta) {
         super(meta);
     }
 

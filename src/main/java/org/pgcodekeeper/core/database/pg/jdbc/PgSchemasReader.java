@@ -20,7 +20,6 @@ import java.sql.*;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.schema.*;
 
@@ -51,7 +50,7 @@ public class PgSchemasReader extends PgAbstractJdbcReader {
             return;
         }
 
-        AbstractSchema s = new PgSchema(schemaName);
+        PgSchema s = new PgSchema(schemaName);
         long owner = res.getLong("nspowner");
 
         if (!schemaName.equals(Consts.PUBLIC)) {
@@ -65,7 +64,7 @@ public class PgSchemasReader extends PgAbstractJdbcReader {
         loader.setAuthor(s, res);
         loader.putSchema(res.getLong("oid"), s);
 
-        db.addSchema(s);
+        db.addChild(s);
     }
 
     @Override

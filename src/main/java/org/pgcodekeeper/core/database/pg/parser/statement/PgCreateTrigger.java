@@ -19,8 +19,10 @@ import java.util.*;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
+import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.launcher.PgTriggerAnalysisLauncher;
@@ -132,7 +134,7 @@ public final class PgCreateTrigger extends PgParserAbstract {
         }
         parseWhen(ctx.when_trigger(), trigger, db, fileName);
 
-        AbstractStatementContainer cont = getSafe(AbstractSchema::getStatementContainer,
+        IStatementContainer cont = getSafe(ISchema::getStatementContainer,
                 getSchemaSafe(ids), parentCtx);
         addSafe(cont, trigger, Arrays.asList(schemaCtx, parentCtx, ctx.name));
     }
@@ -149,7 +151,7 @@ public final class PgCreateTrigger extends PgParserAbstract {
      * @param location the source location for error reporting
      */
     public static void parseWhen(When_triggerContext whenCtx, PgTrigger trigger,
-                                 AbstractDatabase db, String location) {
+                                 IDatabase db, String location) {
         if (whenCtx != null) {
             VexContext vex = whenCtx.vex();
             trigger.setWhen(getFullCtxText(vex));

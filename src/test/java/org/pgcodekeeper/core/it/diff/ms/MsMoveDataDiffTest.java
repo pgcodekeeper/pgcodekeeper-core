@@ -20,7 +20,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;
@@ -50,9 +49,9 @@ class MsMoveDataDiffTest {
         var settings = new CoreSettings();
         settings.setDataMovementMode(true);
         settings.setDbType(DatabaseType.MS);
-        AbstractDatabase dbOld = loadTestDump(
+        var dbOld = loadTestDump(
                 fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, MsMoveDataDiffTest.class, settings);
-        AbstractDatabase dbNew = loadTestDump(
+        var dbNew = loadTestDump(
                 fileNameTemplate + FILES_POSTFIX.NEW_SQL, MsMoveDataDiffTest.class, settings);
 
         assertDiffSame(dbOld, fileNameTemplate, settings);

@@ -54,7 +54,7 @@ public final class ScriptParser {
         LOG.info(Messages.ScriptParser_log_load_dump);
         loader.setMode(ParserListenerMode.SCRIPT);
         // script mode collects only references
-        batches = new ArrayList<>(loader.load().getObjReferences(name));
+        batches = new ArrayList<>(loader.load().getObjReferences().getOrDefault(name, Collections.emptySet()));
 
         dangerStatements = batches.stream()
                 .filter(ObjectLocation::isDanger)

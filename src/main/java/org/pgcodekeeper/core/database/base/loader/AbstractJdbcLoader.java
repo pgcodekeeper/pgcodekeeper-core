@@ -15,18 +15,15 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.loader;
 
-import java.sql.*;
-import java.util.*;
-import java.util.function.*;
-import java.util.stream.Collectors;
-
 import org.antlr.v4.runtime.Parser;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.loader.IJdbcLoader;
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
 import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
 import org.pgcodekeeper.core.database.base.parser.AntlrTaskManager;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.exception.MonitorCancelledRuntimeException;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.localizations.Messages;
@@ -34,15 +31,28 @@ import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Utils;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 /**
  * Base JDBC database loader
  */
-public abstract class AbstractJdbcLoader<T extends AbstractDatabase> extends AbstractLoader<T> implements IJdbcLoader {
+public abstract class AbstractJdbcLoader<T extends IDatabase> extends AbstractLoader<T> implements IJdbcLoader {
 
     protected final JdbcRunner runner;
     protected final IJdbcConnector connector;
     protected final IgnoreSchemaList ignoreSchemaList;
-    protected final Map<Object, AbstractSchema> schemaIds = new HashMap<>();
+    protected final Map<Object, ISchema> schemaIds = new HashMap<>();
 
     private GenericColumn currentObject;
 
@@ -103,7 +113,7 @@ public abstract class AbstractJdbcLoader<T extends AbstractDatabase> extends Abs
      * @param schemaId the schema identifier
      * @param schema   the schema object to associate
      */
-    public void putSchema(Object schemaId, AbstractSchema schema) {
+    public void putSchema(Object schemaId, ISchema schema) {
         schemaIds.put(schemaId, schema);
     }
 
@@ -170,7 +180,7 @@ public abstract class AbstractJdbcLoader<T extends AbstractDatabase> extends Abs
      * @param schemaId the schema identifier
      * @return {@link ISchema} - the schema object to associate
      */
-    public AbstractSchema getSchema(Object schemaId) {
+    public ISchema getSchema(Object schemaId) {
         return schemaIds.get(schemaId);
     }
 }

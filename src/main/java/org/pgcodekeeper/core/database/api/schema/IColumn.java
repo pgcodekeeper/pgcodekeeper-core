@@ -15,5 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
-public interface IColumn {
+/**
+ * Interface for database column
+ */
+public interface IColumn extends ISubElement {
+
+    @Override
+    default DbObjType getStatementType() {
+        return DbObjType.COLUMN;
+    }
 }

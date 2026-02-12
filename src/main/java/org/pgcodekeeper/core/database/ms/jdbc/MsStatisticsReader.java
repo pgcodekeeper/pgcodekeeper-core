@@ -19,7 +19,6 @@ import java.sql.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
 import org.pgcodekeeper.core.database.ms.schema.MsStatistics;
 import org.pgcodekeeper.core.exception.XmlReaderException;
@@ -40,7 +39,7 @@ public final class MsStatisticsReader extends AbstractSearchPathJdbcReader<MsJdb
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException, XmlReaderException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException, XmlReaderException {
         var name = res.getString("name");
         var stat = new MsStatistics(name);
         var schemaName = schema.getName();
@@ -65,7 +64,7 @@ public final class MsStatisticsReader extends AbstractSearchPathJdbcReader<MsJdb
             stat.putOption("INCREMENTAL", "ON");
         }
 
-        if (SupportedMsVersion.VERSION_22.isLE(loader.getVersion())) {
+        if (MsSupportedVersion.VERSION_22.isLE(loader.getVersion())) {
             var sample = res.getInt("persisted_sample_percent");
             if (sample != 0) {
                 stat.setSamplePercent(sample + " PERCENT");
@@ -103,7 +102,7 @@ public final class MsStatisticsReader extends AbstractSearchPathJdbcReader<MsJdb
                 .join("LEFT JOIN sys.objects cont WITH (NOLOCK) ON cont.object_id = res.object_id")
                 .where("res.user_created = 1");
 
-        if (SupportedMsVersion.VERSION_22.isLE(loader.getVersion())) {
+        if (MsSupportedVersion.VERSION_22.isLE(loader.getVersion())) {
             builder
                     .column("res.auto_drop")
                     .column("st_prop.persisted_sample_percent")

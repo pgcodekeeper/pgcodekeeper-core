@@ -21,7 +21,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgAlterTable;
 import org.pgcodekeeper.core.database.pg.schema.*;
@@ -45,8 +44,8 @@ public final class PgConstraintsReader extends PgAbstractSearchPathJdbcReader {
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException {
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion()) && res.getInt("conparentid") != 0) {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion()) && res.getInt("conparentid") != 0) {
             return;
         }
 
@@ -101,7 +100,7 @@ public final class PgConstraintsReader extends PgAbstractSearchPathJdbcReader {
         loader.setAuthor(constr, res);
         loader.setComment(constr, res);
 
-        cont.addConstraint(constr);
+        cont.addChild(constr);
     }
 
     private void readNotNullConstraint(ResultSet res, PgAbstractTable table,
@@ -162,11 +161,11 @@ public final class PgConstraintsReader extends PgAbstractSearchPathJdbcReader {
                 .where("res.contype NOT IN ('t')")
                 .where("res.coninhcount = 0");
 
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             builder.column("res.conparentid::bigint");
         }
 
-        if (SupportedPgVersion.VERSION_18.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_18.isLE(loader.getVersion())) {
             builder
                     .column("a.attname AS col_name")
                     .column("res.connoinherit")

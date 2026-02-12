@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.ms;
 import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
-import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.ms.jdbc.MsJdbcConnector;
 import org.pgcodekeeper.core.database.ms.loader.MsDumpLoader;
 import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
@@ -73,13 +72,13 @@ public class MsDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public IDatabase getDatabaseFromDump(Path path, ISettings settings, IMonitor monitor)
+    public MsDatabase getDatabaseFromDump(Path path, ISettings settings, IMonitor monitor)
             throws IOException, InterruptedException {
         return new MsDumpLoader(path, settings, monitor).loadAndAnalyze();
     }
 
     @Override
-    public IDatabase getDatabaseFromProject(Path path, ISettings settings, IMonitor monitor,
+    public MsDatabase getDatabaseFromProject(Path path, ISettings settings, IMonitor monitor,
                                             IgnoreSchemaList ignoreSchemaList) throws IOException, InterruptedException {
         return new MsProjectLoader(path, settings, monitor, ignoreSchemaList).loadAndAnalyze();
     }

@@ -22,7 +22,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pgcodekeeper.core.Consts.FUNC_SIGN;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -57,8 +56,8 @@ public final class PgCreateType extends PgParserAbstract {
     public void parseObject() {
         List<ParserRuleContext> ids = getIdentifiers(ctx.name);
         String name = QNameParser.getFirstName(ids);
-        AbstractSchema schema = getSchemaSafe(ids);
-        AbstractType type;
+        PgSchema schema = getSchemaSafe(ids);
+        PgAbstractType type;
         if (ctx.RANGE() != null) {
             type = createRangeType(name, schema);
         } else if (ctx.ENUM() != null) {
@@ -92,7 +91,7 @@ public final class PgCreateType extends PgParserAbstract {
         return type;
     }
 
-    private PgRangeType createRangeType(String name, AbstractSchema schema) {
+    private PgRangeType createRangeType(String name, PgSchema schema) {
         PgRangeType type = new PgRangeType(name);
         if (ctx.subtype_name != null) {
             type.setSubtype(getTypeName(ctx.subtype_name));
@@ -123,7 +122,7 @@ public final class PgCreateType extends PgParserAbstract {
         return type;
     }
 
-    private PgBaseType createBaseType(String name, AbstractSchema schema) {
+    private PgBaseType createBaseType(String name, PgSchema schema) {
         PgBaseType type = new PgBaseType(name);
 
         // the order in which dependencies are installed from type to functions is important for generating the migration script
@@ -218,7 +217,7 @@ public final class PgCreateType extends PgParserAbstract {
     }
 
     private void addAttr(Table_column_definitionContext colCtx, PgCompositeType type) {
-        AbstractColumn col = new PgColumn(colCtx.identifier().getText());
+        PgColumn col = new PgColumn(colCtx.identifier().getText());
         col.setType(getTypeName(colCtx.data_type()));
         addTypeDepcy(colCtx.data_type(), type);
         if (colCtx.collate_identifier() != null) {

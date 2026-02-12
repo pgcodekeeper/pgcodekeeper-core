@@ -15,17 +15,37 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.it.jdbc.ch;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.List;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.pgcodekeeper.core.database.api.IDatabaseProvider;
+import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
+import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
+import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
+import org.pgcodekeeper.core.database.base.parser.ScriptParser;
+import org.pgcodekeeper.core.database.ch.loader.ChDumpLoader;
+import org.pgcodekeeper.core.it.jdbc.base.JdbcLoaderTest;
+import org.pgcodekeeper.core.utils.InputStreamProvider;
 import org.pgcodekeeper.core.utils.testcontainer.TestContainerType;
 import org.pgcodekeeper.core.FILES_POSTFIX;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.TestUtils;
+import org.pgcodekeeper.core.api.PgCodeKeeperApi;
 import org.pgcodekeeper.core.database.ch.ChDatabaseProvider;
 import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;
-import org.pgcodekeeper.core.it.jdbc.base.JdbcLoaderTest;
+import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 
 class ChJdbcLoaderTest extends JdbcLoaderTest {
+
+    private final ChDatabaseProvider databaseProvider = new ChDatabaseProvider();
+
+    public static final String CLEAN_DB_SCRIPT = "clean db script";
 
     @ParameterizedTest
     @CsvSource({
@@ -37,9 +57,36 @@ class ChJdbcLoaderTest extends JdbcLoaderTest {
     })
     void chJdbcLoaderTest(String fileName) throws Exception {
         var settings = new CoreSettings();
-        settings.setDbType(DatabaseType.CH);
+        settings.setAddTransaction(true);
+        settings.setEnableFunctionBodiesDependencies(true);
+
+        String dumpFileName = fileName + FILES_POSTFIX.SQL;
+        var path = TestUtils.getPathToResource(dumpFileName, getClass()) ;
+        var dumpDb = databaseProvider.getDatabaseFromDump(path, settings, new NullMonitor());
+        var script = Files.readString(TestUtils.getPathToResource(dumpFileName, getClass()));
+
+        var loader = createDumpLoader(() -> new ByteArrayInputStream(script.getBytes(StandardCharsets.UTF_8)),
+                dumpFileName, settings, databaseProvider);
+        ScriptParser parser = new ScriptParser(loader, dumpFileName, script);
+
         var url = TestContainerType.CH_24.getUrl();
-        jdbcLoaderTest(fileName + FILES_POSTFIX.SQL, "ch.pgcodekeeperignore",
-                url, new ChJdbcConnector(url), settings, null, getClass(), new ChDatabaseProvider());
+        var startConfDb = databaseProvider.getDatabaseFromJdbc(url, settings, new NullMonitor(), null);
+        IJdbcConnector connector = new ChJdbcConnector(url);
+        try {
+            new JdbcRunner(new NullMonitor()).runBatches(connector, parser.batch(), null);
+
+            var remoteDb = databaseProvider.getDatabaseFromJdbc(url, settings, new NullMonitor(), null);
+            List<String> ignoreLists = List.of(TestUtils.getFilePath("ch.pgcodekeeperignore", getClass()));
+            var actual = PgCodeKeeperApi.diff(settings, dumpDb, remoteDb, ignoreLists);
+            Assertions.assertEquals("", actual, "Incorrect run dump %s on Database".formatted(dumpFileName));
+        } finally {
+            clearDb(settings, startConfDb, connector, url, databaseProvider);
+        }
+    }
+
+    @Override
+    protected AbstractDumpLoader<?> createDumpLoader(InputStreamProvider input, String inputObjectName,
+            ISettings settings, IDatabaseProvider databaseProvider) {
+        return new ChDumpLoader(input, inputObjectName, settings);
     }
 }

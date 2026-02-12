@@ -21,7 +21,6 @@ import java.util.List;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.*;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Batch_statementContext;
 import org.pgcodekeeper.core.database.ms.parser.statement.*;
@@ -45,7 +44,7 @@ public final class MsFPVTReader extends AbstractSearchPathJdbcReader<MsJdbcLoade
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException, XmlReaderException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException, XmlReaderException {
         String name = res.getString("name");
 
         String type = res.getString("type");
@@ -82,7 +81,7 @@ public final class MsFPVTReader extends AbstractSearchPathJdbcReader<MsJdbcLoade
                 Batch_statementContext ctx = p.tsql_file().batch(0).batch_statement();
                 return new MsCreateTrigger(ctx, db, an, qi, (CommonTokenStream) p.getInputStream(), settings);
             }, creator -> {
-                MsTrigger tr = creator.getObject(schema, true);
+                MsTrigger tr = creator.getObject((MsSchema) schema, true);
                 tr.setDisable(isDisable);
             });
         } else if (tt == DbObjType.VIEW) {
@@ -100,7 +99,7 @@ public final class MsFPVTReader extends AbstractSearchPathJdbcReader<MsJdbcLoade
                 Batch_statementContext ctx = p.tsql_file().batch(0).batch_statement();
                 return new MsCreateProcedure(ctx, db, an, qi, (CommonTokenStream) p.getInputStream(), settings);
             }, creator -> {
-                AbstractFunction st = creator.getObject(schema, true);
+                MsAbstractCommonFunction st = creator.getObject((MsSchema) schema, true);
                 loader.setOwner(st, owner);
                 loader.setPrivileges(st, acls);
             });
@@ -109,7 +108,7 @@ public final class MsFPVTReader extends AbstractSearchPathJdbcReader<MsJdbcLoade
                 Batch_statementContext ctx = p.tsql_file().batch(0).batch_statement();
                 return new MsCreateFunction(ctx, db, an, qi, (CommonTokenStream) p.getInputStream(), settings);
             }, creator -> {
-                AbstractFunction st = creator.getObject(schema, true);
+                MsAbstractCommonFunction st = creator.getObject((MsSchema) schema, true);
                 loader.setOwner(st, owner);
                 loader.setPrivileges(st, acls);
             });

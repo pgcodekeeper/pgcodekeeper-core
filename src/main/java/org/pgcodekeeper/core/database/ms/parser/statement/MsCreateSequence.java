@@ -19,7 +19,6 @@ import java.util.*;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
 import org.pgcodekeeper.core.database.ms.schema.*;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -52,7 +51,7 @@ public final class MsCreateSequence extends MsParserAbstract {
         MsSequence sequence = new MsSequence(name);
         fillSequence(sequence, ctx.sequence_body());
         List<ParserRuleContext> ids = Arrays.asList(ctx.qualified_name().schema, nameCtx);
-        AbstractSchema schema = getSchemaSafe(ids);
+        MsSchema schema = getSchemaSafe(ids);
         addSafe(schema, sequence, ids);
     }
 

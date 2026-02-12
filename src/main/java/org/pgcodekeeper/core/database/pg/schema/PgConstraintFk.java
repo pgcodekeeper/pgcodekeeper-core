@@ -175,7 +175,7 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
 
     @Override
     protected void compareExtraOptions(PgConstraint newConstr, SQLScript script) {
-        if (!compareCommonFields(newConstr)) {
+        if (!super.compareUnalterable(newConstr)) {
             StringBuilder sb = new StringBuilder();
             appendAlterTable(sb);
             sb.append("\n\tALTER CONSTRAINT ").append(getQuotedName(name));
@@ -194,12 +194,18 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
     }
 
     @Override
-    public boolean compare(IStatement obj) {
-        if (obj instanceof PgConstraintFk con && super.compare(con)) {
-            return compareCommonFields(con)
-                    && compareUnalterable(con);
-        }
-        return false;
+    public void computeHash(Hasher hasher) {
+        super.computeHash(hasher);
+        hasher.put(foreignSchema);
+        hasher.put(foreignTable);
+        hasher.put(columns);
+        hasher.put(delActCols);
+        hasher.put(refs);
+        hasher.put(match);
+        hasher.put(delAction);
+        hasher.put(updAction);
+        hasher.put(periodColumn);
+        hasher.put(periodRefcolumn);
     }
 
     @Override
@@ -219,22 +225,7 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(foreignSchema);
-        hasher.put(foreignTable);
-        hasher.put(columns);
-        hasher.put(delActCols);
-        hasher.put(refs);
-        hasher.put(match);
-        hasher.put(delAction);
-        hasher.put(updAction);
-        hasher.put(periodColumn);
-        hasher.put(periodRefcolumn);
-    }
-
-    @Override
-    protected AbstractConstraint getConstraintCopy() {
+    protected PgConstraint getConstraintCopy() {
         var con = new PgConstraintFk(name);
         con.setForeignSchema(foreignSchema);
         con.setForeignTable(foreignTable);

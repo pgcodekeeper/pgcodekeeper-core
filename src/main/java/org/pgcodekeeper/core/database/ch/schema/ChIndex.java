@@ -15,18 +15,27 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.base.schema.SimpleColumn;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
+import java.util.*;
+
 /**
  * Represents a ClickHouse table index.
- * ClickHouse indexes are used for data skipping and include expression, type, and granularity settings.
+ * ClickHouse's indexes are used for data skipping and include expression, type, and granularity settings.
  */
-public final class ChIndex extends AbstractIndex implements IChStatement {
+public class ChIndex extends ChAbstractStatement implements IIndex {
+
+    protected String where;
+    protected String tablespace;
+    protected boolean unique;
+    protected boolean isClustered;
+
+    protected final List<SimpleColumn> columns = new ArrayList<>();
+    protected final List<String> includes = new ArrayList<>();
+    protected final Map<String, String> options = new LinkedHashMap<>();
 
     private String expr;
     private String type;
@@ -39,6 +48,82 @@ public final class ChIndex extends AbstractIndex implements IChStatement {
      */
     public ChIndex(String name) {
         super(name);
+    }
+
+    public void setClustered(boolean isClustered) {
+        this.isClustered = isClustered;
+        resetHash();
+    }
+
+    public boolean isClustered() {
+        return isClustered;
+    }
+
+    @Override
+    public void addColumn(SimpleColumn column) {
+        columns.add(column);
+        resetHash();
+    }
+
+    @Override
+    public boolean compareColumns(Collection<String> refs) {
+        if (refs.size() != columns.size()) {
+            return false;
+        }
+        int i = 0;
+        for (String ref : refs) {
+            if (!ref.equals(columns.get(i++).getName())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void addInclude(String column) {
+        includes.add(column);
+        resetHash();
+    }
+
+    @Override
+    public boolean isUnique() {
+        return unique;
+    }
+
+    public void setUnique(final boolean unique) {
+        this.unique = unique;
+        resetHash();
+    }
+
+    public void setWhere(final String where) {
+        this.where = where;
+        resetHash();
+    }
+
+    public String getTablespace() {
+        return tablespace;
+    }
+
+    public void setTablespace(String tableSpace) {
+        this.tablespace = tableSpace;
+        resetHash();
+    }
+
+    @Override
+    public Map<String, String> getOptions() {
+        return Collections.unmodifiableMap(options);
+    }
+
+    @Override
+    public void addOption(String key, String value) {
+        options.put(key, value);
+        resetHash();
+    }
+
+    protected void appendWhere(StringBuilder sbSQL) {
+        if (where != null) {
+            sbSQL.append("\nWHERE ").append(where);
+        }
     }
 
     public void setExpr(String expr) {
@@ -97,21 +182,21 @@ public final class ChIndex extends AbstractIndex implements IChStatement {
     }
 
     private String getAlterTable() {
-        return ((AbstractTable) parent).getAlterTable(false);
-    }
-
-    private boolean compareUnalterable(ChIndex newIndex) {
-        return Objects.equals(expr, newIndex.expr)
-                && Objects.equals(type, newIndex.type)
-                && granVal == newIndex.granVal;
+        return ((ChTable) parent).getAlterTable(false);
     }
 
     @Override
     public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
         hasher.put(expr);
         hasher.put(type);
         hasher.put(granVal);
+        hasher.putOrdered(columns);
+        hasher.put(where);
+        hasher.put(includes);
+        hasher.put(unique);
+        hasher.put(isClustered);
+        hasher.put(tablespace);
+        hasher.put(options);
     }
 
     @Override
@@ -119,16 +204,40 @@ public final class ChIndex extends AbstractIndex implements IChStatement {
         if (this == obj) {
             return true;
         }
-        return obj instanceof ChIndex index && super.compare(index)
-                && compareUnalterable(index);
+
+        if (obj instanceof ChIndex index && super.compare(obj)) {
+            return compareUnalterable(index)
+                    && isClustered == index.isClustered
+                    && Objects.equals(tablespace, index.tablespace)
+                    && Objects.equals(options, index.options);
+        }
+
+        return false;
+    }
+
+    protected boolean compareUnalterable(ChIndex index) {
+        return Objects.equals(expr, index.expr)
+                && Objects.equals(type, index.type)
+                && granVal == index.granVal
+                && Objects.equals(columns, index.columns)
+                && Objects.equals(where, index.where)
+                && Objects.equals(includes, index.includes)
+                && unique == index.unique;
     }
 
     @Override
-    protected AbstractIndex getIndexCopy() {
+    protected ChIndex getCopy() {
         var index = new ChIndex(name);
         index.setExpr(expr);
         index.setType(type);
         index.setGranVal(granVal);
+        index.columns.addAll(columns);
+        index.setWhere(where);
+        index.includes.addAll(includes);
+        index.setUnique(unique);
+        index.setClustered(isClustered);
+        index.setTablespace(tablespace);
+        index.options.putAll(options);
         return index;
     }
 }

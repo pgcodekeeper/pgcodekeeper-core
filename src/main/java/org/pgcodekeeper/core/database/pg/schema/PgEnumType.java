@@ -19,7 +19,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractType;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -28,7 +27,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents an enumerated type with a fixed set of string values
  * that can be extended but not reordered.
  */
-public final class PgEnumType extends AbstractType implements IPgStatement {
+public final class PgEnumType extends PgAbstractType {
 
     private final List<String> enums = new ArrayList<>();
 
@@ -54,7 +53,7 @@ public final class PgEnumType extends AbstractType implements IPgStatement {
     }
 
     @Override
-    protected boolean compareUnalterable(AbstractType newType) {
+    protected boolean compareUnalterable(PgAbstractType newType) {
         Iterator<String> ni = ((PgEnumType) newType).enums.iterator();
         for (String oldEnum : enums) {
             if (!ni.hasNext()) {
@@ -83,7 +82,7 @@ public final class PgEnumType extends AbstractType implements IPgStatement {
     }
 
     @Override
-    protected void compareType(AbstractType newType, AtomicBoolean isNeedDepcies, SQLScript script) {
+    protected void compareType(PgAbstractType newType, AtomicBoolean isNeedDepcies, SQLScript script) {
         List<String> newEnums = ((PgEnumType) newType).enums;
         for (int i = 0; i < newEnums.size(); ++i) {
             String value = newEnums.get(i);
@@ -112,10 +111,8 @@ public final class PgEnumType extends AbstractType implements IPgStatement {
     }
 
     @Override
-    protected AbstractType getTypeCopy() {
-        PgEnumType copy = new PgEnumType(name);
-        copy.enums.addAll(enums);
-        return copy;
+    public void computeHash(Hasher hasher) {
+        hasher.put(enums);
     }
 
     @Override
@@ -127,7 +124,9 @@ public final class PgEnumType extends AbstractType implements IPgStatement {
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(enums);
+    protected PgAbstractType getCopy() {
+        PgEnumType copy = new PgEnumType(name);
+        copy.enums.addAll(enums);
+        return copy;
     }
 }

@@ -15,18 +15,22 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import java.util.*;
-
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractView;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.utils.Pair;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * Represents a ClickHouse view (VIEW, MATERIALIZED VIEW, or LIVE VIEW).
  * Supports various ClickHouse-specific view features like refresh periods, engines, and security settings.
  */
-public final class ChView extends AbstractView implements IChStatement {
+public class ChView extends ChAbstractStatement implements IView {
 
     /**
      * Enumeration of ClickHouse view types.
@@ -39,9 +43,10 @@ public final class ChView extends AbstractView implements IChStatement {
         ChViewType(String sql) {
             this.sql = sql;
         }
-    }
 
+    }
     private ChViewType type = ChViewType.SIMPLE;
+
     private String destination;
     private String query;
     private String normalizedQuery;
@@ -86,6 +91,25 @@ public final class ChView extends AbstractView implements IChStatement {
     public void setWithRefresh(boolean isWithRefresh) {
         this.isWithRefresh = isWithRefresh;
         resetHash();
+    }
+
+    @Override
+    public Stream<Pair<String, String>> getRelationColumns() {
+        return Stream.empty();
+    }
+    @Override
+    public void addChild(IStatement stmt) {
+        throw new IllegalArgumentException("Unsupported child type: " + type);
+    }
+
+    @Override
+    public IStatement getChild(String name, DbObjType type) {
+        return null;
+    }
+
+    @Override
+    public Collection<IStatement> getChildrenByType(DbObjType type) {
+        return List.of();
     }
 
     /**
@@ -270,27 +294,17 @@ public final class ChView extends AbstractView implements IChStatement {
     }
 
     @Override
-    protected AbstractView getViewCopy() {
-        ChView view = new ChView(name);
-        view.setType(type);
-        view.setQuery(query, normalizedQuery);
-        view.setDestination(destination);
-        view.setWithRefresh(isWithRefresh);
-        view.setDefiner(definer);
-        view.setRefreshPeriod(refreshPeriod);
-        view.setSqlSecurity(sqlSecurity);
-        view.columns.addAll(columns);
-        view.setEngine(engine);
-        return view;
-    }
-
-    @Override
-    public void appendComments(SQLScript script) {
-        // no impl
-    }
-
-    @Override
-    protected void appendCommentSql(SQLScript script) {
-        // no impl
+    protected ChView getCopy() {
+        ChView copy = new ChView(name);
+        copy.setType(type);
+        copy.setQuery(query, normalizedQuery);
+        copy.setDestination(destination);
+        copy.setWithRefresh(isWithRefresh);
+        copy.setRefreshPeriod(refreshPeriod);
+        copy.setDefiner(definer);
+        copy.setSqlSecurity(sqlSecurity);
+        copy.columns.addAll(columns);
+        copy.setEngine(engine);
+        return copy;
     }
 }

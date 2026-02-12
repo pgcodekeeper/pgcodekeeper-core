@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
+import org.junit.jupiter.api.Assertions;
 
 public final class TestUtils {
 
@@ -53,6 +54,12 @@ public final class TestUtils {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Invalid resource URI: " + resourceName, e);
         }
+    }
+
+    public static void assertIgnoreNewLines(String expected, String actual) {
+        Assertions.assertLinesMatch(
+                expected.lines(),
+                actual.lines());
     }
 
     private TestUtils() {

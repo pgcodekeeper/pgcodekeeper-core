@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -28,7 +27,7 @@ import org.pgcodekeeper.core.settings.ISettings;
  * External tables allow access to data stored outside the database,
  * such as flat files, web services, or other external data sources.
  */
-public final class GpExternalTable extends PgAbstractTable implements PgForeignOptionContainer, IForeignTable {
+public final class GpExternalTable extends PgAbstractTable implements IForeignTable, PgForeignOptionContainer {
 
     private boolean isWritable;
     private boolean isWeb;
@@ -73,7 +72,7 @@ public final class GpExternalTable extends PgAbstractTable implements PgForeignO
     @Override
     protected void appendColumns(StringBuilder sbSQL, SQLScript script) {
         sbSQL.append(" (");
-        for (AbstractColumn column : columns) {
+        for (PgColumn column : columns) {
             sbSQL.append("\n\t").append(column.getName()).append(" ")
                     .append(column.getType()).append(",");
         }
@@ -138,7 +137,7 @@ public final class GpExternalTable extends PgAbstractTable implements PgForeignO
     }
 
     @Override
-    protected boolean isNeedRecreate(AbstractTable newTable) {
+    protected boolean isNeedRecreate(PgAbstractTable newTable) {
         return super.isNeedRecreate(newTable)
                 || !this.getClass().equals(newTable.getClass())
                 || !Objects.equals(getOptions(), newTable.getOptions())
@@ -156,13 +155,8 @@ public final class GpExternalTable extends PgAbstractTable implements PgForeignO
     }
 
     @Override
-    public String getAlterTable(boolean only) {
+    protected String getAlterTable(boolean only) {
         return "ALTER EXTERNAL TABLE " + getQualifiedName();
-    }
-
-    @Override
-    protected AbstractTable getTableCopy() {
-        return new GpExternalTable(name);
     }
 
     @Override
@@ -241,7 +235,24 @@ public final class GpExternalTable extends PgAbstractTable implements PgForeignO
     }
 
     @Override
-    protected boolean compareTable(AbstractStatement obj) {
+    public void computeHash(Hasher hasher) {
+        super.computeHash(hasher);
+        hasher.put(isWritable);
+        hasher.put(isWeb);
+        hasher.put(rejectLimit);
+        hasher.put(distribution);
+        hasher.put(urLocation);
+        hasher.put(exLocation);
+        hasher.put(command);
+        hasher.put(formatType);
+        hasher.put(formatOptions);
+        hasher.put(encoding);
+        hasher.put(isRowReject);
+        hasher.put(isLogErrors);
+    }
+
+    @Override
+    protected boolean compareTable(PgAbstractTable obj) {
         return  obj instanceof GpExternalTable table
                 && super.compareTable(table)
                 && compareExternalOptions(table);
@@ -263,25 +274,8 @@ public final class GpExternalTable extends PgAbstractTable implements PgForeignO
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(isWritable);
-        hasher.put(isWeb);
-        hasher.put(rejectLimit);
-        hasher.put(distribution);
-        hasher.put(urLocation);
-        hasher.put(exLocation);
-        hasher.put(command);
-        hasher.put(formatType);
-        hasher.put(formatOptions);
-        hasher.put(encoding);
-        hasher.put(isRowReject);
-        hasher.put(isLogErrors);
-    }
-
-    @Override
-    public AbstractTable shallowCopy() {
-        GpExternalTable copy = (GpExternalTable) super.shallowCopy();
+    protected PgAbstractTable getTableCopy() {
+        GpExternalTable copy = new GpExternalTable(name);
         copy.setWritable(isWritable);
         copy.setWeb(isWeb);
         copy.setRejectLimit(rejectLimit);

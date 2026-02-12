@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.database.pg.parser.expr;
 
 import java.util.List;
 
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 
 /**
@@ -34,7 +34,7 @@ public class PgSql extends PgAbstractStatements<SqlContext> {
      *
      * @param meta the meta container with schema information
      */
-    public PgSql(MetaContainer meta) {
+    public PgSql(IMetaContainer meta) {
         super(meta);
     }
 

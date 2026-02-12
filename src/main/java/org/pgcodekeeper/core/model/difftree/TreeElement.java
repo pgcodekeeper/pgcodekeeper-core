@@ -15,14 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.difftree;
 
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
-import org.pgcodekeeper.core.database.base.schema.AbstractTable;
-import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-
+import org.pgcodekeeper.core.database.api.schema.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -132,7 +125,7 @@ public final class TreeElement {
      * @param statement the database statement
      * @param side      the diff side
      */
-    public TreeElement(AbstractStatement statement, DiffSide side) {
+    public TreeElement(IStatement statement, DiffSide side) {
         this.name = statement.getName();
         this.side = side;
         this.type = statement.getStatementType();
@@ -240,7 +233,7 @@ public final class TreeElement {
             throw new IllegalArgumentException("No statement found for " + parent);
         }
         if (type == DbObjType.COLUMN) {
-            return ((AbstractTable) stParent).getColumn(name);
+            return ((ITable) stParent).getColumn(name);
         }
         if (stParent instanceof IStatementContainer cont) {
             return cont.getChild(name, type);
@@ -257,7 +250,7 @@ public final class TreeElement {
      * @param right the right database
      * @return statement from the appropriate database
      */
-    public IStatement getStatementSide(AbstractDatabase left, AbstractDatabase right) {
+    public IStatement getStatementSide(IDatabase left, IDatabase right) {
         return switch (side) {
             case LEFT, BOTH -> getStatement(left);
             case RIGHT -> getStatement(right);
@@ -271,7 +264,7 @@ public final class TreeElement {
      * @return the matching tree element, or null if not found
      */
     public TreeElement findElement(IStatement st) {
-        if (st.getStatementType() == DbObjType.DATABASE) {
+        if (st instanceof IDatabase) {
             TreeElement root = this;
             while (root.parent != null) {
                 root = root.parent;

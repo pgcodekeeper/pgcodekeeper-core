@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.utils.testcontainer;
 
-import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
+import org.pgcodekeeper.core.database.ch.jdbc.ChSupportedVersion;
 import org.testcontainers.clickhouse.ClickHouseContainer;
 import org.testcontainers.containers.GenericContainer;
 
@@ -25,8 +25,8 @@ final class Ch24TestContainer implements ITestContainer {
     private static final String TEST_PASSWORD = "1245789630";
 
     @Override
-    public SupportedPgVersion getVersion() {
-        return null;
+    public ChSupportedVersion getVersion() {
+        return ChSupportedVersion.DEFAULT;
     }
 
     @Override

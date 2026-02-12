@@ -170,7 +170,7 @@ public final class PgConstraintPk extends PgConstraint implements IConstraintPk,
                 appendAlterTable(sb);
                 sb.append(" CLUSTER ON ").append(name);
                 script.addStatement(sb);
-            } else if (!((AbstractStatementContainer) newConstr.parent).isClustered()) {
+            } else if (!((PgAbstractStatementContainer) newConstr.parent).isClustered()) {
                 appendAlterTable(sb);
                 sb.append(" SET WITHOUT CLUSTER");
                 script.addStatement(sb);
@@ -181,6 +181,19 @@ public final class PgConstraintPk extends PgConstraint implements IConstraintPk,
     @Override
     protected boolean isGenerateNotValid(ISettings settings) {
         return false;
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        super.computeHash(hasher);
+        hasher.put(isPrimaryKey);
+        hasher.put(isClustered);
+        hasher.put(isDistinct);
+        hasher.put(columns);
+        hasher.put(includes);
+        hasher.put(params);
+        hasher.put(tablespace);
+        hasher.put(withoutOverlapsColumn);
     }
 
     @Override
@@ -206,20 +219,7 @@ public final class PgConstraintPk extends PgConstraint implements IConstraintPk,
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(isPrimaryKey);
-        hasher.put(isClustered);
-        hasher.put(isDistinct);
-        hasher.put(columns);
-        hasher.put(includes);
-        hasher.put(params);
-        hasher.put(tablespace);
-        hasher.put(withoutOverlapsColumn);
-    }
-
-    @Override
-    protected AbstractConstraint getConstraintCopy() {
+    protected PgConstraint getConstraintCopy() {
         var con = new PgConstraintPk(name, isPrimaryKey);
         con.setClustered(isClustered);
         con.setDistinct(isDistinct);

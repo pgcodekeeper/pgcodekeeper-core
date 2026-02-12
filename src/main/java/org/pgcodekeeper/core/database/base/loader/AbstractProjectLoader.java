@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.database.base.loader;
 
 import org.pgcodekeeper.core.database.api.loader.IProjectLoader;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -36,7 +36,7 @@ import java.util.stream.Stream;
  *
  * @param <T> the type of database this loader produces
  */
-public abstract class AbstractProjectLoader<T extends AbstractDatabase> extends AbstractLoader<T>
+public abstract class AbstractProjectLoader<T extends IDatabase> extends AbstractLoader<T>
         implements IProjectLoader {
 
     protected final Queue<AbstractDumpLoader<T>> dumpLoaders = new ArrayDeque<>();

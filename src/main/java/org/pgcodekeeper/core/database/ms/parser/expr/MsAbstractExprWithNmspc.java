@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.utils.*;
@@ -56,7 +56,7 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
      */
     private final Set<String> cte = new HashSet<>();
 
-    protected MsAbstractExprWithNmspc(String schema, MetaContainer meta) {
+    protected MsAbstractExprWithNmspc(String schema, IMetaContainer meta) {
         super(schema, meta);
     }
 

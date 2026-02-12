@@ -20,7 +20,6 @@ import java.util.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -112,10 +111,10 @@ public final class PgAlterOther extends PgParserAbstract {
             return;
         }
 
-        AbstractSchema schema = getSchemaSafe(ids);
+        PgSchema schema = getSchemaSafe(ids);
         ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
 
-        AbstractType type = getSafe(AbstractSchema::getType, schema, nameCtx);
+        PgAbstractType type = getSafe(PgSchema::getType, schema, nameCtx);
         if (type instanceof PgBaseType baseType) {
             for (Storage_directiveContext storDirCtx : encodingCtx.storage_directive()) {
                 if (storDirCtx.compress_type != null) {

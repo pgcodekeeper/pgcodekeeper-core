@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
@@ -145,7 +144,7 @@ public class MetaStatement implements IStatement, Serializable {
     }
 
     @Override
-    public AbstractDatabase getDatabase() {
+    public IDatabase getDatabase() {
         throw new UnsupportedOperationException();
     }
 
@@ -181,11 +180,6 @@ public class MetaStatement implements IStatement, Serializable {
 
     @Override
     public Set<IPrivilege> getPrivileges() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public DatabaseType getDbType() {
         throw new UnsupportedOperationException();
     }
 
@@ -240,11 +234,6 @@ public class MetaStatement implements IStatement, Serializable {
     }
 
     @Override
-    public void appendDefaultPrivileges(IStatement statement, SQLScript script) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void getCreationSQL(SQLScript script) {
         throw new UnsupportedOperationException();
     }
@@ -275,7 +264,27 @@ public class MetaStatement implements IStatement, Serializable {
     }
 
     @Override
-    public void appendFullName(StringBuilder sb) {
+    public void setOwner(String owner) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setLibName(String libName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setLocation(ObjectLocation loc) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasChildren() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getSeparator() {
         throw new UnsupportedOperationException();
     }
 }

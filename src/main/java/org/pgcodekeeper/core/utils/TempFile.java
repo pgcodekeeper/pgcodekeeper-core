@@ -30,17 +30,6 @@ public final class TempFile implements AutoCloseable {
     private final Path f;
 
     /**
-     * Creates a temporary file with specified prefix and suffix in the system temp directory.
-     *
-     * @param prefix the file name prefix
-     * @param suffix the file name suffix
-     * @throws IOException if file creation fails
-     */
-    public TempFile(String prefix, String suffix) throws IOException {
-        this.f = FileUtils.createTempFile(prefix, suffix);
-    }
-
-    /**
      * Creates a temporary file with specified prefix and suffix in the given directory.
      *
      * @param dir    the directory to create file in

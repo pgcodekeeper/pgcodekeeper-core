@@ -19,7 +19,6 @@ import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 
 import java.util.Collection;
@@ -44,7 +43,7 @@ public class SimpleDepcyResolver {
      * @param oldDatabase   the old database schema
      * @param isShowColumns whether to show column dependencies
      */
-    public SimpleDepcyResolver(AbstractDatabase oldDatabase, boolean isShowColumns) {
+    public SimpleDepcyResolver(IDatabase oldDatabase, boolean isShowColumns) {
         this(oldDatabase, null, isShowColumns);
     }
 

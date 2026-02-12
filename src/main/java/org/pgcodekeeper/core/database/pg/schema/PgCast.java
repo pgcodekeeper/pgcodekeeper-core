@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -91,11 +90,6 @@ public final class PgCast extends PgAbstractStatement implements ICast {
     }
 
     @Override
-    public AbstractDatabase getDatabase() {
-        return (AbstractDatabase) parent;
-    }
-
-    @Override
     public String getQualifiedName() {
         if (qualifiedName == null) {
             qualifiedName = '(' + source + " AS " + target + ')';
@@ -148,10 +142,11 @@ public final class PgCast extends PgAbstractStatement implements ICast {
         return getObjectState(script, startSize);
     }
 
-    private boolean compareUnalterable(PgCast cast) {
-        return Objects.equals(function, cast.function)
-                && method == cast.method
-                && context == cast.context;
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(context);
+        hasher.put(method);
+        hasher.put(function);
     }
 
     @Override
@@ -167,17 +162,15 @@ public final class PgCast extends PgAbstractStatement implements ICast {
         return false;
     }
 
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(context);
-        hasher.put(method);
-        hasher.put(function);
+    private boolean compareUnalterable(PgCast cast) {
+        return Objects.equals(function, cast.function)
+                && method == cast.method
+                && context == cast.context;
     }
 
     @Override
-    public PgCast shallowCopy() {
+    protected PgCast getCopy() {
         PgCast copy = new PgCast(source, target);
-        copyBaseFields(copy);
         copy.setContext(context);
         copy.setMethod(method);
         copy.setFunction(function);

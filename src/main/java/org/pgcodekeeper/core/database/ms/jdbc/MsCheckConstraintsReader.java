@@ -19,9 +19,9 @@ import java.sql.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.*;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
 import org.pgcodekeeper.core.database.ms.schema.MsConstraintCheck;
+import org.pgcodekeeper.core.database.ms.schema.MsTable;
 
 /**
  * Reader for Microsoft SQL check constraints.
@@ -39,11 +39,11 @@ public class MsCheckConstraintsReader extends AbstractSearchPathJdbcReader<MsJdb
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String name = res.getString("name");
         loader.setCurrentObject(new GenericColumn(schema.getName(), name, DbObjType.CONSTRAINT));
 
-        AbstractTable table = schema.getTable(res.getString("table_name"));
+        MsTable table = (MsTable) schema.getChild(res.getString("table_name"), DbObjType.TABLE);
         if (table == null) {
             return;
         }
@@ -55,7 +55,7 @@ public class MsCheckConstraintsReader extends AbstractSearchPathJdbcReader<MsJdb
         constrCheck.setNotForRepl(res.getBoolean("is_not_for_replication"));
         constrCheck.setExpression(res.getString("definition"));
 
-        table.addConstraint(constrCheck);
+        table.addChild(constrCheck);
     }
 
     @Override

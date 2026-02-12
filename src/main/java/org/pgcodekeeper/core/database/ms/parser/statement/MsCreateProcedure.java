@@ -75,7 +75,7 @@ public final class MsCreateProcedure extends MsBatchContextProcessor {
      * @param isJdbc whether this is being parsed in JDBC mode
      * @return the created procedure object
      */
-    public AbstractFunction getObject(AbstractSchema schema, boolean isJdbc) {
+    public MsAbstractCommonFunction getObject(MsSchema schema, boolean isJdbc) {
         IdContext nameCtx = ctx.qualified_name().name;
         List<ParserRuleContext> ids = Arrays.asList(ctx.qualified_name().schema, nameCtx);
         if (ctx.proc_body().EXTERNAL() != null) {
@@ -118,7 +118,7 @@ public final class MsCreateProcedure extends MsBatchContextProcessor {
         return procedure;
     }
 
-    private void fillArguments(AbstractFunction function) {
+    private void fillArguments(MsAbstractCommonFunction function) {
         for (Procedure_paramContext argument : ctx.procedure_param()) {
             Argument arg = new Argument(parseArgMode(argument.arg_mode()),
                     argument.name.getText(), getFullCtxText(argument.data_type()));

@@ -147,7 +147,7 @@ public final class PgCastsReader extends PgAbstractJdbcReader {
                 .from("pg_catalog.pg_cast res")
                 .where("res.oid > ?");
 
-        if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
             builder.where("NOT EXISTS (SELECT 1 FROM pg_range r WHERE res.castsource = r.rngtypid AND res.casttarget = r.rngmultitypid)");
         }
     }

@@ -17,14 +17,13 @@ package org.pgcodekeeper.core.database.ms.schema;
 
 import java.util.Objects;
 
-import org.pgcodekeeper.core.database.base.schema.AbstractFunction;
 import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
  * Abstract base class for Microsoft SQL functions.
  * Provides common functionality for Microsoft SQL function implementations.
  */
-public abstract class MsAbstractFunction extends AbstractFunction
+public abstract class MsAbstractFunction extends MsAbstractCommonFunction
         implements MsSourceStatement {
 
     private boolean ansiNulls;
@@ -86,7 +85,7 @@ public abstract class MsAbstractFunction extends AbstractFunction
     }
 
     @Override
-    protected boolean compareUnalterable(AbstractFunction func) {
+    protected boolean compareUnalterable(MsAbstractCommonFunction func) {
         if (func instanceof MsAbstractFunction newFunction && super.compareUnalterable(func)) {
             return ansiNulls == newFunction.ansiNulls
                     && quotedIdentified == newFunction.quotedIdentified
@@ -98,8 +97,8 @@ public abstract class MsAbstractFunction extends AbstractFunction
     }
 
     @Override
-    public AbstractFunction shallowCopy() {
-        MsAbstractFunction functionDst = (MsAbstractFunction) super.shallowCopy();
+    protected MsAbstractCommonFunction getCopy() {
+        MsAbstractFunction functionDst = (MsAbstractFunction) super.getCopy();
         functionDst.setAnsiNulls(ansiNulls);
         functionDst.setQuotedIdentified(quotedIdentified);
         functionDst.setFirstPart(firstPart);
@@ -108,7 +107,7 @@ public abstract class MsAbstractFunction extends AbstractFunction
     }
 
     @Override
-    protected boolean isNeedDepcies(AbstractFunction newFunction) {
+    protected boolean isNeedDepcies(MsAbstractCommonFunction newFunction) {
         return true;
     }
 }

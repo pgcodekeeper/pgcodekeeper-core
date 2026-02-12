@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.utils.testcontainer;
 
-import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
+import org.pgcodekeeper.core.database.pg.jdbc.PgSupportedVersion;
 
 final class Gp6TestContainer extends GpAbstractTestContainer {
 
@@ -25,7 +25,7 @@ final class Gp6TestContainer extends GpAbstractTestContainer {
     }
 
     @Override
-    public SupportedPgVersion getVersion() {
-        return SupportedPgVersion.GP_VERSION_6;
+    public PgSupportedVersion getVersion() {
+        return PgSupportedVersion.GP_VERSION_6;
     }
 }

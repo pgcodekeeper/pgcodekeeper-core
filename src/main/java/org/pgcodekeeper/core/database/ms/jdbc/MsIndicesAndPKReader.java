@@ -42,7 +42,7 @@ public class MsIndicesAndPKReader extends AbstractSearchPathJdbcReader<MsJdbcLoa
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException, XmlReaderException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException, XmlReaderException {
         String name = res.getString("name");
         boolean isPrimaryKey = res.getBoolean("is_primary_key");
         boolean isUniqueConstraint = res.getBoolean("is_unique_constraint");
@@ -78,7 +78,7 @@ public class MsIndicesAndPKReader extends AbstractSearchPathJdbcReader<MsJdbcLoa
             boolean isColumnstoreInd = isClusteredColumnstoreInd || columnstore == 6;
             index.setColumnstore(isColumnstoreInd);
             List<MsXmlReader> cols = MsXmlReader.readXML(res.getString("cols"));
-            if (isColumnstoreInd && SupportedMsVersion.VERSION_22.isLE(loader.getVersion())) {
+            if (isColumnstoreInd && MsSupportedVersion.VERSION_22.isLE(loader.getVersion())) {
                 cols.stream()
                         .filter(col -> col.getInt("col_order") > 0)
                         .sorted(Comparator.comparing(col -> col.getInt("col_order")))
@@ -155,11 +155,11 @@ public class MsIndicesAndPKReader extends AbstractSearchPathJdbcReader<MsJdbcLoa
             options.put("STATISTICS_INCREMENTAL", "ON");
         }
 
-        if (SupportedMsVersion.VERSION_19.isLE(loader.getVersion()) && res.getBoolean("optimize_for_sequential_key")) {
+        if (MsSupportedVersion.VERSION_19.isLE(loader.getVersion()) && res.getBoolean("optimize_for_sequential_key")) {
             options.put("OPTIMIZE_FOR_SEQUENTIAL_KEY", "ON");
         }
 
-        if (SupportedMsVersion.VERSION_22.isLE(loader.getVersion()) && res.getBoolean("xml_compression")) {
+        if (MsSupportedVersion.VERSION_22.isLE(loader.getVersion()) && res.getBoolean("xml_compression")) {
             options.put("XML_COMPRESSION", res.getString("xml_compression_desc"));
         }
 
@@ -203,11 +203,11 @@ public class MsIndicesAndPKReader extends AbstractSearchPathJdbcReader<MsJdbcLoa
                 .where("o.type IN ('U', 'V')")
                 .where("res.type IN (1, 2, 5, 6)");
 
-        if (SupportedMsVersion.VERSION_19.isLE(loader.getVersion())) {
+        if (MsSupportedVersion.VERSION_19.isLE(loader.getVersion())) {
             builder.column("res.optimize_for_sequential_key");
         }
 
-        if (SupportedMsVersion.VERSION_22.isLE(loader.getVersion())) {
+        if (MsSupportedVersion.VERSION_22.isLE(loader.getVersion())) {
             builder
                     .column("sp.xml_compression")
                     .column("sp.xml_compression_desc");
@@ -226,7 +226,7 @@ public class MsIndicesAndPKReader extends AbstractSearchPathJdbcReader<MsJdbcLoa
                 .orderBy("c.key_ordinal")
                 .postAction("FOR XML RAW, ROOT");
 
-        if (SupportedMsVersion.VERSION_22.isLE(loader.getVersion())) {
+        if (MsSupportedVersion.VERSION_22.isLE(loader.getVersion())) {
             subSelect.column("c.column_store_order_ordinal AS col_order");
         }
 

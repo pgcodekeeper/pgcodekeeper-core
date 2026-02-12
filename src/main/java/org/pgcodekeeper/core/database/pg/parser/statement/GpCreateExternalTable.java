@@ -21,7 +21,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -58,12 +57,12 @@ public final class GpCreateExternalTable extends PgTableAbstract {
         List<ParserRuleContext> ids = getIdentifiers(ctx.name);
         String tableName = QNameParser.getFirstName(ids);
         String schemaName = getSchemaNameSafe(ids);
-        AbstractSchema schema = getSchemaSafe(ids);
-        AbstractTable table = defineTable(tableName, schemaName);
+        PgSchema schema = getSchemaSafe(ids);
+        PgAbstractTable table = defineTable(tableName, schemaName);
         addSafe(schema, table, ids);
     }
 
-    private AbstractTable defineTable(String tableName, String schemaName) {
+    private PgAbstractTable defineTable(String tableName, String schemaName) {
         External_table_formatContext formatCtx = ctx.external_table_format();
         GpExternalTable table = new GpExternalTable(tableName);
 

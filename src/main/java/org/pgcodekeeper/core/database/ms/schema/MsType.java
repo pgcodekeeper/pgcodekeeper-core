@@ -16,17 +16,19 @@
 package org.pgcodekeeper.core.database.ms.schema;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.utils.Utils;
 
 /**
  * Represents a Microsoft SQL user-defined type that can be an alias type,
  * assembly type, or table type. Each type has specific properties and behaviors.
  */
-public final class MsType extends AbstractType implements IStatementContainer, IMsStatement {
+public final class MsType extends MsAbstractStatement implements IType, IStatementContainer {
 
     // base type
     private String baseType;
@@ -52,7 +54,32 @@ public final class MsType extends AbstractType implements IStatementContainer, I
     }
 
     @Override
-    protected void appendDef(StringBuilder sb) {
+    public void getCreationSQL(SQLScript script) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("CREATE TYPE ").append(getQualifiedName());
+        appendDef(sb);
+        script.addStatement(sb);
+        appendOwnerSQL(script);
+        appendPrivileges(script);
+        appendComments(script);
+    }
+
+    @Override
+    public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
+        int startSize = script.getSize();
+        MsType newType = (MsType) newCondition;
+
+        if (isNeedRecreate(newType)) {
+            return ObjectState.RECREATE;
+        }
+        AtomicBoolean isNeedDepcies = new AtomicBoolean(false);
+        appendAlterOwner(newType, script);
+        alterPrivileges(newType, script);
+        appendAlterComments(newType, script);
+        return getObjectState(isNeedDepcies.get(), script, startSize);
+    }
+
+    private void appendDef(StringBuilder sb) {
         if (baseType != null) {
             sb.append(" FROM ").append(baseType);
             if (isNotNull) {
@@ -90,34 +117,15 @@ public final class MsType extends AbstractType implements IStatementContainer, I
     }
 
     @Override
-    protected boolean compareUnalterable(AbstractType newType) {
-        if (this == newType) {
-            return true;
-        }
-
-        MsType type = (MsType) newType;
-        return isNotNull == type.isNotNull
-                && isMemoryOptimized == type.isMemoryOptimized
-                && Objects.equals(baseType, type.baseType)
-                && Objects.equals(assemblyName, type.assemblyName)
-                && Objects.equals(assemblyClass, type.assemblyClass)
-                && columns.equals(type.columns)
-                && Utils.setLikeEquals(indices, type.indices)
-                && Utils.setLikeEquals(constraints, type.constraints);
-    }
-
-    @Override
-    protected AbstractType getTypeCopy() {
-        MsType copy = new MsType(name);
-        copy.setNotNull(isNotNull);
-        copy.setMemoryOptimized(isMemoryOptimized);
-        copy.setBaseType(baseType);
-        copy.setAssemblyName(assemblyName);
-        copy.setAssemblyClass(assemblyClass);
-        copy.columns.addAll(columns);
-        copy.indices.addAll(indices);
-        copy.constraints.addAll(constraints);
-        return copy;
+    public void computeHash(Hasher hasher) {
+        hasher.put(isNotNull);
+        hasher.put(isMemoryOptimized);
+        hasher.put(baseType);
+        hasher.put(assemblyName);
+        hasher.put(assemblyClass);
+        hasher.put(columns);
+        hasher.put(indices);
+        hasher.put(constraints);
     }
 
     @Override
@@ -129,16 +137,33 @@ public final class MsType extends AbstractType implements IStatementContainer, I
         return false;
     }
 
+    private boolean compareUnalterable(MsType newType) {
+        if (this == newType) {
+            return true;
+        }
+
+        return isNotNull == newType.isNotNull
+                && isMemoryOptimized == newType.isMemoryOptimized
+                && Objects.equals(baseType, newType.baseType)
+                && Objects.equals(assemblyName, newType.assemblyName)
+                && Objects.equals(assemblyClass, newType.assemblyClass)
+                && columns.equals(newType.columns)
+                && Utils.setLikeEquals(indices, newType.indices)
+                && Utils.setLikeEquals(constraints, newType.constraints);
+    }
+
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(isNotNull);
-        hasher.put(isMemoryOptimized);
-        hasher.put(baseType);
-        hasher.put(assemblyName);
-        hasher.put(assemblyClass);
-        hasher.put(columns);
-        hasher.put(indices);
-        hasher.put(constraints);
+    protected MsType getCopy() {
+        MsType copy = new MsType(name);
+        copy.setNotNull(isNotNull);
+        copy.setMemoryOptimized(isMemoryOptimized);
+        copy.setBaseType(baseType);
+        copy.setAssemblyName(assemblyName);
+        copy.setAssemblyClass(assemblyClass);
+        copy.columns.addAll(columns);
+        copy.indices.addAll(indices);
+        copy.constraints.addAll(constraints);
+        return copy;
     }
 
     public void setBaseType(String baseType) {
@@ -177,7 +202,7 @@ public final class MsType extends AbstractType implements IStatementContainer, I
                 constraints.add(((IConstraint) stmt).getDefinition());
                 break;
             case COLUMN:
-                columns.add(((AbstractColumn) stmt).getFullDefinition());
+                columns.add(((MsColumn) stmt).getFullDefinition());
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported child type: " + type);
@@ -189,5 +214,14 @@ public final class MsType extends AbstractType implements IStatementContainer, I
     public AbstractStatement getChild(String name, DbObjType type) {
         // no impl
         return null;
+    }
+
+    @Override
+    public Collection<IStatement> getChildrenByType(DbObjType type) {
+        return List.of();
+    }
+
+    private boolean isNeedRecreate(MsType newType) {
+        return !getClass().equals(newType.getClass()) || !compareUnalterable(newType);
     }
 }

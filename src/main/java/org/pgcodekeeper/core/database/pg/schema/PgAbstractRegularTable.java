@@ -20,7 +20,6 @@ import java.util.Objects;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.ISimpleOptionContainer;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.*;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -64,7 +63,7 @@ public abstract class PgAbstractRegularTable extends PgAbstractTable implements 
     }
 
     @Override
-    public String getAlterTable(boolean only) {
+    protected String getAlterTable(boolean only) {
         StringBuilder sb = new StringBuilder();
         sb.append(ALTER_TABLE);
         if (only) {
@@ -210,7 +209,7 @@ public abstract class PgAbstractRegularTable extends PgAbstractTable implements 
         String columnName = null;
         // search DISTRIBUTED column(s)
         // 1 step - search in primary key
-        for (AbstractConstraint constraint : newTable.getConstraints()) {
+        for (PgConstraint constraint : newTable.getConstraints()) {
             if (constraint.isPrimaryKey()) {
                 columnName = String.join(", ", constraint.getColumns());
                 break;
@@ -219,7 +218,7 @@ public abstract class PgAbstractRegularTable extends PgAbstractTable implements 
 
         // 2 step - search in columns list
         if (columnName == null) {
-            for (var column : newTable.getColumns()) {
+            for (var column : newTable.columns) {
                 if (!column.getType().contains(".")) {
                     columnName = column.getName();
                     break;
@@ -237,7 +236,7 @@ public abstract class PgAbstractRegularTable extends PgAbstractTable implements 
     protected abstract void convertTable(SQLScript script);
 
     @Override
-    protected boolean isNeedRecreate(AbstractTable newTable) {
+    protected boolean isNeedRecreate(PgAbstractTable newTable) {
         if (super.isNeedRecreate(newTable)) {
             return true;
         }
@@ -309,32 +308,6 @@ public abstract class PgAbstractRegularTable extends PgAbstractTable implements 
     }
 
     @Override
-    protected boolean compareTable(AbstractStatement obj) {
-        return obj instanceof PgAbstractRegularTable table
-                && super.compareTable(table)
-                && Objects.equals(tablespace, table.tablespace)
-                && isLogged == table.isLogged
-                && isRowSecurity == table.isRowSecurity
-                && isForceSecurity == table.isForceSecurity
-                && Objects.equals(partitionBy, table.partitionBy)
-                && Objects.equals(distribution, table.distribution)
-                && Objects.equals(method, table.method);
-    }
-
-    @Override
-    public AbstractTable shallowCopy() {
-        PgAbstractRegularTable copy = (PgAbstractRegularTable) super.shallowCopy();
-        copy.setLogged(isLogged);
-        copy.setTablespace(tablespace);
-        copy.setRowSecurity(isRowSecurity);
-        copy.setForceSecurity(isForceSecurity);
-        copy.setPartitionBy(partitionBy);
-        copy.setDistribution(distribution);
-        copy.setMethod(method);
-        return copy;
-    }
-
-    @Override
     public void computeHash(Hasher hasher) {
         super.computeHash(hasher);
         hasher.put(isLogged);
@@ -344,5 +317,31 @@ public abstract class PgAbstractRegularTable extends PgAbstractTable implements 
         hasher.put(partitionBy);
         hasher.put(distribution);
         hasher.put(method);
+    }
+
+    @Override
+    protected boolean compareTable(PgAbstractTable obj) {
+        return obj instanceof PgAbstractRegularTable table
+                && super.compareTable(table)
+                && isLogged == table.isLogged
+                && Objects.equals(tablespace, table.tablespace)
+                && isRowSecurity == table.isRowSecurity
+                && isForceSecurity == table.isForceSecurity
+                && Objects.equals(partitionBy, table.partitionBy)
+                && Objects.equals(distribution, table.distribution)
+                && Objects.equals(method, table.method);
+    }
+
+    @Override
+    protected PgAbstractTable getCopy() {
+        PgAbstractRegularTable copy = (PgAbstractRegularTable) super.getCopy();
+        copy.setLogged(isLogged);
+        copy.setTablespace(tablespace);
+        copy.setRowSecurity(isRowSecurity);
+        copy.setForceSecurity(isForceSecurity);
+        copy.setPartitionBy(partitionBy);
+        copy.setDistribution(distribution);
+        copy.setMethod(method);
+        return copy;
     }
 }

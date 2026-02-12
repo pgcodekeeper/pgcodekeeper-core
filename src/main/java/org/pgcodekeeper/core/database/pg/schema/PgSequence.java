@@ -20,22 +20,43 @@
 package org.pgcodekeeper.core.database.pg.schema;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractSequence;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.*;
+import org.pgcodekeeper.core.utils.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * PostgreSQL sequence implementation.
  * Sequences generate unique numeric identifiers, commonly used for auto-incrementing primary keys.
  * Supports various data types, caching, cycling, and ownership by table columns.
  */
-public final class PgSequence extends AbstractSequence implements IPgStatement {
+public final class PgSequence extends PgAbstractStatement implements ISequence {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PgSequence.class);
 
     private static final String ALTER_SEQUENCE = "ALTER SEQUENCE ";
+    private static final String BIGINT = "bigint";
+
+    private static final List<Pair<String, String>> relationColumns = List.of(
+            new Pair<>("sequence_name", "name"), new Pair<>("last_value", BIGINT),
+            new Pair<>("start_value", BIGINT), new Pair<>("increment_by", BIGINT),
+            new Pair<>("max_value", BIGINT), new Pair<>("min_value", BIGINT),
+            new Pair<>("cache_value", BIGINT), new Pair<>("log_cnt", BIGINT),
+            new Pair<>("is_cycled", "boolean"), new Pair<>("is_called", "boolean"));
+
     private GenericColumn ownedBy;
     private boolean isLogged = true;
+    private String cache = "1";
+    private String dataType = BIGINT;
+    private String startWith;
+    private String increment;
+    private String maxValue;
+    private String minValue;
+    private boolean cycle;
 
     /**
      * Creates a new PostgreSQL sequence with default cache value of 1.
@@ -44,7 +65,6 @@ public final class PgSequence extends AbstractSequence implements IPgStatement {
      */
     public PgSequence(String name) {
         super(name);
-        setCache("1");
     }
 
     @Override
@@ -71,7 +91,6 @@ public final class PgSequence extends AbstractSequence implements IPgStatement {
         appendComments(script);
     }
 
-    @Override
     public void fillSequenceBody(StringBuilder sbSQL) {
         if (startWith != null) {
             sbSQL.append("\n\tSTART WITH ");
@@ -212,7 +231,6 @@ public final class PgSequence extends AbstractSequence implements IPgStatement {
         return !sbSQL.isEmpty();
     }
 
-    @Override
     public void setMinMaxInc(long inc, Long max, Long min, String dataType, long precision) {
         String type = dataType != null ? dataType : BIGINT;
         this.increment = Long.toString(inc);
@@ -235,14 +253,27 @@ public final class PgSequence extends AbstractSequence implements IPgStatement {
         resetHash();
     }
 
-    @Override
-    public boolean compare(IStatement obj) {
-        if (obj instanceof PgSequence seq && super.compare(obj)) {
-            return Objects.equals(ownedBy, seq.ownedBy)
-                    && isLogged == seq.isLogged;
-        }
+    public void setStartWith(String startWith) {
+        this.startWith = startWith;
+    }
 
-        return false;
+    private long getBoundaryTypeVal(String type, boolean needMaxVal, long precision) {
+        return switch (type) {
+            case "tinyint" -> needMaxVal ? 255 : 0;
+            case "smallint" -> needMaxVal ? Short.MAX_VALUE : Short.MIN_VALUE;
+            case "int", "integer" -> needMaxVal ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+            case BIGINT -> needMaxVal ? Long.MAX_VALUE : Long.MIN_VALUE;
+            case "numeric", "decimal" -> {
+                // It used for MS SQL.
+                long boundaryTypeVal = (long) (Math.pow(10, precision)) - 1;
+                yield needMaxVal ? boundaryTypeVal : -boundaryTypeVal;
+            }
+            default -> {
+                var msg = "Unsupported sequence type: %s".formatted(type);
+                LOG.warn(msg);
+                yield needMaxVal ? Long.MAX_VALUE : Long.MIN_VALUE;
+            }
+        };
     }
 
     /**
@@ -259,9 +290,13 @@ public final class PgSequence extends AbstractSequence implements IPgStatement {
         resetHash();
     }
 
-    @Override
     public void setDataType(String dataType) {
-        super.setDataType(dataType.toLowerCase(Locale.ROOT));
+        this.dataType = dataType.toLowerCase(Locale.ROOT);
+        resetHash();
+    }
+
+    public String getDataType() {
+        return dataType;
     }
 
     /**
@@ -280,22 +315,61 @@ public final class PgSequence extends AbstractSequence implements IPgStatement {
 
     @Override
     public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
         hasher.put(ownedBy == null ? 0 : ownedBy.hashCode());
+        hasher.put(cache);
+        hasher.put(cycle);
+        hasher.put(increment);
+        hasher.put(maxValue);
+        hasher.put(minValue);
+        hasher.put(dataType);
+        hasher.put(startWith);
         hasher.put(isLogged);
     }
 
     @Override
-    protected AbstractSequence getSequenceCopy() {
-        PgSequence sequence = new PgSequence(name);
-        sequence.setOwnedBy(ownedBy);
-        return sequence;
+    public boolean compare(IStatement obj) {
+        if (obj instanceof PgSequence seq && super.compare(obj)) {
+            return Objects.equals(ownedBy, seq.ownedBy)
+                    && Objects.equals(cache, seq.cache)
+                    && cycle == seq.cycle
+                    && Objects.equals(increment, seq.increment)
+                    && Objects.equals(maxValue, seq.maxValue)
+                    && Objects.equals(minValue, seq.minValue)
+                    && Objects.equals(dataType, seq.dataType)
+                    && Objects.equals(startWith, seq.startWith)
+                    && isLogged == seq.isLogged;
+        }
+
+        return false;
     }
 
     @Override
-    public AbstractSequence shallowCopy() {
-        PgSequence copy = (PgSequence) super.shallowCopy();
+    protected PgSequence getCopy() {
+        PgSequence copy = new PgSequence(name);
+        copy.setOwnedBy(ownedBy);
+        copy.setCache(cache);
+        copy.setCycle(cycle);
+        copy.increment = increment;
+        copy.maxValue = maxValue;
+        copy.minValue = minValue;
+        copy.dataType = dataType;
+        copy.setStartWith(startWith);
         copy.setLogged(isLogged);
         return copy;
+    }
+
+    public void setCycle(boolean cycle) {
+        this.cycle = cycle;
+        resetHash();
+    }
+
+    public void setCache(String cache) {
+        this.cache = cache;
+        resetHash();
+    }
+
+    @Override
+    public Stream<Pair<String, String>> getRelationColumns() {
+        return relationColumns.stream();
     }
 }

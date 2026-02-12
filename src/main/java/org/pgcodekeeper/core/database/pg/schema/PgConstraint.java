@@ -20,21 +20,24 @@
 package org.pgcodekeeper.core.database.pg.schema;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
+
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Base PostgreSQL constraint implementation.
  * Provides common functionality for all PostgreSQL constraint types
  * including deferrable and initially deferred properties.
  */
-public abstract class PgConstraint extends AbstractConstraint implements IPgStatement {
+public abstract class PgConstraint extends PgAbstractStatement implements IConstraint, ISubElement {
 
     protected boolean deferrable;
     protected boolean initially;
     protected boolean notEnforced;
+    protected boolean isNotValid;
 
     /**
      * Creates a new PostgreSQL constraint.
@@ -60,8 +63,6 @@ public abstract class PgConstraint extends AbstractConstraint implements IPgStat
         resetHash();
     }
 
-    protected abstract String getErrorCode();
-
     @Override
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
@@ -83,6 +84,11 @@ public abstract class PgConstraint extends AbstractConstraint implements IPgStat
         }
 
         appendOptions(script, sbSQL, true);
+    }
+
+    protected void appendAlterTable(StringBuilder sb) {
+        sb.append("ALTER ").append(parent.getStatementType().name()).append(' ');
+        sb.append(getParent().getQualifiedName());
     }
 
     public void appendOptions(SQLScript script, StringBuilder sbSQL, boolean needNotValid) {
@@ -163,10 +169,6 @@ public abstract class PgConstraint extends AbstractConstraint implements IPgStat
         return getObjectState(script, startSize);
     }
 
-    protected boolean compareUnalterable(PgConstraint newConstr) {
-        return compareCommonFields(newConstr);
-    }
-
     protected void compareExtraOptions(PgConstraint newConstr, SQLScript script) {
         // subclasses will override if needed
     }
@@ -183,17 +185,40 @@ public abstract class PgConstraint extends AbstractConstraint implements IPgStat
         script.addCommentStatement(sb.toString());
     }
 
+    public void setNotValid(boolean isNotValid) {
+        this.isNotValid = isNotValid;
+        resetHash();
+    }
+
+    public boolean isNotValid() {
+        return isNotValid;
+    }
+
     @Override
     public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
+        hasher.put(isNotValid);
         hasher.put(deferrable);
         hasher.put(initially);
         hasher.put(notEnforced);
     }
 
     @Override
-    public AbstractConstraint shallowCopy() {
-        var con = (PgConstraint) super.shallowCopy();
+    public boolean compare(IStatement obj) {
+        return obj instanceof PgConstraint con && super.compare(obj)
+                && compareUnalterable(con)
+                && isNotValid == con.isNotValid;
+    }
+
+    protected boolean compareUnalterable(PgConstraint con) {
+        return deferrable == con.deferrable
+                && initially == con.initially
+                && notEnforced == con.notEnforced;
+    }
+
+    @Override
+    protected PgConstraint getCopy() {
+        PgConstraint con = getConstraintCopy();
+        con.setNotValid(isNotValid);
         con.setDeferrable(deferrable);
         con.setInitially(initially);
         con.setNotEnforced(notEnforced);
@@ -201,13 +226,21 @@ public abstract class PgConstraint extends AbstractConstraint implements IPgStat
     }
 
     @Override
-    public boolean compare(IStatement obj) {
-        return obj instanceof PgConstraint && super.compare(obj);
+    public String getTableName() {
+        return parent.getName();
     }
 
-    protected boolean compareCommonFields(PgConstraint con) {
-        return deferrable == con.deferrable
-                && initially == con.initially
-                && notEnforced == con.notEnforced;
+    @Override
+    public boolean containsColumn(String name) {
+        return getColumns().contains(name);
     }
+
+    @Override
+    public Collection<String> getColumns() {
+        return Collections.emptySet();
+    }
+
+    protected abstract String getErrorCode();
+
+    protected abstract PgConstraint getConstraintCopy();
 }

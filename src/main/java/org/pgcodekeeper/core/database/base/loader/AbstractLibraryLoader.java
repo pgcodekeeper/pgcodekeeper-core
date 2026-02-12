@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.database.base.loader;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.library.Library;
 import org.pgcodekeeper.core.library.LibrarySource;
 import org.pgcodekeeper.core.library.LibraryXmlStore;
@@ -42,7 +42,7 @@ import java.util.stream.Stream;
  * Loads database schemas from dependency sources including JAR files, directories, and XML dependency definitions.
  * Supports nested dependency loading and prevents circular dependencies.
  */
-public abstract class AbstractLibraryLoader<T extends AbstractDatabase> extends AbstractLoader<T> {
+public abstract class AbstractLibraryLoader<T extends IDatabase> extends AbstractLoader<T> {
 
     protected final T database;
     protected final Path metaPath;

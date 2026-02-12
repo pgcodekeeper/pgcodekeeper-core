@@ -17,11 +17,10 @@ package org.pgcodekeeper.core.it.diff.pg;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;
@@ -59,10 +58,9 @@ class PgMoveDataDiffTest {
     void moveDataTest(String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         settings.setDataMovementMode(true);
-        settings.setDbType(DatabaseType.PG);
-        AbstractDatabase dbOld = loadTestDump(
+        IDatabase dbOld = loadTestDump(
                 fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, PgMoveDataDiffTest.class, settings);
-        AbstractDatabase dbNew = loadTestDump(
+        IDatabase dbNew = loadTestDump(
                 fileNameTemplate + FILES_POSTFIX.NEW_SQL, PgMoveDataDiffTest.class, settings);
 
         IntegrationTestUtils.assertDiffSame(dbOld, fileNameTemplate, settings);

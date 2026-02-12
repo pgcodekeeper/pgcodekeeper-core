@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -74,12 +73,9 @@ public final class PgFtsTemplate extends PgAbstractStatement implements ISearchP
     }
 
     @Override
-    public PgFtsTemplate shallowCopy() {
-        PgFtsTemplate templateDst = new PgFtsTemplate(name);
-        copyBaseFields(templateDst);
-        templateDst.setInitFunction(initFunction);
-        templateDst.setLexizeFunction(lexizeFunction);
-        return templateDst;
+    public void computeHash(Hasher hasher) {
+        hasher.put(initFunction);
+        hasher.put(lexizeFunction);
     }
 
     @Override
@@ -101,10 +97,13 @@ public final class PgFtsTemplate extends PgAbstractStatement implements ISearchP
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(initFunction);
-        hasher.put(lexizeFunction);
+    protected PgFtsTemplate getCopy() {
+        PgFtsTemplate templateDst = new PgFtsTemplate(name);
+        templateDst.setInitFunction(initFunction);
+        templateDst.setLexizeFunction(lexizeFunction);
+        return templateDst;
     }
+
 
     public void setInitFunction(final String initFunction) {
         this.initFunction = initFunction;

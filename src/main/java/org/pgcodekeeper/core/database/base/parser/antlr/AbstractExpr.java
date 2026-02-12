@@ -20,8 +20,8 @@ import java.util.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation.*;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.CodeUnitToken;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +40,7 @@ public abstract class AbstractExpr {
     // and put it to the 'PgDatabase' as currentPostgreSqlVersion,
     // but I couldn't get it from PgDumpLoader(WRITER), that's why for
     // cases with 'PgDumpLoader(WRITER)' the version was hard-coded in 'AbstractDatabase'.
-    protected final MetaContainer meta;
+    protected final IMetaContainer meta;
 
     protected final AbstractExpr parent;
 
@@ -51,7 +51,7 @@ public abstract class AbstractExpr {
      * @param dependencies set for dependencies
      * @param meta meta storage
      */
-    protected AbstractExpr(AbstractExpr parent, Set<ObjectLocation> dependencies, MetaContainer meta) {
+    protected AbstractExpr(AbstractExpr parent, Set<ObjectLocation> dependencies, IMetaContainer meta) {
         this.parent = parent;
         this.dependencies = dependencies;
         this.meta = meta;
@@ -71,7 +71,7 @@ public abstract class AbstractExpr {
      *
      * @param meta meta storage
      */
-    protected AbstractExpr(MetaContainer meta) {
+    protected AbstractExpr(IMetaContainer meta) {
         this(null, new LinkedHashSet<>(), meta);
     }
 

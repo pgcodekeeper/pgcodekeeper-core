@@ -19,9 +19,9 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.launcher.AbstractAnalysisLauncher;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.database.pg.parser.expr.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.VexContext;
 
@@ -45,7 +45,7 @@ public abstract class PgAbstractAnalysisLauncher extends AbstractAnalysisLaunche
      *
      * @return dependencies from child expression
      */
-    protected Set<ObjectLocation> analyzeTableChildVex(VexContext ctx, MetaContainer meta) {
+    protected Set<ObjectLocation> analyzeTableChildVex(VexContext ctx, IMetaContainer meta) {
         IStatement table = stmt.getParent();
         String schemaName = table.getParent().getName();
         String rawTableReference = table.getName();

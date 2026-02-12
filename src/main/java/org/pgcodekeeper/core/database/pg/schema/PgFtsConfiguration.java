@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -128,14 +127,10 @@ public final class PgFtsConfiguration extends PgAbstractStatement implements ISe
         return sqlAction.toString();
     }
 
-
     @Override
-    public PgFtsConfiguration shallowCopy() {
-        PgFtsConfiguration confDst = new PgFtsConfiguration(name);
-        copyBaseFields(confDst);
-        confDst.setParser(getParser());
-        confDst.dictionariesMap.putAll(dictionariesMap);
-        return confDst;
+    public void computeHash(Hasher hasher) {
+        hasher.put(parser);
+        hasher.put(dictionariesMap);
     }
 
     @Override
@@ -145,7 +140,7 @@ public final class PgFtsConfiguration extends PgAbstractStatement implements ISe
         }
 
         if (obj instanceof PgFtsConfiguration config && super.compare(obj)) {
-            return Objects.equals(parser, config.getParser())
+            return Objects.equals(parser, config.parser)
                     && dictionariesMap.equals(config.dictionariesMap);
         }
 
@@ -153,9 +148,11 @@ public final class PgFtsConfiguration extends PgAbstractStatement implements ISe
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(parser);
-        hasher.put(dictionariesMap);
+    protected PgFtsConfiguration getCopy() {
+        PgFtsConfiguration confDst = new PgFtsConfiguration(name);
+        confDst.setParser(parser);
+        confDst.dictionariesMap.putAll(dictionariesMap);
+        return confDst;
     }
 
     /**

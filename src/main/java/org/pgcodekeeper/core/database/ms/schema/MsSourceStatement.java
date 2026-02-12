@@ -22,7 +22,7 @@ import org.pgcodekeeper.core.database.api.schema.ISearchPath;
  * The source is separated into two parts by the CREATE/ALTER statement keywords,
  * allowing for flexible SQL generation while preserving the original formatting.
  */
-public interface MsSourceStatement extends ISearchPath, IMsStatement {
+public interface MsSourceStatement extends ISearchPath {
     /**
      * Gets the first part of the source statement (before CREATE/ALTER).
      *
@@ -56,7 +56,12 @@ public interface MsSourceStatement extends ISearchPath, IMsStatement {
      *
      * @param isCreate do CREATE or ALTER
      */
-    default void appendSourceStatement(boolean isCreate, StringBuilder sb) {
+    default void appendSourceStatement(StringBuilder sb, boolean quotedIdentified, boolean ansiNulls, boolean isCreate) {
+        sb.append("SET QUOTED_IDENTIFIER ").append(quotedIdentified ? "ON" : "OFF");
+        sb.append(getSeparator()).append('\n');
+        sb.append("SET ANSI_NULLS ").append(ansiNulls ? "ON" : "OFF");
+        sb.append(getSeparator()).append('\n');
+
         sb.append(getFirstPart())
                 .append(isCreate ? "CREATE " : "ALTER ")
                 .append(getStatementType())

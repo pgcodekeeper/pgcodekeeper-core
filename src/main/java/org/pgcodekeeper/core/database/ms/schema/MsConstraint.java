@@ -16,17 +16,20 @@
 package org.pgcodekeeper.core.database.ms.schema;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
+
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Abstract base class for Microsoft SQL table constraints.
  * Provides common functionality for constraint management including disabled state handling.
  */
-public abstract class MsConstraint extends AbstractConstraint implements IMsStatement {
+public abstract class MsConstraint extends MsAbstractStatement implements IConstraint {
 
     private boolean isDisabled;
+    protected boolean isNotValid;
 
     /**
      * Creates a new Microsoft SQL constraint with the specified name.
@@ -106,14 +109,6 @@ public abstract class MsConstraint extends AbstractConstraint implements IMsStat
         script.addStatement(sbSQL);
     }
 
-    @Override
-    public boolean compare(IStatement obj) {
-        if (obj instanceof MsConstraint con && super.compare(obj)) {
-            return isDisabled == con.isDisabled;
-        }
-        return false;
-    }
-
     public void setDisabled(boolean isDisabled) {
         this.isDisabled = isDisabled;
         resetHash();
@@ -121,14 +116,51 @@ public abstract class MsConstraint extends AbstractConstraint implements IMsStat
 
     @Override
     public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
         hasher.put(isDisabled);
+        hasher.put(isNotValid);
     }
 
     @Override
-    public AbstractConstraint shallowCopy() {
-        MsConstraint con = (MsConstraint) super.shallowCopy();
-        con.setDisabled(isDisabled);
-        return con;
+    public boolean compare(IStatement obj) {
+        if (obj instanceof MsConstraint con && super.compare(obj)) {
+            return isDisabled == con.isDisabled
+                    && isNotValid == con.isNotValid;
+        }
+        return false;
+    }
+
+    @Override
+    protected MsConstraint getCopy() {
+        MsConstraint constraintDst = getConstraintCopy();
+        constraintDst.setDisabled(isDisabled);
+        constraintDst.setNotValid(isNotValid);
+        return constraintDst;
+    }
+
+    public void setNotValid(boolean isNotValid) {
+        this.isNotValid = isNotValid;
+        resetHash();
+    }
+
+    private void appendAlterTable(StringBuilder sb) {
+        sb.append("ALTER ").append(parent.getStatementType().name()).append(' ');
+        sb.append(getParent().getQualifiedName());
+    }
+
+    protected abstract MsConstraint getConstraintCopy();
+
+    @Override
+    public Collection<String> getColumns() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public boolean containsColumn(String name) {
+        return getColumns().contains(name);
+    }
+
+    @Override
+    public String getTableName() {
+        return parent.getName();
     }
 }

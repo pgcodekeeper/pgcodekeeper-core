@@ -52,7 +52,7 @@ public final class MsCreateStatistics extends MsParserAbstract {
         var parentCtx = parentQualNameCtx.name;
         var nameCtx = ctx.id();
         List<ParserRuleContext> ids = Arrays.asList(schemaCtx, nameCtx);
-        AbstractSchema schema = getSchemaSafe(ids);
+        MsSchema schema = getSchemaSafe(ids);
         addObjReference(Arrays.asList(schemaCtx, parentCtx), DbObjType.TABLE, null);
 
         var stat = new MsStatistics(nameCtx.getText());
@@ -74,7 +74,7 @@ public final class MsCreateStatistics extends MsParserAbstract {
             pasreOption(stat, option);
         }
 
-        AbstractStatementContainer st = getSafe(AbstractSchema::getStatementContainer, schema, parentCtx);
+        MsAbstractStatementContainer st = getSafe(MsSchema::getStatementContainer, schema, parentCtx);
         addSafe(st, stat, Arrays.asList(schemaCtx, parentCtx, nameCtx));
     }
 

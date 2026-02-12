@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.utils.testcontainer;
 
-import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
+import org.pgcodekeeper.core.database.pg.jdbc.PgSupportedVersion;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
@@ -25,8 +25,8 @@ final class Pg16TestContainer implements ITestContainer {
     private static final String TEST_PASSWORD = "1245789630";
 
     @Override
-    public SupportedPgVersion getVersion() {
-        return SupportedPgVersion.VERSION_16;
+    public PgSupportedVersion getVersion() {
+        return PgSupportedVersion.VERSION_16;
     }
 
     @Override

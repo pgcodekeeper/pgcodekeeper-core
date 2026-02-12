@@ -20,7 +20,7 @@ import java.util.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.localizations.Messages;
@@ -68,7 +68,7 @@ public final class PgSequencesReader extends PgAbstractSearchPathJdbcReader {
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String sequenceName = res.getString("relname");
         loader.setCurrentObject(new GenericColumn(schema.getName(), sequenceName, DbObjType.SEQUENCE));
         PgSequence s = new PgSequence(sequenceName);
@@ -81,7 +81,7 @@ public final class PgSequencesReader extends PgAbstractSearchPathJdbcReader {
         }
 
         String identityType = null;
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             identityType = res.getString("attidentity");
             if (identityType != null && identityType.isEmpty()) {
                 // treat lack of table dependency and no identityType as a single case
@@ -111,35 +111,35 @@ public final class PgSequencesReader extends PgAbstractSearchPathJdbcReader {
 
         var isDefault = "d".equals(identityType);
         if (isDefault || "a".equals(identityType)) {
-            AbstractTable table = schema.getTable(refTable);
+            PgAbstractTable table = (PgAbstractTable) schema.getChild(refTable, DbObjType.TABLE);
             if (table == null) {
                 var msg = Messages.SequencesReader_log_not_found_table.formatted(refTable, s);
                 LOG.error(msg);
                 return;
             }
-            PgColumn column = (PgColumn) table.getColumn(refColumn);
+            PgColumn column = table.getColumn(refColumn);
             if (column == null) {
                 column = new PgColumn(refColumn);
                 column.setInherit(true);
                 table.addColumn(column);
             }
             column.setSequence(s);
-            s.setParent(schema);
+            s.setParent((AbstractStatement) schema);
             column.setIdentityType(isDefault ? "BY DEFAULT" : "ALWAYS");
         } else {
             loader.setAuthor(s, res);
-            schema.addSequence(s);
+            schema.addChild(s);
         }
     }
 
-    public void querySequencesData(AbstractDatabase db)
+    public void querySequencesData(IDatabase db)
             throws SQLException, InterruptedException {
         loader.setCurrentOperation("sequences data query");
 
         List<String> schemasAccess = new ArrayList<>();
         try (PreparedStatement schemasAccessQuery = loader.getConnection().prepareStatement(QUERY_SCHEMAS_ACCESS)) {
             Array arrSchemas = loader.getConnection().createArrayOf("text",
-                    db.getSchemas().stream().filter(s -> !s.getSequences().isEmpty()).map(AbstractSchema::getName).toArray());
+                    db.getSchemas().stream().filter(s -> !((PgSchema) s).getSequences().isEmpty()).map(ISchema::getName).toArray());
             schemasAccessQuery.setArray(1, arrSchemas);
             try (ResultSet schemaRes = loader.getRunner().runScript(schemasAccessQuery)) {
                 while (schemaRes.next()) {
@@ -159,9 +159,9 @@ public final class PgSequencesReader extends PgAbstractSearchPathJdbcReader {
             }
         }
 
-        Map<String, AbstractSequence> seqs = new HashMap<>();
+        Map<String, PgSequence> seqs = new HashMap<>();
         for (String schema : schemasAccess) {
-            for (AbstractSequence seq : db.getSchema(schema).getSequences()) {
+            for (PgSequence seq : ((PgSchema) db.getSchema(schema)).getSequences()) {
                 seqs.put(seq.getQualifiedName(), seq);
             }
         }
@@ -201,7 +201,7 @@ public final class PgSequencesReader extends PgAbstractSearchPathJdbcReader {
         try (ResultSet res = loader.getRunner().runScript(loader.getStatement(), sbUnionQuery.toString())) {
             while (res.next()) {
                 IMonitor.checkCancelled(loader.getMonitor());
-                AbstractSequence seq = seqs.get(res.getString("qname"));
+                PgSequence seq = seqs.get(res.getString("qname"));
                 seq.setStartWith(res.getString("start_value"));
                 seq.setMinMaxInc(res.getLong("increment_by"), res.getLong("max_value"),
                         res.getLong("min_value"), null, 0L);
@@ -239,7 +239,7 @@ public final class PgSequencesReader extends PgAbstractSearchPathJdbcReader {
                 .join("LEFT JOIN pg_catalog.pg_attribute a ON a.attrelid = dep.refobjid AND a.attnum = dep.refobjsubid AND a.attisdropped IS FALSE")
                 .where("res.relkind = 'S'");
 
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             builder
                     .column("s.seqtypid::bigint AS data_type")
                     .column("s.seqstart")

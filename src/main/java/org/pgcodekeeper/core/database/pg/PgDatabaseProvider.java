@@ -19,7 +19,6 @@ import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
-import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
 import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
@@ -75,13 +74,13 @@ public class PgDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public IDatabase getDatabaseFromDump(Path path, ISettings settings, IMonitor monitor)
+    public PgDatabase getDatabaseFromDump(Path path, ISettings settings, IMonitor monitor)
             throws IOException, InterruptedException {
         return new PgDumpLoader(path, settings, monitor).loadAndAnalyze();
     }
 
     @Override
-    public IDatabase getDatabaseFromProject(Path path, ISettings settings, IMonitor monitor,
+    public PgDatabase getDatabaseFromProject(Path path, ISettings settings, IMonitor monitor,
                                             IgnoreSchemaList ignoreSchemaList) throws IOException, InterruptedException {
         return new PgProjectLoader(path, settings, monitor, ignoreSchemaList).loadAndAnalyze();
     }

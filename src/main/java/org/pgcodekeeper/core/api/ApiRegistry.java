@@ -18,10 +18,6 @@ package org.pgcodekeeper.core.api;
 import java.util.Collection;
 import java.util.Collections;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
-import org.pgcodekeeper.core.database.ch.ChDatabaseProvider;
-import org.pgcodekeeper.core.database.ms.MsDatabaseProvider;
-import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,13 +33,6 @@ public final class ApiRegistry {
 
     private ApiRegistry() {
         throw new UnsupportedOperationException("Utility class");
-    }
-
-    // Static initializer for default implementations
-    static {
-        register(new PgDatabaseProvider());
-        register(new MsDatabaseProvider());
-        register(new ChDatabaseProvider());
     }
 
     /**

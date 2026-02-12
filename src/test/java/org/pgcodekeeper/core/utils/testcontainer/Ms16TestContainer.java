@@ -1,6 +1,6 @@
 package org.pgcodekeeper.core.utils.testcontainer;
 
-import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
+import org.pgcodekeeper.core.database.ms.jdbc.MsSupportedVersion;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.startupcheck.MinimumDurationRunningStartupCheckStrategy;
 import org.testcontainers.mssqlserver.MSSQLServerContainer;
@@ -25,8 +25,8 @@ import java.time.Duration;
 final class Ms16TestContainer implements ITestContainer {
 
     @Override
-    public SupportedPgVersion getVersion() {
-        return null;
+    public MsSupportedVersion getVersion() {
+        return MsSupportedVersion.VERSION_22;
     }
 
     @Override

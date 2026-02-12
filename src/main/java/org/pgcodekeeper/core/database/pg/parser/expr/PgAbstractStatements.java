@@ -18,7 +18,7 @@ package org.pgcodekeeper.core.database.pg.parser.expr;
 import java.util.*;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.utils.ModPair;
 
@@ -34,7 +34,7 @@ public abstract class PgAbstractStatements<T extends ParserRuleContext> extends 
         super(parent);
     }
 
-    protected PgAbstractStatements(MetaContainer meta) {
+    protected PgAbstractStatements(IMetaContainer meta) {
         super(meta);
     }
 

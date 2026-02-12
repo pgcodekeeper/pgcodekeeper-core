@@ -28,6 +28,7 @@ import org.pgcodekeeper.core.settings.ISettings;
  * Provides common functionality for identifying and accessing database objects.
  */
 public interface IStatement {
+
     /**
      * Gets the name of this statement.
      *
@@ -47,7 +48,9 @@ public interface IStatement {
      *
      * @return the containing database
      */
-    IDatabase getDatabase();
+    default IDatabase getDatabase() {
+        return (IDatabase) getParent();
+    };
 
     /**
      * Gets the type name of this statement for SQL generation.
@@ -56,10 +59,6 @@ public interface IStatement {
      */
      default String getTypeName() {
         return getStatementType().getTypeName();
-    }
-
-    default void appendFullName(StringBuilder sb) {
-        sb.append(getQualifiedName());
     }
 
     /**
@@ -140,13 +139,6 @@ public interface IStatement {
     Set<IPrivilege> getPrivileges();
 
     /**
-     * Gets the type of database.
-     *
-     * @return the database type
-     */
-    DatabaseType getDbType();
-
-    /**
      * Gets the SQL representation of this statement with optional formatting.
      *
      * @param isFormatted whether to apply formatting to the SQL
@@ -170,6 +162,8 @@ public interface IStatement {
      */
     String getOwner();
 
+    void setOwner(String owner);
+
     /**
      * Gets the location information for this statement.
      *
@@ -189,6 +183,8 @@ public interface IStatement {
      */
     String getLibName();
 
+    void setLibName(String libName);
+
     /**
      * Fill script with object changes and return change type
      *
@@ -197,14 +193,6 @@ public interface IStatement {
      * @return object change type
      */
     ObjectState appendAlterSQL(IStatement newCondition, SQLScript script);
-
-    /**
-     * Appends default privileges for statement
-     *
-     * @param statement new object state
-     * @param script    script to collect changes
-     */
-    void appendDefaultPrivileges(IStatement statement, SQLScript script);
 
     /**
      * Generates the SQL statements needed to create this database object.
@@ -235,6 +223,8 @@ public interface IStatement {
      * @return true if the statement can be dropped
      */
     boolean canDrop();
+
+    String getSeparator();
 
     /**
      * Checks if this statement can be dropped before being recreated.
@@ -279,4 +269,8 @@ public interface IStatement {
      * @return sql command to rename the given object
      */
     String getRenameCommand(String newName);
+
+    void setLocation(ObjectLocation loc);
+
+    boolean hasChildren();
 }

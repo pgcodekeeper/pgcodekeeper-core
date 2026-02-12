@@ -75,13 +75,13 @@ public final class MsCreateFunction extends MsBatchContextProcessor {
      * @param isJdbc whether this is being parsed in JDBC mode
      * @return the created function object
      */
-    public AbstractFunction getObject(AbstractSchema schema, boolean isJdbc) {
+    public MsAbstractCommonFunction getObject(MsSchema schema, boolean isJdbc) {
         IdContext nameCtx = ctx.qualified_name().name;
         List<ParserRuleContext> ids = Arrays.asList(ctx.qualified_name().schema, nameCtx);
         String name = nameCtx.getText();
         Func_bodyContext bodyRet = ctx.func_body();
 
-        AbstractFunction f;
+        MsAbstractCommonFunction f;
         if (bodyRet.EXTERNAL() != null) {
             Assembly_specifierContext assemblyCtx = bodyRet.assembly_specifier();
             String assembly = assemblyCtx.assembly_name.getText();
@@ -154,7 +154,7 @@ public final class MsCreateFunction extends MsBatchContextProcessor {
         return f;
     }
 
-    private void analyzeReturn(Func_returnContext ret, AbstractFunction function) {
+    private void analyzeReturn(Func_returnContext ret, MsAbstractCommonFunction function) {
         var typeCtx = ret.data_type();
         if (typeCtx != null) {
             addTypeDepcy(typeCtx, function);
@@ -177,7 +177,7 @@ public final class MsCreateFunction extends MsBatchContextProcessor {
         }
     }
 
-    private void fillArguments(AbstractFunction function) {
+    private void fillArguments(MsAbstractCommonFunction function) {
         for (Procedure_paramContext argument : ctx.procedure_param()) {
             addTypeDepcy(argument.data_type(), function);
 

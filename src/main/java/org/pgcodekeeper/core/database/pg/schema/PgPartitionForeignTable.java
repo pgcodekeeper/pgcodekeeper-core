@@ -57,7 +57,7 @@ public final class PgPartitionForeignTable extends PgAbstractForeignTable implem
     }
 
     @Override
-    protected boolean isNeedRecreate(AbstractTable newTable) {
+    protected boolean isNeedRecreate(PgAbstractTable newTable) {
         return super.isNeedRecreate(newTable)
                 || !(Objects.equals(partitionBounds, ((PgPartitionForeignTable) newTable).partitionBounds))
                 || !inherits.equals(((PgAbstractTable) newTable).inherits);
@@ -71,8 +71,8 @@ public final class PgPartitionForeignTable extends PgAbstractForeignTable implem
             sbSQL.append(" (\n");
 
             int start = sbSQL.length();
-            for (AbstractColumn column : columns) {
-                writeColumn((PgColumn) column, sbSQL, script);
+            for (PgColumn column : columns) {
+                writeColumn(column, sbSQL, script);
             }
 
             if (start != sbSQL.length()) {
@@ -93,12 +93,12 @@ public final class PgPartitionForeignTable extends PgAbstractForeignTable implem
     }
 
     @Override
-    protected AbstractTable getTableCopy() {
+    protected PgAbstractTable getTableCopy() {
         return new PgPartitionForeignTable(name, serverName, partitionBounds);
     }
 
     @Override
-    protected boolean compareTable(AbstractStatement obj) {
+    protected boolean compareTable(PgAbstractTable obj) {
         return obj instanceof PgPartitionForeignTable table
                 && super.compareTable(table)
                 && Objects.equals(partitionBounds, table.partitionBounds);

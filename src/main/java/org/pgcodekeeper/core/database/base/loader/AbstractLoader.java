@@ -16,9 +16,9 @@
 package org.pgcodekeeper.core.database.base.loader;
 
 import org.pgcodekeeper.core.database.api.loader.ILoader;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.base.parser.AntlrTask;
 import org.pgcodekeeper.core.database.base.parser.AntlrTaskManager;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.database.base.parser.FullAnalyze;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -34,7 +34,7 @@ import java.util.Queue;
 /**
  * Base database loader
  */
-public abstract class AbstractLoader<T extends AbstractDatabase> implements ILoader {
+public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractLoader.class);
 

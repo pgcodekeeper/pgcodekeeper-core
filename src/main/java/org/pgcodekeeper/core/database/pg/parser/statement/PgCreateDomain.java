@@ -20,8 +20,8 @@ import java.util.List;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.launcher.*;
 import org.pgcodekeeper.core.database.pg.schema.*;
@@ -101,7 +101,7 @@ public final class PgCreateDomain extends PgParserAbstract {
      * @param settings the parser settings
      */
     public static void parseDomainConstraint(PgDomain domain, PgConstraintCheck constr,
-                                             Domain_constraintContext ctx, AbstractDatabase db, String location, ISettings settings) {
+                                             Domain_constraintContext ctx, IDatabase db, String location, ISettings settings) {
         VexContext vexCtx = ctx.vex();
         constr.setExpression(Utils.checkNewLines(getFullCtxText(vexCtx), settings.isKeepNewlines()));
         db.addAnalysisLauncher(new PgDomainAnalysisLauncher(domain, vexCtx, location));

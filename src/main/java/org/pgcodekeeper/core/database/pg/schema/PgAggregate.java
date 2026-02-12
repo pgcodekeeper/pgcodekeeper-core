@@ -18,6 +18,7 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IFunction;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 
@@ -195,11 +196,6 @@ public final class PgAggregate extends PgAbstractFunction {
     }
 
     @Override
-    public boolean needDrop(AbstractFunction newFunction) {
-        return true;
-    }
-
-    @Override
     public void appendFullName(StringBuilder sb) {
         sb.append(getQuotedName(getSchemaName())).append('.');
         sb.append(getQuotedName(name)).append('(');
@@ -224,61 +220,6 @@ public final class PgAggregate extends PgAbstractFunction {
             }
         }
         sb.append(')');
-    }
-
-    @Override
-    protected boolean compareUnalterable(AbstractFunction func) {
-        if (func instanceof PgAggregate aggr && super.compareUnalterable(func)) {
-            return directCount == aggr.directCount
-                    && Objects.equals(kind, aggr.kind)
-                    && Objects.equals(sFunc, aggr.sFunc)
-                    && Objects.equals(sType, aggr.sType)
-                    && sSpace == aggr.sSpace
-                    && Objects.equals(finalFunc, aggr.finalFunc)
-                    && isFinalFuncExtra == aggr.isFinalFuncExtra
-                    && Objects.equals(finalFuncModify, aggr.finalFuncModify)
-                    && Objects.equals(combineFunc, aggr.combineFunc)
-                    && Objects.equals(serialFunc, aggr.serialFunc)
-                    && Objects.equals(deserialFunc, aggr.deserialFunc)
-                    && Objects.equals(initCond, aggr.initCond)
-                    && Objects.equals(mSFunc, aggr.mSFunc)
-                    && Objects.equals(mInvFunc, aggr.mInvFunc)
-                    && Objects.equals(mSType, aggr.mSType)
-                    && mSSpace == aggr.mSSpace
-                    && Objects.equals(mFinalFunc, aggr.mFinalFunc)
-                    && isMFinalFuncExtra == aggr.isMFinalFuncExtra
-                    && Objects.equals(mFinalFuncModify, aggr.mFinalFuncModify)
-                    && Objects.equals(mInitCond, aggr.mInitCond)
-                    && Objects.equals(sortOp, aggr.sortOp);
-        }
-
-        return false;
-    }
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(directCount);
-        hasher.put(kind);
-        hasher.put(sFunc);
-        hasher.put(sType);
-        hasher.put(sSpace);
-        hasher.put(finalFunc);
-        hasher.put(isFinalFuncExtra);
-        hasher.put(finalFuncModify);
-        hasher.put(combineFunc);
-        hasher.put(serialFunc);
-        hasher.put(deserialFunc);
-        hasher.put(initCond);
-        hasher.put(mSFunc);
-        hasher.put(mInvFunc);
-        hasher.put(mSType);
-        hasher.put(mSSpace);
-        hasher.put(mFinalFunc);
-        hasher.put(isMFinalFuncExtra);
-        hasher.put(mFinalFuncModify);
-        hasher.put(mInitCond);
-        hasher.put(sortOp);
     }
 
     public int getDirectCount() {
@@ -418,6 +359,66 @@ public final class PgAggregate extends PgAbstractFunction {
     }
 
     @Override
+    public boolean needDrop(IFunction newFunction) {
+        return true;
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        super.computeHash(hasher);
+        hasher.put(directCount);
+        hasher.put(kind);
+        hasher.put(sFunc);
+        hasher.put(sType);
+        hasher.put(sSpace);
+        hasher.put(finalFunc);
+        hasher.put(isFinalFuncExtra);
+        hasher.put(finalFuncModify);
+        hasher.put(combineFunc);
+        hasher.put(serialFunc);
+        hasher.put(deserialFunc);
+        hasher.put(initCond);
+        hasher.put(mSFunc);
+        hasher.put(mInvFunc);
+        hasher.put(mSType);
+        hasher.put(mSSpace);
+        hasher.put(mFinalFunc);
+        hasher.put(isMFinalFuncExtra);
+        hasher.put(mFinalFuncModify);
+        hasher.put(mInitCond);
+        hasher.put(sortOp);
+    }
+
+    @Override
+    protected boolean compareUnalterable(PgAbstractFunction func) {
+        if (func instanceof PgAggregate aggr && super.compareUnalterable(func)) {
+            return directCount == aggr.directCount
+                    && Objects.equals(kind, aggr.kind)
+                    && Objects.equals(sFunc, aggr.sFunc)
+                    && Objects.equals(sType, aggr.sType)
+                    && sSpace == aggr.sSpace
+                    && Objects.equals(finalFunc, aggr.finalFunc)
+                    && isFinalFuncExtra == aggr.isFinalFuncExtra
+                    && Objects.equals(finalFuncModify, aggr.finalFuncModify)
+                    && Objects.equals(combineFunc, aggr.combineFunc)
+                    && Objects.equals(serialFunc, aggr.serialFunc)
+                    && Objects.equals(deserialFunc, aggr.deserialFunc)
+                    && Objects.equals(initCond, aggr.initCond)
+                    && Objects.equals(mSFunc, aggr.mSFunc)
+                    && Objects.equals(mInvFunc, aggr.mInvFunc)
+                    && Objects.equals(mSType, aggr.mSType)
+                    && mSSpace == aggr.mSSpace
+                    && Objects.equals(mFinalFunc, aggr.mFinalFunc)
+                    && isMFinalFuncExtra == aggr.isMFinalFuncExtra
+                    && Objects.equals(mFinalFuncModify, aggr.mFinalFuncModify)
+                    && Objects.equals(mInitCond, aggr.mInitCond)
+                    && Objects.equals(sortOp, aggr.sortOp);
+        }
+
+        return false;
+    }
+
+    @Override
     protected PgAbstractFunction getFunctionCopy() {
         PgAggregate copy = new PgAggregate(name);
         copy.setDirectCount(directCount);
@@ -441,8 +442,6 @@ public final class PgAggregate extends PgAbstractFunction {
         copy.setMFinalFuncModify(mFinalFuncModify);
         copy.setMInitCond(mInitCond);
         copy.setSortOp(sortOp);
-        copy.setParallel(getParallel());
-        copy.setReturns(getReturns());
         return copy;
     }
 }

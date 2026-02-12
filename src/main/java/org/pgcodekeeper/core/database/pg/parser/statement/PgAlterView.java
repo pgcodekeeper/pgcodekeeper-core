@@ -21,7 +21,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.launcher.PgVexAnalysisLauncher;
 import org.pgcodekeeper.core.database.pg.schema.*;
@@ -56,7 +55,7 @@ public final class PgAlterView extends PgParserAbstract {
     @Override
     public void parseObject() {
         List<ParserRuleContext> ids = getIdentifiers(ctx.name);
-        var st = getSafe(AbstractSchema::getView, getSchemaSafe(ids), QNameParser.getFirstNameCtx(ids));
+        var st = getSafe(PgSchema::getView, getSchemaSafe(ids), QNameParser.getFirstNameCtx(ids));
         if (st instanceof PgView dbView) {
             Alter_view_actionContext action = ctx.alter_view_action();
             if (action.set_def_column() != null) {

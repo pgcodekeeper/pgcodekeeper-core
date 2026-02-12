@@ -20,7 +20,6 @@ import java.util.List;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Alter_materialized_view_statementContext;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -56,17 +55,15 @@ public final class PgAlterMatView extends PgParserAbstract {
             List<ParserRuleContext> ids = getIdentifiers(ctx.schema_qualified_name());
             addObjReference(ids, DbObjType.VIEW, action);
 
-            PgAbstractView view = (PgAbstractView) getSafe(AbstractSchema::getView,
-                    getSchemaSafe(ids), QNameParser.getFirstNameCtx(ids));
-
+            PgAbstractView view = getSafe(PgSchema::getView, getSchemaSafe(ids), QNameParser.getFirstNameCtx(ids));
             var alterAction = ctx.alter_materialized_view_action();
             if (alterAction != null) {
                 for (var act : alterAction.materialized_view_action()) {
                     var indexNameCtx = act.index_name;
                     if (indexNameCtx != null) {
                         ParserRuleContext indexName = QNameParser.getFirstNameCtx(getIdentifiers(indexNameCtx));
-                        AbstractIndex index = getSafe(PgAbstractView::getIndex, view, indexName);
-                        doSafe(AbstractIndex::setClustered, index, true);
+                        PgIndex index = getSafe(PgAbstractView::getIndex, view, indexName);
+                        doSafe(PgIndex::setClustered, index, true);
                     }
                 }
             }

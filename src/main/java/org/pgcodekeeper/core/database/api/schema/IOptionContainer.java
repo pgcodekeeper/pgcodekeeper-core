@@ -26,19 +26,6 @@ import org.pgcodekeeper.core.script.SQLScript;
 public interface IOptionContainer extends IStatement {
 
     /**
-     * List of Greenplum-specific storage options.
-     */
-    List<String> GP_OPTION_LIST = List.of(
-            "appendonly",
-            "appendoptimized",
-            "blocksize",
-            "orientation",
-            "checksum",
-            "compresstype",
-            "compresslevel",
-            "analyze_hll_non_part_table");
-
-    /**
      * Adds an option to this container.
      *
      * @param key the option key

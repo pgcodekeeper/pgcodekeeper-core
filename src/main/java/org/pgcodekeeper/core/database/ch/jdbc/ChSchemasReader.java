@@ -52,7 +52,7 @@ public class ChSchemasReader extends AbstractJdbcReader<ChJdbcLoader> {
         schema.setEngine(result.getString("engine_full"));
         loader.setComment(schema, result);
         loader.putSchema(schemaName, schema);
-        db.addSchema(schema);
+        db.addChild(schema);
     }
 
     @Override

@@ -17,17 +17,17 @@ package org.pgcodekeeper.core.database.base.project;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
 import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeFlattener;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.utils.TempDir;
 
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
@@ -95,10 +95,10 @@ import static org.pgcodekeeper.core.it.IntegrationTestUtils.loadTestDump;
  *
  * @author ryabinin_av
  */
-public class PartialExporterTest {
+class PartialExporterTest {
 
-    private static AbstractDatabase dbSource;
-    private static AbstractDatabase dbTarget;
+    private static IDatabase dbSource;
+    private static IDatabase dbTarget;
 
     @BeforeAll
     static void initDiffTree() throws InterruptedException, IOException {
@@ -115,31 +115,23 @@ public class PartialExporterTest {
 
     @ParameterizedTest
     @MethodSource("generator")
-    void testExportPartial(PartialExportInfo info) throws Exception {
+    void testExportPartial(PartialExportInfo info, @TempDir Path exportDirFull, @TempDir Path exportDirPartial)
+            throws Exception {
         var settings = new CoreSettings();
         TreeElement tree = DiffTree.create(settings, dbSource, dbTarget);
-        try (TempDir dirFull = new TempDir("pgCodekeeper-test-files");
-             TempDir dirPartial = new TempDir("pgCodekeeper-test-export-partial")) {
-            Path exportDirFull = dirFull.get();
-            Path exportDirPartial = dirPartial.get();
 
-            // full export of source
-            new PgModelExporter(exportDirFull, dbSource, Consts.UTF_8, settings).exportFull();
-            // full export of source to target directory
-            new PgModelExporter(exportDirPartial, dbSource, Consts.UTF_8, settings).exportFull();
+        // full export of source
+        new PgModelExporter(exportDirFull, dbSource, Consts.UTF_8, settings).exportFull();
+        // full export of source to target directory
+        new PgModelExporter(exportDirPartial, dbSource, Consts.UTF_8, settings).exportFull();
 
-            // get new db with selected changes
-            info.setUserSelection(tree);
-            Collection<TreeElement> list = new TreeFlattener()
-                    .onlySelected()
-                    .onlyEdits(dbSource, dbTarget)
-                    .flatten(tree);
-            // apply partial changes to the full database
-            new PgModelExporter(exportDirPartial, dbTarget, dbSource, list, Consts.UTF_8, settings)
-                    .exportPartial();
+        // get new db with selected changes
+        info.setUserSelection(tree);
+        Collection<TreeElement> list = new TreeFlattener().onlySelected().onlyEdits(dbSource, dbTarget).flatten(tree);
+        // apply partial changes to the full database
+        new PgModelExporter(exportDirPartial, dbTarget, dbSource, list, Consts.UTF_8, settings).exportPartial();
 
-            walkAndCompare(exportDirFull, exportDirPartial, info);
-        }
+        walkAndCompare(exportDirFull, exportDirPartial, info);
     }
 
     private static Stream<Arguments> generator() {

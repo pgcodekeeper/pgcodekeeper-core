@@ -54,13 +54,13 @@ public final class MsDisableTrigger extends MsParserAbstract {
         }
 
         IdContext schemaCtx = parent.schema;
-        AbstractStatementContainer cont = getSafe(AbstractSchema::getStatementContainer,
+        MsAbstractStatementContainer cont = getSafe(MsSchema::getStatementContainer,
                 getSchemaSafe(Arrays.asList(schemaCtx, parent.name)), parent.name);
         addObjReference(Arrays.asList(parent.schema, parent.name),
                 DbObjType.TABLE, null);
 
         for (Qualified_nameContext qname : triggers.qualified_name()) {
-            MsTrigger trig = (MsTrigger) getSafe(AbstractStatementContainer::getTrigger,
+            MsTrigger trig = getSafe(MsAbstractStatementContainer::getTrigger,
                     cont, qname.name);
             addObjReference(Arrays.asList(schemaCtx, parent.name, qname.name),
                     DbObjType.TRIGGER, ACTION_ALTER);

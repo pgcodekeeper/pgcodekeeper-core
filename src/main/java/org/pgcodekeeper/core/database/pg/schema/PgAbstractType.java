@@ -13,22 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.database.base.schema;
-
-import java.util.concurrent.atomic.AtomicBoolean;
+package org.pgcodekeeper.core.database.pg.schema;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Abstract base class for database user-defined types.
  * Provides common functionality for types across different database types including
  * composite types, enums, domains, and other user-defined data types.
  */
-@Deprecated
-public abstract class AbstractType extends AbstractStatement implements ISearchPath {
+public abstract class PgAbstractType extends PgAbstractStatement implements IType {
 
-    protected AbstractType(String name) {
+    protected PgAbstractType(String name) {
         super(name);
     }
 
@@ -54,7 +53,7 @@ public abstract class AbstractType extends AbstractStatement implements ISearchP
     @Override
     public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
         int startSize = script.getSize();
-        AbstractType newType = (AbstractType) newCondition;
+        PgAbstractType newType = (PgAbstractType) newCondition;
 
         if (isNeedRecreate(newType)) {
             return ObjectState.RECREATE;
@@ -67,13 +66,13 @@ public abstract class AbstractType extends AbstractStatement implements ISearchP
         return getObjectState(isNeedDepcies.get(), script, startSize);
     }
 
-    private boolean isNeedRecreate(AbstractType newType) {
+    private boolean isNeedRecreate(PgAbstractType newType) {
         return !getClass().equals(newType.getClass()) || !compareUnalterable(newType);
     }
 
-    protected abstract boolean compareUnalterable(AbstractType newType);
+    protected abstract boolean compareUnalterable(PgAbstractType newType);
 
-    protected void compareType(AbstractType newType, AtomicBoolean isNeedDepcies, SQLScript script) {
+    protected void compareType(PgAbstractType newType, AtomicBoolean isNeedDepcies, SQLScript script) {
         // subclasses may override if needed
     }
 
@@ -82,26 +81,4 @@ public abstract class AbstractType extends AbstractStatement implements ISearchP
             sb.append(",\n\t").append(name).append(" = ").append(value);
         }
     }
-
-    @Override
-    public DbObjType getStatementType() {
-        return DbObjType.TYPE;
-    }
-
-    @Override
-    public AbstractType shallowCopy() {
-        AbstractType typeDst = getTypeCopy();
-        copyBaseFields(typeDst);
-        return typeDst;
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        if (this == obj) {
-            return true;
-        }
-        return obj instanceof AbstractType && super.compare(obj);
-    }
-
-    protected abstract AbstractType getTypeCopy();
 }

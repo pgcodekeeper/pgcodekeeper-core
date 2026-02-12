@@ -20,6 +20,7 @@
 package org.pgcodekeeper.core.database.pg.schema;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.*;
@@ -31,8 +32,13 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Schemas are namespaces that contain database objects like tables, functions, types, and operators.
  * Each schema can have its own set of permissions and provides object organization.
  */
-public final class PgSchema extends AbstractSchema implements IPgStatement {
+public final class PgSchema extends PgAbstractStatement implements ISchema {
 
+    private final Map<String, PgAbstractFunction> functions = new LinkedHashMap<>();
+    private final Map<String, PgSequence> sequences = new LinkedHashMap<>();
+    private final Map<String, PgAbstractTable> tables = new LinkedHashMap<>();
+    private final Map<String, PgAbstractView> views = new LinkedHashMap<>();
+    private final Map<String, PgAbstractType> types = new LinkedHashMap<>();
     private final Map<String, PgDomain> domains = new LinkedHashMap<>();
     private final Map<String, PgFtsParser> parsers = new LinkedHashMap<>();
     private final Map<String, PgFtsTemplate> templates = new LinkedHashMap<>();
@@ -154,20 +160,38 @@ public final class PgSchema extends AbstractSchema implements IPgStatement {
         addUnique(statistics, rule);
     }
 
-    @Override
-    public void addType(final AbstractType type) {
+    /**
+     * Adds a type to this schema.
+     *
+     * @param type the table to add
+     */
+    private void addType(final PgAbstractType type) {
         // replace shell type by real type
-        AbstractType oldType = getType(type.getName());
+        PgAbstractType oldType = getType(type.getName());
         if (oldType instanceof PgShellType && !(type instanceof PgShellType)) {
             types.remove(type.getName());
             oldType.setParent(null);
         }
-        super.addType(type);
+        addUnique(types, type);
+    }
+
+    /**
+     * Finds type according to specified type {@code name}.
+     *
+     * @param name name of the type to be searched
+     * @return found type or null if no such type has been found
+     */
+    public PgAbstractType getType(final String name) {
+        return getChildByName(types, name);
     }
 
     @Override
-    protected void fillChildrenList(List<Collection<? extends AbstractStatement>> l) {
-        super.fillChildrenList(l);
+    public void fillChildrenList(List<Collection<? extends AbstractStatement>> l) {
+        l.add(functions.values());
+        l.add(sequences.values());
+        l.add(tables.values());
+        l.add(views.values());
+        l.add(types.values());
         l.add(domains.values());
         l.add(parsers.values());
         l.add(templates.values());
@@ -176,6 +200,17 @@ public final class PgSchema extends AbstractSchema implements IPgStatement {
         l.add(operators.values());
         l.add(collations.values());
         l.add(statistics.values());
+    }
+
+    @Override
+    public void fillDescendantsList(List<Collection<? extends AbstractStatement>> l) {
+        fillChildrenList(l);
+        for (var table : tables.values()) {
+            table.fillDescendantsList(l);
+        }
+        for (var view : views.values()) {
+            view.fillDescendantsList(l);
+        }
     }
 
     @Override
@@ -189,8 +224,80 @@ public final class PgSchema extends AbstractSchema implements IPgStatement {
             case OPERATOR -> getOperator(name);
             case COLLATION -> getCollation(name);
             case STATISTICS -> getStatistics(name);
-            default -> super.getChild(name, type);
+            case FUNCTION, PROCEDURE, AGGREGATE -> {
+                PgAbstractFunction func = getFunction(name);
+                yield func != null && func.getStatementType() == type ? func : null;
+            }
+            case SEQUENCE -> getSequence(name);
+            case TYPE -> getType(name);
+            case TABLE -> getTable(name);
+            case VIEW -> getView(name);
+            default -> null;
         };
+    }
+
+    @Override
+    public Collection<IStatement> getChildrenByType(DbObjType type) {
+        return switch (type) {
+            case DOMAIN -> Collections.unmodifiableCollection(domains.values());
+            case FTS_PARSER -> Collections.unmodifiableCollection(parsers.values());
+            case FTS_TEMPLATE -> Collections.unmodifiableCollection(templates.values());
+            case FTS_DICTIONARY -> Collections.unmodifiableCollection(dictionaries.values());
+            case FTS_CONFIGURATION -> Collections.unmodifiableCollection(configurations.values());
+            case OPERATOR -> Collections.unmodifiableCollection(operators.values());
+            case COLLATION -> Collections.unmodifiableCollection(collations.values());
+            case STATISTICS -> Collections.unmodifiableCollection(statistics.values());
+            case FUNCTION, PROCEDURE, AGGREGATE -> Collections.unmodifiableCollection(functions.values());
+            case SEQUENCE -> Collections.unmodifiableCollection(sequences.values());
+            case TYPE -> Collections.unmodifiableCollection(types.values());
+            case TABLE -> Collections.unmodifiableCollection(tables.values());
+            case VIEW -> Collections.unmodifiableCollection(views.values());
+            default -> List.of();
+        };
+    }
+
+    /**
+     * Finds function according to specified function {@code signature}.
+     *
+     * @param signature signature of the function to be searched
+     * @return found function or null if no such function has been found
+     */
+    public PgAbstractFunction getFunction(final String signature) {
+        return getChildByName(functions, signature);
+    }
+
+    /**
+     * Finds sequence according to specified sequence {@code name}.
+     *
+     * @param name name of the sequence to be searched
+     * @return found sequence or null if no such sequence has been found
+     */
+    public PgSequence getSequence(final String name) {
+        return getChildByName(sequences, name);
+    }
+
+    /**
+     * Finds table according to specified table {@code name}.
+     *
+     * @param name name of the table to be searched
+     * @return found table or null if no such table has been found
+     */
+    public PgAbstractTable getTable(final String name) {
+        return getChildByName(tables, name);
+    }
+
+    public Collection<PgAbstractTable> getTables() {
+        return Collections.unmodifiableCollection(tables.values());
+    }
+
+    /**
+     * Finds view according to specified view {@code name}.
+     *
+     * @param name name of the view to be searched
+     * @return found view or null if no such view has been found
+     */
+    public PgAbstractView getView(final String name) {
+        return getChildByName(views, name);
     }
 
     @Override
@@ -221,15 +328,69 @@ public final class PgSchema extends AbstractSchema implements IPgStatement {
             case STATISTICS:
                 addStatistics((PgStatistics) st);
                 break;
+            case AGGREGATE, FUNCTION, PROCEDURE:
+                addFunction((PgAbstractFunction) st);
+                break;
+            case SEQUENCE:
+                addSequence((PgSequence) st);
+                break;
+            case TABLE:
+                addTable((PgAbstractTable) st);
+                break;
+            case TYPE:
+                addType((PgAbstractType) st);
+                break;
+            case VIEW:
+                addView((PgAbstractView) st);
+                break;
             default:
-                super.addChild(st);
+                throw new IllegalArgumentException("Unsupported child type: " + type);
         }
+    }
+
+    private void addView(PgAbstractView st) {
+        addUnique(views, st);
+    }
+
+    private void addTable(PgAbstractTable st) {
+        addUnique(tables, st);
+    }
+
+    private void addSequence(PgSequence st) {
+        addUnique(sequences, st);
+    }
+
+    private void addFunction(PgAbstractFunction st) {
+        addUnique(functions, st);
+    }
+
+    @Override
+    protected void computeChildrenHash(Hasher hasher) {
+        super.computeChildrenHash(hasher);
+        hasher.putUnordered(sequences);
+        hasher.putUnordered(functions);
+        hasher.putUnordered(views);
+        hasher.putUnordered(tables);
+        hasher.putUnordered(types);
+        hasher.putUnordered(domains);
+        hasher.putUnordered(collations);
+        hasher.putUnordered(parsers);
+        hasher.putUnordered(templates);
+        hasher.putUnordered(dictionaries);
+        hasher.putUnordered(configurations);
+        hasher.putUnordered(operators);
+        hasher.putUnordered(statistics);
     }
 
     @Override
     public boolean compareChildren(AbstractStatement obj) {
         if (obj instanceof PgSchema schema) {
             return super.compareChildren(obj)
+                    && sequences.equals(schema.sequences)
+                    && functions.equals(schema.functions)
+                    && views.equals(schema.views)
+                    && tables.equals(schema.tables)
+                    && types.equals(schema.types)
                     && domains.equals(schema.domains)
                     && collations.equals(schema.collations)
                     && parsers.equals(schema.parsers)
@@ -243,20 +404,94 @@ public final class PgSchema extends AbstractSchema implements IPgStatement {
     }
 
     @Override
-    protected void computeChildrenHash(Hasher hasher) {
-        super.computeChildrenHash(hasher);
-        hasher.putUnordered(domains);
-        hasher.putUnordered(collations);
-        hasher.putUnordered(parsers);
-        hasher.putUnordered(templates);
-        hasher.putUnordered(dictionaries);
-        hasher.putUnordered(configurations);
-        hasher.putUnordered(operators);
-        hasher.putUnordered(statistics);
+    public void computeHash(Hasher hasher) {
+        // all hashable fields in AbstractStatement
     }
 
     @Override
-    protected AbstractSchema getSchemaCopy() {
-        return new PgSchema(getName());
+    protected PgSchema getCopy() {
+        return new PgSchema(name);
     }
+
+    /**
+     * @return found relation or null if no such relation has been found
+     */
+    @Override
+    public IRelation getRelation(String name) {
+        IRelation result = getTable(name);
+        if (result == null) {
+            result = getView(name);
+        }
+        if (result == null) {
+            result = getSequence(name);
+        }
+        return result;
+    }
+
+    @Override
+    public Stream<IRelation> getRelations() {
+        return Stream.concat(Stream.concat(tables.values().stream(), views.values().stream()),
+                sequences.values().stream());
+    }
+
+    /**
+     * Getter for {@link #functions}. The list cannot be modified.
+     *
+     * @return {@link #functions}
+     */
+    public Collection<IFunction> getFunctions() {
+        return Collections.unmodifiableCollection(functions.values());
+    }
+
+    public Collection<PgSequence> getSequences() {
+        return Collections.unmodifiableCollection(sequences.values());
+    }
+
+    /**
+     * Gets a statement container by name.
+     *
+     * @param name the name of the container to find
+     * @return the statement container with the given name, or null if not found
+     */
+    @Override
+    public PgAbstractStatementContainer getStatementContainer(String name) {
+        PgAbstractStatementContainer container = getTable(name);
+        return container == null ? getView(name) : container;
+    }
+
+    /**
+     * Gets a stream of all statement containers in this schema.
+     *
+     * @return a stream of statement containers
+     */
+    public Stream<PgAbstractStatementContainer> getStatementContainers() {
+        return Stream.concat(tables.values().stream(), views.values().stream());
+    }
+
+    /**
+     * Finds an index by name across all tables and views in this schema.
+     *
+     * @param indexName the name of the index to find
+     * @return the index with the given name, or null if not found
+     */
+    public PgIndex getIndexByName(String indexName) {
+        return getStatementContainers()
+                .map(c -> c.getIndex(indexName))
+                .filter(Objects::nonNull)
+                .findAny().orElse(null);
+    }
+
+    /**
+     * Finds a constraint by name across all tables and views in this schema.
+     *
+     * @param constraintName the name of the constraint to find
+     * @return the constraint with the given name, or null if not found
+     */
+    public PgConstraint getConstraintByName(String constraintName) {
+        return (PgConstraint) getStatementContainers()
+                .map(c -> c.getChild(constraintName, DbObjType.CONSTRAINT))
+                .filter(Objects::nonNull)
+                .findAny().orElse(null);
+    }
+
 }

@@ -20,7 +20,6 @@ import java.sql.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateIndex;
 import org.pgcodekeeper.core.database.pg.schema.*;
@@ -42,7 +41,7 @@ public final class PgIndicesReader extends PgAbstractSearchPathJdbcReader {
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String tableName = res.getString("table_name");
         var cont = schema.getStatementContainer(tableName);
         if (cont == null) {
@@ -68,7 +67,7 @@ public final class PgIndicesReader extends PgAbstractSearchPathJdbcReader {
         i.setClustered(res.getBoolean("indisclustered"));
         i.setUnique(res.getBoolean("indisunique"));
 
-        if (SupportedPgVersion.VERSION_15.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_15.isLE(loader.getVersion())) {
             i.setNullsDistinction(res.getBoolean("indnullsnotdistinct"));
         }
 
@@ -78,7 +77,7 @@ public final class PgIndicesReader extends PgAbstractSearchPathJdbcReader {
             i.addInherit(inhnspname, inhrelname);
             addDep(i, inhnspname, inhrelname, DbObjType.INDEX);
         }
-        cont.addIndex(i);
+        cont.addChild(i);
     }
 
     @Override
@@ -118,7 +117,7 @@ public final class PgIndicesReader extends PgAbstractSearchPathJdbcReader {
                 .where("ind.indisexclusion = FALSE")
                 .where("cons.conindid is NULL");
 
-        if (SupportedPgVersion.VERSION_15.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_15.isLE(loader.getVersion())) {
             builder.column("ind.indnullsnotdistinct");
         }
     }

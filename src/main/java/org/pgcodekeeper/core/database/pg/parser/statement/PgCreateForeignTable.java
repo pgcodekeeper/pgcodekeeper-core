@@ -20,9 +20,9 @@ import java.util.List;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IColumn;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -57,19 +57,19 @@ public final class PgCreateForeignTable extends PgTableAbstract {
     public void parseObject() {
         List<ParserRuleContext> ids = getIdentifiers(ctx.name);
         String tableName = QNameParser.getFirstName(ids);
-        AbstractSchema schema = getSchemaSafe(ids);
-        AbstractTable table = defineTable(tableName, getSchemaNameSafe(ids));
+        PgSchema schema = getSchemaSafe(ids);
+        PgAbstractTable table = defineTable(tableName, getSchemaNameSafe(ids));
         addSafe(schema, table, ids);
 
-        for (AbstractColumn col : table.getColumns()) {
-            AbstractSequence seq = ((PgColumn) col).getSequence();
+        for (IColumn col : table.getColumns()) {
+            PgSequence seq = ((PgColumn) col).getSequence();
             if (seq != null) {
                 seq.setParent(schema);
             }
         }
     }
 
-    private AbstractTable defineTable(String tableName, String schemaName) {
+    private PgAbstractTable defineTable(String tableName, String schemaName) {
         Define_serverContext srvCtx = ctx.define_server();
         IdentifierContext srvName = srvCtx.identifier();
         Define_columnsContext colCtx = ctx.define_columns();

@@ -49,4 +49,12 @@ public interface IFunction extends ISearchPath {
      * @param returns the return type to set
      */
     void setReturns(String returns);
+
+    /**
+     * Determines whether this function needs to be dropped before creating the new version.
+     *
+     * @param newFunction the new function version to compare against
+     * @return true if the function needs to be dropped and recreated
+     */
+    boolean needDrop(IFunction newFunction);
 }

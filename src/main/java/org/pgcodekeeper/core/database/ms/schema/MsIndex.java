@@ -26,10 +26,18 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a Microsoft SQL index with support for clustered, non-clustered,
  * and columnstore indexes.
  */
-public final class MsIndex extends AbstractIndex implements IMsStatement {
+public final class MsIndex extends MsAbstractStatement implements IIndex {
 
     private boolean isColumnstore;
     private final List<String> orderCols = new ArrayList<>();
+
+    private boolean unique;
+    private String tablespace;
+    private final List<SimpleColumn> columns = new ArrayList<>();
+    private final Map<String, String> options = new LinkedHashMap<>();
+    private final List<String> includes = new ArrayList<>();
+    private String where;
+    private boolean isClustered;
 
     /**
      * Creates a new Microsoft SQL index.
@@ -109,7 +117,9 @@ public final class MsIndex extends AbstractIndex implements IMsStatement {
             sb.append("\nORDER ");
             StatementUtils.appendCols(sb, orderCols, getQuoter());
         }
-        appendWhere(sb);
+        if (where != null) {
+            sb.append("\nWHERE ").append(where);
+        }
 
         var tmpOptions = new LinkedHashMap<>(options);
         if (!isTypeIndex) {
@@ -173,27 +183,121 @@ public final class MsIndex extends AbstractIndex implements IMsStatement {
     }
 
     @Override
-    public boolean compare(IStatement obj) {
-        if (obj instanceof MsIndex ind && super.compare(obj)) {
-            return isColumnstore == ind.isColumnstore
-                    && Objects.equals(orderCols, ind.orderCols);
-        }
-
-        return false;
-    }
-
-    @Override
     public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
+        hasher.putOrdered(columns);
+        hasher.put(where);
+        hasher.put(includes);
+        hasher.put(unique);
+        hasher.put(isClustered);
+        hasher.put(tablespace);
+        hasher.put(options);
         hasher.put(isColumnstore);
         hasher.put(orderCols);
     }
 
     @Override
-    protected AbstractIndex getIndexCopy() {
-        MsIndex ind = new MsIndex(name);
-        ind.setColumnstore(isColumnstore);
-        ind.orderCols.addAll(orderCols);
-        return ind;
+    public boolean compare(IStatement obj) {
+        if (obj instanceof MsIndex index && super.compare(obj)) {
+            return compareUnalterable(index)
+                    && isClustered == index.isClustered
+                    && Objects.equals(tablespace, index.tablespace)
+                    && Objects.equals(options, index.options)
+                    && isColumnstore == index.isColumnstore
+                    && Objects.equals(orderCols, index.orderCols);
+        }
+
+        return false;
+    }
+
+    private boolean compareUnalterable(MsIndex index) {
+        return Objects.equals(columns, index.columns)
+                && Objects.equals(where, index.where)
+                && Objects.equals(includes, index.includes)
+                && unique == index.unique;
+    }
+
+    @Override
+    protected MsIndex getCopy() {
+        MsIndex indexDst = new MsIndex(name);
+        indexDst.columns.addAll(columns);
+        indexDst.setWhere(where);
+        indexDst.includes.addAll(includes);
+        indexDst.setUnique(unique);
+        indexDst.setClustered(isClustered);
+        indexDst.setTablespace(tablespace);
+        indexDst.options.putAll(options);
+        indexDst.setColumnstore(isColumnstore);
+        indexDst.orderCols.addAll(orderCols);
+        return indexDst;
+    }
+
+    public void setTablespace(String tablespace) {
+        this.tablespace = tablespace;
+        resetHash();
+    }
+
+    public void setWhere(String where) {
+        this.where = where;
+        resetHash();
+    }
+
+    public void setClustered(boolean isClustered) {
+        this.isClustered = isClustered;
+        resetHash();
+    }
+
+    public void setUnique(boolean unique) {
+        this.unique = unique;
+        resetHash();
+    }
+
+    @Override
+    public Map<String, String> getOptions() {
+        return Collections.unmodifiableMap(options);
+    }
+
+    @Override
+    public void addOption(String key, String value) {
+        options.put(key, value);
+        resetHash();
+    }
+
+    public boolean isClustered() {
+        return isClustered;
+    }
+
+    @Override
+    public void addColumn(SimpleColumn column) {
+        columns.add(column);
+        resetHash();
+    }
+
+    @Override
+    public void addInclude(String include) {
+        this.includes.add(include);
+        resetHash();
+    }
+
+    public String getTablespace() {
+        return tablespace;
+    }
+
+    @Override
+    public boolean isUnique() {
+        return unique;
+    }
+
+    @Override
+    public boolean compareColumns(Collection<String> refs) {
+        if (refs.size() != columns.size()) {
+            return false;
+        }
+        int i = 0;
+        for (String ref : refs) {
+            if (!ref.equals(columns.get(i++).getName())) {
+                return false;
+            }
+        }
+        return true;
     }
 }

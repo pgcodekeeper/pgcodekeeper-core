@@ -20,10 +20,13 @@
 package org.pgcodekeeper.core.it.loader.pg;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.EventType;
 import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
@@ -32,7 +35,6 @@ import org.pgcodekeeper.core.database.pg.schema.PgTrigger.TgTypes;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.TempDir;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -53,46 +55,42 @@ class PgAntlrLoaderTest {
     private static final String CHARACTER_VARYING_40 = "character varying(40)";
     private static final String INTEGER = "integer";
 
-    void testDatabase(String fileName, AbstractDatabase d) throws IOException, InterruptedException {
+    void testDatabase(String fileName, IDatabase d, Path exportDir) throws IOException, InterruptedException {
         loadSchema(fileName, d);
-        exportFullDb(fileName, d);
+        exportFullDb(fileName, d, exportDir);
     }
 
-    void loadSchema(String fileName, AbstractDatabase dbPredefined) throws IOException, InterruptedException {
+    void loadSchema(String fileName, IDatabase dbPredefined) throws IOException, InterruptedException {
         // first test the dump loader itself
         var settings = new CoreSettings();
         settings.setKeepNewlines(true);
-        AbstractDatabase d = loadTestDump(fileName, PgAntlrLoaderTest.class, settings);
+        IDatabase d = loadTestDump(fileName, PgAntlrLoaderTest.class, settings);
 
         assertDiff(d, dbPredefined, settings, "PgDumpLoader: predefined object is not equal to file " + fileName);
 
         // test deepCopy mechanism
-        assertDiff(d, (AbstractDatabase) d.deepCopy(), settings, "PgStatement deep copy altered");
+        assertDiff(d, (IDatabase) d.deepCopy(), settings, "PgStatement deep copy altered");
         assertDiff(dbPredefined, d, settings, "PgStatement deep copy altered original");
     }
 
-    void exportFullDb(String fileName, AbstractDatabase dbPredefined) throws IOException, InterruptedException {
+    void exportFullDb(String fileName, IDatabase dbPredefined, Path exportDir) throws IOException, InterruptedException {
         // prepare db object from sql file
         var settings = new CoreSettings();
         settings.setKeepNewlines(true);
-        AbstractDatabase dbFromFile = loadTestDump(fileName, PgAntlrLoaderTest.class, settings);
+        IDatabase dbFromFile = loadTestDump(fileName, PgAntlrLoaderTest.class, settings);
 
-        Path exportDir;
-        try (TempDir dir = new TempDir("pgCodekeeper-test-files")) {
-            exportDir = dir.get();
-            new PgModelExporter(exportDir, dbPredefined, Consts.UTF_8, settings).exportFull();
+        new PgModelExporter(exportDir, dbPredefined, Consts.UTF_8, settings).exportFull();
 
-            AbstractDatabase dbAfterExport = IntegrationTestUtils.createProjectLoader(exportDir, settings,
-                    dbFromFile).loadAndAnalyze();
+        IDatabase dbAfterExport = IntegrationTestUtils.createProjectLoader(exportDir, settings,
+                dbFromFile).loadAndAnalyze();
 
-            // check the same db similarity before and after export
+        // check the same db similarity before and after export
 
-            assertDiff(dbPredefined, dbAfterExport, settings, "Predefined object PgDB" + fileName +
-                    " is not equal to exported'n'loaded.");
+        assertDiff(dbPredefined, dbAfterExport, settings, "Predefined object PgDB" + fileName +
+                " is not equal to exported'n'loaded.");
 
-            assertDiff(dbAfterExport, dbFromFile, settings,
-                    "Exported predefined object is not equal to file " + fileName);
-        }
+        assertDiff(dbAfterExport, dbFromFile, settings,
+                "Exported predefined object is not equal to file " + fileName);
     }
 
     private PgConstraintNotNull createNotNullConstraint(PgSimpleTable table, PgColumn col) {
@@ -103,12 +101,12 @@ class PgAntlrLoaderTest {
     }
 
     @Test
-    void testDB1() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB1(@TempDir Path exportDir) throws IOException, InterruptedException {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         PgSimpleTable table = new PgSimpleTable("fax_boxes");
-        schema.addTable(table);
+        schema.addChild(table);
 
         PgColumn col = new PgColumn("fax_box_id");
         col.setType("serial");
@@ -122,12 +120,12 @@ class PgAntlrLoaderTest {
         var constraintPK = new PgConstraintPk("fax_boxes_pkey", true);
         constraintPK.addColumn("fax_box_id");
         constraintPK.addInclude("name");
-        table.addConstraint(constraintPK);
+        table.addChild(constraintPK);
 
         table.setOwner(POSTGRES);
 
         table = new PgSimpleTable("faxes");
-        schema.addTable(table);
+        schema.addChild(table);
 
         col = new PgColumn("fax_id");
         col.setType("serial");
@@ -174,7 +172,7 @@ class PgAntlrLoaderTest {
 
         constraintPK = new PgConstraintPk("faxes_pkey", true);
         constraintPK.addColumn("fax_id");
-        table.addConstraint(constraintPK);
+        table.addChild(constraintPK);
 
         var constraintFk = new PgConstraintFk("faxes_fax_box_id_fkey");
         constraintFk.addColumn("fax_box_id");
@@ -184,10 +182,10 @@ class PgAntlrLoaderTest {
         constraintFk.setUpdAction("RESTRICT");
         constraintFk.setDelAction("SET NULL");
         constraintFk.addDelActCol("fax_box_id");
-        table.addConstraint(constraintFk);
+        table.addChild(constraintFk);
 
         table = new PgSimpleTable("extensions");
-        schema.addTable(table);
+        schema.addChild(table);
 
         col = new PgColumn("id");
         col.setType("serial");
@@ -201,17 +199,17 @@ class PgAntlrLoaderTest {
         constraintFk.addForeignColumn("fax_box_id");
         constraintFk.setUpdAction("RESTRICT");
         constraintFk.setDelAction("RESTRICT");
-        table.addConstraint(constraintFk);
+        table.addChild(constraintFk);
 
-        testDatabase("schema_1.sql", d);
+        testDatabase("schema_1.sql", d, exportDir);
     }
 
     @Test
-    void testDB2() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
+    void testDB2(@TempDir Path exportDir) throws IOException, InterruptedException {
+        IDatabase d = createDumpDB();
 
-        AbstractSchema schema = new PgSchema("postgis");
-        d.addSchema(schema);
+        ISchema schema = new PgSchema("postgis");
+        d.addChild(schema);
 
         PgExtension ext = new PgExtension("postgis");
         ext.setSchema("postgis");
@@ -220,10 +218,10 @@ class PgAntlrLoaderTest {
 
         schema = d.getSchema(Consts.PUBLIC);
 
-        AbstractTable table = new PgSimpleTable("contacts");
-        schema.addTable(table);
+        PgAbstractTable table = new PgSimpleTable("contacts");
+        schema.addChild(table);
 
-        AbstractColumn col = new PgColumn("id");
+        PgColumn col = new PgColumn("id");
         col.setType(INTEGER);
         table.addColumn(col);
 
@@ -236,24 +234,24 @@ class PgAntlrLoaderTest {
         table.addColumn(col);
 
         PgIndex idx = new PgIndex("contacts_number_pool_id_idx");
-        table.addIndex(idx);
+        table.addChild(idx);
         idx.addColumn(new SimpleColumn("number_pool_id"));
-        testDatabase("schema_2.sql", d);
+        testDatabase("schema_2.sql", d, exportDir);
     }
 
     @Test
-    void testDB3() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB3(@TempDir Path exportDir) throws IOException, InterruptedException {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
-        AbstractSequence seq = new PgSequence("admins_aid_seq");
+        PgSequence seq = new PgSequence("admins_aid_seq");
         seq.setStartWith("1");
         seq.setMinMaxInc(1L, 1000000000L, null, null, 0L);
         seq.setCache("1");
-        schema.addSequence(seq);
+        schema.addChild(seq);
 
         PgSimpleTable table = new PgSimpleTable("admins");
-        schema.addTable(table);
+        schema.addChild(table);
 
         PgColumn col = new PgColumn("aid");
         col.setType(INTEGER);
@@ -329,18 +327,18 @@ class PgAntlrLoaderTest {
 
         var constraintPK = new PgConstraintPk("admins_pkey", true);
         constraintPK.addColumn("aid");
-        table.addConstraint(constraintPK);
+        table.addChild(constraintPK);
 
-        testDatabase("schema_3.sql", d);
+        testDatabase("schema_3.sql", d, exportDir);
     }
 
     @Test
-    void testDB4() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB4(@TempDir Path exportDir) throws IOException, InterruptedException {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         PgSimpleTable table = new PgSimpleTable("call_logs");
-        schema.addTable(table);
+        schema.addChild(table);
 
         PgColumn col = new PgColumn("id");
         col.setType(BIGINT);
@@ -348,13 +346,13 @@ class PgAntlrLoaderTest {
         col.setDefaultValue("nextval('public.call_logs_id_seq'::regclass)");
         table.addColumn(col);
 
-        testDatabase("schema_4.sql", d);
+        testDatabase("schema_4.sql", d, exportDir);
     }
 
     @Test
-    void testDB5() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB5(@TempDir Path exportDir) throws IOException, InterruptedException {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         PgFunction func = new PgFunction("gtsq_in");
         func.setLanguageCost("c", null);
@@ -365,7 +363,7 @@ class PgAntlrLoaderTest {
         Argument arg = new Argument(null, "cstring");
         func.addArgument(arg);
 
-        schema.addFunction(func);
+        schema.addChild(func);
 
         func = new PgFunction("multiply_numbers");
         func.setLanguageCost("plpgsql", null);
@@ -379,7 +377,7 @@ class PgAntlrLoaderTest {
         arg = new Argument("number2", INTEGER);
         func.addArgument(arg);
 
-        schema.addFunction(func);
+        schema.addChild(func);
 
         func = new PgFunction("select_something");
         func.setLanguageCost("sql", null);
@@ -392,7 +390,7 @@ class PgAntlrLoaderTest {
         arg = new Argument("number2", INTEGER);
         func.addArgument(arg);
 
-        schema.addFunction(func);
+        schema.addChild(func);
 
         func = new PgFunction("select_something2");
         func.setLanguageCost("sql", null);
@@ -405,7 +403,7 @@ class PgAntlrLoaderTest {
         arg = new Argument("number2", INTEGER);
         func.addArgument(arg);
 
-        schema.addFunction(func);
+        schema.addChild(func);
 
         func = new PgFunction("select_something3");
         func.setLanguageCost("sql", null);
@@ -418,25 +416,25 @@ class PgAntlrLoaderTest {
         arg = new Argument("number2", INTEGER);
         func.addArgument(arg);
 
-        schema.addFunction(func);
+        schema.addChild(func);
 
-        testDatabase("schema_5.sql", d);
+        testDatabase("schema_5.sql", d, exportDir);
     }
 
     @Test
-    void testDB6() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB6(@TempDir Path exportDir) throws IOException, InterruptedException {
+        PgDatabase d = createDumpDB();
+        PgSchema schema = d.getDefaultSchema();
 
         schema.addPrivilege(new PgPrivilege("REVOKE", "ALL", "SCHEMA public", "PUBLIC", false));
         schema.addPrivilege(new PgPrivilege("REVOKE", "ALL", "SCHEMA public", POSTGRES, false));
         schema.addPrivilege(new PgPrivilege("GRANT", "ALL", "SCHEMA public", POSTGRES, false));
         schema.addPrivilege(new PgPrivilege("GRANT", "ALL", "SCHEMA public", "PUBLIC", false));
 
-        AbstractTable table = new PgSimpleTable("test_table");
-        schema.addTable(table);
+        PgAbstractTable table = new PgSimpleTable("test_table");
+        schema.addChild(table);
 
-        AbstractColumn col = new PgColumn("id");
+        PgColumn col = new PgColumn("id");
         col.setType(BIGINT);
         table.addColumn(col);
 
@@ -450,17 +448,17 @@ class PgAntlrLoaderTest {
         idx.setMethod("btree");
         idx.addColumn(new SimpleColumn("date_deleted"));
         idx.setWhere("(date_deleted IS NULL)");
-        table.addIndex(idx);
+        table.addChild(idx);
 
-        testDatabase("schema_6.sql", d);
+        testDatabase("schema_6.sql", d, exportDir);
     }
 
     @Test
-    void testDB7() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
+    void testDB7(@TempDir Path exportDir) throws IOException, InterruptedException {
+        IDatabase d = createDumpDB();
 
-        AbstractSchema schema = new PgSchema("common");
-        d.addSchema(schema);
+        ISchema schema = new PgSchema("common");
+        d.addChild(schema);
         d.setDefaultSchema("common");
 
         PgFunction func = new PgFunction("t_common_casttotext");
@@ -473,7 +471,7 @@ class PgAntlrLoaderTest {
         Argument arg = new Argument(null, "time with time zone");
         func.addArgument(arg);
 
-        schema.addFunction(func);
+        schema.addChild(func);
 
         func = new PgFunction("t_common_casttotext");
         func.setLanguageCost("sql", null);
@@ -485,7 +483,7 @@ class PgAntlrLoaderTest {
         arg = new Argument(null, "time without time zone");
         func.addArgument(arg);
 
-        schema.addFunction(func);
+        schema.addChild(func);
 
         func = new PgFunction("t_common_casttotext");
         func.setLanguageCost("sql", null);
@@ -497,7 +495,7 @@ class PgAntlrLoaderTest {
         arg = new Argument(null, "timestamp with time zone");
         func.addArgument(arg);
 
-        schema.addFunction(func);
+        schema.addChild(func);
 
         func = new PgFunction("t_common_casttotext");
         func.setLanguageCost("sql", null);
@@ -509,28 +507,28 @@ class PgAntlrLoaderTest {
         arg = new Argument(null, "timestamp without time zone");
         func.addArgument(arg);
 
-        schema.addFunction(func);
+        schema.addChild(func);
 
-        testDatabase("schema_7.sql", d);
+        testDatabase("schema_7.sql", d, exportDir);
     }
 
     @Test
-    void testDB8() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB8(@TempDir Path exportDir) throws IOException, InterruptedException {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         PgCompositeType type = new PgCompositeType("testtt");
-        AbstractColumn col = new PgColumn("a");
+        PgColumn col = new PgColumn("a");
         col.setType(INTEGER);
         type.addAttr(col);
         col = new PgColumn("b");
         col.setType("text");
         type.addAttr(col);
         type.setOwner("madej");
-        schema.addType(type);
+        schema.addChild(type);
 
         schema = new PgSchema("``54'253-=9!@#$%^&*()__<>?:\"{}[];',./");
-        d.addSchema(schema);
+        d.addChild(schema);
 
         PgFunction func = new PgFunction(".x\".\"\".");
         func.setLanguageCost("plpgsql", null);
@@ -540,19 +538,19 @@ class PgAntlrLoaderTest {
         Argument arg = new Argument(null, INTEGER);
         func.addArgument(arg);
 
-        schema.addFunction(func);
+        schema.addChild(func);
         func.setOwner("madej");
 
-        testDatabase("schema_8.sql", d);
+        testDatabase("schema_8.sql", d, exportDir);
     }
 
     @Test
-    void testDB9() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB9(@TempDir Path exportDir) throws IOException, InterruptedException {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         PgSimpleTable table = new PgSimpleTable("user_data");
-        schema.addTable(table);
+        schema.addChild(table);
 
         PgColumn col = new PgColumn("id");
         col.setType(BIGINT);
@@ -575,17 +573,17 @@ class PgAntlrLoaderTest {
         rule.setEvent(EventType.SELECT);
         rule.setCondition("(1=1)");
         rule.setInstead(true);
-        table.addRule(rule);
+        table.addChild(rule);
 
         PgSequence seq = new PgSequence("user_id_seq");
         seq.setMinMaxInc(1L, null, null, null, 0L);
         seq.setCache("1");
         seq.setOwnedBy(new GenericColumn("public", "user_data", "id", DbObjType.COLUMN));
-        schema.addSequence(seq);
+        schema.addChild(seq);
         seq.setOwner(POSTGRES);
 
         table = new PgSimpleTable("t1");
-        schema.addTable(table);
+        schema.addChild(table);
 
         col = new PgColumn("c1");
         col.setType(INTEGER);
@@ -595,47 +593,47 @@ class PgAntlrLoaderTest {
         view.setQuery("( SELECT user_data.id, user_data.email, user_data.created FROM public.user_data)",
                 "(SELECT user_data.id, user_data.email, user_data.created FROM public.user_data)");
         view.addColumnDefaultValue("created", "now()");
-        schema.addView(view);
+        schema.addChild(view);
 
         view.setOwner(POSTGRES);
 
         rule = new PgRule("on_delete");
         rule.setEvent(EventType.DELETE);
         rule.addCommand("DELETE FROM public.user_data WHERE (user_data.id = old.id)");
-        view.addRule(rule);
+        view.addChild(rule);
 
         rule = new PgRule("on_insert");
         rule.setEvent(EventType.INSERT);
         rule.setInstead(true);
         rule.addCommand("INSERT INTO public.user_data (id, email, created) VALUES (new.id, new.email, new.created)");
         rule.addCommand("INSERT INTO public.t1(c1) DEFAULT VALUES");
-        view.addRule(rule);
+        view.addChild(rule);
 
         rule = new PgRule("on_update");
         rule.setEvent(EventType.UPDATE);
         rule.setInstead(true);
         rule.addCommand("UPDATE public.user_data SET id = new.id, email = new.email, created = new.created WHERE (user_data.id = old.id)");
-        view.addRule(rule);
+        view.addChild(rule);
 
         view = new PgView("ws_test");
         view.setQuery("SELECT ud.id \"   i   d   \" FROM public.user_data ud",
                 "SELECT ud.id \"   i   d   \" FROM public.user_data ud");
-        schema.addView(view);
+        schema.addChild(view);
 
-        testDatabase("schema_9.sql", d);
+        testDatabase("schema_9.sql", d, exportDir);
     }
 
     @Test
-    void testDB10() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = new PgSchema("admin");
-        d.addSchema(schema);
+    void testDB10(@TempDir Path exportDir) throws IOException, InterruptedException {
+        IDatabase d = createDumpDB();
+        ISchema schema = new PgSchema("admin");
+        d.addChild(schema);
         d.setDefaultSchema("admin");
 
         schema.setOwner(POSTGRES);
 
         PgSimpleTable table = new PgSimpleTable("acl_role");
-        schema.addTable(table);
+        schema.addChild(table);
 
         PgColumn col = new PgColumn("id");
         col.setType(BIGINT);
@@ -644,12 +642,12 @@ class PgAntlrLoaderTest {
 
         var constraintPK = new PgConstraintPk("acl_role_pkey", true);
         constraintPK.addColumn("id");
-        table.addConstraint(constraintPK);
+        table.addChild(constraintPK);
 
         table.setOwner(POSTGRES);
 
         table = new PgSimpleTable("user");
-        schema.addTable(table);
+        schema.addChild(table);
 
         col = new PgColumn("id");
         col.setType(BIGINT);
@@ -703,47 +701,47 @@ class PgAntlrLoaderTest {
         PgIndex idx = new PgIndex("fki_user_role_id_fkey");
         idx.setMethod("btree");
         idx.addColumn(new SimpleColumn("role_id"));
-        table.addIndex(idx);
+        table.addChild(idx);
 
         var constraintFk = new PgConstraintFk("user_role_id_fkey");
         constraintFk.addColumn("role_id");
         constraintFk.setForeignSchema("admin");
         constraintFk.setForeignTable("acl_role");
         constraintFk.addForeignColumn("id");
-        table.addConstraint(constraintFk);
+        table.addChild(constraintFk);
 
         table.setOwner(POSTGRES);
 
-        testDatabase("schema_10.sql", d);
+        testDatabase("schema_10.sql", d, exportDir);
     }
 
     @Test
-    void testDB11() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB11(@TempDir Path exportDir) throws IOException, InterruptedException {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         PgFunction func = new PgFunction("curdate");
         func.setLanguageCost("sql", null);
         func.setBody("$$SELECT CAST('now' AS date);\n$$");
         func.setReturns("date");
-        schema.addFunction(func);
+        schema.addChild(func);
 
-        testDatabase("schema_11.sql", d);
+        testDatabase("schema_11.sql", d, exportDir);
     }
 
     @Test
-    void testDB12() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
+    void testDB12(@TempDir Path exportDir) throws IOException, InterruptedException {
+        IDatabase d = createDumpDB();
 
         // d.setComment("'The status : ''E'' for enabled, ''D'' for disabled.'")
 
-        testDatabase("schema_12.sql", d);
+        testDatabase("schema_12.sql", d, exportDir);
     }
 
     @Test
-    void testDB13() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB13(@TempDir Path exportDir) throws IOException, InterruptedException {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         PgFunction func = new PgFunction("drop_fk_except_for");
         func.setLanguageCost("plpgsql", null);
@@ -753,15 +751,15 @@ class PgAntlrLoaderTest {
         Argument arg = new Argument("tables_in", "character varying[]");
         func.addArgument(arg);
 
-        schema.addFunction(func);
+        schema.addChild(func);
 
-        testDatabase("schema_13.sql", d);
+        testDatabase("schema_13.sql", d, exportDir);
     }
 
     @Test
-    void testDB14() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB14(@TempDir Path exportDir) throws IOException, InterruptedException {
+        PgDatabase d = createDumpDB();
+        PgSchema schema = d.getDefaultSchema();
 
         schema.addPrivilege(new PgPrivilege("REVOKE", "ALL", "SCHEMA public", "PUBLIC", false));
         schema.addPrivilege(new PgPrivilege("REVOKE", "ALL", "SCHEMA public", POSTGRES, false));
@@ -783,18 +781,18 @@ class PgAntlrLoaderTest {
 
         func.setComment("'test function'");
 
-        schema.addFunction(func);
+        schema.addChild(func);
 
         func = new PgFunction("trigger_fnc");
         func.setLanguageCost("plpgsql", null);
         func.setBody("$$begin\nend;$$");
         func.setReturns("trigger");
-        schema.addFunction(func);
+        schema.addChild(func);
 
         func.setOwner("fordfrog");
 
         PgSimpleTable table = new PgSimpleTable("test");
-        schema.addTable(table);
+        schema.addChild(table);
 
         PgColumn col = new PgColumn("id");
         col.setType(INTEGER);
@@ -812,13 +810,13 @@ class PgAntlrLoaderTest {
         var constraintCheck = new PgConstraintCheck("text_check");
         constraintCheck.setExpression("(length((text)::text) > 0)");
         constraintCheck.setComment("'text check'");
-        table.addConstraint(constraintCheck);
+        table.addChild(constraintCheck);
 
         table.setComment("'test table'");
 
         var constraintPk = new PgConstraintPk("test_pkey", true);
         constraintPk.addColumn("id");
-        table.addConstraint(constraintPk);
+        table.addChild(constraintPk);
 
         constraintPk.setComment("'primary key'");
 
@@ -828,7 +826,7 @@ class PgAntlrLoaderTest {
         seq.setStartWith("1");
         seq.setMinMaxInc(1L, null, null, null, 0L);
         seq.setCache("1");
-        schema.addSequence(seq);
+        schema.addChild(seq);
 
         seq.setOwnedBy(new GenericColumn("public", "test", "id", DbObjType.COLUMN));
 
@@ -839,7 +837,7 @@ class PgAntlrLoaderTest {
         PgView view = new PgView("test_view");
         view.setQuery("SELECT test.id, test.text FROM public.test",
                 "SELECT test.id, test.text FROM public.test");
-        schema.addView(view);
+        schema.addChild(view);
 
         view.setComment("'test view'");
         view.addColumnComment("id", "'view id col'");
@@ -851,46 +849,46 @@ class PgAntlrLoaderTest {
         trigger.setOnUpdate(true);
         trigger.setForEachRow(false);
         trigger.setFunction("public.trigger_fnc()");
-        table.addTrigger(trigger);
+        table.addChild(trigger);
 
         trigger.setComment("'test trigger'");
 
-        testDatabase("schema_14.sql", d);
+        testDatabase("schema_14.sql", d, exportDir);
     }
 
     @Test
-    void testDB15() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB15(@TempDir Path exportDir) throws IOException, InterruptedException {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
-        AbstractTable table = new PgSimpleTable("test");
-        schema.addTable(table);
+        PgAbstractTable table = new PgSimpleTable("test");
+        schema.addChild(table);
 
-        AbstractColumn col = new PgColumn("id");
+        PgColumn col = new PgColumn("id");
         col.setType(BIGINT);
         table.addColumn(col);
 
         table.setComment("'multiline\ncomment\n'");
 
-        testDatabase("schema_15.sql", d);
+        testDatabase("schema_15.sql", d, exportDir);
     }
 
     @Test
-    void testDB16() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB16(@TempDir Path exportDir) throws IOException, InterruptedException {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         // table1
-        AbstractTable table = new PgSimpleTable("t_work");
-        schema.addTable(table);
+        PgAbstractTable table = new PgSimpleTable("t_work");
+        schema.addChild(table);
 
-        AbstractColumn col = new PgColumn("id");
+        PgColumn col = new PgColumn("id");
         col.setType(INTEGER);
         table.addColumn(col);
 
         // table2
-        AbstractTable table2 = new PgSimpleTable("t_chart");
-        schema.addTable(table2);
+        PgAbstractTable table2 = new PgSimpleTable("t_chart");
+        schema.addChild(table2);
         col = new PgColumn("id");
         col.setType(INTEGER);
         table2.addColumn(col);
@@ -901,34 +899,34 @@ class PgAntlrLoaderTest {
                         + "JOIN public.t_chart c ON t.id = c.id",
                 "SELECT c.id, t.id FROM (SELECT t_work.id FROM public.t_work) t "
                         + "JOIN public.t_chart c ON t.id = c.id");
-        schema.addView(view);
+        schema.addChild(view);
 
-        testDatabase("schema_16.sql", d);
+        testDatabase("schema_16.sql", d, exportDir);
     }
 
     @Test
-    void testDB17() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB17(@TempDir Path exportDir) throws IOException, InterruptedException {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         // table1
-        AbstractTable table = new PgSimpleTable("t_work");
-        schema.addTable(table);
+        PgAbstractTable table = new PgSimpleTable("t_work");
+        schema.addChild(table);
 
-        AbstractColumn col = new PgColumn("id");
+        PgColumn col = new PgColumn("id");
         col.setType(INTEGER);
         table.addColumn(col);
 
         // table2
-        AbstractTable table2 = new PgSimpleTable("t_chart");
-        schema.addTable(table2);
+        PgAbstractTable table2 = new PgSimpleTable("t_chart");
+        schema.addChild(table2);
         col = new PgColumn("id");
         col.setType(INTEGER);
         table2.addColumn(col);
 
         // table 3
-        AbstractTable table3 = new PgSimpleTable("t_memo");
-        schema.addTable(table3);
+        PgAbstractTable table3 = new PgSimpleTable("t_memo");
+        schema.addChild(table3);
         col = new PgColumn("name");
         col.setType("text");
         table3.addColumn(col);
@@ -947,12 +945,12 @@ class PgAntlrLoaderTest {
                         FROM ((SELECT w.id, m.name FROM ((SELECT t_work.id FROM public.t_work) w \
                         JOIN public.t_memo m ON (((w.id) :: text = m.name)))) t \
                         JOIN public.t_chart c ON ((t.id = c.id)))""");
-        schema.addView(view);
+        schema.addChild(view);
 
-        testDatabase("schema_17.sql", d);
+        testDatabase("schema_17.sql", d, exportDir);
     }
 
-    private static AbstractDatabase createDumpDB() {
+    private static PgDatabase createDumpDB() {
         ISettings settings = new CoreSettings();
         return new PgDumpLoader(() -> null, null, settings).createDatabaseWithSchema();
     }

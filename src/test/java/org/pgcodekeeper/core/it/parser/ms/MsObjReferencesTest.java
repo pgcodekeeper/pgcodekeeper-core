@@ -21,7 +21,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.database.ms.loader.MsDumpLoader;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
@@ -83,7 +82,7 @@ class MsObjReferencesTest {
         String resource = fileNameTemplate + FILES_POSTFIX.SQL;
         var loader = new MsDumpLoader(() -> getClass().getResourceAsStream(resource), resource, settings);
         loader.setMode(ParserListenerMode.REF);
-        AbstractDatabase db = loader.load();
+        var db = loader.load();
 
         String expected = TestUtils
                 .readResource(fileNameTemplate + FILES_POSTFIX.REFS_TXT, getClass()).strip();

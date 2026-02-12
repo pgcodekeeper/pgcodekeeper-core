@@ -19,8 +19,8 @@ import java.sql.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
+import org.pgcodekeeper.core.database.ms.schema.MsSchema;
 import org.pgcodekeeper.core.database.ms.schema.MsSequence;
 import org.pgcodekeeper.core.exception.XmlReaderException;
 
@@ -40,7 +40,7 @@ public class MsSequencesReader extends AbstractSearchPathJdbcReader<MsJdbcLoader
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException, XmlReaderException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException, XmlReaderException {
         String sequenceName = res.getString("name");
         loader.setCurrentObject(new GenericColumn(schema.getName(), sequenceName, DbObjType.SEQUENCE));
         MsSequence s = new MsSequence(sequenceName);
@@ -66,7 +66,7 @@ public class MsSequencesReader extends AbstractSearchPathJdbcReader<MsJdbcLoader
 
         loader.setOwner(s, res.getString("owner"));
 
-        schema.addSequence(s);
+        ((MsSchema) schema).addSequence(s);
         loader.setPrivileges(s, MsXmlReader.readXML(res.getString("acl")));
     }
 

@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -31,7 +30,7 @@ import org.pgcodekeeper.core.settings.ISettings;
  * @author galiev_mr
  * @since 4.1.1
  */
-public abstract class PgAbstractForeignTable extends PgAbstractTable implements PgForeignOptionContainer, IForeignTable {
+public abstract class PgAbstractForeignTable extends PgAbstractTable implements IForeignTable, PgForeignOptionContainer {
 
     protected final String serverName;
 
@@ -41,7 +40,7 @@ public abstract class PgAbstractForeignTable extends PgAbstractTable implements 
     }
 
     @Override
-    public String getAlterTable(boolean only) {
+    protected String getAlterTable(boolean only) {
         StringBuilder sb = new StringBuilder();
         sb.append("ALTER FOREIGN TABLE ");
         if (only) {
@@ -52,7 +51,7 @@ public abstract class PgAbstractForeignTable extends PgAbstractTable implements 
     }
 
     @Override
-    protected boolean isNeedRecreate(AbstractTable newTable) {
+    protected boolean isNeedRecreate(PgAbstractTable newTable) {
         return super.isNeedRecreate(newTable)
                 || !this.getClass().equals(newTable.getClass())
                 || !Objects.equals(serverName, ((PgAbstractForeignTable) newTable).serverName);
@@ -106,7 +105,7 @@ public abstract class PgAbstractForeignTable extends PgAbstractTable implements 
     }
 
     @Override
-    protected boolean compareTable(AbstractStatement obj) {
+    protected boolean compareTable(PgAbstractTable obj) {
         return obj instanceof PgAbstractForeignTable table
                 && super.compareTable(table)
                 && Objects.equals(serverName, table.serverName);

@@ -107,20 +107,18 @@ public final class DepcyGraph {
         graph.addVertex(db);
 
         // first pass: object tree
-        db.getDescendants().flatMap(AbstractTable::columnAdder).forEach(st -> {
+        db.getDescendants().flatMap(ITable::columnAdder).forEach(st -> {
             graph.addVertex(st);
             graph.addEdge(st, st.getParent());
         });
 
 
         // second pass: dependency graph
-        db.getDescendants().flatMap(AbstractTable::columnAdder).forEach(st -> {
+        db.getDescendants().flatMap(ITable::columnAdder).forEach(st -> {
             processDeps(st);
             if (st instanceof IConstraintFk fk) {
                 createFkeyToUnique(fk);
-            } else if (st.getStatementType() == DbObjType.COLUMN
-                    && st.getDbType() == DatabaseType.PG) {
-                PgColumn col = (PgColumn) st;
+            } else if (st instanceof PgColumn col) {
                 AbstractStatement tbl = col.getParent();
                 if (st.getParent() instanceof PgPartitionTable) {
                     createChildColToPartTblCol((PgPartitionTable) tbl, col);
@@ -128,7 +126,7 @@ public final class DepcyGraph {
                     // Creating the connection between the column of a inherit
                     // table and the columns of its child tables.
 
-                    AbstractColumn parentTblCol = col.getParentCol((PgAbstractTable) tbl);
+                    IColumn parentTblCol = col.getParentCol((PgAbstractTable) tbl);
                     if (parentTblCol != null) {
                         graph.addEdge(col, parentTblCol);
                     }
@@ -216,13 +214,14 @@ public final class DepcyGraph {
         IStatement cont = db.getStatement(
                 new GenericColumn(con.getForeignSchema(), con.getForeignTable(), DbObjType.TABLE));
 
-        if (cont instanceof AbstractStatementContainer c) {
-            for (AbstractConstraint refCon : c.getConstraints()) {
-                if (refCon instanceof IConstraintPk && refs.equals(refCon.getColumns())) {
+        if (cont instanceof IStatementContainer c) {
+            for (IStatement refCon : c.getChildrenByType(DbObjType.CONSTRAINT)) {
+                if (refCon instanceof IConstraintPk fkCon && refs.equals(fkCon.getColumns())) {
                     graph.addEdge(con, refCon);
                 }
             }
-            for (AbstractIndex refInd : c.getIndexes()) {
+            for (IStatement ref : c.getChildrenByType(DbObjType.INDEX)) {
+                var refInd = (IIndex) ref;
                 if (refInd.isUnique() && refInd.compareColumns(refs)) {
                     graph.addEdge(con, refInd);
                 }
@@ -249,7 +248,7 @@ public final class DepcyGraph {
                 createChildColToPartTblCol(partTable, col);
             } else {
                 String colName = col.getName();
-                AbstractColumn parentCol = ((AbstractTable) parentTbl).getColumn(colName);
+                IColumn parentCol = ((ITable) parentTbl).getColumn(colName);
                 if (parentCol != null) {
                     graph.addEdge(col, parentCol);
                 } else {

@@ -18,9 +18,9 @@ package org.pgcodekeeper.core.database.pg.jdbc;
 import java.sql.*;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.schema.PgFtsDictionary;
@@ -41,7 +41,7 @@ public final class PgFtsDictionariesReader extends PgAbstractSearchPathJdbcReade
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String name = res.getString("dictname");
         PgFtsDictionary dic = new PgFtsDictionary(name);
 

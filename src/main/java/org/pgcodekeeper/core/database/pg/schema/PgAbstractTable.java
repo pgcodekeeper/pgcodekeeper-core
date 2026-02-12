@@ -15,20 +15,25 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.Stream;
-
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.Inherits;
+import org.pgcodekeeper.core.database.base.schema.StatementUtils;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.script.*;
+import org.pgcodekeeper.core.script.SQLActionType;
+import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Pair;
+import org.pgcodekeeper.core.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Base PostgreSQL table class providing common functionality for all PostgreSQL table types.
@@ -38,7 +43,20 @@ import org.slf4j.LoggerFactory;
  * @author galiev_mr
  * @since 5.3.1.
  */
-public abstract class PgAbstractTable extends AbstractTable implements IPgStatement {
+public abstract class PgAbstractTable extends PgAbstractStatementContainer implements ITable, IOptionContainer {
+
+    /**
+     * List of Greenplum-specific storage options.
+     */
+    private static final List<String> GP_OPTION_LIST = List.of(
+            "appendonly",
+            "appendoptimized",
+            "blocksize",
+            "orientation",
+            "checksum",
+            "compresstype",
+            "compresslevel",
+            "analyze_hll_non_part_table");
 
     private static final String RESTART_SEQUENCE_QUERY = """
             DO LANGUAGE plpgsql $_$
@@ -54,11 +72,17 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
     private static final String CHANGE_TRIGGER_STATE =
             "ALTER TABLE %1$s %2$s TRIGGER %3$s";
 
+    protected static final String ALTER_COLUMN = " ALTER COLUMN ";
+
     private static final Logger LOG = LoggerFactory.getLogger(PgAbstractTable.class);
 
+    private final Map<String, PgConstraint> constraints = new LinkedHashMap<>();
+    private final Map<String, String> triggerStates = new HashMap<>();
+
+    protected final List<PgColumn> columns = new ArrayList<>();
+    protected final Map<String, String> options = new LinkedHashMap<>();
     protected boolean hasOids;
     protected final List<Inherits> inherits = new ArrayList<>();
-    private final Map<String, String> triggerStates = new HashMap<>();
 
     protected PgAbstractTable(String name) {
         super(name);
@@ -68,7 +92,7 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
 
-        SQLScript temp = new SQLScript(script.getSettings());
+        SQLScript temp = new SQLScript(script.getSettings(), getSeparator());
 
         appendName(sbSQL, script.getSettings());
         appendColumns(sbSQL, temp);
@@ -83,7 +107,7 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
 
         appendOwnerSQL(script);
         appendPrivileges(script);
-        appendColumnsPriliges(script);
+        appendColumnsPrivileges(script);
         appendColumnsStatistics(script);
         appendTriggerStates(script);
         appendComments(script);
@@ -91,7 +115,7 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
 
     private void appendNotNullTableConstraints(SQLScript script) {
         columns.forEach(col -> {
-            var notNullConstraint = ((PgColumn) col).getNotNullConstraint();
+            var notNullConstraint = col.getNotNullConstraint();
             if (notNullConstraint == null ) {
                 return;
             }
@@ -131,9 +155,62 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
     }
 
     private void appendChildrenComments(SQLScript script) {
-        for (final AbstractColumn column : getColumns()) {
+        for (var column : columns) {
             column.appendComments(script);
         }
+    }
+
+    @Override
+    public List<IColumn> getColumns() {
+        return Collections.unmodifiableList(columns);
+    }
+
+    @Override
+    public void fillChildrenList(List<Collection<? extends AbstractStatement>> l) {
+        super.fillChildrenList(l);
+        l.add(constraints.values());
+    }
+
+    @Override
+    public void addChild(IStatement st) {
+        if (DbObjType.CONSTRAINT == st.getStatementType()) {
+            addConstraint((PgConstraint) st);
+            return;
+        }
+
+        super.addChild(st);
+    }
+
+    @Override
+    public AbstractStatement getChild(String name, DbObjType type) {
+        if (DbObjType.CONSTRAINT == type) {
+            return getConstraint(name);
+        }
+
+        return super.getChild(name, type);
+    }
+
+    @Override
+    public Collection<IStatement> getChildrenByType(DbObjType type) {
+        if (DbObjType.CONSTRAINT == type) {
+            return Collections.unmodifiableCollection(constraints.values());
+        }
+        return super.getChildrenByType(type);
+    }
+
+    @Override
+    public boolean isClustered() {
+        if (super.isClustered()) {
+            return true;
+        }
+
+        for (PgConstraint constr : constraints.values()) {
+            if (constr instanceof IConstraintPk pk && pk.isClustered()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -186,6 +263,23 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
      * @param sbSQL - StringBuilder for options
      */
     protected abstract void appendOptions(StringBuilder sbSQL);
+
+
+    /**
+     * Getter for {@link #constraints}. The list cannot be modified.
+     *
+     * @return {@link #constraints}
+     */
+    @Override
+    public Collection<PgConstraint> getConstraints() {
+        return Collections.unmodifiableCollection(constraints.values());
+    }
+
+    @Override
+    public void addOption(String option, String value) {
+        options.put(option, value);
+        resetHash();
+    }
 
     /**
      * Appends <b>TABLE</b> options by alter table statement
@@ -248,7 +342,12 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
     }
 
     @Override
-    protected boolean isNeedRecreate(AbstractTable newTable) {
+    public final boolean isRecreated(ITable newTable, ISettings settings) {
+        return newTable instanceof PgAbstractTable newPgTable &&
+                (isNeedRecreate(newPgTable) || isColumnsOrderChanged(newPgTable, settings));
+    }
+
+    protected boolean isNeedRecreate(PgAbstractTable newTable) {
         if (options.equals(newTable.getOptions())) {
             return false;
         }
@@ -263,9 +362,21 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
         return false;
     }
 
+    private String getOption(String option) {
+        return options.get(option);
+    }
+
+    @Override
+    public Map<String, String> getOptions() {
+        return Collections.unmodifiableMap(options);
+    }
+
+
     @Override
     public Stream<Pair<String, String>> getRelationColumns() {
-        Stream<Pair<String, String>> localColumns = super.getRelationColumns();
+        Stream<Pair<String, String>> localColumns = columns.stream()
+                .filter(c -> c.getType() != null)
+                .map(c -> new Pair<>(c.getName(), c.getType()));
         if (inherits.isEmpty()) {
             return localColumns;
         }
@@ -276,7 +387,7 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
             ISchema inhtSchema = schemaName == null ? getContainingSchema() : getDatabase().getSchema(schemaName);
             if (inhtSchema != null) {
                 String tableName = inht.value();
-                AbstractTable inhtTable = (AbstractTable) inhtSchema.getChild(tableName, DbObjType.TABLE);
+                PgAbstractTable inhtTable = (PgAbstractTable) inhtSchema.getChild(tableName, DbObjType.TABLE);
                 if (inhtTable != null) {
                     inhColumns = Stream.concat(inhColumns, inhtTable.getRelationColumns());
                 } else {
@@ -291,12 +402,15 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
         return Stream.concat(inhColumns, localColumns);
     }
 
-    @Override
-    protected boolean isColumnsOrderChanged(AbstractTable newTable, ISettings settings) {
+    protected boolean isColumnsOrderChanged(PgAbstractTable newTable, ISettings settings) {
         // broken inherit algorithm
-        if (newTable instanceof PgAbstractTable table && !(newTable instanceof PgTypedTable)
-                && inherits.isEmpty() && table.inherits.isEmpty()) {
-            return super.isColumnsOrderChanged(newTable, settings);
+        if (!(newTable instanceof PgTypedTable)
+                && inherits.isEmpty() && newTable.inherits.isEmpty()) {
+            if (settings.isIgnoreColumnOrder()) {
+                return false;
+            }
+
+            return StatementUtils.isColumnsOrderChanged(newTable.columns, columns);
         }
 
         return false;
@@ -395,8 +509,8 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
         }
 
         columns.sort((e1, e2) -> {
-            boolean first = ((PgColumn) e1).isInherit();
-            boolean second = ((PgColumn) e2).isInherit();
+            boolean first = e1.isInherit();
+            boolean second = e2.isInherit();
             if (first && second) {
                 return e1.getName().compareTo(e2.getName());
             } else {
@@ -427,7 +541,7 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
         }
 
         writeOptions(column, script, isInherit);
-        AbstractSequence sequence = column.getSequence();
+        PgSequence sequence = column.getSequence();
         if (sequence != null) {
             StringBuilder sbSeq = new StringBuilder();
             if (script.getSettings().isGenerateExistDoBlock()) {
@@ -442,7 +556,7 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
         }
     }
 
-    private void fillInheritOptions(AbstractColumn column, SQLScript script) {
+    private void fillInheritOptions(PgColumn column, SQLScript script) {
         if (column.isNotNull()) {
             script.addStatement(getAlterColumn(column) + " SET NOT NULL");
         }
@@ -451,7 +565,7 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
         }
     }
 
-    private String getAlterColumn(AbstractColumn column) {
+    private String getAlterColumn(PgColumn column) {
         return getAlterTable(true) + ALTER_COLUMN + getQuotedName(column.getName());
     }
 
@@ -507,47 +621,90 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
     protected abstract void compareTableTypes(PgAbstractTable newTable, SQLScript script);
 
     @Override
-    protected boolean compareTable(AbstractStatement obj) {
-        return obj instanceof PgAbstractTable table
-                && hasOids == table.hasOids
+    public void computeChildrenHash(Hasher hasher) {
+        super.computeChildrenHash(hasher);
+        hasher.putUnordered(constraints);
+    }
+
+    @Override
+    public boolean compareChildren(AbstractStatement obj) {
+        if (obj instanceof PgAbstractTable table && super.compareChildren(obj)) {
+            return constraints.equals(table.constraints);
+        }
+
+        return false;
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.putOrdered(columns);
+        hasher.put(options);
+        hasher.put(hasOids);
+        hasher.putOrdered(inherits);
+        hasher.put(triggerStates);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return compare(obj, true);
+    }
+
+    private boolean compare(IStatement obj, boolean checkColumnOrder) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj instanceof PgAbstractTable table && super.compare(obj)) {
+            boolean isColumnsEqual;
+            if (checkColumnOrder) {
+                isColumnsEqual = columns.equals(table.columns);
+            } else {
+                isColumnsEqual = Utils.setLikeEquals(columns, table.columns);
+            }
+
+            return isColumnsEqual
+                    && getClass().equals(table.getClass())
+                    && options.equals(table.options)
+                    && compareTable(table);
+        }
+
+        return false;
+    }
+
+    protected boolean compareTable(PgAbstractTable table) {
+        return hasOids == table.hasOids
                 && inherits.equals(table.inherits)
                 && triggerStates.equals(table.triggerStates);
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.putOrdered(inherits);
-        hasher.put(hasOids);
-        hasher.put(triggerStates);
-    }
-
-    @Override
-    public AbstractTable shallowCopy() {
-        PgAbstractTable copy = (PgAbstractTable) super.shallowCopy();
-        copy.inherits.addAll(inherits);
+    protected PgAbstractTable getCopy() {
+        PgAbstractTable copy = getTableCopy();
+        for (PgColumn colSrc : columns) {
+            copy.addColumn((PgColumn) colSrc.deepCopy());
+        }
+        copy.options.putAll(options);
         copy.setHasOids(hasOids);
+        copy.inherits.addAll(inherits);
         copy.triggerStates.putAll(triggerStates);
         return copy;
     }
 
-    @Override
-    public AbstractConstraint getConstraint(final String name) {
-        var constraint = super.getConstraint(name);
+    public PgConstraint getConstraint(final String name) {
+        var constraint = getChildByName(constraints, name);
         if (constraint != null) {
             return constraint;
         }
 
         return columns.stream()
-                .map(col -> ((PgColumn) col).getNotNullConstraint())
+                .map(PgColumn::getNotNullConstraint)
                 .filter(Objects::nonNull)
                 .filter(notNullConstraint -> notNullConstraint.getName().equals(name))
                 .findAny()
                 .orElse(null);
     }
 
-    @Override
-    protected void writeInsert(SQLScript script, AbstractTable newTable, String tblTmpQName,
+    protected void writeInsert(SQLScript script, PgAbstractTable newTable, String tblTmpQName,
                                List<String> identityColsForMovingData, String cols) {
         String tblQName = newTable.getQualifiedName();
         StringBuilder sbInsert = new StringBuilder();
@@ -564,13 +721,80 @@ public abstract class PgAbstractTable extends AbstractTable implements IPgStatem
         }
     }
 
-    @Override
-    public List<String> getColsForMovingData(AbstractTable newTable) {
+    /**
+     * Returns the names of the columns from which data will be moved to another table, excluding calculated columns.
+     */
+    public List<String> getColsForMovingData(PgAbstractTable newTable) {
         return newTable.getColumns().stream()
-                .filter(c -> containsColumn(c.getName()))
+                .filter(c -> getColumn(c.getName()) != null)
                 .map(PgColumn.class::cast)
                 .filter(pgCol -> !pgCol.isGenerated())
-                .map(AbstractColumn::getName)
+                .map(PgColumn::getName)
                 .toList();
+    }
+
+    /**
+     * Finds column according to specified column {@code name}.
+     *
+     * @param name name of the column to be searched
+     * @return found column or null if no such column has been found
+     */
+    @Override
+    public PgColumn getColumn(final String name) {
+        for (PgColumn column : columns) {
+            if (column.getName().equals(name)) {
+                return column;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void appendMoveDataSql(IStatement newCondition, SQLScript script, String tblTmpBareName,
+                                  List<String> identityCols) {
+        PgAbstractTable newTable = (PgAbstractTable) newCondition;
+        List<String> colsForMovingData = getColsForMovingData(newTable);
+        if (colsForMovingData.isEmpty()) {
+            return;
+        }
+
+        var quoter = getQuoter();
+        String tblTmpQName = quoter.apply(getSchemaName()) + '.' + quoter.apply(tblTmpBareName);
+        String cols = colsForMovingData.stream().map(quoter).collect(Collectors.joining(", "));
+        List<String> identityColsForMovingData = identityCols == null ? Collections.emptyList()
+                : identityCols.stream().filter(colsForMovingData::contains).toList();
+        writeInsert(script, newTable, tblTmpQName, identityColsForMovingData, cols);
+    }
+
+    protected void appendColumnsPrivileges(SQLScript script) {
+        for (PgColumn col : columns) {
+            col.appendPrivileges(script);
+        }
+    }
+
+    protected void addConstraint(PgConstraint constraint) {
+        addUnique(constraints, constraint);
+    }
+
+    public void addColumn(final PgColumn column) {
+        assertUnique(getColumn(column.getName()), column);
+        columns.add(column);
+        column.setParent(this);
+        resetHash();
+    }
+
+    protected abstract PgAbstractTable getTableCopy();
+
+    /**
+     * Generates beginning of alter table statement.
+     *
+     * @param only if true, append 'ONLY' to statement
+     * @return alter table statement beginning in String format
+     */
+    protected abstract String getAlterTable(boolean only);
+
+    @Override
+    public boolean compareIgnoringColumnOrder(ITable newTable) {
+        return compare(newTable, false);
     }
 }

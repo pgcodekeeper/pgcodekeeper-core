@@ -20,7 +20,6 @@ import java.sql.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateStatistics;
 import org.pgcodekeeper.core.database.pg.schema.*;
@@ -42,7 +41,7 @@ public final class PgStatisticsReader extends PgAbstractSearchPathJdbcReader {
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String schemaName = schema.getName();
         String statisticsName = res.getString("stxname");
         loader.setCurrentObject(new GenericColumn(schemaName, statisticsName, DbObjType.STATISTICS));
@@ -58,7 +57,7 @@ public final class PgStatisticsReader extends PgAbstractSearchPathJdbcReader {
                         loader.getSettings())
                         .parseStatistics(stat));
 
-        if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
             var statVal = res.getString("stxstattarget");
             if (null != statVal) {
                 stat.setStatistics(Integer.parseInt(statVal));
@@ -93,7 +92,7 @@ public final class PgStatisticsReader extends PgAbstractSearchPathJdbcReader {
                 .column("pg_catalog.pg_get_statisticsobjdef(res.oid::pg_catalog.oid) AS def")
                 .from("pg_catalog.pg_statistic_ext res");
 
-        if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
             builder.column("res.stxstattarget");
         }
     }

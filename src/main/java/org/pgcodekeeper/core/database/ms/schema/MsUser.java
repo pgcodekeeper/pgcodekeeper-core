@@ -19,7 +19,6 @@ import java.util.Objects;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -47,11 +46,6 @@ public final class MsUser extends MsAbstractStatement {
     @Override
     public DbObjType getStatementType() {
         return DbObjType.USER;
-    }
-
-    @Override
-    public AbstractDatabase getDatabase() {
-        return (AbstractDatabase) parent;
     }
 
     @Override
@@ -157,17 +151,6 @@ public final class MsUser extends MsAbstractStatement {
     }
 
     @Override
-    public MsUser shallowCopy() {
-        MsUser userDst = new MsUser(name);
-        copyBaseFields(userDst);
-        userDst.setSchema(schema);
-        userDst.setLogin(login);
-        userDst.setLanguage(language);
-        userDst.setAllowEncrypted(allowEncrypted);
-        return userDst;
-    }
-
-    @Override
     public boolean compare(IStatement obj) {
         if (obj == this) {
             return true;
@@ -180,5 +163,15 @@ public final class MsUser extends MsAbstractStatement {
                     && allowEncrypted == user.allowEncrypted;
         }
         return false;
+    }
+
+    @Override
+    protected MsUser getCopy() {
+        MsUser userDst = new MsUser(name);
+        userDst.setSchema(schema);
+        userDst.setLogin(login);
+        userDst.setLanguage(language);
+        userDst.setAllowEncrypted(allowEncrypted);
+        return userDst;
     }
 }

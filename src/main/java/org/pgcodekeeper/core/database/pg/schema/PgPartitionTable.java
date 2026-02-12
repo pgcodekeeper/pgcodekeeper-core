@@ -63,8 +63,8 @@ public final class PgPartitionTable extends PgAbstractRegularTable implements IP
             sbSQL.append(" (\n");
 
             int start = sbSQL.length();
-            for (AbstractColumn column : columns) {
-                writeColumn((PgColumn) column, sbSQL, script);
+            for (PgColumn column : columns) {
+                writeColumn(column, sbSQL, script);
             }
 
             if (start != sbSQL.length()) {
@@ -137,21 +137,21 @@ public final class PgPartitionTable extends PgAbstractRegularTable implements IP
     }
 
     @Override
-    protected AbstractTable getTableCopy() {
-        return new PgPartitionTable(name, partitionBounds);
+    public void computeHash(Hasher hasher) {
+        super.computeHash(hasher);
+        hasher.put(partitionBounds);
     }
 
     @Override
-    protected boolean compareTable(AbstractStatement obj) {
+    protected boolean compareTable(PgAbstractTable obj) {
         return obj instanceof PgPartitionTable table
                 && super.compareTable(table)
                 && Objects.equals(partitionBounds, table.partitionBounds);
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(partitionBounds);
+    protected PgAbstractTable getTableCopy() {
+        return new PgPartitionTable(name, partitionBounds);
     }
 
     @Override

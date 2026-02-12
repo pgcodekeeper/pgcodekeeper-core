@@ -15,5 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
-public interface IStatistics {
+/**
+ * Interface for database statistics
+ */
+public interface IStatistics extends IStatement {
+
+    @Override
+    default DbObjType getStatementType() {
+        return DbObjType.STATISTICS;
+    }
 }

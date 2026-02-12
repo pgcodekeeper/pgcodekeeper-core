@@ -17,7 +17,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 
 import java.util.Objects;
 
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -53,8 +52,8 @@ public final class PgTypedTable extends PgAbstractRegularTable {
             sbSQL.append(" (\n");
 
             int start = sbSQL.length();
-            for (AbstractColumn column : columns) {
-                writeColumn((PgColumn) column, sbSQL, script);
+            for (PgColumn column : columns) {
+                writeColumn(column, sbSQL, script);
             }
 
             if (start != sbSQL.length()) {
@@ -91,26 +90,26 @@ public final class PgTypedTable extends PgAbstractRegularTable {
     }
 
     @Override
-    protected boolean isColumnsOrderChanged(AbstractTable newTable, ISettings settings) {
+    protected boolean isColumnsOrderChanged(PgAbstractTable newTable, ISettings settings) {
         return false;
-    }
-
-    @Override
-    protected AbstractTable getTableCopy() {
-        return new PgTypedTable(name, ofType);
-    }
-
-    @Override
-    protected boolean compareTable(AbstractStatement obj) {
-        return obj instanceof PgTypedTable table
-                && super.compareTable(table)
-                && Objects.equals(ofType, table.ofType);
     }
 
     @Override
     public void computeHash(Hasher hasher) {
         super.computeHash(hasher);
         hasher.put(ofType);
+    }
+
+    @Override
+    protected boolean compareTable(PgAbstractTable obj) {
+        return obj instanceof PgTypedTable table
+                && super.compareTable(table)
+                && Objects.equals(ofType, table.ofType);
+    }
+
+    @Override
+    protected PgAbstractTable getTableCopy() {
+        return new PgTypedTable(name, ofType);
     }
 
     @Override

@@ -48,14 +48,14 @@ public final class PgTypesReader extends PgAbstractSearchPathJdbcReader {
     }
 
     @Override
-    protected void processResult(ResultSet result, AbstractSchema schema) throws SQLException {
+    protected void processResult(ResultSet result, ISchema schema) throws SQLException {
         AbstractStatement typeOrDomain = getTypeDomain(result, schema);
         if (typeOrDomain != null) {
             schema.addChild(typeOrDomain);
         }
     }
 
-    private AbstractStatement getTypeDomain(ResultSet res, AbstractSchema schema) throws SQLException {
+    private AbstractStatement getTypeDomain(ResultSet res, ISchema schema) throws SQLException {
         AbstractStatement st;
         String typtype = res.getString("typtype");
         if ("d".equals(typtype)) {
@@ -72,7 +72,7 @@ public final class PgTypesReader extends PgAbstractSearchPathJdbcReader {
         return st;
     }
 
-    private PgDomain getDomain(ResultSet res, AbstractSchema schema) throws SQLException {
+    private PgDomain getDomain(ResultSet res, ISchema schema) throws SQLException {
         String schemaName = schema.getName();
         PgDomain d = new PgDomain(res.getString("typname"));
         loader.setCurrentObject(new GenericColumn(schemaName, d.getName(), DbObjType.DOMAIN));
@@ -90,7 +90,7 @@ public final class PgTypesReader extends PgAbstractSearchPathJdbcReader {
             addDep(d, schemaName, collationName, DbObjType.COLLATION);
         }
 
-        AbstractDatabase dataBase = schema.getDatabase();
+        IDatabase dataBase = schema.getDatabase();
 
         String def = res.getString("dom_defaultbin");
         if (def == null) {
@@ -134,7 +134,7 @@ public final class PgTypesReader extends PgAbstractSearchPathJdbcReader {
         return d;
     }
 
-    private AbstractType getType(ResultSet res, String schemaName, String typtype) throws SQLException {
+    private PgAbstractType getType(ResultSet res, String schemaName, String typtype) throws SQLException {
         String name = res.getString("typname");
         loader.setCurrentObject(new GenericColumn(schemaName, name, DbObjType.TYPE));
         return switch (typtype) {
@@ -183,7 +183,7 @@ public final class PgTypesReader extends PgAbstractSearchPathJdbcReader {
             setFunctionWithDep(PgBaseType::setAnalyzeFunction, t, typanalyzeset, FUNC_SIGN.INTERNAL.getName());
         }
 
-        if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
             String typsubscript = res.getString("typsubscript");
             if (!EMPTY_FUNCTION.equals(typsubscript)) {
                 setFunctionWithDep(PgBaseType::setSubscriptFunction, t, typsubscript, FUNC_SIGN.INTERNAL.getName());
@@ -268,7 +268,7 @@ public final class PgTypesReader extends PgAbstractSearchPathJdbcReader {
         }
 
         if (loader.isGreenplumDb()) {
-            ICompressOptionContainer.fillCompressOptions(t, res.getString("typoptions"));
+            fillCompressOptions(t, res.getString("typoptions"));
         }
 
         return t;
@@ -289,7 +289,7 @@ public final class PgTypesReader extends PgAbstractSearchPathJdbcReader {
         String[] attcomments = PgJdbcUtils.getColArray(res, "comp_attcomments");
 
         for (int i = 0; i < attnames.length; ++i) {
-            AbstractColumn a = new PgColumn(attnames[i]);
+            PgColumn a = new PgColumn(attnames[i]);
             String type = atttypes[i];
             IPgJdbcReader.checkTypeValidity(type);
             a.setType(type);
@@ -353,7 +353,7 @@ public final class PgTypesReader extends PgAbstractSearchPathJdbcReader {
                     FUNC_SIGN.SUBTYPE_DIFF.getName().formatted(t.getSubtype()));
         }
 
-        if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
             long multiRangeLong = res.getLong("rngmultirange");
             if (multiRangeLong != 0) {
                 PgJdbcType multiRangeType = loader.getCachedTypeByOid(multiRangeLong);
@@ -423,7 +423,7 @@ public final class PgTypesReader extends PgAbstractSearchPathJdbcReader {
                 .join("LEFT JOIN pg_catalog.pg_range r ON r.rngtypid = res.oid")
                 .join("LEFT JOIN pg_catalog.pg_opclass opc ON opc.oid = r.rngsubopc");
 
-        if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
             builder.column("r.rngmultitypid::bigint AS rngmultirange");
         }
     }
@@ -447,7 +447,7 @@ public final class PgTypesReader extends PgAbstractSearchPathJdbcReader {
                 .column("res.typelem::bigint")
                 .column("res.typdelim");
 
-        if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
             builder.column("res.typsubscript");
         }
 

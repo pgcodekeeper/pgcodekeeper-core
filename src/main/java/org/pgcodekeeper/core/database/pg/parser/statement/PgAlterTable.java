@@ -64,7 +64,7 @@ public final class PgAlterTable extends PgTableAbstract {
     @Override
     public void parseObject() {
         List<ParserRuleContext> ids = getIdentifiers(ctx.name);
-        AbstractSchema schema = getSchemaSafe(ids);
+        PgSchema schema = getSchemaSafe(ids);
         ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
         PgAbstractTable tabl;
 
@@ -86,7 +86,7 @@ public final class PgAlterTable extends PgTableAbstract {
             }
 
             // everything else requires a real table, so fail immediately
-            tabl = (PgAbstractTable) getSafe(AbstractSchema::getTable, schema, nameCtx);
+            tabl = getSafe(PgSchema::getTable, schema, nameCtx);
 
             if (tablAction.tabl_constraint != null) {
                 var tableConstraint = tablAction.tabl_constraint;
@@ -95,7 +95,7 @@ public final class PgAlterTable extends PgTableAbstract {
                     return;
                 }
                 IdentifierContext conNameCtx = tableConstraint.identifier();
-                AbstractConstraint constr = parseAlterTableConstraint(tablAction,
+                PgConstraint constr = parseAlterTableConstraint(tablAction,
                         createTableConstraintBlank(tableConstraint),
                         getSchemaNameSafe(ids), nameCtx.getText(), fileName);
 
@@ -103,7 +103,7 @@ public final class PgAlterTable extends PgTableAbstract {
                     addSafe(tabl, constr, Arrays.asList(
                             QNameParser.getSchemaNameCtx(ids), nameCtx, conNameCtx));
                 } else {
-                    doSafe(PgAbstractTable::addConstraint, tabl, constr);
+                    doSafe(PgAbstractTable::addChild, tabl, constr);
                 }
             }
 
@@ -127,10 +127,10 @@ public final class PgAlterTable extends PgTableAbstract {
             if (column != null && colAction != null) {
                 PgColumn col;
                 if (tabl.getInherits().isEmpty()) {
-                    col = (PgColumn) getSafe(AbstractTable::getColumn, tabl, column);
+                    col = getSafe(PgAbstractTable::getColumn, tabl, column);
                 } else {
                     String colName = column.getText();
-                    col = (PgColumn) tabl.getColumn(colName);
+                    col = tabl.getColumn(colName);
                     if (col == null) {
                         col = new PgColumn(colName);
                         col.setInherit(true);
@@ -165,13 +165,13 @@ public final class PgAlterTable extends PgTableAbstract {
         }
         var alterPartition = ctx.alter_partition_gp();
         if (alterPartition != null && !isRefMode()) {
-            tabl = (GpPartitionTable) getSafe(AbstractSchema::getTable, schema, nameCtx);
+            tabl = getSafe(PgSchema::getTable, schema, nameCtx);
             parseGpPartitionTemplate((GpPartitionTable) tabl, alterPartition, stream);
         }
     }
 
-    private void fillRelationAction(AbstractSchema schema, ParserRuleContext nameCtx, Table_actionContext tablAction) {
-        IRelation r = getSafe(AbstractSchema::getRelation, schema, nameCtx);
+    private void fillRelationAction(ISchema schema, ParserRuleContext nameCtx, Table_actionContext tablAction) {
+        IRelation r = getSafe(ISchema::getRelation, schema, nameCtx);
         if (tablAction.owner_to() != null) {
             if (r instanceof AbstractStatement st) {
                 fillOwnerTo(tablAction.owner_to().user_name().identifier(), st);
@@ -179,10 +179,10 @@ public final class PgAlterTable extends PgTableAbstract {
             return;
         }
 
-        if (r instanceof AbstractStatementContainer cont) {
+        if (r instanceof PgAbstractStatementContainer cont) {
             var indexNameCtx = tablAction.index_name;
             ParserRuleContext indexName = QNameParser.getFirstNameCtx(getIdentifiers(indexNameCtx));
-            AbstractConstraint constr = cont.getConstraint(indexName.getText());
+            IStatement constr = cont.getChild(indexName.getText(), DbObjType.CONSTRAINT);
             if (constr != null) {
                 if (constr instanceof PgConstraintPk pk) {
                     doSafe(PgConstraintPk::setClustered, pk, true);
@@ -190,8 +190,8 @@ public final class PgAlterTable extends PgTableAbstract {
                     throw new IllegalArgumentException(Messages.Constraint_WarningMismatchedConstraintTypeForClusterOn);
                 }
             } else {
-                AbstractIndex index = getSafe(AbstractStatementContainer::getIndex, cont, indexName);
-                doSafe(AbstractIndex::setClustered, index, true);
+                PgIndex index = getSafe(PgAbstractStatementContainer::getIndex, cont, indexName);
+                doSafe(PgIndex::setClustered, index, true);
             }
         }
 
@@ -226,7 +226,7 @@ public final class PgAlterTable extends PgTableAbstract {
         }
     }
 
-    private void parseColumnAction(AbstractSchema schema, PgColumn col,
+    private void parseColumnAction(ISchema schema, PgColumn col,
                                    Column_actionContext colAction, String tableName) {
         // column statistics
         Set_statisticsContext statistics = colAction.set_statistics();
@@ -292,7 +292,7 @@ public final class PgAlterTable extends PgTableAbstract {
             }
 
             col.setSequence(sequence);
-            sequence.setParent(schema);
+            sequence.setParent((AbstractStatement) schema);
             col.setIdentityType(identity.ALWAYS() != null ? "ALWAYS" : "BY DEFAULT");
         }
     }
@@ -323,8 +323,7 @@ public final class PgAlterTable extends PgTableAbstract {
             }
             tabl.putTriggerState(triggerName, triggerState);
         } else {
-            PgTrigger trigger = (PgTrigger) getSafe(AbstractStatementContainer::getTrigger, tabl,
-                    triggerNameCtx);
+            PgTrigger trigger = getSafe(PgAbstractTable::getTrigger, tabl, triggerNameCtx);
             trigger.setTriggerState(triggerState);
         }
         var idsCopy = new ArrayList<>(ids);
@@ -333,7 +332,7 @@ public final class PgAlterTable extends PgTableAbstract {
     }
 
     private void createRule(PgAbstractTable tabl, Table_actionContext tablAction) {
-        PgRule rule = (PgRule) getChildSafe(tabl, DbObjType.RULE, getIdentifiers(tablAction.rewrite_rule_name).get(0));
+        PgRule rule = getSafe(PgAbstractTable::getRule, tabl, getIdentifiers(tablAction.rewrite_rule_name).get(0));
         if (rule != null) {
             if (tablAction.DISABLE() != null) {
                 rule.setEnabledState("DISABLE");
@@ -347,8 +346,8 @@ public final class PgAlterTable extends PgTableAbstract {
         }
     }
 
-    public AbstractConstraint parseAlterTableConstraint(Table_actionContext tableAction,
-                                                        PgConstraint constrBlank, String schemaName, String tableName, String location) {
+    public PgConstraint parseAlterTableConstraint(Table_actionContext tableAction, PgConstraint constrBlank,
+            String schemaName, String tableName, String location) {
         processTableConstraintBlank(tableAction.tabl_constraint, constrBlank,
                 schemaName, tableName, tablespace, location);
         return constrBlank;

@@ -20,9 +20,10 @@ import java.util.Arrays;
 import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
+import org.pgcodekeeper.core.database.ch.schema.ChConstraint;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.database.ch.schema.ChSchema;
 import org.pgcodekeeper.core.settings.ISettings;
 
 /**
@@ -55,7 +56,7 @@ public final class ChAlterTable extends ChParserAbstract {
         var ids = getIdentifiers(ctx.qualified_name());
         var schemaCtx = QNameParser.getSchemaNameCtx(ids);
         var nameCtx = QNameParser.getFirstNameCtx(ids);
-        AbstractTable table = getSafe(AbstractSchema::getTable, getSchemaSafe(ids), nameCtx);
+        var table = getSafe(ChSchema::getTable, getSchemaSafe(ids), nameCtx);
         ObjectLocation loc = addObjReference(ids, DbObjType.TABLE, ACTION_ALTER);
         for (Alter_table_actionContext alterAction : ctx.alter_table_actions().alter_table_action()) {
             if (alterAction.UPDATE() != null) {
@@ -73,7 +74,7 @@ public final class ChAlterTable extends ChParserAbstract {
             var addAction = alterAction.alter_table_add_action();
             var constraintCtx = addAction.table_constraint_def();
             if (constraintCtx != null) {
-                var constr = getConstraint(constraintCtx);
+                ChConstraint constr = getConstraint(constraintCtx);
                 addSafe(table, constr, Arrays.asList(schemaCtx, nameCtx, constraintCtx.identifier()));
             } else if (addAction.INDEX() != null) {
                 var indexCtx = addAction.table_index_def();

@@ -80,7 +80,7 @@ public final class MsCreateTrigger extends MsBatchContextProcessor {
      * @param isJdbc whether this is being parsed in JDBC mode
      * @return the created trigger object
      */
-    public MsTrigger getObject(AbstractSchema schema, boolean isJdbc) {
+    public MsTrigger getObject(MsSchema schema, boolean isJdbc) {
         IdContext schemaCtx = ctx.trigger_name.schema;
         if (schemaCtx == null) {
             schemaCtx = ctx.table_name.schema;
@@ -100,11 +100,11 @@ public final class MsCreateTrigger extends MsBatchContextProcessor {
         db.addAnalysisLauncher(new MsFuncProcTrigAnalysisLauncher(trigger,
                 ctx.sql_clauses(), fileName, settings.isEnableFunctionBodiesDependencies()));
 
-        AbstractStatementContainer cont = getSafe(AbstractSchema::getStatementContainer,
+        MsAbstractStatementContainer cont = getSafe(MsSchema::getStatementContainer,
                 schema, tableNameCtx);
 
         if (isJdbc && schema != null) {
-            cont.addTrigger(trigger);
+            cont.addChild(trigger);
         } else {
             addSafe(cont, trigger,
                     Arrays.asList(schemaCtx, tableNameCtx, nameCtx));

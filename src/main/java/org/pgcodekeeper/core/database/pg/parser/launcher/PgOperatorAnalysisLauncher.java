@@ -19,9 +19,9 @@ import java.util.*;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.launcher.AbstractAnalysisLauncher;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 
 /**
  * Launcher for analyzing operator dependencies and return types.
@@ -44,7 +44,7 @@ public class PgOperatorAnalysisLauncher extends AbstractAnalysisLauncher {
     }
 
     @Override
-    protected Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    protected Set<ObjectLocation> analyze(ParserRuleContext ctx, IMetaContainer meta) {
         IFunction func = meta.findFunction(function.schema(), function.table());
         IOperator oper = meta.findOperator(getSchemaName(), stmt.getName());
 

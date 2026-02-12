@@ -19,8 +19,8 @@ import java.util.*;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.launcher.AbstractAnalysisLauncher;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.database.ms.parser.expr.*;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
 import org.pgcodekeeper.core.database.ms.schema.*;
@@ -90,7 +90,7 @@ public final class MsFuncProcTrigAnalysisLauncher extends AbstractAnalysisLaunch
     }
 
     @Override
-    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, IMetaContainer meta) {
         String schema = getSchemaName();
 
         if (ctx instanceof Sql_clausesContext sqlCtx) {

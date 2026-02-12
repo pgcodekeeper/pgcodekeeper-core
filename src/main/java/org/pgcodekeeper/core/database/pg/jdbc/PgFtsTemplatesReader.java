@@ -17,8 +17,8 @@ package org.pgcodekeeper.core.database.pg.jdbc;
 
 import java.sql.*;
 
+import org.pgcodekeeper.core.database.api.schema.ISchema;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.schema.PgFtsTemplate;
 
@@ -38,7 +38,7 @@ public final class PgFtsTemplatesReader extends PgAbstractSearchPathJdbcReader {
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         PgFtsTemplate template = new PgFtsTemplate(res.getString("tmplname"));
 
         String init = res.getString("tmplinit");

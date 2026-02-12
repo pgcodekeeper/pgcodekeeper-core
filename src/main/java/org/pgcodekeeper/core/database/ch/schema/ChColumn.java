@@ -15,21 +15,85 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import java.util.*;
-
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
+import org.pgcodekeeper.core.database.api.schema.IColumn;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a ClickHouse database column with ClickHouse-specific properties.
  * Extends the base AbstractColumn with support for ClickHouse-specific features like TTL,
  * codecs, and different default types.
  */
-public final class ChColumn extends AbstractColumn implements IChStatement {
+public class ChColumn extends ChAbstractStatement implements IColumn {
+
+    protected static final String ALTER_COLUMN = "\n\tALTER COLUMN ";
+    protected static final String COLLATE = " COLLATE ";
+    protected static final String NULL = " NULL";
+    protected static final String NOT_NULL = " NOT NULL";
+
+    protected String type;
+    protected String collation;
+    protected boolean notNull;
+    protected String defaultValue;
+
+    public void setDefaultValue(final String defaultValue) {
+        this.defaultValue = defaultValue;
+        resetHash();
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setNotNull(final boolean notNull) {
+        this.notNull = notNull;
+        resetHash();
+    }
+
+    public boolean isNotNull() {
+        return notNull;
+    }
+
+    public void setType(final String type) {
+        this.type = type;
+        resetHash();
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setCollation(final String collation) {
+        this.collation = collation;
+        resetHash();
+    }
+
+    public String getCollation() {
+        return collation;
+    }
+
+    @Override
+    public ObjectLocation getLocation() {
+        ObjectLocation location = meta.getLocation();
+        if (location == null) {
+            location = parent.getLocation();
+        }
+        return location;
+    }
+
+    protected String getAlterTable(boolean only) {
+        return ((ChTable) parent).getAlterTable(only);
+    }
+
     private String defaultType;
 
     private String ttl;
@@ -66,7 +130,11 @@ public final class ChColumn extends AbstractColumn implements IChStatement {
         resetHash();
     }
 
-    @Override
+    /**
+     * Returns the complete column definition including type, constraints, and other attributes.
+     *
+     * @return the full column definition as SQL string
+     */
     public String getFullDefinition() {
         var sb = new StringBuilder();
         sb.append(ChDiffUtils.quoteName(name));
@@ -255,7 +323,10 @@ public final class ChColumn extends AbstractColumn implements IChStatement {
 
     @Override
     public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
+        hasher.put(type);
+        hasher.put(collation);
+        hasher.put(notNull);
+        hasher.put(defaultValue);
         hasher.put(defaultType);
         hasher.put(option);
         hasher.put(ttl);
@@ -269,6 +340,10 @@ public final class ChColumn extends AbstractColumn implements IChStatement {
         }
 
         return obj instanceof ChColumn column && super.compare(column)
+                && Objects.equals(type, column.type)
+                && Objects.equals(collation, column.collation)
+                && notNull == column.notNull
+                && Objects.equals(defaultValue, column.defaultValue)
                 && Objects.equals(defaultType, column.defaultType)
                 && Objects.equals(option, column.option)
                 && Objects.equals(ttl, column.ttl)
@@ -276,22 +351,16 @@ public final class ChColumn extends AbstractColumn implements IChStatement {
     }
 
     @Override
-    protected AbstractColumn getColumnCopy() {
+    protected ChColumn getCopy() {
         var column = new ChColumn(name);
+        column.setType(type);
+        column.setCollation(collation);
+        column.setNotNull(notNull);
+        column.setDefaultValue(defaultValue);
         column.setDefaultType(defaultType);
         column.setOption(option);
         column.setTtl(ttl);
         column.codecs.addAll(codecs);
         return column;
-    }
-
-    @Override
-    public void appendComments(SQLScript script) {
-        // no impl
-    }
-
-    @Override
-    protected void appendCommentSql(SQLScript script) {
-        // no impl
     }
 }

@@ -19,13 +19,14 @@ import java.util.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.ICast.CastContext;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 
 /**
  * Container for database metadata objects organized by type and schema.
  * Provides efficient lookup and storage of functions, operators, relations, constraints,
  * casts, and composite types from database schemas.
  */
-public final class MetaContainer {
+public class MetaContainer implements IMetaContainer {
 
     private final List<ICast> casts = new ArrayList<>();
 
@@ -47,7 +48,7 @@ public final class MetaContainer {
     /**
      * Constraints grouped by schema name and table name
      */
-    private final Map<String, Map<String, List<IConstraint>>> constraints = new LinkedHashMap<>();
+    private final Map<String, Map<String, List<IConstraintPk>>> primaryKeys = new LinkedHashMap<>();
 
     /**
      * Composite types grouped by schema name
@@ -64,7 +65,7 @@ public final class MetaContainer {
             functions.computeIfAbsent(f.getSchemaName(), e -> new LinkedHashMap<>()).put(f.getName(), f);
             return;
         }
-        if (st instanceof ICast cast) {
+        if (st instanceof ICast cast && cast.getContext() == CastContext.IMPLICIT) {
             casts.add(cast);
             return;
         }
@@ -77,7 +78,7 @@ public final class MetaContainer {
             return;
         }
         if (st instanceof IConstraintPk con) {
-            constraints
+            primaryKeys
                     .computeIfAbsent(con.getSchemaName(), e -> new LinkedHashMap<>())
                     .computeIfAbsent(con.getTableName(), e -> new ArrayList<>())
                     .add(con);
@@ -88,17 +89,10 @@ public final class MetaContainer {
         }
     }
 
-    /**
-     * Checks if there is an implicit cast from source to target type.
-     *
-     * @param source the source data type
-     * @param target the target data type
-     * @return true if an implicit cast exists, false otherwise
-     */
+    @Override
     public boolean containsCastImplicit(String source, String target) {
         for (ICast cast : casts) {
-            if (CastContext.IMPLICIT == cast.getContext()
-                    && source.equals(cast.getSource())
+            if (source.equals(cast.getSource())
                     && target.equals(cast.getTarget())) {
                 return true;
             }
@@ -106,90 +100,46 @@ public final class MetaContainer {
         return false;
     }
 
-    /**
-     * Finds a relation by schema and name.
-     *
-     * @param schemaName   the schema name
-     * @param relationName the relation name
-     * @return the relation, or null if not found
-     */
+    @Override
     public IRelation findRelation(String schemaName, String relationName) {
         return relations.getOrDefault(schemaName, Collections.emptyMap()).get(relationName);
     }
 
-    /**
-     * Returns all relations grouped by schema name.
-     *
-     * @return unmodifiable map of relations
-     */
+    @Override
     public Map<String, Map<String, IRelation>> getRelations() {
         return Collections.unmodifiableMap(relations);
     }
 
-    /**
-     * Finds a function by schema and name.
-     *
-     * @param schemaName   the schema name
-     * @param functionName the function name
-     * @return the function, or null if not found
-     */
+    @Override
     public IFunction findFunction(String schemaName, String functionName) {
         return functions.getOrDefault(schemaName, Collections.emptyMap()).get(functionName);
     }
 
-    /**
-     * Returns available functions in the specified schema.
-     *
-     * @param schemaName the schema name
-     * @return unmodifiable collection of functions
-     */
+    @Override
     public Collection<IFunction> availableFunctions(String schemaName) {
         return Collections.unmodifiableCollection(functions
                 .getOrDefault(schemaName, Collections.emptyMap()).values());
     }
 
-    /**
-     * Finds an operator by schema and name.
-     *
-     * @param schemaName   the schema name
-     * @param operatorName the operator name
-     * @return the operator, or null if not found
-     */
+    @Override
     public IOperator findOperator(String schemaName, String operatorName) {
         return operators.getOrDefault(schemaName, Collections.emptyMap()).get(operatorName);
     }
 
-    /**
-     * Finds composite type by schema and name.
-     *
-     * @param schemaName the schema name
-     * @param typeName   the type name
-     * @return the composite type, or null if not found
-     */
+    @Override
     public ICompositeType findType(String schemaName, String typeName) {
         return types.getOrDefault(schemaName, Collections.emptyMap()).get(typeName);
     }
 
-    /**
-     * Returns available operators in the specified schema.
-     *
-     * @param schemaName the schema name
-     * @return unmodifiable collection of operators
-     */
+    @Override
     public Collection<IOperator> availableOperators(String schemaName) {
         return Collections.unmodifiableCollection(operators
                 .getOrDefault(schemaName, Collections.emptyMap()).values());
     }
 
-    /**
-     * Returns constraints for the specified table.
-     *
-     * @param schemaName the schema name
-     * @param tableName  the table name
-     * @return collection of constraints for the table
-     */
-    public Collection<IConstraint> getConstraints(String schemaName, String tableName) {
-        return constraints
+    @Override
+    public Collection<IConstraintPk> getPrimaryKeys(String schemaName, String tableName) {
+        return primaryKeys
                 .getOrDefault(schemaName, Collections.emptyMap())
                 .getOrDefault(tableName, Collections.emptyList());
     }

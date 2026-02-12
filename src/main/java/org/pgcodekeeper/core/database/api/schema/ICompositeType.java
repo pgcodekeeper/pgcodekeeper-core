@@ -20,16 +20,9 @@ import java.util.List;
 import org.pgcodekeeper.core.utils.Pair;
 
 /**
- * Represents composite type metadata object.
- * Stores information about composite type attributes including their names and types.
- *
- * @see IType Base interface for all type metadata objects
+ * Interface for database composite type
  */
 public interface ICompositeType extends IType {
-
-    public default String getSchemaName() {
-        return getParent().getName();
-    }
 
     /**
      * Returns the type of the specified attribute.

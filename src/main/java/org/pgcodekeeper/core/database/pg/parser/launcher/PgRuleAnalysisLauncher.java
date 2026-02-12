@@ -19,7 +19,7 @@ import java.util.*;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.pg.parser.expr.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.schema.PgRule;
@@ -42,7 +42,7 @@ public class PgRuleAnalysisLauncher extends PgAbstractAnalysisLauncher {
     }
 
     @Override
-    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, IMetaContainer meta) {
         Set<ObjectLocation> depcies = new LinkedHashSet<>();
 
         Create_rewrite_statementContext createRewriteCtx = (Create_rewrite_statementContext) ctx;
@@ -59,7 +59,7 @@ public class PgRuleAnalysisLauncher extends PgAbstractAnalysisLauncher {
         return depcies;
     }
 
-    private Set<ObjectLocation> analyzeRulesCommand(Rewrite_commandContext cmd, MetaContainer meta) {
+    private Set<ObjectLocation> analyzeRulesCommand(Rewrite_commandContext cmd, IMetaContainer meta) {
         Select_stmtContext select;
         if ((select = cmd.select_stmt()) != null) {
             return analyzeTableChild(select, new PgSelect(meta));

@@ -20,8 +20,8 @@ import java.util.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IColumn;
 import org.pgcodekeeper.core.database.base.parser.*;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.schema.*;
@@ -71,11 +71,11 @@ public final class PgCreateTable extends PgTableAbstract {
         List<ParserRuleContext> ids = getIdentifiers(ctx.name);
         String tableName = QNameParser.getFirstName(ids);
         String schemaName = getSchemaNameSafe(ids);
-        AbstractSchema schema = getSchemaSafe(ids);
-        AbstractTable table = defineTable(tableName, schemaName);
+        PgSchema schema = getSchemaSafe(ids);
+        PgAbstractTable table = defineTable(tableName, schemaName);
         addSafe(schema, table, ids);
 
-        for (AbstractColumn col : table.getColumns()) {
+        for (IColumn col : table.getColumns()) {
             PgSequence seq = ((PgColumn) col).getSequence();
             if (seq != null) {
                 if (table instanceof PgAbstractRegularTable regTable) {
@@ -86,7 +86,7 @@ public final class PgCreateTable extends PgTableAbstract {
         }
     }
 
-    private AbstractTable defineTable(String tableName, String schemaName) {
+    private PgAbstractTable defineTable(String tableName, String schemaName) {
         Define_tableContext tabCtx = ctx.define_table();
         Define_columnsContext colCtx = tabCtx.define_columns();
         Define_typeContext typeCtx = tabCtx.define_type();
@@ -200,10 +200,10 @@ public final class PgCreateTable extends PgTableAbstract {
     }
 
     @Override
-    protected void fillColNotNull(AbstractTable table, Constraint_commonContext tblConstrCtx,
+    protected void fillColNotNull(PgAbstractTable table, Constraint_commonContext tblConstrCtx,
                                   Schema_qualified_nameContext colNameCtx) {
         AntlrTaskManager.submit(antlrTasks, () -> colNameCtx, colCtx -> {
-            var col = (PgColumn) getSafe(AbstractTable::getColumn, table, colNameCtx);
+            var col = getSafe(PgAbstractTable::getColumn, table, colNameCtx);
             if (col != null) {
                 fillColNotNull(col, table, tblConstrCtx);
             }

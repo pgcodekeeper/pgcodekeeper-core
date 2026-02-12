@@ -18,6 +18,7 @@ package org.pgcodekeeper.core.database.base.jdbc;
 import java.sql.*;
 
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcReader;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.base.loader.AbstractJdbcLoader;
 import org.pgcodekeeper.core.exception.XmlReaderException;
 import org.pgcodekeeper.core.localizations.Messages;
@@ -28,7 +29,7 @@ import org.pgcodekeeper.core.monitor.IMonitor;
  * Provides common functionality for building SQL queries with extension and description support,
  * and processing database objects from ResultSets.
  */
-public abstract class AbstractJdbcReader<T extends AbstractJdbcLoader> implements IJdbcReader {
+public abstract class AbstractJdbcReader<T extends AbstractJdbcLoader<? extends IDatabase>> implements IJdbcReader {
 
     protected final T loader;
 

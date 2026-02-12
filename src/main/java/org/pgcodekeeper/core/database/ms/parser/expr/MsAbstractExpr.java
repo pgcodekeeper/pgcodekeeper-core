@@ -16,8 +16,8 @@
 package org.pgcodekeeper.core.database.ms.parser.expr;
 
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.antlr.AbstractExpr;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
 import org.pgcodekeeper.core.localizations.Messages;
@@ -32,7 +32,7 @@ public abstract class MsAbstractExpr extends AbstractExpr {
 
     private final String schema;
 
-    protected MsAbstractExpr(String schema, MetaContainer meta) {
+    protected MsAbstractExpr(String schema, IMetaContainer meta) {
         super(meta);
         this.schema = schema;
     }

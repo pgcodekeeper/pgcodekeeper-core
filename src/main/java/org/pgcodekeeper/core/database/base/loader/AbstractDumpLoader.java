@@ -16,12 +16,8 @@
 package org.pgcodekeeper.core.database.base.loader;
 
 import org.pgcodekeeper.core.database.api.loader.IDumpLoader;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.AntlrTask;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.base.schema.StatementOverride;
 import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
@@ -39,7 +35,7 @@ import java.util.Queue;
 /**
  * Base database dump loader
  */
-public abstract class AbstractDumpLoader<T extends AbstractDatabase> extends AbstractLoader<T> implements IDumpLoader {
+public abstract class AbstractDumpLoader<T extends IDatabase> extends AbstractLoader<T> implements IDumpLoader {
 
     protected final InputStreamProvider input;
     protected final String inputObjectName;
@@ -79,8 +75,8 @@ public abstract class AbstractDumpLoader<T extends AbstractDatabase> extends Abs
 
     public T createDatabaseWithSchema() {
         T db = createDatabase();
-        AbstractSchema schema = createDefaultSchema();
-        db.addSchema(schema);
+        ISchema schema = createDefaultSchema();
+        db.addChild(schema);
         ObjectLocation loc = new ObjectLocation.Builder()
                 .setObject(new GenericColumn(schema.getName(), DbObjType.SCHEMA))
                 .build();
@@ -101,7 +97,7 @@ public abstract class AbstractDumpLoader<T extends AbstractDatabase> extends Abs
 
     protected abstract T createDatabase();
 
-    protected abstract AbstractSchema createDefaultSchema();
+    protected abstract ISchema createDefaultSchema();
 
     @Override
     protected void prepare() {

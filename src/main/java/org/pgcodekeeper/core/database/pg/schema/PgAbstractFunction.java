@@ -19,16 +19,17 @@ import java.io.Serial;
 import java.util.*;
 import java.util.Map.Entry;
 
-import org.pgcodekeeper.core.database.api.schema.ArgMode;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.script.SQLScript;
 
 /**
  * Base implementation of PostgreSQL functions and procedures.
  * Provides common functionality for managing function properties such as language,
  * volatility, security, parallelism, and other PostgreSQL-specific attributes.
  */
-public abstract class PgAbstractFunction extends AbstractFunction implements IPgStatement {
+public abstract class PgAbstractFunction extends PgAbstractStatement implements IFunction {
 
     /**
      * Constant representing "FROM CURRENT" configuration value for function parameters
@@ -59,11 +60,51 @@ public abstract class PgAbstractFunction extends AbstractFunction implements IPg
     private String signatureCache;
     private boolean inStatementBody;
 
+    protected final List<Argument> arguments = new ArrayList<>();
+
     protected PgAbstractFunction(String name) {
         super(name);
     }
 
     @Override
+    public void getCreationSQL(SQLScript script) {
+        final StringBuilder sbSQL = new StringBuilder();
+        appendFunctionFullSQL(sbSQL, true);
+        script.addStatement(sbSQL);
+        appendOwnerSQL(script);
+        appendPrivileges(script);
+        appendComments(script);
+    }
+
+    @Override
+    public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
+        int startSize = script.getSize();
+        boolean isNeedDepcies = false;
+        PgAbstractFunction newFunction = (PgAbstractFunction) newCondition;
+
+        if (!compareUnalterable(newFunction)) {
+            if (needDrop(newFunction)) {
+                return ObjectState.RECREATE;
+            }
+
+            isNeedDepcies = isNeedDepcies(newFunction);
+
+            StringBuilder sbSQL = new StringBuilder();
+            newFunction.appendFunctionFullSQL(sbSQL, false);
+            script.addStatement(sbSQL);
+        }
+
+        appendAlterOwner(newFunction, script);
+        alterPrivileges(newFunction, script);
+        appendAlterComments(newFunction, script);
+
+        return getObjectState(isNeedDepcies, script, startSize);
+    }
+
+    protected boolean isNeedDepcies(PgAbstractFunction newFunction) {
+        return !deps.equals(newFunction.deps);
+    }
+
     protected void appendFunctionFullSQL(StringBuilder sbSQL, boolean isCreate) {
         sbSQL.append("CREATE OR REPLACE ");
         sbSQL.append(getStatementType());
@@ -348,7 +389,7 @@ public abstract class PgAbstractFunction extends AbstractFunction implements IPg
     }
 
     @Override
-    public boolean needDrop(AbstractFunction newFunction) {
+    public boolean needDrop(IFunction newFunction) {
         var iOld = arguments.iterator();
         var iNew = newFunction.getArguments().iterator();
         while (iOld.hasNext() && iNew.hasNext()) {
@@ -374,68 +415,92 @@ public abstract class PgAbstractFunction extends AbstractFunction implements IPg
     }
 
     @Override
-    protected boolean compareUnalterable(AbstractFunction function) {
-        if (function instanceof PgAbstractFunction func && super.compareUnalterable(function)) {
-            return Objects.equals(body, func.body)
-                    && isWindow == func.isWindow
-                    && Objects.equals(language, func.language)
-                    && Objects.equals(parallel, func.parallel)
-                    && Objects.equals(volatileType, func.volatileType)
-                    && isStrict == func.isStrict
-                    && isSecurityDefiner == func.isSecurityDefiner
-                    && isLeakproof == func.isLeakproof
-                    && rows == func.rows
-                    && Objects.equals(cost, func.cost)
-                    && Objects.equals(transforms, func.transforms)
-                    && Objects.equals(configurations, func.configurations)
-                    && Objects.equals(executeOn, func.executeOn)
-                    && Objects.equals(supportFunc, func.supportFunc);
-        }
-
-        return false;
-    }
-
-    @Override
     public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(supportFunc);
+        hasher.putOrdered(arguments);
         hasher.put(body);
-        hasher.put(transforms);
-        hasher.put(configurations);
         hasher.put(isWindow);
         hasher.put(language);
+        hasher.put(parallel);
         hasher.put(volatileType);
         hasher.put(isStrict);
         hasher.put(isSecurityDefiner);
         hasher.put(isLeakproof);
         hasher.put(rows);
         hasher.put(cost);
-        hasher.put(parallel);
+        hasher.put(transforms);
+        hasher.put(configurations);
         hasher.put(executeOn);
+        hasher.put(supportFunc);
     }
 
     @Override
-    public AbstractFunction shallowCopy() {
-        PgAbstractFunction functionDst = (PgAbstractFunction) super.shallowCopy();
-        functionDst.setReturns(getReturns());
-        functionDst.setSupportFunc(supportFunc);
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj instanceof PgAbstractFunction func && super.compare(obj)) {
+            return compareUnalterable(func);
+        }
+
+        return false;
+    }
+
+    protected boolean compareUnalterable(PgAbstractFunction func) {
+        return arguments.equals(func.arguments)
+                && Objects.equals(body, func.body)
+                && isWindow == func.isWindow
+                && Objects.equals(language, func.language)
+                && Objects.equals(parallel, func.parallel)
+                && Objects.equals(volatileType, func.volatileType)
+                && isStrict == func.isStrict
+                && isSecurityDefiner == func.isSecurityDefiner
+                && isLeakproof == func.isLeakproof
+                && rows == func.rows
+                && Objects.equals(cost, func.cost)
+                && Objects.equals(transforms, func.transforms)
+                && Objects.equals(configurations, func.configurations)
+                && Objects.equals(executeOn, func.executeOn)
+                && Objects.equals(supportFunc, func.supportFunc);
+    }
+
+    @Override
+    protected PgAbstractFunction getCopy() {
+        PgAbstractFunction functionDst = getFunctionCopy();
+        for (Argument argSrc : arguments) {
+            functionDst.addArgument(argSrc.getCopy());
+        }
         functionDst.setBody(body);
         functionDst.setWindow(isWindow);
         functionDst.language = language;
         functionDst.setVolatileType(volatileType);
+        functionDst.setParallel(parallel);
         functionDst.setStrict(isStrict);
         functionDst.setSecurityDefiner(isSecurityDefiner);
         functionDst.setLeakproof(isLeakproof);
         functionDst.setRows(rows);
         functionDst.cost = cost;
-        functionDst.setParallel(parallel);
         functionDst.transforms.addAll(transforms);
-        functionDst.returnsColumns.putAll(returnsColumns);
         functionDst.configurations.putAll(configurations);
-        functionDst.setInStatementBody(inStatementBody);
         functionDst.setExecuteOn(executeOn);
+        functionDst.setSupportFunc(supportFunc);
+
+        // meta
+        functionDst.setReturns(getReturns());
+        functionDst.returnsColumns.putAll(returnsColumns);
+        functionDst.setInStatementBody(inStatementBody);
 
         return functionDst;
+    }
+
+    public void addArgument(Argument argDst) {
+        arguments.add(argDst);
+        resetHash();
+    }
+
+    @Override
+    public List<IArgument> getArguments() {
+        return Collections.unmodifiableList(arguments);
     }
 
     @Override
@@ -446,6 +511,8 @@ public abstract class PgAbstractFunction extends AbstractFunction implements IPg
 
         return qualifiedName;
     }
+
+    protected abstract PgAbstractFunction getFunctionCopy();
 
     /**
      * PostgreSQL-specific function argument implementation.

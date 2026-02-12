@@ -71,8 +71,8 @@ public final class MsClrFunction extends MsAbstractClrFunction {
 
     @Override
     protected void appendFunctionFullSQL(StringBuilder sbSQL, boolean isCreate) {
-        sbSQL.append("SET QUOTED_IDENTIFIER OFF").append(GO).append('\n');
-        sbSQL.append("SET ANSI_NULLS OFF").append(GO).append('\n');
+        sbSQL.append("SET QUOTED_IDENTIFIER OFF").append(getSeparator()).append('\n');
+        sbSQL.append("SET ANSI_NULLS OFF").append(getSeparator()).append('\n');
         sbSQL.append(isCreate ? "CREATE" : "ALTER");
         sbSQL.append(" FUNCTION ");
         sbSQL.append(getQualifiedName()).append('(');
@@ -110,14 +110,14 @@ public final class MsClrFunction extends MsAbstractClrFunction {
     }
 
     @Override
-    protected boolean compareUnalterable(AbstractFunction func) {
+    protected boolean compareUnalterable(MsAbstractCommonFunction func) {
         return func instanceof MsClrFunction newClrFunc && super.compareUnalterable(func)
                 && Objects.equals(returns, func.getReturns())
                 && Objects.equals(funcType, newClrFunc.funcType);
     }
 
     @Override
-    public boolean needDrop(AbstractFunction newFunction) {
+    public boolean needDrop(IFunction newFunction) {
         if (newFunction instanceof MsClrFunction newClrFunc) {
             return funcType != newClrFunc.funcType;
         }

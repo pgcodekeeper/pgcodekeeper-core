@@ -111,8 +111,13 @@ public final class PgServer extends PgAbstractStatement implements PgForeignOpti
     }
 
     @Override
-    public AbstractDatabase getDatabase() {
-        return (AbstractDatabase) parent;
+    protected AbstractStatement getCopy() {
+        PgServer copyServer = new PgServer(name);
+        copyServer.setType(type);
+        copyServer.setVersion(version);
+        copyServer.setFdw(fdw);
+        copyServer.options.putAll(options);
+        return copyServer;
     }
 
     @Override
@@ -160,16 +165,5 @@ public final class PgServer extends PgAbstractStatement implements PgForeignOpti
         appendAlterComments(newServer, script);
 
         return getObjectState(script, startSize);
-    }
-
-    @Override
-    public AbstractStatement shallowCopy() {
-        PgServer copyServer = new PgServer(name);
-        copyBaseFields(copyServer);
-        copyServer.setType(type);
-        copyServer.setVersion(version);
-        copyServer.setFdw(fdw);
-        copyServer.options.putAll(options);
-        return copyServer;
     }
 }

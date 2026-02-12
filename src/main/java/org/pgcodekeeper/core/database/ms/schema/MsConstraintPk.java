@@ -142,6 +142,16 @@ public final class MsConstraintPk extends MsConstraint
     }
 
     @Override
+    public void computeHash(Hasher hasher) {
+        super.computeHash(hasher);
+        hasher.put(isPrimaryKey);
+        hasher.put(isClustered);
+        hasher.put(dataSpace);
+        hasher.putOrdered(columns);
+        hasher.put(options);
+    }
+
+    @Override
     public boolean compare(IStatement obj) {
         if (this == obj) {
             return true;
@@ -168,17 +178,7 @@ public final class MsConstraintPk extends MsConstraint
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(isPrimaryKey);
-        hasher.put(isClustered);
-        hasher.put(dataSpace);
-        hasher.putOrdered(columns);
-        hasher.put(options);
-    }
-
-    @Override
-    protected AbstractConstraint getConstraintCopy() {
+    protected MsConstraint getConstraintCopy() {
         var con = new MsConstraintPk(name, isPrimaryKey);
         con.setClustered(isClustered);
         con.setDataSpace(dataSpace);

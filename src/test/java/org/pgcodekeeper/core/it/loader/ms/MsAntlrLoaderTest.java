@@ -16,24 +16,24 @@
 package org.pgcodekeeper.core.it.loader.ms;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.TestUtils;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
 import org.pgcodekeeper.core.database.base.schema.Argument;
 import org.pgcodekeeper.core.database.base.schema.SimpleColumn;
+import org.pgcodekeeper.core.database.ms.MsDatabaseProvider;
 import org.pgcodekeeper.core.database.ms.loader.MsDumpLoader;
 import org.pgcodekeeper.core.database.ms.project.MsModelExporter;
 import org.pgcodekeeper.core.database.ms.schema.*;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
+import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.utils.TempDir;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 import static org.pgcodekeeper.core.it.IntegrationTestUtils.assertDiff;
-import static org.pgcodekeeper.core.it.IntegrationTestUtils.loadTestDump;
 
 /**
  * Tests for PgDiffLoader class.
@@ -57,59 +57,56 @@ class MsAntlrLoaderTest {
     private static final String PRIMARY = "[PRIMARY]";
     private static final String ENCODING = Consts.UTF_8;
 
-    void testDatabase(String fileName, AbstractDatabase d) throws IOException, InterruptedException {
+    void testDatabase(String fileName, IDatabase d, Path exportDir) throws Exception {
         loadSchema(fileName, d);
-        exportFullDb(fileName, d);
+        exportFullDb(fileName, d, exportDir);
     }
 
-    void loadSchema(String fileName, AbstractDatabase dbPredefined) throws IOException, InterruptedException {
+    void loadSchema(String fileName, IDatabase dbPredefined) throws Exception {
         // first test the dump loader itself
         var settings = new CoreSettings();
         settings.setInCharsetName(ENCODING);
         settings.setKeepNewlines(true);
-        settings.setDbType(DatabaseType.MS);
-        AbstractDatabase d = loadTestDump(fileName, MsAntlrLoaderTest.class, settings);
+        IDatabase d = new MsDatabaseProvider().getDatabaseFromDump(
+                TestUtils.getPathToResource(fileName, MsAntlrLoaderTest.class), settings, new NullMonitor());
 
         assertDiff(dbPredefined, d, settings, "PgDumpLoader: predefined object is not equal to file " + fileName);
 
         // test deepCopy mechanism
-        assertDiff(d, (AbstractDatabase) d.deepCopy(), settings, "PgStatement deep copy altered");
+        assertDiff(d, (IDatabase) d.deepCopy(), settings, "PgStatement deep copy altered");
         assertDiff(dbPredefined, d, settings, "PgStatement deep copy altered original");
     }
 
-    void exportFullDb(String fileName, AbstractDatabase dbPredefined) throws IOException, InterruptedException {
+    void exportFullDb(String fileName, IDatabase dbPredefined, Path exportDir) throws Exception {
         // prepare db object from sql file
         var settings = new CoreSettings();
         settings.setInCharsetName(ENCODING);
         settings.setKeepNewlines(true);
-        settings.setDbType(DatabaseType.MS);
-        AbstractDatabase dbFromFile = loadTestDump(fileName, MsAntlrLoaderTest.class, settings);
 
-        Path exportDir;
-        try (TempDir dir = new TempDir("pgCodekeeper-test-files")) {
-            exportDir = dir.get();
-            new MsModelExporter(exportDir, dbPredefined, ENCODING, settings).exportFull();
+        IDatabase dbFromFile = new MsDatabaseProvider().getDatabaseFromDump(
+                TestUtils.getPathToResource(fileName, MsAntlrLoaderTest.class), settings, new NullMonitor());
 
-            AbstractDatabase dbAfterExport = IntegrationTestUtils.createProjectLoader(exportDir, settings, dbFromFile)
-                    .loadAndAnalyze();
+        new MsModelExporter(exportDir, dbPredefined, ENCODING, settings).exportFull();
 
-            // check the same db similarity before and after export
-            assertDiff(dbPredefined, dbAfterExport, settings, "Predefined object PgDB" + fileName +
-                    " is not equal to exported'n'loaded.");
+        IDatabase dbAfterExport = IntegrationTestUtils.createProjectLoader(exportDir, settings, dbFromFile)
+                .loadAndAnalyze();
 
-            assertDiff(dbAfterExport, dbFromFile, settings,
-                    "Exported predefined object is not equal to file " + fileName);
-        }
+        // check the same db similarity before and after export
+        assertDiff(dbPredefined, dbAfterExport, settings, "Predefined object PgDB" + fileName +
+                " is not equal to exported'n'loaded.");
+
+        assertDiff(dbAfterExport, dbFromFile, settings,
+                "Exported predefined object is not equal to file " + fileName);
     }
 
     @Test
-    void testDB0() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB0(@TempDir Path exportDir) throws Exception {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         MsTable table = new MsTable("fax_boxes");
         table.setAnsiNulls(true);
-        schema.addTable(table);
+        schema.addChild(table);
 
         MsColumn col = new MsColumn("fax_box_id");
         col.setType(INT);
@@ -124,13 +121,13 @@ class MsAntlrLoaderTest {
         constriaintPk.setClustered(true);
         constriaintPk.setDataSpace(PRIMARY);
         constriaintPk.addColumn(new SimpleColumn("fax_box_id"));
-        table.addConstraint(constriaintPk);
+        table.addChild(constriaintPk);
 
         table.setOwner(MS_USER);
 
         table = new MsTable("faxes");
         table.setAnsiNulls(true);
-        schema.addTable(table);
+        schema.addChild(table);
 
         col = new MsColumn("fax_id");
         col.setType(INT);
@@ -181,7 +178,7 @@ class MsAntlrLoaderTest {
         constriaintPk.setClustered(true);
         constriaintPk.setDataSpace(PRIMARY);
         constriaintPk.addColumn(new SimpleColumn("fax_id"));
-        table.addConstraint(constriaintPk);
+        table.addChild(constriaintPk);
 
         var constraintFk = new MsConstraintFk("FK_faxes_fax_box_id");
         constraintFk.setForeignSchema("dbo");
@@ -190,11 +187,11 @@ class MsAntlrLoaderTest {
         constraintFk.addForeignColumn("fax_box_id");
         constraintFk.setDelAction("SET NULL");
         constraintFk.setUpdAction("CASCADE");
-        table.addConstraint(constraintFk);
+        table.addChild(constraintFk);
 
         table = new MsTable("extensions");
         table.setAnsiNulls(true);
-        schema.addTable(table);
+        schema.addChild(table);
 
         col = new MsColumn("id");
         col.setType(INT);
@@ -208,11 +205,11 @@ class MsAntlrLoaderTest {
         constraintFk.setDelAction("SET DEFAULT");
         constraintFk.setUpdAction("SET NULL");
         constraintFk.setNotForRepl(true);
-        table.addConstraint(constraintFk);
+        table.addChild(constraintFk);
 
         table = new MsTable("table1");
         table.setAnsiNulls(true);
-        schema.addTable(table);
+        schema.addChild(table);
 
         col = new MsColumn("id");
         col.setType(INT);
@@ -225,23 +222,23 @@ class MsAntlrLoaderTest {
         constraintFk.addColumn("fax_box_id");
         constraintFk.setDelAction("CASCADE");
         constraintFk.setUpdAction("SET DEFAULT");
-        table.addConstraint(constraintFk);
+        table.addChild(constraintFk);
 
-        testDatabase("ms_schema_0.sql", d);
+        testDatabase("ms_schema_0.sql", d, exportDir);
     }
 
     @Test
-    void testDB1() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
+    void testDB1(@TempDir Path exportDir) throws Exception {
+        IDatabase d = createDumpDB();
 
-        AbstractSchema schema = new MsSchema("msschema");
-        d.addSchema(schema);
+        ISchema schema = new MsSchema("msschema");
+        d.addChild(schema);
 
         schema = d.getSchema(Consts.DBO);
 
         MsTable table = new MsTable("contacts");
         table.setAnsiNulls(true);
-        schema.addTable(table);
+        schema.addChild(table);
 
         MsColumn col = new MsColumn("id");
         col.setType(INT);
@@ -257,26 +254,26 @@ class MsAntlrLoaderTest {
 
         MsIndex idx = new MsIndex("IX_contacts_number_pool_id");
         idx.addColumn(new SimpleColumn("number_pool_id"));
-        table.addIndex(idx);
+        table.addChild(idx);
 
-        testDatabase("ms_schema_1.sql", d);
+        testDatabase("ms_schema_1.sql", d, exportDir);
     }
 
     @Test
-    void testDB2() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB2(@TempDir Path exportDir) throws Exception {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         MsSequence seq = new MsSequence("admins_aid_seq");
         seq.setStartWith("1");
         seq.setMinMaxInc(1L, 1000000000L, 1L, null, 0L);
         seq.setCached(true);
         seq.setCache("1");
-        schema.addSequence(seq);
+        schema.addChild(seq);
 
         MsTable table = new MsTable("admins");
         table.setAnsiNulls(true);
-        schema.addTable(table);
+        schema.addChild(table);
 
         MsColumn col = new MsColumn("aid");
         col.setType(INT);
@@ -289,7 +286,7 @@ class MsAntlrLoaderTest {
         constriaintPk.setClustered(true);
         constriaintPk.setDataSpace(PRIMARY);
         constriaintPk.addColumn(new SimpleColumn("aid"));
-        table.addConstraint(constriaintPk);
+        table.addChild(constriaintPk);
 
         col = new MsColumn("companyid");
         col.setType(INT);
@@ -363,24 +360,24 @@ class MsAntlrLoaderTest {
         col.setDefaultValue("0");
         table.addColumn(col);
 
-        testDatabase("ms_schema_2.sql", d);
+        testDatabase("ms_schema_2.sql", d, exportDir);
     }
 
     @Test
-    void testDB3() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB3(@TempDir Path exportDir) throws Exception {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         MsSequence seq = new MsSequence("call_logs_id_seq");
         seq.setStartWith("1");
         seq.setMinMaxInc(1L, 1000000000L, 1L, null, 0L);
         seq.setCached(true);
         seq.setCache("1");
-        schema.addSequence(seq);
+        schema.addChild(seq);
 
         MsTable table = new MsTable("call_logs");
         table.setAnsiNulls(true);
-        schema.addTable(table);
+        schema.addChild(table);
 
         MsColumn col = new MsColumn("id");
         col.setType(BIGINT);
@@ -389,17 +386,17 @@ class MsAntlrLoaderTest {
         col.setDefaultValue("(NEXT VALUE FOR [dbo].[call_logs_id_seq])");
         table.addColumn(col);
 
-        testDatabase("ms_schema_3.sql", d);
+        testDatabase("ms_schema_3.sql", d, exportDir);
     }
 
     @Test
-    void testDB4() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB4(@TempDir Path exportDir) throws Exception {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         MsTable table = new MsTable("table1");
         table.setAnsiNulls(true);
-        schema.addTable(table);
+        schema.addChild(table);
 
         MsColumn col = new MsColumn("id");
         col.setType(INT);
@@ -428,7 +425,7 @@ class MsAntlrLoaderTest {
                     RETURN  @logid
                 END""");
 
-        schema.addFunction(func);
+        schema.addChild(func);
 
         func = new MsFunction("multiply_numbers");
         func.setAnsiNulls(true);
@@ -442,15 +439,15 @@ class MsAntlrLoaderTest {
                 AS
                 BEGIN
                     DECLARE @Res integer = 0
-                
+
                     SET @Res = @First * @Second
-                
+
                     IF @Res < 0
                         SET @Res = 0
-                
+
                     RETURN @Res
                 END""");
-        schema.addFunction(func);
+        schema.addChild(func);
 
         func = new MsFunction("select_something");
         func.setAnsiNulls(true);
@@ -467,15 +464,15 @@ class MsAntlrLoaderTest {
                     SELECT  @Res = COUNT(*) FROM [dbo].[table1];
                     RETURN @Res + @First * @Second
                 END""");
-        schema.addFunction(func);
+        schema.addChild(func);
 
-        testDatabase("ms_schema_4.sql", d);
+        testDatabase("ms_schema_4.sql", d, exportDir);
     }
 
     @Test
-    void testDB5() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB5(@TempDir Path exportDir) throws Exception {
+        MsDatabase d = createDumpDB();
+        MsSchema schema = d.getDefaultSchema();
 
         schema.addPrivilege(new MsPrivilege(REVOKE, "SELECT", SCHEMA_DBO, QUOTED_MS_USER, false));
         schema.addPrivilege(new MsPrivilege(REVOKE, "UPDATE", SCHEMA_DBO, QUOTED_MS_USER, false));
@@ -489,7 +486,7 @@ class MsAntlrLoaderTest {
 
         MsTable table = new MsTable("test_table");
         table.setAnsiNulls(true);
-        schema.addTable(table);
+        schema.addChild(table);
 
         MsColumn col = new MsColumn("id");
         col.setType(BIGINT);
@@ -504,17 +501,17 @@ class MsAntlrLoaderTest {
         MsIndex idx = new MsIndex("IX_test_table_date_deleted");
         idx.addColumn(new SimpleColumn("date_deleted"));
         idx.setWhere("(date_deleted IS NULL)");
-        table.addIndex(idx);
+        table.addChild(idx);
 
-        testDatabase("ms_schema_5.sql", d);
+        testDatabase("ms_schema_5.sql", d, exportDir);
     }
 
     @Test
-    void testDB6() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
+    void testDB6(@TempDir Path exportDir) throws Exception {
+        IDatabase d = createDumpDB();
 
-        AbstractSchema schema = new MsSchema("common");
-        d.addSchema(schema);
+        ISchema schema = new MsSchema("common");
+        d.addChild(schema);
         d.setDefaultSchema("common");
 
         MsFunction func = new MsFunction("t_common_casttotext");
@@ -531,15 +528,15 @@ class MsAntlrLoaderTest {
                     RETURN  @Res
                 END""");
 
-        schema.addFunction(func);
+        schema.addChild(func);
 
-        testDatabase("ms_schema_6.sql", d);
+        testDatabase("ms_schema_6.sql", d, exportDir);
     }
 
     @Test
-    void testDB7() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB7(@TempDir Path exportDir) throws Exception {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         MsType type = new MsType("testtt");
         MsColumn col = new MsColumn("a");
@@ -549,10 +546,10 @@ class MsAntlrLoaderTest {
         col.setType(TEXT);
         type.addChild(col);
         type.setOwner(MS_USER);
-        schema.addType(type);
+        schema.addChild(type);
 
         schema = new MsSchema("``54'253-=9!@#$%^&*()__<>?:\"\"{]};',./");
-        d.addSchema(schema);
+        d.addChild(schema);
 
         MsFunction func = new MsFunction(".x\"\".\"\"\"\".");
         func.setAnsiNulls(true);
@@ -565,36 +562,36 @@ class MsAntlrLoaderTest {
                 AS
                 BEGIN
                     DECLARE @Res bit = 0
-                
+
                     IF @arg1 > 1
                         SET @Res = 1
-                
+
                     RETURN @Res
                 END""");
 
         func.setOwner(MS_USER);
 
-        schema.addFunction(func);
+        schema.addChild(func);
 
-        testDatabase("ms_schema_7.sql", d);
+        testDatabase("ms_schema_7.sql", d, exportDir);
     }
 
     @Test
-    void testDB8() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB8(@TempDir Path exportDir) throws Exception {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         MsSequence seq = new MsSequence("user_id_seq");
         seq.setMinMaxInc(1L, null, null, null, 0L);
         seq.setCached(true);
         seq.setCache("1");
         seq.setOwner(MS_USER);
-        schema.addSequence(seq);
+        schema.addChild(seq);
 
         MsTable table = new MsTable("user_data");
         table.setAnsiNulls(true);
         table.setOwner(MS_USER);
-        schema.addTable(table);
+        schema.addChild(table);
 
         MsColumn col = new MsColumn("id");
         col.setType(BIGINT);
@@ -616,7 +613,7 @@ class MsAntlrLoaderTest {
 
         table = new MsTable("t1");
         table.setAnsiNulls(true);
-        schema.addTable(table);
+        schema.addChild(table);
 
         col = new MsColumn("c1");
         col.setType(INT);
@@ -635,14 +632,14 @@ class MsAntlrLoaderTest {
                 FROM [dbo].[user_data]""");
 
         view.setOwner(MS_USER);
-        schema.addView(view);
+        schema.addChild(view);
 
         MsTrigger trigger = new MsTrigger("instead_of_delete");
         trigger.setAnsiNulls(true);
         trigger.setQuotedIdentified(true);
         trigger.setFirstPart("");
         trigger.setSecondPart("""
-                
+
                     INSTEAD OF DELETE
                     AS
                     BEGIN
@@ -650,14 +647,14 @@ class MsAntlrLoaderTest {
                         WHERE id = 10 \s
                     END\
                 """);
-        view.addTrigger(trigger);
+        view.addChild(trigger);
 
         trigger = new MsTrigger("instead_of_insert");
         trigger.setAnsiNulls(true);
         trigger.setQuotedIdentified(true);
         trigger.setFirstPart("");
         trigger.setSecondPart("""
-                
+
                     INSTEAD OF INSERT
                     AS
                     BEGIN
@@ -665,14 +662,14 @@ class MsAntlrLoaderTest {
                         VALUES(1, 'test@supermail.loc', getdate())
                     END\
                 """);
-        view.addTrigger(trigger);
+        view.addChild(trigger);
 
         trigger = new MsTrigger("instead_of_update");
         trigger.setAnsiNulls(true);
         trigger.setQuotedIdentified(true);
         trigger.setFirstPart("");
         trigger.setSecondPart("""
-                
+
                     INSTEAD OF UPDATE
                     AS
                     BEGIN
@@ -681,7 +678,7 @@ class MsAntlrLoaderTest {
                         WHERE id = 4
                     END\
                 """);
-        view.addTrigger(trigger);
+        view.addChild(trigger);
 
         view = new MsView("ws_test");
         view.setAnsiNulls(true);
@@ -692,23 +689,23 @@ class MsAntlrLoaderTest {
                     SELECT\s
                     ud.[id] AS "   i   d   "
                 FROM [dbo].[user_data] ud""");
-        schema.addView(view);
+        schema.addChild(view);
 
-        testDatabase("ms_schema_8.sql", d);
+        testDatabase("ms_schema_8.sql", d, exportDir);
     }
 
     @Test
-    void testDB9() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = new MsSchema("admin");
-        d.addSchema(schema);
+    void testDB9(@TempDir Path exportDir) throws Exception {
+        IDatabase d = createDumpDB();
+        ISchema schema = new MsSchema("admin");
+        d.addChild(schema);
         d.setDefaultSchema("admin");
 
         schema.setOwner(MS_USER);
 
         MsTable table = new MsTable("acl_role");
         table.setAnsiNulls(true);
-        schema.addTable(table);
+        schema.addChild(table);
 
         MsColumn col = new MsColumn("id");
         col.setType(BIGINT);
@@ -719,13 +716,13 @@ class MsAntlrLoaderTest {
         constriaintPk.setClustered(true);
         constriaintPk.setDataSpace(PRIMARY);
         constriaintPk.addColumn(new SimpleColumn("id"));
-        table.addConstraint(constriaintPk);
+        table.addChild(constriaintPk);
 
         table.setOwner(MS_USER);
 
         table = new MsTable("\"user\"");
         table.setAnsiNulls(true);
-        schema.addTable(table);
+        schema.addChild(table);
 
         col = new MsColumn("id");
         col.setType(BIGINT);
@@ -782,24 +779,24 @@ class MsAntlrLoaderTest {
 
         MsIndex idx = new MsIndex("IX_user_role_id");
         idx.addColumn(new SimpleColumn("role_id"));
-        table.addIndex(idx);
+        table.addChild(idx);
 
         var constraintFk = new MsConstraintFk("FK_user_fax_box_id");
         constraintFk.addColumn("role_id");
         constraintFk.setForeignSchema("admin");
         constraintFk.setForeignTable("acl_role");
         constraintFk.addForeignColumn("id");
-        table.addConstraint(constraintFk);
+        table.addChild(constraintFk);
 
         table.setOwner(MS_USER);
 
-        testDatabase("ms_schema_9.sql", d);
+        testDatabase("ms_schema_9.sql", d, exportDir);
     }
 
     @Test
-    void testDB10() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB10(@TempDir Path exportDir) throws Exception {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         MsFunction func = new MsFunction("curdate");
         func.setAnsiNulls(true);
@@ -815,19 +812,19 @@ class MsAntlrLoaderTest {
                     RETURN  @textdate;
                 END""");
 
-        schema.addFunction(func);
+        schema.addChild(func);
 
-        testDatabase("ms_schema_10.sql", d);
+        testDatabase("ms_schema_10.sql", d, exportDir);
     }
 
     @Test
-    void testDB11() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB11(@TempDir Path exportDir) throws Exception {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         MsTable table = new MsTable("TABLE_1");
         table.setAnsiNulls(true);
-        schema.addTable(table);
+        schema.addChild(table);
 
         MsColumn col = new MsColumn("ID");
         col.setType(INT);
@@ -847,15 +844,15 @@ class MsAntlrLoaderTest {
         constriaintPk.setClustered(true);
         constriaintPk.setDataSpace(PRIMARY);
         constriaintPk.addColumn(new SimpleColumn("ID"));
-        table.addConstraint(constriaintPk);
+        table.addChild(constriaintPk);
 
-        testDatabase("ms_schema_11.sql", d);
+        testDatabase("ms_schema_11.sql", d, exportDir);
     }
 
     @Test
-    void testDB12() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB12(@TempDir Path exportDir) throws Exception {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         MsFunction func = new MsFunction("function_string_to_table");
         func.setAnsiNulls(true);
@@ -865,26 +862,26 @@ class MsAntlrLoaderTest {
         func.addArgument(new Argument("@delimiter", "char(1)"));
         func.setFirstPart("");
         func.setSecondPart("""
-                
+
                 (@string nvarchar(MAX), @delimiter char(1))
                 RETURNS @output TABLE(tbldata nvarchar(256))
                 BEGIN
                     DECLARE @start INT, @end INT
                     SELECT @start = 1, @end = CHARINDEX(@delimiter, @string)
-                
+
                     WHILE @start < LEN(@string) + 1 BEGIN
                         IF @end = 0\s
                             SET @end = LEN(@string) + 1
-                
+
                         INSERT INTO @output (tbldata)\s
                         VALUES(SUBSTRING(@string, @start, @end - @start))
                         SET @start = @end + 1
                         SET @end = CHARINDEX(@delimiter, @string, @start)
                     END
-                
+
                     RETURN
                 END""");
-        schema.addFunction(func);
+        schema.addChild(func);
 
         func = new MsFunction("function_empty");
         func.setAnsiNulls(true);
@@ -894,7 +891,7 @@ class MsAntlrLoaderTest {
         func.addArgument(new Argument("@delimiter", "char(1)"));
         func.setFirstPart("");
         func.setSecondPart("""
-                
+
                 (@string nvarchar(MAX), @delimiter char(1))
                 RETURNS @output TABLE(tbldata nvarchar(256))
                 BEGIN
@@ -902,15 +899,15 @@ class MsAntlrLoaderTest {
                     RETURN
                 END""");
 
-        schema.addFunction(func);
+        schema.addChild(func);
 
-        testDatabase("ms_schema_12.sql", d);
+        testDatabase("ms_schema_12.sql", d, exportDir);
     }
 
     @Test
-    void testDB13() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB13(@TempDir Path exportDir) throws Exception {
+        MsDatabase d = createDumpDB();
+        MsSchema schema = d.getDefaultSchema();
 
         schema.addPrivilege(new MsPrivilege(REVOKE, "SELECT", SCHEMA_DBO, QUOTED_MS_USER, false));
         schema.addPrivilege(new MsPrivilege(REVOKE, "UPDATE", SCHEMA_DBO, QUOTED_MS_USER, false));
@@ -928,7 +925,7 @@ class MsAntlrLoaderTest {
         seq.setCached(true);
         seq.setCache("1");
         seq.setOwner(MS_USER);
-        schema.addSequence(seq);
+        schema.addChild(seq);
 
         MsFunction func = new MsFunction("test_fnc");
         func.setAnsiNulls(true);
@@ -944,7 +941,7 @@ class MsAntlrLoaderTest {
                 END""");
         func.setOwner(MS_USER);
 
-        schema.addFunction(func);
+        schema.addChild(func);
 
         func = new MsFunction("fnc");
         func.setAnsiNulls(true);
@@ -959,7 +956,7 @@ class MsAntlrLoaderTest {
                 END""");
 
 
-        schema.addFunction(func);
+        schema.addChild(func);
 
         func.setOwner(MS_USER);
 
@@ -968,19 +965,19 @@ class MsAntlrLoaderTest {
         proc.setQuotedIdentified(true);
         proc.setFirstPart("");
         proc.setSecondPart("""
-                
+
                 AS
                 BEGIN
                     -- empty procedure
                     RETURN
                 END""");
-        schema.addFunction(proc);
+        schema.addChild(proc);
 
         proc.setOwner(MS_USER);
 
         MsTable table = new MsTable("test");
         table.setAnsiNulls(true);
-        schema.addTable(table);
+        schema.addChild(table);
 
         MsColumn col = new MsColumn("id");
         col.setType(INT);
@@ -996,14 +993,14 @@ class MsAntlrLoaderTest {
 
         var constraintCheck = new MsConstraintCheck("text_check");
         constraintCheck.setExpression("(LEN([text])>(0))");
-        table.addConstraint(constraintCheck);
+        table.addChild(constraintCheck);
 
 
         MsConstraintPk constriaintPk = new MsConstraintPk("PK_test", true);
         constriaintPk.setClustered(true);
         constriaintPk.setDataSpace(PRIMARY);
         constriaintPk.addColumn(new SimpleColumn("id"));
-        table.addConstraint(constriaintPk);
+        table.addChild(constriaintPk);
         table.setOwner(MS_USER);
 
         MsView view = new MsView("test_view");
@@ -1016,11 +1013,11 @@ class MsAntlrLoaderTest {
                     [test].[id],
                     [test].[text]
                 FROM [dbo].[test]""");
-        schema.addView(view);
+        schema.addChild(view);
         view.setOwner(MS_USER);
 
         MsIndex idx = new MsIndex("IX_test_id");
-        table.addIndex(idx);
+        table.addChild(idx);
         idx.addColumn(new SimpleColumn("id"));
 
         MsTrigger trigger = new MsTrigger("test_trigger");
@@ -1028,43 +1025,43 @@ class MsAntlrLoaderTest {
         trigger.setAnsiNulls(true);
         trigger.setFirstPart("");
         trigger.setSecondPart("""
-                
+
                 FOR UPDATE
                 AS\s
                     BEGIN
                         SET NOCOUNT ON;
                         EXEC [dbo].[trigger_proc];
                     END""");
-        table.addTrigger(trigger);
+        table.addChild(trigger);
 
-        testDatabase("ms_schema_13.sql", d);
+        testDatabase("ms_schema_13.sql", d, exportDir);
     }
 
     @Test
-    void testDB14() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB14(@TempDir Path exportDir) throws Exception {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         MsTable table = new MsTable("test");
         table.setAnsiNulls(true);
-        schema.addTable(table);
+        schema.addChild(table);
 
         MsColumn col = new MsColumn("id");
         col.setType(BIGINT);
         table.addColumn(col);
 
-        testDatabase("ms_schema_14.sql", d);
+        testDatabase("ms_schema_14.sql", d, exportDir);
     }
 
     @Test
-    void testDB15() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB15(@TempDir Path exportDir) throws Exception {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         // table1
         MsTable table = new MsTable("\"t_work\"");
         table.setAnsiNulls(true);
-        schema.addTable(table);
+        schema.addChild(table);
 
         MsColumn col = new MsColumn("id");
         col.setType(INT);
@@ -1073,7 +1070,7 @@ class MsAntlrLoaderTest {
         // table2
         MsTable table2 = new MsTable("\"t_chart\"");
         table2.setAnsiNulls(true);
-        schema.addTable(table2);
+        schema.addChild(table2);
         col = new MsColumn("id");
         col.setType(INT);
         table2.addColumn(col);
@@ -1092,20 +1089,20 @@ class MsAntlrLoaderTest {
                                ["t_work"].[id]\s
                            FROM [dbo].["t_work"]) t\s
                 JOIN [dbo].["t_chart"] c ON t.[id] = c.[id]""");
-        schema.addView(view);
+        schema.addChild(view);
 
-        testDatabase("ms_schema_15.sql", d);
+        testDatabase("ms_schema_15.sql", d, exportDir);
     }
 
     @Test
-    void testDB16() throws IOException, InterruptedException {
-        AbstractDatabase d = createDumpDB();
-        AbstractSchema schema = d.getDefaultSchema();
+    void testDB16(@TempDir Path exportDir) throws Exception {
+        IDatabase d = createDumpDB();
+        ISchema schema = d.getDefaultSchema();
 
         // table1
         MsTable table = new MsTable("\"t_work\"");
         table.setAnsiNulls(true);
-        schema.addTable(table);
+        schema.addChild(table);
 
         MsColumn col = new MsColumn("id");
         col.setType(INT);
@@ -1114,7 +1111,7 @@ class MsAntlrLoaderTest {
         // table2
         MsTable table2 = new MsTable("\"t_chart\"");
         table2.setAnsiNulls(true);
-        schema.addTable(table2);
+        schema.addChild(table2);
         col = new MsColumn("id");
         col.setType(INT);
         table2.addColumn(col);
@@ -1122,7 +1119,7 @@ class MsAntlrLoaderTest {
         // table 3
         MsTable table3 = new MsTable("\"t_memo\"");
         table3.setAnsiNulls(true);
-        schema.addTable(table3);
+        schema.addChild(table3);
         col = new MsColumn("name");
         col.setType(TEXT);
         table3.addColumn(col);
@@ -1147,14 +1144,12 @@ class MsAntlrLoaderTest {
                           JOIN [dbo].["t_memo"] m ON w.[id] = CONVERT(INT, CONVERT(VARCHAR(MAX), m.[name]))) t
                     JOIN [dbo].["t_chart"] c ON t.[id] = c.[id]\
                 """);
-        schema.addView(view);
+        schema.addChild(view);
 
-        testDatabase("ms_schema_16.sql", d);
+        testDatabase("ms_schema_16.sql", d, exportDir);
     }
 
-    private static AbstractDatabase createDumpDB() {
-        var settings = new CoreSettings();
-        settings.setDbType(DatabaseType.MS);
-        return new MsDumpLoader(() -> null, null, settings).createDatabaseWithSchema();
+    private static MsDatabase createDumpDB() {
+        return new MsDumpLoader(() -> null, null, new CoreSettings()).createDatabaseWithSchema();
     }
 }

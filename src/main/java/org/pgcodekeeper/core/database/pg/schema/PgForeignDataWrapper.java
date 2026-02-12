@@ -75,32 +75,6 @@ public final class PgForeignDataWrapper extends PgAbstractStatement
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(handler);
-        hasher.put(validator);
-        hasher.put(options);
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj instanceof PgForeignDataWrapper fdw && super.compare(obj)) {
-            return Objects.equals(handler, fdw.handler)
-                    && Objects.equals(validator, fdw.validator)
-                    && Objects.equals(options, fdw.options);
-        }
-        return false;
-    }
-
-    @Override
-    public AbstractDatabase getDatabase() {
-        return (AbstractDatabase) parent;
-    }
-
-    @Override
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sb = new StringBuilder();
         sb.append("CREATE FOREIGN DATA WRAPPER ");
@@ -161,9 +135,29 @@ public final class PgForeignDataWrapper extends PgAbstractStatement
     }
 
     @Override
-    public AbstractStatement shallowCopy() {
+    public void computeHash(Hasher hasher) {
+        hasher.put(handler);
+        hasher.put(validator);
+        hasher.put(options);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj instanceof PgForeignDataWrapper fdw && super.compare(obj)) {
+            return Objects.equals(handler, fdw.handler)
+                    && Objects.equals(validator, fdw.validator)
+                    && Objects.equals(options, fdw.options);
+        }
+        return false;
+    }
+
+    @Override
+    protected AbstractStatement getCopy() {
         PgForeignDataWrapper copyFwd = new PgForeignDataWrapper(name);
-        copyBaseFields(copyFwd);
         copyFwd.setHandler(handler);
         copyFwd.setValidator(validator);
         copyFwd.options.putAll(options);

@@ -19,10 +19,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;
@@ -95,7 +95,7 @@ class DepcyFinderTest {
         }
         settings.setEnableFunctionBodiesDependencies(true);
 
-        AbstractDatabase db = IntegrationTestUtils.loadTestDump(fileName + FILES_POSTFIX.SQL, getClass(), settings);
+        IDatabase db = IntegrationTestUtils.loadTestDump(fileName + FILES_POSTFIX.SQL, getClass(), settings);
 
         var deps = DepcyFinder.byPatterns(10, isReverse, Collections.emptyList(), false, db, List.of(objectName));
         String actual = String.join("\n", deps);

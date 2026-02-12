@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.formatter;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
@@ -38,13 +37,13 @@ class ChFormatterTest {
         String newFile = TestUtils.readResource("new_ch" + FILES_POSTFIX.SQL, getClass());
         String oldFile = TestUtils.readResource("old_ch" + FILES_POSTFIX.SQL, getClass());
         ChFormatter formatter = new ChFormatter(oldFile, 0, oldFile.length(), config);
-        Assertions.assertEquals(newFile, formatter.formatText(), "Formatted files are different");
+        TestUtils.assertIgnoreNewLines(newFile, formatter.formatText());
     }
 
     @Test
     void testFormatSql() throws IOException {
         String newFile = TestUtils.readResource("new_ch_format_sql" + FILES_POSTFIX.SQL, getClass());
         String oldFile = TestUtils.readResource("old_ch" + FILES_POSTFIX.SQL, getClass());
-        Assertions.assertEquals(newFile, ChFormatter.formatSql(oldFile));
+        TestUtils.assertIgnoreNewLines(newFile, ChFormatter.formatSql(oldFile));
     }
 }

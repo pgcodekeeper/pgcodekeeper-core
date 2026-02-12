@@ -15,12 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.project;
 
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.database.api.schema.IPrivilege;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractTable;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
@@ -115,14 +110,14 @@ public abstract class AbstractOverridesModelExporter extends AbstractModelExport
 
     @Override
     protected String getDumpSql(IStatement st) {
-        SQLScript script = new SQLScript(settings);
+        SQLScript script = new SQLScript(settings, st.getSeparator());
         Set<IPrivilege> privs = st.getPrivileges();
         st.appendOwnerSQL(script);
         IPrivilege.appendPrivileges(privs, script);
         appendDefaultPrivileges(st, privs, script);
 
-        if (DbObjType.TABLE == st.getStatementType()) {
-            for (AbstractColumn col : ((AbstractTable) st).getColumns()) {
+        if (st instanceof ITable table) {
+            for (IColumn col : table.getColumns()) {
                 IPrivilege.appendPrivileges(col.getPrivileges(), script);
             }
         }

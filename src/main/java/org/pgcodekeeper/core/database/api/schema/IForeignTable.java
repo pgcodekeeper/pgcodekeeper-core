@@ -19,6 +19,6 @@ package org.pgcodekeeper.core.database.api.schema;
  * Marker interface for foreign tables.
  * Foreign tables are used to access data stored in external data sources.
  */
-public interface IForeignTable {
+public interface IForeignTable extends ITable {
 
 }

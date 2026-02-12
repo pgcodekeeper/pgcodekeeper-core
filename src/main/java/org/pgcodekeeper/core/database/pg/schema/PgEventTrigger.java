@@ -125,17 +125,11 @@ public final class PgEventTrigger extends PgAbstractStatement {
     }
 
     @Override
-    public AbstractDatabase getDatabase() {
-        return (AbstractDatabase) parent;
-    }
-
-    @Override
-    public AbstractStatement shallowCopy() {
+    protected AbstractStatement getCopy() {
         PgEventTrigger evt = new PgEventTrigger(name);
-        copyBaseFields(evt);
-        evt.setEvent(event);
         evt.setExecutable(executable);
         evt.tags.addAll(tags);
+        evt.setEvent(event);
         evt.setMode(mode);
 
         return evt;

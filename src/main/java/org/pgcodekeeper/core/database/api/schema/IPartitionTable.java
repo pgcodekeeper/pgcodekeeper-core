@@ -19,7 +19,7 @@ package org.pgcodekeeper.core.database.api.schema;
  * Interface for partitioned tables.
  * Defines functionality for table partitioning including partition bounds and parent table references.
  */
-public interface IPartitionTable extends IStatement {
+public interface IPartitionTable extends ITable {
     /**
      * Gets the partition bounds specification for this partition.
      *

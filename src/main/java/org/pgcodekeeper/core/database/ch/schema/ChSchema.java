@@ -15,21 +15,23 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import java.util.*;
-import java.util.stream.Stream;
-
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
+
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Represents a ClickHouse database schema (database in ClickHouse terms).
  * Contains tables, views, dictionaries and has an associated engine type.
  */
-public final class ChSchema extends AbstractSchema implements IChStatement {
+public class ChSchema extends ChAbstractStatement implements ISchema, IStatementContainer {
 
     private String engine = "Atomic";
+    private final Map<String, ChTable> tables = new LinkedHashMap<>();
+    private final Map<String, ChView> views = new LinkedHashMap<>();
     private final Map<String, ChDictionary> dictionaries = new LinkedHashMap<>();
 
     /**
@@ -48,45 +50,38 @@ public final class ChSchema extends AbstractSchema implements IChStatement {
 
     @Override
     public Stream<IRelation> getRelations() {
-        return Stream.concat(super.getRelations(), dictionaries.values().stream());
+        return Stream.concat(Stream.concat(tables.values().stream(), views.values().stream()),
+                dictionaries.values().stream());
     }
 
     @Override
-    public IRelation getRelation(String name) {
-        IRelation result = super.getRelation(name);
-        return result != null ? result : getDictionary(name);
-    }
-
-    private void addDictionary(final ChDictionary dictionary) {
-        addUnique(dictionaries, dictionary);
+    public void fillDescendantsList(List<Collection<? extends AbstractStatement>> l) {
+        fillChildrenList(l);
+        for (var table : tables.values()) {
+            table.fillDescendantsList(l);
+        }
+        for (var view : views.values()) {
+            view.fillDescendantsList(l);
+        }
     }
 
     @Override
-    protected void fillChildrenList(List<Collection<? extends AbstractStatement>> l) {
-        super.fillChildrenList(l);
+    public void fillChildrenList(List<Collection<? extends AbstractStatement>> l) {
+        l.add(tables.values());
+        l.add(views.values());
         l.add(dictionaries.values());
     }
 
     @Override
-    public AbstractStatement getChild(String name, DbObjType type) {
-        if (type == DbObjType.DICTIONARY) {
-            return getDictionary(name);
+    public IRelation getRelation(String name) {
+        IRelation result = tables.get(name);
+        if (result == null) {
+            result = views.get(name);
         }
-        return super.getChild(name, type);
-    }
-
-    private ChDictionary getDictionary(String name) {
-        return getChildByName(dictionaries, name);
-    }
-
-    @Override
-    public void addChild(IStatement st) {
-        DbObjType type = st.getStatementType();
-        if (type == DbObjType.DICTIONARY) {
-            addDictionary((ChDictionary) st);
-            return;
+        if (result == null) {
+            result = dictionaries.get(name);
         }
-        super.addChild(st);
+        return result;
     }
 
     @Override
@@ -121,8 +116,109 @@ public final class ChSchema extends AbstractSchema implements IChStatement {
     }
 
     @Override
+    public AbstractStatement getChild(String name, DbObjType type) {
+        return switch (type) {
+            case TABLE -> getTable(name);
+            case VIEW -> getChildByName(views, name);
+            case DICTIONARY -> getChildByName(dictionaries, name);
+            default -> null;
+        };
+    }
+
+    @Override
+    public Collection<IStatement> getChildrenByType(DbObjType type) {
+        return switch (type) {
+            case TABLE -> Collections.unmodifiableCollection(tables.values());
+            case VIEW -> Collections.unmodifiableCollection(views.values());
+            case DICTIONARY -> Collections.unmodifiableCollection(dictionaries.values());
+            default -> List.of();
+        };
+    }
+
+    @Override
+    public void addChild(IStatement st) {
+        DbObjType type = st.getStatementType();
+        switch (type) {
+            case DICTIONARY:
+                addUnique(dictionaries, (ChDictionary) st);
+                break;
+            case TABLE:
+                addUnique(tables, (ChTable) st);
+                break;
+            case VIEW:
+                addUnique(views, (ChView) st);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported child type: " + type);
+        }
+    }
+
+    /**
+     * Gets a statement container by name.
+     *
+     * @param name the name of the container to find
+     * @return the statement container with the given name, or null if not found
+     */
+    @Override
+    public IStatementContainer getStatementContainer(String name) {
+        IStatementContainer container = tables.get(name);
+        return container == null ? views.get(name) : container;
+    }
+
+    /**
+     * Gets a stream of all statement containers in this schema.
+     *
+     * @return a stream of statement containers
+     */
+    public Stream<IStatementContainer> getStatementContainers() {
+        return Stream.concat(tables.values().stream(), views.values().stream());
+    }
+
+    /**
+     * Finds an index by name across all tables and views in this schema.
+     *
+     * @param indexName the name of the index to find
+     * @return the index with the given name, or null if not found
+     */
+    public ChIndex getIndexByName(String indexName) {
+        return (ChIndex) getStatementContainers()
+                .map(c -> c.getChild(indexName, DbObjType.INDEX))
+                .filter(Objects::nonNull)
+                .findAny().orElse(null);
+    }
+
+    /**
+     * Finds a constraint by name across all tables and views in this schema.
+     *
+     * @param constraintName the name of the constraint to find
+     * @return the constraint with the given name, or null if not found
+     */
+    public ChConstraint getConstraintByName(String constraintName) {
+        return (ChConstraint) getStatementContainers()
+                .map(c -> c.getChild(constraintName, DbObjType.CONSTRAINT))
+                .filter(Objects::nonNull)
+                .findAny().orElse(null);
+    }
+
+    @Override
+    protected void computeChildrenHash(Hasher hasher) {
+        hasher.putUnordered(views);
+        hasher.putUnordered(tables);
+        hasher.putUnordered(dictionaries);
+    }
+
+    @Override
+    public boolean compareChildren(AbstractStatement obj) {
+        if (obj instanceof ChSchema schema) {
+            return views.equals(schema.views)
+                    && tables.equals(schema.tables)
+                    && dictionaries.equals(schema.dictionaries);
+        }
+        return false;
+    }
+
+    @Override
     public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
         hasher.put(engine);
     }
 
@@ -141,29 +237,13 @@ public final class ChSchema extends AbstractSchema implements IChStatement {
     }
 
     @Override
-    public boolean compareChildren(AbstractStatement obj) {
-        if (obj instanceof ChSchema schema) {
-            return super.compareChildren(obj)
-                    && dictionaries.equals(schema.dictionaries);
-        }
-        return false;
-    }
-
-    @Override
-    protected void computeChildrenHash(Hasher hasher) {
-        super.computeChildrenHash(hasher);
-        hasher.putUnordered(dictionaries);
-    }
-
-    @Override
-    protected AbstractSchema getSchemaCopy() {
+    protected ChSchema getCopy() {
         var schema = new ChSchema(name);
         schema.setEngine(engine);
         return schema;
     }
 
-    @Override
-    public void appendComments(SQLScript script) {
-        // no impl
+    public ChTable getTable(String name) {
+        return getChildByName(tables, name);
     }
 }

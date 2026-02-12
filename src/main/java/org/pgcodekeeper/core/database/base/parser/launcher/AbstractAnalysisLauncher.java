@@ -19,10 +19,11 @@ import java.util.*;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
+import org.pgcodekeeper.core.database.api.launcher.IAnalysisLauncher;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.*;
 import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.exception.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * This class and all child classes contains statement, its contexts and
  * implementation of logic for launch the analysis of statement's contexts.
  */
-public abstract class AbstractAnalysisLauncher {
+public abstract class AbstractAnalysisLauncher implements IAnalysisLauncher {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractAnalysisLauncher.class);
 
@@ -53,6 +54,7 @@ public abstract class AbstractAnalysisLauncher {
         this.location = location;
     }
 
+    @Override
     public IStatement getStmt() {
         return stmt;
     }
@@ -62,6 +64,7 @@ public abstract class AbstractAnalysisLauncher {
      *
      * @return schema name or null if not applicable
      */
+    @Override
     public String getSchemaName() {
         if (stmt instanceof ISearchPath path) {
             return path.getSchemaName();
@@ -75,6 +78,7 @@ public abstract class AbstractAnalysisLauncher {
      *
      * @return unmodifiable list of references
      */
+    @Override
     public List<ObjectLocation> getReferences() {
         return Collections.unmodifiableList(references);
     }
@@ -92,7 +96,8 @@ public abstract class AbstractAnalysisLauncher {
      * @param db
      *            database
      */
-    public void updateStmt(AbstractDatabase db) {
+    @Override
+    public void updateStmt(IDatabase db) {
         if (stmt.getDatabase() != db) {
             // statement came from another DB object, probably a library
             // for proper depcy processing, find its twin in the final DB object
@@ -109,7 +114,8 @@ public abstract class AbstractAnalysisLauncher {
      * @param meta   metadata container for dependency resolution
      * @return set of dependencies found
      */
-    public Set<GenericColumn> launchAnalyze(List<Object> errors, MetaContainer meta) {
+    @Override
+    public Set<GenericColumn> launchAnalyze(List<Object> errors, IMetaContainer meta) {
         // Duplicated objects don't have parent, skip them
         if (stmt.getParent() == null) {
             return Collections.emptySet();
@@ -172,5 +178,5 @@ public abstract class AbstractAnalysisLauncher {
      * @return set of object locations representing dependencies found in the context
      * @throws UnresolvedReferenceException if references cannot be resolved
      */
-    protected abstract Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta);
+    protected abstract Set<ObjectLocation> analyze(ParserRuleContext ctx, IMetaContainer meta);
 }

@@ -25,7 +25,7 @@ import org.pgcodekeeper.core.database.base.schema.SimpleColumn;
  * Interface for database objects that contain simple column references.
  * Used primarily by indexes and similar objects that reference columns with attributes.
  */
-public interface ISimpleColumnContainer extends ISearchPath {
+public interface ISimpleColumnContainer extends IStatement {
     /**
      * Adds a column reference to this container.
      *

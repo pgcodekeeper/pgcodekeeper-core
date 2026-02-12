@@ -17,9 +17,9 @@ package org.pgcodekeeper.core.database.ch.parser.expr;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.parser.antlr.AbstractExpr;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
 
@@ -35,7 +35,7 @@ public abstract class ChAbstractExpr extends AbstractExpr {
         this.schema = parent.schema;
     }
 
-    protected ChAbstractExpr(String schema, MetaContainer meta) {
+    protected ChAbstractExpr(String schema, IMetaContainer meta) {
         super(meta);
         this.schema = schema;
     }

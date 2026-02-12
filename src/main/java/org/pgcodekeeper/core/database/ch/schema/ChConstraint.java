@@ -15,20 +15,25 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import java.util.Objects;
-
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
+import org.pgcodekeeper.core.database.api.schema.IConstraint;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Objects;
 
 /**
  * Represents a ClickHouse table constraint (CHECK or ASSUME).
  */
-public final class ChConstraint extends AbstractConstraint implements IChStatement {
+public class ChConstraint extends ChAbstractStatement implements IConstraint {
 
     private final boolean isAssume;
     private String expr;
+    protected boolean isNotValid;
 
     /**
      * Creates a new ClickHouse constraint.
@@ -44,6 +49,15 @@ public final class ChConstraint extends AbstractConstraint implements IChStateme
     public void setExpr(String expr) {
         this.expr = expr;
         resetHash();
+    }
+
+    public void setNotValid(boolean notValid) {
+        this.isNotValid = notValid;
+        resetHash();
+    }
+
+    public boolean isNotValid() {
+        return isNotValid;
     }
 
     @Override
@@ -86,8 +100,29 @@ public final class ChConstraint extends AbstractConstraint implements IChStateme
     }
 
     @Override
+    public Collection<String> getColumns() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public boolean containsColumn(String name) {
+        return getColumns().contains(name);
+    }
+
+
+
+    @Override
+    public ObjectLocation getLocation() {
+        ObjectLocation location = meta.getLocation();
+        if (location == null) {
+            location = parent.getLocation();
+        }
+        return location;
+    }
+
+    @Override
     public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
+        hasher.put(isNotValid);
         hasher.put(isAssume);
         hasher.put(expr);
     }
@@ -97,14 +132,27 @@ public final class ChConstraint extends AbstractConstraint implements IChStateme
         if (this == obj) {
             return true;
         }
-        return obj instanceof ChConstraint constr && super.compare(constr)
-                && compareUnalterable(constr);
+
+        return obj instanceof ChConstraint con && super.compare(obj)
+                && isNotValid == con.isNotValid
+                && compareUnalterable(con);
     }
 
     @Override
-    protected AbstractConstraint getConstraintCopy() {
-        var constr = new ChConstraint(name, isAssume);
-        constr.setExpr(expr);
-        return constr;
+    protected ChConstraint getCopy() {
+        var constraintDst = new ChConstraint(name, isAssume);
+        constraintDst.setNotValid(isNotValid);
+        constraintDst.setExpr(expr);
+        return constraintDst;
+    }
+
+    protected void appendAlterTable(StringBuilder sb) {
+        sb.append("ALTER ").append(parent.getStatementType().name()).append(' ');
+        sb.append(getParent().getQualifiedName());
+    }
+
+    @Override
+    public String getTableName() {
+        return parent.getName();
     }
 }

@@ -100,8 +100,10 @@ public final class PgUserMapping extends PgAbstractStatement implements PgForeig
     }
 
     @Override
-    public AbstractDatabase getDatabase() {
-        return (AbstractDatabase) parent;
+    protected AbstractStatement getCopy() {
+        PgUserMapping copyUsm = new PgUserMapping(user, server);
+        copyUsm.options.putAll(options);
+        return copyUsm;
     }
 
     @Override
@@ -140,14 +142,6 @@ public final class PgUserMapping extends PgAbstractStatement implements PgForeig
         }
         sbString.append("FOR ").append(getQualifiedName());
         script.addStatement(sbString);
-    }
-
-    @Override
-    public AbstractStatement shallowCopy() {
-        PgUserMapping copyUsm = new PgUserMapping(user, server);
-        copyBaseFields(copyUsm);
-        copyUsm.options.putAll(options);
-        return copyUsm;
     }
 
     @Override

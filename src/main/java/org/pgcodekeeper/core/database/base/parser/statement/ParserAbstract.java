@@ -25,8 +25,6 @@ import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.project.AbstractModelExporter;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.exception.MisplacedObjectException;
@@ -48,7 +46,7 @@ import java.util.stream.Collectors;
  * Abstract base class for database object parsers that provides common parsing functionality
  * and utilities for working with ANTLR-generated parse trees.
  */
-public abstract class ParserAbstract<S extends AbstractDatabase> {
+public abstract class ParserAbstract<S extends IDatabase> {
 
     private static final String SCHEMA_ERROR = "Object must be schema qualified: ";
     private static final String LOCATION_ERROR = "The object %s must be defined in the file: %s";
@@ -200,7 +198,7 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
                                              DbObjType type, String action, String signature) {
         ObjectLocation loc = getLocation(ids, type, action, false, signature, LocationType.REFERENCE);
         if (loc != null) {
-            db.addReference(fileName, loc);
+            addReference(loc);
         }
 
         return loc;
@@ -259,65 +257,19 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
         return statement;
     }
 
-    /**
-     * Safely retrieves a database statement with validation.
-     * <p>
-     * Note: Always returns null if parser is in ref mode.
-     *
-     * @param container the containing statement
-     * @param type      the type of the statement to find
-     * @param ctx       the parse tree context
-     * @return the found statement or null if parser is in ref mode
-     * @throws UnresolvedReferenceException if statement not found
-     */
-    public IStatement getChildSafe(
-            IStatementContainer container,
-            DbObjType type, ParserRuleContext ctx) {
-        return getChildSafe(container, type, ctx.getText(), ctx.start);
-    }
-
-    /**
-     * Safely retrieves a database statement by name with validation.
-     * <p>
-     * Note: Always returns null if parser is in ref mode.
-     *
-     * @param container the containing statement
-     * @param type      the type of the statement to find
-     * @param name      the name of the statement to find
-     * @param errToken  the token for error reporting
-     * @return the found statement
-     * @throws UnresolvedReferenceException if statement not found
-     */
-    public IStatement getChildSafe(IStatementContainer container,
-                                   DbObjType type,
-                                   String name, Token errToken) {
-        if (isRefMode()) {
-            return null;
-        }
-        IStatement statement = container.getChild(name, type);
-        if (statement == null) {
-            throw new UnresolvedReferenceException("Cannot find object in database: "
-                    + name, errToken);
-        }
-
-        checkLocation(statement, errToken);
-
-        return statement;
-    }
-
-    protected void addSafe(IStatementContainer parent, AbstractStatement child,
+    protected void addSafe(IStatementContainer parent, IStatement child,
                            List<? extends ParserRuleContext> ids) {
         addSafe(parent, child, ids, null);
     }
 
-    protected void addSafe(IStatementContainer parent, AbstractStatement child,
+    protected void addSafe(IStatementContainer parent, IStatement child,
                            List<? extends ParserRuleContext> ids, String signature) {
         doSafe(IStatementContainer::addChild, parent, child);
         ObjectLocation loc = getLocation(ids, child.getStatementType(),
                 ACTION_CREATE, false, signature, LocationType.DEFINITION);
         if (loc != null) {
             child.setLocation(loc);
-            db.addReference(fileName, loc);
+            addReference(loc);
         }
 
         // TODO move to beginning of the method later
@@ -441,17 +393,13 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
             if (!refMode) {
                 st.addDependency(loc.getObj());
             }
-            db.addReference(fileName, loc);
+            addReference(loc);
         }
     }
 
     protected abstract boolean isSystemSchema(String schema);
 
-    protected final DatabaseType getDbType() {
-        return db.getDbType();
-    }
-
-    protected AbstractSchema getSchemaSafe(List<? extends ParserRuleContext> ids) {
+    protected ISchema getSchemaSafe(List<? extends ParserRuleContext> ids) {
         ParserRuleContext schemaCtx = QNameParser.getSchemaNameCtx(ids);
 
         if (schemaCtx == null) {
@@ -462,7 +410,7 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
                     QNameParser.getFirstNameCtx(ids).start);
         }
 
-        AbstractSchema schema = db.getSchema(schemaCtx.getText());
+        ISchema schema = db.getSchema(schemaCtx.getText());
 
         if (schema != null || refMode) {
             return schema;
@@ -547,7 +495,7 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
                 .setCtx(ctx)
                 .build();
 
-        db.addReference(fileName, loc);
+        addReference(loc);
         return loc;
     }
 
@@ -561,7 +509,7 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
                 .setAction(action)
                 .setCtx(ctx)
                 .build();
-        db.addReference(fileName, loc);
+        addReference(loc);
     }
 
     protected static String getStrForStmtAction(String action, DbObjType type, ParseTree id) {
@@ -582,7 +530,7 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
      */
     protected abstract String getStmtAction();
 
-    protected AbstractSchema createAndAddSchemaWithCheck(ParserRuleContext nameCtx) {
+    protected ISchema createAndAddSchemaWithCheck(ParserRuleContext nameCtx) {
         String name = nameCtx.getText();
         var defaultSchema = db.getDefaultSchema();
         // override the default schema location if we created it
@@ -594,10 +542,14 @@ public abstract class ParserAbstract<S extends AbstractDatabase> {
             return defaultSchema;
         }
 
-        AbstractSchema schema = createSchema(name);
+        ISchema schema = createSchema(name);
         addSafe(db, schema, List.of(nameCtx));
         return schema;
     }
 
-    protected abstract AbstractSchema createSchema(String name);
+    protected abstract ISchema createSchema(String name);
+
+    private void addReference(ObjectLocation loc) {
+        db.addReference(fileName, loc);
+    };
 }

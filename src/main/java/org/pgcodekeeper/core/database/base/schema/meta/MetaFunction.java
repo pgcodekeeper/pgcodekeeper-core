@@ -145,6 +145,11 @@ public final class MetaFunction extends MetaStatement implements IFunction {
         this.returns = returns;
     }
 
+    @Override
+    public boolean needDrop(IFunction newFunction) {
+        return false;
+    }
+
     /**
      * Alias for {@link #getSignature()} which provides a unique function ID.
      * <p>

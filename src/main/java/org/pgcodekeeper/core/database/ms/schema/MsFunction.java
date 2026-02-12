@@ -18,7 +18,7 @@ package org.pgcodekeeper.core.database.ms.schema;
 import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.base.schema.AbstractFunction;
+import org.pgcodekeeper.core.database.api.schema.IFunction;
 import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
@@ -28,11 +28,6 @@ import org.pgcodekeeper.core.hasher.Hasher;
 public final class MsFunction extends MsAbstractFunction {
 
     private MsFunctionTypes funcType = MsFunctionTypes.SCALAR;
-
-    @Override
-    public DbObjType getStatementType() {
-        return DbObjType.FUNCTION;
-    }
 
     /**
      * Creates a new Microsoft SQL function.
@@ -44,22 +39,23 @@ public final class MsFunction extends MsAbstractFunction {
     }
 
     @Override
-    protected void appendFunctionFullSQL(StringBuilder sbSQL, boolean isCreate) {
-        sbSQL.append("SET QUOTED_IDENTIFIER ").append(isQuotedIdentified() ? "ON" : "OFF");
-        sbSQL.append(GO).append('\n');
-        sbSQL.append("SET ANSI_NULLS ").append(isAnsiNulls() ? "ON" : "OFF");
-        sbSQL.append(GO).append('\n');
-        appendSourceStatement(isCreate, sbSQL);
+    public DbObjType getStatementType() {
+        return DbObjType.FUNCTION;
     }
 
     @Override
-    protected boolean compareUnalterable(AbstractFunction func) {
+    protected void appendFunctionFullSQL(StringBuilder sbSQL, boolean isCreate) {
+        appendSourceStatement(sbSQL, isQuotedIdentified(), isAnsiNulls(), isCreate);
+    }
+
+    @Override
+    protected boolean compareUnalterable(MsAbstractCommonFunction func) {
         return func instanceof MsAbstractFunction && super.compareUnalterable(func)
                 && Objects.equals(funcType, ((MsFunction) func).funcType);
     }
 
     @Override
-    public boolean needDrop(AbstractFunction newFunction) {
+    public boolean needDrop(IFunction newFunction) {
         if (newFunction instanceof MsFunction msFunction) {
             return funcType != msFunction.funcType;
         }
