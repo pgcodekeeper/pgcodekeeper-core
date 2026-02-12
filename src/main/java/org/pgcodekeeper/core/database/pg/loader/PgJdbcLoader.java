@@ -153,14 +153,14 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
             new PgViewsReader(this).read();
             new PgTablesReader(this).read();
             new PgRulesReader(this).read();
-            if (SupportedPgVersion.GP_VERSION_7.isLE(getVersion())) {
+            if (PgSupportedVersion.GP_VERSION_7.isLE(getVersion())) {
                 new PgPoliciesReader(this).read();
             }
             new PgTriggersReader(this).read();
             new PgIndicesReader(this).read();
             new PgConstraintsReader(this).read();
             new PgTypesReader(this).read();
-            if (SupportedPgVersion.GP_VERSION_7.isLE(getVersion())) {
+            if (PgSupportedVersion.GP_VERSION_7.isLE(getVersion())) {
                 new PgStatisticsReader(this).read();
             }
 
@@ -185,7 +185,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
             }
             new PgCollationsReader(this).read();
 
-            if (!SupportedPgVersion.GP_VERSION_7.isLE(getVersion())) {
+            if (!PgSupportedVersion.GP_VERSION_7.isLE(getVersion())) {
                 sequencesReader.querySequencesData(d);
             }
             connection.commit();
@@ -193,7 +193,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
 
             d.sortColumns();
 
-            d.setVersion(SupportedPgVersion.valueOf(getVersion()));
+            d.setVersion(PgSupportedVersion.valueOf(getVersion()));
             info(Messages.JdbcLoader_log_succes_queried);
         } catch (InterruptedException ex) {
             throw ex;
@@ -219,21 +219,21 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
         setCurrentOperation(Messages.JdbcLoaderBase_log_reading_pg_version);
         int version;
         try (ResultSet res = runner.runScript(statement, QUERY_CHECK_PG_VERSION)) {
-            version = res.next() ? res.getInt(1) : SupportedPgVersion.GP_VERSION_6.getVersion();
+            version = res.next() ? res.getInt(1) : PgSupportedVersion.GP_VERSION_6.getVersion();
             setVersion(version);
             debug(Messages.JdbcLoaderBase_log_load_version, getVersion());
         }
-        if (!isGreenplumDb && !SupportedPgVersion.VERSION_14.isLE(version)) {
+        if (!isGreenplumDb && !PgSupportedVersion.VERSION_14.isLE(version)) {
             throw new IllegalStateException(Messages.JdbcLoaderBase_unsupported_pg_version);
         }
-        if (isGreenplumDb && !SupportedPgVersion.GP_VERSION_6.isLE(version)) {
+        if (isGreenplumDb && !PgSupportedVersion.GP_VERSION_6.isLE(version)) {
             throw new IllegalStateException(Messages.JdbcLoaderBase_unsupported_gp_version);
         }
     }
 
     protected void queryCheckLastSysOid() throws SQLException, InterruptedException {
         setCurrentOperation(Messages.JdbcLoaderBase_log_get_last_oid);
-        if (SupportedPgVersion.VERSION_15.isLE(getVersion())) {
+        if (PgSupportedVersion.VERSION_15.isLE(getVersion())) {
             lastSysOid = FIRST_NORMAL_OBJECT_ID - 1L;
         } else {
             try (ResultSet res = runner.runScript(statement, QUERY_CHECK_LAST_SYS_OID)) {
@@ -317,7 +317,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
         setPrivileges(st, aclItemsArrayAsString, null, schemaName);
     }
 
-    public void setPrivileges(AbstractColumn column, AbstractTable t, String aclItemsArrayAsString, String schemaName) {
+    public void setPrivileges(PgColumn column, PgAbstractTable t, String aclItemsArrayAsString, String schemaName) {
         setPrivileges(column, PgDiffUtils.getQuotedName(t.getName()), aclItemsArrayAsString,
                 t.getOwner(), PgDiffUtils.getQuotedName(column.getName()), schemaName);
     }
@@ -385,7 +385,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
                 stType = "TABLE";
                 if (columnId != null) {
                     order = "raxw";
-                } else if (SupportedPgVersion.VERSION_17.isLE(version)) {
+                } else if (PgSupportedVersion.VERSION_17.isLE(version)) {
                     order = "raxdtDwm";
                 } else {
                     order = "raxdtDw";

@@ -16,9 +16,9 @@
 package org.pgcodekeeper.core.database.ms.parser.statement;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Create_schemaContext;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
+import org.pgcodekeeper.core.database.ms.schema.MsSchema;
 import org.pgcodekeeper.core.settings.ISettings;
 
 /**
@@ -43,7 +43,7 @@ public final class MsCreateSchema extends MsParserAbstract {
 
     @Override
     public void parseObject() {
-        AbstractSchema schema = createAndAddSchemaWithCheck(ctx.schema_name);
+        MsSchema schema = (MsSchema) createAndAddSchemaWithCheck(ctx.schema_name);
         if (ctx.owner_name != null && !settings.isIgnorePrivileges()) {
             schema.setOwner(ctx.owner_name.getText());
         }

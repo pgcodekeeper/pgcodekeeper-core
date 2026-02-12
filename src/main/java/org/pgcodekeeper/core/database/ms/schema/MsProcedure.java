@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.database.ms.schema;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.base.schema.AbstractFunction;
+import org.pgcodekeeper.core.database.api.schema.IFunction;
 
 /**
  * Represents a Microsoft SQL stored procedure.
@@ -40,16 +40,11 @@ public final class MsProcedure extends MsAbstractFunction {
 
     @Override
     protected void appendFunctionFullSQL(StringBuilder sbSQL, boolean isCreate) {
-        sbSQL.append("SET QUOTED_IDENTIFIER ").append(isQuotedIdentified() ? "ON" : "OFF");
-        sbSQL.append(GO).append('\n');
-        sbSQL.append("SET ANSI_NULLS ").append(isAnsiNulls() ? "ON" : "OFF");
-        sbSQL.append(GO).append('\n');
-
-        appendSourceStatement(isCreate, sbSQL);
+        appendSourceStatement(sbSQL, isQuotedIdentified(), isAnsiNulls(), isCreate);
     }
 
     @Override
-    public boolean needDrop(AbstractFunction newFunction) {
+    public boolean needDrop(IFunction newFunction) {
         return newFunction instanceof MsClrProcedure;
     }
 

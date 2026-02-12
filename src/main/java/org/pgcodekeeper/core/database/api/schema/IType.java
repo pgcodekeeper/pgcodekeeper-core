@@ -15,5 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
-public interface IType extends IStatement {
+/**
+ * Interface for database type
+ */
+public interface IType extends ISearchPath {
+
+    @Override
+    default DbObjType getStatementType() {
+        return DbObjType.TYPE;
+    }
 }

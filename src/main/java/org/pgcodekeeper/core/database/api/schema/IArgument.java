@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.database.api.schema;
 
 /**
- * Interface for function argument.
+ * Interface for database function argument
  */
 public interface IArgument {
 

@@ -22,8 +22,8 @@ import java.util.Map.Entry;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.utils.Pair;
@@ -58,7 +58,7 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
      */
     private final boolean isLocalScope;
 
-    protected ChAbstractExprWithNmspc(String schema, MetaContainer meta) {
+    protected ChAbstractExprWithNmspc(String schema, IMetaContainer meta) {
         super(schema, meta);
         this.isLocalScope = false;
     }

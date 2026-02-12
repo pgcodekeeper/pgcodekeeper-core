@@ -21,6 +21,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.base.schema.*;
@@ -36,7 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T> the type of database schema being built
  */
-public class CustomParserListener<T extends AbstractDatabase> {
+public class CustomParserListener<T extends IDatabase> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CustomParserListener.class);
 

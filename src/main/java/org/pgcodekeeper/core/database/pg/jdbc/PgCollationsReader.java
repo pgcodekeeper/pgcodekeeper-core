@@ -19,7 +19,6 @@ import java.sql.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.schema.PgCollation;
 import org.pgcodekeeper.core.utils.Utils;
@@ -40,7 +39,7 @@ public final class PgCollationsReader extends PgAbstractSearchPathJdbcReader {
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String schemaName = schema.getName();
         String collName = res.getString("collname");
         loader.setCurrentObject(new GenericColumn(schemaName, collName, DbObjType.COLLATION));
@@ -58,7 +57,7 @@ public final class PgCollationsReader extends PgAbstractSearchPathJdbcReader {
 
         loader.setComment(coll, res);
 
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             String provider = res.getString("collprovider");
             switch (provider) {
                 case "c":
@@ -67,9 +66,9 @@ public final class PgCollationsReader extends PgAbstractSearchPathJdbcReader {
                 case "i":
                     coll.setProvider("icu");
                     String locale = null;
-                    if (SupportedPgVersion.VERSION_17.isLE(loader.getVersion())) {
+                    if (PgSupportedVersion.VERSION_17.isLE(loader.getVersion())) {
                         locale = res.getString("colllocale");
-                    } else if (SupportedPgVersion.VERSION_15.isLE(loader.getVersion())) {
+                    } else if (PgSupportedVersion.VERSION_15.isLE(loader.getVersion())) {
                         locale = res.getString("colliculocale");
                     }
                     if (locale != null) {
@@ -86,7 +85,7 @@ public final class PgCollationsReader extends PgAbstractSearchPathJdbcReader {
             coll.setDeterministic(res.getBoolean("collisdeterministic"));
         }
 
-        if (SupportedPgVersion.VERSION_16.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_16.isLE(loader.getVersion())) {
             String rules = res.getString("collicurules");
             if (rules != null) {
                 coll.setRules(Utils.quoteString(rules));
@@ -121,19 +120,19 @@ public final class PgCollationsReader extends PgAbstractSearchPathJdbcReader {
                 .column("res.collowner::bigint")
                 .from("pg_catalog.pg_collation res");
 
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             builder
                     .column("res.collprovider")
                     .column("res.collisdeterministic");
         }
 
-        if (SupportedPgVersion.VERSION_17.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_17.isLE(loader.getVersion())) {
             builder.column("res.colllocale");
-        } else if (SupportedPgVersion.VERSION_15.isLE(loader.getVersion())) {
+        } else if (PgSupportedVersion.VERSION_15.isLE(loader.getVersion())) {
             builder.column("res.colliculocale");
         }
 
-        if (SupportedPgVersion.VERSION_16.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_16.isLE(loader.getVersion())) {
             builder.column("res.collicurules");
         }
     }

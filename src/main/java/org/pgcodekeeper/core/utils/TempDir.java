@@ -30,16 +30,6 @@ public final class TempDir implements AutoCloseable {
     private final Path dir;
 
     /**
-     * Creates a temporary directory with specified prefix in the system temp directory.
-     *
-     * @param prefix the directory name prefix
-     * @throws IOException if directory creation fails
-     */
-    public TempDir(String prefix) throws IOException {
-        this.dir = FileUtils.createTempDirectory(prefix);
-    }
-
-    /**
      * Creates a temporary directory with specified prefix in the given parent directory.
      *
      * @param dir    the parent directory

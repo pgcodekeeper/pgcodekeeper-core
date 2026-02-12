@@ -15,5 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
-public interface IPolicy {
+/**
+ * Interface for database policy
+ */
+public interface IPolicy extends IStatement {
+
+    @Override
+    default DbObjType getStatementType() {
+        return DbObjType.POLICY;
+    }
 }

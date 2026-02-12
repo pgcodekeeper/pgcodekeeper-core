@@ -19,11 +19,11 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.launcher.AbstractAnalysisLauncher;
-import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.database.ms.parser.expr.*;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.ExpressionContext;
+import org.pgcodekeeper.core.database.ms.schema.MsAbstractStatement;
 
 /**
  * Launcher for analyzing Microsoft SQL expressions.
@@ -38,13 +38,13 @@ public class MsExpressionAnalysisLauncher extends AbstractAnalysisLauncher {
      * @param ctx      the expression parse tree context
      * @param location the source location identifier
      */
-    public MsExpressionAnalysisLauncher(AbstractStatement stmt, ExpressionContext ctx, String location) {
+    public MsExpressionAnalysisLauncher(MsAbstractStatement stmt, ExpressionContext ctx, String location) {
         super(stmt, ctx, location);
     }
 
     @Override
-    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
-        if (stmt instanceof AbstractColumn) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, IMetaContainer meta) {
+        if (stmt instanceof IColumn) {
             var expr = new MsExprWithNmspc(getSchemaName(), meta);
             var table = stmt.getParent();
             String schemaName = table.getParent().getName();

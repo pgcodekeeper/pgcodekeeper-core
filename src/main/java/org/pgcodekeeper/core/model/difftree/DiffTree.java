@@ -16,13 +16,13 @@
 package org.pgcodekeeper.core.model.difftree;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IColumn;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
+import org.pgcodekeeper.core.database.api.schema.ITable;
 import org.pgcodekeeper.core.diff.Comparison;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
-import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
-import org.pgcodekeeper.core.database.base.schema.AbstractTable;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.ISettings;
 
@@ -60,7 +60,7 @@ public final class DiffTree {
      */
     public static TreeElement create(ISettings settings, IDatabase left, IDatabase right, IMonitor monitor)
             throws InterruptedException {
-        return new DiffTree(settings, monitor).createTree((AbstractDatabase) left, (AbstractDatabase) right);
+        return new DiffTree(settings, monitor).createTree(left, right);
     }
 
     /**
@@ -73,10 +73,10 @@ public final class DiffTree {
      * @deprecated this method is deprecated
      */
     @Deprecated
-    public static void addColumns(List<AbstractColumn> left, List<AbstractColumn> right,
+    public static void addColumns(Collection<IColumn> left, Collection<IColumn> right,
                                   TreeElement parent, List<TreeElement> list) {
-        for (AbstractColumn sLeft : left) {
-            AbstractColumn foundRight = right.stream().filter(
+        for (IColumn sLeft : left) {
+            IColumn foundRight = right.stream().filter(
                             sRight -> sLeft.getName().equals(sRight.getName()))
                     .findAny().orElse(null);
 
@@ -87,7 +87,7 @@ public final class DiffTree {
             }
         }
 
-        for (AbstractColumn sRight : right) {
+        for (IColumn sRight : right) {
             if (left.stream().noneMatch(sLeft -> sRight.getName().equals(sLeft.getName()))) {
                 TreeElement col = new TreeElement(sRight, DiffSide.RIGHT);
                 col.setParent(parent);
@@ -105,7 +105,7 @@ public final class DiffTree {
      * @return a set of table elements that have changed columns
      */
     public static Set<TreeElement> getTablesWithChangedColumns(
-            AbstractDatabase oldDbFull, AbstractDatabase newDbFull, List<TreeElement> selected) {
+            IDatabase oldDbFull, IDatabase newDbFull, List<TreeElement> selected) {
 
         Set<TreeElement> tables = new HashSet<>();
         for (TreeElement el : selected) {
@@ -113,18 +113,18 @@ public final class DiffTree {
                 List<TreeElement> columns = new ArrayList<>();
                 DiffSide side = el.getSide();
 
-                List<AbstractColumn> oldColumns;
+                Collection<IColumn> oldColumns;
 
                 if (side == DiffSide.LEFT || side == DiffSide.BOTH) {
-                    AbstractTable oldTbl = (AbstractTable) el.getStatement(oldDbFull);
+                    ITable oldTbl = (ITable) el.getStatement(oldDbFull);
                     oldColumns = oldTbl.getColumns();
                 } else {
                     oldColumns = Collections.emptyList();
                 }
 
-                List<AbstractColumn> newColumns;
+                Collection<IColumn> newColumns;
                 if (side == DiffSide.RIGHT || side == DiffSide.BOTH) {
-                    AbstractTable newTbl = (AbstractTable) el.getStatement(newDbFull);
+                    ITable newTbl = (ITable) el.getStatement(newDbFull);
                     newColumns = newTbl.getColumns();
                 } else {
                     newColumns = Collections.emptyList();
@@ -159,7 +159,7 @@ public final class DiffTree {
      * as the root node and all schema differences as child nodes
      * @throws InterruptedException if the operation is cancelled via the progress monitor
      */
-    public TreeElement createTree(AbstractDatabase left, AbstractDatabase right) throws InterruptedException {
+    public TreeElement createTree(IDatabase left, IDatabase right) throws InterruptedException {
         IMonitor.checkCancelled(monitor);
         TreeElement db = new TreeElement("Database", DbObjType.DATABASE, DiffSide.BOTH);
         addChildren(left, right, db);
@@ -167,14 +167,15 @@ public final class DiffTree {
         return db;
     }
 
-    private void addChildren(AbstractStatement left, AbstractStatement right, TreeElement parent) throws InterruptedException {
+    private void addChildren(IStatementContainer left, IStatementContainer right, TreeElement parent)
+            throws InterruptedException {
         for (CompareResult res : compareStatements(left, right)) {
             IMonitor.checkCancelled(monitor);
             TreeElement child = new TreeElement(res.getStatement(), res.getSide());
             parent.addChild(child);
 
             if (res.hasChildren()) {
-                addChildren(res.left(), res.right(), child);
+                addChildren((IStatementContainer) res.left(), (IStatementContainer) res.right(), child);
             }
         }
     }
@@ -182,19 +183,16 @@ public final class DiffTree {
     /**
      * Compare lists and put elements onto appropriate sides.
      */
-    private List<CompareResult> compareStatements(AbstractStatement left, AbstractStatement right) {
+    private List<CompareResult> compareStatements(IStatementContainer left, IStatementContainer right) {
         List<CompareResult> rv = new ArrayList<>();
 
         // add LEFT and BOTH here
         // and RIGHT in a separate pass
         if (left != null) {
             left.getChildren().forEach(sLeft -> {
-                AbstractStatement foundRight = null;
+                IStatement foundRight = null;
                 if (right != null) {
-                    foundRight = right.getChildren().filter(
-                                    sRight -> sLeft.getName().equals(sRight.getName())
-                                            && sLeft.getStatementType() == sRight.getStatementType())
-                            .findAny().orElse(null);
+                    foundRight = right.getChild(sLeft.getName(), sLeft.getStatementType());
                 }
 
                 if (foundRight == null) {
@@ -207,9 +205,7 @@ public final class DiffTree {
 
         if (right != null) {
             right.getChildren().forEach(sRight -> {
-                if (left == null || left.getChildren().noneMatch(
-                        sLeft -> sRight.getName().equals(sLeft.getName())
-                                && sLeft.getStatementType() == sRight.getStatementType())) {
+                if (left == null || left.getChild(sRight.getName(), sRight.getStatementType()) == null) {
                     rv.add(new CompareResult(null, sRight));
                 }
             });
@@ -224,7 +220,7 @@ public final class DiffTree {
  * Contains references to the left and right statements and provides methods to
  * determine the comparison side and retrieve statement information.
  */
-record CompareResult(AbstractStatement left, AbstractStatement right) {
+record CompareResult(IStatement left, IStatement right) {
 
     /**
      * Determines which side of the comparison this result represents.
@@ -252,7 +248,7 @@ record CompareResult(AbstractStatement left, AbstractStatement right) {
      * @return the statement from this comparison
      * @throws IllegalStateException if both sides are null
      */
-    public AbstractStatement getStatement() {
+    public IStatement getStatement() {
         if (left != null) {
             return left;
         }

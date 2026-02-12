@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractType;
 import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
@@ -26,7 +25,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
  * Range types store ranges of values for a given subtype, such as int4range for integers
  * or tsrange for timestamps. They support inclusion/exclusion bounds and various operations.
  */
-public final class PgRangeType extends AbstractType implements IPgStatement {
+public final class PgRangeType extends PgAbstractType {
 
     private String subtype;
     private String subtypeOpClass;
@@ -97,15 +96,13 @@ public final class PgRangeType extends AbstractType implements IPgStatement {
     }
 
     @Override
-    protected AbstractType getTypeCopy() {
-        PgRangeType copy = new PgRangeType(name);
-        copy.setSubtype(subtype);
-        copy.setSubtypeOpClass(subtypeOpClass);
-        copy.setCollation(collation);
-        copy.setCanonical(canonical);
-        copy.setSubtypeDiff(subtypeDiff);
-        copy.setMultirange(multirange);
-        return copy;
+    public void computeHash(Hasher hasher) {
+        hasher.put(subtype);
+        hasher.put(subtypeOpClass);
+        hasher.put(collation);
+        hasher.put(canonical);
+        hasher.put(subtypeDiff);
+        hasher.put(multirange);
     }
 
     @Override
@@ -117,17 +114,7 @@ public final class PgRangeType extends AbstractType implements IPgStatement {
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(subtype);
-        hasher.put(subtypeOpClass);
-        hasher.put(collation);
-        hasher.put(canonical);
-        hasher.put(subtypeDiff);
-        hasher.put(multirange);
-    }
-
-    @Override
-    protected boolean compareUnalterable(AbstractType newType) {
+    protected boolean compareUnalterable(PgAbstractType newType) {
         PgRangeType type = (PgRangeType) newType;
         return Objects.equals(subtype, type.subtype)
                 && Objects.equals(subtypeOpClass, type.subtypeOpClass)
@@ -135,5 +122,17 @@ public final class PgRangeType extends AbstractType implements IPgStatement {
                 && Objects.equals(canonical, type.canonical)
                 && Objects.equals(subtypeDiff, type.subtypeDiff)
                 && Objects.equals(multirange, type.multirange);
+    }
+
+    @Override
+    protected PgAbstractType getCopy() {
+        PgRangeType copy = new PgRangeType(name);
+        copy.setSubtype(subtype);
+        copy.setSubtypeOpClass(subtypeOpClass);
+        copy.setCollation(collation);
+        copy.setCanonical(canonical);
+        copy.setSubtypeDiff(subtypeDiff);
+        copy.setMultirange(multirange);
+        return copy;
     }
 }

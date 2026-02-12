@@ -13,51 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.database.pg.jdbc;
+package org.pgcodekeeper.core.database.ch.jdbc;
+
+import org.pgcodekeeper.core.database.api.jdbc.ISupportedVersion;
 
 /**
- * Enumeration of supported PostgreSQL and Greenplum versions.
+ * Enumeration of supported ClickHouse versions.
  * Provides version comparison and lookup functionality for database compatibility checking.
  */
-public enum SupportedPgVersion {
-    GP_VERSION_6(90400, "9.4"),
-    GP_VERSION_7(120012, "12.12"),
-    VERSION_14(140000, "14.0"),
-    VERSION_15(150000, "15.0"),
-    VERSION_16(160000, "16.0"),
-    VERSION_17(170000, "17.0"),
-    VERSION_18(180000, "18.0");
+public enum ChSupportedVersion implements ISupportedVersion {
+
+    DEFAULT(0, "0");
 
     private final int version;
     private final String text;
 
     /**
-     * Creates a new PostgreSQL version entry.
+     * Creates a new ClickHouse version entry.
      *
      * @param version the numeric version identifier
      * @param text    the human-readable version string
      */
-    SupportedPgVersion(int version, String text) {
+    ChSupportedVersion(int version, String text) {
         this.version = version;
         this.text = text;
     }
 
+    @Override
     public int getVersion() {
         return version;
     }
 
+    @Override
     public String getText() {
         return text;
-    }
-
-    /**
-     * Checks if this version is less than or equal to the specified version.
-     *
-     * @param version the version to compare against
-     * @return true if this version is less than or equal to the specified version
-     */
-    public boolean isLE(int version) {
-        return this.version <= version;
     }
 
     /**
@@ -67,16 +56,7 @@ public enum SupportedPgVersion {
      * @param checkVersion the version to check
      * @return the matching supported version or VERSION_9_4 as default
      */
-    public static SupportedPgVersion valueOf(int checkVersion) {
-        SupportedPgVersion[] set = SupportedPgVersion.values();
-
-        for (int i = set.length - 1; i >= 0; i--) {
-            SupportedPgVersion verEnum = set[i];
-            if (verEnum.isLE(checkVersion)) {
-                return verEnum;
-            }
-        }
-
-        return SupportedPgVersion.GP_VERSION_6;
+    public static ChSupportedVersion valueOf(int checkVersion) {
+        return ISupportedVersion.valueOf(checkVersion, ChSupportedVersion.values(), ChSupportedVersion.DEFAULT);
     }
 }

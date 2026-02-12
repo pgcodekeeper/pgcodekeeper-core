@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -67,11 +66,6 @@ public final class PgExtension extends PgAbstractStatement {
     }
 
     @Override
-    public AbstractDatabase getDatabase() {
-        return (AbstractDatabase) parent;
-    }
-
-    @Override
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("CREATE EXTENSION ");
@@ -111,6 +105,11 @@ public final class PgExtension extends PgAbstractStatement {
     }
 
     @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(schema);
+    }
+
+    @Override
     public boolean compare(IStatement obj) {
         if (this == obj) {
             return true;
@@ -124,14 +123,8 @@ public final class PgExtension extends PgAbstractStatement {
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(schema);
-    }
-
-    @Override
-    public PgExtension shallowCopy() {
+    protected PgExtension getCopy() {
         PgExtension extDst = new PgExtension(name);
-        copyBaseFields(extDst);
         extDst.setSchema(schema);
         return extDst;
     }

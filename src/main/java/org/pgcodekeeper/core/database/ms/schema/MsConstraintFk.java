@@ -134,6 +134,26 @@ public final class MsConstraintFk extends MsConstraint implements IConstraintFk 
     }
 
     @Override
+    public void computeHash(Hasher hasher) {
+        super.computeHash(hasher);
+        hasher.put(columns);
+        hasher.put(foreignSchema);
+        hasher.put(foreignTable);
+        hasher.put(refs);
+        hasher.put(delAction);
+        hasher.put(updAction);
+        hasher.put(isNotForRepl);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (obj instanceof MsConstraintFk con && super.compare(con)) {
+            return compareUnalterable(con);
+        }
+        return false;
+    }
+
+    @Override
     protected boolean compareUnalterable(MsConstraint obj) {
         if (obj instanceof MsConstraintFk con) {
             return Objects.equals(columns, con.columns)
@@ -149,27 +169,7 @@ public final class MsConstraintFk extends MsConstraint implements IConstraintFk 
     }
 
     @Override
-    public boolean compare(IStatement obj) {
-        if (obj instanceof MsConstraintFk con && super.compare(con)) {
-            return compareUnalterable(con);
-        }
-        return false;
-    }
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(columns);
-        hasher.put(foreignSchema);
-        hasher.put(foreignTable);
-        hasher.put(refs);
-        hasher.put(delAction);
-        hasher.put(updAction);
-        hasher.put(isNotForRepl);
-    }
-
-    @Override
-    protected AbstractConstraint getConstraintCopy() {
+    protected MsConstraint getConstraintCopy() {
         var con = new MsConstraintFk(name);
         con.columns.addAll(columns);
         con.setForeignSchema(foreignSchema);

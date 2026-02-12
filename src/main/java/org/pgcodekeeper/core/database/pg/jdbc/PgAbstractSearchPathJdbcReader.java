@@ -22,6 +22,7 @@ import org.pgcodekeeper.core.database.base.jdbc.*;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.schema.ICompressOptionContainer;
 import org.pgcodekeeper.core.utils.Utils;
 
 public abstract class PgAbstractSearchPathJdbcReader extends AbstractSearchPathJdbcReader<PgJdbcLoader> implements IPgJdbcReader {
@@ -73,6 +74,33 @@ public abstract class PgAbstractSearchPathJdbcReader extends AbstractSearchPathJ
         var builder = super.makeQuery();
         appendExtension(builder, loader.getExtensionSchema());
         return builder;
+    }
+
+    /**
+     * Parses and fills compression options from a comma-separated string.
+     *
+     * @param statement the statement to apply options to
+     * @param compressOptions the options string to parse
+     */
+    protected void fillCompressOptions(ICompressOptionContainer statement, String compressOptions) {
+        for (String pair : compressOptions.split(",")) {
+            int sep = pair.indexOf('=');
+            if (sep != -1) {
+                String option = pair.substring(0, sep).trim();
+                String value = pair.substring(sep + 1);
+                switch (option) {
+                    case "compresstype":
+                        statement.setCompressType(value);
+                        break;
+                    case "compresslevel":
+                        statement.setCompressLevel(Integer.parseInt(value));
+                        break;
+                    case "blocksize":
+                        statement.setBlockSize(Integer.parseInt(value));
+                        break;
+                }
+            }
+        }
     }
 
     @Override

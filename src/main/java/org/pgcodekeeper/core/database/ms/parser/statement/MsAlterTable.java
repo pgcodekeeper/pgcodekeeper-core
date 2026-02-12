@@ -52,8 +52,8 @@ public final class MsAlterTable extends MsTableAbstract {
         IdContext schemaCtx = ctx.name.schema;
         IdContext nameCtx = ctx.name.name;
         List<ParserRuleContext> ids = Arrays.asList(schemaCtx, nameCtx);
-        AbstractSchema schema = getSchemaSafe(ids);
-        AbstractTable table = getSafe(AbstractSchema::getTable, schema, nameCtx);
+        MsSchema schema = getSchemaSafe(ids);
+        MsTable table = getSafe(MsSchema::getTable, schema, nameCtx);
         ObjectLocation ref = addObjReference(ids, DbObjType.TABLE, ACTION_ALTER);
 
         var tableActionCtx = ctx.alter_table_action();
@@ -62,9 +62,9 @@ public final class MsAlterTable extends MsTableAbstract {
             addConstraints(elements, table, schemaCtx, nameCtx);
         } else if (tableActionCtx.CONSTRAINT() != null && tableActionCtx.ALL() == null) {
             for (IdContext id : tableActionCtx.name_list().id()) {
-                MsConstraint constr = (MsConstraint) getSafe(AbstractTable::getConstraint, table, id);
+                MsConstraint constr = (MsConstraint) getSafe(MsTable::getConstraint, table, id);
                 if (tableActionCtx.WITH() != null) {
-                    doSafe(AbstractConstraint::setNotValid, constr, tableActionCtx.nocheck_check != null);
+                    doSafe(MsConstraint::setNotValid, constr, tableActionCtx.nocheck_check != null);
                 }
                 doSafe(MsConstraint::setDisabled, constr, tableActionCtx.nocheck != null);
             }
@@ -79,26 +79,26 @@ public final class MsAlterTable extends MsTableAbstract {
             ref.setWarning(DangerStatement.ALTER_COLUMN);
         } else if (tableActionCtx.TRIGGER() != null && tableActionCtx.ALL() == null) {
             for (IdContext trigger : tableActionCtx.name_list().id()) {
-                MsTrigger tr = (MsTrigger) getSafe(AbstractTable::getTrigger, table, trigger);
+                MsTrigger tr = getSafe(MsTable::getTrigger, table, trigger);
                 doSafe(MsTrigger::setDisable, tr, tableActionCtx.ENABLE() == null);
                 addObjReference(Arrays.asList(schemaCtx, nameCtx, trigger),
                         DbObjType.TRIGGER, ACTION_ALTER);
             }
         } else if (tableActionCtx.CHANGE_TRACKING() != null && tableActionCtx.ENABLE() != null) {
-            doSafe(MsTable::setTracked, ((MsTable) table), tableActionCtx.on_off().ON() != null);
+            doSafe(MsTable::setTracked, (table), tableActionCtx.on_off().ON() != null);
         } else if (tableActionCtx.SET() != null) {
             var set = tableActionCtx.alter_table_set_action().index_option();
             if (set != null && "SYSTEM_VERSIONING".equalsIgnoreCase(set.key.getText())) {
                 var sysVer = set.index_option_value();
                 if (sysVer.ON() != null) {
-                    doSafe(MsTable::setSysVersioning, ((MsTable) table), getFullCtxText(sysVer));
+                    doSafe(MsTable::setSysVersioning, table, getFullCtxText(sysVer));
                     addHistTableDep(sysVer.on_option(), table);
                 }
             }
         }
     }
 
-    private void addConstraints(Table_elements_extendedContext elementsCtx, AbstractTable table, IdContext schemaCtx,
+    private void addConstraints(Table_elements_extendedContext elementsCtx, MsTable table, IdContext schemaCtx,
                                 IdContext nameCtx) {
         for (var elementCtx : elementsCtx.table_element_extended()) {
             Table_constraintContext constrCtx = elementCtx.table_constraint();
@@ -108,7 +108,7 @@ public final class MsAlterTable extends MsTableAbstract {
 
             Table_constraint_bodyContext constrBodyCtx = constrCtx.table_constraint_body();
             if (constrBodyCtx.DEFAULT() != null) {
-                MsColumn col = (MsColumn) getSafe(AbstractTable::getColumn, table, constrBodyCtx.id());
+                MsColumn col = getSafe(MsTable::getColumn, table, constrBodyCtx.id());
                 ExpressionContext expCtx = constrBodyCtx.expression();
                 doSafe(MsColumn::setDefaultValue, col, getFullCtxTextWithCheckNewLines(expCtx));
                 if (constrCtx.constraint != null) {
@@ -116,13 +116,13 @@ public final class MsAlterTable extends MsTableAbstract {
                 }
                 db.addAnalysisLauncher(new MsExpressionAnalysisLauncher(col, expCtx, fileName));
             } else {
-                AbstractConstraint con = getMsConstraint(constrCtx, schemaCtx.getText(), nameCtx.getText());
+                MsConstraint con = getMsConstraint(constrCtx, schemaCtx.getText(), nameCtx.getText());
                 con.setNotValid(ctx.alter_table_action().nocheck_add != null);
                 IdContext id = constrCtx.id();
                 if (id != null) {
                     addSafe(table, con, Arrays.asList(schemaCtx, nameCtx, id));
                 } else {
-                    doSafe(AbstractTable::addConstraint, table, con);
+                    doSafe(MsTable::addChild, table, con);
                 }
             }
         }

@@ -23,8 +23,6 @@ import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
-import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
@@ -81,7 +79,7 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
                     col.setDefaultType("EPHEMERAL");
                 }
                 if (defType.expr() != null) {
-                    setExprWithAnalyze(AbstractColumn::setDefaultValue, col, defType.expr());
+                    setExprWithAnalyze(ChColumn::setDefaultValue, col, defType.expr());
                 }
             }
         }
@@ -242,7 +240,7 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
     }
 
     @Override
-    protected AbstractSchema createSchema(String name) {
+    protected ChSchema createSchema(String name) {
         return new ChSchema(name);
     }
 
@@ -259,5 +257,10 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
     @Override
     protected List<String> getDirectoryNames() {
         return ChWorkDirs.getDirectoryNames();
+    }
+
+    @Override
+    protected ChSchema getSchemaSafe(List<? extends ParserRuleContext> ids) {
+        return (ChSchema) super.getSchemaSafe(ids);
     }
 }

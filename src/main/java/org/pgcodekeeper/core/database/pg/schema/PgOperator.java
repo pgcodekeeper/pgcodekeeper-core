@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -195,16 +194,6 @@ public final class PgOperator extends PgAbstractStatement implements IOperator, 
         return getObjectState(script, startSize);
     }
 
-    private boolean compareUnalterable(PgOperator oper) {
-        return Objects.equals(procedure, oper.procedure)
-                && Objects.equals(leftArg, oper.leftArg)
-                && Objects.equals(rightArg, oper.rightArg)
-                && Objects.equals(commutator, oper.commutator)
-                && Objects.equals(negator, oper.negator)
-                && isMerges == oper.isMerges
-                && isHashes == oper.isHashes;
-    }
-
     /**
      * Alias for {@link #getSignature()} which provides a unique operator ID.
      * <p>
@@ -225,6 +214,19 @@ public final class PgOperator extends PgAbstractStatement implements IOperator, 
     }
 
     @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(procedure);
+        hasher.put(leftArg);
+        hasher.put(rightArg);
+        hasher.put(commutator);
+        hasher.put(negator);
+        hasher.put(isMerges);
+        hasher.put(isHashes);
+        hasher.put(restrict);
+        hasher.put(join);
+    }
+
+    @Override
     public boolean compare(IStatement obj) {
         if (this == obj) {
             return true;
@@ -239,17 +241,29 @@ public final class PgOperator extends PgAbstractStatement implements IOperator, 
         return false;
     }
 
+    private boolean compareUnalterable(PgOperator oper) {
+        return Objects.equals(procedure, oper.procedure)
+                && Objects.equals(leftArg, oper.leftArg)
+                && Objects.equals(rightArg, oper.rightArg)
+                && Objects.equals(commutator, oper.commutator)
+                && Objects.equals(negator, oper.negator)
+                && isMerges == oper.isMerges
+                && isHashes == oper.isHashes;
+    }
+
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(procedure);
-        hasher.put(leftArg);
-        hasher.put(rightArg);
-        hasher.put(commutator);
-        hasher.put(negator);
-        hasher.put(isMerges);
-        hasher.put(isHashes);
-        hasher.put(restrict);
-        hasher.put(join);
+    protected PgOperator getCopy() {
+        PgOperator operatorDst = new PgOperator(name);
+        operatorDst.setProcedure(procedure);
+        operatorDst.setLeftArg(leftArg);
+        operatorDst.setRightArg(rightArg);
+        operatorDst.setCommutator(commutator);
+        operatorDst.setNegator(negator);
+        operatorDst.setMerges(isMerges);
+        operatorDst.setHashes(isHashes);
+        operatorDst.setRestrict(restrict);
+        operatorDst.setJoin(join);
+        return operatorDst;
     }
 
     public void setProcedure(String procedure) {
@@ -305,21 +319,5 @@ public final class PgOperator extends PgAbstractStatement implements IOperator, 
     public void setJoin(String join) {
         this.join = join;
         resetHash();
-    }
-
-    @Override
-    public PgOperator shallowCopy() {
-        PgOperator operatorDst = new PgOperator(name);
-        copyBaseFields(operatorDst);
-        operatorDst.setProcedure(procedure);
-        operatorDst.setLeftArg(leftArg);
-        operatorDst.setRightArg(rightArg);
-        operatorDst.setCommutator(commutator);
-        operatorDst.setNegator(negator);
-        operatorDst.setMerges(isMerges);
-        operatorDst.setHashes(isHashes);
-        operatorDst.setRestrict(restrict);
-        operatorDst.setJoin(join);
-        return operatorDst;
     }
 }

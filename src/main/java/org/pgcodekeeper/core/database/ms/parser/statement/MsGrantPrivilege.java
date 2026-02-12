@@ -128,8 +128,8 @@ public final class MsGrantPrivilege extends MsParserAbstract {
                     name.append('(').append(MsDiffUtils.quoteName(column.getText())).append(')');
                     IPrivilege priv = new MsPrivilege(state, per, name.toString(), role, isGO);
                     // table column privileges to columns, other columns to statement
-                    if (st instanceof AbstractTable table) {
-                        addPrivilege(getSafe(AbstractTable::getColumn, table, column), priv);
+                    if (st instanceof MsTable table) {
+                        addPrivilege(getSafe(MsTable::getColumn, table, column), priv);
                     } else {
                         addPrivilege(st, priv);
                     }
@@ -144,7 +144,7 @@ public final class MsGrantPrivilege extends MsParserAbstract {
 
         AbstractStatement st;
         if (type == null || type.OBJECT() != null || type.TYPE() != null) {
-            AbstractSchema schema = getSchemaSafe(
+            MsSchema schema = (MsSchema) getSchemaSafe(
                     Arrays.asList(object.qualified_name().schema, nameCtx));
             st = getSafe((k, v) -> k.getChildren().filter(
                             e -> e.getBareName().equals(v))
@@ -197,8 +197,8 @@ public final class MsGrantPrivilege extends MsParserAbstract {
 
                 for (String role : roles) {
                     IPrivilege priv = new MsPrivilege(state, pr, objectName, role, isGO);
-                    if (st instanceof AbstractTable table) {
-                        addPrivilege(getSafe(AbstractTable::getColumn, table, col), priv);
+                    if (st instanceof MsTable table) {
+                        addPrivilege(getSafe(MsTable::getColumn, table, col), priv);
                     } else {
                         addPrivilege(st, priv);
                     }

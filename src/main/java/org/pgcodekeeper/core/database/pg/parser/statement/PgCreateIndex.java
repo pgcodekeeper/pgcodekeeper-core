@@ -20,8 +20,9 @@ import java.util.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
+import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.launcher.PgIndexAnalysisLauncher;
 import org.pgcodekeeper.core.database.pg.schema.*;
@@ -90,8 +91,7 @@ public final class PgCreateIndex extends PgParserAbstract {
 
         if (nameCtx != null) {
             ParserRuleContext parent = QNameParser.getFirstNameCtx(ids);
-            AbstractStatementContainer table = getSafe(AbstractSchema::getStatementContainer,
-                    getSchemaSafe(ids), parent);
+            IStatementContainer table = getSafe(ISchema::getStatementContainer, getSchemaSafe(ids), parent);
             addSafe(table, ind, Arrays.asList(QNameParser.getSchemaNameCtx(ids), nameCtx));
         }
     }

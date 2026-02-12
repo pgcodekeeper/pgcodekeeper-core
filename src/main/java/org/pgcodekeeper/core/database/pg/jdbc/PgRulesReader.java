@@ -19,7 +19,6 @@ import java.sql.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateRule;
 import org.pgcodekeeper.core.database.pg.schema.PgRule;
@@ -40,15 +39,15 @@ public final class PgRulesReader extends PgAbstractSearchPathJdbcReader {
     }
 
     @Override
-    protected void processResult(ResultSet result, AbstractSchema schema) throws SQLException {
+    protected void processResult(ResultSet result, ISchema schema) throws SQLException {
         String contName = result.getString("relname");
         var c = schema.getStatementContainer(contName);
         if (c != null) {
-            c.addRule(getRule(result, schema, contName));
+            c.addChild(getRule(result, schema, contName));
         }
     }
 
-    private PgRule getRule(ResultSet res, AbstractSchema schema, String tableName) throws SQLException {
+    private PgRule getRule(ResultSet res, ISchema schema, String tableName) throws SQLException {
         String schemaName = schema.getName();
         String ruleName = res.getString("rulename");
         loader.setCurrentObject(new GenericColumn(schemaName, tableName, ruleName, DbObjType.RULE));

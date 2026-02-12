@@ -22,7 +22,7 @@ import java.util.Collection;
  * Provides common functionality for all constraint types including primary keys,
  * foreign keys, unique constraints, and check constraints.
  */
-public interface IConstraint extends ISearchPath {
+public interface IConstraint extends ISubElement {
     /**
      * Checks if this constraint is a primary key constraint.
      *
@@ -60,4 +60,9 @@ public interface IConstraint extends ISearchPath {
      * @return the table name
      */
     String getTableName();
+
+    @Override
+    default DbObjType getStatementType() {
+        return DbObjType.CONSTRAINT;
+    }
 }

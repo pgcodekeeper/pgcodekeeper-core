@@ -102,8 +102,8 @@ public final class MsCreateTable extends MsTableAbstract {
         } else if ((indCtx = tableElementCtx.table_index()) != null) {
             parseTableIndex(indCtx, table, schemaName, tableName);
         } else if ((periodCtx = tableElementCtx.period_for_system_time()) != null) {
-            var startCol = getSafe(AbstractTable::getColumn, table, periodCtx.start_col_name);
-            var endCol = getSafe(AbstractTable::getColumn, table, periodCtx.end_col_name);
+            var startCol = getSafe(MsTable::getColumn, table, periodCtx.start_col_name);
+            var endCol = getSafe(MsTable::getColumn, table, periodCtx.end_col_name);
 
             table.setPeriodStartCol(startCol);
             table.setPeriodEndCol(endCol);
@@ -165,7 +165,7 @@ public final class MsCreateTable extends MsTableAbstract {
         table.addColumn(col);
     }
 
-    private void parseColumnstoreIndex(Columnstore_indexContext ctx, AbstractIndex index, String schema, String table) {
+    private void parseColumnstoreIndex(Columnstore_indexContext ctx, MsIndex index, String schema, String table) {
         var nameList = ctx.name_list_in_brackets();
         if (nameList != null) {
             for (IdContext col : nameList.id()) {
@@ -175,7 +175,7 @@ public final class MsCreateTable extends MsTableAbstract {
         }
         var orderCols = ctx.order_cols;
         if (orderCols != null) {
-            fillOrderCols((MsIndex) index, orderCols.column_name_list_with_order().column_with_order(), schema, table);
+            fillOrderCols(index, orderCols.column_name_list_with_order().column_with_order(), schema, table);
         }
     }
 

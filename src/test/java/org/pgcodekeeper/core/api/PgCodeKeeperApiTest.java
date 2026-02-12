@@ -22,7 +22,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.database.pg.loader.PgProjectLoader;
 import org.pgcodekeeper.core.exception.PgCodeKeeperException;
@@ -68,7 +67,7 @@ class PgCodeKeeperApiTest {
 
         String actual = PgCodeKeeperApi.diff(settings, oldDb, newDb);
 
-        assertEquals(expectedDiff, actual);
+        TestUtils.assertIgnoreNewLines(expectedDiff, actual);
     }
 
     @ParameterizedTest
@@ -83,7 +82,7 @@ class PgCodeKeeperApiTest {
 
         String actual = PgCodeKeeperApi.diff(settings, oldDb, newDb, List.of(ignoreListPath));
 
-        assertEquals(expectedDiff, actual);
+        TestUtils.assertIgnoreNewLines(expectedDiff, actual);
     }
 
     @Test
@@ -184,7 +183,7 @@ class PgCodeKeeperApiTest {
     private void assertFileContent(Path filePath, String expectedContent) throws IOException {
         assertTrue(Files.exists(filePath));
         var actualContent = Files.readString(filePath);
-        assertEquals(expectedContent, actualContent);
+        TestUtils.assertIgnoreNewLines(expectedContent, actualContent);
     }
 
     private static IDatabase loadDatabaseFromDump(String pathToFile, ISettings settings)
@@ -192,7 +191,7 @@ class PgCodeKeeperApiTest {
         return (new PgDumpLoader(Path.of(pathToFile), settings)).load();
     }
 
-    private static AbstractDatabase loadDatabaseFromProject(String projectPath, ISettings settings)
+    private static IDatabase loadDatabaseFromProject(String projectPath, ISettings settings)
             throws IOException, InterruptedException {
         var ignoreSchemaList = IIgnoreList.parseIgnoreList((String) null, new IgnoreSchemaList());
         return new PgProjectLoader(Path.of(projectPath), settings, null, ignoreSchemaList).loadAndAnalyze();

@@ -15,10 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import java.util.*;
-import java.util.function.UnaryOperator;
-
+import org.pgcodekeeper.core.database.api.schema.IColumn;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.function.UnaryOperator;
 
 /**
  * Utility class providing common functionality for database statement operations.
@@ -64,10 +68,11 @@ public final class StatementUtils {
      * @return true if order was changed or order is ignored
      * @since 5.1.7
      */
-    public static boolean isColumnsOrderChanged(List<AbstractColumn> newColumns, List<AbstractColumn> oldColumns) {
+    public static boolean isColumnsOrderChanged(List<? extends IColumn> newColumns,
+                                                List<? extends IColumn> oldColumns) {
         // last founded column
         int i = -1;
-        for (AbstractColumn col : newColumns) {
+        for (IColumn col : newColumns) {
             // old column index
             int index = 0;
             // search old column index by new column name
@@ -184,7 +189,7 @@ public final class StatementUtils {
     public static String getFullBareName(IStatement st) {
         StringBuilder sb = new StringBuilder(st.getBareName());
         var par = st.getParent();
-        while (par != null && !(par instanceof AbstractDatabase)) {
+        while (par != null && !(par instanceof IDatabase)) {
             sb.insert(0, '.').insert(0, par.getBareName());
             par = par.getParent();
         }

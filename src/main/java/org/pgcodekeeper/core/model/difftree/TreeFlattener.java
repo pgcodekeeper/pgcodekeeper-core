@@ -16,12 +16,12 @@
 package org.pgcodekeeper.core.model.difftree;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.ignorelist.IgnoreList;
 import org.pgcodekeeper.core.ignorelist.IgnoredObject;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.ignorelist.IgnoredObject.AddStatus;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +38,8 @@ public final class TreeFlattener {
 
     private boolean onlySelected;
     private boolean onlyEdits;
-    private AbstractDatabase dbSource;
-    private AbstractDatabase dbTarget;
+    private IDatabase dbSource;
+    private IDatabase dbTarget;
     private IgnoreList ignoreList;
     private String[] dbNames;
     private Collection<DbObjType> onlyTypes;
@@ -75,7 +75,7 @@ public final class TreeFlattener {
      * @param dbTarget target database for comparison
      * @return this TreeFlattener for method chaining
      */
-    public TreeFlattener onlyEdits(AbstractDatabase dbSource, AbstractDatabase dbTarget) {
+    public TreeFlattener onlyEdits(IDatabase dbSource, IDatabase dbTarget) {
         onlyEdits = dbSource != null && dbTarget != null;
         this.dbSource = dbSource;
         this.dbTarget = dbTarget;

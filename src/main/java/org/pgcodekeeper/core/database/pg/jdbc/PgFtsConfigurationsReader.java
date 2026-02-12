@@ -21,7 +21,6 @@ import java.util.*;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.schema.PgFtsConfiguration;
@@ -42,7 +41,7 @@ public final class PgFtsConfigurationsReader extends PgAbstractSearchPathJdbcRea
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String name = res.getString("cfgname");
         PgFtsConfiguration config = new PgFtsConfiguration(name);
 

@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.ms.schema;
 import java.util.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -42,11 +41,6 @@ public final class MsRole extends MsAbstractStatement {
     @Override
     public DbObjType getStatementType() {
         return DbObjType.ROLE;
-    }
-
-    @Override
-    public AbstractDatabase getDatabase() {
-        return (AbstractDatabase) parent;
     }
 
     @Override
@@ -123,14 +117,6 @@ public final class MsRole extends MsAbstractStatement {
     }
 
     @Override
-    public MsRole shallowCopy() {
-        MsRole roleDst = new MsRole(name);
-        copyBaseFields(roleDst);
-        roleDst.members.addAll(members);
-        return roleDst;
-    }
-
-    @Override
     public boolean compare(IStatement obj) {
         if (obj == this) {
             return true;
@@ -138,5 +124,12 @@ public final class MsRole extends MsAbstractStatement {
 
         return obj instanceof MsRole role && super.compare(obj)
                 && Objects.equals(members, role.members);
+    }
+
+    @Override
+    protected MsRole getCopy() {
+        MsRole roleDst = new MsRole(name);
+        roleDst.members.addAll(members);
+        return roleDst;
     }
 }

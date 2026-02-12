@@ -16,7 +16,6 @@
 package org.pgcodekeeper.core.database.pg.schema;
 
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractType;
 import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
@@ -24,7 +23,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
  * Shell types are placeholder types created before their actual definition,
  * used to resolve forward references in type definitions.
  */
-public final class PgShellType extends AbstractType implements IPgStatement {
+public final class PgShellType extends PgAbstractType {
 
     /**
      * Creates a new PostgreSQL shell type.
@@ -36,8 +35,13 @@ public final class PgShellType extends AbstractType implements IPgStatement {
     }
 
     @Override
-    protected AbstractType getTypeCopy() {
-        return new PgShellType(name);
+    protected void appendDef(StringBuilder sb) {
+        // no body
+    }
+
+    @Override
+    protected boolean compareUnalterable(PgAbstractType newType) {
+        return true;
     }
 
     @Override
@@ -46,17 +50,12 @@ public final class PgShellType extends AbstractType implements IPgStatement {
     }
 
     @Override
-    protected void appendDef(StringBuilder sb) {
-        // no body
-    }
-
-    @Override
-    protected boolean compareUnalterable(AbstractType newType) {
-        return true;
-    }
-
-    @Override
     public boolean compare(IStatement obj) {
         return obj instanceof PgShellType && super.compare(obj);
+    }
+
+    @Override
+    protected PgAbstractType getCopy() {
+        return new PgShellType(name);
     }
 }

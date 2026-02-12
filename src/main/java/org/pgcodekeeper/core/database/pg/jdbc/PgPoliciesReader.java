@@ -19,7 +19,6 @@ import java.sql.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.parser.launcher.PgVexAnalysisLauncher;
 import org.pgcodekeeper.core.database.pg.schema.PgPolicy;
@@ -40,7 +39,7 @@ public class PgPoliciesReader extends PgAbstractSearchPathJdbcReader {
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String tableName = res.getString("relname");
         var c = schema.getStatementContainer(tableName);
         if (c == null) {
@@ -75,10 +74,10 @@ public class PgPoliciesReader extends PgAbstractSearchPathJdbcReader {
             }
         }
 
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             p.setPermissive(res.getBoolean("polpermissive"));
         }
-        AbstractDatabase db = schema.getDatabase();
+        IDatabase db = schema.getDatabase();
 
         String using = res.getString("polqual");
         if (using != null) {
@@ -97,7 +96,7 @@ public class PgPoliciesReader extends PgAbstractSearchPathJdbcReader {
         loader.setAuthor(p, res);
         loader.setComment(p, res);
 
-        c.addPolicy(p);
+        c.addChild(p);
     }
 
     @Override
@@ -125,7 +124,7 @@ public class PgPoliciesReader extends PgAbstractSearchPathJdbcReader {
                 .from("pg_catalog.pg_policy res")
                 .join("JOIN pg_catalog.pg_class c ON c.oid = res.polrelid");
 
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             builder.column("res.polpermissive");
         }
     }

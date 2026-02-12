@@ -26,7 +26,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents Microsoft SQL table statistics.
  * Statistics are used by the query optimizer to create efficient query execution plans.
  */
-public final class MsStatistics extends AbstractStatistics implements ISubElement, IMsStatement {
+public final class MsStatistics extends MsAbstractStatement implements IStatistics, ISubElement {
 
     public static final String SAMPLE = "SAMPLE";
     private String filter;
@@ -98,26 +98,6 @@ public final class MsStatistics extends AbstractStatistics implements ISubElemen
         return getObjectState(script, startSize);
     }
 
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(filter);
-        hasher.put(cols);
-        hasher.put(options);
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        return obj instanceof MsStatistics stat
-                && super.compare(stat)
-                && compareUnalterable(stat)
-                && compareSample(stat)
-                && Objects.equals(options, stat.options);
-    }
-
     private boolean compareSample(MsStatistics stat) {
         if (!isParentHasData || !stat.isParentHasData) {
             // MS SQL doesn't persist samplePercent for empty tables - compare only when both have data
@@ -127,19 +107,41 @@ public final class MsStatistics extends AbstractStatistics implements ISubElemen
         return Objects.equals(samplePercent, stat.samplePercent);
     }
 
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(filter);
+        hasher.put(cols);
+        // TODO difficult equals
+        // hasher.put(samplePercent);
+        // hasher.put(isParentHasData);
+        hasher.put(options);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        return obj instanceof MsStatistics stat && super.compare(stat)
+                && compareUnalterable(stat)
+                && compareSample(stat)
+                && Objects.equals(options, stat.options);
+    }
+
     private boolean compareUnalterable(MsStatistics stat) {
         return Objects.equals(filter, stat.filter)
                 && Objects.equals(cols, stat.cols);
     }
 
     @Override
-    protected AbstractStatistics getStatisticsCopy() {
+    protected MsStatistics getCopy() {
         var stat = new MsStatistics(name);
         stat.setFilter(filter);
-        stat.setSamplePercent(samplePercent);
         stat.cols.addAll(cols);
-        stat.options.putAll(options);
+        stat.setSamplePercent(samplePercent);
         stat.setParentHasData(isParentHasData);
+        stat.options.putAll(options);
         return stat;
     }
 

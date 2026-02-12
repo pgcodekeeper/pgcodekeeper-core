@@ -53,7 +53,7 @@ public abstract class PgTableAbstract extends PgParserAbstract {
     }
 
     protected void fillTypeColumns(List_of_type_column_defContext columns,
-                                   AbstractTable table, String schemaName, String tablespace) {
+            PgAbstractTable table, String schemaName, String tablespace) {
         if (columns == null) {
             return;
         }
@@ -67,7 +67,7 @@ public abstract class PgTableAbstract extends PgParserAbstract {
     }
 
     protected void addTableConstraint(Constraint_commonContext tblConstrCtx,
-                                      AbstractTable table, String schemaName, String tablespace) {
+            PgAbstractTable table, String schemaName, String tablespace) {
         if (tblConstrCtx.constr_body().NULL() != null) {
             addNotNullTableConstraint(tblConstrCtx, table);
             return;
@@ -75,10 +75,10 @@ public abstract class PgTableAbstract extends PgParserAbstract {
         PgConstraint constrBlank = createTableConstraintBlank(tblConstrCtx);
         processTableConstraintBlank(tblConstrCtx, constrBlank, schemaName,
                 table.getName(), tablespace, fileName);
-        doSafe(AbstractTable::addConstraint, table, constrBlank);
+        doSafe(PgAbstractTable::addChild, table, constrBlank);
     }
 
-    protected void addNotNullTableConstraint(Constraint_commonContext tblConstrCtx, AbstractTable table) {
+    protected void addNotNullTableConstraint(Constraint_commonContext tblConstrCtx, PgAbstractTable table) {
         var body = tblConstrCtx.constr_body();
         if (body.NOT() != null) {
             var colNameCtx = body.col_name;
@@ -88,19 +88,19 @@ public abstract class PgTableAbstract extends PgParserAbstract {
         }
     }
 
-    protected void fillColNotNull(AbstractTable table, Constraint_commonContext tblConstrCtx,
+    protected void fillColNotNull(PgAbstractTable table, Constraint_commonContext tblConstrCtx,
                                   Schema_qualified_nameContext colNameCtx) {
         var col = table != null ? (PgColumn) table.getColumn(colNameCtx.getText()) : null;
         if (col != null) {
             fillColNotNull(col, table, tblConstrCtx);
         } else if (table instanceof PgPartitionTable) {
             addColumn(colNameCtx.getText(), Collections.singletonList(tblConstrCtx), table, table.getSchemaName());
-            col = (PgColumn) table.getColumn(colNameCtx.getText());
+            col = table.getColumn(colNameCtx.getText());
             fillColNotNull(col, table, tblConstrCtx);
         }
     }
 
-    protected void fillColNotNull(PgColumn col, AbstractTable table, Constraint_commonContext constraint) {
+    protected void fillColNotNull(PgColumn col, PgAbstractTable table, Constraint_commonContext constraint) {
         var body = constraint.constr_body();
 
         if (body.NOT() == null) {
@@ -124,7 +124,7 @@ public abstract class PgTableAbstract extends PgParserAbstract {
     }
 
     private void addTableConstraint(Constraint_commonContext ctx, PgColumn col,
-                                    AbstractTable table, String schemaName) {
+            PgAbstractTable table, String schemaName) {
         Constr_bodyContext body = ctx.constr_body();
         PgConstraint constr = null;
         String colName = col.getName();
@@ -187,7 +187,7 @@ public abstract class PgTableAbstract extends PgParserAbstract {
 
         if (constr != null) {
             appendConstrCommon(ctx, constr);
-            table.addConstraint(constr);
+            table.addChild(constr);
         }
     }
 
@@ -216,7 +216,7 @@ public abstract class PgTableAbstract extends PgParserAbstract {
     protected void addColumn(String columnName, Data_typeContext datatype, Storage_optionContext storage,
                              Collate_identifierContext collate, Compression_identifierContext compression,
                              List<Constraint_commonContext> constraints, Encoding_identifierContext encOptions,
-                             Define_foreign_optionsContext options, AbstractTable table, String schemaName) {
+                             Define_foreign_optionsContext options, PgAbstractTable table, String schemaName) {
         PgColumn col = new PgColumn(columnName);
         if (datatype != null) {
             col.setType(getTypeName(datatype));
@@ -258,11 +258,11 @@ public abstract class PgTableAbstract extends PgParserAbstract {
             }
         }
 
-        doSafe(AbstractTable::addColumn, table, col);
+        doSafe(PgAbstractTable::addColumn, table, col);
     }
 
     protected void addColumn(String columnName, List<Constraint_commonContext> constraints,
-                             AbstractTable table, String schemaName) {
+            PgAbstractTable table, String schemaName) {
         addColumn(columnName, null, null, null, null, constraints, null, null, table, schemaName);
     }
 

@@ -42,7 +42,7 @@ public class MsExtendedObjectsReader extends AbstractSearchPathJdbcReader<MsJdbc
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException, XmlReaderException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException, XmlReaderException {
         String name = res.getString("name");
         String funcType = res.getString("type");
         DbObjType type = "PC".equals(funcType) ? DbObjType.PROCEDURE : DbObjType.FUNCTION;
@@ -85,7 +85,7 @@ public class MsExtendedObjectsReader extends AbstractSearchPathJdbcReader<MsJdbc
         String owner = res.getString("owner");
         loader.setOwner(func, owner);
 
-        schema.addFunction(func);
+        schema.addChild(func);
         loader.setPrivileges(func, MsXmlReader.readXML(res.getString("acl")));
     }
 

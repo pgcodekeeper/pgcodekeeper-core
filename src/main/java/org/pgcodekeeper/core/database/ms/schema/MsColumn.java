@@ -19,7 +19,6 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.*;
 
@@ -28,11 +27,15 @@ import org.pgcodekeeper.core.script.*;
  * Handles column-specific features like SPARSE, ROWGUIDCOL, PERSISTED, identity columns,
  * generated columns, and data masking functions.
  */
-public final class MsColumn extends AbstractColumn implements IMsStatement {
+public final class MsColumn extends MsAbstractStatement implements IColumn {
 
     private static final String SPARSE = "SPARSE";
     private static final String ROWGUIDCOL = "ROWGUIDCOL";
     private static final String PERSISTED = "PERSISTED";
+    private static final String COLLATE = " COLLATE ";
+    private static final String NULL = " NULL";
+    private static final String NOT_NULL = " NOT NULL";
+    private static final String ALTER_COLUMN = "\n\tALTER COLUMN ";
 
     private boolean isSparse;
     private boolean isRowGuidCol;
@@ -46,6 +49,10 @@ public final class MsColumn extends AbstractColumn implements IMsStatement {
     private String expression;
     private String maskingFunction;
     private MsGeneratedType generated;
+    private String type;
+    private String collation;
+    private boolean notNull;
+    private String defaultValue;
 
     /**
      * Creates a new Microsoft SQL column with the specified name.
@@ -56,7 +63,6 @@ public final class MsColumn extends AbstractColumn implements IMsStatement {
         super(name);
     }
 
-    @Override
     public String getFullDefinition() {
         final StringBuilder sbDefinition = new StringBuilder();
         sbDefinition.append(getQuotedName(name));
@@ -333,7 +339,7 @@ public final class MsColumn extends AbstractColumn implements IMsStatement {
     }
 
     private String getAlterColumn(String column) {
-        return ((AbstractTable) parent).getAlterTable(false) + ALTER_COLUMN + getQuotedName(column);
+        return ((MsTable) parent).getAlterTable(false) + ALTER_COLUMN + getQuotedName(column);
     }
 
     @Override
@@ -424,6 +430,26 @@ public final class MsColumn extends AbstractColumn implements IMsStatement {
     }
 
     @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(isSparse);
+        hasher.put(isRowGuidCol);
+        hasher.put(isPersisted);
+        hasher.put(isNotForRep);
+        hasher.put(isIdentity);
+        hasher.put(isHidden);
+        hasher.put(seed);
+        hasher.put(increment);
+        hasher.put(defaultName);
+        hasher.put(expression);
+        hasher.put(maskingFunction);
+        hasher.put(generated);
+        hasher.put(type);
+        hasher.put(collation);
+        hasher.put(notNull);
+        hasher.put(defaultValue);
+    }
+
+    @Override
     public boolean compare(IStatement obj) {
         if (obj instanceof MsColumn col && super.compare(obj)) {
             return isSparse == col.isSparse
@@ -437,31 +463,18 @@ public final class MsColumn extends AbstractColumn implements IMsStatement {
                     && Objects.equals(defaultName, col.defaultName)
                     && Objects.equals(expression, col.expression)
                     && Objects.equals(maskingFunction, col.maskingFunction)
-                    && generated == col.generated;
+                    && generated == col.generated
+                    && Objects.equals(type, col.type)
+                    && Objects.equals(collation, col.collation)
+                    && Objects.equals(notNull, col.notNull)
+                    && Objects.equals(defaultValue, col.defaultValue);
         }
 
         return false;
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(isSparse);
-        hasher.put(isRowGuidCol);
-        hasher.put(isPersisted);
-        hasher.put(isNotForRep);
-        hasher.put(isIdentity);
-        hasher.put(isHidden);
-        hasher.put(seed);
-        hasher.put(increment);
-        hasher.put(defaultName);
-        hasher.put(expression);
-        hasher.put(maskingFunction);
-        hasher.put(generated);
-    }
-
-    @Override
-    protected AbstractColumn getColumnCopy() {
+    protected MsColumn getCopy() {
         MsColumn copy = new MsColumn(name);
         copy.setSparse(isSparse);
         copy.setRowGuidCol(isRowGuidCol);
@@ -475,6 +488,38 @@ public final class MsColumn extends AbstractColumn implements IMsStatement {
         copy.setExpression(expression);
         copy.setMaskingFunction(maskingFunction);
         copy.setGenerated(generated);
+        copy.setType(type);
+        copy.setCollation(collation);
+        copy.setNotNull(notNull);
+        copy.setDefaultValue(defaultValue);
         return copy;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
+        resetHash();
+    }
+
+    public void setNotNull(boolean notNull) {
+        this.notNull = notNull;
+        resetHash();
+    }
+
+    public void setCollation(String collation) {
+        this.collation = collation;
+        resetHash();
+    }
+
+    public void setType(String type) {
+        this.type = type;
+        resetHash();
+    }
+
+    private String getAlterTable(boolean only) {
+        return ((MsTable) parent).getAlterTable(only);
+    }
+
+    public String getType() {
+        return type;
     }
 }

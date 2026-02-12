@@ -22,7 +22,11 @@ package org.pgcodekeeper.core;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractTable;
+import org.pgcodekeeper.core.database.api.schema.ITable;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
+
 import org.pgcodekeeper.core.ignorelist.IgnoreList;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.CompareTree;
@@ -111,17 +115,22 @@ public class PgDiff {
             return EMPTY_SCRIPT;
         }
 
-        return switch (settings.getDbType()) {
-            case MS -> getMsScript(actions, toRefresh, selected, oldDb, newDb);
-            case PG -> getPgScript(actions, toRefresh, selected, oldDb, newDb);
-            case CH -> getChScript(actions, toRefresh, selected, oldDb, newDb);
-        };
+        if (newDb instanceof PgDatabase) {
+            return getPgScript(actions, toRefresh, selected, oldDb, newDb);
+        }
+        if (newDb instanceof MsDatabase) {
+            return getMsScript(actions, toRefresh, selected, oldDb, newDb);
+        }
+        if (newDb instanceof ChDatabase) {
+            return getChScript(actions, toRefresh, selected, oldDb, newDb);
+        }
+        throw new IllegalArgumentException("Unsupported database type: " + newDb.getClass().getName());
     }
 
     private String getPgScript(Set<ActionContainer> actions, Set<IStatement> toRefresh, List<TreeElement> selected,
                                IDatabase oldDb, IDatabase newDb)
             throws IOException {
-        SQLScript script = new SQLScript(settings);
+        SQLScript script = new SQLScript(settings, oldDb.getSeparator());
         for (String preFilePath : settings.getPreFilePath()) {
             addPrePostPath(script, preFilePath, SQLActionType.PRE);
         }
@@ -152,12 +161,12 @@ public class PgDiff {
         return script.getFullScript();
     }
 
-    private void addPrePostPath(SQLScript script, String scriptPath, SQLActionType actionType) throws IOException {
+    protected void addPrePostPath(SQLScript script, String scriptPath, SQLActionType actionType) throws IOException {
         Path path = Paths.get(scriptPath);
         addPrePostPath(script, path, actionType);
     }
 
-    private void addPrePostPath(SQLScript script, Path path, SQLActionType actionType) throws IOException {
+    protected void addPrePostPath(SQLScript script, Path path, SQLActionType actionType) throws IOException {
         if (Files.isRegularFile(path)) {
             addPrePostScript(script, path, actionType);
             return;
@@ -180,7 +189,7 @@ public class PgDiff {
 
     private String getMsScript(Set<ActionContainer> actions, Set<IStatement> toRefresh, List<TreeElement> selected,
                                IDatabase oldDb, IDatabase newDb) {
-        SQLScript script = new SQLScript(settings);
+        SQLScript script = new SQLScript(settings, newDb.getSeparator());
         if (settings.isAddTransaction()) {
             script.addStatement("BEGIN TRANSACTION", SQLActionType.BEGIN); //$NON-NLS-1$
         }
@@ -196,7 +205,7 @@ public class PgDiff {
 
     private String getChScript(Set<ActionContainer> actions, Set<IStatement> toRefresh, List<TreeElement> selected,
                                IDatabase oldDb, IDatabase newDb) {
-        SQLScript script = new SQLScript(settings);
+        SQLScript script = new SQLScript(settings, oldDb.getSeparator());
         ActionsToScriptConverter.fillScript(script, actions, toRefresh, oldDb, newDb, selected);
         return script.getFullScript();
     }
@@ -247,8 +256,8 @@ public class PgDiff {
         List<TreeElement> tempColumns = new ArrayList<>();
         for (TreeElement el : selected) {
             if (el.getType() == DbObjType.TABLE && el.getSide() == DiffSide.BOTH) {
-                AbstractTable oldTbl = (AbstractTable) el.getStatement(oldDb);
-                AbstractTable newTbl = (AbstractTable) el.getStatement(newDb);
+                ITable oldTbl = (ITable) el.getStatement(oldDb);
+                ITable newTbl = (ITable) el.getStatement(newDb);
                 DiffTree.addColumns(oldTbl.getColumns(), newTbl.getColumns(), el, tempColumns);
             }
         }

@@ -16,8 +16,12 @@
 package org.pgcodekeeper.core.database.api.schema;
 
 /**
- * Interface for rule type.
+ * Interface for database rule
  */
 public interface IRule extends ISubElement {
 
+    @Override
+    default DbObjType getStatementType() {
+        return DbObjType.RULE;
+    }
 }

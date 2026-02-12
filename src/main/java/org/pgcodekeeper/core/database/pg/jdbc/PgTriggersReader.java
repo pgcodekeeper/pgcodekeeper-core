@@ -20,7 +20,6 @@ import java.sql.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateTrigger;
@@ -54,9 +53,9 @@ public final class PgTriggersReader extends PgAbstractSearchPathJdbcReader {
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String tableName = res.getString("relname");
-        AbstractStatementContainer c = schema.getStatementContainer(tableName);
+        IStatementContainer c = schema.getStatementContainer(tableName);
         if (c == null) {
             return;
         }
@@ -66,7 +65,7 @@ public final class PgTriggersReader extends PgAbstractSearchPathJdbcReader {
         String tgEnabled = res.getString("tgenabled");
 
         if (c instanceof PgAbstractTable table
-                && SupportedPgVersion.VERSION_15.isLE(loader.getVersion())
+                && PgSupportedVersion.VERSION_15.isLE(loader.getVersion())
                 && !NO_PARENT.equals(res.getString("tgparentid"))) {
             table.putTriggerState(triggerName, readEnabledState(tgEnabled, true));
             return;
@@ -149,7 +148,7 @@ public final class PgTriggersReader extends PgAbstractSearchPathJdbcReader {
         }
 
         // after Postgresql 10
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             t.setOldTable(res.getString("tgoldtable"));
             t.setNewTable(res.getString("tgnewtable"));
         }
@@ -170,7 +169,7 @@ public final class PgTriggersReader extends PgAbstractSearchPathJdbcReader {
 
         loader.setAuthor(t, res);
         loader.setComment(t, res);
-        c.addTrigger(t);
+        c.addChild(t);
     }
 
     private PgTriggerState readEnabledState(String tgEnabled, boolean isChild) {
@@ -228,13 +227,13 @@ public final class PgTriggersReader extends PgAbstractSearchPathJdbcReader {
                 .where("cls.relkind IN ('r', 'f', 'p', 'm', 'v')")
                 .where("res.tgisinternal = FALSE");
 
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             builder
                     .column("res.tgoldtable")
                     .column("res.tgnewtable");
         }
 
-        if (SupportedPgVersion.VERSION_15.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_15.isLE(loader.getVersion())) {
             builder
                     .column("res.tgparentid")
                     .column("res.tgenabled")

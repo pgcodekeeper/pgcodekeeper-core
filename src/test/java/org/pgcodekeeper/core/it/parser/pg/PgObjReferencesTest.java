@@ -20,8 +20,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
@@ -133,13 +131,10 @@ class PgObjReferencesTest {
             "pg_unicode_escaping"
     })
     void comparePgReferences(final String fileNameTemplate) throws IOException, InterruptedException {
-        var settings = new CoreSettings();
-        settings.setDbType(DatabaseType.PG);
-
         String resource = fileNameTemplate + FILES_POSTFIX.SQL;
-        var loader = new PgDumpLoader(() -> getClass().getResourceAsStream(resource), resource, settings);
+        var loader = new PgDumpLoader(() -> getClass().getResourceAsStream(resource), resource, new CoreSettings());
         loader.setMode(ParserListenerMode.REF);
-        AbstractDatabase db = loader.load();
+        var db = loader.load();
 
         String expected = TestUtils
                 .readResource(fileNameTemplate + FILES_POSTFIX.REFS_TXT, getClass()).strip();

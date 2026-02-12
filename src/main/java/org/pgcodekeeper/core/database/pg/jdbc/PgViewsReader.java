@@ -21,7 +21,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.launcher.*;
@@ -45,7 +44,7 @@ public final class PgViewsReader extends PgAbstractSearchPathJdbcReader {
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String schemaName = schema.getName();
         String viewName = res.getString("relname");
         loader.setCurrentObject(new GenericColumn(schemaName, viewName, DbObjType.VIEW));
@@ -60,7 +59,7 @@ public final class PgViewsReader extends PgAbstractSearchPathJdbcReader {
             if (tableSpace != null && !tableSpace.isEmpty()) {
                 matV.setTablespace(tableSpace);
             }
-            if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+            if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
                 matV.setMethod(res.getString("access_method"));
             }
             if (loader.isGreenplumDb()) {
@@ -80,7 +79,7 @@ public final class PgViewsReader extends PgAbstractSearchPathJdbcReader {
         int semicolonPos = viewDef.length() - 1;
         String query = viewDef.charAt(semicolonPos) == ';' ? viewDef.substring(0, semicolonPos) : viewDef;
 
-        AbstractDatabase dataBase = schema.getDatabase();
+        IDatabase dataBase = schema.getDatabase();
 
         loader.submitAntlrTask(viewDef,
                 p -> new Pair<>(
@@ -132,7 +131,7 @@ public final class PgViewsReader extends PgAbstractSearchPathJdbcReader {
             ParserAbstract.fillOptionParams(options, v::addOption, false, false, false);
         }
 
-        schema.addView(v);
+        schema.addChild(v);
     }
 
     @Override

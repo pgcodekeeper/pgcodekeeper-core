@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 
 /**
@@ -39,7 +38,7 @@ public final class PgSimpleForeignTable extends PgAbstractForeignTable {
     }
 
     @Override
-    protected AbstractTable getTableCopy() {
+    protected PgAbstractTable getTableCopy() {
         return new PgSimpleForeignTable(name, serverName);
     }
 
@@ -48,8 +47,8 @@ public final class PgSimpleForeignTable extends PgAbstractForeignTable {
         sbSQL.append(" (\n");
 
         int start = sbSQL.length();
-        for (AbstractColumn column : columns) {
-            writeColumn((PgColumn) column, sbSQL, script);
+        for (PgColumn column : columns) {
+            writeColumn(column, sbSQL, script);
         }
 
         if (start != sbSQL.length()) {

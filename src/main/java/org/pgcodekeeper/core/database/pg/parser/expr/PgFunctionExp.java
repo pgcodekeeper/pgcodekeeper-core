@@ -20,7 +20,7 @@ import java.util.Map.Entry;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.rulectx.*;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
@@ -41,7 +41,7 @@ public final class PgFunctionExp extends PgAbstractExprWithNmspc<Plpgsql_functio
      *
      * @param meta the meta container with schema information
      */
-    public PgFunctionExp(MetaContainer meta) {
+    public PgFunctionExp(IMetaContainer meta) {
         super(meta);
     }
 

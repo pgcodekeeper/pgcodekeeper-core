@@ -19,8 +19,8 @@ import java.util.*;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.launcher.AbstractAnalysisLauncher;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.database.ch.parser.expr.ChValueExpr;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.ExprContext;
 import org.pgcodekeeper.core.database.ch.schema.ChFunction;
@@ -48,7 +48,7 @@ public final class ChFuncAnalysisLauncher extends AbstractAnalysisLauncher {
     }
 
     @Override
-    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, IMetaContainer meta) {
         ChValueExpr expr = new ChValueExpr(meta);
         expr.analyze((ExprContext) ctx);
         return expr.getDependencies();

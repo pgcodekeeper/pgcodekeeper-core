@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 
 import java.util.*;
 
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -69,8 +68,8 @@ public final class GpPartitionTable extends PgAbstractRegularTable {
         sbSQL.append(" (\n");
 
         int start = sbSQL.length();
-        for (AbstractColumn column : columns) {
-            writeColumn((PgColumn) column, sbSQL, script);
+        for (PgColumn column : columns) {
+            writeColumn(column, sbSQL, script);
         }
 
         if (start != sbSQL.length()) {
@@ -82,7 +81,7 @@ public final class GpPartitionTable extends PgAbstractRegularTable {
     }
 
     @Override
-    protected boolean isNeedRecreate(AbstractTable newTable) {
+    protected boolean isNeedRecreate(PgAbstractTable newTable) {
         return super.isNeedRecreate(newTable) || !this.getClass().equals(newTable.getClass());
     }
 
@@ -106,14 +105,6 @@ public final class GpPartitionTable extends PgAbstractRegularTable {
             template.appendCreateSQL(sql);
             script.addStatement(sql);
         }
-    }
-
-    @Override
-    protected boolean compareTable(AbstractStatement obj) {
-        return obj instanceof GpPartitionTable table
-                && super.compareTable(table)
-                && Objects.equals(normalizedPartitionGpBounds, table.normalizedPartitionGpBounds)
-                && Objects.equals(templates, table.templates);
     }
 
     @Override
@@ -168,23 +159,27 @@ public final class GpPartitionTable extends PgAbstractRegularTable {
         // no implements
     }
 
-    @Override
-    protected AbstractTable getTableCopy() {
-        return new GpPartitionTable(name);
-    }
-
-    @Override
-    public AbstractTable shallowCopy() {
-        GpPartitionTable copy = (GpPartitionTable) super.shallowCopy();
-        copy.templates.putAll(templates);
-        copy.setPartitionGpBound(partitionGpBounds, normalizedPartitionGpBounds);
-        return copy;
-    }
 
     @Override
     public void computeHash(Hasher hasher) {
         super.computeHash(hasher);
         hasher.putUnordered(templates);
         hasher.put(normalizedPartitionGpBounds);
+    }
+
+    @Override
+    protected boolean compareTable(PgAbstractTable obj) {
+        return obj instanceof GpPartitionTable table
+                && super.compareTable(table)
+                && Objects.equals(templates, table.templates)
+                && Objects.equals(normalizedPartitionGpBounds, table.normalizedPartitionGpBounds);
+    }
+
+    @Override
+    protected PgAbstractTable getTableCopy() {
+        GpPartitionTable copy = new GpPartitionTable(name);
+        copy.templates.putAll(templates);
+        copy.setPartitionGpBound(partitionGpBounds, normalizedPartitionGpBounds);
+        return copy;
     }
 }

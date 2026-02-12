@@ -18,9 +18,10 @@ package org.pgcodekeeper.core.database.pg.parser.launcher;
 import java.util.Set;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.pgcodekeeper.core.database.api.schema.IColumn;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.database.pg.parser.expr.PgValueExpr;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.VexContext;
 import org.pgcodekeeper.core.database.pg.parser.rulectx.PgVex;
@@ -43,8 +44,8 @@ public class PgVexAnalysisLauncher extends PgAbstractAnalysisLauncher {
     }
 
     @Override
-    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
-        if (stmt instanceof AbstractColumn) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, IMetaContainer meta) {
+        if (stmt instanceof IColumn) {
             return analyzeTableChildVex((VexContext) ctx, meta);
         }
 

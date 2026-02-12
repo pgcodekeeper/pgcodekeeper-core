@@ -32,7 +32,7 @@ import org.pgcodekeeper.core.utils.Utils;
  * Extended statistics collect additional information about column correlations
  * and distributions to improve query planning for multi-column predicates.
  */
-public final class PgStatistics extends AbstractStatistics implements IPgStatement {
+public final class PgStatistics extends PgAbstractStatement implements IStatistics, ISearchPath {
 
     private int statistics = -1;
     private final List<String> kinds = new ArrayList<>();
@@ -139,6 +139,15 @@ public final class PgStatistics extends AbstractStatistics implements IPgStateme
     }
 
     @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(kinds);
+        hasher.put(expressions);
+        hasher.put(foreignSchema);
+        hasher.put(foreignTable);
+        hasher.put(statistics);
+    }
+
+    @Override
     public boolean compare(IStatement obj) {
         if (this == obj) {
             return true;
@@ -160,22 +169,13 @@ public final class PgStatistics extends AbstractStatistics implements IPgStateme
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(kinds);
-        hasher.put(expressions);
-        hasher.put(statistics);
-        hasher.put(foreignSchema);
-        hasher.put(foreignTable);
-    }
-
-    @Override
-    protected PgStatistics getStatisticsCopy() {
+    protected PgStatistics getCopy() {
         PgStatistics stat = new PgStatistics(name);
         stat.kinds.addAll(kinds);
         stat.expressions.addAll(expressions);
-        stat.setStatistics(statistics);
         stat.setForeignSchema(foreignSchema);
         stat.setForeignTable(foreignTable);
+        stat.setStatistics(statistics);
         return stat;
     }
 }

@@ -19,8 +19,8 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.launcher.AbstractAnalysisLauncher;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.database.pg.parser.expr.PgValueExprWithNmspc;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.VexContext;
 import org.pgcodekeeper.core.database.pg.parser.rulectx.PgVex;
@@ -44,7 +44,7 @@ public class PgStatisticsAnalysisLauncher extends AbstractAnalysisLauncher {
     }
 
     @Override
-    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, IMetaContainer meta) {
         PgValueExprWithNmspc expr = new PgValueExprWithNmspc(meta);
 
         if (stmt instanceof PgStatistics stat) {

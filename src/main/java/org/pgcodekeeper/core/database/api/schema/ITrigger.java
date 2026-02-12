@@ -15,5 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
-public interface ITrigger {
+/**
+ * Interface for database trigger
+ */
+public interface ITrigger extends ISubElement {
+
+    @Override
+    default DbObjType getStatementType() {
+        return DbObjType.TRIGGER;
+    }
 }

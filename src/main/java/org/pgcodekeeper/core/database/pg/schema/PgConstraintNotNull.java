@@ -142,22 +142,22 @@ public class PgConstraintNotNull extends PgConstraint {
     }
 
     @Override
-    public boolean compare(IStatement obj) {
-        if (obj instanceof PgConstraintNotNull con && super.compare(con)) {
-            return compareUnalterable(con) && isNoInherit == con.isNoInherit;
-        }
-
-        return false;
-    }
-
-    @Override
     public void computeHash(Hasher hasher) {
         super.computeHash(hasher);
         hasher.put(isNoInherit);
     }
 
     @Override
-    protected AbstractConstraint getConstraintCopy() {
+    public boolean compare(IStatement obj) {
+        if (obj instanceof PgConstraintNotNull con && super.compare(con)) {
+            return isNoInherit == con.isNoInherit;
+        }
+
+        return false;
+    }
+
+    @Override
+    protected PgConstraint getConstraintCopy() {
         var con = new PgConstraintNotNull(name);
         con.setNoInherit(isNoInherit);
         return con;

@@ -37,13 +37,18 @@ import org.slf4j.LoggerFactory;
  * Stores column information including data type, constraints, storage parameters,
  * statistics, compression settings, and identity properties.
  */
-public final class PgColumn extends AbstractColumn
-        implements ISimpleOptionContainer, ICompressOptionContainer, IPgStatement {
+public final class PgColumn extends PgAbstractStatement
+        implements ISimpleOptionContainer, ICompressOptionContainer, IColumn {
 
     private static final Logger LOG = LoggerFactory.getLogger(PgColumn.class);
 
     private static final String ALTER_FOREIGN_OPTION = "%s OPTIONS (%s %s %s)";
     private static final String COMPRESSION = " COMPRESSION ";
+    private static final String ALTER_COLUMN = "\n\tALTER COLUMN ";
+    private static final String COLLATE = " COLLATE ";
+    private static final String NULL = " NULL";
+    private static final String NOT_NULL = " NOT NULL";
+
 
     private Integer statistics;
     private String storage;
@@ -55,6 +60,9 @@ public final class PgColumn extends AbstractColumn
     private boolean isInherit;
     private String generationOption;
     private PgConstraintNotNull notNullConstraint;
+    private String type;
+    private String collation;
+    private String defaultValue;
 
     // greenplum type fields
     private String compressType;
@@ -70,7 +78,6 @@ public final class PgColumn extends AbstractColumn
         super(name);
     }
 
-    @Override
     public String getFullDefinition() {
         final StringBuilder sbDefinition = new StringBuilder();
         String cName = getQuotedName(name);
@@ -172,6 +179,10 @@ public final class PgColumn extends AbstractColumn
         compareIdentity(null, identityType, null, sequence, script);
 
         appendComments(script);
+    }
+
+    private String getAlterTable(boolean only) {
+        return ((PgAbstractTable) parent).getAlterTable(only);
     }
 
     private void appendCompressOptions(StringBuilder sb) {
@@ -595,7 +606,7 @@ public final class PgColumn extends AbstractColumn
      * @param tbl table to search inheritance hierarchy from
      * @return parent column or null if no parent column exists
      */
-    public AbstractColumn getParentCol(PgAbstractTable tbl) {
+    public PgColumn getParentCol(PgAbstractTable tbl) {
         for (Inherits in : tbl.getInherits()) {
             IStatement parent = getDatabase().getStatement(new GenericColumn(in.key(), in.value(), DbObjType.TABLE));
             if (parent == null) {
@@ -605,7 +616,7 @@ public final class PgColumn extends AbstractColumn
             }
 
             PgAbstractTable parentTbl = (PgAbstractTable) parent;
-            AbstractColumn parentCol = parentTbl.getColumn(name);
+            PgColumn parentCol = parentTbl.getColumn(name);
             if (parentCol == null) {
                 parentCol = getParentCol(parentTbl);
             }
@@ -671,14 +682,8 @@ public final class PgColumn extends AbstractColumn
         resetHash();
     }
 
-    @Override
     public boolean isNotNull() {
         return notNullConstraint != null;
-    }
-
-    @Override
-    public void setNotNull(boolean notNull) {
-        throw new UnsupportedOperationException("Not supported, add NOT NULL as a constraint instead");
     }
 
     public boolean isGenerated() {
@@ -740,32 +745,38 @@ public final class PgColumn extends AbstractColumn
         resetHash();
     }
 
-    @Override
-    public boolean compare(IStatement obj) {
-        if (obj instanceof PgColumn col && super.compare(obj)) {
-            return compareColOptions(col);
-        }
-
-        return false;
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
+        resetHash();
     }
 
-    private boolean compareColOptions(PgColumn col) {
-        return Objects.equals(statistics, col.statistics)
-                && Objects.equals(storage, col.storage)
-                && Objects.equals(identityType, col.identityType)
-                && isInherit == col.isInherit
-                && options.equals(col.options)
-                && fOptions.equals(col.fOptions)
-                && compareCompressOptions(col)
-                && Objects.equals(sequence, col.sequence)
-                && Objects.equals(compression, col.compression)
-                && Objects.equals(generationOption, col.generationOption)
-                && Objects.equals(notNullConstraint, col.notNullConstraint);
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+        resetHash();
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setCollation(String collation) {
+        this.collation = collation;
+        resetHash();
+    }
+
+    public String getCollation() {
+        return collation;
     }
 
     @Override
     public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
+        hasher.put(type);
+        hasher.put(collation);
+        hasher.put(defaultValue);
         hasher.put(statistics);
         hasher.put(storage);
         hasher.put(options);
@@ -782,18 +793,37 @@ public final class PgColumn extends AbstractColumn
     }
 
     @Override
-    public AbstractColumn shallowCopy() {
-        AbstractColumn colDst = getColumnCopy();
-        copyBaseFields(colDst);
-        colDst.setType(type);
-        colDst.setCollation(collation);
-        colDst.setDefaultValue(defaultValue);
-        return colDst;
+    public boolean compare(IStatement obj) {
+        if (obj instanceof PgColumn col && super.compare(obj)) {
+            return Objects.equals(type, col.type)
+                    && Objects.equals(collation, col.collation)
+                    && Objects.equals(defaultValue, col.defaultValue)
+                    && compareColOptions(col);
+        }
+
+        return false;
+    }
+
+    private boolean compareColOptions(PgColumn col) {
+        return Objects.equals(statistics, col.statistics)
+                && Objects.equals(storage, col.storage)
+                && options.equals(col.options)
+                && fOptions.equals(col.fOptions)
+                && compareCompressOptions(col)
+                && Objects.equals(sequence, col.sequence)
+                && Objects.equals(compression, col.compression)
+                && Objects.equals(identityType, col.identityType)
+                && isInherit == col.isInherit
+                && Objects.equals(generationOption, col.generationOption)
+                && Objects.equals(notNullConstraint, col.notNullConstraint);
     }
 
     @Override
-    protected AbstractColumn getColumnCopy() {
+    protected PgColumn getCopy() {
         PgColumn copy = new PgColumn(name);
+        copy.type = type;
+        copy.collation = collation;
+        copy.defaultValue = defaultValue;
         copy.setStatistics(statistics);
         copy.setStorage(storage);
         copy.options.putAll(options);

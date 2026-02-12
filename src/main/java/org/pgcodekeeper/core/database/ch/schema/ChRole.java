@@ -15,12 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import java.util.Objects;
-
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.ObjectState;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
+
+import java.util.Objects;
 
 /**
  * Represents a ClickHouse role for access control.
@@ -42,6 +44,11 @@ public final class ChRole extends ChAbstractStatement {
     }
 
     @Override
+    public DbObjType getStatementType() {
+        return DbObjType.ROLE;
+    }
+
+    @Override
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("CREATE ROLE ");
@@ -59,11 +66,11 @@ public final class ChRole extends ChAbstractStatement {
         int startSize = script.getSize();
         ChRole newRole = (ChRole) newCondition;
 
-        if (!Objects.equals(storageType, newRole.getStorageType())) {
+        if (!Objects.equals(storageType, newRole.storageType)) {
             StringBuilder sql = new StringBuilder();
             sql.append("MOVE ROLE ")
                     .append(getQualifiedName()).append(" TO ")
-                    .append(newRole.getStorageType());
+                    .append(newRole.storageType);
             script.addStatement(sql);
         }
         alterPrivileges(newRole, script);
@@ -89,30 +96,10 @@ public final class ChRole extends ChAbstractStatement {
     }
 
     @Override
-    public AbstractDatabase getDatabase() {
-        return (AbstractDatabase) parent;
-    }
-
-    @Override
-    public DbObjType getStatementType() {
-        return DbObjType.ROLE;
-    }
-
-    @Override
-    public AbstractStatement shallowCopy() {
+    protected AbstractStatement getCopy() {
         ChRole copy = new ChRole(name);
-        copyBaseFields(copy);
         copy.setStorageType(storageType);
         return copy;
-    }
-
-    /**
-     * Returns the storage type for this role.
-     *
-     * @return the storage type
-     */
-    public String getStorageType() {
-        return storageType;
     }
 
     public void setStorageType(String storageType) {

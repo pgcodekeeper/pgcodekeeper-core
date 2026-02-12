@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 /**
@@ -38,18 +37,16 @@ public interface ISchema extends IStatementContainer {
      */
     IRelation getRelation(String name);
 
-    /**
-     * Gets all functions in this schema.
-     *
-     * @return a collection of functions
-     */
-    Collection<IFunction> getFunctions();
+    @Override
+    default DbObjType getStatementType() {
+        return DbObjType.SCHEMA;
+    }
 
     /**
-     * Gets a function by its signature.
+     * Gets a statement container by name.
      *
-     * @param signature the function signature
-     * @return the function with the given signature, or null if not found
+     * @param name the name of the container to find
+     * @return the statement container with the given name, or null if not found
      */
-    IFunction getFunction(String signature);
+    IStatementContainer getStatementContainer(String name);
 }

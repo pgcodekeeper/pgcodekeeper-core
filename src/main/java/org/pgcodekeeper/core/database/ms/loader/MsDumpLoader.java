@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.ms.loader;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.parser.AntlrTask;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.ms.parser.*;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.ms.schema.MsSchema;
@@ -52,7 +51,7 @@ public class MsDumpLoader extends AbstractDumpLoader<MsDatabase> {
     }
 
     @Override
-    protected AbstractSchema createDefaultSchema() {
+    protected MsSchema createDefaultSchema() {
         return new MsSchema(Consts.DBO);
     }
 

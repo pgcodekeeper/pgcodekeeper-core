@@ -21,7 +21,6 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
@@ -59,8 +58,7 @@ public final class PgAlterSequence extends PgParserAbstract {
             setLogged(loggedCtx, ids);
             return;
         }
-        PgSequence sequence = (PgSequence) getSafe(AbstractSchema::getSequence,
-                getSchemaSafe(ids), QNameParser.getFirstNameCtx(ids));
+        PgSequence sequence = getSafe(PgSchema::getSequence, getSchemaSafe(ids), QNameParser.getFirstNameCtx(ids));
 
         for (Sequence_bodyContext seqbody : ctx.sequence_body()) {
             if (seqbody.OWNED() != null && seqbody.col_name != null) {

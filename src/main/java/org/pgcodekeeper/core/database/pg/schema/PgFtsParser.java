@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -82,15 +81,12 @@ public final class PgFtsParser extends PgAbstractStatement implements ISearchPat
     }
 
     @Override
-    public PgFtsParser shallowCopy() {
-        PgFtsParser parserDst = new PgFtsParser(name);
-        copyBaseFields(parserDst);
-        parserDst.setStartFunction(startFunction);
-        parserDst.setGetTokenFunction(getTokenFunction);
-        parserDst.setEndFunction(endFunction);
-        parserDst.setLexTypesFunction(lexTypesFunction);
-        parserDst.setHeadLineFunction(headLineFunction);
-        return parserDst;
+    public void computeHash(Hasher hasher) {
+        hasher.put(startFunction);
+        hasher.put(getTokenFunction);
+        hasher.put(endFunction);
+        hasher.put(lexTypesFunction);
+        hasher.put(headLineFunction);
     }
 
     @Override
@@ -110,17 +106,19 @@ public final class PgFtsParser extends PgAbstractStatement implements ISearchPat
         return Objects.equals(startFunction, parser.startFunction)
                 && Objects.equals(getTokenFunction, parser.getTokenFunction)
                 && Objects.equals(endFunction, parser.endFunction)
-                && Objects.equals(headLineFunction, parser.headLineFunction)
-                && Objects.equals(lexTypesFunction, parser.lexTypesFunction);
+                && Objects.equals(lexTypesFunction, parser.lexTypesFunction)
+                && Objects.equals(headLineFunction, parser.headLineFunction);
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(startFunction);
-        hasher.put(getTokenFunction);
-        hasher.put(endFunction);
-        hasher.put(headLineFunction);
-        hasher.put(lexTypesFunction);
+    protected PgFtsParser getCopy() {
+        PgFtsParser parserDst = new PgFtsParser(name);
+        parserDst.setStartFunction(startFunction);
+        parserDst.setGetTokenFunction(getTokenFunction);
+        parserDst.setEndFunction(endFunction);
+        parserDst.setLexTypesFunction(lexTypesFunction);
+        parserDst.setHeadLineFunction(headLineFunction);
+        return parserDst;
     }
 
     public void setStartFunction(final String startFunction) {

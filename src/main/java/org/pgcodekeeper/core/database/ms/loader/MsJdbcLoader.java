@@ -117,8 +117,8 @@ public final class MsJdbcLoader extends AbstractJdbcLoader<MsDatabase> {
     private void queryCheckMsVersion() throws SQLException, InterruptedException {
         setCurrentOperation(Messages.JdbcLoaderBase_log_reading_ms_version);
         try (ResultSet res = runner.runScript(statement, QUERY_CHECK_MS_VERSION)) {
-            version = res.next() ? res.getInt(1) : SupportedMsVersion.VERSION_17.getVersion();
-            if (!SupportedMsVersion.VERSION_17.isLE(version)) {
+            version = res.next() ? res.getInt(1) : MsSupportedVersion.VERSION_17.getVersion();
+            if (!MsSupportedVersion.VERSION_17.isLE(version)) {
                 throw new IllegalStateException(Messages.JdbcLoaderBase_unsupported_ms_sql_version);
             }
 
@@ -206,7 +206,7 @@ public final class MsJdbcLoader extends AbstractJdbcLoader<MsDatabase> {
             IPrivilege priv = new MsPrivilege(state, permission, sb.toString(),
                     MsDiffUtils.quoteName(role), isWithGrantOption);
 
-            if (col != null && st instanceof AbstractTable table) {
+            if (col != null && st instanceof MsTable table) {
                 table.getColumn(col).addPrivilege(priv);
             } else {
                 st.addPrivilege(priv);

@@ -18,8 +18,8 @@ package org.pgcodekeeper.core.database.ch.parser.expr;
 import java.util.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
 import org.pgcodekeeper.core.utils.Pair;
 
@@ -38,7 +38,7 @@ public final class ChValueExpr extends ChAbstractExpr {
      *
      * @param meta the metadata container for database objects
      */
-    public ChValueExpr(MetaContainer meta) {
+    public ChValueExpr(IMetaContainer meta) {
         super(null, meta);
     }
 

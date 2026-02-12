@@ -15,5 +15,33 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
-public interface IIndex {
+import java.util.Collection;
+
+/**
+ * Interface for database index
+ */
+public interface IIndex extends ISubElement, ISimpleOptionContainer, ISimpleColumnContainer {
+
+    @Override
+    default DbObjType getStatementType() {
+        return DbObjType.INDEX;
+    }
+
+    @Override
+    default GenericColumn toGenericColumn(DbObjType type) {
+        return new GenericColumn(getContainingSchema().getName(), getName(), type);
+    }
+
+    /**
+     * @return true if unique index
+     */
+    boolean isUnique();
+
+    /**
+     * Compares the columns of this index with a collection of column references.
+     *
+     * @param refs the collection of column references to compare against
+     * @return true if the columns match in order and count
+     */
+    boolean compareColumns(Collection<String> refs);
 }

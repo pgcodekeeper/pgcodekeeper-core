@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.ms.schema;
 import java.util.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -45,11 +44,6 @@ public final class MsAssembly extends MsAbstractStatement {
     }
 
     @Override
-    public AbstractDatabase getDatabase() {
-        return (AbstractDatabase) parent;
-    }
-
-    @Override
     public void getCreationSQL(SQLScript script) {
         getAssemblyFullSQL(false, script);
     }
@@ -61,7 +55,7 @@ public final class MsAssembly extends MsAbstractStatement {
      * @return the preview SQL string with truncated binaries
      */
     public String getPreview(ISettings settings) {
-        SQLScript script = new SQLScript(settings);
+        SQLScript script = new SQLScript(settings, getSeparator());
         getAssemblyFullSQL(true, script);
         return script.getFullScript();
     }
@@ -138,19 +132,9 @@ public final class MsAssembly extends MsAbstractStatement {
 
     @Override
     public void computeHash(Hasher hasher) {
-        hasher.put(binaries);
         hasher.put(isVisible);
         hasher.put(permission);
-    }
-
-    @Override
-    public MsAssembly shallowCopy() {
-        MsAssembly assDst = new MsAssembly(name);
-        copyBaseFields(assDst);
-        assDst.setPermission(permission);
-        assDst.binaries.addAll(binaries);
-        assDst.setVisible(isVisible);
-        return assDst;
+        hasher.put(binaries);
     }
 
     @Override
@@ -166,6 +150,15 @@ public final class MsAssembly extends MsAbstractStatement {
         }
 
         return false;
+    }
+
+    @Override
+    protected MsAssembly getCopy() {
+        MsAssembly assDst = new MsAssembly(name);
+        assDst.setVisible(isVisible);
+        assDst.setPermission(permission);
+        assDst.binaries.addAll(binaries);
+        return assDst;
     }
 
     public void setPermission(final String permission) {

@@ -17,17 +17,15 @@ package org.pgcodekeeper.core.it.loader.ms;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.ms.project.MsModelExporter;
 import org.pgcodekeeper.core.ignorelist.IgnoreParser;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.utils.TempDir;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -37,35 +35,31 @@ import static org.pgcodekeeper.core.it.IntegrationTestUtils.*;
 class MsProjectLoaderTest {
 
     @Test
-    void testProjectLoaderWithIgnoredSchemas() throws IOException, InterruptedException {
-        try (TempDir tempDir = new TempDir("ignore-schemas test project")) {
-            Path dir = tempDir.get();
-            var settings = new CoreSettings();
-            settings.setDbType(DatabaseType.MS);
+    void testProjectLoaderWithIgnoredSchemas(@TempDir Path dir) throws IOException, InterruptedException {
+        var settings = new CoreSettings();
+        settings.setDbType(DatabaseType.MS);
 
-            AbstractDatabase msDbDump = loadTestDump(RESOURCE_MS_DUMP, IntegrationTestUtils.class, settings);
+        var msDbDump = loadTestDump(RESOURCE_MS_DUMP, IntegrationTestUtils.class, settings);
 
-            new MsModelExporter(dir, msDbDump, Consts.UTF_8, settings).exportFull();
+        new MsModelExporter(dir, msDbDump, Consts.UTF_8, settings).exportFull();
 
-            createIgnoredSchemaFile(dir);
-            Path listFile = dir.resolve(".pgcodekeeperignoreschema");
+        createIgnoredSchemaFile(dir);
+        Path listFile = dir.resolve(".pgcodekeeperignoreschema");
 
-            // load ignored schema list
-            IgnoreSchemaList ignoreSchemaList = new IgnoreSchemaList();
-            IgnoreParser ignoreParser = new IgnoreParser(ignoreSchemaList);
-            ignoreParser.parse(listFile);
+        // load ignored schema list
+        IgnoreSchemaList ignoreSchemaList = new IgnoreSchemaList();
+        IgnoreParser ignoreParser = new IgnoreParser(ignoreSchemaList);
+        ignoreParser.parse(listFile);
 
-            AbstractDatabase loader = IntegrationTestUtils.createProjectLoader(dir, settings, msDbDump,
-                    new NullMonitor(), ignoreSchemaList).load();
+        var loader = IntegrationTestUtils
+                .createProjectLoader(dir, settings, msDbDump, new NullMonitor(), ignoreSchemaList).load();
 
-            for (AbstractSchema dbSchema : loader.getSchemas()) {
-                if (IGNORED_SCHEMAS_LIST.contains(dbSchema.getName())) {
-                    Assertions.fail("Ignored Schema loaded " + dbSchema.getName());
-                } else {
-                    Assertions.assertEquals(
-                            msDbDump.getSchema(dbSchema.getName()), dbSchema,
-                            "Schema from ms dump isn't equal schema from loader");
-                }
+        for (var dbSchema : loader.getSchemas()) {
+            if (IGNORED_SCHEMAS_LIST.contains(dbSchema.getName())) {
+                Assertions.fail("Ignored Schema loaded " + dbSchema.getName());
+            } else {
+                Assertions.assertEquals(msDbDump.getSchema(dbSchema.getName()), dbSchema,
+                        "Schema from ms dump isn't equal schema from loader");
             }
         }
     }

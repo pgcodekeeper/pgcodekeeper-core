@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.database.base.schema.meta;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
+import org.pgcodekeeper.core.database.pg.jdbc.PgSupportedVersion;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -27,8 +27,8 @@ class MetaStorageTest {
 
     @Disabled("wait serialization fix")
     @ParameterizedTest
-    @EnumSource(SupportedPgVersion.class)
-    void testGetSystemObjectsNotEmpty(SupportedPgVersion version) {
+    @EnumSource(PgSupportedVersion.class)
+    void testGetSystemObjectsNotEmpty(PgSupportedVersion version) {
         var systemObjects = MetaStorage.getSystemObjects(version);
 
         assertFalse(systemObjects.isEmpty());

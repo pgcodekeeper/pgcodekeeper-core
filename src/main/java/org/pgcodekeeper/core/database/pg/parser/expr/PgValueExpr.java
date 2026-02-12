@@ -22,9 +22,9 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
@@ -45,7 +45,7 @@ public final class PgValueExpr extends PgAbstractExpr {
      *
      * @param meta the meta container with schema information
      */
-    public PgValueExpr(MetaContainer meta) {
+    public PgValueExpr(IMetaContainer meta) {
         super(meta);
     }
 

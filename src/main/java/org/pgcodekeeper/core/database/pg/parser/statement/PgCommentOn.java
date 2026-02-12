@@ -89,9 +89,9 @@ public final class PgCommentOn extends PgParserAbstract {
                         "Table name is missing for commented column!", nameCtx.getStart());
             }
             String tableName = tableCtx.getText();
-            PgAbstractTable table = (PgAbstractTable) schema.getTable(tableName);
+            PgAbstractTable table = schema.getTable(tableName);
             if (table == null) {
-                PgAbstractView view = (PgAbstractView) schema.getView(tableName);
+                PgAbstractView view = schema.getView(tableName);
                 if (view == null) {
                     PgCompositeType t = ((PgCompositeType) getSafe(PgSchema::getType, schema, tableCtx));
                     addObjReference(tableIds, DbObjType.TYPE, null);
@@ -103,10 +103,10 @@ public final class PgCommentOn extends PgParserAbstract {
             } else {
                 PgColumn column;
                 if (table.getInherits().isEmpty()) {
-                    column = (PgColumn) getSafe(AbstractTable::getColumn, table, nameCtx);
+                    column = getSafe(PgAbstractTable::getColumn, table, nameCtx);
                 } else {
                     String colName = nameCtx.getText();
-                    column = (PgColumn) table.getColumn(colName);
+                    column = table.getColumn(colName);
                     if (column == null) {
                         column = new PgColumn(colName);
                         column.setInherit(true);
@@ -168,8 +168,8 @@ public final class PgCommentOn extends PgParserAbstract {
                 st = getSafe(PgDomain::getConstraint, domain, nameCtx);
             } else {
                 addObjReference(parentIds, DbObjType.TABLE, null);
-                AbstractStatementContainer table = getSafe(PgSchema::getStatementContainer, schema, parentCtx);
-                st = getSafe(AbstractStatementContainer::getConstraint, table, nameCtx);
+                PgAbstractTable table = getSafe(PgSchema::getTable, schema, parentCtx);
+                st = getSafe(PgAbstractTable::getConstraint, table, nameCtx);
             }
             ids = Arrays.asList(QNameParser.getSchemaNameCtx(parentIds), parentCtx, nameCtx);
         } else if (obj.CAST() != null) {
@@ -211,16 +211,16 @@ public final class PgCommentOn extends PgParserAbstract {
             addObjReference(parentIds, DbObjType.TABLE, null);
             ParserRuleContext tableCtx = QNameParser.getFirstNameCtx(parentIds);
             ids = Arrays.asList(QNameParser.getSchemaNameCtx(parentIds), tableCtx, nameCtx);
-            AbstractStatementContainer c = getSafe(PgSchema::getStatementContainer, schema, tableCtx);
+            PgAbstractStatementContainer c = getSafe(PgSchema::getStatementContainer, schema, tableCtx);
             if (obj.POLICY() != null) {
                 type = DbObjType.POLICY;
-                st = getSafe(AbstractStatementContainer::getPolicy, c, nameCtx);
+                st = getSafe(PgAbstractStatementContainer::getPolicy, c, nameCtx);
             } else if (obj.RULE() != null) {
                 type = DbObjType.RULE;
-                st = getSafe(AbstractStatementContainer::getRule, c, nameCtx);
+                st = getSafe(PgAbstractStatementContainer::getRule, c, nameCtx);
             } else {
                 type = DbObjType.TRIGGER;
-                st = getSafe(AbstractStatementContainer::getTrigger, c, nameCtx);
+                st = getSafe(PgAbstractStatementContainer::getTrigger, c, nameCtx);
             }
         } else if (obj.CONFIGURATION() != null) {
             type = DbObjType.FTS_CONFIGURATION;

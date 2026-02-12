@@ -19,7 +19,7 @@ import java.util.*;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.schema.PgIndex;
 
@@ -50,7 +50,7 @@ public class PgIndexAnalysisLauncher extends PgAbstractAnalysisLauncher {
      * @return set of object locations referenced in the index definition
      */
     @Override
-    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, IMetaContainer meta) {
         Set<ObjectLocation> depcies = new LinkedHashSet<>();
         Index_restContext rest = (Index_restContext) ctx;
 

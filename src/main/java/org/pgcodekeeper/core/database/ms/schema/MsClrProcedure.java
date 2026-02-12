@@ -46,8 +46,8 @@ public final class MsClrProcedure extends MsAbstractClrFunction {
 
     @Override
     protected void appendFunctionFullSQL(StringBuilder sbSQL, boolean isCreate) {
-        sbSQL.append("SET QUOTED_IDENTIFIER OFF").append(GO).append('\n');
-        sbSQL.append("SET ANSI_NULLS OFF").append(GO).append('\n');
+        sbSQL.append("SET QUOTED_IDENTIFIER OFF").append(getSeparator()).append('\n');
+        sbSQL.append("SET ANSI_NULLS OFF").append(getSeparator()).append('\n');
         sbSQL.append(isCreate ? "CREATE" : "ALTER");
         sbSQL.append(" PROCEDURE ");
         sbSQL.append(getQualifiedName()).append('\n');
@@ -68,7 +68,7 @@ public final class MsClrProcedure extends MsAbstractClrFunction {
     }
 
     @Override
-    public boolean needDrop(AbstractFunction newFunction) {
+    public boolean needDrop(IFunction newFunction) {
         return newFunction instanceof MsProcedure;
     }
 

@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.utils.Utils;
@@ -34,7 +33,7 @@ public final class PgDomain extends PgAbstractStatement implements ISearchPath {
     private String collation;
     private String defaultValue;
     private boolean notNull;
-    private final List<AbstractConstraint> constraints = new ArrayList<>();
+    private final List<PgConstraint> constraints = new ArrayList<>();
 
     public void setDataType(String dataType) {
         this.dataType = dataType;
@@ -62,8 +61,8 @@ public final class PgDomain extends PgAbstractStatement implements ISearchPath {
      * @param name constraint name
      * @return constraint or null if not found
      */
-    public AbstractConstraint getConstraint(String name) {
-        for (AbstractConstraint c : constraints) {
+    public PgConstraint getConstraint(String name) {
+        for (PgConstraint c : constraints) {
             if (c.getName().equals(name)) {
                 return c;
             }
@@ -76,7 +75,7 @@ public final class PgDomain extends PgAbstractStatement implements ISearchPath {
      *
      * @param constraint constraint to add
      */
-    public void addConstraint(AbstractConstraint constraint) {
+    public void addConstraint(PgConstraint constraint) {
         assertUnique(getConstraint(constraint.getName()), constraint);
         constraints.add(constraint);
         constraint.setParent(this);
@@ -112,8 +111,8 @@ public final class PgDomain extends PgAbstractStatement implements ISearchPath {
             sql.append(" DEFAULT ").append(defaultValue);
         }
 
-        List<AbstractConstraint> notValids = new ArrayList<>();
-        for (AbstractConstraint constr : constraints) {
+        List<PgConstraint> notValids = new ArrayList<>();
+        for (PgConstraint constr : constraints) {
             if (constr.isNotValid()) {
                 notValids.add(constr);
             } else {
@@ -123,7 +122,7 @@ public final class PgDomain extends PgAbstractStatement implements ISearchPath {
         }
         script.addStatement(sql);
 
-        for (AbstractConstraint notValid : notValids) {
+        for (PgConstraint notValid : notValids) {
             notValid.getCreationSQL(script);
         }
 
@@ -168,8 +167,8 @@ public final class PgDomain extends PgAbstractStatement implements ISearchPath {
         alterPrivileges(newDomain, script);
         appendAlterComments(newDomain, script);
 
-        for (AbstractConstraint oldConstr : constraints) {
-            AbstractConstraint newConstr = newDomain.getConstraint(oldConstr.getName());
+        for (PgConstraint oldConstr : constraints) {
+            PgConstraint newConstr = newDomain.getConstraint(oldConstr.getName());
             if (newConstr == null) {
                 oldConstr.getDropSQL(script);
             } else if ((oldConstr.appendAlterSQL(newConstr, script) == ObjectState.RECREATE)) {
@@ -177,7 +176,7 @@ public final class PgDomain extends PgAbstractStatement implements ISearchPath {
                 newConstr.getCreationSQL(script);
             }
         }
-        for (AbstractConstraint newConstr : newDomain.constraints) {
+        for (PgConstraint newConstr : newDomain.constraints) {
             if (getConstraint(newConstr.getName()) == null) {
                 newConstr.getCreationSQL(script);
             }
@@ -193,23 +192,18 @@ public final class PgDomain extends PgAbstractStatement implements ISearchPath {
     }
 
     private void appendChildrenComments(SQLScript script) {
-        for (AbstractConstraint c : constraints) {
+        for (PgConstraint c : constraints) {
             c.appendComments(script);
         }
     }
 
     @Override
-    public PgDomain shallowCopy() {
-        PgDomain domainDst = new PgDomain(name);
-        copyBaseFields(domainDst);
-        domainDst.setDataType(dataType);
-        domainDst.setCollation(collation);
-        domainDst.setDefaultValue(defaultValue);
-        domainDst.setNotNull(notNull);
-        for (AbstractConstraint constr : constraints) {
-            domainDst.addConstraint((AbstractConstraint) constr.deepCopy());
-        }
-        return domainDst;
+    public void computeHash(Hasher hasher) {
+        hasher.put(dataType);
+        hasher.put(collation);
+        hasher.put(defaultValue);
+        hasher.put(notNull);
+        hasher.putUnordered(constraints);
     }
 
     @Override
@@ -230,11 +224,15 @@ public final class PgDomain extends PgAbstractStatement implements ISearchPath {
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(dataType);
-        hasher.put(collation);
-        hasher.put(defaultValue);
-        hasher.put(notNull);
-        hasher.putUnordered(constraints);
+    protected PgDomain getCopy() {
+        PgDomain domainDst = new PgDomain(name);
+        domainDst.setDataType(dataType);
+        domainDst.setCollation(collation);
+        domainDst.setDefaultValue(defaultValue);
+        domainDst.setNotNull(notNull);
+        for (PgConstraint constr : constraints) {
+            domainDst.addConstraint((PgConstraint) constr.deepCopy());
+        }
+        return domainDst;
     }
 }

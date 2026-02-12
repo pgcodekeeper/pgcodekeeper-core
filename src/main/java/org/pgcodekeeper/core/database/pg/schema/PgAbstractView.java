@@ -36,7 +36,7 @@ import org.pgcodekeeper.core.utils.Pair;
  *
  * @author fordfrog
  */
-public abstract class PgAbstractView extends AbstractView implements ISimpleOptionContainer, IPgStatement {
+public abstract class PgAbstractView extends PgAbstractStatementContainer implements IView, ISimpleOptionContainer {
 
     private static final String COLUMN_COMMENT = "COMMENT ON COLUMN %s.%s IS %s";
     public static final String CHECK_OPTION = "check_option";
@@ -261,8 +261,8 @@ public abstract class PgAbstractView extends AbstractView implements ISimpleOpti
     }
 
     @Override
-    protected AbstractStatementContainer getCopy() {
-        PgAbstractView view = (PgAbstractView) super.getCopy();
+    protected PgAbstractStatementContainer getCopy() {
+        PgAbstractView view = getViewCopy();
         view.query = query;
         view.normalizedQuery = normalizedQuery;
         view.columnNames.addAll(columnNames);
@@ -278,4 +278,11 @@ public abstract class PgAbstractView extends AbstractView implements ISimpleOpti
         hasher.put(columnComments);
         hasher.put(options);
     }
+
+    @Override
+    public Collection<PgConstraint> getConstraints() {
+        return Collections.emptyList();
+    }
+
+    protected abstract PgAbstractView getViewCopy();
 }

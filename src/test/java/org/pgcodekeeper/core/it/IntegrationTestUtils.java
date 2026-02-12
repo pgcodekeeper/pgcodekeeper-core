@@ -22,7 +22,6 @@ import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.database.ch.loader.ChDumpLoader;
 import org.pgcodekeeper.core.database.ch.loader.ChProjectLoader;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
@@ -45,6 +44,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public final class IntegrationTestUtils {
 
@@ -57,12 +57,12 @@ public final class IntegrationTestUtils {
     public static final String RESOURCE_MS_DUMP = "testing_ms_dump.sql";
     public static final List<String> IGNORED_SCHEMAS_LIST = List.of("worker", "country", "ignore1", "ignore4vrw");
 
-    public static AbstractDatabase loadTestDump(String resource, Class<?> c, ISettings settings)
+    public static IDatabase loadTestDump(String resource, Class<?> c, ISettings settings)
             throws IOException, InterruptedException {
         return loadTestDump(resource, c, settings, true);
     }
 
-    public static AbstractDatabase loadTestDump(String resource, Class<?> c, ISettings settings, boolean analysis)
+    public static IDatabase loadTestDump(String resource, Class<?> c, ISettings settings, boolean analysis)
             throws IOException, InterruptedException {
         InputStreamProvider input = () -> c.getResourceAsStream(resource);
         String inputObjectName = "test/" + c.getName() + '/' + resource;
@@ -71,29 +71,35 @@ public final class IntegrationTestUtils {
             case MS -> new MsDumpLoader(input, inputObjectName, settings);
             case CH -> new ChDumpLoader(input, inputObjectName, settings);
         };
-        AbstractDatabase db = loader.load();
+        IDatabase db = loader.load();
         if (analysis) {
             FullAnalyze.fullAnalyze(db, loader.getErrors());
         }
-        Assertions.assertEquals("[]", loader.getErrors().toString(), "Test resource caused loader errors!");
+
+        var errors = loader.getErrors().stream()
+        .map(Object::toString)
+        .collect(Collectors.joining(System.lineSeparator()));
+
+        Assertions.assertEquals("", errors, "Test resource caused loader errors!");
         return db;
     }
 
-    public static void assertDiffSame(AbstractDatabase db, String template, ISettings settings)
+    public static void assertDiffSame(IDatabase db, String template, ISettings settings)
             throws IOException, InterruptedException {
         assertDiff(db, db, settings, "File name template: " + template);
     }
 
-    public static void assertDiff(AbstractDatabase oldDb, AbstractDatabase newDb, ISettings settings, String errorMessage)
+    public static void assertDiff(IDatabase oldDb, IDatabase newDb, ISettings settings, String errorMessage)
             throws IOException, InterruptedException {
         String script = PgCodeKeeperApi.diff(settings, oldDb, newDb);
         Assertions.assertEquals("", script.trim(), errorMessage);
     }
 
     public static void assertResult(String script, String template, Class<?> clazz) throws IOException {
-        Assertions.assertEquals(
-                TestUtils.readResource(template + FILES_POSTFIX.DIFF_SQL, clazz).trim(),
-                script.trim());
+        String expected = TestUtils.readResource(template + FILES_POSTFIX.DIFF_SQL, clazz).trim();
+        String actual = script.trim();
+
+        TestUtils.assertIgnoreNewLines(expected, actual);
     }
 
     public static void createIgnoredSchemaFile(Path dir) throws IOException {
@@ -122,10 +128,10 @@ public final class IntegrationTestUtils {
 
     public static String getScript(String fileNameTemplate, CoreSettings settings, Class<?> clazz)
             throws IOException, InterruptedException {
-        AbstractDatabase dbOld = loadTestDump(fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, settings);
+        IDatabase dbOld = loadTestDump(fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, settings);
         assertDiffSame(dbOld, fileNameTemplate, settings);
 
-        AbstractDatabase dbNew = loadTestDump(fileNameTemplate + FILES_POSTFIX.NEW_SQL, clazz, settings);
+        IDatabase dbNew = loadTestDump(fileNameTemplate + FILES_POSTFIX.NEW_SQL, clazz, settings);
         assertDiffSame(dbNew, fileNameTemplate, settings);
 
         return PgCodeKeeperApi.diff(settings, dbOld, dbNew);
@@ -134,8 +140,8 @@ public final class IntegrationTestUtils {
     public static void assertEqualsDependencies(String dbTemplate, String userTemplateName,
                                                 Map<String, DbObjType> selected, Class<?> clazz, ISettings settings)
             throws IOException, InterruptedException {
-        AbstractDatabase oldDbFull = loadTestDump(dbTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, settings);
-        AbstractDatabase newDbFull = loadTestDump(dbTemplate + FILES_POSTFIX.NEW_SQL, clazz, settings);
+        IDatabase oldDbFull = loadTestDump(dbTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, settings);
+        IDatabase newDbFull = loadTestDump(dbTemplate + FILES_POSTFIX.NEW_SQL, clazz, settings);
 
         assertDiffSame(oldDbFull, dbTemplate, settings);
         assertDiffSame(newDbFull, dbTemplate, settings);
@@ -155,11 +161,11 @@ public final class IntegrationTestUtils {
      * @param selectedObjects - {@link Map} selected objects, where key - name of object, value - {@link DbObjType} of
      *                        object. If is null user select all objects
      * @param tree            - {@link TreeElement} after diff old and new database state
-     * @param oldDbFull       - old state of {@link AbstractDatabase}
-     * @param newDbFull       - new state of {@link AbstractDatabase}
+     * @param oldDbFull       - old state of {@link IDatabase}
+     * @param newDbFull       - new state of {@link IDatabase}
      */
-    private static void setSelected(Map<String, DbObjType> selectedObjects, TreeElement tree, AbstractDatabase oldDbFull,
-                                    AbstractDatabase newDbFull) {
+    private static void setSelected(Map<String, DbObjType> selectedObjects, TreeElement tree, IDatabase oldDbFull,
+                                    IDatabase newDbFull) {
         if (null == selectedObjects) {
             tree.setAllChecked();
             return;

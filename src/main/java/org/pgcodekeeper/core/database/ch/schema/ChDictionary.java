@@ -36,7 +36,7 @@ public final class ChDictionary extends ChAbstractStatement implements IRelation
     private String layOut;
     private String pk;
     private String range;
-    private final List<AbstractColumn> columns = new ArrayList<>();
+    private final List<ChColumn> columns = new ArrayList<>();
     private final Map<String, String> sources = new LinkedHashMap<>();
     private final Map<String, String> options = new LinkedHashMap<>();
 
@@ -79,7 +79,7 @@ public final class ChDictionary extends ChAbstractStatement implements IRelation
      *
      * @param column the column to add
      */
-    public void addColumn(final AbstractColumn column) {
+    public void addColumn(final ChColumn column) {
         assertUnique(getColumn(column.getName()), column);
         columns.add(column);
         column.setParent(this);
@@ -92,8 +92,8 @@ public final class ChDictionary extends ChAbstractStatement implements IRelation
      * @param name name of the column to be searched
      * @return found column or null if no such column has been found
      */
-    private AbstractColumn getColumn(final String name) {
-        for (AbstractColumn column : columns) {
+    private ChColumn getColumn(final String name) {
+        for (ChColumn column : columns) {
             if (column.getName().equals(name)) {
                 return column;
             }
@@ -211,27 +211,18 @@ public final class ChDictionary extends ChAbstractStatement implements IRelation
     }
 
     @Override
-    public void appendComments(SQLScript script) {
-        // no impl
-    }
-
-    @Override
-    protected void appendCommentSql(SQLScript script) {
-        // no impl
-    }
-
-    @Override
-    public AbstractStatement shallowCopy() {
-        var dictn = new ChDictionary(name);
-        copyBaseFields(dictn);
-        dictn.setSourceType(sourceType);
-        dictn.setLifeTime(lifeTime);
-        dictn.setLayOut(layOut);
-        dictn.setPk(pk);
-        dictn.setRange(range);
-        dictn.sources.putAll(sources);
-        dictn.columns.addAll(columns);
-        dictn.options.putAll(options);
-        return dictn;
+    protected AbstractStatement getCopy() {
+        var copy = new ChDictionary(name);
+        copy.setSourceType(sourceType);
+        copy.setLifeTime(lifeTime);
+        copy.setLayOut(layOut);
+        copy.setPk(pk);
+        copy.setRange(range);
+        for (var colSrc : columns) {
+            copy.addColumn((ChColumn) colSrc.deepCopy());
+        }
+        copy.sources.putAll(sources);
+        copy.options.putAll(options);
+        return copy;
     }
 }

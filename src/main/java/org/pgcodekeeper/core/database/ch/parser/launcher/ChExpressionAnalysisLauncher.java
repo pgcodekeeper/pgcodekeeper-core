@@ -19,9 +19,9 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.launcher.AbstractAnalysisLauncher;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.database.ch.parser.expr.*;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.ExprContext;
 
@@ -43,7 +43,7 @@ public class ChExpressionAnalysisLauncher extends AbstractAnalysisLauncher {
     }
 
     @Override
-    protected Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    protected Set<ObjectLocation> analyze(ParserRuleContext ctx, IMetaContainer meta) {
         if (isNeedNmspc()) {
             var expr = new ChExprWithNmspc(getSchemaName(), meta);
             var table = stmt.getParent();

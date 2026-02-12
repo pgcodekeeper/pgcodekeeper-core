@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.ms.schema;
 import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
 import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
@@ -59,13 +58,12 @@ public final class MsConstraintCheck extends MsConstraint {
         return sbSQL.toString();
     }
 
+
     @Override
-    protected boolean compareUnalterable(MsConstraint newConstr) {
-        if (newConstr instanceof MsConstraintCheck con) {
-            return isNotForRepl == con.isNotForRepl
-                    && Objects.equals(expression, con.expression);
-        }
-        return false;
+    public void computeHash(Hasher hasher) {
+        super.computeHash(hasher);
+        hasher.put(isNotForRepl);
+        hasher.put(expression);
     }
 
     @Override
@@ -77,14 +75,16 @@ public final class MsConstraintCheck extends MsConstraint {
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(isNotForRepl);
-        hasher.put(expression);
+    protected boolean compareUnalterable(MsConstraint newConstr) {
+        if (newConstr instanceof MsConstraintCheck con) {
+            return isNotForRepl == con.isNotForRepl
+                    && Objects.equals(expression, con.expression);
+        }
+        return false;
     }
 
     @Override
-    protected AbstractConstraint getConstraintCopy() {
+    protected MsConstraint getConstraintCopy() {
         var con = new MsConstraintCheck(name);
         con.setNotForRepl(isNotForRepl);
         con.setExpression(expression);

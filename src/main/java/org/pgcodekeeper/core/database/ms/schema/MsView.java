@@ -16,17 +16,18 @@
 package org.pgcodekeeper.core.database.ms.schema;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.utils.Pair;
 
 /**
  * Represents a Microsoft SQL view with support for schema binding,
  * ANSI_NULLS and QUOTED_IDENTIFIER settings, and statistics.
  */
-public final class MsView extends AbstractView implements MsSourceStatement {
+public final class MsView extends MsAbstractStatementContainer implements MsSourceStatement, IView {
 
     private boolean ansiNulls;
     private boolean quotedIdentified;
@@ -39,8 +40,6 @@ public final class MsView extends AbstractView implements MsSourceStatement {
 
     private String firstPart;
     private String secondPart;
-
-    private final Map<String, MsStatistics> statistics = new HashMap<>();
 
     /**
      * Creates a new Microsoft SQL view.
@@ -60,12 +59,7 @@ public final class MsView extends AbstractView implements MsSourceStatement {
 
     private void addViewFullSQL(SQLScript script, boolean isCreate) {
         final StringBuilder sb = new StringBuilder();
-        sb.append("SET QUOTED_IDENTIFIER ").append(quotedIdentified ? "ON" : "OFF");
-        sb.append(GO).append('\n');
-        sb.append("SET ANSI_NULLS ").append(ansiNulls ? "ON" : "OFF");
-        sb.append(GO).append('\n');
-
-        appendSourceStatement(isCreate, sb);
+        appendSourceStatement(sb, quotedIdentified, ansiNulls, isCreate);
         script.addStatement(sb);
     }
 
@@ -112,7 +106,7 @@ public final class MsView extends AbstractView implements MsSourceStatement {
     }
 
     @Override
-    protected AbstractView getViewCopy() {
+    protected MsView getCopy() {
         MsView view = new MsView(name);
         view.setFirstPart(firstPart);
         view.setSecondPart(secondPart);
@@ -120,47 +114,6 @@ public final class MsView extends AbstractView implements MsSourceStatement {
         view.setQuotedIdentified(quotedIdentified);
         view.setSchemaBinding(schemaBinding);
         return view;
-    }
-
-    @Override
-    public void addChild(IStatement st) {
-        if (st instanceof MsStatistics stat) {
-            addStatistics(stat);
-        } else {
-            super.addChild(st);
-        }
-    }
-
-    @Override
-    public AbstractStatement getChild(String name, DbObjType type) {
-        if (DbObjType.STATISTICS == type) {
-            return getChildByName(statistics, name);
-        }
-        return super.getChild(name, type);
-    }
-
-    @Override
-    protected void fillChildrenList(List<Collection<? extends AbstractStatement>> l) {
-        super.fillChildrenList(l);
-        l.add(statistics.values());
-    }
-
-    private void addStatistics(final MsStatistics stat) {
-        addUnique(statistics, stat);
-    }
-
-    @Override
-    public boolean compareChildren(AbstractStatement obj) {
-        if (obj instanceof MsView view && super.compareChildren(obj)) {
-            return statistics.equals(view.statistics);
-        }
-        return false;
-    }
-
-    @Override
-    public void computeChildrenHash(Hasher hasher) {
-        super.computeChildrenHash(hasher);
-        hasher.putUnordered(statistics);
     }
 
     public void setAnsiNulls(boolean ansiNulls) {
@@ -203,4 +156,10 @@ public final class MsView extends AbstractView implements MsSourceStatement {
     public boolean isSchemaBinding() {
         return schemaBinding;
     }
+
+    @Override
+    public Stream<Pair<String, String>> getRelationColumns() {
+        return Stream.empty();
+    }
+
 }

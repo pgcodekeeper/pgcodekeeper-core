@@ -21,9 +21,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;
@@ -48,7 +48,7 @@ interface TreeElementCreator {
     /**
      * Возвращает зависимости от объектов в дереве
      */
-    Set<TreeElement> getDepcySet(AbstractDatabase source, AbstractDatabase target, TreeElement tree);
+    Set<TreeElement> getDepcySet(IDatabase source, IDatabase target, TreeElement tree);
 }
 
 /**
@@ -73,8 +73,8 @@ class DepcyTreeExtenderTest {
         String fileName = "depcy_schema_" + fileIndex + ".sql";
         String targetFileName = "depcy_schema_new_" + fileIndex + ".sql";
 
-        AbstractDatabase dbSource = loadTestDump(fileName, DepcyTreeExtenderTest.class, settings);
-        AbstractDatabase dbTarget = loadTestDump(targetFileName, DepcyTreeExtenderTest.class, settings);
+        IDatabase dbSource = loadTestDump(fileName, DepcyTreeExtenderTest.class, settings);
+        IDatabase dbTarget = loadTestDump(targetFileName, DepcyTreeExtenderTest.class, settings);
 
         TreeElement tree = new TreeElement("Database", DbObjType.DATABASE, DiffSide.BOTH);
         predefined.setUserSelection(tree);
@@ -122,9 +122,9 @@ class Predefined1 implements TreeElementCreator {
     }
 
     @Override
-    public Set<TreeElement> getDepcySet(AbstractDatabase source, AbstractDatabase target, TreeElement tree) {
-        TreeElement table = tree.findElement(target.getDefaultSchema().getTable("t1"));
-        TreeElement view = tree.findElement(target.getDefaultSchema().getView("v2"));
+    public Set<TreeElement> getDepcySet(IDatabase source, IDatabase target, TreeElement tree) {
+        TreeElement table = tree.findElement(target.getDefaultSchema().getChild("t1", DbObjType.TABLE));
+        TreeElement view = tree.findElement(target.getDefaultSchema().getChild("v2", DbObjType.VIEW));
         TreeElement publicSchema = tree.findElement(target.getDefaultSchema());
         return new HashSet<>(Arrays.asList(table, publicSchema, view));
     }
@@ -148,7 +148,7 @@ class Predefined2 implements TreeElementCreator {
     }
 
     @Override
-    public Set<TreeElement> getDepcySet(AbstractDatabase source, AbstractDatabase target, TreeElement tree) {
+    public Set<TreeElement> getDepcySet(IDatabase source, IDatabase target, TreeElement tree) {
         return new HashSet<>();
     }
 }
@@ -172,7 +172,7 @@ class Predefined3 implements TreeElementCreator {
     }
 
     @Override
-    public Set<TreeElement> getDepcySet(AbstractDatabase source, AbstractDatabase target, TreeElement tree) {
+    public Set<TreeElement> getDepcySet(IDatabase source, IDatabase target, TreeElement tree) {
         //        PgSchema schema = db.getSchema(Consts.PUBLIC);
         //        PgTable table = schema.getTable("t1");
         //        PgSequence seq = schema.getSequence("s1");
@@ -199,7 +199,7 @@ class Predefined4 implements TreeElementCreator {
     }
 
     @Override
-    public Set<TreeElement> getDepcySet(AbstractDatabase source, AbstractDatabase target, TreeElement tree) {
+    public Set<TreeElement> getDepcySet(IDatabase source, IDatabase target, TreeElement tree) {
         return new HashSet<>(Arrays.asList(tree.findElement(source.getDefaultSchema())));
     }
 }
@@ -226,8 +226,8 @@ class Predefined5 implements TreeElementCreator {
     }
 
     @Override
-    public Set<TreeElement> getDepcySet(AbstractDatabase source, AbstractDatabase target, TreeElement tree) {
-        TreeElement table = tree.findElement(target.getSchema("republic").getTable("t_test2foreign"));
+    public Set<TreeElement> getDepcySet(IDatabase source, IDatabase target, TreeElement tree) {
+        TreeElement table = tree.findElement(target.getSchema("republic").getChild("t_test2foreign", DbObjType.TABLE));
         return new HashSet<>(Arrays.asList(table));
     }
 }
@@ -252,8 +252,8 @@ class Predefined6 implements TreeElementCreator {
     }
 
     @Override
-    public Set<TreeElement> getDepcySet(AbstractDatabase source, AbstractDatabase target, TreeElement tree) {
-        TreeElement func = tree.findElement(target.getSchema(Consts.PUBLIC).getFunction("f1()"));
+    public Set<TreeElement> getDepcySet(IDatabase source, IDatabase target, TreeElement tree) {
+        TreeElement func = tree.findElement(target.getSchema(Consts.PUBLIC).getChild("f1()", DbObjType.FUNCTION));
         return new HashSet<>(Arrays.asList(func));
     }
 }

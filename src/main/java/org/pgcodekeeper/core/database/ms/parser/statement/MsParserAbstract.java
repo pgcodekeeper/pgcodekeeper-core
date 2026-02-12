@@ -47,7 +47,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
         super(db, settings);
     }
 
-    protected AbstractConstraint getMsPKConstraint(String schema, String table, String conName,
+    protected MsConstraint getMsPKConstraint(String schema, String table, String conName,
                                                    Table_constraint_bodyContext body) {
         var constrPk = new MsConstraintPk(conName, body.PRIMARY() != null);
         var clusteredCtx = body.clustered();
@@ -68,7 +68,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
         return constrPk;
     }
 
-    protected void parseIndex(Index_restContext rest, AbstractIndex index, String schema, String table) {
+    protected void parseIndex(Index_restContext rest, MsIndex index, String schema, String table) {
         fillColumns(index, rest.index_sort().column_name_list_with_order().column_with_order(), null, null);
         Index_includeContext include = rest.index_include();
         if (include != null) {
@@ -80,7 +80,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
         parseIndexOptions(index, rest.index_where(), rest.index_options(), rest.dataspace());
     }
 
-    protected void parseIndexOptions(AbstractIndex index, Index_whereContext wherePart,
+    protected void parseIndexOptions(MsIndex index, Index_whereContext wherePart,
                                      Index_optionsContext options, DataspaceContext space) {
         if (wherePart != null) {
             index.setWhere(getFullCtxText(wherePart.where));
@@ -353,7 +353,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
     }
 
     @Override
-    protected AbstractSchema createSchema(String name) {
+    protected MsSchema createSchema(String name) {
         return new MsSchema(name);
     }
 
@@ -379,5 +379,10 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
             return FileUtils.getValidFilename(sp.getSchemaName()) + '.' + fileName;
         }
         return fileName;
+    }
+
+    @Override
+    protected MsSchema getSchemaSafe(List<? extends ParserRuleContext> ids) {
+        return (MsSchema) super.getSchemaSafe(ids);
     }
 }

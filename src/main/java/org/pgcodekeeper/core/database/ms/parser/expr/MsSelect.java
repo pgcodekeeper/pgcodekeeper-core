@@ -19,7 +19,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
 import org.pgcodekeeper.core.database.ms.parser.rulectx.*;
 import org.pgcodekeeper.core.localizations.Messages;
@@ -55,7 +55,7 @@ public class MsSelect extends MsAbstractExprWithNmspc<Select_statementContext> {
      * @param schema the current schema context
      * @param meta   the metadata container for database schema information
      */
-    public MsSelect(String schema, MetaContainer meta) {
+    public MsSelect(String schema, IMetaContainer meta) {
         super(schema, meta);
     }
 

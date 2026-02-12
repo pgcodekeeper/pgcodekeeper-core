@@ -48,11 +48,6 @@ public class PgRule extends PgAbstractStatement implements IRule {
         super(name);
     }
 
-    @Override
-    public DbObjType getStatementType() {
-        return DbObjType.RULE;
-    }
-
     public void setEvent(EventType event) {
         this.event = event;
         resetHash();
@@ -162,20 +157,12 @@ public class PgRule extends PgAbstractStatement implements IRule {
     }
 
     @Override
-    public PgRule shallowCopy() {
-        PgRule copy = getRuleCopy();
-        copyBaseFields(copy);
-        return copy;
-    }
-
-    protected PgRule getRuleCopy() {
-        PgRule ruleDst = new PgRule(name);
-        ruleDst.setEvent(event);
-        ruleDst.setCondition(condition);
-        ruleDst.setInstead(instead);
-        ruleDst.commands.addAll(commands);
-        ruleDst.setEnabledState(enabledState);
-        return ruleDst;
+    public void computeHash(Hasher hasher) {
+        hasher.put(event);
+        hasher.put(condition);
+        hasher.put(instead);
+        hasher.put(commands);
+        hasher.put(enabledState);
     }
 
     @Override
@@ -184,8 +171,7 @@ public class PgRule extends PgAbstractStatement implements IRule {
             return true;
         }
 
-        return obj instanceof PgRule rule
-                && super.compare(obj)
+        return obj instanceof PgRule rule && super.compare(obj)
                 && compareUnalterable(rule)
                 && Objects.equals(enabledState, rule.enabledState);
     }
@@ -198,11 +184,13 @@ public class PgRule extends PgAbstractStatement implements IRule {
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(event);
-        hasher.put(condition);
-        hasher.put(instead);
-        hasher.put(commands);
-        hasher.put(enabledState);
+    protected PgRule getCopy() {
+        PgRule ruleDst = new PgRule(name);
+        ruleDst.setEvent(event);
+        ruleDst.setCondition(condition);
+        ruleDst.setInstead(instead);
+        ruleDst.commands.addAll(commands);
+        ruleDst.setEnabledState(enabledState);
+        return ruleDst;
     }
 }

@@ -16,10 +16,7 @@
 package org.pgcodekeeper.core.model.graph;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractSequence;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractTable;
 import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.ms.schema.MsColumn;
 import org.pgcodekeeper.core.database.ms.schema.MsConstraintPk;
@@ -28,7 +25,6 @@ import org.pgcodekeeper.core.database.ms.schema.MsView;
 import org.pgcodekeeper.core.database.pg.schema.PgColumn;
 import org.pgcodekeeper.core.database.pg.schema.PgPartitionTable;
 import org.pgcodekeeper.core.database.pg.schema.PgSequence;
-import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -248,7 +244,7 @@ public final class ActionsToScriptConverter {
 
                 addToAddScript(obj);
 
-                if (settings.isDataMovementMode() && oldObj instanceof AbstractTable oldTable) {
+                if (settings.isDataMovementMode() && oldObj instanceof ITable oldTable) {
                     moveData(oldTable, obj);
                 }
                 break;
@@ -257,10 +253,10 @@ public final class ActionsToScriptConverter {
                     script.addStatementWithoutSeparator(depcy);
                 }
                 if (settings.isDataMovementMode()
-                        && DbObjType.TABLE == obj.getStatementType()
+                        && obj instanceof ITable
                         && !(obj instanceof IForeignTable)
                         && obj.getTwin(newDbFull) != null) {
-                    addCommandsForRenameTbl((AbstractTable) obj);
+                    addCommandsForRenameTbl((ITable) obj);
                 } else {
                     checkMsTableOptions(obj);
                     addToDropScript(obj, false);
@@ -272,7 +268,7 @@ public final class ActionsToScriptConverter {
                     getAlterTableScript(joinableActions);
                     return;
                 }
-                SQLScript temp = new SQLScript(settings);
+                SQLScript temp = new SQLScript(settings, obj.getSeparator());
                 ObjectState state = obj.appendAlterSQL(action.getNewObj(), temp);
 
                 if (state.in(ObjectState.ALTER, ObjectState.ALTER_WITH_DEP)) {
@@ -354,7 +350,7 @@ public final class ActionsToScriptConverter {
                 .toList();
     }
 
-    private void moveData(AbstractTable oldTable, IStatement newObj) {
+    private void moveData(ITable oldTable, IStatement newObj) {
         String qname = newObj.getQualifiedName();
         String tempName = tblTmpNames.get(qname);
         if (tempName == null) {
@@ -380,13 +376,13 @@ public final class ActionsToScriptConverter {
         printDropTempTable(oldTable);
     }
 
-    private void printDropTempTable(AbstractTable table) {
+    private void printDropTempTable(ITable table) {
         String tblTmpName = tblTmpNames.get(table.getQualifiedName());
         if (tblTmpName != null) {
             UnaryOperator<String> quoter = table.getQuoter();
             StringBuilder sb = new StringBuilder();
             sb.append("DROP TABLE ")
-                    .append(quoter.apply(table.getSchemaName())).append('.').append(quoter.apply(tblTmpName));
+                    .append(quoter.apply(table.getParent().getName())).append('.').append(quoter.apply(tblTmpName));
             script.addStatement(sb);
         }
     }
@@ -490,44 +486,34 @@ public final class ActionsToScriptConverter {
      *
      * @param oldTbl the original table to be renamed to a temporary name
      */
-    private void addCommandsForRenameTbl(AbstractTable oldTbl) {
+    private void addCommandsForRenameTbl(ITable oldTbl) {
         String qname = oldTbl.getQualifiedName();
         String tmpTblName = getTempName(oldTbl);
 
         script.addStatement(oldTbl.getRenameCommand(tmpTblName));
         tblTmpNames.put(qname, tmpTblName);
 
-        DatabaseType dbtype = settings.getDbType();
         List<String> identityCols = new ArrayList<>();
-        for (AbstractColumn col : oldTbl.getColumns()) {
-            switch (dbtype) {
-                case PG:
-                    PgColumn oldPgCol = (PgColumn) col;
-                    PgColumn newPgCol = (PgColumn) oldPgCol.getTwin(newDbFull);
-                    if (newPgCol != null && newPgCol.getSequence() != null) {
-                        AbstractSequence seq = oldPgCol.getSequence();
-                        if (seq != null) {
-                            script.addStatement(seq.getRenameCommand(getTempName(seq)));
-                        }
-                        identityCols.add(oldPgCol.getName());
+        for (IColumn col : oldTbl.getColumns()) {
+            if (col instanceof PgColumn oldPgCol) {
+                PgColumn newPgCol = (PgColumn) oldPgCol.getTwin(newDbFull);
+                if (newPgCol != null && newPgCol.getSequence() != null) {
+                    ISequence seq = oldPgCol.getSequence();
+                    if (seq != null) {
+                        script.addStatement(seq.getRenameCommand(getTempName(seq)));
                     }
-                    break;
-                case MS:
-                    MsColumn msCol = (MsColumn) col;
-                    if (msCol.isIdentity()) {
-                        identityCols.add(msCol.getName());
-                    }
-                    if (msCol.getDefaultName() != null) {
-                        script.addStatement("ALTER TABLE "
-                                + MsDiffUtils.quoteName(oldTbl.getSchemaName()) + '.'
-                                + MsDiffUtils.quoteName(tmpTblName) + " DROP CONSTRAINT "
-                                + MsDiffUtils.quoteName(msCol.getDefaultName()));
-                    }
-                    break;
-                case CH:
-                    break;
-                default:
-                    throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + dbtype);
+                    identityCols.add(oldPgCol.getName());
+                }
+            } else if (col instanceof MsColumn msCol) {
+                if (msCol.isIdentity()) {
+                    identityCols.add(msCol.getName());
+                }
+                if (msCol.getDefaultName() != null) {
+                    script.addStatement("ALTER TABLE "
+                            + MsDiffUtils.quoteName(oldTbl.getParent().getName()) + '.'
+                            + MsDiffUtils.quoteName(tmpTblName) + " DROP CONSTRAINT "
+                            + MsDiffUtils.quoteName(msCol.getDefaultName()));
+                }
             }
         }
 
@@ -536,7 +522,7 @@ public final class ActionsToScriptConverter {
         }
     }
 
-    private String getTempName(AbstractStatement st) {
+    private String getTempName(IStatement st) {
         String tmpSuffix = '_' + UUID.randomUUID().toString().replace("-", "");
         String name = st.getName();
         if (name.length() > 30) {

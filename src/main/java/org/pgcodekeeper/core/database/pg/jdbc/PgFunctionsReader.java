@@ -51,10 +51,10 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String schemaName = schema.getName();
         String funcName = res.getString("proname");
-        AbstractFunction f = res.getBoolean("proisagg") ? getAgg(res, schemaName, funcName)
+        PgAbstractFunction f = res.getBoolean("proisagg") ? getAgg(res, schemaName, funcName)
                 : getFunc(res, schema, funcName);
 
         loader.setOwner(f, res.getLong("proowner"));
@@ -62,11 +62,11 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
         loader.setPrivileges(f, res.getString("aclarray"), schemaName);
         loader.setAuthor(f, res);
 
-        schema.addFunction(f);
+        schema.addChild(f);
     }
 
-    private PgAbstractFunction getFunc(ResultSet res, AbstractSchema schema, String funcName) throws SQLException {
-        boolean isProc = SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion()) && res.getBoolean("proisproc");
+    private PgAbstractFunction getFunc(ResultSet res, ISchema schema, String funcName) throws SQLException {
+        boolean isProc = PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion()) && res.getBoolean("proisproc");
         PgAbstractFunction function = isProc ? new PgProcedure(funcName) : new PgFunction(funcName);
         loader.setCurrentObject(new GenericColumn(schema.getName(), funcName, function.getStatementType()));
 
@@ -75,7 +75,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
         // since 9.5 PostgreSQL
         fillTransform(function, res);
 
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             String supportFunc = res.getString("support_func");
             if (!"-".equals(supportFunc)) {
                 setFunctionWithDep(PgAbstractFunction::setSupportFunc, function, supportFunc,
@@ -137,7 +137,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
             function.setRows(rows);
         }
 
-        AbstractDatabase db = schema.getDatabase();
+        IDatabase db = schema.getDatabase();
         fillBody(function, db, res);
         fillDefaultValues(function, db, res);
         fillConfiguration(function, res);
@@ -146,7 +146,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
     }
 
     private void fillTransform(PgAbstractFunction function, ResultSet res) throws SQLException {
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             Long[] protrftypes = PgJdbcUtils.getColArray(res, "protrftypes", true);
             if (protrftypes != null) {
                 for (Long s : protrftypes) {
@@ -156,7 +156,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
         }
     }
 
-    private void fillDefaultValues(PgAbstractFunction function, AbstractDatabase db, ResultSet res)
+    private void fillDefaultValues(PgAbstractFunction function, IDatabase db, ResultSet res)
             throws SQLException {
         String defaultValuesAsString = res.getString("default_values_as_string");
         if (defaultValuesAsString == null) {
@@ -220,7 +220,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
         }
     }
 
-    private void fillBody(PgAbstractFunction function, AbstractDatabase db, ResultSet res) throws SQLException {
+    private void fillBody(PgAbstractFunction function, IDatabase db, ResultSet res) throws SQLException {
         List<Pair<String, GenericColumn>> argsQualTypes = fillArguments(function, res);
 
         String body = "";
@@ -240,7 +240,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
             body = sb.toString();
         } else if (definition != null && !definition.isEmpty() && !"-".equals(definition)) {
             body = PgDiffUtils.quoteStringDollar(definition);
-        } else if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
+        } else if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
             String probody = res.getString("prosqlbody");
             // must not be null at this point, otherwise function has no body (?)
             IPgJdbcReader.checkObjectValidity(probody, DbObjType.FUNCTION, function.getBareName());
@@ -267,7 +267,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
         }
     }
 
-    private AbstractFunction getAgg(ResultSet res, String schemaName,
+    private PgAbstractFunction getAgg(ResultSet res, String schemaName,
                                     String funcName) throws SQLException {
         loader.setCurrentObject(new GenericColumn(schemaName, funcName, DbObjType.AGGREGATE));
         PgAggregate aggregate = new PgAggregate(funcName);
@@ -328,7 +328,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
 
         // since 9.6 PostgreSQL
         // parallel mode: s - safe, r - restricted, u - unsafe
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             String parMode = res.getString("proparallel");
             switch (parMode) {
                 case "s":
@@ -351,7 +351,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
                 res.getString("deserialfunc"), AggFuncs.DESERIALFUNC));
 
         // since 11 PostgreSQL
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             aggregate.setFinalFuncModify(getModifyType(
                     res.getString("finalfunc_modify"), aggregate.getKind()));
             aggregate.setMFinalFuncModify(getModifyType(
@@ -594,7 +594,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
                 .join("LEFT JOIN pg_catalog.pg_proc deserialfn ON a.aggdeserialfn = deserialfn.oid")
                 .join("LEFT JOIN pg_catalog.pg_namespace deserialfn_n ON deserialfn.pronamespace = deserialfn_n.oid");
 
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             builder
                     .column("res.protrftypes::bigint[]")
                     .column("res.proparallel")
@@ -610,7 +610,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
                     .column("res.proiswindow");
         }
 
-        if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
             builder.column("""
                     case when (res.prosrc is null or res.prosrc='') and l.lanname = 'sql'
                         then pg_get_function_sqlbody(res.oid) end as prosqlbody""");

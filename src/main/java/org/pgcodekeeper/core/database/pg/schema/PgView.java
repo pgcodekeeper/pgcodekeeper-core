@@ -23,7 +23,6 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractView;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -156,7 +155,7 @@ public final class PgView extends PgAbstractView {
     }
 
     @Override
-    protected AbstractView getViewCopy() {
+    protected PgAbstractView getViewCopy() {
         PgView view = new PgView(name);
         view.defaultValues.putAll(defaultValues);
         return view;

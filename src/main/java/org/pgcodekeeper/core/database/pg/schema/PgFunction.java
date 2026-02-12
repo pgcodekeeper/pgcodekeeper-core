@@ -22,7 +22,7 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.base.schema.AbstractFunction;
+import org.pgcodekeeper.core.database.api.schema.IFunction;
 import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
@@ -49,20 +49,6 @@ public final class PgFunction extends PgAbstractFunction {
     }
 
     @Override
-    public boolean needDrop(AbstractFunction newFunction) {
-        if (newFunction == null ||
-                !Objects.equals(getReturns(), newFunction.getReturns())) {
-            return true;
-        }
-        return super.needDrop(newFunction);
-    }
-
-    @Override
-    protected PgAbstractFunction getFunctionCopy() {
-        return new PgFunction(getBareName());
-    }
-
-    @Override
     public String getReturns() {
         return returns;
     }
@@ -74,7 +60,22 @@ public final class PgFunction extends PgAbstractFunction {
     }
 
     @Override
-    protected boolean compareUnalterable(AbstractFunction function) {
+    public boolean needDrop(IFunction newFunction) {
+        if (newFunction == null ||
+                !Objects.equals(getReturns(), newFunction.getReturns())) {
+            return true;
+        }
+        return super.needDrop(newFunction);
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        super.computeHash(hasher);
+        hasher.put(returns);
+    }
+
+    @Override
+    protected boolean compareUnalterable(PgAbstractFunction function) {
         if (function instanceof PgFunction pgFunc && super.compareUnalterable(function)) {
             return Objects.equals(returns, pgFunc.getReturns());
         }
@@ -82,8 +83,7 @@ public final class PgFunction extends PgAbstractFunction {
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(returns);
+    protected PgAbstractFunction getFunctionCopy() {
+        return new PgFunction(getBareName());
     }
 }

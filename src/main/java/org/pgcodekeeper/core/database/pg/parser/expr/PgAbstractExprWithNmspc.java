@@ -23,8 +23,8 @@ import java.util.stream.Stream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.rulectx.PgSelectStmt;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
@@ -76,7 +76,7 @@ public abstract class PgAbstractExprWithNmspc<T extends ParserRuleContext> exten
      */
     protected final Map<String, List<Pair<String, String>>> complexNamespace = new LinkedHashMap<>();
 
-    protected PgAbstractExprWithNmspc(MetaContainer meta) {
+    protected PgAbstractExprWithNmspc(IMetaContainer meta) {
         super(meta);
     }
 

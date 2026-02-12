@@ -22,7 +22,8 @@ import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.GenericColumn;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
@@ -44,7 +45,7 @@ class ModelExporterTest {
         settings.setGenerateConstraintNotValid(true);
         settings.setGenerateExists(true);
 
-        AbstractDatabase db = IntegrationTestUtils.loadTestDump(template + FILES_POSTFIX.SQL, getClass(), settings);
+        IDatabase db = IntegrationTestUtils.loadTestDump(template + FILES_POSTFIX.SQL, getClass(), settings);
 
         var exporter = new PgModelExporter(null, db, Consts.UTF_8, settings);
         var stmt = getStatement(db, stmtName, type);
@@ -53,7 +54,7 @@ class ModelExporterTest {
         // check that exporter generate script is equals generated script with default settings
         Assertions.assertEquals(getCreationSQL(stmt), actual, "this should be equals");
 
-        var script = new SQLScript(settings);
+        var script = new SQLScript(settings, db.getSeparator());
         stmt.getCreationSQL(script);
 
         // check that exporter generates script is not equals generated script with user settings
@@ -61,14 +62,14 @@ class ModelExporterTest {
     }
 
     /**
-     * get {@link AbstractStatement} object from {@link AbstractDatabase}
+     * get {@link AbstractStatement} object from {@link IDatabase}
      *
-     * @param db       - {@link AbstractDatabase} witch store PgStatement
+     * @param db       - {@link IDatabase} witch store PgStatement
      * @param stmtName - name of {@link AbstractStatement} witch we need for test
      * @param type     - {@link DbObjType} of {@link AbstractStatement} witch we need for test
      * @return - {@link AbstractStatement} witch we need for test
      */
-    private AbstractStatement getStatement(AbstractDatabase db, String stmtName, DbObjType type) {
+    private IStatement getStatement(IDatabase db, String stmtName, DbObjType type) {
         String[] arr = Arrays.copyOf(stmtName.split("\\."), 3);
         return db.getStatement(new GenericColumn(arr[0], arr[1], arr[2], type));
     }
@@ -79,8 +80,8 @@ class ModelExporterTest {
      * @param statement - {@link AbstractStatement} witch we used for test
      * @return - generated script
      */
-    private String getCreationSQL(AbstractStatement statement) {
-        var script = new SQLScript(new CoreSettings());
+    private String getCreationSQL(IStatement statement) {
+        var script = new SQLScript(new CoreSettings(), statement.getSeparator());
         statement.getCreationSQL(script);
         return script.getFullScript();
     }

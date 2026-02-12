@@ -18,8 +18,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.Objects;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
 import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
@@ -62,11 +60,10 @@ public final class PgConstraintCheck extends PgConstraint {
     }
 
     @Override
-    public boolean compare(IStatement obj) {
-        if (obj instanceof PgConstraintCheck check && super.compare(obj)) {
-            return compareUnalterable(check);
-        }
-        return false;
+    public void computeHash(Hasher hasher) {
+        super.computeHash(hasher);
+        hasher.put(isInherit);
+        hasher.put(expression);
     }
 
     @Override
@@ -80,14 +77,7 @@ public final class PgConstraintCheck extends PgConstraint {
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(isInherit);
-        hasher.put(expression);
-    }
-
-    @Override
-    protected AbstractConstraint getConstraintCopy() {
+    protected PgConstraint getConstraintCopy() {
         var con = new PgConstraintCheck(name);
         con.setInherit(isInherit);
         con.setExpression(expression);

@@ -13,66 +13,55 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.database.ms.jdbc;
+package org.pgcodekeeper.core.database.pg.jdbc;
+
+import org.pgcodekeeper.core.database.api.jdbc.ISupportedVersion;
 
 /**
- * Enumeration of supported Microsoft SQL Server versions.
+ * Enumeration of supported PostgreSQL and Greenplum versions.
  * Provides version comparison and lookup functionality for database compatibility checking.
  */
-public enum SupportedMsVersion {
-    VERSION_17(14, "2017"),
-    VERSION_19(15, "2019"),
-    VERSION_22(16, "2022");
+public enum PgSupportedVersion implements ISupportedVersion {
+    GP_VERSION_6(90400, "9.4"),
+    GP_VERSION_7(120012, "12.12"),
+    VERSION_14(140000, "14.0"),
+    VERSION_15(150000, "15.0"),
+    VERSION_16(160000, "16.0"),
+    VERSION_17(170000, "17.0"),
+    VERSION_18(180000, "18.0");
 
     private final int version;
     private final String text;
 
     /**
-     * Creates a new Microsoft SQL Server version entry.
+     * Creates a new PostgreSQL version entry.
      *
      * @param version the numeric version identifier
      * @param text    the human-readable version string
      */
-    SupportedMsVersion(int version, String text) {
+    PgSupportedVersion(int version, String text) {
         this.version = version;
         this.text = text;
     }
 
+    @Override
     public int getVersion() {
         return version;
     }
 
+    @Override
     public String getText() {
         return text;
     }
 
     /**
-     * Checks if this version is less than or equal to the specified version.
-     *
-     * @param version the version to compare against
-     * @return true if this version is less than or equal to the specified version
-     */
-    public boolean isLE(int version) {
-        return this.version <= version;
-    }
-
-    /**
      * Returns the highest supported version that is less than or equal to the specified version.
-     * If no matching version is found, returns VERSION_12 as the default.
+     * If no matching version is found, returns VERSION_9_4 as the default.
      *
      * @param checkVersion the version to check
-     * @return the matching supported version or VERSION_12 as default
+     * @return the matching supported version or VERSION_9_4 as default
      */
-    public static SupportedMsVersion valueOf(int checkVersion) {
-        SupportedMsVersion[] set = SupportedMsVersion.values();
-
-        for (int i = set.length - 1; i >= 0; i--) {
-            SupportedMsVersion verEnum = set[i];
-            if (verEnum.isLE(checkVersion)) {
-                return verEnum;
-            }
-        }
-
-        return SupportedMsVersion.VERSION_17;
+    public static PgSupportedVersion valueOf(int checkVersion) {
+        return ISupportedVersion.valueOf(checkVersion, PgSupportedVersion.values(), PgSupportedVersion.GP_VERSION_6);
     }
 }

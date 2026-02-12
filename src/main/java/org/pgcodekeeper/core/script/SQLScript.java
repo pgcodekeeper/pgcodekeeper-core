@@ -31,8 +31,7 @@ import java.util.stream.Collectors;
 public final class SQLScript {
 
     private final ISettings settings;
-    private static final String PG_SEPARATOR = ";";
-    private static final String MS_SEPARATOR = "\nGO";
+    private final String separator;
 
     private static final String DELIMITER = "\n\n";
 
@@ -44,11 +43,12 @@ public final class SQLScript {
      * Creates a new SQL script builder with specified settings.
      *
      * @param settings the settings containing database type and formatting options
+     * @param separator - statement separator
      */
-    public SQLScript(ISettings settings) {
+    public SQLScript(ISettings settings, String separator) {
         this.settings = settings;
+        this.separator = separator;
     }
-
     /**
      * Adds a comment statement to the script.
      * Comments are placed either in POST phase (if commentsToEnd is enabled) or MID phase.
@@ -118,11 +118,6 @@ public final class SQLScript {
         if (!needSeparator || sql.endsWith("*/") || sql.startsWith("--")) {
             return sql;
         }
-
-        String separator = switch (settings.getDbType()) {
-            case PG, CH -> PG_SEPARATOR;
-            case MS -> MS_SEPARATOR;
-        };
 
         return sql + separator;
     }

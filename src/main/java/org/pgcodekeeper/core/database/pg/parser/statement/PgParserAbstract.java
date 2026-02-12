@@ -23,7 +23,6 @@ import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 import org.pgcodekeeper.core.database.base.parser.CodeUnitToken;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.base.schema.Argument;
 import org.pgcodekeeper.core.database.base.schema.SimpleColumn;
@@ -432,7 +431,7 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
     }
 
     @Override
-    protected AbstractSchema createSchema(String name) {
+    protected PgSchema createSchema(String name) {
         return new PgSchema(name);
     }
 

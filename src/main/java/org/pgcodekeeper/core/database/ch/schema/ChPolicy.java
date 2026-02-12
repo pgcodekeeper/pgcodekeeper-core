@@ -16,9 +16,9 @@
 package org.pgcodekeeper.core.database.ch.schema;
 
 import java.util.*;
+import java.util.function.UnaryOperator;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -26,8 +26,12 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a ClickHouse row-level security policy.
  * Supports role-based access control with EXCEPT clauses for role exclusions.
  */
-public final class ChPolicy extends AbstractPolicy implements IChStatement {
+public class ChPolicy extends ChAbstractStatement implements IPolicy {
 
+    protected EventType event;
+    protected final Set<String> roles = new LinkedHashSet<>();
+    protected String using;
+    protected boolean isPermissive = true;
     private final Set<String> excepts = new LinkedHashSet<>();
 
     /**
@@ -37,6 +41,36 @@ public final class ChPolicy extends AbstractPolicy implements IChStatement {
      */
     public ChPolicy(String name) {
         super(name);
+    }
+
+    @Override
+    public DbObjType getStatementType() {
+        return DbObjType.POLICY;
+    }
+
+    public void setEvent(EventType event) {
+        this.event = event;
+        resetHash();
+    }
+
+    /**
+     * Adds a role to this policy.
+     *
+     * @param role the role name to add
+     */
+    public void addRole(String role) {
+        roles.add(role);
+        resetHash();
+    }
+
+    public void setUsing(String using) {
+        this.using = using;
+        resetHash();
+    }
+
+    public void setPermissive(boolean isPermissive) {
+        this.isPermissive = isPermissive;
+        resetHash();
     }
 
     /**
@@ -103,13 +137,23 @@ public final class ChPolicy extends AbstractPolicy implements IChStatement {
     }
 
     @Override
-    public String getQualifiedName() {
-        return name;
+    protected ChPolicy getCopy() {
+        ChPolicy copy = new ChPolicy(name);
+        copy.setPermissive(isPermissive);
+        copy.setEvent(event);
+        copy.setUsing(using);
+        copy.roles.addAll(roles);
+        copy.excepts.addAll(excepts);
+        return copy;
     }
+
 
     @Override
     public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
+        hasher.put(isPermissive);
+        hasher.put(event);
+        hasher.put(using);
+        hasher.put(roles);
         hasher.put(excepts);
     }
 
@@ -120,26 +164,18 @@ public final class ChPolicy extends AbstractPolicy implements IChStatement {
         }
 
         if (obj instanceof ChPolicy police && super.compare(obj)) {
-            return Objects.equals(excepts, police.excepts);
+            return isPermissive == police.isPermissive
+                    && event == police.event
+                    && Objects.equals(using, police.using)
+                    && roles.equals(police.roles)
+                    && excepts.equals(police.excepts);
         }
 
         return false;
     }
 
     @Override
-    protected AbstractPolicy getPolicyCopy() {
-        ChPolicy policy = new ChPolicy(name);
-        policy.excepts.addAll(excepts);
-        return policy;
-    }
-
-    @Override
-    public AbstractDatabase getDatabase() {
-        return (AbstractDatabase) parent;
-    }
-
-    @Override
-    public GenericColumn toGenericColumn(DbObjType type) {
-        return new GenericColumn(getName(), type);
+    public UnaryOperator<String> getQuoter() {
+        return (name) -> name;
     }
 }

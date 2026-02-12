@@ -55,6 +55,10 @@ public final class ChFunction extends ChAbstractStatement {
         resetHash();
     }
 
+    public List<IArgument> getArguments() {
+        return Collections.unmodifiableList(arguments);
+    }
+
     /**
      * Adds an argument to this function.
      *
@@ -94,16 +98,6 @@ public final class ChFunction extends ChAbstractStatement {
         return ObjectState.NOTHING;
     }
 
-    private boolean compareUnalterable(ChFunction newFunc) {
-        return Objects.equals(body, newFunc.getBody())
-                && arguments.equals(newFunc.arguments);
-    }
-
-    @Override
-    public ChDatabase getDatabase() {
-        return (ChDatabase) parent;
-    }
-
     @Override
     public void computeHash(Hasher hasher) {
         hasher.put(body);
@@ -120,11 +114,17 @@ public final class ChFunction extends ChAbstractStatement {
                 && compareUnalterable(func);
     }
 
+    private boolean compareUnalterable(ChFunction newFunc) {
+        return Objects.equals(body, newFunc.getBody())
+                && arguments.equals(newFunc.arguments);
+    }
+
     @Override
-    public AbstractStatement shallowCopy() {
+    protected AbstractStatement getCopy() {
         ChFunction copy = new ChFunction(name);
-        copyBaseFields(copy);
-        copy.arguments.addAll(arguments);
+        for (Argument argSrc : arguments) {
+            copy.addArgument(argSrc.getCopy());
+        }
         copy.setBody(body);
         return copy;
     }

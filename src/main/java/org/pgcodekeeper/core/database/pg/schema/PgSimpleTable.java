@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.script.SQLScript;
 
 /**
@@ -42,8 +41,8 @@ public final class PgSimpleTable extends PgAbstractRegularTable {
         sbSQL.append(" (\n");
 
         int start = sbSQL.length();
-        for (AbstractColumn column : columns) {
-            writeColumn((PgColumn) column, sbSQL, script);
+        for (PgColumn column : columns) {
+            writeColumn(column, sbSQL, script);
         }
         if (start != sbSQL.length()) {
             sbSQL.setLength(sbSQL.length() - 2);
@@ -54,7 +53,7 @@ public final class PgSimpleTable extends PgAbstractRegularTable {
     }
 
     @Override
-    protected AbstractTable getTableCopy() {
+    protected PgAbstractTable getTableCopy() {
         return new PgSimpleTable(name);
     }
 

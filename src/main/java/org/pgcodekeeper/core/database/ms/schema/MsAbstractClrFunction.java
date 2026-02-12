@@ -24,7 +24,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
  * Abstract base class for Microsoft SQL CLR (Common Language Runtime) functions.
  * Represents functions implemented in .NET assemblies that can be called from SQL.
  */
-public abstract class MsAbstractClrFunction extends AbstractFunction implements IMsStatement {
+public abstract class MsAbstractClrFunction extends MsAbstractCommonFunction {
 
     protected final List<String> options = new ArrayList<>();
     protected final String assembly;
@@ -52,7 +52,16 @@ public abstract class MsAbstractClrFunction extends AbstractFunction implements 
     }
 
     @Override
-    protected boolean compareUnalterable(AbstractFunction function) {
+    public void computeHash(Hasher hasher) {
+        super.computeHash(hasher);
+        hasher.put(options);
+        hasher.put(assembly);
+        hasher.put(assemblyClass);
+        hasher.put(assemblyMethod);
+    }
+
+    @Override
+    protected boolean compareUnalterable(MsAbstractCommonFunction function) {
         if (function instanceof MsAbstractClrFunction func && super.compareUnalterable(function)) {
             return Objects.equals(assembly, func.assembly)
                     && Objects.equals(assemblyClass, func.assemblyClass)
@@ -64,23 +73,14 @@ public abstract class MsAbstractClrFunction extends AbstractFunction implements 
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(options);
-        hasher.put(assembly);
-        hasher.put(assemblyClass);
-        hasher.put(assemblyMethod);
+    protected MsAbstractClrFunction getCopy() {
+        MsAbstractClrFunction copy = (MsAbstractClrFunction) super.getCopy();
+        copy.options.addAll(options);
+        return copy;
     }
 
     @Override
-    public MsAbstractClrFunction shallowCopy() {
-        MsAbstractClrFunction functionDst = (MsAbstractClrFunction) super.shallowCopy();
-        functionDst.options.addAll(options);
-        return functionDst;
-    }
-
-    @Override
-    protected boolean isNeedDepcies(AbstractFunction newFunction) {
+    protected boolean isNeedDepcies(MsAbstractCommonFunction newFunction) {
         return true;
     }
 }

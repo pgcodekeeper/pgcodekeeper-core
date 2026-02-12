@@ -24,9 +24,9 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.*;
 import org.pgcodekeeper.core.database.base.parser.antlr.AbstractExpr;
-import org.pgcodekeeper.core.database.base.schema.meta.*;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
@@ -45,7 +45,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
 
     private FullAnalyze fullAnalyze;
 
-    protected PgAbstractExpr(MetaContainer meta) {
+    protected PgAbstractExpr(IMetaContainer meta) {
         super(meta);
     }
 

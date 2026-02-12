@@ -30,7 +30,7 @@ import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.database.base.parser.FullAnalyze;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IRelation;
 import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.database.base.schema.meta.MetaUtils;
@@ -98,7 +98,7 @@ class ExprTypeTest {
 
     private MetaContainer loadAndAnalyze(String fileNameTemplate, CoreSettings settings, FILES_POSTFIX postfix)
             throws InterruptedException, IOException {
-        AbstractDatabase dbNew = IntegrationTestUtils.loadTestDump(
+        IDatabase dbNew = IntegrationTestUtils.loadTestDump(
                 fileNameTemplate + postfix, ExprTypeTest.class, settings, false);
         MetaContainer metaDb = MetaUtils.createTreeFromDb(dbNew);
         FullAnalyze.fullAnalyze(dbNew, metaDb, new ArrayList<>());

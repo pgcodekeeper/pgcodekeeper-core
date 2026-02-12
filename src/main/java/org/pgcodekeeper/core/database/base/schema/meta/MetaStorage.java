@@ -19,7 +19,7 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 
-import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
+import org.pgcodekeeper.core.database.api.jdbc.ISupportedVersion;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +70,7 @@ public final class MetaStorage implements Serializable {
      */
     public static final String FILE_NAME = "SYSTEM_OBJECTS_";
 
-    private static final ConcurrentMap<SupportedPgVersion, MetaStorage> STORAGE_CACHE = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<ISupportedVersion, MetaStorage> STORAGE_CACHE = new ConcurrentHashMap<>();
 
     private final List<MetaStatement> definitions = new ArrayList<>();
 
@@ -89,12 +89,12 @@ public final class MetaStorage implements Serializable {
      * @param version the PostgreSQL version
      * @return list of system metadata objects
      */
-    static List<MetaStatement> getSystemObjects(SupportedPgVersion version) {
+    static List<MetaStatement> getSystemObjects(ISupportedVersion version) {
         MetaStorage storage = getObjectsFromResources(version);
         return storage != null ? storage.definitions : Collections.emptyList();
     }
 
-    private static MetaStorage getObjectsFromResources(SupportedPgVersion ver) {
+    private static MetaStorage getObjectsFromResources(ISupportedVersion ver) {
         MetaStorage db = STORAGE_CACHE.get(ver);
         if (db != null) {
             return db;

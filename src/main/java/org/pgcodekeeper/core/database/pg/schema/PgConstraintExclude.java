@@ -148,11 +148,14 @@ public final class PgConstraintExclude extends PgConstraint implements PgIndexPa
     }
 
     @Override
-    public boolean compare(IStatement obj) {
-        if (obj instanceof PgConstraintExclude exclude && super.compare(obj)) {
-            return compareUnalterable(exclude);
-        }
-        return false;
+    public void computeHash(Hasher hasher) {
+        super.computeHash(hasher);
+        hasher.put(params);
+        hasher.put(includes);
+        hasher.putOrdered(columns);
+        hasher.put(indexMethod);
+        hasher.put(predicate);
+        hasher.put(tablespace);
     }
 
     @Override
@@ -168,18 +171,7 @@ public final class PgConstraintExclude extends PgConstraint implements PgIndexPa
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(params);
-        hasher.put(includes);
-        hasher.putOrdered(columns);
-        hasher.put(indexMethod);
-        hasher.put(predicate);
-        hasher.put(tablespace);
-    }
-
-    @Override
-    protected AbstractConstraint getConstraintCopy() {
+    protected PgConstraint getConstraintCopy() {
         var con = new PgConstraintExclude(name);
         con.params.putAll(params);
         con.includes.addAll(includes);

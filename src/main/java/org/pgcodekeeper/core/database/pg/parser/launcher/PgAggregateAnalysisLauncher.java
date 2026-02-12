@@ -19,9 +19,9 @@ import java.util.*;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.launcher.AbstractAnalysisLauncher;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 
 /**
  * Specialized launcher for analyzing aggregate function dependencies.
@@ -46,7 +46,7 @@ public class PgAggregateAnalysisLauncher extends AbstractAnalysisLauncher {
 
     @Override
     protected Set<ObjectLocation> analyze(ParserRuleContext ctx,
-                                          MetaContainer meta) {
+                                          IMetaContainer meta) {
 
         IFunction func = meta.findFunction(function.schema(), function.table());
         IFunction aggr = meta.findFunction(getSchemaName(), stmt.getName());

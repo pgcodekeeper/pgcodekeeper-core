@@ -20,7 +20,6 @@ import java.util.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.*;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
 import org.pgcodekeeper.core.database.ms.parser.launcher.MsExpressionAnalysisLauncher;
@@ -43,7 +42,7 @@ public class MsTablesReader extends AbstractSearchPathJdbcReader<MsJdbcLoader> i
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException, XmlReaderException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException, XmlReaderException {
         String tableName = res.getString("name");
         loader.setCurrentObject(new GenericColumn(schema.getName(), tableName, DbObjType.TABLE));
         MsTable table = new MsTable(tableName);
@@ -68,7 +67,7 @@ public class MsTablesReader extends AbstractSearchPathJdbcReader<MsJdbcLoader> i
             appendSystemVersioning(res, table);
         }
 
-        if (SupportedMsVersion.VERSION_22.isLE(loader.getVersion()) && res.getBoolean("xml_compression")) {
+        if (MsSupportedVersion.VERSION_22.isLE(loader.getVersion()) && res.getBoolean("xml_compression")) {
             table.addOption("XML_COMPRESSION", "ON");
         }
 
@@ -84,7 +83,7 @@ public class MsTablesReader extends AbstractSearchPathJdbcReader<MsJdbcLoader> i
         boolean isTextImage = false;
         for (MsXmlReader col : xmlCols) {
             isTextImage = isTextImage || col.getBoolean("ti");
-            table.addColumn(getColumn(col, schema, loader, null));
+            table.addColumn(getColumn(col, (MsSchema) schema, loader, null));
         }
 
         String perStartCol = getPeriodColName(res.getInt("start_col_id"), xmlCols);
@@ -111,7 +110,7 @@ public class MsTablesReader extends AbstractSearchPathJdbcReader<MsJdbcLoader> i
         }
         loader.setOwner(table, res.getString("owner"));
 
-        schema.addTable(table);
+        schema.addChild(table);
         loader.setPrivileges(table, MsXmlReader.readXML(res.getString("acl")));
     }
 
@@ -136,7 +135,7 @@ public class MsTablesReader extends AbstractSearchPathJdbcReader<MsJdbcLoader> i
         sysVersioning.append(" (HISTORY_TABLE = ").append(MsDiffUtils.quoteName(histSchemaName)).append('.')
                 .append(MsDiffUtils.quoteName(histTableName));
 
-        if (SupportedMsVersion.VERSION_17.isLE(loader.getVersion())) {
+        if (MsSupportedVersion.VERSION_17.isLE(loader.getVersion())) {
             var histRetPeriod = res.getString("history_retention_period_unit_desc");
             if (null != histRetPeriod && !Objects.equals("INFINITE", histRetPeriod)) {
                 sysVersioning.append(", HISTORY_RETENTION_PERIOD = ").append(res.getInt("history_retention_period"))
@@ -150,7 +149,7 @@ public class MsTablesReader extends AbstractSearchPathJdbcReader<MsJdbcLoader> i
 
     // 'MsType type' used only for MsTypesReader processing to extract type depcy
     // from column object since it is temporary
-    static AbstractColumn getColumn(MsXmlReader col, AbstractSchema schema, MsJdbcLoader loader, MsType type) {
+    static MsColumn getColumn(MsXmlReader col, MsSchema schema, MsJdbcLoader loader, MsType type) {
         MsColumn column = new MsColumn(col.getString("name"));
         String exp = col.getString("def");
         if (exp == null) {
@@ -245,13 +244,13 @@ public class MsTablesReader extends AbstractSearchPathJdbcReader<MsJdbcLoader> i
                 .join("LEFT JOIN sys.objects hist WITH (NOLOCK) ON hist.object_id = res.history_table_id")
                 .where("res.type = 'U'");
 
-        if (SupportedMsVersion.VERSION_17.isLE(loader.getVersion())) {
+        if (MsSupportedVersion.VERSION_17.isLE(loader.getVersion())) {
             builder
                     .column("res.history_retention_period_unit_desc")
                     .column("res.history_retention_period");
         }
 
-        if (SupportedMsVersion.VERSION_22.isLE(loader.getVersion())) {
+        if (MsSupportedVersion.VERSION_22.isLE(loader.getVersion())) {
             builder.column("sp.xml_compression");
         }
     }

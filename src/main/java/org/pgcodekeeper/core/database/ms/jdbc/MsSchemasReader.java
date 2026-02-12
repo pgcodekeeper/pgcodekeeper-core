@@ -20,7 +20,6 @@ import java.sql.*;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
 import org.pgcodekeeper.core.database.ms.schema.*;
 import org.pgcodekeeper.core.exception.XmlReaderException;
@@ -52,7 +51,7 @@ public class MsSchemasReader extends AbstractJdbcReader<MsJdbcLoader> implements
             return;
         }
 
-        AbstractSchema schema = new MsSchema(schemaName);
+        MsSchema schema = new MsSchema(schemaName);
         String owner = res.getString("owner");
         if (!schemaName.equalsIgnoreCase(Consts.DBO) || !owner.equalsIgnoreCase(Consts.DBO)) {
             loader.setOwner(schema, owner);

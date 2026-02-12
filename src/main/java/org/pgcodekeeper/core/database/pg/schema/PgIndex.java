@@ -34,12 +34,21 @@ import org.pgcodekeeper.core.utils.Utils;
  * Supports all PostgreSQL index features including unique constraints,
  * partial indexes, expression indexes, and index inheritance for partitioned tables.
  */
-public final class PgIndex extends AbstractIndex implements IPgStatement {
+public final class PgIndex extends PgAbstractStatement implements IIndex {
 
     private static final String ALTER_INDEX = "ALTER INDEX ";
+
     private Inherits inherit;
     private String method;
     private boolean nullsDistinction = true;
+    private boolean unique;
+    private String where;
+    private boolean isClustered;
+    private String tablespace;
+
+    private final List<SimpleColumn> columns = new ArrayList<>();
+    private final List<String> includes = new ArrayList<>();
+    private final Map<String, String> options = new LinkedHashMap<>();
 
     /**
      * Creates a new PostgreSQL index.
@@ -192,7 +201,7 @@ public final class PgIndex extends AbstractIndex implements IPgStatement {
         if (newIndex.isClustered != isClustered) {
             if (newIndex.isClustered) {
                 script.addStatement(newIndex.appendClusterSql());
-            } else if (!((AbstractStatementContainer) newIndex.parent).isClustered()) {
+            } else if (!((PgAbstractStatementContainer) newIndex.parent).isClustered()) {
                 script.addStatement(ALTER_TABLE + newIndex.parent.getQualifiedName() + " SET WITHOUT CLUSTER");
             }
         }
@@ -238,30 +247,130 @@ public final class PgIndex extends AbstractIndex implements IPgStatement {
     }
 
     @Override
-    protected boolean compareUnalterable(AbstractIndex index) {
-        if (!(index instanceof PgIndex pgIndex)) {
-            return false;
-        }
-        return super.compareUnalterable(pgIndex)
-                && Objects.equals(inherit, pgIndex.inherit)
-                && Objects.equals(method, pgIndex.method)
-                && nullsDistinction == pgIndex.nullsDistinction;
-    }
-
-    @Override
     public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
+        hasher.putOrdered(columns);
+        hasher.put(unique);
+        hasher.put(where);
+        hasher.put(includes);
         hasher.put(inherit);
         hasher.put(method);
         hasher.put(nullsDistinction);
+        hasher.put(isClustered);
+        hasher.put(tablespace);
+        hasher.put(options);
     }
 
     @Override
-    protected AbstractIndex getIndexCopy() {
-        PgIndex index = new PgIndex(name);
-        index.inherit = inherit;
-        index.setMethod(method);
-        index.setNullsDistinction(nullsDistinction);
-        return index;
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj instanceof PgIndex index && super.compare(obj)) {
+            return compareUnalterable(index)
+                    && isClustered == index.isClustered
+                    && Objects.equals(tablespace, index.tablespace)
+                    && Objects.equals(options, index.options);
+        }
+
+        return false;
+    }
+
+    private boolean compareUnalterable(PgIndex index) {
+        return Objects.equals(columns, index.columns)
+                && unique == index.unique
+                && Objects.equals(where, index.where)
+                && Objects.equals(includes, index.includes)
+                && Objects.equals(inherit, index.inherit)
+                && Objects.equals(method, index.method)
+                && nullsDistinction == index.nullsDistinction;
+    }
+
+    @Override
+    protected PgIndex getCopy() {
+        PgIndex copy = new PgIndex(name);
+        copy.columns.addAll(columns);
+        copy.unique = unique;
+        copy.where = where;
+        copy.includes.addAll(includes);
+        copy.inherit = inherit;
+        copy.setMethod(method);
+        copy.setNullsDistinction(nullsDistinction);
+        copy.isClustered = isClustered;
+        copy.tablespace = tablespace;
+        copy.options.putAll(options);
+        return copy;
+    }
+
+    private void appendWhere(StringBuilder sbSQL) {
+        if (where != null) {
+            sbSQL.append("\nWHERE ").append(where);
+        }
+    }
+
+    @Override
+    public void addOption(String key, String value) {
+        options.put(key, value);
+        resetHash();
+    }
+
+    @Override
+    public Map<String, String> getOptions() {
+        return Collections.unmodifiableMap(options);
+    }
+
+    @Override
+    public void addColumn(SimpleColumn column) {
+        columns.add(column);
+        resetHash();
+    }
+
+    @Override
+    public void addInclude(String column) {
+        includes.add(column);
+        resetHash();
+    }
+
+    public boolean isClustered() {
+        return isClustered;
+    }
+
+    public void setClustered(boolean isClustered) {
+        this.isClustered = isClustered;
+        resetHash();
+    }
+
+    public void setUnique(boolean isUnique) {
+        this.unique = isUnique;
+        resetHash();
+    }
+
+    public void setWhere(String where) {
+        this.where = where;
+        resetHash();
+    }
+
+    public void setTablespace(String tablespace) {
+        this.tablespace = tablespace;
+        resetHash();
+    }
+
+    @Override
+    public boolean isUnique() {
+        return unique;
+    }
+
+    @Override
+    public boolean compareColumns(Collection<String> refs) {
+        if (refs.size() != columns.size()) {
+            return false;
+        }
+        int i = 0;
+        for (String ref : refs) {
+            if (!ref.equals(columns.get(i++).getName())) {
+                return false;
+            }
+        }
+        return true;
     }
 }

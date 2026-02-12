@@ -22,7 +22,7 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.base.schema.AbstractFunction;
+import org.pgcodekeeper.core.database.api.schema.IFunction;
 import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
@@ -59,17 +59,17 @@ public final class PgProcedure extends PgAbstractFunction {
     }
 
     @Override
-    protected boolean compareUnalterable(AbstractFunction function) {
+    public void computeHash(Hasher hasher) {
+        super.computeHash(hasher);
+        hasher.put(returns);
+    }
+
+    @Override
+    protected boolean compareUnalterable(PgAbstractFunction function) {
         if (function instanceof PgProcedure proc && super.compareUnalterable(function)) {
             return Objects.equals(returns, proc.getReturns());
         }
         return false;
-    }
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(returns);
     }
 
     @Override

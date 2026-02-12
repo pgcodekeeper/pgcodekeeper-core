@@ -20,7 +20,6 @@ import java.util.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.launcher.PgRuleAnalysisLauncher;
 import org.pgcodekeeper.core.database.pg.schema.*;
@@ -64,13 +63,12 @@ public final class PgCreateRule extends PgParserAbstract {
         setConditionAndAddCommands(ctx, rule, db, fileName, settings);
 
         ParserRuleContext parent = QNameParser.getFirstNameCtx(ids);
-        AbstractStatementContainer cont = getSafe(AbstractSchema::getStatementContainer,
-                getSchemaSafe(ids), parent);
+        IStatementContainer cont = getSafe(ISchema::getStatementContainer, getSchemaSafe(ids), parent);
         addSafe(cont, rule, Arrays.asList(QNameParser.getSchemaNameCtx(ids), parent, ctx.name));
     }
 
     public static void setConditionAndAddCommands(Create_rewrite_statementContext ctx,
-                                                  PgRule rule, AbstractDatabase db, String location, ISettings settings) {
+                                                  PgRule rule, IDatabase db, String location, ISettings settings) {
         rule.setCondition((ctx.WHERE() != null) ? getFullCtxText(ctx.vex()) : null);
 
         // allows to write a common namespace-setup code with no copy-paste for each cmd type

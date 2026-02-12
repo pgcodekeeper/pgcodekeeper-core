@@ -17,7 +17,6 @@ package org.pgcodekeeper.core.database.api.schema;
 
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
 import java.util.Map;
@@ -80,7 +79,7 @@ public interface ISimpleOptionContainer extends IOptionContainer {
     default void appendOptions(IOptionContainer newContainer, StringBuilder setOptions,
                                StringBuilder resetOptions, SQLScript script) {
         DbObjType type = getStatementType();
-        String typeName = type == DbObjType.VIEW ? ((AbstractStatement) newContainer).getTypeName() : type.name();
+        String typeName = type == DbObjType.VIEW ? newContainer.getTypeName() : type.name();
         getAlterOptionAction(setOptions, " SET (", script, type, typeName);
         getAlterOptionAction(resetOptions, " RESET (", script, type, typeName);
     }

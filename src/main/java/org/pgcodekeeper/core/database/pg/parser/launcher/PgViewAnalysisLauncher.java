@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.launcher.AbstractAnalysisLauncher;
 import org.pgcodekeeper.core.database.base.schema.meta.*;
 import org.pgcodekeeper.core.database.pg.parser.expr.PgSelect;
@@ -50,7 +51,7 @@ public class PgViewAnalysisLauncher extends AbstractAnalysisLauncher {
     }
 
     @Override
-    public Set<ObjectLocation> analyze(ParserRuleContext ctx, MetaContainer meta) {
+    public Set<ObjectLocation> analyze(ParserRuleContext ctx, IMetaContainer meta) {
         PgSelect select = new PgSelect(meta);
         select.setFullAnalyze(fullAnalyze);
         MetaUtils.initializeView(meta, getSchemaName(), stmt.getName(),

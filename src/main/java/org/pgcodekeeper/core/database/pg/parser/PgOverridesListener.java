@@ -27,6 +27,7 @@ import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.statement.*;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgSchema;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
 import org.pgcodekeeper.core.monitor.IMonitor;
@@ -108,7 +109,7 @@ public final class PgOverridesListener extends CustomParserListener<PgDatabase>
             return;
         }
 
-        AbstractStatement st = getSafe(AbstractDatabase::getSchema, db, ctx.name);
+        PgSchema st = (PgSchema) getSafe(IDatabase::getSchema, db, ctx.name);
         if (Consts.PUBLIC.equals(st.getName()) && "postgres".equals(owner.getText())) {
             return;
         }
@@ -119,8 +120,8 @@ public final class PgOverridesListener extends CustomParserListener<PgDatabase>
     private void alterTable(Alter_table_statementContext ctx) {
         List<ParserRuleContext> ids = PgParserAbstract.getIdentifiers(ctx.name);
         ParserRuleContext schemaCtx = QNameParser.getSchemaNameCtx(ids);
-        AbstractSchema schema = schemaCtx == null ? db.getDefaultSchema() :
-                getSafe(AbstractDatabase::getSchema, db, schemaCtx);
+        ISchema schema = schemaCtx == null ? db.getDefaultSchema() :
+                getSafe(IDatabase::getSchema, db, schemaCtx);
 
         ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
 
@@ -128,7 +129,7 @@ public final class PgOverridesListener extends CustomParserListener<PgDatabase>
             Owner_toContext owner = tablAction.owner_to();
             IdentifierContext name;
             if (owner != null && (name = owner.user_name().identifier()) != null) {
-                IRelation st = getSafe(AbstractSchema::getRelation, schema, nameCtx);
+                IRelation st = getSafe(ISchema::getRelation, schema, nameCtx);
                 overrides.computeIfAbsent((AbstractStatement) st,
                         k -> new StatementOverride()).setOwner(name.getText());
             }

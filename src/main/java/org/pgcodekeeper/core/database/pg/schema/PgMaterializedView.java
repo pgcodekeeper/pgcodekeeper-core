@@ -23,7 +23,6 @@ import java.util.Objects;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractView;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -154,7 +153,7 @@ public final class PgMaterializedView extends PgAbstractView {
     }
 
     @Override
-    protected AbstractView getViewCopy() {
+    protected PgAbstractView getViewCopy() {
         PgMaterializedView view = new PgMaterializedView(name);
         view.setIsWithData(isWithData);
         view.setMethod(method);

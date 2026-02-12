@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.database.ms.parser.expr;
 
 import java.util.*;
 
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.ExpressionContext;
 
 /**
@@ -35,7 +35,7 @@ public class MsExprWithNmspc extends MsAbstractExprWithNmspc<ExpressionContext> 
      * @param schema the current schema context
      * @param meta   the metadata container for database schema information
      */
-    public MsExprWithNmspc(String schema, MetaContainer meta) {
+    public MsExprWithNmspc(String schema, IMetaContainer meta) {
         super(schema, meta);
         expr = new MsValueExpr(this);
     }

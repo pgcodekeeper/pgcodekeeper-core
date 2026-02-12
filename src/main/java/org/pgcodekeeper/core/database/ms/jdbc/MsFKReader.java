@@ -19,9 +19,9 @@ import java.sql.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
 import org.pgcodekeeper.core.database.ms.schema.MsConstraintFk;
+import org.pgcodekeeper.core.database.ms.schema.MsTable;
 import org.pgcodekeeper.core.exception.XmlReaderException;
 
 /**
@@ -40,7 +40,7 @@ public class MsFKReader extends AbstractSearchPathJdbcReader<MsJdbcLoader> imple
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema)
+    protected void processResult(ResultSet res, ISchema schema)
             throws SQLException, XmlReaderException {
         String name = res.getString("name");
         loader.setCurrentObject(new GenericColumn(schema.getName(), name, DbObjType.CONSTRAINT));
@@ -69,8 +69,8 @@ public class MsFKReader extends AbstractSearchPathJdbcReader<MsJdbcLoader> imple
         constrFk.setDelAction(getAction(res.getInt("delete_referential_action")));
         constrFk.setUpdAction(getAction(res.getInt("update_referential_action")));
         constrFk.setNotForRepl(res.getBoolean("is_not_for_replication"));
-
-        schema.getTable(res.getString("table_name")).addConstraint(constrFk);
+        MsTable table = (MsTable) schema.getChild(res.getString("table_name"), DbObjType.TABLE);;
+        table.addChild(constrFk);
     }
 
     private String getAction(int value) {

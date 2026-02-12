@@ -15,11 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.utils;
 
-import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;
-import org.pgcodekeeper.core.database.ms.jdbc.MsJdbcConnector;
-import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,21 +140,6 @@ public final class Utils {
         tf.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
         tf.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4"); //$NON-NLS-1$ //$NON-NLS-2$
         tf.transform(new DOMSource(xml), stream);
-    }
-
-    /**
-     * Returns JdbcConnector for the given database type. Temporary solution until the new API is finished.
-     *
-     * @param dbType the database type
-     * @param url full jdbc connection string
-     * @return JdbcConnector for the given database type.
-     */
-    public static IJdbcConnector getJdbcConnectorByType(DatabaseType dbType, String url) {
-        return switch (dbType) {
-            case PG -> new PgJdbcConnector(url);
-            case MS -> new MsJdbcConnector(url);
-            case CH -> new ChJdbcConnector(url);
-        };
     }
 
     /**

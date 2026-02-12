@@ -132,6 +132,13 @@ public class Argument implements IArgument, Serializable, IHashable {
         return false;
     }
 
+    public Argument getCopy() {
+        Argument copy = new Argument(mode, name, dataType);
+        copy.setDefaultExpression(defaultExpression);
+        copy.setReadOnly(isReadOnly);
+        return copy;
+    }
+
     @Override
     public int hashCode() {
         JavaHasher hasher = new JavaHasher();

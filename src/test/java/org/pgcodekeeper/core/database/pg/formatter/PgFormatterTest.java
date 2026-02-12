@@ -15,9 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.formatter;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.pgcodekeeper.core.FILES_POSTFIX;
+import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.database.api.formatter.IndentType;
 import org.pgcodekeeper.core.database.base.formatter.FormatConfiguration;
 import org.pgcodekeeper.core.utils.FileUtils;
@@ -141,7 +141,7 @@ class PgFormatterTest {
         String newFile = getFileContent(newFileName + FILES_POSTFIX.SQL);
         String oldFile = getFileContent(oldFileName + FILES_POSTFIX.SQL);
         PgFormatter fileFormatter = new PgFormatter(oldFile, 0, oldFile.length(), config);
-        Assertions.assertEquals(newFile, fileFormatter.formatText(), "Formatted files are different");
+        TestUtils.assertIgnoreNewLines(newFile, fileFormatter.formatText());
     }
 
     private String getFileContent(String fileName) throws IOException {

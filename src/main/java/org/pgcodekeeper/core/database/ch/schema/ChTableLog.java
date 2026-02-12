@@ -17,6 +17,8 @@ package org.pgcodekeeper.core.database.ch.schema;
 
 import java.util.*;
 
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 
@@ -26,7 +28,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
  */
 public final class ChTableLog extends ChTable {
 
-    private final List<AbstractConstraint> constrs = new ArrayList<>();
+    private final List<ChConstraint> constrs = new ArrayList<>();
 
     /**
      * Creates a new ClickHouse Log table with the specified name.
@@ -47,14 +49,24 @@ public final class ChTableLog extends ChTable {
     }
 
     @Override
-    public void addConstraint(AbstractConstraint constraint) {
-        constrs.add(constraint);
-        resetHash();
+    public void addChild(IStatement st) {
+        if (st.getStatementType() == DbObjType.CONSTRAINT) {
+            constrs.add((ChConstraint) st);
+            resetHash();
+            return;
+        }
+        super.addChild(st);
     }
 
     @Override
     protected boolean isNotEmptyTable() {
         return super.isNotEmptyTable() || !constrs.isEmpty();
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        super.computeHash(hasher);
+        hasher.putOrdered(constrs);
     }
 
     @Override
@@ -65,22 +77,14 @@ public final class ChTableLog extends ChTable {
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.putOrdered(constrs);
-    }
-
-    @Override
-    protected AbstractTable getTableCopy() {
+    protected ChTableLog getTableCopy() {
         var table = new ChTableLog(name);
-        table.projections.putAll(projections);
-        table.engine = engine;
         table.constrs.addAll(constrs);
         return table;
     }
 
     @Override
-    protected boolean isNeedRecreate(AbstractTable newTable) {
+    protected boolean isNeedRecreate(ChTable newTable) {
         var newChLogTable = (ChTableLog) newTable;
         return super.isNeedRecreate(newChLogTable)
                 || !constrs.equals(newChLogTable.constrs)

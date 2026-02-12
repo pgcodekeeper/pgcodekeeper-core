@@ -15,23 +15,34 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import java.util.*;
-import java.util.Map.Entry;
-
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.StatementUtils;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.Pair;
+import org.pgcodekeeper.core.utils.Utils;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Represents a ClickHouse table with engine configuration and projections.
  * Supports ClickHouse-specific features like table engines, projections, and specialized DDL operations.
  */
-public class ChTable extends AbstractTable implements IChStatement {
+public class ChTable extends ChAbstractStatement implements ITable, IOptionContainer {
 
-    protected final Map<String, String> projections = new LinkedHashMap<>();
+    protected static final String ALTER_COLUMN = " ALTER COLUMN ";
+    private final Map<String, ChIndex> indexes = new LinkedHashMap<>();
+    private final Map<String, ChConstraint> constraints = new LinkedHashMap<>();
 
     protected ChEngine engine;
+    protected final Map<String, String> projections = new LinkedHashMap<>();
+    protected final Map<String, String> options = new LinkedHashMap<>();
+    protected final List<ChColumn> columns = new ArrayList<>();
 
     /**
      * Creates a new ClickHouse table with the specified name.
@@ -90,7 +101,7 @@ public class ChTable extends AbstractTable implements IChStatement {
     }
 
     protected void appendTableBody(StringBuilder sb) {
-        for (AbstractColumn column : columns) {
+        for (ChColumn column : columns) {
             sb.append("\n\t").append(column.getFullDefinition()).append(',');
         }
 
@@ -169,48 +180,14 @@ public class ChTable extends AbstractTable implements IChStatement {
         script.addStatement(sb);
     }
 
-    @Override
     public String getAlterTable(boolean only) {
         return ALTER_TABLE + getQualifiedName();
     }
 
-    @Override
-    protected boolean isNeedRecreate(AbstractTable newTable) {
-        var newEngine = ((ChTable) newTable).engine;
+    protected boolean isNeedRecreate(ChTable newTable) {
+        var newEngine = newTable.engine;
         return !engine.compareUnalterable(newEngine)
                 && !engine.isModifybleSampleBy(newEngine);
-    }
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(projections);
-        hasher.put(engine);
-    }
-
-    @Override
-    protected boolean compareTable(AbstractStatement obj) {
-        return obj instanceof ChTable table
-                && Objects.equals(projections, table.projections)
-                && Objects.equals(engine, table.engine);
-    }
-
-    @Override
-    protected AbstractTable getTableCopy() {
-        var table = new ChTable(name);
-        table.projections.putAll(projections);
-        table.setEngine(engine);
-        return table;
-    }
-
-    @Override
-    public void appendComments(SQLScript script) {
-        // no impl
-    }
-
-    @Override
-    protected void appendCommentSql(SQLScript script) {
-        // no impl
     }
 
     @Override
@@ -218,8 +195,7 @@ public class ChTable extends AbstractTable implements IChStatement {
         // no impl
     }
 
-    @Override
-    protected void writeInsert(SQLScript script, AbstractTable newTable, String tblTmpQName,
+    protected void writeInsert(SQLScript script, ChTable newTable, String tblTmpQName,
                                List<String> identityColsForMovingData, String cols) {
         StringBuilder sbInsert = new StringBuilder();
         sbInsert.append("INSERT INTO ").append(newTable.getQualifiedName()).append('(').append(cols).append(")");
@@ -227,11 +203,257 @@ public class ChTable extends AbstractTable implements IChStatement {
         script.addStatement(sbInsert);
     }
 
-    @Override
-    protected List<String> getColsForMovingData(AbstractTable newTable) {
-        return newTable.getColumns().stream()
-                .map(AbstractColumn::getName)
+    protected List<String> getColsForMovingData(ChTable newTable) {
+        return newTable.columns.stream()
+                .map(IColumn::getName)
                 .filter(this::containsColumn)
                 .toList();
+    }
+
+    @Override
+    public DbObjType getStatementType() {
+        return DbObjType.TABLE;
+    }
+
+    @Override
+    public void fillChildrenList(List<Collection<? extends AbstractStatement>> l) {
+        l.add(indexes.values());
+        l.add(constraints.values());
+    }
+
+    /**
+     * Checks if this container has any clustered indexes or constraints.
+     */
+    public boolean isClustered() {
+        for (var ind : indexes.values()) {
+            if (ind.isClustered()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public AbstractStatement getChild(String name, DbObjType type) {
+        return switch (type) {
+            case INDEX -> getChildByName(indexes, name);
+            case CONSTRAINT -> getChildByName(constraints, name);
+            default -> null;
+        };
+    }
+
+    @Override
+    public Collection<IStatement> getChildrenByType(DbObjType type) {
+        return switch (type) {
+            case INDEX -> Collections.unmodifiableCollection(indexes.values());
+            case CONSTRAINT -> Collections.unmodifiableCollection(constraints.values());
+            default -> List.of();
+        };
+    }
+
+    @Override
+    public void addChild(IStatement st) {
+        DbObjType type = st.getStatementType();
+        switch (type) {
+            case INDEX:
+                addUnique(indexes, (ChIndex) st);
+                break;
+            case CONSTRAINT:
+                addUnique(constraints, (ChConstraint) st);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported child type: " + type);
+        }
+    }
+
+    /**
+     * Finds column according to specified column {@code name}.
+     *
+     * @param name name of the column to be searched
+     * @return found column or null if no such column has been found
+     */
+    @Override
+    public ChColumn getColumn(final String name) {
+        for (ChColumn column : columns) {
+            if (column.getName().equals(name)) {
+                return column;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Getter for {@link #columns}. The list cannot be modified.
+     *
+     * @return {@link #columns}
+     */
+    @Override
+    public List<IColumn> getColumns() {
+        return Collections.unmodifiableList(columns);
+    }
+
+    @Override
+    public Stream<Pair<String, String>> getRelationColumns() {
+        return columns.stream()
+                .filter(c -> c.getType() != null)
+                .map(c -> new Pair<>(c.getName(), c.getType()));
+    }
+
+    protected boolean isColumnsOrderChanged(ChTable newTable, ISettings settings) {
+        if (settings.isIgnoreColumnOrder()) {
+            return false;
+        }
+
+        return StatementUtils.isColumnsOrderChanged(newTable.columns, columns);
+    }
+
+    protected void appendColumnsPrivileges(SQLScript script) {
+        for (var col : columns) {
+            col.appendPrivileges(script);
+        }
+    }
+
+    @Override
+    public Map<String, String> getOptions() {
+        return Collections.unmodifiableMap(options);
+    }
+
+    /**
+     * Gets the value for the specified option.
+     *
+     * @param option the option key
+     * @return the option value, or null if not found
+     */
+    public String getOption(String option) {
+        return options.get(option);
+    }
+
+    @Override
+    public void addOption(String option, String value) {
+        options.put(option, value);
+        resetHash();
+    }
+
+    /**
+     * Adds a column to the table.
+     *
+     * @param column the column to add
+     */
+    public void addColumn(final ChColumn column) {
+        assertUnique(getColumn(column.getName()), column);
+        columns.add(column);
+        column.setParent(this);
+        resetHash();
+    }
+
+    /**
+     * Checks if a column with the specified name exists.
+     *
+     * @param name the column name
+     * @return true if column exists, false otherwise
+     */
+    public boolean containsColumn(final String name) {
+        return getColumn(name) != null;
+    }
+
+    @Override
+    public void computeChildrenHash(Hasher hasher) {
+        hasher.putUnordered(constraints);
+        hasher.putUnordered(indexes);
+    }
+
+    @Override
+    public boolean compareChildren(AbstractStatement obj) {
+        if (obj instanceof ChTable table && super.compareChildren(obj)) {
+            return constraints.equals(table.constraints)
+                    && indexes.equals(table.indexes);
+        }
+        return false;
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.putOrdered(columns);
+        hasher.put(options);
+        hasher.put(projections);
+        hasher.put(engine);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return compare(obj, true);
+    }
+
+    private boolean compare(IStatement obj, boolean checkColumnOrder) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj instanceof ChTable table && super.compare(obj)) {
+            boolean isColumnsEqual;
+            if (checkColumnOrder) {
+                isColumnsEqual = columns.equals(table.columns);
+            } else {
+                isColumnsEqual = Utils.setLikeEquals(columns, table.columns);
+            }
+
+            return isColumnsEqual
+                    && getClass().equals(table.getClass())
+                    && options.equals(table.options)
+                    && compareTable(table);
+        }
+
+        return false;
+    }
+
+    protected boolean compareTable(AbstractStatement obj) {
+        return obj instanceof ChTable table
+                && Objects.equals(projections, table.projections)
+                && Objects.equals(engine, table.engine);
+    }
+
+    @Override
+    protected ChTable getCopy() {
+        ChTable copy = getTableCopy();
+        for (var colSrc : columns) {
+            copy.addColumn((ChColumn) colSrc.deepCopy());
+        }
+        copy.options.putAll(options);
+        copy.projections.putAll(projections);
+        copy.setEngine(engine);
+        return copy;
+    }
+
+    protected ChTable getTableCopy() {
+        return new ChTable(name);
+    }
+
+    @Override
+    public void appendMoveDataSql(IStatement newCondition, SQLScript script, String tblTmpBareName,
+                                  List<String> identityCols) {
+        ChTable newTable = (ChTable) newCondition;
+        List<String> colsForMovingData = getColsForMovingData(newTable);
+        if (colsForMovingData.isEmpty()) {
+            return;
+        }
+
+        var quoter = getQuoter();
+        String tblTmpQName = quoter.apply(getSchemaName()) + '.' + quoter.apply(tblTmpBareName);
+        String cols = colsForMovingData.stream().map(quoter).collect(Collectors.joining(", "));
+        List<String> identityColsForMovingData = identityCols == null ? Collections.emptyList()
+                : identityCols.stream().filter(colsForMovingData::contains).toList();
+        writeInsert(script, newTable, tblTmpQName, identityColsForMovingData, cols);
+    }
+
+    @Override
+    public boolean isRecreated(ITable newTable, ISettings settings) {
+        return newTable instanceof ChTable newChTable
+                && (isNeedRecreate(newChTable) || isColumnsOrderChanged(newChTable, settings));
+    }
+
+    @Override
+    public boolean compareIgnoringColumnOrder(ITable newTable) {
+        return compare(newTable, false);
     }
 }

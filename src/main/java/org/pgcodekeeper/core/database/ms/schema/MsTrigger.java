@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.ms.schema;
 import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractTrigger;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -26,7 +25,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a Microsoft SQL trigger that executes in response to specific database events.
  * Triggers can be enabled or disabled and support ANSI_NULLS and QUOTED_IDENTIFIER settings.
  */
-public final class MsTrigger extends AbstractTrigger implements MsSourceStatement {
+public final class MsTrigger extends MsAbstractStatement implements MsSourceStatement, ITrigger {
 
     private boolean ansiNulls;
     private boolean quotedIdentified;
@@ -58,11 +57,7 @@ public final class MsTrigger extends AbstractTrigger implements MsSourceStatemen
 
     private void addTriggerFullSQL(SQLScript script, boolean isCreate) {
         final StringBuilder sbSQL = new StringBuilder();
-        sbSQL.append("SET QUOTED_IDENTIFIER ").append(quotedIdentified ? "ON" : "OFF");
-        sbSQL.append(GO).append('\n');
-        sbSQL.append("SET ANSI_NULLS ").append(ansiNulls ? "ON" : "OFF");
-        sbSQL.append(GO).append('\n');
-        appendSourceStatement(isCreate, sbSQL);
+        appendSourceStatement(sbSQL, quotedIdentified, ansiNulls, isCreate);
         script.addStatement(sbSQL);
     }
 
@@ -111,6 +106,15 @@ public final class MsTrigger extends AbstractTrigger implements MsSourceStatemen
     }
 
     @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(firstPart);
+        hasher.put(secondPart);
+        hasher.put(quotedIdentified);
+        hasher.put(ansiNulls);
+        hasher.put(isDisable);
+    }
+
+    @Override
     public boolean compare(IStatement obj) {
         if (obj instanceof MsTrigger trigger && super.compare(obj)) {
             return Objects.equals(firstPart, trigger.firstPart)
@@ -124,21 +128,12 @@ public final class MsTrigger extends AbstractTrigger implements MsSourceStatemen
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(firstPart);
-        hasher.put(secondPart);
-        hasher.put(quotedIdentified);
-        hasher.put(ansiNulls);
-        hasher.put(isDisable);
-    }
-
-    @Override
-    protected AbstractTrigger getTriggerCopy() {
+    protected MsTrigger getCopy() {
         MsTrigger trigger = new MsTrigger(name);
         trigger.setFirstPart(firstPart);
         trigger.setSecondPart(secondPart);
-        trigger.setAnsiNulls(ansiNulls);
         trigger.setQuotedIdentified(quotedIdentified);
+        trigger.setAnsiNulls(ansiNulls);
         trigger.setDisable(isDisable);
         return trigger;
     }

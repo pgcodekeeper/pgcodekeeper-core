@@ -114,9 +114,7 @@ public abstract class AbstractModelExporter {
         this.changeList = changedObjects;
 
         // we should create new settings to get correct script in project files
-        var copySettings = new CoreSettings();
-        copySettings.setDbType(settings.getDbType());
-        this.settings = copySettings;
+        this.settings = new CoreSettings();
     }
 
     /**

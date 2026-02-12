@@ -29,11 +29,11 @@ import org.pgcodekeeper.core.utils.Pair;
  * Represents a composite type consisting of multiple attributes (fields),
  * similar to a table row structure but used as a data type.
  */
-public final class PgCompositeType extends AbstractType implements IPgStatement, ICompositeType {
+public final class PgCompositeType extends PgAbstractType implements ICompositeType {
 
     private static final String COLLATE = " COLLATE ";
 
-    private final List<AbstractColumn> attrs = new ArrayList<>();
+    private final List<PgColumn> attrs = new ArrayList<>();
 
     /**
      * Creates a new PostgreSQL composite type.
@@ -47,7 +47,7 @@ public final class PgCompositeType extends AbstractType implements IPgStatement,
     @Override
     protected void appendDef(StringBuilder sb) {
         sb.append(" AS (");
-        for (AbstractColumn attr : attrs) {
+        for (PgColumn attr : attrs) {
             sb.append("\n\t").append(getQuotedName(attr.getName()))
                     .append(' ').append(attr.getType());
 
@@ -70,22 +70,22 @@ public final class PgCompositeType extends AbstractType implements IPgStatement,
     }
 
     private void appendChildrenComments(SQLScript script) {
-        for (final AbstractColumn column : attrs) {
+        for (final PgColumn column : attrs) {
             column.appendComments(script);
         }
     }
 
     @Override
-    protected boolean compareUnalterable(AbstractType newType) {
+    protected boolean compareUnalterable(PgAbstractType newType) {
         return !StatementUtils.isColumnsOrderChanged(((PgCompositeType) newType).attrs, attrs);
     }
 
     @Override
-    protected void compareType(AbstractType newType, AtomicBoolean isNeedDepcies, SQLScript script) {
+    protected void compareType(PgAbstractType newType, AtomicBoolean isNeedDepcies, SQLScript script) {
         PgCompositeType newCompositeType = (PgCompositeType) newType;
         StringBuilder attrSb = new StringBuilder();
-        for (AbstractColumn attr : newCompositeType.attrs) {
-            AbstractColumn oldAttr = getAttr(attr.getName());
+        for (PgColumn attr : newCompositeType.attrs) {
+            PgColumn oldAttr = getAttr(attr.getName());
             if (oldAttr == null) {
                 appendAlterAttribute(attrSb, "ADD", " ", attr);
             } else if (!oldAttr.getType().equals(attr.getType()) ||
@@ -94,7 +94,7 @@ public final class PgCompositeType extends AbstractType implements IPgStatement,
             }
         }
 
-        for (AbstractColumn attr : attrs) {
+        for (PgColumn attr : attrs) {
             if (newCompositeType.getAttr(attr.getName()) == null) {
                 appendAlterAttribute(attrSb, "DROP", ",", attr);
             }
@@ -116,8 +116,8 @@ public final class PgCompositeType extends AbstractType implements IPgStatement,
 
     private void appendAlterChildrenComments(AbstractStatement newObj, SQLScript script) {
         PgCompositeType newType = (PgCompositeType) newObj;
-        for (AbstractColumn newAttr : newType.attrs) {
-            AbstractColumn oldAttr = getAttr(newAttr.getName());
+        for (PgColumn newAttr : newType.attrs) {
+            PgColumn oldAttr = getAttr(newAttr.getName());
             if (oldAttr != null) {
                 oldAttr.appendAlterComments(newAttr, script);
             } else {
@@ -127,7 +127,7 @@ public final class PgCompositeType extends AbstractType implements IPgStatement,
     }
 
     private void appendAlterAttribute(StringBuilder attrSb, String action, String delimiter,
-                                      AbstractColumn attr) {
+                                      PgColumn attr) {
         attrSb.append("\n\t").append(action).append(" ATTRIBUTE ")
                 .append(getQuotedName(attr.getName()))
                 .append(delimiter);
@@ -147,8 +147,8 @@ public final class PgCompositeType extends AbstractType implements IPgStatement,
      * @param name attribute name
      * @return attribute or null if not found
      */
-    public AbstractColumn getAttr(String name) {
-        for (AbstractColumn att : attrs) {
+    public PgColumn getAttr(String name) {
+        for (PgColumn att : attrs) {
             if (att.getName().equals(name)) {
                 return att;
             }
@@ -159,7 +159,7 @@ public final class PgCompositeType extends AbstractType implements IPgStatement,
     @Override
     public List<Pair<String, String>> getAttrs() {
         List<Pair<String, String>> result = new ArrayList<>();
-        for (AbstractColumn column : attrs) {
+        for (PgColumn column : attrs) {
             result.add(new Pair<>(column.getName(), column.getType()));
         }
         return Collections.unmodifiableList(result);
@@ -170,36 +170,32 @@ public final class PgCompositeType extends AbstractType implements IPgStatement,
      *
      * @param attr attribute to add
      */
-    public void addAttr(AbstractColumn attr) {
+    public void addAttr(PgColumn attr) {
         attrs.add(attr);
         attr.setParent(this);
         resetHash();
     }
 
     @Override
-    protected AbstractType getTypeCopy() {
-        PgCompositeType copy = new PgCompositeType(name);
-        for (AbstractColumn attr : attrs) {
-            copy.addAttr((AbstractColumn) attr.deepCopy());
-        }
-        return copy;
+    public void computeHash(Hasher hasher) {
+        hasher.putOrdered(attrs);
     }
 
     @Override
     public boolean compare(IStatement obj) {
-        if (obj instanceof PgCompositeType type) {
-            return super.compare(type) && attrs.equals(type.attrs);
+        if (obj instanceof PgCompositeType type && super.compare(type)) {
+            return attrs.equals(type.attrs);
         }
         return false;
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.putOrdered(attrs);
-    }
-    @Override
-    public String getSchemaName() {
-        return super.getSchemaName();
+    protected PgAbstractType getCopy() {
+        PgCompositeType copy = new PgCompositeType(name);
+        for (PgColumn attr : attrs) {
+            copy.addAttr((PgColumn) attr.deepCopy());
+        }
+        return copy;
     }
 
     @Override
@@ -207,6 +203,6 @@ public final class PgCompositeType extends AbstractType implements IPgStatement,
         return attrs.stream()
                     .filter(column -> attrName.equals(column.getName()))
                     .findFirst()
-                    .map(AbstractColumn::getType).orElse(null);
+                    .map(PgColumn::getType).orElse(null);
     }
 }

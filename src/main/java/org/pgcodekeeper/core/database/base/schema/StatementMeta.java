@@ -60,7 +60,7 @@ public class StatementMeta {
     }
 
     /**
-     * Copies metadata from another PgStatementMeta instance.
+     * Copies metadata from another StatementMeta instance.
      *
      * @param meta the metadata to copy from
      */

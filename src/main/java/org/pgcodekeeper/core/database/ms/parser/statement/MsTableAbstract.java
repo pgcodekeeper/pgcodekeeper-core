@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.ms.parser.statement;
 import java.util.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractConstraint;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
 import org.pgcodekeeper.core.database.ms.schema.*;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -34,7 +33,7 @@ public abstract class MsTableAbstract extends MsParserAbstract {
         super(db, settings);
     }
 
-    protected AbstractConstraint getMsConstraint(Table_constraintContext conCtx,
+    protected MsConstraint getMsConstraint(Table_constraintContext conCtx,
                                                  String schema, String table) {
         String conName = conCtx.id() == null ? "" : conCtx.id().getText();
         Table_constraint_bodyContext body = conCtx.table_constraint_body();
@@ -51,7 +50,7 @@ public abstract class MsTableAbstract extends MsParserAbstract {
         return null;
     }
 
-    private AbstractConstraint getMsFKConstraint(String schema, String table, String conName,
+    private MsConstraint getMsFKConstraint(String schema, String table, String conName,
                                                  Table_constraint_bodyContext body) {
         var constrFk = new MsConstraintFk(conName);
 
@@ -108,7 +107,7 @@ public abstract class MsTableAbstract extends MsParserAbstract {
         return constrFk;
     }
 
-    private AbstractConstraint getMsCheckConstraint(String conName, Table_constraint_bodyContext body) {
+    private MsConstraint getMsCheckConstraint(String conName, Table_constraint_bodyContext body) {
         var constrCheck = new MsConstraintCheck(conName);
         constrCheck.setNotForRepl(body.not_for_replication() != null);
         constrCheck.setExpression(getFullCtxText(body.search_condition()));

@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.database.pg.parser.statement;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -51,7 +51,7 @@ public final class PgCreateSchema extends PgParserAbstract {
             return;
         }
 
-        AbstractSchema schema = createAndAddSchemaWithCheck(nameCtx);
+        ISchema schema = createAndAddSchemaWithCheck(nameCtx);
 
         User_nameContext user = ctx.user_name();
         IdentifierContext userName = user == null ? null : user.identifier();

@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.database.ch.parser.expr;
 
 import java.util.*;
 
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
 import org.pgcodekeeper.core.database.ch.parser.rulectx.*;
 import org.pgcodekeeper.core.localizations.Messages;
@@ -45,7 +45,7 @@ public final class ChSelect extends ChAbstractExprWithNmspc<Select_stmtContext> 
      * @param schema the database schema name
      * @param meta   the metadata container
      */
-    public ChSelect(String schema, MetaContainer meta) {
+    public ChSelect(String schema, IMetaContainer meta) {
         super(schema, meta);
     }
 

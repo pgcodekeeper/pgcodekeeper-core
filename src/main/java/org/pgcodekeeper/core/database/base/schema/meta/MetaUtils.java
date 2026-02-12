@@ -20,8 +20,7 @@ import java.util.stream.Stream;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
-import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.utils.Pair;
 
 /**
@@ -37,38 +36,18 @@ public final class MetaUtils {
      * @param db the database object
      * @return the metadata container with all database objects
      */
-    public static MetaContainer createTreeFromDb(AbstractDatabase db) {
+    public static MetaContainer createTreeFromDb(IDatabase db) {
         MetaContainer tree = new MetaContainer();
         db.getDescendants()
                 .map(MetaUtils::createMetaFromStatement)
                 .forEach(tree::addStatement);
 
-        if (db.getDbType() == DatabaseType.PG) {
-            MetaStorage.getSystemObjects(db.getVersion()).forEach(tree::addStatement);
-        }
+        MetaStorage.getSystemObjects(db.getVersion()).forEach(tree::addStatement);
+
         return tree;
     }
 
-    /**
-     * Creates a metadata container from a stream of metadata definitions.
-     *
-     * @param defs    the stream of metadata statements
-     * @param dbType  the database type
-     * @param version the PostgreSQL version (used only for PG databases)
-     * @return the metadata container with all definitions
-     */
-    public static MetaContainer createTreeFromDefs(Stream<MetaStatement> defs,
-                                                   DatabaseType dbType, SupportedPgVersion version) {
-        MetaContainer tree = new MetaContainer();
-        defs.forEach(tree::addStatement);
-
-        if (dbType == DatabaseType.PG) {
-            MetaStorage.getSystemObjects(version).forEach(tree::addStatement);
-        }
-        return tree;
-    }
-
-    private static MetaStatement createMetaFromStatement(AbstractStatement st) {
+    private static MetaStatement createMetaFromStatement(IStatement st) {
         DbObjType type = st.getStatementType();
         ObjectLocation loc = getLocation(st, type);
         var meta = createMeta(st, loc);
@@ -81,7 +60,7 @@ public final class MetaUtils {
         return meta;
     }
 
-    private static MetaStatement createMeta(AbstractStatement st, ObjectLocation loc) {
+    private static MetaStatement createMeta(IStatement st, ObjectLocation loc) {
         if (st instanceof ICast cast) {
             return new MetaCast(cast.getSource(), cast.getTarget(), cast.getContext(), loc);
         }
@@ -124,7 +103,7 @@ public final class MetaUtils {
         return new MetaStatement(loc);
     }
 
-    private static ObjectLocation getLocation(AbstractStatement st, DbObjType type) {
+    private static ObjectLocation getLocation(IStatement st, DbObjType type) {
         ObjectLocation loc = st.getLocation();
         // some children may have a parental location
         if (loc != null && loc.getType() == type) {
@@ -144,7 +123,7 @@ public final class MetaUtils {
      * @param db the database object
      * @return map of file paths to lists of metadata statements
      */
-    public static Map<String, List<MetaStatement>> getObjDefinitions(AbstractDatabase db) {
+    public static Map<String, List<MetaStatement>> getObjDefinitions(IDatabase db) {
         Map<String, List<MetaStatement>> definitions = new HashMap<>();
 
         db.getDescendants().forEach(st -> {
@@ -169,7 +148,7 @@ public final class MetaUtils {
      * @param name       the view name
      * @param columns    the list of column name-type pairs
      */
-    public static void initializeView(MetaContainer meta, String schemaName,
+    public static void initializeView(IMetaContainer meta, String schemaName,
                                       String name, List<? extends Pair<String, String>> columns) {
         IRelation rel = meta.findRelation(schemaName, name);
         if (rel instanceof MetaRelation metaRel) {

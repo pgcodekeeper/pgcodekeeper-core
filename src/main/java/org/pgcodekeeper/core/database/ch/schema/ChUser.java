@@ -56,11 +56,6 @@ public final class ChUser extends ChAbstractStatement {
     }
 
     @Override
-    public AbstractDatabase getDatabase() {
-        return (ChDatabase) parent;
-    }
-
-    @Override
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("CREATE USER ");
@@ -151,6 +146,17 @@ public final class ChUser extends ChAbstractStatement {
     }
 
     @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(hosts);
+        hasher.put(storageType);
+        hasher.put(defRoles);
+        hasher.put(exceptRoles);
+        hasher.put(grantees);
+        hasher.put(exGrantees);
+        hasher.put(defDb);
+    }
+
+    @Override
     public boolean compare(IStatement obj) {
         if (this == obj) {
             return true;
@@ -170,9 +176,8 @@ public final class ChUser extends ChAbstractStatement {
     }
 
     @Override
-    public AbstractStatement shallowCopy() {
+    protected AbstractStatement getCopy() {
         ChUser userDst = new ChUser(name);
-        copyBaseFields(userDst);
         userDst.hosts.addAll(hosts);
         userDst.setStorageType(storageType);
         userDst.defRoles.addAll(defRoles);
@@ -181,17 +186,6 @@ public final class ChUser extends ChAbstractStatement {
         userDst.exGrantees.addAll(exGrantees);
         userDst.setDefaultDatabase(defDb);
         return userDst;
-    }
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(hosts);
-        hasher.put(storageType);
-        hasher.put(defRoles);
-        hasher.put(exceptRoles);
-        hasher.put(grantees);
-        hasher.put(exGrantees);
-        hasher.put(defDb);
     }
 
     public void setDefaultDatabase(String defaultDatabase) {

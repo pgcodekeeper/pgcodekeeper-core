@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.database.ch.parser.expr;
 
 import java.util.*;
 
-import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.ExprContext;
 
 /**
@@ -34,7 +34,7 @@ public final class ChExprWithNmspc extends ChAbstractExprWithNmspc<ExprContext> 
      * @param schema the database schema name
      * @param meta   the metadata container for database objects
      */
-    public ChExprWithNmspc(String schema, MetaContainer meta) {
+    public ChExprWithNmspc(String schema, IMetaContainer meta) {
         super(schema, meta);
         expr = new ChValueExpr(this);
     }

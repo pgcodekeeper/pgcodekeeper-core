@@ -16,21 +16,20 @@
 package org.pgcodekeeper.core.database.ms.schema;
 
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.ms.formatter.MsFormatter;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.utils.Utils;
 
+import java.util.Locale;
 import java.util.function.UnaryOperator;
 
 public abstract class MsAbstractStatement extends AbstractStatement {
 
-    private String RENAME_OBJECT_COMMAND = "EXEC sp_rename %s, %s";
-    private String GO = "\nGO";
+    private static final String RENAME_OBJECT_COMMAND = "EXEC sp_rename %s, %s";
+    private static final String GO = "\nGO";
 
     protected MsAbstractStatement(String name) {
         super(name);
@@ -39,11 +38,6 @@ public abstract class MsAbstractStatement extends AbstractStatement {
     @Override
     public String formatSql(String sql, int offset, int length, IFormatConfiguration formatConfiguration) {
         return new MsFormatter(sql, offset, length, formatConfiguration).formatText();
-    }
-
-    @Override
-    public DatabaseType getDbType() {
-        return DatabaseType.MS;
     }
 
     @Override
@@ -77,12 +71,42 @@ public abstract class MsAbstractStatement extends AbstractStatement {
     }
 
     @Override
-    public void appendDefaultPrivileges(IStatement statement, SQLScript script) {
-        // no imp
+    protected void alterOwnerSQL(SQLScript script) {
+        if (owner == null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("ALTER AUTHORIZATION ON ");
+            DbObjType type = getStatementType();
+            if (DbObjType.TYPE == type || DbObjType.SCHEMA == type
+                    || DbObjType.ASSEMBLY == type) {
+                sb.append(type).append("::");
+            }
+
+            sb.append(getQualifiedName()).append(" TO ");
+
+            if (DbObjType.SCHEMA == type || DbObjType.ASSEMBLY == type) {
+                sb.append("[dbo]");
+            } else {
+                sb.append("SCHEMA OWNER");
+            }
+
+            script.addStatement(sb);
+        } else {
+            super.alterOwnerSQL(script);
+        }
+    }
+
+    @Override
+    protected String getNameInCorrectCase(String name) {
+        return name.toLowerCase(Locale.ROOT);
     }
 
     @Override
     public String getRenameCommand(String newName) {
         return RENAME_OBJECT_COMMAND.formatted(Utils.quoteString(getQualifiedName()), Utils.quoteString(newName));
+    }
+
+    @Override
+    public String getSeparator() {
+        return GO;
     }
 }

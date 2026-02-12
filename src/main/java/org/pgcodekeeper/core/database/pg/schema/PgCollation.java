@@ -119,6 +119,15 @@ public final class PgCollation extends PgAbstractStatement implements ISearchPat
     }
 
     @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(deterministic);
+        hasher.put(lcCollate);
+        hasher.put(lcCtype);
+        hasher.put(provider);
+        hasher.put(rules);
+    }
+
+    @Override
     public boolean compare(IStatement obj) {
         if (this == obj) {
             return true;
@@ -139,18 +148,8 @@ public final class PgCollation extends PgAbstractStatement implements ISearchPat
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(deterministic);
-        hasher.put(lcCollate);
-        hasher.put(lcCtype);
-        hasher.put(provider);
-        hasher.put(rules);
-    }
-
-    @Override
-    public AbstractStatement shallowCopy() {
+    protected AbstractStatement getCopy() {
         PgCollation collationDst = new PgCollation(name);
-        copyBaseFields(collationDst);
         collationDst.setLcCollate(lcCollate);
         collationDst.setLcCtype(lcCtype);
         collationDst.setProvider(provider);

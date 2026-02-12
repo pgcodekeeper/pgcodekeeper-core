@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.database.api.schema;
+package org.pgcodekeeper.core.database.pg.schema;
 
 /**
  * Interface for database objects that support compression options.
@@ -25,12 +25,12 @@ public interface ICompressOptionContainer {
      * Default compression type.
      */
     String DEFAULT_COMPRESS_TYPE = "none";
-    
+
     /**
      * Default compression level.
      */
     int DEFAULT_COMPRESS_LEVEL = 0;
-    
+
     /**
      * Default block size.
      */
@@ -56,31 +56,4 @@ public interface ICompressOptionContainer {
      * @param blockSize the block size to set
      */
     void setBlockSize(int blockSize);
-
-    /**
-     * Parses and fills compression options from a comma-separated string.
-     *
-     * @param statement the statement to apply options to
-     * @param compressOptions the options string to parse
-     */
-    static void fillCompressOptions(ICompressOptionContainer statement, String compressOptions) {
-        for (String pair : compressOptions.split(",")) {
-            int sep = pair.indexOf('=');
-            if (sep != -1) {
-                String option = pair.substring(0, sep).trim();
-                String value = pair.substring(sep + 1);
-                switch (option) {
-                    case "compresstype":
-                        statement.setCompressType(value);
-                        break;
-                    case "compresslevel":
-                        statement.setCompressLevel(Integer.parseInt(value));
-                        break;
-                    case "blocksize":
-                        statement.setBlockSize(Integer.parseInt(value));
-                        break;
-                }
-            }
-        }
-    }
 }

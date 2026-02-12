@@ -17,23 +17,54 @@ package org.pgcodekeeper.core.database.ms.schema;
 
 import java.util.*;
 
+import org.pgcodekeeper.core.database.api.jdbc.ISupportedVersion;
+import org.pgcodekeeper.core.database.api.launcher.IAnalysisLauncher;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.ms.jdbc.MsSupportedVersion;
 import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
  * Represents a Microsoft SQL database with its schemas, assemblies, roles, and users.
  * Provides functionality for managing database-level objects and their relationships.
  */
-public final class MsDatabase extends AbstractDatabase implements IMsStatement {
+public final class MsDatabase extends MsAbstractStatement implements IDatabase {
+
+    private MsSupportedVersion version = MsSupportedVersion.VERSION_17;
+
+    /**
+     * Current default schema.
+     */
+    private MsSchema defaultSchema;
+    private final Map<String, MsSchema> schemas = new LinkedHashMap<>();
+
+    private final List<ObjectOverride> overrides = new ArrayList<>();
+
+    // Contains object references
+    private final Map<String, Set<ObjectLocation>> objReferences = new HashMap<>();
+    // Contains analysis launchers for all statements
+    // (used for launch analyze and getting dependencies).
+    private final ArrayList<IAnalysisLauncher> analysisLaunchers = new ArrayList<>();
 
     private final Map<String, MsAssembly> assemblies = new LinkedHashMap<>();
     private final Map<String, MsRole> roles = new LinkedHashMap<>();
     private final Map<String, MsUser> users = new LinkedHashMap<>();
 
+    public MsDatabase() {
+        super("DB_name_placeholder");
+    }
+
     @Override
-    protected void fillChildrenList(List<Collection<? extends AbstractStatement>> l) {
-        super.fillChildrenList(l);
+    public void fillDescendantsList(List<Collection<? extends AbstractStatement>> l) {
+        fillChildrenList(l);
+        for (var schema : schemas.values()) {
+            schema.fillDescendantsList(l);
+        }
+    }
+
+    @Override
+    public void fillChildrenList(List<Collection<? extends AbstractStatement>> l) {
+        l.add(schemas.values());
         l.add(assemblies.values());
         l.add(roles.values());
         l.add(users.values());
@@ -51,11 +82,22 @@ public final class MsDatabase extends AbstractDatabase implements IMsStatement {
     }
 
     @Override
+    public Collection<IStatement> getChildrenByType(DbObjType type) {
+        return switch (type) {
+            case SCHEMA -> Collections.unmodifiableCollection(schemas.values());
+            case ASSEMBLY -> Collections.unmodifiableCollection(assemblies.values());
+            case ROLE -> Collections.unmodifiableCollection(roles.values());
+            case USER -> Collections.unmodifiableCollection(users.values());
+            default -> List.of();
+        };
+    }
+
+    @Override
     public void addChild(IStatement st) {
         DbObjType type = st.getStatementType();
         switch (type) {
             case SCHEMA:
-                addSchema((AbstractSchema) st);
+                addSchema((MsSchema) st);
                 break;
             case ASSEMBLY:
                 addAssembly((MsAssembly) st);
@@ -155,6 +197,139 @@ public final class MsDatabase extends AbstractDatabase implements IMsStatement {
         addUnique(users, user);
     }
 
+    /**
+     * Getter for {@link #schemas}. The list cannot be modified.
+     *
+     * @return {@link #schemas}
+     */
+    @Override
+    public Collection<MsSchema> getSchemas() {
+        return Collections.unmodifiableCollection(schemas.values());
+    }
+
+    /**
+     * Resolves and returns a database statement based on the provided generic column specification.
+     *
+     * @param gc the generic column specification containing type and naming information
+     * @return the resolved statement, or null if not found
+     */
+    @Override
+    public IStatement getStatement(GenericColumn gc) {
+        DbObjType type = gc.type();
+        if (type == DbObjType.DATABASE) {
+            return this;
+        }
+
+        if (type.in(DbObjType.SCHEMA, DbObjType.USER, DbObjType.ROLE, DbObjType.ASSEMBLY)) {
+            return getChild(gc.schema(), type);
+        }
+
+        MsSchema s = getSchema(gc.schema());
+        if (s == null) {
+            return null;
+        }
+
+        return switch (type) {
+            case SEQUENCE, VIEW -> s.getChild(gc.table(), type);
+            case TYPE -> resolveTypeCall(s, gc.table());
+            case FUNCTION, PROCEDURE -> resolveFunctionCall(s, gc.table());
+            case TABLE -> s.getRelation(gc.table());
+            case INDEX -> s.getIndexByName(gc.table());
+            // handled in getStatement, left here for consistency
+            case COLUMN -> {
+                MsTable t = s.getTable(gc.table());
+                yield t == null ? null : t.getColumn(gc.column());
+            }
+            case STATISTICS, CONSTRAINT, TRIGGER -> {
+                var sc = s.getStatementContainer(gc.table());
+                yield sc == null ? null : sc.getChild(gc.column(), type);
+            }
+            default -> throw new IllegalStateException("Unhandled DbObjType: " + type);
+        };
+    }
+
+    private IStatement resolveTypeCall(MsSchema s, String table) {
+        IStatement st = s.getChild(table, DbObjType.TYPE);
+        if (st != null) {
+            return st;
+        }
+        // every "selectable" relation can be used as a type
+        // getRelation should only look for "selectable" relations
+        return s.getRelation(table);
+    }
+
+    private IFunction resolveFunctionCall(MsSchema schema, String table) {
+        for (IFunction f : schema.getFunctions()) {
+            if (f.getBareName().equals(table)) {
+                return f;
+            }
+        }
+        return null;
+    }
+
+    public void setVersion(MsSupportedVersion version) {
+        this.version = version;
+    }
+
+    @Override
+    public ISupportedVersion getVersion() {
+        return version;
+    }
+
+    @Override
+    public MsSchema getDefaultSchema() {
+        return defaultSchema;
+    }
+
+    @Override
+    public void setDefaultSchema(String defaultSchemaName) {
+        this.defaultSchema = getSchema(defaultSchemaName);
+    }
+
+    @Override
+    public void addOverride(ObjectOverride override) {
+        overrides.add(override);
+    }
+
+    @Override
+    public Collection<ObjectOverride> getOverrides() {
+        return overrides;
+    }
+
+    @Override
+    public Map<String, Set<ObjectLocation>> getObjReferences() {
+        return objReferences;
+    }
+
+    @Override
+    public List<IAnalysisLauncher> getAnalysisLaunchers() {
+        return analysisLaunchers;
+    }
+
+    /**
+     * Clears all analysis launchers and trims the internal list to size.
+     */
+    @Override
+    public void clearAnalysisLaunchers() {
+        analysisLaunchers.clear();
+        analysisLaunchers.trimToSize();
+    }
+
+    /**
+     * Add 'analysis launcher' for deferred analyze.
+     *
+     * @param launcher launcher that contains almost everything needed to analyze a statement contained in it
+     */
+    @Override
+    public void addAnalysisLauncher(IAnalysisLauncher launcher) {
+        analysisLaunchers.add(launcher);
+    }
+
+    @Override
+    public void addReference(String fileName, ObjectLocation loc) {
+        objReferences.computeIfAbsent(fileName, k -> new LinkedHashSet<>()).add(loc);
+    }
+
     @Override
     public boolean compareChildren(AbstractStatement obj) {
         if (obj instanceof MsDatabase db && super.compareChildren(obj)) {
@@ -167,25 +342,45 @@ public final class MsDatabase extends AbstractDatabase implements IMsStatement {
 
     @Override
     public void computeChildrenHash(Hasher hasher) {
-        super.computeChildrenHash(hasher);
         hasher.putUnordered(assemblies);
         hasher.putUnordered(roles);
         hasher.putUnordered(users);
     }
 
     @Override
-    protected boolean isFirstLevelType(DbObjType type) {
-        return type.in(DbObjType.SCHEMA, DbObjType.USER, DbObjType.ROLE, DbObjType.ASSEMBLY);
+    public void computeHash(Hasher hasher) {
+        // has only child objects
     }
 
     @Override
-    protected AbstractDatabase getDatabaseCopy() {
-        return new MsDatabase();
+    protected MsDatabase getCopy() {
+        MsDatabase dbDst = new MsDatabase();
+        dbDst.setVersion(version);
+        return dbDst;
     }
 
+    /**
+     * Returns schema of given name or null if the schema has not been found. If schema name is null then default schema
+     * is returned.
+     *
+     * @param name schema name or null which means default schema
+     * @return found schema or null
+     */
     @Override
-    protected AbstractStatement resolveStatistics(AbstractSchema s, GenericColumn gc, DbObjType type) {
-        var cont = s.getStatementContainer(gc.table());
-        return cont != null ? cont.getChild(gc.column(), type) : null;
+    public MsSchema getSchema(final String name) {
+        if (name == null) {
+            return getDefaultSchema();
+        }
+
+        return getChildByName(schemas, name);
+    }
+
+    /**
+     * Adds a schema to this database.
+     *
+     * @param schema the schema to add
+     */
+    public void addSchema(final MsSchema schema) {
+        addUnique(schemas, schema);
     }
 }

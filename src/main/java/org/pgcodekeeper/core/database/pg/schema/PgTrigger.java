@@ -22,7 +22,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractTrigger;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -31,7 +30,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Triggers are functions that are automatically executed in response to database events
  * like INSERT, UPDATE, DELETE, or TRUNCATE on tables or views.
  */
-public final class PgTrigger extends AbstractTrigger implements IPgStatement {
+public final class PgTrigger extends PgAbstractStatement implements ITrigger {
 
     public enum TgTypes {
         BEFORE, AFTER, INSTEAD_OF
@@ -304,36 +303,6 @@ public final class PgTrigger extends AbstractTrigger implements IPgStatement {
     }
 
     @Override
-    public boolean compare(IStatement obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj instanceof PgTrigger trigger && super.compare(obj)) {
-            return compareUnalterable(trigger)
-                    && triggerState == trigger.triggerState;
-        }
-        return false;
-    }
-
-    private boolean compareUnalterable(PgTrigger trigger) {
-        return tgType == trigger.tgType
-                && (isForEachRow == trigger.isForEachRow)
-                && Objects.equals(function, trigger.function)
-                && (isOnDelete == trigger.isOnDelete)
-                && (isOnInsert == trigger.isOnInsert)
-                && (isOnUpdate == trigger.isOnUpdate)
-                && (isOnTruncate == trigger.isOnTruncate)
-                && Objects.equals(isImmediate, trigger.isImmediate)
-                && Objects.equals(refTableName, trigger.refTableName)
-                && (isConstraint == trigger.isConstraint)
-                && Objects.equals(when, trigger.when)
-                && Objects.equals(newTable, trigger.newTable)
-                && Objects.equals(oldTable, trigger.oldTable)
-                && Objects.equals(updateColumns, trigger.updateColumns);
-
-    }
-
-    @Override
     public void computeHash(Hasher hasher) {
         hasher.put(tgType);
         hasher.put(isForEachRow);
@@ -353,7 +322,36 @@ public final class PgTrigger extends AbstractTrigger implements IPgStatement {
     }
 
     @Override
-    protected AbstractTrigger getTriggerCopy() {
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj instanceof PgTrigger trigger && super.compare(obj)) {
+            return compareUnalterable(trigger)
+                    && triggerState == trigger.triggerState;
+        }
+        return false;
+    }
+
+    private boolean compareUnalterable(PgTrigger trigger) {
+        return tgType == trigger.tgType
+                && (isForEachRow == trigger.isForEachRow)
+                && Objects.equals(function, trigger.function)
+                && (isOnDelete == trigger.isOnDelete)
+                && (isOnInsert == trigger.isOnInsert)
+                && (isOnTruncate == trigger.isOnTruncate)
+                && (isOnUpdate == trigger.isOnUpdate)
+                && Objects.equals(when, trigger.when)
+                && Objects.equals(updateColumns, trigger.updateColumns)
+                && (isConstraint == trigger.isConstraint)
+                && Objects.equals(isImmediate, trigger.isImmediate)
+                && Objects.equals(refTableName, trigger.refTableName)
+                && Objects.equals(newTable, trigger.newTable)
+                && Objects.equals(oldTable, trigger.oldTable);
+    }
+
+    @Override
+    protected PgTrigger getCopy() {
         PgTrigger trigger = new PgTrigger(name);
         trigger.setType(tgType);
         trigger.setForEachRow(isForEachRow);
@@ -362,13 +360,13 @@ public final class PgTrigger extends AbstractTrigger implements IPgStatement {
         trigger.setOnInsert(isOnInsert);
         trigger.setOnTruncate(isOnTruncate);
         trigger.setOnUpdate(isOnUpdate);
-        trigger.setConstraint(isConstraint);
         trigger.setWhen(when);
+        trigger.updateColumns.addAll(updateColumns);
+        trigger.setConstraint(isConstraint);
         trigger.setImmediate(isImmediate);
         trigger.setRefTableName(refTableName);
         trigger.setNewTable(newTable);
         trigger.setOldTable(oldTable);
-        trigger.updateColumns.addAll(updateColumns);
         trigger.setTriggerState(triggerState);
         return trigger;
     }

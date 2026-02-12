@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -113,12 +112,9 @@ public final class PgFtsDictionary extends PgAbstractStatement
     }
 
     @Override
-    public PgFtsDictionary shallowCopy() {
-        PgFtsDictionary dictDst = new PgFtsDictionary(name);
-        copyBaseFields(dictDst);
-        dictDst.setTemplate(template);
-        dictDst.options.putAll(options);
-        return dictDst;
+    public void computeHash(Hasher hasher) {
+        hasher.put(template);
+        hasher.put(options);
     }
 
     @Override
@@ -136,8 +132,10 @@ public final class PgFtsDictionary extends PgAbstractStatement
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(template);
-        hasher.put(options);
+    protected PgFtsDictionary getCopy() {
+        PgFtsDictionary dictDst = new PgFtsDictionary(name);
+        dictDst.setTemplate(template);
+        dictDst.options.putAll(options);
+        return dictDst;
     }
 }

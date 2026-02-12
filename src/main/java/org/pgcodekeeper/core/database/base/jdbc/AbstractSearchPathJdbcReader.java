@@ -18,15 +18,16 @@ package org.pgcodekeeper.core.database.base.jdbc;
 import java.sql.*;
 
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcReader;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
 import org.pgcodekeeper.core.database.base.loader.AbstractJdbcLoader;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.exception.*;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractSearchPathJdbcReader<T extends AbstractJdbcLoader> implements IJdbcReader {
+public abstract class AbstractSearchPathJdbcReader<T extends AbstractJdbcLoader<? extends IDatabase>> implements IJdbcReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractSearchPathJdbcReader.class);
 
@@ -60,7 +61,7 @@ public abstract class AbstractSearchPathJdbcReader<T extends AbstractJdbcLoader>
     private void processResult(ResultSet result) throws SQLException, XmlReaderException {
         String schemaColumn = getSchemaColumn();
         var schemaId = result.getObject(schemaColumn.substring(schemaColumn.indexOf('.') + 1));
-        AbstractSchema schema = loader.getSchema(schemaId);
+        ISchema schema = loader.getSchema(schemaId);
         if (schema == null) {
             var msg = "No schema found for id %s".formatted(schemaId);
             LOG.warn(msg);
@@ -91,7 +92,7 @@ public abstract class AbstractSearchPathJdbcReader<T extends AbstractJdbcLoader>
 
     protected abstract void fillQueryBuilder(QueryBuilder builder);
     protected abstract String getSchemaColumn();
-    protected abstract void processResult(ResultSet result, AbstractSchema schema)
+    protected abstract void processResult(ResultSet result, ISchema schema)
             throws ConcurrentModificationException, SQLException, XmlReaderException;
 
     /**

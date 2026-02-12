@@ -189,8 +189,8 @@ public final class DepcyResolver {
         // if no depcies were triggered for a MsTable alter
         // check for column layout changes and refresh views
         if (oldStatement instanceof MsTable tOld && newStatement instanceof MsTable tNew) {
-            List<AbstractColumn> cOld = tOld.getColumns();
-            List<AbstractColumn> cNew = tNew.getColumns();
+            List<IColumn> cOld = tOld.getColumns();
+            List<IColumn> cNew = tNew.getColumns();
 
             // first check for columns added or removed
             boolean colLayoutChanged = cOld.size() != cNew.size();
@@ -324,10 +324,10 @@ public final class DepcyResolver {
 
         // Columns are skipped when dropping the table
         if (oldObj.getStatementType() == DbObjType.COLUMN) {
-            AbstractTable oldTable = (AbstractTable) oldObj.getParent();
+            ITable oldTable = (ITable) oldObj.getParent();
             var newTable = oldObj.getParent().getTwin(newDb);
 
-            if (newTable == null || getRecreatedObj(oldTable, (AbstractTable) newTable)) {
+            if (newTable == null || getRecreatedObj(oldTable, (ITable) newTable)) {
                 // case where dependency drop affects a column we don't handle
                 // because the table is being dropped - drop the table instead
                 addDropStatements(oldTable, oldObj);
@@ -362,8 +362,7 @@ public final class DepcyResolver {
             DbObjType type = dependency.getStatementType();
             var newSt = dependency.getTwin(newDb);
             if (newSt == null) {
-                if (type == DbObjType.FUNCTION && dependency.getDbType() == DatabaseType.PG
-                        && isDefaultsOnlyChange((IFunction) dependency)) {
+                if (type == DbObjType.FUNCTION && isDefaultsOnlyChange((IFunction) dependency)) {
                     // when function's signature changes it has no twin
                     // but the dependent object might be unchanged
                     // due to default arguments changing in the signature
@@ -373,8 +372,7 @@ public final class DepcyResolver {
             }
 
             if (type.in(DbObjType.FUNCTION, DbObjType.PROCEDURE)
-                    && dependency.getDbType() != DatabaseType.CH
-                    && !((AbstractFunction) dependency).needDrop((AbstractFunction) newSt)) {
+                    && !((IFunction) dependency).needDrop((IFunction) newSt)) {
                 continue;
             }
 
@@ -407,7 +405,10 @@ public final class DepcyResolver {
 
         var oldArgs = argsBeforeDefaults.apply(oldFunc);
 
-        return newSchema.getFunctions().stream()
+        var allFuncs = newSchema.getChildrenByType(DbObjType.FUNCTION);
+
+        return allFuncs.stream()
+                .map(IFunction.class::cast)
                 .filter(f -> oldFunc.getBareName().equals(f.getBareName()))
                 .map(argsBeforeDefaults)
                 .anyMatch(oldArgs::equals);
@@ -496,8 +497,8 @@ public final class DepcyResolver {
 
         if (newObj.getStatementType() == DbObjType.COLUMN) {
             var oldTable = newObj.getParent().getTwin(oldDb);
-            AbstractTable newTable = (AbstractTable) newObj.getParent();
-            if (oldTable == null || getRecreatedObj((AbstractTable) oldTable, newTable)) {
+            ITable newTable = (ITable) newObj.getParent();
+            if (oldTable == null || getRecreatedObj((ITable) oldTable, newTable)) {
                 // columns are integrated into CREATE TABLE
                 return;
             }
@@ -547,19 +548,19 @@ public final class DepcyResolver {
     }
 
     private void createColumnDependencies(IStatement newObj) {
-        if (newObj instanceof AbstractTable table) {
+        if (newObj instanceof ITable table) {
             // create column dependencies before table
-            for (AbstractColumn col : table.getColumns()) {
+            for (IColumn col : table.getColumns()) {
                 addCreateStatements(col, null);
             }
         }
     }
 
     private ObjectState getObjectState(IStatement oldSt, IStatement newSt) {
-        return states.computeIfAbsent(oldSt, x -> oldSt.appendAlterSQL(newSt, new SQLScript(settings)));
+        return states.computeIfAbsent(oldSt, x -> oldSt.appendAlterSQL(newSt, new SQLScript(settings, newSt.getSeparator())));
     }
 
-    private Boolean getRecreatedObj(AbstractTable oldTable, AbstractTable newTable) {
+    private Boolean getRecreatedObj(ITable oldTable, ITable newTable) {
         return recreatedObjs.computeIfAbsent(oldTable.getQualifiedName(), x -> oldTable.isRecreated(newTable, settings));
     }
 

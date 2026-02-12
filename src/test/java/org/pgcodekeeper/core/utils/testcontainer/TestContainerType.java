@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.utils.testcontainer;
 
-import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
+import org.pgcodekeeper.core.database.api.jdbc.ISupportedVersion;
 import org.testcontainers.containers.GenericContainer;
 
 public enum TestContainerType {
@@ -26,7 +26,7 @@ public enum TestContainerType {
     GP_6(new Gp6TestContainer()),
     GP_7(new Gp7TestContainer());
 
-    private final SupportedPgVersion version;
+    private final ISupportedVersion version;
     private final String draftUrl;
     private final GenericContainer<?> container;
 
@@ -43,7 +43,7 @@ public enum TestContainerType {
         return draftUrl.formatted(container.getFirstMappedPort(), isMemmoryOpt ? "test_db_memory_optimized" : "test_db");
     }
 
-    public SupportedPgVersion getVersion() {
+    public ISupportedVersion getVersion() {
         return version;
     }
 

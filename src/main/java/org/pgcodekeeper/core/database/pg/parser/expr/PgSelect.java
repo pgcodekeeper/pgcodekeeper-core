@@ -21,8 +21,8 @@ import java.util.function.Predicate;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.meta.*;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.rulectx.*;
@@ -54,7 +54,7 @@ public final class PgSelect extends PgAbstractExprWithNmspc<Select_stmtContext> 
      *
      * @param db the meta container with schema information
      */
-    public PgSelect(MetaContainer db) {
+    public PgSelect(IMetaContainer db) {
         super(db);
     }
 
@@ -381,7 +381,7 @@ public final class PgSelect extends PgAbstractExprWithNmspc<Select_stmtContext> 
             return;
         }
 
-        for (IConstraint con : meta.getConstraints(dep.getSchema(), dep.getTable())) {
+        for (IConstraintPk con : meta.getPrimaryKeys(dep.getSchema(), dep.getTable())) {
             if (con.isPrimaryKey() && con.containsColumn(dep.getObjName())) {
                 // implicit reference
                 vex.addDependency(new GenericColumn(con.getSchemaName(),

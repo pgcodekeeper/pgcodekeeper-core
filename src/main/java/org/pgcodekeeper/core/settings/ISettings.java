@@ -15,8 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.settings;
 
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
+import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 
 import java.util.Collection;

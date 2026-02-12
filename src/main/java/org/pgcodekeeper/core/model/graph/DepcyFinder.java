@@ -21,11 +21,9 @@ import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.AbstractDatabase;
-import org.pgcodekeeper.core.database.base.schema.AbstractTable;
+import org.pgcodekeeper.core.database.api.schema.ITable;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.base.schema.StatementUtils;
-
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -61,7 +59,7 @@ public class DepcyFinder {
 
     /**
      * Finds dependencies by matching object name patterns.
-     * 
+     *
      * @param depth maximum depth to search
      * @param isReverse whether to search reverse dependencies
      * @param filterObjTypes object types to filter by
@@ -71,7 +69,7 @@ public class DepcyFinder {
      * @return list of formatted dependency strings
      */
     public static List<String> byPatterns(int depth, boolean isReverse, Collection<DbObjType> filterObjTypes,
-                                          boolean isInvertFilter, AbstractDatabase db, Collection<String> names) {
+                                          boolean isInvertFilter, IDatabase db, Collection<String> names) {
         DepcyFinder depcyFinder = new DepcyFinder(db, depth, isReverse, filterObjTypes, isInvertFilter);
         depcyFinder.searchDeps(names);
         return depcyFinder.getResult();
@@ -79,7 +77,7 @@ public class DepcyFinder {
 
     /**
      * Finds dependencies for a specific database statement.
-     * 
+     *
      * @param depth maximum depth to search
      * @param isReverse whether to search reverse dependencies
      * @param filterObjTypes object types to filter by
@@ -104,7 +102,7 @@ public class DepcyFinder {
                 patterns.put(pattern, isNeedQuotes);
             }
 
-            db.getDescendants().flatMap(AbstractTable::columnAdder)
+            db.getDescendants().flatMap(ITable::columnAdder)
                     .filter(st -> find(patterns, st))
                     .forEach(st -> fillTree(st, START_LEVEL, new HashSet<>(), null, 0));
         } else {

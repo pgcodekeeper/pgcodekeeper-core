@@ -160,7 +160,7 @@ public final class PgGrantPrivilege extends PgParserAbstract {
             List<ParserRuleContext> funcIds = getIdentifiers(funct.schema_qualified_name());
             ParserRuleContext functNameCtx = QNameParser.getFirstNameCtx(funcIds);
             PgSchema schema = getSchemaSafe(funcIds);
-            PgAbstractFunction func = (PgAbstractFunction) getSafe(PgSchema::getFunction, schema,
+            PgAbstractFunction func = getSafe(PgSchema::getFunction, schema,
                     parseSignature(functNameCtx.getText(), funct.function_args()),
                     functNameCtx.getStart());
 
@@ -237,8 +237,7 @@ public final class PgGrantPrivilege extends PgParserAbstract {
                     addPrivilege(st, priv);
                 } else {
                     IdentifierContext colName = colPriv.getValue().getKey();
-                    AbstractColumn col = getSafe(AbstractTable::getColumn,
-                            (AbstractTable) st, colName);
+                    PgColumn col = getSafe(PgAbstractTable::getColumn, (PgAbstractTable) st, colName);
                     addPrivilege(col, priv);
                 }
             }

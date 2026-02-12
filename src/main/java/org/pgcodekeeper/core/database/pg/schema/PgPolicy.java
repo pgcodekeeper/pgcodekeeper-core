@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractPolicy;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -27,9 +26,13 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Policies control which rows are visible or modifiable for specific users or roles,
  * providing fine-grained access control at the row level.
  */
-public final class PgPolicy extends AbstractPolicy implements ISubElement, IPgStatement {
+public final class PgPolicy extends PgAbstractStatement implements ISubElement, IPolicy {
 
     private String check;
+    private boolean isPermissive = true;
+    private EventType event;
+    private final Set<String> roles = new LinkedHashSet<>();
+    private String using;
 
     /**
      * Creates a new PostgreSQL policy.
@@ -122,10 +125,12 @@ public final class PgPolicy extends AbstractPolicy implements ISubElement, IPgSt
     }
 
     @Override
-    protected AbstractPolicy getPolicyCopy() {
-        PgPolicy copy = new PgPolicy(name);
-        copy.setCheck(check);
-        return copy;
+    public void computeHash(Hasher hasher) {
+        hasher.put(isPermissive);
+        hasher.put(event);
+        hasher.put(roles);
+        hasher.put(using);
+        hasher.put(check);
     }
 
     @Override
@@ -135,10 +140,25 @@ public final class PgPolicy extends AbstractPolicy implements ISubElement, IPgSt
         }
 
         if (obj instanceof PgPolicy police && super.compare(obj)) {
-            return Objects.equals(check, police.check);
+            return isPermissive == police.isPermissive
+                    && event == police.event
+                    && roles.equals(police.roles)
+                    && Objects.equals(using, police.using)
+                    && Objects.equals(check, police.check);
         }
 
         return false;
+    }
+
+    @Override
+    protected PgPolicy getCopy() {
+        PgPolicy copy = new PgPolicy(name);
+        copy.isPermissive = isPermissive;
+        copy.event = event;
+        copy.roles.addAll(roles);
+        copy.using = using;
+        copy.setCheck(check);
+        return copy;
     }
 
     private boolean compareUnalterable(PgPolicy police) {
@@ -154,9 +174,23 @@ public final class PgPolicy extends AbstractPolicy implements ISubElement, IPgSt
         return event == police.event && isPermissive == police.isPermissive;
     }
 
-    @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(check);
+    public void setEvent(EventType event) {
+        this.event = event;
+        resetHash();
+    }
+
+    public void addRole(String role) {
+        roles.add(role);
+        resetHash();
+    }
+
+    public void setPermissive(boolean isPermissive) {
+        this.isPermissive = isPermissive;
+        resetHash();
+    }
+
+    public void setUsing(String using) {
+        this.using = using;
+        resetHash();
     }
 }

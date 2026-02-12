@@ -15,12 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.utils.testcontainer;
 
-import org.pgcodekeeper.core.database.pg.jdbc.SupportedPgVersion;
+import org.pgcodekeeper.core.database.api.jdbc.ISupportedVersion;
 import org.testcontainers.containers.GenericContainer;
 
 interface ITestContainer {
 
-    SupportedPgVersion getVersion();
+    ISupportedVersion getVersion();
     String getDraftUrl();
     GenericContainer<?> getTestContainer();
 }

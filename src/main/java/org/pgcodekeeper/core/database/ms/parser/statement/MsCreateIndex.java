@@ -52,7 +52,7 @@ public final class MsCreateIndex extends MsParserAbstract {
         IdContext tableCtx = indexNameCtx.table_name.name;
         IdContext nameCtx = indexNameCtx.name;
         List<ParserRuleContext> ids = Arrays.asList(schemaCtx, nameCtx);
-        AbstractSchema schema = getSchemaSafe(ids);
+        MsSchema schema = getSchemaSafe(ids);
         addObjReference(Arrays.asList(schemaCtx, tableCtx), DbObjType.TABLE, null);
 
         MsIndex ind = new MsIndex(nameCtx.getText());
@@ -67,11 +67,11 @@ public final class MsCreateIndex extends MsParserAbstract {
             parseColumnstoreIndex(ctx, ind, schemaCtx == null ? null : schemaCtx.getText(), tableCtx.getText());
         }
 
-        AbstractStatementContainer cont = getSafe(AbstractSchema::getStatementContainer, schema, tableCtx);
+        MsAbstractStatementContainer cont = getSafe(MsSchema::getStatementContainer, schema, tableCtx);
         addSafe(cont, ind, Arrays.asList(schemaCtx, tableCtx, nameCtx));
     }
 
-    private void parseColumnstoreIndex(Create_indexContext ctx, AbstractIndex index, String schema, String table) {
+    private void parseColumnstoreIndex(Create_indexContext ctx, MsIndex index, String schema, String table) {
         var nameList = ctx.name_list_in_brackets();
         if (nameList != null) {
             for (IdContext col : nameList.id()) {

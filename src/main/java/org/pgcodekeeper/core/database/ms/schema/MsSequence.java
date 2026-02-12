@@ -16,19 +16,40 @@
 package org.pgcodekeeper.core.database.ms.schema;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractSequence;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.utils.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents a Microsoft SQL sequence object.
  * Sequences generate sequential numeric values and are commonly used for primary keys and unique identifiers.
  */
-public final class MsSequence extends AbstractSequence implements IMsStatement {
+public final class MsSequence extends MsAbstractStatement implements ISequence {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MsSequence.class);
+
+    private static final String BIGINT = "bigint";
+
+    private static final List<Pair<String, String>> relationColumns = List.of(
+            new Pair<>("sequence_name", "name"), new Pair<>("last_value", BIGINT),
+            new Pair<>("start_value", BIGINT), new Pair<>("increment_by", BIGINT),
+            new Pair<>("max_value", BIGINT), new Pair<>("min_value", BIGINT),
+            new Pair<>("cache_value", BIGINT), new Pair<>("log_cnt", BIGINT),
+            new Pair<>("is_cycled", "boolean"), new Pair<>("is_called", "boolean"));
 
     private boolean isCached;
+    private String dataType = BIGINT;
+    private String startWith;
+    private String increment;
+    private String maxValue;
+    private String minValue;
+    private String cache;
+    private boolean cycle;
 
     /**
      * Creates a new Microsoft SQL sequence with BIGINT data type as default.
@@ -54,8 +75,6 @@ public final class MsSequence extends AbstractSequence implements IMsStatement {
         appendPrivileges(script);
     }
 
-
-    @Override
     public void fillSequenceBody(StringBuilder sbSQL) {
         if (startWith != null) {
             sbSQL.append("\n\tSTART WITH ");
@@ -168,7 +187,6 @@ public final class MsSequence extends AbstractSequence implements IMsStatement {
         return !sbSQL.isEmpty();
     }
 
-    @Override
     public void setDataType(String dataType) {
         String type = dataType.toLowerCase(Locale.ROOT);
         switch (type) {
@@ -184,10 +202,10 @@ public final class MsSequence extends AbstractSequence implements IMsStatement {
                 // set exactly as given
                 type = dataType;
         }
-        super.setDataType(type);
+        this.dataType = type;
+        resetHash();
     }
 
-    @Override
     public void setMinMaxInc(long inc, Long max, Long min, String dataType, long precision) {
         String type = dataType != null ? dataType : BIGINT;
         this.increment = Long.toString(inc);
@@ -202,24 +220,83 @@ public final class MsSequence extends AbstractSequence implements IMsStatement {
     }
 
     @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(isCached);
+        hasher.put(cache);
+        hasher.put(cycle);
+        hasher.put(increment);
+        hasher.put(maxValue);
+        hasher.put(minValue);
+        hasher.put(dataType);
+        hasher.put(startWith);
+    }
+
+    @Override
     public boolean compare(IStatement obj) {
         if (obj instanceof MsSequence seq && super.compare(obj)) {
-            return isCached == seq.isCached;
+            return isCached == seq.isCached
+                    && Objects.equals(cache, seq.cache)
+                    && cycle == seq.cycle
+                    && Objects.equals(increment, seq.increment)
+                    && Objects.equals(maxValue, seq.maxValue)
+                    && Objects.equals(minValue, seq.minValue)
+                    && Objects.equals(dataType, seq.dataType)
+                    && Objects.equals(startWith, seq.startWith);
         }
 
         return false;
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(isCached);
+    protected MsSequence getCopy() {
+        MsSequence copy = new MsSequence(name);
+        copy.setCached(isCached);
+        copy.setCache(cache);
+        copy.setCycle(cycle);
+        copy.increment = increment;
+        copy.maxValue = maxValue;
+        copy.minValue = minValue;
+        copy.dataType = dataType;
+        copy.setStartWith(startWith);
+        return copy;
+    }
+
+    public void setStartWith(String startWith) {
+        this.startWith = startWith;
+        resetHash();
+    }
+
+    public void setCycle(boolean cycle) {
+        this.cycle = cycle;
+        resetHash();
+    }
+
+    public void setCache(String cache) {
+        this.cache = cache;
+        resetHash();
+    }
+
+    private long getBoundaryTypeVal(String type, boolean needMaxVal, long precision) {
+        return switch (type) {
+            case "tinyint" -> needMaxVal ? 255 : 0;
+            case "smallint" -> needMaxVal ? Short.MAX_VALUE : Short.MIN_VALUE;
+            case "int", "integer" -> needMaxVal ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+            case BIGINT -> needMaxVal ? Long.MAX_VALUE : Long.MIN_VALUE;
+            case "numeric", "decimal" -> {
+                // It used for MS SQL.
+                long boundaryTypeVal = (long) (Math.pow(10, precision)) - 1;
+                yield needMaxVal ? boundaryTypeVal : -boundaryTypeVal;
+            }
+            default -> {
+                var msg = "Unsupported sequence type: %s".formatted(type);
+                LOG.warn(msg);
+                yield needMaxVal ? Long.MAX_VALUE : Long.MIN_VALUE;
+            }
+        };
     }
 
     @Override
-    protected AbstractSequence getSequenceCopy() {
-        MsSequence sequence = new MsSequence(name);
-        sequence.setCached(isCached);
-        return sequence;
+    public Stream<Pair<String, String>> getRelationColumns() {
+        return relationColumns.stream();
     }
 }

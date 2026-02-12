@@ -19,7 +19,6 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.AbstractType;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -28,7 +27,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents user-defined base types with input/output functions,
  * storage properties, and optional Greenplum compression options.
  */
-public final class PgBaseType extends AbstractType implements ICompressOptionContainer, IPgStatement {
+public final class PgBaseType extends PgAbstractType implements ICompressOptionContainer {
 
     private String inputFunction;
     private String outputFunction;
@@ -92,7 +91,7 @@ public final class PgBaseType extends AbstractType implements ICompressOptionCon
     }
 
     @Override
-    protected void compareType(AbstractType newType, AtomicBoolean isNeedDepcies, SQLScript script) {
+    protected void compareType(PgAbstractType newType, AtomicBoolean isNeedDepcies, SQLScript script) {
         PgBaseType newBaseType = (PgBaseType) newType;
         if (!Objects.equals(newBaseType.compressType, compressType)
                 || newBaseType.compressLevel != compressLevel
@@ -239,7 +238,69 @@ public final class PgBaseType extends AbstractType implements ICompressOptionCon
     }
 
     @Override
-    protected AbstractType getTypeCopy() {
+    public void computeHash(Hasher hasher) {
+        hasher.put(inputFunction);
+        hasher.put(outputFunction);
+        hasher.put(receiveFunction);
+        hasher.put(sendFunction);
+        hasher.put(typmodInputFunction);
+        hasher.put(typmodOutputFunction);
+        hasher.put(analyzeFunction);
+        hasher.put(subscriptFunction);
+        hasher.put(internalLength);
+        hasher.put(passedByValue);
+        hasher.put(alignment);
+        hasher.put(storage);
+        hasher.put(likeType);
+        hasher.put(category);
+        hasher.put(preferred);
+        hasher.put(defaultValue);
+        hasher.put(element);
+        hasher.put(delimiter);
+        hasher.put(collatable);
+        hasher.put(compressType);
+        hasher.put(compressLevel);
+        hasher.put(blockSize);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (obj instanceof PgBaseType type) {
+            return super.compare(type)
+                    && compareUnalterable(type)
+                    && Objects.equals(compressType, type.compressType)
+                    && compressLevel == type.compressLevel
+                    && blockSize == type.blockSize;
+        }
+        return false;
+    }
+
+    @Override
+    protected boolean compareUnalterable(PgAbstractType newType) {
+        PgBaseType type = (PgBaseType) newType;
+        return Objects.equals(inputFunction, type.inputFunction)
+                && Objects.equals(outputFunction, type.outputFunction)
+                && Objects.equals(receiveFunction, type.receiveFunction)
+                && Objects.equals(sendFunction, type.sendFunction)
+                && Objects.equals(typmodInputFunction, type.typmodInputFunction)
+                && Objects.equals(typmodOutputFunction, type.typmodOutputFunction)
+                && Objects.equals(analyzeFunction, type.analyzeFunction)
+                && Objects.equals(subscriptFunction, type.subscriptFunction)
+                && Objects.equals(internalLength, type.internalLength)
+                && passedByValue == type.passedByValue
+                && Objects.equals(alignment, type.alignment)
+                && Objects.equals(storage, type.storage)
+                && Objects.equals(likeType, type.likeType)
+                && Objects.equals(category, type.category)
+                && Objects.equals(preferred, type.preferred)
+                && Objects.equals(defaultValue, type.defaultValue)
+                && Objects.equals(element, type.element)
+                && Objects.equals(delimiter, type.delimiter)
+                && Objects.equals(collatable, type.collatable);
+    }
+
+    @Override
+    protected PgAbstractType getCopy() {
         PgBaseType copy = new PgBaseType(name);
         copy.setInputFunction(inputFunction);
         copy.setOutputFunction(outputFunction);
@@ -264,67 +325,5 @@ public final class PgBaseType extends AbstractType implements ICompressOptionCon
         copy.setCompressLevel(compressLevel);
         copy.setBlockSize(blockSize);
         return copy;
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        if (obj instanceof PgBaseType type) {
-            return super.compare(type)
-                    && compareUnalterable(type)
-                    && Objects.equals(compressType, type.compressType)
-                    && compressLevel == type.compressLevel
-                    && blockSize == type.blockSize;
-        }
-        return false;
-    }
-
-    @Override
-    protected boolean compareUnalterable(AbstractType newType) {
-        PgBaseType type = (PgBaseType) newType;
-        return Objects.equals(inputFunction, type.inputFunction)
-                && Objects.equals(outputFunction, type.outputFunction)
-                && Objects.equals(receiveFunction, type.receiveFunction)
-                && Objects.equals(sendFunction, type.sendFunction)
-                && Objects.equals(typmodInputFunction, type.typmodInputFunction)
-                && Objects.equals(typmodOutputFunction, type.typmodOutputFunction)
-                && Objects.equals(analyzeFunction, type.analyzeFunction)
-                && Objects.equals(subscriptFunction, type.subscriptFunction)
-                && Objects.equals(internalLength, type.internalLength)
-                && passedByValue == type.passedByValue
-                && Objects.equals(alignment, type.alignment)
-                && Objects.equals(storage, type.storage)
-                && Objects.equals(likeType, type.likeType)
-                && Objects.equals(category, type.category)
-                && Objects.equals(preferred, type.preferred)
-                && Objects.equals(defaultValue, type.defaultValue)
-                && Objects.equals(element, type.element)
-                && Objects.equals(delimiter, type.delimiter)
-                && Objects.equals(collatable, type.collatable);
-    }
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(inputFunction);
-        hasher.put(outputFunction);
-        hasher.put(receiveFunction);
-        hasher.put(sendFunction);
-        hasher.put(typmodInputFunction);
-        hasher.put(typmodOutputFunction);
-        hasher.put(analyzeFunction);
-        hasher.put(subscriptFunction);
-        hasher.put(internalLength);
-        hasher.put(passedByValue);
-        hasher.put(alignment);
-        hasher.put(storage);
-        hasher.put(likeType);
-        hasher.put(category);
-        hasher.put(preferred);
-        hasher.put(defaultValue);
-        hasher.put(element);
-        hasher.put(delimiter);
-        hasher.put(collatable);
-        hasher.put(compressType);
-        hasher.put(compressLevel);
-        hasher.put(blockSize);
     }
 }

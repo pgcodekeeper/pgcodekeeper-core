@@ -15,5 +15,15 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
-public interface ISequence {
+import org.pgcodekeeper.core.hasher.IHashable;
+
+/**
+ * Interface for database sequence
+ */
+public interface ISequence extends IStatement, IRelation, IHashable {
+
+    @Override
+    default DbObjType getStatementType() {
+        return DbObjType.SEQUENCE;
+    }
 }

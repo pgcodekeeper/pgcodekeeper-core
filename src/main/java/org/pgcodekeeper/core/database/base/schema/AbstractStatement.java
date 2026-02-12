@@ -15,17 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.exception.ObjectCreationException;
+import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.hasher.IHashable;
+import org.pgcodekeeper.core.hasher.JavaHasher;
+import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.settings.ISettings;
+
 import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
-
-import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.exception.ObjectCreationException;
-import org.pgcodekeeper.core.hasher.*;
-import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.script.SQLScript;
-import org.pgcodekeeper.core.settings.ISettings;
 
 /**
  * Abstract base class for all database statements and objects.
@@ -39,11 +39,12 @@ public abstract class AbstractStatement implements IStatement, IHashable {
 
     protected static final String IF_EXISTS = "IF EXISTS ";
     protected static final String ALTER_TABLE = "ALTER TABLE ";
+    private static final String SEPARATOR = ";";
 
     protected final String name;
     protected String owner;
     protected String comment;
-    private final Set<IPrivilege> privileges = new LinkedHashSet<>();
+    protected final Set<IPrivilege> privileges = new LinkedHashSet<>();
 
     protected AbstractStatement parent;
     protected final Set<GenericColumn> deps = new LinkedHashSet<>();
@@ -96,6 +97,7 @@ public abstract class AbstractStatement implements IStatement, IHashable {
      *
      * @param location the location where this statement is defined
      */
+    @Override
     public void setLocation(ObjectLocation location) {
         meta.setLocation(location);
     }
@@ -115,6 +117,7 @@ public abstract class AbstractStatement implements IStatement, IHashable {
      *
      * @param libName the library name to set
      */
+    @Override
     public void setLibName(String libName) {
         meta.setLibName(libName);
     }
@@ -219,6 +222,10 @@ public abstract class AbstractStatement implements IStatement, IHashable {
         }
     }
 
+    protected void alterOwnerSQL(SQLScript script) {
+        appendOwnerSQL(script);
+    }
+
     /**
      * Gets an unmodifiable set of privileges for this statement.
      *
@@ -230,68 +237,14 @@ public abstract class AbstractStatement implements IStatement, IHashable {
     }
 
     /**
-     * Adds a privilege to this statement with database-specific filtering.
-     * For PostgreSQL, applies ownership and permission filtering.
-     * For MS SQL and ClickHouse, adds privileges directly.
+     * Adds a privilege to this statement.
      *
      * @param privilege the privilege to add
      * @throws IllegalArgumentException if database type is unsupported
      */
     public void addPrivilege(IPrivilege privilege) {
-        switch (getDbType()) {
-            case PG:
-                String locOwner;
-                if (owner == null && getStatementType() == DbObjType.SCHEMA
-                        && Consts.PUBLIC.equals(getName())) {
-                    locOwner = "postgres";
-                } else {
-                    locOwner = owner;
-                }
-
-                // Skip filtering if statement type is COLUMN, because of the
-                // specific relationship with table privileges.
-                // The privileges of columns for role are not set lower than for the
-                // same role in the parent table, they may be the same or higher.
-                if (DbObjType.COLUMN != getStatementType()
-                        && "ALL".equalsIgnoreCase(privilege.getPermission())) {
-                    addPrivilegeFiltered(privilege, locOwner);
-                } else {
-                    privileges.add(privilege);
-                }
-                break;
-            case MS:
-            case CH:
-                privileges.add(privilege);
-                break;
-            default:
-                throw new IllegalArgumentException(Messages.DatabaseType_unsupported_type + getDbType());
-        }
-        resetHash();
-    }
-
-    private void addPrivilegeFiltered(IPrivilege privilege, String locOwner) {
-        if ("PUBLIC".equals(privilege.getRole())) {
-            boolean isFunc = switch (getStatementType()) {
-                case FUNCTION, PROCEDURE, AGGREGATE, DOMAIN, TYPE -> true;
-                default -> false;
-            };
-            if (isFunc != privilege.isRevoke()) {
-                return;
-            }
-        }
-
-        if (!privilege.isRevoke() && privilege.getRole().equals(locOwner)) {
-            IPrivilege delRevoke = privileges.stream()
-                    .filter(p -> p.isRevoke()
-                            && p.getRole().equals(privilege.getRole())
-                            && p.getPermission().equals(privilege.getPermission()))
-                    .findAny().orElse(null);
-            if (delRevoke != null) {
-                privileges.remove(delRevoke);
-                return;
-            }
-        }
         privileges.add(privilege);
+        resetHash();
     }
 
     /**
@@ -302,25 +255,12 @@ public abstract class AbstractStatement implements IStatement, IHashable {
         resetHash();
     }
 
-    protected void appendPrivileges(SQLScript script) {
+    public void appendPrivileges(SQLScript script) {
         IPrivilege.appendPrivileges(privileges, script);
     }
 
     protected void alterPrivileges(AbstractStatement newObj, SQLScript script) {
         Set<IPrivilege> newPrivileges = newObj.getPrivileges();
-
-        // if new object has all privileges from old object and if it doesn't have
-        // new revokes, then we can just grant difference between new and old privileges
-        if (getDbType() == DatabaseType.PG && newPrivileges.containsAll(privileges)
-                && Objects.equals(owner, newObj.owner)) {
-            Set<IPrivilege> diff = new LinkedHashSet<>(newPrivileges);
-            diff.removeAll(privileges);
-            boolean isGrantOnly = diff.stream().noneMatch(IPrivilege::isRevoke);
-            if (isGrantOnly) {
-                IPrivilege.appendPrivileges(diff, script);
-                return;
-            }
-        }
 
         // first drop (revoke) missing grants
         for (IPrivilege privilege : privileges) {
@@ -336,43 +276,24 @@ public abstract class AbstractStatement implements IStatement, IHashable {
         }
     }
 
+    protected void appendDefaultPrivileges(IStatement statement, SQLScript script) {
+        // no imp
+    }
+
     @Override
     public String getOwner() {
         return owner;
     }
 
+    @Override
     public void setOwner(String owner) {
         this.owner = owner;
         resetHash();
     }
 
-    private void alterOwnerSQL(SQLScript script) {
-        if (getDbType() == DatabaseType.MS && owner == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("ALTER AUTHORIZATION ON ");
-            DbObjType type = getStatementType();
-            if (DbObjType.TYPE == type || DbObjType.SCHEMA == type
-                    || DbObjType.ASSEMBLY == type) {
-                sb.append(type).append("::");
-            }
-
-            sb.append(getQualifiedName()).append(" TO ");
-
-            if (DbObjType.SCHEMA == type || DbObjType.ASSEMBLY == type) {
-                sb.append("[dbo]");
-            } else {
-                sb.append("SCHEMA OWNER");
-            }
-
-            script.addStatement(sb);
-        } else {
-            appendOwnerSQL(script);
-        }
-    }
-
     @Override
     public String getSQL(boolean isFormatted, ISettings settings) {
-        SQLScript script = new SQLScript(settings);
+        SQLScript script = new SQLScript(settings, getSeparator());
         getCreationSQL(script);
         String sql = script.getFullScript();
         if (!isFormatted || !settings.isAutoFormatObjectCode()) {
@@ -462,13 +383,18 @@ public abstract class AbstractStatement implements IStatement, IHashable {
                 && privileges.equals(statement.privileges);
     }
 
-    protected final void copyBaseFields(AbstractStatement copy) {
+    @Override
+    public final AbstractStatement shallowCopy() {
+        AbstractStatement copy = getCopy();
         copy.setOwner(owner);
         copy.setComment(comment);
         copy.deps.addAll(deps);
         copy.privileges.addAll(privileges);
         copy.meta.copy(meta);
+        return copy;
     }
+
+    protected abstract AbstractStatement getCopy();
 
     @Override
     public IStatement getTwin(IDatabase db) {
@@ -487,7 +413,7 @@ public abstract class AbstractStatement implements IStatement, IHashable {
             return null;
         }
         if (DbObjType.COLUMN == type) {
-            return ((AbstractTable) twinParent).getColumn(getName());
+            return ((ITable) twinParent).getColumn(getName());
         }
         if (twinParent instanceof IStatementContainer cont) {
             return cont.getChild(getName(), type);
@@ -515,15 +441,16 @@ public abstract class AbstractStatement implements IStatement, IHashable {
      *
      * @return true if this statement has children, false otherwise
      */
+    @Override
     public boolean hasChildren() {
         return getChildren().anyMatch(e -> true);
     }
 
-    protected void fillDescendantsList(List<Collection<? extends AbstractStatement>> l) {
+    public void fillDescendantsList(List<Collection<? extends AbstractStatement>> l) {
         fillChildrenList(l);
     }
 
-    protected void fillChildrenList(List<Collection<? extends AbstractStatement>> l) {
+    public void fillChildrenList(List<Collection<? extends AbstractStatement>> l) {
         // default no op
     }
 
@@ -533,7 +460,7 @@ public abstract class AbstractStatement implements IStatement, IHashable {
      */
     public boolean compareChildren(AbstractStatement obj) {
         if (obj == null) {
-            throw new IllegalArgumentException("Null PgStatement!");
+            throw new IllegalArgumentException("Null Statement!");
         }
         return true;
     }
@@ -642,7 +569,7 @@ public abstract class AbstractStatement implements IStatement, IHashable {
             StringBuilder sb = new StringBuilder(quoter.apply(name));
 
             AbstractStatement par = this.parent;
-            while (par != null && !(par instanceof AbstractDatabase)) {
+            while (par != null && !(par instanceof IDatabase)) {
                 sb.insert(0, '.').insert(0, quoter.apply(par.name));
                 par = par.parent;
             }
@@ -679,7 +606,16 @@ public abstract class AbstractStatement implements IStatement, IHashable {
         return map.get(lowerCaseName);
     }
 
-    private String getNameInCorrectCase(String name) {
-        return DatabaseType.MS == getDbType() ? name.toLowerCase(Locale.ROOT) : name;
+    protected String getNameInCorrectCase(String name) {
+        return name;
+    }
+
+    protected void appendFullName(StringBuilder sb) {
+        sb.append(getQualifiedName());
+    }
+
+    @Override
+    public String getSeparator() {
+        return SEPARATOR;
     }
 }

@@ -22,7 +22,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
@@ -52,7 +51,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema) throws SQLException {
+    protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String schemaName = schema.getName();
         String tableName = res.getString("relname");
         loader.setCurrentObject(new GenericColumn(schemaName, tableName, DbObjType.TABLE));
@@ -60,7 +59,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
         long ofTypeOid = res.getLong("of_type");
         var t = getTable(res, tableName, ofTypeOid);
 
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion()) && t instanceof PgAbstractRegularTable regTable) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion()) && t instanceof PgAbstractRegularTable regTable) {
             String accessMethod = res.getString("access_method");
             if (accessMethod != null) {
                 regTable.setMethod(accessMethod);
@@ -97,7 +96,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
             ParserAbstract.fillOptionParams(toast, t::addOption, true, false, false);
         }
 
-        if (!SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion()) && res.getBoolean("has_oids")) {
+        if (!PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion()) && res.getBoolean("has_oids")) {
             t.setHasOids(true);
         }
 
@@ -105,7 +104,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
             fillRegularTable(t, res);
         }
 
-        schema.addTable(t);
+        schema.addChild(t);
     }
 
     private PgAbstractTable getTable(ResultSet res, String tableName, long ofTypeOid) throws SQLException {
@@ -117,7 +116,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
         String partitionGpBound = null;
         String partitionGpTemplate = null;
 
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             if (res.getBoolean("relispartition")) {
                 partitionBound = res.getString("partition_bound");
                 IPgJdbcReader.checkObjectValidity(partitionBound, DbObjType.TABLE, tableName);
@@ -199,7 +198,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
         }
 
         // since 9.5 PostgreSQL
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             regTable.setRowSecurity(res.getBoolean("row_security"));
             regTable.setForceSecurity(res.getBoolean("force_security"));
 
@@ -218,7 +217,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
     }
 
     private void readColumns(ResultSet res, PgAbstractTable t, long ofTypeOid,
-                             AbstractSchema schema) throws SQLException {
+                             ISchema schema) throws SQLException {
         String[] colNames = PgJdbcUtils.getColArray(res, "col_names", true);
         if (colNames == null) {
             return;
@@ -230,12 +229,12 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
         String[] colDefaults = PgJdbcUtils.getColArray(res, "col_defaults");
         String[] colComments = PgJdbcUtils.getColArray(res, "col_comments");
         Boolean[] colNotNull = null;
-        if (!SupportedPgVersion.VERSION_18.isLE(loader.getVersion())) {
+        if (!PgSupportedVersion.VERSION_18.isLE(loader.getVersion())) {
             colNotNull = PgJdbcUtils.getColArray(res, "col_notnull");
         }
 
         Integer[] colStatistics;
-        if (SupportedPgVersion.VERSION_16.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_16.isLE(loader.getVersion())) {
             // in PG 16 type changed from int4 to int2
             Short[] tmpStatistics = PgJdbcUtils.getColArray(res, "col_statistics");
             colStatistics = new Integer[tmpStatistics.length];
@@ -263,11 +262,11 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
         String[] colDefaultStorages = PgJdbcUtils.getColArray(res, "col_default_storages");
 
         String[] colGenerated = null;
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             colGenerated = PgJdbcUtils.getColArray(res, "col_generated", true);
         }
         String[] colCompression = null;
-        if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
             colCompression = PgJdbcUtils.getColArray(res, "col_compression", true);
         }
         String[] colEncOptions = null;
@@ -294,7 +293,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
                 ParserAbstract.fillOptionParams(colFOptions[i].split(","), column::addForeignOption, false, true, false);
             }
             if (loader.isGreenplumDb() && colEncOptions[i] != null && !column.isInherit()) {
-                ICompressOptionContainer.fillCompressOptions(column, colEncOptions[i]);
+                fillCompressOptions(column, colEncOptions[i]);
             }
 
             if (!colStorages[i].equals(colDefaultStorages[i])) {
@@ -447,7 +446,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
         }
 
         String formatOptions = res.getString("fmtopts");
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             String[] ftoptionNames = PgJdbcUtils.getColArray(res, "ftoption_names");
             String[] ftoptionValues = PgJdbcUtils.getColArray(res, "ftoption_values");
 
@@ -536,7 +535,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
                 .join("LEFT JOIN pg_catalog.pg_am am ON am.oid = res.relam")
                 .where("res.relkind IN ('f','r','p')");
 
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             builder
                     .column("res.relrowsecurity AS row_security")
                     .column("res.relforcerowsecurity AS force_security")
@@ -561,7 +560,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
                     .column("x.writable")
                     .join("LEFT JOIN pg_exttable x ON res.oid = x.reloid");
 
-            if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+            if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
                 builder.column(("ARRAY(SELECT option_name FROM pg_options_to_table(ftbl.ftoptions) " +
                         "WHERE option_name NOT IN (%s)) AS ftoption_names").formatted(GP_SYSTEM_OPTIONS));
                 builder.column(("ARRAY(SELECT option_value FROM pg_options_to_table(ftbl.ftoptions) " +
@@ -623,17 +622,17 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
                 .where("a.attnum > 0 GROUP BY a.attrelid")
         ;
 
-        if (SupportedPgVersion.GP_VERSION_7.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion())) {
             builder.column("columns.col_generated");
             subQueryBuilder.column("pg_catalog.array_agg(a.attgenerated ORDER BY a.attnum) AS col_generated");
         }
 
-        if (SupportedPgVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
             builder.column("columns.col_compression");
             subQueryBuilder.column("pg_catalog.array_agg(a.attcompression ORDER BY a.attnum) AS col_compression");
         }
 
-        if (!SupportedPgVersion.VERSION_18.isLE(loader.getVersion())) {
+        if (!PgSupportedVersion.VERSION_18.isLE(loader.getVersion())) {
             builder.column("columns.col_notnull");
             // skips not null for column, if parents have not null
             subQueryBuilder.column("""

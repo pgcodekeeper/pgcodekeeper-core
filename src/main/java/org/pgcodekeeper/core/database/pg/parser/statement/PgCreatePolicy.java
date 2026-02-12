@@ -20,7 +20,6 @@ import java.util.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.launcher.PgVexAnalysisLauncher;
 import org.pgcodekeeper.core.database.pg.schema.*;
@@ -79,8 +78,7 @@ public final class PgCreatePolicy extends PgParserAbstract {
         }
 
         ParserRuleContext parent = QNameParser.getFirstNameCtx(ids);
-        AbstractStatementContainer cont = getSafe(
-                AbstractSchema::getStatementContainer, getSchemaSafe(ids), parent);
+        IStatementContainer cont = getSafe(ISchema::getStatementContainer, getSchemaSafe(ids), parent);
         addSafe(cont, policy, Arrays.asList(QNameParser.getSchemaNameCtx(ids), parent, ctx.identifier()));
     }
 

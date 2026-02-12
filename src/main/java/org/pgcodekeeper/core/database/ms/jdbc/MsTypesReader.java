@@ -41,7 +41,7 @@ public final class MsTypesReader extends AbstractSearchPathJdbcReader<MsJdbcLoad
     }
 
     @Override
-    protected void processResult(ResultSet res, AbstractSchema schema)
+    protected void processResult(ResultSet res, ISchema schema)
             throws SQLException, XmlReaderException {
         String name = res.getString("name");
         loader.setCurrentObject(new GenericColumn(schema.getName(), name, DbObjType.TYPE));
@@ -58,23 +58,23 @@ public final class MsTypesReader extends AbstractSearchPathJdbcReader<MsJdbcLoad
                     res.getInt("precision"), res.getInt("scale")));
             type.setNotNull(!res.getBoolean("is_nullable"));
         } else {
-            addColumns(res, schema, type);
+            addColumns(res, (MsSchema) schema, type);
             addIndices(type, MsXmlReader.readXML(res.getString("indices")));
             addChecks(type, MsXmlReader.readXML(res.getString("checks")));
             type.setMemoryOptimized(res.getBoolean("is_memory_optimized"));
         }
 
-        schema.addType(type);
+        schema.addChild(type);
         loader.setOwner(type, res.getString("owner"));
         loader.setPrivileges(type, MsXmlReader.readXML(res.getString("acl")));
     }
 
-    private void addColumns(ResultSet res, AbstractSchema schema, MsType type)
+    private void addColumns(ResultSet res, MsSchema schema, MsType type)
             throws XmlReaderException, SQLException {
         for (MsXmlReader col : MsXmlReader.readXML(res.getString("cols"))) {
             // pass the 'type' to the method for extract type depcy from column
             // object since it is temporary
-            AbstractColumn column = MsTablesReader.getColumn(col, schema, loader, type);
+            MsColumn column = MsTablesReader.getColumn(col, schema, loader, type);
             type.addChild(column);
             // extract type depcy from column object since it is temporary
             // (column also has depcy that is not related to the analysis)

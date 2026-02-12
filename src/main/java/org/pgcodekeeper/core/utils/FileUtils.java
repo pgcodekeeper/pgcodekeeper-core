@@ -358,10 +358,7 @@ public final class FileUtils {
             return Files.createTempFile(prefix, suffix, POSIX_PERMISSIONS);
         }
 
-        Path path = Files.createTempFile(prefix, suffix);
-        File f = path.toFile();
-        setAttributes(f);
-        return path;
+        return Files.createTempFile(prefix, suffix);
     }
 
     /**
@@ -380,28 +377,6 @@ public final class FileUtils {
     }
 
     /**
-     * Creates temporary directory with secure permissions.
-     * On POSIX systems, sets permissions to rwx------. On other systems, uses file attribute methods.
-     *
-     * @param prefix the directory name prefix
-     * @return path to created temporary directory
-     * @throws IOException if directory creation fails
-     */
-    public static Path createTempDirectory(String prefix) throws IOException {
-        var msg = Messages.FileUtils_creating_temp_directory.formatted(prefix);
-        LOG.info(msg);
-
-        if (IS_POSIX) {
-            return Files.createTempDirectory(prefix, POSIX_PERMISSIONS);
-        }
-
-        Path path = Files.createTempDirectory(prefix);
-        File f = path.toFile();
-        setAttributes(f);
-        return path;
-    }
-
-    /**
      * Creates temporary directory in specified parent directory.
      *
      * @param dir    the parent directory
@@ -414,24 +389,6 @@ public final class FileUtils {
         LOG.info(msg);
         return Files.createTempDirectory(dir, prefix);
     }
-
-    private static void setAttributes(File f) throws IOException {
-        var readable = f.setReadable(true, true);
-        if (!readable) {
-            throw new IOException("Failed to set temp file readable"); //$NON-NLS-1$
-        }
-
-        var writable = f.setWritable(true, true);
-        if (!writable) {
-            throw new IOException("Failed to set temp file writable"); //$NON-NLS-1$
-        }
-
-        var executable = f.setExecutable(true, true);
-        if (!executable) {
-            throw new IOException("Failed to set temp file executable"); //$NON-NLS-1$
-        }
-    }
-
 
     private FileUtils() {
     }

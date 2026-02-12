@@ -20,7 +20,6 @@ import java.util.List;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.AbstractSchema;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -79,9 +78,9 @@ public final class PgAlterIndex extends PgParserAbstract {
                 return;
             }
 
-            PgIndex index = (PgIndex) schema.getIndexByName(inhName.getText());
+            PgIndex index = schema.getIndexByName(inhName.getText());
             if (index == null) {
-                getSafe(AbstractSchema::getConstraintByName, schema, inhName);
+                getSafe(PgSchema::getConstraintByName, schema, inhName);
             } else {
                 doSafe((i, o) -> i.addInherit(inhSchemaName, inhTableName), index, null);
                 addDepSafe(index, ids, DbObjType.INDEX);

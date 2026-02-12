@@ -13,24 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.database.base.schema;
+package org.pgcodekeeper.core.database.ms.schema;
 
-import java.util.*;
-
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.IArgument;
+import org.pgcodekeeper.core.database.api.schema.IFunction;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.ObjectState;
+import org.pgcodekeeper.core.database.base.schema.Argument;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Abstract base class for database functions, procedures, and aggregates.
  * Provides common functionality for callable database objects across different database types.
  */
-@Deprecated
-public abstract class AbstractFunction extends AbstractStatement implements IFunction {
+public abstract class MsAbstractCommonFunction extends MsAbstractStatement implements IFunction {
 
     protected final List<Argument> arguments = new ArrayList<>();
 
-    protected AbstractFunction(String name) {
+    protected MsAbstractCommonFunction(String name) {
         super(name);
     }
 
@@ -70,7 +76,7 @@ public abstract class AbstractFunction extends AbstractStatement implements IFun
     public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
         int startSize = script.getSize();
         boolean isNeedDepcies = false;
-        AbstractFunction newFunction = (AbstractFunction) newCondition;
+        MsAbstractCommonFunction newFunction = (MsAbstractCommonFunction) newCondition;
 
         if (!compareUnalterable(newFunction)) {
             if (needDrop(newFunction)) {
@@ -91,7 +97,7 @@ public abstract class AbstractFunction extends AbstractStatement implements IFun
         return getObjectState(isNeedDepcies, script, startSize);
     }
 
-    protected boolean isNeedDepcies(AbstractFunction newFunction) {
+    protected boolean isNeedDepcies(MsAbstractCommonFunction newFunction) {
         return !deps.equals(newFunction.deps);
     }
 
@@ -115,16 +121,9 @@ public abstract class AbstractFunction extends AbstractStatement implements IFun
         resetHash();
     }
 
-    /**
-     * Compares two objects whether they are equal. If both objects are of the same class, but they not equal just in
-     * whitespace in function body, they are considered being equal.
-     *
-     * @param func object to be compared
-     * @return true if {@code object} is PgFunction and the function code is the same when compared ignoring whitespace,
-     * otherwise returns false
-     */
-    protected boolean compareUnalterable(AbstractFunction func) {
-        return arguments.equals(func.arguments);
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.putOrdered(arguments);
     }
 
     @Override
@@ -133,7 +132,7 @@ public abstract class AbstractFunction extends AbstractStatement implements IFun
             return true;
         }
 
-        if (obj instanceof AbstractFunction func && super.compare(obj)) {
+        if (obj instanceof MsAbstractCommonFunction func && super.compare(obj)) {
             return compareUnalterable(func);
         }
 
@@ -141,30 +140,25 @@ public abstract class AbstractFunction extends AbstractStatement implements IFun
     }
 
     /**
-     * Determines whether this function needs to be dropped before creating the new version.
+     * Compares two objects whether they are equal. If both objects are of the same class, but they not equal just in
+     * whitespace in function body, they are considered being equal.
      *
-     * @param newFunction the new function version to compare against
-     * @return true if the function needs to be dropped and recreated
+     * @param func object to be compared
+     * @return true if {@code object} is PgFunction and the function code is the same when compared ignoring whitespace,
+     * otherwise returns false
      */
-    public abstract boolean needDrop(AbstractFunction newFunction);
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.putOrdered(arguments);
+    protected boolean compareUnalterable(MsAbstractCommonFunction func) {
+        return arguments.equals(func.arguments);
     }
 
     @Override
-    public AbstractFunction shallowCopy() {
-        AbstractFunction functionDst = getFunctionCopy();
-        copyBaseFields(functionDst);
+    protected MsAbstractCommonFunction getCopy() {
+        MsAbstractCommonFunction functionDst = getFunctionCopy();
         for (Argument argSrc : arguments) {
-            Argument argDst = new Argument(argSrc.getMode(), argSrc.getName(), argSrc.getDataType());
-            argDst.setDefaultExpression(argSrc.getDefaultExpression());
-            argDst.setReadOnly(argSrc.isReadOnly());
-            functionDst.addArgument(argDst);
+            functionDst.addArgument(argSrc.getCopy());
         }
         return functionDst;
     }
 
-    protected abstract AbstractFunction getFunctionCopy();
+    protected abstract MsAbstractCommonFunction getFunctionCopy();
 }

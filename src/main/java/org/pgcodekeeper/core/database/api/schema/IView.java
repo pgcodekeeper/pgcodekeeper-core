@@ -15,5 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
-public interface IView {
+/**
+ * Interface for database view
+ */
+public interface IView extends IRelation, IStatementContainer {
+
+    @Override
+    default DbObjType getStatementType() {
+        return DbObjType.VIEW;
+    }
 }
