@@ -21,6 +21,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.ISchema;
+import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
 import org.pgcodekeeper.core.ignorelist.IgnoreList;
 import org.pgcodekeeper.core.ignorelist.IgnoreParser;
@@ -38,13 +39,18 @@ import java.util.List;
 
 import static org.pgcodekeeper.core.it.IntegrationTestUtils.*;
 
+/**
+ * Tests for PostgreSQL ProjectLoader functionality
+ */
 class PgProjectLoaderTest {
+
+    private final PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
 
     @Test
     void testProjectLoaderWithIgnoredSchemas(@TempDir Path dir) throws IOException, InterruptedException {
         var settings = new CoreSettings();
 
-        IDatabase dbDump = loadTestDump(RESOURCE_DUMP, IntegrationTestUtils.class, settings);
+        IDatabase dbDump = loadTestDump(databaseProvider, RESOURCE_DUMP, IntegrationTestUtils.class, settings);
 
         new PgModelExporter(dir, dbDump, Consts.UTF_8, settings).exportFull();
 
@@ -73,7 +79,7 @@ class PgProjectLoaderTest {
     void testModelExporterWithIgnoredLists(@TempDir Path dir) throws IOException, InterruptedException {
         var settings = new CoreSettings();
 
-        IDatabase dbDump = loadTestDump(RESOURCE_DUMP, IntegrationTestUtils.class, settings);
+        IDatabase dbDump = loadTestDump(databaseProvider, RESOURCE_DUMP, IntegrationTestUtils.class, settings);
         TreeElement root = DiffTree.create(settings, dbDump, null, null);
         root.setAllChecked();
 

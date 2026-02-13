@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
+import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
@@ -43,12 +44,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * Tests for checking column types.
+ * Tests for PostgreSQL database checking column types.
  *
  * @author shamsutdinov_lr
  */
 
-class ExprTypeTest {
+class PgExprTypeTest {
 
     @Disabled("wait serialization fix")
     @ParameterizedTest
@@ -98,8 +99,10 @@ class ExprTypeTest {
 
     private MetaContainer loadAndAnalyze(String fileNameTemplate, CoreSettings settings, FILES_POSTFIX postfix)
             throws InterruptedException, IOException {
-        IDatabase dbNew = IntegrationTestUtils.loadTestDump(
-                fileNameTemplate + postfix, ExprTypeTest.class, settings, false);
+        PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
+
+        IDatabase dbNew = IntegrationTestUtils.loadTestDump(databaseProvider,
+                fileNameTemplate + postfix, PgExprTypeTest.class, settings, false);
         MetaContainer metaDb = MetaUtils.createTreeFromDb(dbNew);
         FullAnalyze.fullAnalyze(dbNew, metaDb, new ArrayList<>());
         return metaDb;

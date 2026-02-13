@@ -18,9 +18,10 @@ package org.pgcodekeeper.core.it.depcies.ch;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
+import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.ch.ChDatabaseProvider;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;
@@ -65,8 +66,8 @@ class ChDiffDepciesTest {
     void dependencyTest(final String dbTemplate, String userTemplateName, Map<String, DbObjType> selectedObjs)
             throws IOException, InterruptedException {
         var settings = new CoreSettings();
-        settings.setDbType(DatabaseType.CH);
+        IDatabaseProvider databaseProvider = new ChDatabaseProvider();
         settings.setEnableFunctionBodiesDependencies(true);
-        IntegrationTestUtils.assertEqualsDependencies(dbTemplate, userTemplateName, selectedObjs, getClass(), settings);
+        IntegrationTestUtils.assertEqualsDependencies(databaseProvider, dbTemplate, userTemplateName, selectedObjs, getClass(), settings);
     }
 }

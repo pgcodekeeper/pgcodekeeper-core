@@ -23,6 +23,7 @@ import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.monitor.NullMonitor;
+import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.loader.PgLibraryLoader;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.settings.CoreSettings;
@@ -64,13 +65,14 @@ class LibDiffTest {
     private void testLibrary(String fileNameTemplate, List<String> libList, boolean isIgnorePrivileges)
             throws IOException, InterruptedException, URISyntaxException {
         var settings = new CoreSettings();
+        PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
         settings.setIgnorePrivileges(isIgnorePrivileges);
         List<String> libs = new ArrayList<>();
         for (String lib : libList) {
             libs.add(TestUtils.getPathToResource(lib, getClass()).toString());
         }
         PgDatabase dbOld = new PgDatabase();
-        PgDatabase dbNew = (PgDatabase) IntegrationTestUtils.loadTestDump(fileNameTemplate + FILES_POSTFIX.NEW_SQL, getClass(), settings);
+        PgDatabase dbNew = (PgDatabase) IntegrationTestUtils.loadTestDump(databaseProvider, fileNameTemplate + FILES_POSTFIX.NEW_SQL, getClass(), settings);
         PgLibraryLoader loader = new PgLibraryLoader(dbNew, null, new HashSet<>(), settings, new NullMonitor());
 
         loader.loadLibraries(isIgnorePrivileges, libs);

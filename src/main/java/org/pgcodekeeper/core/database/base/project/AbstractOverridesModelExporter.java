@@ -109,7 +109,7 @@ public abstract class AbstractOverridesModelExporter extends AbstractModelExport
     }
 
     @Override
-    protected String getDumpSql(IStatement st) {
+    public String getDumpSql(IStatement st) {
         SQLScript script = new SQLScript(settings, st.getSeparator());
         Set<IPrivilege> privs = st.getPrivileges();
         st.appendOwnerSQL(script);

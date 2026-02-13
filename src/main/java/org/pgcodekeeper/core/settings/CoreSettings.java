@@ -17,7 +17,6 @@ package org.pgcodekeeper.core.settings;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.base.formatter.FormatConfiguration;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 
 import java.util.ArrayList;
@@ -31,7 +30,6 @@ import java.util.List;
  * character encoding, file paths, and various migration behavior flags.
  */
 public class CoreSettings implements ISettings {
-    private DatabaseType dbType = DatabaseType.PG;
     private String inCharsetName = Consts.UTF_8;
     private List<String> preFilePath = new ArrayList<>();
     private List<String> postFilePath = new ArrayList<>();
@@ -56,15 +54,6 @@ public class CoreSettings implements ISettings {
     private boolean selectedOnly;
     private boolean ignoreConcurrentModification;
     private String clusterName;
-
-    @Override
-    public DatabaseType getDbType() {
-        return dbType;
-    }
-
-    public void setDbType(DatabaseType dbType) {
-        this.dbType = dbType;
-    }
 
     @Override
     public boolean isConcurrentlyMode() {
@@ -301,7 +290,6 @@ public class CoreSettings implements ISettings {
         settings.commentsToEnd = commentsToEnd;
         settings.concurrentlyMode = concurrentlyMode;
         settings.dataMovementMode = dataMovementMode;
-        settings.dbType = dbType;
         settings.disableCheckFunctionBodies = disableCheckFunctionBodies;
         settings.dropBeforeCreate = dropBeforeCreate;
         settings.enableFunctionBodiesDependencies = enableFunctionBodiesDependencies;

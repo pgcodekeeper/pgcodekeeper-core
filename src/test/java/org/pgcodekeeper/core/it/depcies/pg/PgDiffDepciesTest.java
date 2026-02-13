@@ -20,6 +20,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;
@@ -28,11 +29,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * Тестирует сравнение БД с неполным выбором различающихся объектов
- *
- * @author botov_av
+ * Tests PostgreSQL database comparison with incomplete selection of differing objects
  */
 class PgDiffDepciesTest {
+
+    private final PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
 
     private static Stream<Arguments> provideSelectedObjects() {
         return Stream.of(
@@ -272,7 +273,7 @@ class PgDiffDepciesTest {
     @MethodSource("provideSelectedObjects")
     void dependencyTest(final String dbTemplate, String userTemplateName, Map<String, DbObjType> selectedObjs)
             throws IOException, InterruptedException {
-        IntegrationTestUtils.assertEqualsDependencies(dbTemplate, userTemplateName, selectedObjs, getClass(), new CoreSettings());
+        IntegrationTestUtils.assertEqualsDependencies(databaseProvider, dbTemplate, userTemplateName, selectedObjs, getClass(), new CoreSettings());
     }
 
     private static Stream<Arguments> provideSelectedObjectsWithFunctionBody() {
@@ -334,6 +335,6 @@ class PgDiffDepciesTest {
                                          Map<String, DbObjType> selectedObjs) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         settings.setEnableFunctionBodiesDependencies(true);
-        IntegrationTestUtils.assertEqualsDependencies(dbTemplate, userTemplateName, selectedObjs, getClass(), settings);
+        IntegrationTestUtils.assertEqualsDependencies(databaseProvider, dbTemplate, userTemplateName, selectedObjs, getClass(), settings);
     }
 }

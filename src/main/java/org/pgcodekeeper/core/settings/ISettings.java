@@ -16,7 +16,6 @@
 package org.pgcodekeeper.core.settings;
 
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 
 import java.util.Collection;
@@ -27,13 +26,6 @@ import java.util.Collection;
  * that control how database schema comparisons and migrations are performed.
  */
 public interface ISettings {
-
-    /**
-     * Gets the database type for operations.
-     *
-     * @return the database type
-     */
-    DatabaseType getDbType();
 
     /**
      * Checks if concurrent mode is enabled.

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.database.base.project;
+package org.pgcodekeeper.core.database.pg.project;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -23,6 +23,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.base.project.PartialExportTestFileVisitor;
+import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
 import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
@@ -39,7 +41,7 @@ import java.util.stream.Stream;
 import static org.pgcodekeeper.core.it.IntegrationTestUtils.loadTestDump;
 
 /**
- * Test for partial export
+ * Test for PostgreSQL database partial export
  * <p>
  * <!--
  * Below is the list of differences between DBs in TestPartialExportSource.sql
@@ -95,19 +97,20 @@ import static org.pgcodekeeper.core.it.IntegrationTestUtils.loadTestDump;
  *
  * @author ryabinin_av
  */
-class PartialExporterTest {
+class PgPartialExporterTest {
 
     private static IDatabase dbSource;
     private static IDatabase dbTarget;
 
     @BeforeAll
     static void initDiffTree() throws InterruptedException, IOException {
+       PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
         String sourceFilename = "TestPartialExportSource.sql";
         String targetFilename = "TestPartialExportTarget.sql";
         var settings = new CoreSettings();
         settings.setInCharsetName(Consts.UTF_8);
-        dbSource = loadTestDump(sourceFilename, PartialExporterTest.class, settings, false);
-        dbTarget = loadTestDump(targetFilename, PartialExporterTest.class, settings, false);
+        dbSource = loadTestDump(databaseProvider, sourceFilename, PgPartialExporterTest.class, settings, false);
+        dbTarget = loadTestDump(databaseProvider, targetFilename, PgPartialExporterTest.class, settings, false);
 
         Assertions.assertNotNull(dbSource);
         Assertions.assertNotNull(dbTarget);

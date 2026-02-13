@@ -296,7 +296,7 @@ public abstract class AbstractModelExporter {
         }
     }
 
-    protected String getDumpSql(IStatement statement) {
+    public String getDumpSql(IStatement statement) {
         return statement.getSQL(true, settings);
     }
 

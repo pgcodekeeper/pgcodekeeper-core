@@ -20,7 +20,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.ch.loader.ChDumpLoader;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
@@ -53,7 +52,6 @@ class ChObjReferencesTest {
     })
     void compareChReferences(final String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
-        settings.setDbType(DatabaseType.CH);
 
         String resource = fileNameTemplate + FILES_POSTFIX.SQL;
         var loader = new ChDumpLoader(() -> getClass().getResourceAsStream(resource), resource, settings);
