@@ -78,7 +78,7 @@ public abstract class AbstractDumpLoader<T extends IDatabase> extends AbstractLo
         ISchema schema = createDefaultSchema();
         db.addChild(schema);
         ObjectLocation loc = new ObjectLocation.Builder()
-                .setObject(new GenericColumn(schema.getName(), DbObjType.SCHEMA))
+                .setReference(new ObjectReference(schema.getName(), DbObjType.SCHEMA))
                 .build();
         schema.setLocation(loc);
         db.setDefaultSchema(schema.getName());

@@ -64,11 +64,11 @@ Reference: Object = foo (FOREIGN_DATA_WRAPPER), action = CREATE, offset = 3822, 
 Reference: Object = s1 (SERVER), action = CREATE, offset = 3841, line number = 115, charPositionInLine = 14
 Reference: Object = foo (FOREIGN_DATA_WRAPPER), action = null, offset = 3865, line number = 115, charPositionInLine = 38
 Reference: Object = s1 (SERVER), action = COMMENT, offset = 3888, line number = 116, charPositionInLine = 18
-Reference: Object = "current_user SERVER s1" (USER_MAPPING), action = CREATE, offset = 3936, line number = 117, charPositionInLine = 24
+Reference: Object = current_user SERVER s1 (USER_MAPPING), action = CREATE, offset = 3936, line number = 117, charPositionInLine = 24
 Reference: Object = s1 (SERVER), action = null, offset = 3956, line number = 117, charPositionInLine = 44
-Reference: Object = "current_user SERVER s1" (USER_MAPPING), action = CREATE, offset = 3984, line number = 118, charPositionInLine = 24
+Reference: Object = current_user SERVER s1 (USER_MAPPING), action = CREATE, offset = 3984, line number = 118, charPositionInLine = 24
 Reference: Object = s1 (SERVER), action = null, offset = 4004, line number = 118, charPositionInLine = 44
-Reference: Object = "current_user SERVER s1" (USER_MAPPING), action = CREATE, offset = 4058, line number = 119, charPositionInLine = 38
+Reference: Object = current_user SERVER s1 (USER_MAPPING), action = CREATE, offset = 4058, line number = 119, charPositionInLine = 38
 Reference: Object = s1 (SERVER), action = null, offset = 4078, line number = 119, charPositionInLine = 58
 Reference: Object = foo (FOREIGN_DATA_WRAPPER), action = DROP, offset = 4121, line number = 123, charPositionInLine = 26
 Reference: action = SET, offset = 4164, line number = 124, charPositionInLine = 0
@@ -162,57 +162,57 @@ Reference: Object = s2 (SERVER), action = ALTER, offset = 7741, line number = 21
 Reference: action = SET, offset = 7772, line number = 216, charPositionInLine = 0
 Reference: Object = s2 (SERVER), action = DROP, offset = 7812, line number = 217, charPositionInLine = 12
 Reference: action = RESET, offset = 7816, line number = 218, charPositionInLine = 0
-Reference: Object = "current_user SERVER s3" (USER_MAPPING), action = CREATE, offset = 7853, line number = 220, charPositionInLine = 24
+Reference: Object = current_user SERVER s3 (USER_MAPPING), action = CREATE, offset = 7853, line number = 220, charPositionInLine = 24
 Reference: Object = s3 (SERVER), action = null, offset = 7873, line number = 220, charPositionInLine = 44
 Reference: Object = s3 (SERVER), action = DROP, offset = 7890, line number = 222, charPositionInLine = 12
 Reference: Object = s3 (SERVER), action = DROP, offset = 7959, line number = 223, charPositionInLine = 12
-Reference: Object = "regress_test_missing_role SERVER s1" (USER_MAPPING), action = CREATE, offset = 8021, line number = 228, charPositionInLine = 24
+Reference: Object = regress_test_missing_role SERVER s1 (USER_MAPPING), action = CREATE, offset = 8021, line number = 228, charPositionInLine = 24
 Reference: Object = s1 (SERVER), action = null, offset = 8054, line number = 228, charPositionInLine = 57
-Reference: Object = "current_user SERVER s1" (USER_MAPPING), action = CREATE, offset = 8092, line number = 229, charPositionInLine = 24
+Reference: Object = current_user SERVER s1 (USER_MAPPING), action = CREATE, offset = 8092, line number = 229, charPositionInLine = 24
 Reference: Object = s1 (SERVER), action = null, offset = 8112, line number = 229, charPositionInLine = 44
-Reference: Object = "current_user SERVER s4" (USER_MAPPING), action = CREATE, offset = 8161, line number = 230, charPositionInLine = 24
+Reference: Object = current_user SERVER s4 (USER_MAPPING), action = CREATE, offset = 8161, line number = 230, charPositionInLine = 24
 Reference: Object = s4 (SERVER), action = null, offset = 8181, line number = 230, charPositionInLine = 44
-Reference: Object = "public SERVER s4" (USER_MAPPING), action = CREATE, offset = 8288, line number = 232, charPositionInLine = 24
+Reference: Object = public SERVER s4 (USER_MAPPING), action = CREATE, offset = 8288, line number = 232, charPositionInLine = 24
 Reference: Object = s4 (SERVER), action = null, offset = 8302, line number = 232, charPositionInLine = 38
 Reference: Object = s5 (SERVER), action = ALTER, offset = 8534, line number = 235, charPositionInLine = 13
 Reference: Object = s6 (SERVER), action = ALTER, offset = 8578, line number = 236, charPositionInLine = 13
 Reference: action = SET, offset = 8613, line number = 237, charPositionInLine = 0
-Reference: Object = "current_user SERVER s5" (USER_MAPPING), action = CREATE, offset = 8665, line number = 238, charPositionInLine = 24
+Reference: Object = current_user SERVER s5 (USER_MAPPING), action = CREATE, offset = 8665, line number = 238, charPositionInLine = 24
 Reference: Object = s5 (SERVER), action = null, offset = 8685, line number = 238, charPositionInLine = 44
-Reference: Object = "current_user SERVER s6" (USER_MAPPING), action = CREATE, offset = 8713, line number = 239, charPositionInLine = 24
+Reference: Object = current_user SERVER s6 (USER_MAPPING), action = CREATE, offset = 8713, line number = 239, charPositionInLine = 24
 Reference: Object = s6 (SERVER), action = null, offset = 8733, line number = 239, charPositionInLine = 44
-Reference: Object = "current_user SERVER s7" (USER_MAPPING), action = CREATE, offset = 8787, line number = 240, charPositionInLine = 24
+Reference: Object = current_user SERVER s7 (USER_MAPPING), action = CREATE, offset = 8787, line number = 240, charPositionInLine = 24
 Reference: Object = s7 (SERVER), action = null, offset = 8807, line number = 240, charPositionInLine = 44
-Reference: Object = "public SERVER s8" (USER_MAPPING), action = CREATE, offset = 8856, line number = 241, charPositionInLine = 24
+Reference: Object = public SERVER s8 (USER_MAPPING), action = CREATE, offset = 8856, line number = 241, charPositionInLine = 24
 Reference: Object = s8 (SERVER), action = null, offset = 8870, line number = 241, charPositionInLine = 38
 Reference: action = RESET, offset = 8901, line number = 242, charPositionInLine = 0
 Reference: Object = t1 (SERVER), action = ALTER, offset = 8927, line number = 244, charPositionInLine = 13
 Reference: action = SET, offset = 8962, line number = 245, charPositionInLine = 0
-Reference: Object = "current_user SERVER t1" (USER_MAPPING), action = CREATE, offset = 9014, line number = 246, charPositionInLine = 24
+Reference: Object = current_user SERVER t1 (USER_MAPPING), action = CREATE, offset = 9014, line number = 246, charPositionInLine = 24
 Reference: Object = t1 (SERVER), action = null, offset = 9034, line number = 246, charPositionInLine = 44
-Reference: Object = "public SERVER t1" (USER_MAPPING), action = CREATE, offset = 9103, line number = 247, charPositionInLine = 24
+Reference: Object = public SERVER t1 (USER_MAPPING), action = CREATE, offset = 9103, line number = 247, charPositionInLine = 24
 Reference: Object = t1 (SERVER), action = null, offset = 9117, line number = 247, charPositionInLine = 38
 Reference: action = RESET, offset = 9121, line number = 248, charPositionInLine = 0
-Reference: Object = "regress_test_missing_role SERVER s4" (USER_MAPPING), action = ALTER, offset = 9180, line number = 252, charPositionInLine = 23
-Reference: Object = "user SERVER ss4" (USER_MAPPING), action = ALTER, offset = 9273, line number = 253, charPositionInLine = 23
-Reference: Object = "public SERVER s5" (USER_MAPPING), action = ALTER, offset = 9346, line number = 254, charPositionInLine = 23
-Reference: Object = "current_user SERVER s8" (USER_MAPPING), action = ALTER, offset = 9431, line number = 255, charPositionInLine = 23
-Reference: Object = "current_user SERVER s8" (USER_MAPPING), action = ALTER, offset = 9516, line number = 256, charPositionInLine = 23
+Reference: Object = regress_test_missing_role SERVER s4 (USER_MAPPING), action = ALTER, offset = 9180, line number = 252, charPositionInLine = 23
+Reference: Object = user SERVER ss4 (USER_MAPPING), action = ALTER, offset = 9273, line number = 253, charPositionInLine = 23
+Reference: Object = public SERVER s5 (USER_MAPPING), action = ALTER, offset = 9346, line number = 254, charPositionInLine = 23
+Reference: Object = current_user SERVER s8 (USER_MAPPING), action = ALTER, offset = 9431, line number = 255, charPositionInLine = 23
+Reference: Object = current_user SERVER s8 (USER_MAPPING), action = ALTER, offset = 9516, line number = 256, charPositionInLine = 23
 Reference: action = SET, offset = 9583, line number = 257, charPositionInLine = 0
-Reference: Object = "current_user SERVER s5" (USER_MAPPING), action = ALTER, offset = 9634, line number = 258, charPositionInLine = 23
-Reference: Object = "public SERVER s4" (USER_MAPPING), action = ALTER, offset = 9708, line number = 259, charPositionInLine = 23
-Reference: Object = "public SERVER t1" (USER_MAPPING), action = ALTER, offset = 9785, line number = 260, charPositionInLine = 23
+Reference: Object = current_user SERVER s5 (USER_MAPPING), action = ALTER, offset = 9634, line number = 258, charPositionInLine = 23
+Reference: Object = public SERVER s4 (USER_MAPPING), action = ALTER, offset = 9708, line number = 259, charPositionInLine = 23
+Reference: Object = public SERVER t1 (USER_MAPPING), action = ALTER, offset = 9785, line number = 260, charPositionInLine = 23
 Reference: action = RESET, offset = 9830, line number = 261, charPositionInLine = 0
-Reference: Object = "regress_test_missing_role SERVER s4" (USER_MAPPING), action = DROP, offset = 9887, line number = 265, charPositionInLine = 22
-Reference: Object = "user SERVER ss4" (USER_MAPPING), action = DROP, offset = 9956, line number = 266, charPositionInLine = 22
-Reference: Object = "public SERVER s7" (USER_MAPPING), action = DROP, offset = 9995, line number = 267, charPositionInLine = 22
-Reference: Object = "regress_test_missing_role SERVER s4" (USER_MAPPING), action = DROP, offset = 10074, line number = 268, charPositionInLine = 32
-Reference: Object = "user SERVER ss4" (USER_MAPPING), action = DROP, offset = 10143, line number = 269, charPositionInLine = 32
-Reference: Object = "public SERVER s7" (USER_MAPPING), action = DROP, offset = 10192, line number = 270, charPositionInLine = 32
-Reference: Object = "public SERVER s8" (USER_MAPPING), action = CREATE, offset = 10234, line number = 271, charPositionInLine = 24
+Reference: Object = regress_test_missing_role SERVER s4 (USER_MAPPING), action = DROP, offset = 9887, line number = 265, charPositionInLine = 22
+Reference: Object = user SERVER ss4 (USER_MAPPING), action = DROP, offset = 9956, line number = 266, charPositionInLine = 22
+Reference: Object = public SERVER s7 (USER_MAPPING), action = DROP, offset = 9995, line number = 267, charPositionInLine = 22
+Reference: Object = regress_test_missing_role SERVER s4 (USER_MAPPING), action = DROP, offset = 10074, line number = 268, charPositionInLine = 32
+Reference: Object = user SERVER ss4 (USER_MAPPING), action = DROP, offset = 10143, line number = 269, charPositionInLine = 32
+Reference: Object = public SERVER s7 (USER_MAPPING), action = DROP, offset = 10192, line number = 270, charPositionInLine = 32
+Reference: Object = public SERVER s8 (USER_MAPPING), action = CREATE, offset = 10234, line number = 271, charPositionInLine = 24
 Reference: Object = s8 (SERVER), action = null, offset = 10248, line number = 271, charPositionInLine = 38
 Reference: action = SET, offset = 10252, line number = 272, charPositionInLine = 0
-Reference: Object = "public SERVER s8" (USER_MAPPING), action = DROP, offset = 10302, line number = 273, charPositionInLine = 22
+Reference: Object = public SERVER s8 (USER_MAPPING), action = DROP, offset = 10302, line number = 273, charPositionInLine = 22
 Reference: action = RESET, offset = 10349, line number = 274, charPositionInLine = 0
 Reference: Object = s7 (SERVER), action = DROP, offset = 10373, line number = 275, charPositionInLine = 12
 Reference: Object = foreign_schema (SCHEMA), action = CREATE, offset = 10417, line number = 279, charPositionInLine = 14
@@ -328,7 +328,7 @@ Reference: action = SET, offset = 17426, line number = 408, charPositionInLine =
 Reference: action = SELECT, offset = 17454, line number = 409, charPositionInLine = 0
 Reference: action = SELECT, offset = 17529, line number = 410, charPositionInLine = 0
 Reference: action = SELECT, offset = 17670, line number = 411, charPositionInLine = 0
-Reference: Object = "current_user SERVER t1" (USER_MAPPING), action = DROP, offset = 17834, line number = 412, charPositionInLine = 22
+Reference: Object = current_user SERVER t1 (USER_MAPPING), action = DROP, offset = 17834, line number = 412, charPositionInLine = 22
 Reference: action = SET, offset = 17858, line number = 413, charPositionInLine = 0
 Reference: action = SELECT, offset = 17887, line number = 414, charPositionInLine = 0
 Reference: action = RESET, offset = 17962, line number = 415, charPositionInLine = 0
@@ -350,9 +350,9 @@ Reference: Object = s8 (SERVER), action = GRANT, offset = 19525, line number = 4
 Reference: action = SELECT, offset = 19550, line number = 446, charPositionInLine = 0
 Reference: Object = s8 (SERVER), action = REVOKE, offset = 19646, line number = 447, charPositionInLine = 31
 Reference: Object = s4 (SERVER), action = GRANT, offset = 19704, line number = 449, charPositionInLine = 30
-Reference: Object = "public SERVER s4" (USER_MAPPING), action = DROP, offset = 19751, line number = 450, charPositionInLine = 22
+Reference: Object = public SERVER s4 (USER_MAPPING), action = DROP, offset = 19751, line number = 450, charPositionInLine = 22
 Reference: Object = s6 (SERVER), action = ALTER, offset = 19782, line number = 451, charPositionInLine = 13
-Reference: Object = "regress_test_role SERVER s6" (USER_MAPPING), action = ALTER, offset = 19842, line number = 452, charPositionInLine = 23
+Reference: Object = regress_test_role SERVER s6 (USER_MAPPING), action = ALTER, offset = 19842, line number = 452, charPositionInLine = 23
 Reference: Object = foo (FOREIGN_DATA_WRAPPER), action = ALTER, offset = 19922, line number = 453, charPositionInLine = 27
 Reference: action = SET, offset = 19977, line number = 456, charPositionInLine = 0
 Reference: Object = foobar (FOREIGN_DATA_WRAPPER), action = CREATE, offset = 20041, line number = 457, charPositionInLine = 28
@@ -366,10 +366,10 @@ Reference: Object = s4 (SERVER), action = ALTER, offset = 20467, line number = 4
 Reference: Object = s4 (SERVER), action = ALTER, offset = 20540, line number = 464, charPositionInLine = 13
 Reference: Object = s4 (SERVER), action = DROP, offset = 20612, line number = 465, charPositionInLine = 12
 Reference: Object = s4 (SERVER), action = GRANT, offset = 20703, line number = 466, charPositionInLine = 30
-Reference: Object = "public SERVER s4" (USER_MAPPING), action = CREATE, offset = 20770, line number = 467, charPositionInLine = 24
+Reference: Object = public SERVER s4 (USER_MAPPING), action = CREATE, offset = 20770, line number = 467, charPositionInLine = 24
 Reference: Object = s4 (SERVER), action = null, offset = 20784, line number = 467, charPositionInLine = 38
-Reference: Object = "regress_test_role SERVER s6" (USER_MAPPING), action = ALTER, offset = 20842, line number = 468, charPositionInLine = 23
-Reference: Object = "regress_test_role SERVER s6" (USER_MAPPING), action = DROP, offset = 20926, line number = 469, charPositionInLine = 22
+Reference: Object = regress_test_role SERVER s6 (USER_MAPPING), action = ALTER, offset = 20842, line number = 468, charPositionInLine = 23
+Reference: Object = regress_test_role SERVER s6 (USER_MAPPING), action = DROP, offset = 20926, line number = 469, charPositionInLine = 22
 Reference: action = RESET, offset = 20977, line number = 470, charPositionInLine = 0
 Reference: Object = postgresql (FOREIGN_DATA_WRAPPER), action = GRANT, offset = 21026, line number = 472, charPositionInLine = 36
 Reference: Object = foo (FOREIGN_DATA_WRAPPER), action = GRANT, offset = 21103, line number = 473, charPositionInLine = 36
@@ -385,12 +385,12 @@ Reference: Object = s6 (SERVER), action = ALTER, offset = 21615, line number = 4
 Reference: Object = s6 (SERVER), action = DROP, offset = 21687, line number = 482, charPositionInLine = 12
 Reference: Object = s6 (SERVER), action = GRANT, offset = 21778, line number = 483, charPositionInLine = 30
 Reference: Object = s9 (SERVER), action = GRANT, offset = 21851, line number = 484, charPositionInLine = 30
-Reference: Object = "public SERVER s6" (USER_MAPPING), action = CREATE, offset = 21900, line number = 485, charPositionInLine = 24
+Reference: Object = public SERVER s6 (USER_MAPPING), action = CREATE, offset = 21900, line number = 485, charPositionInLine = 24
 Reference: Object = s6 (SERVER), action = null, offset = 21914, line number = 485, charPositionInLine = 38
-Reference: Object = "public SERVER s9" (USER_MAPPING), action = CREATE, offset = 21973, line number = 486, charPositionInLine = 24
+Reference: Object = public SERVER s9 (USER_MAPPING), action = CREATE, offset = 21973, line number = 486, charPositionInLine = 24
 Reference: Object = s9 (SERVER), action = null, offset = 21987, line number = 486, charPositionInLine = 38
-Reference: Object = "regress_test_role SERVER s6" (USER_MAPPING), action = ALTER, offset = 22014, line number = 487, charPositionInLine = 23
-Reference: Object = "regress_test_role SERVER s6" (USER_MAPPING), action = DROP, offset = 22098, line number = 488, charPositionInLine = 22
+Reference: Object = regress_test_role SERVER s6 (USER_MAPPING), action = ALTER, offset = 22014, line number = 487, charPositionInLine = 23
+Reference: Object = regress_test_role SERVER s6 (USER_MAPPING), action = DROP, offset = 22098, line number = 488, charPositionInLine = 22
 Reference: action = RESET, offset = 22149, line number = 489, charPositionInLine = 0
 Reference: Object = foo (FOREIGN_DATA_WRAPPER), action = REVOKE, offset = 22199, line number = 491, charPositionInLine = 37
 Reference: Object = foo (FOREIGN_DATA_WRAPPER), action = REVOKE, offset = 22281, line number = 492, charPositionInLine = 37
@@ -400,7 +400,7 @@ Reference: Object = s10 (SERVER), action = CREATE, offset = 22448, line number =
 Reference: Object = foo (FOREIGN_DATA_WRAPPER), action = null, offset = 22473, line number = 495, charPositionInLine = 39
 Reference: Object = s9 (SERVER), action = ALTER, offset = 22520, line number = 496, charPositionInLine = 13
 Reference: Object = s9 (SERVER), action = GRANT, offset = 22568, line number = 497, charPositionInLine = 30
-Reference: Object = "current_user SERVER s9" (USER_MAPPING), action = CREATE, offset = 22617, line number = 498, charPositionInLine = 24
+Reference: Object = current_user SERVER s9 (USER_MAPPING), action = CREATE, offset = 22617, line number = 498, charPositionInLine = 24
 Reference: Object = s9 (SERVER), action = null, offset = 22637, line number = 498, charPositionInLine = 44
 Reference: Object = s9 (SERVER), action = DROP, offset = 22726, line number = 501, charPositionInLine = 12
 Reference: action = RESET, offset = 22739, line number = 503, charPositionInLine = 0
@@ -410,15 +410,15 @@ Reference: Object = s9 (SERVER), action = GRANT, offset = 22824, line number = 5
 Reference: action = SET, offset = 22857, line number = 506, charPositionInLine = 0
 Reference: Object = s9 (SERVER), action = ALTER, offset = 22906, line number = 507, charPositionInLine = 13
 Reference: Object = s9 (SERVER), action = GRANT, offset = 22996, line number = 508, charPositionInLine = 30
-Reference: Object = "current_user SERVER s9" (USER_MAPPING), action = CREATE, offset = 23065, line number = 509, charPositionInLine = 24
+Reference: Object = current_user SERVER s9 (USER_MAPPING), action = CREATE, offset = 23065, line number = 509, charPositionInLine = 24
 Reference: Object = s9 (SERVER), action = null, offset = 23085, line number = 509, charPositionInLine = 44
 Reference: Object = s9 (SERVER), action = DROP, offset = 23101, line number = 510, charPositionInLine = 12
 Reference: action = SET, offset = 23204, line number = 513, charPositionInLine = 0
 Reference: Object = s10 (SERVER), action = CREATE, offset = 23246, line number = 514, charPositionInLine = 14
 Reference: Object = foo (FOREIGN_DATA_WRAPPER), action = null, offset = 23271, line number = 514, charPositionInLine = 39
-Reference: Object = "public SERVER s10" (USER_MAPPING), action = CREATE, offset = 23300, line number = 515, charPositionInLine = 24
+Reference: Object = public SERVER s10 (USER_MAPPING), action = CREATE, offset = 23300, line number = 515, charPositionInLine = 24
 Reference: Object = s10 (SERVER), action = null, offset = 23314, line number = 515, charPositionInLine = 38
-Reference: Object = "regress_unprivileged_role SERVER s10" (USER_MAPPING), action = CREATE, offset = 23367, line number = 516, charPositionInLine = 24
+Reference: Object = regress_unprivileged_role SERVER s10 (USER_MAPPING), action = CREATE, offset = 23367, line number = 516, charPositionInLine = 24
 Reference: Object = s10 (SERVER), action = null, offset = 23400, line number = 516, charPositionInLine = 57
 Reference: action = RESET, offset = 23476, line number = 519, charPositionInLine = 0
 Reference: action = SET, offset = 23577, line number = 523, charPositionInLine = 0
@@ -568,7 +568,7 @@ Reference: Object = foreign_part (TABLE), action = DROP, offset = 31848, line nu
 Reference: Object = temp_parted (TABLE), action = DROP, offset = 31873, line number = 800, charPositionInLine = 11
 Reference: Object = foreign_schema (SCHEMA), action = DROP, offset = 31910, line number = 803, charPositionInLine = 12
 Reference: Object = t1 (SERVER), action = DROP, offset = 32015, line number = 805, charPositionInLine = 12
-Reference: Object = "regress_test_role SERVER s6" (USER_MAPPING), action = DROP, offset = 32049, line number = 806, charPositionInLine = 22
+Reference: Object = regress_test_role SERVER s6 (USER_MAPPING), action = DROP, offset = 32049, line number = 806, charPositionInLine = 22
 Reference: Object = foo (FOREIGN_DATA_WRAPPER), action = DROP, offset = 32105, line number = 808, charPositionInLine = 26
 Reference: Object = s8 (SERVER), action = DROP, offset = 32130, line number = 809, charPositionInLine = 12
 Reference: Object = postgresql (FOREIGN_DATA_WRAPPER), action = REVOKE, offset = 32309, line number = 814, charPositionInLine = 35

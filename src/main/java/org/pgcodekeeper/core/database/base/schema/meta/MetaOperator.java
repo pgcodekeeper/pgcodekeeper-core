@@ -49,7 +49,7 @@ public final class MetaOperator extends MetaStatement implements IOperator {
      * @param name       the operator name
      */
     public MetaOperator(String schemaName, String name) {
-        super(new GenericColumn(schemaName, name, DbObjType.OPERATOR));
+        super(new ObjectReference(schemaName, name, DbObjType.OPERATOR));
     }
 
     @Override

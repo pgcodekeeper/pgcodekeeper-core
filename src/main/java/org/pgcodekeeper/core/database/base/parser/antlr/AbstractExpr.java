@@ -116,7 +116,7 @@ public abstract class AbstractExpr {
      * and is not a reference to external table.<br>
      * null if the name is not found
      */
-    public Map.Entry<String, GenericColumn> findReference(String schema, String name, String column) {
+    public Map.Entry<String, ObjectReference> findReference(String schema, String name, String column) {
         return hasParent() ? parent.findReference(schema, name, column) : null;
     }
 
@@ -140,33 +140,33 @@ public abstract class AbstractExpr {
     /**
      * Adds a dependency with parser rule context as a reference
      *
-     * @param genericColumn object location
+     * @param objectReference object location
      * @param ctx parser rule context
      */
-    public void addReference(GenericColumn genericColumn, ParserRuleContext ctx) {
-        addDependency(genericColumn, ctx, LocationType.LOCAL_REF);
+    public void addReference(ObjectReference objectReference, ParserRuleContext ctx) {
+        addDependency(objectReference, ctx, LocationType.LOCAL_REF);
     }
 
     /**
      * Adds a dependency with parser rule context as a variable
      *
-     * @param genericColumn object location
+     * @param objectReference object location
      * @param ctx rule context
      */
-    public void addVariable(GenericColumn genericColumn, ParserRuleContext ctx) {
-        addDependency(genericColumn, ctx, LocationType.VARIABLE);
+    public void addVariable(ObjectReference objectReference, ParserRuleContext ctx) {
+        addDependency(objectReference, ctx, LocationType.VARIABLE);
     }
 
     /**
      * Adds a dependency with parser rule context and dependency type
      *
-     * @param genericColumn object location
+     * @param objectReference object location
      * @param ctx rule context
      * @param type dependency type
      */
-    public void addDependency(GenericColumn genericColumn, ParserRuleContext ctx, LocationType type) {
+    public void addDependency(ObjectReference objectReference, ParserRuleContext ctx, LocationType type) {
         addDependency(new Builder()
-                .setObject(genericColumn)
+                .setReference(objectReference)
                 .setCtx(ctx)
                 .setLocationType(type)
                 .setAlias(ctx.getText())
@@ -176,16 +176,16 @@ public abstract class AbstractExpr {
     /**
      * Adds a non-system dependency
      *
-     * @param genericColumn object location
+     * @param objectReference object location
      * @param ctx rule context
      */
-    public void addDependency(GenericColumn genericColumn, ParserRuleContext ctx) {
-        if (isSystemSchema(genericColumn.schema())) {
+    public void addDependency(ObjectReference objectReference, ParserRuleContext ctx) {
+        if (isSystemSchema(objectReference.schema())) {
             return;
         }
 
         var dep = new Builder()
-                .setObject(genericColumn)
+                .setReference(objectReference)
                 .setCtx(ctx)
                 .build();
         addDependency(dep);

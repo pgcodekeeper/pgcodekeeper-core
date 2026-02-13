@@ -50,7 +50,7 @@ public final class PgRulesReader extends PgAbstractSearchPathJdbcReader {
     private PgRule getRule(ResultSet res, ISchema schema, String tableName) throws SQLException {
         String schemaName = schema.getName();
         String ruleName = res.getString("rulename");
-        loader.setCurrentObject(new GenericColumn(schemaName, tableName, ruleName, DbObjType.RULE));
+        loader.setCurrentObject(new ObjectReference(schemaName, tableName, ruleName, DbObjType.RULE));
 
         String command = res.getString("rule_string");
         IPgJdbcReader.checkObjectValidity(command, DbObjType.RULE, ruleName);

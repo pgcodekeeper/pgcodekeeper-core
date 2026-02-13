@@ -47,12 +47,12 @@ public class MetaStatement implements IStatement, Serializable {
     }
 
     /**
-     * Creates a new metadata statement from a generic column.
+     * Creates a new metadata statement from object reference.
      *
-     * @param column the generic column information
+     * @param reference object reference
      */
-    public MetaStatement(GenericColumn column) {
-        this(new ObjectLocation.Builder().setObject(column).build());
+    public MetaStatement(ObjectReference reference) {
+        this(new ObjectLocation.Builder().setReference(reference).build());
     }
 
     @Override
@@ -62,7 +62,7 @@ public class MetaStatement implements IStatement, Serializable {
 
     @Override
     public String getBareName() {
-        return object.getObjName();
+        return object.getName();
     }
 
     @Override
@@ -71,12 +71,10 @@ public class MetaStatement implements IStatement, Serializable {
     }
 
     /**
-     * Returns the generic column information for this statement.
-     *
-     * @return the generic column
+     * @return object reference for this statement
      */
-    public GenericColumn getGenericColumn() {
-        return object.getObj();
+    public ObjectReference getObjectReference() {
+        return object.getObjectReference();
     }
 
     /**
@@ -90,7 +88,7 @@ public class MetaStatement implements IStatement, Serializable {
 
     @Override
     public String getQualifiedName() {
-        return getGenericColumn().getQualifiedName();
+        return getObjectReference().toString();
     }
 
     @Override
@@ -169,12 +167,12 @@ public class MetaStatement implements IStatement, Serializable {
     }
 
     @Override
-    public void addDependency(GenericColumn dependency) {
+    public void addDependency(ObjectReference dependency) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Set<GenericColumn> getDependencies() {
+    public Set<ObjectReference> getDependencies() {
         throw new UnsupportedOperationException();
     }
 

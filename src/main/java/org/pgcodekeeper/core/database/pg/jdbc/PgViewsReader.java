@@ -47,7 +47,7 @@ public final class PgViewsReader extends PgAbstractSearchPathJdbcReader {
     protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String schemaName = schema.getName();
         String viewName = res.getString("relname");
-        loader.setCurrentObject(new GenericColumn(schemaName, viewName, DbObjType.VIEW));
+        loader.setCurrentObject(new ObjectReference(schemaName, viewName, DbObjType.VIEW));
 
         PgAbstractView v;
 

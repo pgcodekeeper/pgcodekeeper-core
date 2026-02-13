@@ -45,7 +45,7 @@ Reference: Object = hstore (EXTENSION), action = CREATE, offset = 2093, line num
 Reference: Object = public (SCHEMA), action = null, offset = 2107, line number = 43, charPositionInLine = 31
 Reference: Object = addr_fdw (FOREIGN_DATA_WRAPPER), action = CREATE, offset = 2159, line number = 44, charPositionInLine = 28
 Reference: action = CREATE LANGUAGE, offset = 2169, line number = 45, charPositionInLine = 0
-Reference: Object = "integer" (SERVER), action = CREATE, offset = 2239, line number = 46, charPositionInLine = 14
+Reference: Object = integer (SERVER), action = CREATE, offset = 2239, line number = 46, charPositionInLine = 14
 Reference: Object = addr_fdw (FOREIGN_DATA_WRAPPER), action = null, offset = 2270, line number = 46, charPositionInLine = 45
 Reference: Object = addr_fserv (SERVER), action = CREATE, offset = 2294, line number = 47, charPositionInLine = 14
 Reference: Object = addr_fdw (FOREIGN_DATA_WRAPPER), action = null, offset = 2326, line number = 47, charPositionInLine = 46
@@ -76,8 +76,8 @@ Reference: Object = addr_nsp (SCHEMA), action = null, offset = 3676, line number
 Reference: Object = addr_nsp.gentable (TABLE), action = null, offset = 3685, line number = 66, charPositionInLine = 43
 Reference: Object = addr_nsp (SCHEMA), action = null, offset = 3725, line number = 66, charPositionInLine = 83
 Reference: Object = addr_nsp.trig() (FUNCTION), action = null, offset = 3734, line number = 66, charPositionInLine = 92
-Reference: Object = "regress_addr_user SERVER integer" (USER_MAPPING), action = CREATE, offset = 3766, line number = 67, charPositionInLine = 24
-Reference: Object = "integer" (SERVER), action = null, offset = 3791, line number = 67, charPositionInLine = 49
+Reference: Object = regress_addr_user SERVER integer (USER_MAPPING), action = CREATE, offset = 3766, line number = 67, charPositionInLine = 24
+Reference: Object = integer (SERVER), action = null, offset = 3791, line number = 67, charPositionInLine = 49
 Reference: action = CREATE USER, offset = 3802, line number = 68, charPositionInLine = 0
 Reference: Object = addr_nsp (SCHEMA), action = null, offset = 3845, line number = 69, charPositionInLine = 12
 Reference: Object = addr_nsp.genview (VIEW), action = CREATE, offset = 3854, line number = 69, charPositionInLine = 21

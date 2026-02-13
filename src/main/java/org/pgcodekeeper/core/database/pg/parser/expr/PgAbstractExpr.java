@@ -83,42 +83,42 @@ public abstract class PgAbstractExpr extends AbstractExpr {
         return null;
     }
 
-    protected GenericColumn addRelationDepcy(List<ParserRuleContext> ids) {
+    protected ObjectReference addRelationDepcy(List<ParserRuleContext> ids) {
         return addDepcy(ids, DbObjType.TABLE, null);
     }
 
-    protected GenericColumn addDepcy(List<ParserRuleContext> ids, DbObjType type, Token start) {
+    protected ObjectReference addDepcy(List<ParserRuleContext> ids, DbObjType type, Token start) {
         ParserRuleContext schemaCtx = QNameParser.getSchemaNameCtx(ids);
         ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
         String name = nameCtx.getText();
 
         if (schemaCtx == null) {
-            return new GenericColumn(Consts.PG_CATALOG, name, type);
+            return new ObjectReference(Consts.PG_CATALOG, name, type);
         }
         String schemaName = schemaCtx.getText();
-        GenericColumn depcy = new GenericColumn(schemaName, name, type);
-        addDepcy(new GenericColumn(schemaName, DbObjType.SCHEMA), schemaCtx, start);
+        ObjectReference depcy = new ObjectReference(schemaName, name, type);
+        addDepcy(new ObjectReference(schemaName, DbObjType.SCHEMA), schemaCtx, start);
         addDepcy(depcy, nameCtx, start);
         return depcy;
     }
 
-    protected GenericColumn addTypeDepcy(Data_typeContext type) {
+    protected ObjectReference addTypeDepcy(Data_typeContext type) {
         Schema_qualified_name_nontypeContext typeName = type.predefined_type().schema_qualified_name_nontype();
         if (typeName == null) {
-            return new GenericColumn(Consts.PG_CATALOG, PgParserAbstract.getTypeName(type),
+            return new ObjectReference(Consts.PG_CATALOG, PgParserAbstract.getTypeName(type),
                     DbObjType.TYPE);
         }
         return addTypeDepcy(typeName);
     }
 
-    protected GenericColumn addTypeDepcy(Schema_qualified_name_nontypeContext typeName) {
+    protected ObjectReference addTypeDepcy(Schema_qualified_name_nontypeContext typeName) {
         return addDepcy(PgParserAbstract.getIdentifiers(typeName), DbObjType.TYPE, null);
     }
 
-    protected void addDepcy(GenericColumn depcy, ParserRuleContext ctx, Token start) {
+    protected void addDepcy(ObjectReference depcy, ParserRuleContext ctx, Token start) {
         if (!isSystemSchema(depcy.schema())) {
             ObjectLocation loc = new ObjectLocation.Builder()
-                    .setObject(depcy)
+                    .setReference(depcy)
                     .setCtx(ctx)
                     .build();
             if (start instanceof CodeUnitToken codeUnitStart) {
@@ -156,16 +156,16 @@ public abstract class PgAbstractExpr extends AbstractExpr {
         String schemaName = schemaNameCtx == null ? null : schemaNameCtx.getText();
 
         String columnType = IPgTypesSetManually.COLUMN;
-        Entry<String, GenericColumn> ref = findReference(schemaName, columnParent, columnName);
+        Entry<String, ObjectReference> ref = findReference(schemaName, columnParent, columnName);
         List<Pair<String, String>> refComplex;
         if (ref != null) {
-            GenericColumn referencedTable = ref.getValue();
+            ObjectReference referencedTable = ref.getValue();
             if (referencedTable != null) {
                 if (schemaNameCtx != null) {
-                    addDependency(new GenericColumn(referencedTable.schema(), DbObjType.SCHEMA), schemaNameCtx);
+                    addDependency(new ObjectReference(referencedTable.schema(), DbObjType.SCHEMA), schemaNameCtx);
                 }
 
-                if (referencedTable.getObjName().equals(columnParent)) {
+                if (referencedTable.getName().equals(columnParent)) {
                     addDependency(referencedTable, columnParentCtx);
                 } else {
                     addReference(referencedTable, columnParentCtx);
@@ -264,7 +264,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
         }
 
         // hack
-        return cols.peek(col -> addDependency(new GenericColumn(relSchemaName,
+        return cols.peek(col -> addDependency(new ObjectReference(relSchemaName,
                 relation.getName(), col.getFirst(), DbObjType.COLUMN), null));
     }
 
@@ -285,7 +285,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
             }
             IRelation rel = relCol.getFirst();
             col = relCol.getSecond();
-            addDependency(new GenericColumn(rel.getSchemaName(), rel.getName(),
+            addDependency(new ObjectReference(rel.getSchemaName(), rel.getName(),
                     col.getFirst(), DbObjType.COLUMN), id);
         }
         return col.copyMod();
@@ -303,7 +303,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
     }
 
     protected void addFunctionDepcy(IFunction function, ParserRuleContext ctx) {
-        addDependency(new GenericColumn(function.getSchemaName(), function.getName(),
+        addDependency(new ObjectReference(function.getSchemaName(), function.getName(),
                 function.getStatementType()), ctx);
     }
 
@@ -322,7 +322,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
         if (isSystemSchema(schemaName)) {
             return;
         }
-        addDepcy(new GenericColumn(schemaName, DbObjType.SCHEMA), schemaCtx, start);
+        addDepcy(new ObjectReference(schemaName, DbObjType.SCHEMA), schemaCtx, start);
 
         ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
         String name = nameCtx.getText();
@@ -332,7 +332,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
 
         for (IStatement statement : availableStatements) {
             if (statement.getBareName().equals(name)) {
-                addDepcy(new GenericColumn(schemaName, statement.getName(), type), nameCtx, start);
+                addDepcy(new ObjectReference(schemaName, statement.getName(), type), nameCtx, start);
                 break;
             }
         }
@@ -362,17 +362,17 @@ public abstract class PgAbstractExpr extends AbstractExpr {
         if (isSystemSchema(schemaName)) {
             return;
         }
-        addDepcy(new GenericColumn(schemaName, DbObjType.SCHEMA), schemaCtx, start);
+        addDepcy(new ObjectReference(schemaName, DbObjType.SCHEMA), schemaCtx, start);
 
         ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
         String name = nameCtx.getText();
         String fullName = fullNameOperator.apply(name);
-        addDepcy(new GenericColumn(schemaName, fullName, type), nameCtx, start);
+        addDepcy(new ObjectReference(schemaName, fullName, type), nameCtx, start);
     }
 
     protected void addSchemaDepcy(List<ParserRuleContext> ids, Token start) {
         ParserRuleContext ctx = QNameParser.getFirstNameCtx(ids);
-        addDepcy(new GenericColumn(ctx.getText(), DbObjType.SCHEMA), ctx, start);
+        addDepcy(new ObjectReference(ctx.getText(), DbObjType.SCHEMA), ctx, start);
     }
 
     protected Collection<IFunction> availableFunctions(String schemaName) {

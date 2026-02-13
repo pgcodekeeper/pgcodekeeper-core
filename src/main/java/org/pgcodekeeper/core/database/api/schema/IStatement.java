@@ -124,12 +124,12 @@ public interface IStatement {
      *
      * @param dependency the dependency to add
      */
-    void addDependency(GenericColumn dependency);
+    void addDependency(ObjectReference dependency);
 
     /**
      * @return all object dependencies
      */
-    Set<GenericColumn> getDependencies();
+    Set<ObjectReference> getDependencies();
 
     /**
      * Gets an unmodifiable set of privileges for this statement.
@@ -234,8 +234,8 @@ public interface IStatement {
      */
     boolean canDropBeforeCreate();
 
-     default GenericColumn toGenericColumn(DbObjType type) {
-         return new GenericColumn(getName(), type);
+     default ObjectReference toObjectReference() {
+         return new ObjectReference(getName(), getStatementType());
      }
 
     /**

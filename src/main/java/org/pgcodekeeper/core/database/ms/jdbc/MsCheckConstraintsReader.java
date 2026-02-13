@@ -41,7 +41,7 @@ public class MsCheckConstraintsReader extends AbstractSearchPathJdbcReader<MsJdb
     @Override
     protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String name = res.getString("name");
-        loader.setCurrentObject(new GenericColumn(schema.getName(), name, DbObjType.CONSTRAINT));
+        loader.setCurrentObject(new ObjectReference(schema.getName(), name, DbObjType.CONSTRAINT));
 
         MsTable table = (MsTable) schema.getChild(res.getString("table_name"), DbObjType.TABLE);
         if (table == null) {

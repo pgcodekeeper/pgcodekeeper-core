@@ -207,42 +207,36 @@ public final class MsDatabase extends MsAbstractStatement implements IDatabase {
         return Collections.unmodifiableCollection(schemas.values());
     }
 
-    /**
-     * Resolves and returns a database statement based on the provided generic column specification.
-     *
-     * @param gc the generic column specification containing type and naming information
-     * @return the resolved statement, or null if not found
-     */
     @Override
-    public IStatement getStatement(GenericColumn gc) {
-        DbObjType type = gc.type();
+    public IStatement getStatement(ObjectReference reference) {
+        DbObjType type = reference.type();
         if (type == DbObjType.DATABASE) {
             return this;
         }
 
         if (type.in(DbObjType.SCHEMA, DbObjType.USER, DbObjType.ROLE, DbObjType.ASSEMBLY)) {
-            return getChild(gc.schema(), type);
+            return getChild(reference.schema(), type);
         }
 
-        MsSchema s = getSchema(gc.schema());
+        MsSchema s = getSchema(reference.schema());
         if (s == null) {
             return null;
         }
 
         return switch (type) {
-            case SEQUENCE, VIEW -> s.getChild(gc.table(), type);
-            case TYPE -> resolveTypeCall(s, gc.table());
-            case FUNCTION, PROCEDURE -> resolveFunctionCall(s, gc.table());
-            case TABLE -> s.getRelation(gc.table());
-            case INDEX -> s.getIndexByName(gc.table());
+            case SEQUENCE, VIEW -> s.getChild(reference.table(), type);
+            case TYPE -> resolveTypeCall(s, reference.table());
+            case FUNCTION, PROCEDURE -> resolveFunctionCall(s, reference.table());
+            case TABLE -> s.getRelation(reference.table());
+            case INDEX -> s.getIndexByName(reference.table());
             // handled in getStatement, left here for consistency
             case COLUMN -> {
-                MsTable t = s.getTable(gc.table());
-                yield t == null ? null : t.getColumn(gc.column());
+                MsTable t = s.getTable(reference.table());
+                yield t == null ? null : t.getColumn(reference.column());
             }
             case STATISTICS, CONSTRAINT, TRIGGER -> {
-                var sc = s.getStatementContainer(gc.table());
-                yield sc == null ? null : sc.getChild(gc.column(), type);
+                var sc = s.getStatementContainer(reference.table());
+                yield sc == null ? null : sc.getChild(reference.column(), type);
             }
             default -> throw new IllegalStateException("Unhandled DbObjType: " + type);
         };

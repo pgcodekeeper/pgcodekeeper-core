@@ -47,7 +47,7 @@ public class ChSchemasReader extends AbstractJdbcReader<ChJdbcLoader> {
         if (loader.isIgnoredSchema(schemaName)) {
             return;
         }
-        loader.setCurrentObject(new GenericColumn(schemaName, DbObjType.SCHEMA));
+        loader.setCurrentObject(new ObjectReference(schemaName, DbObjType.SCHEMA));
         var schema = new ChSchema(schemaName);
         schema.setEngine(result.getString("engine_full"));
         loader.setComment(schema, result);

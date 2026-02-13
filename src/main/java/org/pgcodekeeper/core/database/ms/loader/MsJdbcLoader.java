@@ -142,7 +142,7 @@ public final class MsJdbcLoader extends AbstractJdbcLoader<MsDatabase> {
         StringBuilder sb = new StringBuilder();
 
         if (isUserDefined) {
-            statement.addDependency(new GenericColumn(schema, dataType, DbObjType.TYPE));
+            statement.addDependency(new ObjectReference(schema, dataType, DbObjType.TYPE));
             sb.append(MsDiffUtils.quoteName(schema)).append('.');
         }
 

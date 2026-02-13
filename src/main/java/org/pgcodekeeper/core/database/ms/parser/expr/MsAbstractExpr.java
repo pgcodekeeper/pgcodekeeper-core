@@ -42,7 +42,7 @@ public abstract class MsAbstractExpr extends AbstractExpr {
         this.schema = parent.schema;
     }
 
-    protected GenericColumn addObjectDepcy(Qualified_nameContext qualifiedName, DbObjType type) {
+    protected ObjectReference addObjectDepcy(Qualified_nameContext qualifiedName, DbObjType type) {
         IdContext nameCtx = qualifiedName.name;
         String relationName = nameCtx.getText();
         IdContext schemaCtx = qualifiedName.schema;
@@ -51,10 +51,10 @@ public abstract class MsAbstractExpr extends AbstractExpr {
             schemaName = schema;
         } else {
             schemaName = schemaCtx.getText();
-            addDependency(new GenericColumn(schemaName, DbObjType.SCHEMA), schemaCtx);
+            addDependency(new ObjectReference(schemaName, DbObjType.SCHEMA), schemaCtx);
         }
 
-        GenericColumn depcy = new GenericColumn(schemaName, relationName, type);
+        ObjectReference depcy = new ObjectReference(schemaName, relationName, type);
         addDependency(depcy, nameCtx);
         return depcy;
     }
@@ -85,7 +85,7 @@ public abstract class MsAbstractExpr extends AbstractExpr {
 
             IRelation rel = relCol.getFirst();
             Pair<String, String> col = relCol.getSecond();
-            addDependency(new GenericColumn(rel.getSchemaName(), rel.getName(), col.getFirst(), DbObjType.COLUMN),
+            addDependency(new ObjectReference(rel.getSchemaName(), rel.getName(), col.getFirst(), DbObjType.COLUMN),
                     columnCtx);
             return;
         }
@@ -94,7 +94,7 @@ public abstract class MsAbstractExpr extends AbstractExpr {
         String schemaName = null;
         if (schemaCtx != null) {
             schemaName = schemaCtx.getText();
-            addDependency(new GenericColumn(schemaName, DbObjType.SCHEMA), schemaCtx);
+            addDependency(new ObjectReference(schemaName, DbObjType.SCHEMA), schemaCtx);
         }
 
         IdContext relationCtx = tableName.name;
@@ -102,7 +102,7 @@ public abstract class MsAbstractExpr extends AbstractExpr {
 
         var ref = findReference(schemaName, relationName, null);
         if (ref != null) {
-            GenericColumn table = ref.getValue();
+            ObjectReference table = ref.getValue();
             if (table != null) {
                 if (relationName.equals(table.table())) {
                     addDependency(table, relationCtx);
@@ -110,7 +110,7 @@ public abstract class MsAbstractExpr extends AbstractExpr {
                     addReference(table, relationCtx);
                 }
 
-                addDependency(new GenericColumn(table.schema(), table.table(),
+                addDependency(new ObjectReference(table.schema(), table.table(),
                         columnName, DbObjType.COLUMN), columnCtx);
             }
         } else {

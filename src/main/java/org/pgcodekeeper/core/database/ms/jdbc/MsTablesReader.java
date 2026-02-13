@@ -44,7 +44,7 @@ public class MsTablesReader extends AbstractSearchPathJdbcReader<MsJdbcLoader> i
     @Override
     protected void processResult(ResultSet res, ISchema schema) throws SQLException, XmlReaderException {
         String tableName = res.getString("name");
-        loader.setCurrentObject(new GenericColumn(schema.getName(), tableName, DbObjType.TABLE));
+        loader.setCurrentObject(new ObjectReference(schema.getName(), tableName, DbObjType.TABLE));
         MsTable table = new MsTable(tableName);
 
         if (res.getBoolean("is_memory_optimized")) {
@@ -144,7 +144,7 @@ public class MsTablesReader extends AbstractSearchPathJdbcReader<MsJdbcLoader> i
         }
         sysVersioning.append(')');
         table.setSysVersioning(sysVersioning.toString());
-        table.addDependency(new GenericColumn(histSchemaName, histTableName, DbObjType.TABLE));
+        table.addDependency(new ObjectReference(histSchemaName, histTableName, DbObjType.TABLE));
     }
 
     // 'MsType type' used only for MsTypesReader processing to extract type depcy

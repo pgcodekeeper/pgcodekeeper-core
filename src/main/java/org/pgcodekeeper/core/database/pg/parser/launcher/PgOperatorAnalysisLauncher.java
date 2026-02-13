@@ -29,7 +29,7 @@ import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
  */
 public class PgOperatorAnalysisLauncher extends AbstractAnalysisLauncher {
 
-    private final GenericColumn function;
+    private final ObjectReference function;
 
     /**
      * Creates an operator analyzer.
@@ -38,7 +38,7 @@ public class PgOperatorAnalysisLauncher extends AbstractAnalysisLauncher {
      * @param function the underlying function implementation
      * @param location the source location identifier
      */
-    public PgOperatorAnalysisLauncher(AbstractStatement stmt, GenericColumn function, String location) {
+    public PgOperatorAnalysisLauncher(AbstractStatement stmt, ObjectReference function, String location) {
         super(stmt, null, location);
         this.function = function;
     }

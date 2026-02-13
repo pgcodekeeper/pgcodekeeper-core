@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.database.ms.loader;
 
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
@@ -87,7 +87,7 @@ public class MsProjectLoader extends AbstractProjectLoader<MsDatabase> {
         if (!db.containsSchema(Consts.DBO)) {
             MsSchema schema = new MsSchema(Consts.DBO);
             ObjectLocation loc = new ObjectLocation.Builder()
-                    .setObject(new GenericColumn(Consts.DBO, DbObjType.SCHEMA))
+                    .setReference(new ObjectReference(Consts.DBO, DbObjType.SCHEMA))
                     .build();
 
             schema.setLocation(loc);

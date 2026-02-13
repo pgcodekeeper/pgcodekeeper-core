@@ -42,7 +42,7 @@ public final class MetaCast extends MetaStatement implements ICast {
      * @param context the casting context
      */
     public MetaCast(String source, String target, CastContext context) {
-        super(new GenericColumn(ICast.getSimpleName(source, target), DbObjType.CAST));
+        super(new ObjectReference(ICast.getSimpleName(source, target), DbObjType.CAST));
         this.source = source;
         this.target = target;
         this.context = context;

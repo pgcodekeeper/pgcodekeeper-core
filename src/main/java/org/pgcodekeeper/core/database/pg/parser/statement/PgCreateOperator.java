@@ -124,9 +124,9 @@ public final class PgCreateOperator extends PgParserAbstract {
         addSafe(getSchemaSafe(ids), oper, ids);
     }
 
-    private GenericColumn getOperatorFunction(PgOperator oper, List<ParserRuleContext> ids) {
+    private ObjectReference getOperatorFunction(PgOperator oper, List<ParserRuleContext> ids) {
         String name = QNameParser.getFirstName(ids) + oper.getArguments();
-        return new GenericColumn(QNameParser.getSchemaName(ids), name, DbObjType.FUNCTION);
+        return new ObjectReference(QNameParser.getSchemaName(ids), name, DbObjType.FUNCTION);
     }
 
     @Override

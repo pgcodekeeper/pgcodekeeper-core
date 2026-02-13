@@ -71,7 +71,7 @@ public final class PgTriggersReader extends PgAbstractSearchPathJdbcReader {
             return;
         }
 
-        loader.setCurrentObject(new GenericColumn(schemaName, tableName, triggerName, DbObjType.TRIGGER));
+        loader.setCurrentObject(new ObjectReference(schemaName, tableName, triggerName, DbObjType.TRIGGER));
         PgTrigger t = new PgTrigger(triggerName);
 
         int firingConditions = res.getInt("tgtype");
@@ -157,7 +157,7 @@ public final class PgTriggersReader extends PgAbstractSearchPathJdbcReader {
         if (arrCols != null) {
             for (String colName : arrCols) {
                 t.addUpdateColumn(colName);
-                t.addDependency(new GenericColumn(schemaName, tableName, colName, DbObjType.COLUMN));
+                t.addDependency(new ObjectReference(schemaName, tableName, colName, DbObjType.COLUMN));
             }
         }
 

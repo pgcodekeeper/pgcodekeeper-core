@@ -58,12 +58,12 @@ public class MsInsert extends MsAbstractExprWithNmspc<Insert_statementContext> {
 
         Qualified_nameContext tableName = insert.qualified_name();
         if (tableName != null) {
-            GenericColumn gc = addNameReference(tableName, null);
+            ObjectReference ref = addNameReference(tableName, null);
             Name_list_in_bracketsContext columns;
 
-            if (gc != null && (columns = insert.name_list_in_brackets()) != null) {
+            if (ref != null && (columns = insert.name_list_in_brackets()) != null) {
                 for (IdContext id : columns.id()) {
-                    addDependency(new GenericColumn(gc.schema(), gc.table(), id.getText(), DbObjType.COLUMN), id);
+                    addDependency(new ObjectReference(ref.schema(), ref.table(), id.getText(), DbObjType.COLUMN), id);
                 }
             }
         }

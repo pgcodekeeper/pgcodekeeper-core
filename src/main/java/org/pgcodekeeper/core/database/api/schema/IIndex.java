@@ -28,8 +28,8 @@ public interface IIndex extends ISubElement, ISimpleOptionContainer, ISimpleColu
     }
 
     @Override
-    default GenericColumn toGenericColumn(DbObjType type) {
-        return new GenericColumn(getContainingSchema().getName(), getName(), type);
+    default ObjectReference toObjectReference() {
+        return new ObjectReference(getContainingSchema().getName(), getName(), getStatementType());
     }
 
     /**

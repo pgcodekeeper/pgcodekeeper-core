@@ -46,7 +46,7 @@ public class MsAssembliesReader extends AbstractJdbcReader<MsJdbcLoader> impleme
     @Override
     protected void processResult(ResultSet res) throws SQLException, XmlReaderException {
         String name = res.getString("name");
-        loader.setCurrentObject(new GenericColumn(name, DbObjType.ASSEMBLY));
+        loader.setCurrentObject(new ObjectReference(name, DbObjType.ASSEMBLY));
 
         MsAssembly ass = new MsAssembly(name);
         for (MsXmlReader bin : MsXmlReader.readXML(res.getString("binaries"))) {

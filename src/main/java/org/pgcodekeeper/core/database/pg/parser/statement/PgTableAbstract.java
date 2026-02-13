@@ -354,7 +354,7 @@ public abstract class PgTableAbstract extends PgParserAbstract {
         String refTableName = QNameParser.getFirstName(ids);
 
         ObjectLocation loc = addObjReference(ids, DbObjType.TABLE, null);
-        GenericColumn fTable = loc.getObj();
+        ObjectReference fTable = loc.getObjectReference();
         constrFk.setForeignSchema(refSchemaName);
         constrFk.setForeignTable(refTableName);
         constrFk.addDependency(fTable);
@@ -362,17 +362,17 @@ public abstract class PgTableAbstract extends PgParserAbstract {
         var cols = body.col_period;
         if (columnName != null) {
             constrFk.addColumn(columnName);
-            constrFk.addDependency(new GenericColumn(schemaName, tableName, columnName, DbObjType.COLUMN));
+            constrFk.addDependency(new ObjectReference(schemaName, tableName, columnName, DbObjType.COLUMN));
         } else if (cols != null) {
             for (Schema_qualified_nameContext name : cols.schema_qualified_name()) {
                 String colName = QNameParser.getFirstName(getIdentifiers(name));
-                constrFk.addDependency(new GenericColumn(schemaName, tableName, colName, DbObjType.COLUMN));
+                constrFk.addDependency(new ObjectReference(schemaName, tableName, colName, DbObjType.COLUMN));
                 constrFk.addColumn(colName);
             }
             if (cols.name_with_period() != null) {
                 String colName = QNameParser.getFirstName(
                         getIdentifiers(cols.name_with_period().schema_qualified_name()));
-                constrFk.addDependency(new GenericColumn(schemaName, tableName, colName, DbObjType.COLUMN));
+                constrFk.addDependency(new ObjectReference(schemaName, tableName, colName, DbObjType.COLUMN));
                 constrFk.setPeriodColumn(colName);
             }
         }
@@ -388,13 +388,13 @@ public abstract class PgTableAbstract extends PgParserAbstract {
             for (Schema_qualified_nameContext column : columns) {
                 var fColumn = QNameParser.getFirstName(getIdentifiers(column));
                 constrFk.addForeignColumn(fColumn);
-                constrFk.addDependency(new GenericColumn(refSchemaName, refTableName, fColumn, DbObjType.COLUMN));
+                constrFk.addDependency(new ObjectReference(refSchemaName, refTableName, fColumn, DbObjType.COLUMN));
             }
             if (refs.name_with_period() != null) {
                 var periodColName = QNameParser.getFirstName(
                         getIdentifiers(refs.name_with_period().schema_qualified_name()));
                 constrFk.setPeriodRefColumn(periodColName);
-                constrFk.addDependency(new GenericColumn(refSchemaName, refTableName, periodColName, DbObjType.COLUMN));
+                constrFk.addDependency(new ObjectReference(refSchemaName, refTableName, periodColName, DbObjType.COLUMN));
             }
         }
 
@@ -433,18 +433,18 @@ public abstract class PgTableAbstract extends PgParserAbstract {
 
         if (colName != null) {
             constrPk.addColumn(colName);
-            constrPk.addDependency(new GenericColumn(schemaName, tableName, colName, DbObjType.COLUMN));
+            constrPk.addDependency(new ObjectReference(schemaName, tableName, colName, DbObjType.COLUMN));
         } else {
             var cols = body.col_overlaps;
             for (Schema_qualified_nameContext name : cols.schema_qualified_name()) {
                 String columnName = QNameParser.getFirstName(getIdentifiers(name));
-                constrPk.addDependency(new GenericColumn(schemaName, tableName, columnName, DbObjType.COLUMN));
+                constrPk.addDependency(new ObjectReference(schemaName, tableName, columnName, DbObjType.COLUMN));
                 constrPk.addColumn(columnName);
             }
             if (cols.name_without_overlaps() != null) {
                 String withoutOverlaps = QNameParser.getFirstName(getIdentifiers(cols.name_without_overlaps()
                         .schema_qualified_name()));
-                constrPk.addDependency(new GenericColumn(schemaName, tableName, withoutOverlaps, DbObjType.COLUMN));
+                constrPk.addDependency(new ObjectReference(schemaName, tableName, withoutOverlaps, DbObjType.COLUMN));
                 constrPk.setWithoutOverlapsColumn(withoutOverlaps);
             }
         }

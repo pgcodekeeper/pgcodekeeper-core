@@ -19,7 +19,6 @@ import java.util.*;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
 import org.pgcodekeeper.core.database.ms.schema.*;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -66,7 +65,7 @@ public final class MsCreateStatistics extends MsParserAbstract {
         for (var col : ctx.name_list_in_brackets().id()) {
             var colName = col.getText();
             stat.addCol(colName);
-            stat.addDependency(new GenericColumn(schemaCtx != null ? schemaCtx.getText() : null,
+            stat.addDependency(new ObjectReference(schemaCtx != null ? schemaCtx.getText() : null,
                     parentCtx.getText(), colName, DbObjType.COLUMN));
         }
 

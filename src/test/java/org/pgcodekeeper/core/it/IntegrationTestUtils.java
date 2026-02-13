@@ -88,12 +88,16 @@ public final class IntegrationTestUtils {
             FullAnalyze.fullAnalyze(db, loader.getErrors());
         }
 
-        var errors = loader.getErrors().stream()
+        assertErrors(loader.getErrors());
+        return db;
+    }
+
+    public static void assertErrors(List<Object> errors) {
+        var errorsString = errors.stream()
         .map(Object::toString)
         .collect(Collectors.joining(System.lineSeparator()));
 
-        Assertions.assertEquals("", errors, "Test resource caused loader errors!");
-        return db;
+        Assertions.assertEquals("", errorsString);
     }
 
     public static void assertDiffSame(IDatabase db, String template, ISettings settings)
@@ -184,10 +188,10 @@ public final class IntegrationTestUtils {
 
         for (var sel : selectedObjects.entrySet()) {
             String[] arr = Arrays.copyOf(sel.getKey().split("-"), 3);
-            var col = new GenericColumn(arr[0], arr[1], arr[2], sel.getValue());
-            var stmt = newDbFull.getStatement(col);
+            var ref = new ObjectReference(arr[0], arr[1], arr[2], sel.getValue());
+            var stmt = newDbFull.getStatement(ref);
             if (null == stmt) {
-                stmt = oldDbFull.getStatement(col);
+                stmt = oldDbFull.getStatement(ref);
             }
             tree.findElement(stmt).setSelected(true);
         }
@@ -199,9 +203,9 @@ public final class IntegrationTestUtils {
         for (Map.Entry<String, Set<ObjectLocation>> entry : refs.entrySet()) {
             entry.getValue().stream().sorted(Comparator.comparingInt(ContextLocation::getOffset)).forEach(loc -> {
                 sb.append("Reference: ");
-                GenericColumn col = loc.getObj();
-                if (col != null) {
-                    sb.append("Object = ").append(col).append(", ");
+                ObjectReference ref = loc.getObjectReference();
+                if (ref != null) {
+                    sb.append("Object = ").append(ref).append(", ");
                 }
                 sb.append("action = ").append(loc.getAction()).append(", ");
                 sb.append("offset = ").append(loc.getOffset()).append(", ");

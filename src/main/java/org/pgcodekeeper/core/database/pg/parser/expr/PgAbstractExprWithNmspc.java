@@ -45,13 +45,13 @@ public abstract class PgAbstractExprWithNmspc<T extends ParserRuleContext> exten
      * String-null pairs keep track of internal query names that have only the
      * Alias.
      */
-    protected final Map<String, GenericColumn> namespace = new LinkedHashMap<>();
+    protected final Map<String, ObjectReference> namespace = new LinkedHashMap<>();
     /**
      * Unaliased namespace keeps track of tables that have no Alias.<br>
      * It has to be separate since same-named unaliased tables from different
      * schemas can be used, requiring qualification.
      */
-    protected final Set<GenericColumn> unaliasedNamespace = new LinkedHashSet<>();
+    protected final Set<ObjectReference> unaliasedNamespace = new LinkedHashSet<>();
     /**
      * Column alias' are in a separate sets (per table) since they have two
      * values as the Key. This is not a Map because we don't connect column
@@ -109,20 +109,20 @@ public abstract class PgAbstractExprWithNmspc<T extends ParserRuleContext> exten
     }
 
     @Override
-    public Entry<String, GenericColumn> findReference(String schema, String name, String column) {
+    public Entry<String, ObjectReference> findReference(String schema, String name, String column) {
         if (!namespaceAccessible()) {
             return super.findReference(schema, name, column);
         }
 
         boolean found = false;
-        GenericColumn dereferenced = null;
+        ObjectReference dereferenced = null;
         if (schema == null && namespace.containsKey(name)) {
             found = true;
             dereferenced = namespace.get(name);
         } else if (!unaliasedNamespace.isEmpty()) {
             // simple empty check to save some allocations
             // it will almost always be empty
-            for (GenericColumn unaliased : unaliasedNamespace) {
+            for (ObjectReference unaliased : unaliasedNamespace) {
                 if (unaliased.table().equals(name) &&
                         (schema == null || unaliased.schema().equals(schema))) {
                     if (dereferenced == null) {
@@ -168,8 +168,8 @@ public abstract class PgAbstractExprWithNmspc<T extends ParserRuleContext> exten
         return ret != null ? ret : super.findColumn(name);
     }
 
-    private Pair<IRelation, Pair<String, String>> findColumn(String name, Collection<GenericColumn> refs) {
-        for (GenericColumn ref : refs) {
+    private Pair<IRelation, Pair<String, String>> findColumn(String name, Collection<ObjectReference> refs) {
+        for (ObjectReference ref : refs) {
             if (ref == null) {
                 continue;
             }
@@ -217,7 +217,7 @@ public abstract class PgAbstractExprWithNmspc<T extends ParserRuleContext> exten
      * @param name    var name (optional, may be null)
      * @param argType var type
      */
-    public void declareNamespaceVar(String alias, String name, GenericColumn argType) {
+    public void declareNamespaceVar(String alias, String name, ObjectReference argType) {
         if (Consts.PG_CATALOG.equals(argType.schema())) {
             String type = argType.table().toLowerCase(Locale.ROOT);
 
@@ -239,7 +239,7 @@ public abstract class PgAbstractExprWithNmspc<T extends ParserRuleContext> exten
 
         IRelation rel = findRelation(argType.schema(), argType.table());
         if (rel != null) {
-            GenericColumn ref = new GenericColumn(rel.getSchemaName(), rel.getName(), rel.getStatementType());
+            ObjectReference ref = new ObjectReference(rel.getSchemaName(), rel.getName(), rel.getStatementType());
             addReference(alias, ref);
             if (name != null) {
                 addReference(name, ref);
@@ -248,7 +248,7 @@ public abstract class PgAbstractExprWithNmspc<T extends ParserRuleContext> exten
             // treat all non-relations (custom types etc) as primitives for now
             // this is in line with current behavior when, e.g., selecting from tables
             // (the composite type's qualified name will be taken as is)
-            addVarToPrims(alias, name, argType.getQualifiedName());
+            addVarToPrims(alias, name, argType.getFullName());
         }
     }
 
@@ -270,7 +270,7 @@ public abstract class PgAbstractExprWithNmspc<T extends ParserRuleContext> exten
     /**
      * Clients may use this to set up pseudo-variable names before expression analysis.
      */
-    public boolean addReference(String alias, GenericColumn object) {
+    public boolean addReference(String alias, ObjectReference object) {
         boolean exists = namespace.containsKey(alias);
         if (exists) {
             log(Consts.DUPLICATE_ALIASES, alias);
@@ -280,7 +280,7 @@ public abstract class PgAbstractExprWithNmspc<T extends ParserRuleContext> exten
         return !exists;
     }
 
-    public void addRawTableReference(GenericColumn qualifiedTable) {
+    public void addRawTableReference(ObjectReference qualifiedTable) {
         boolean exists = !unaliasedNamespace.add(qualifiedTable);
         if (exists) {
             log(Messages.AbstractExprWithNmspc_log_dupl_unaliased_table,
@@ -304,8 +304,8 @@ public abstract class PgAbstractExprWithNmspc<T extends ParserRuleContext> exten
         }
     }
 
-    protected GenericColumn addNameReference(Schema_qualified_nameContext name, IdentifierContext alias,
-                                             List<IdentifierContext> columnAliases) {
+    protected ObjectReference addNameReference(Schema_qualified_nameContext name, IdentifierContext alias,
+                                               List<IdentifierContext> columnAliases) {
         List<ParserRuleContext> ids = PgParserAbstract.getIdentifiers(name);
         String firstName = QNameParser.getFirstName(ids);
 
@@ -313,7 +313,7 @@ public abstract class PgAbstractExprWithNmspc<T extends ParserRuleContext> exten
         if (ids.size() == 1) {
             cteList = findCte(firstName);
         }
-        GenericColumn depcy = null;
+        ObjectReference depcy = null;
         if (cteList == null) {
             depcy = addRelationDepcy(ids);
         }
@@ -395,7 +395,7 @@ public abstract class PgAbstractExprWithNmspc<T extends ParserRuleContext> exten
     }
 
     protected List<ModPair<String, String>> analyzeReturningSelectList(
-            PgSelect select, Returning_select_list_with_aliasContext ctx, GenericColumn implicitTable) {
+            PgSelect select, Returning_select_list_with_aliasContext ctx, ObjectReference implicitTable) {
         if (ctx == null) {
             return Collections.emptyList();
         }

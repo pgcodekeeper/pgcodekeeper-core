@@ -54,7 +54,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
     protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String schemaName = schema.getName();
         String tableName = res.getString("relname");
-        loader.setCurrentObject(new GenericColumn(schemaName, tableName, DbObjType.TABLE));
+        loader.setCurrentObject(new ObjectReference(schemaName, tableName, DbObjType.TABLE));
 
         long ofTypeOid = res.getLong("of_type");
         var t = getTable(res, tableName, ofTypeOid);
@@ -134,7 +134,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
             } else {
                 t = new PgPartitionForeignTable(tableName, serverName, partitionBound);
             }
-            t.addDependency(new GenericColumn(serverName, DbObjType.SERVER));
+            t.addDependency(new ObjectReference(serverName, DbObjType.SERVER));
         } else if (ofTypeOid != 0) {
             PgJdbcType jdbcOfType = loader.getCachedTypeByOid(ofTypeOid);
             String ofType = jdbcOfType.getFullName();

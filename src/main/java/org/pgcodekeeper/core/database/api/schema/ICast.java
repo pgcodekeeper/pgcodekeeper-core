@@ -68,7 +68,7 @@ public interface ICast extends IStatement {
     }
 
     @Override
-    default GenericColumn toGenericColumn(DbObjType type) {
-        return new GenericColumn(getSimpleName(getSource(), getTarget()), type);
+    default ObjectReference toObjectReference() {
+        return new ObjectReference(getSimpleName(getSource(), getTarget()), getStatementType());
     }
 }

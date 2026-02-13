@@ -48,7 +48,7 @@ public final class PgSequence extends PgAbstractStatement implements ISequence {
             new Pair<>("cache_value", BIGINT), new Pair<>("log_cnt", BIGINT),
             new Pair<>("is_cycled", "boolean"), new Pair<>("is_called", "boolean"));
 
-    private GenericColumn ownedBy;
+    private ObjectReference ownedBy;
     private boolean isLogged = true;
     private String cache = "1";
     private String dataType = BIGINT;
@@ -138,9 +138,12 @@ public final class PgSequence extends PgAbstractStatement implements ISequence {
             return;
         }
 
-        String sbSQL = ALTER_SEQUENCE + getQualifiedName() +
-                "\n\tOWNED BY " + ownedBy.getQualifiedName();
-        script.addStatement(sbSQL, SQLActionType.END);
+        String sb = ALTER_SEQUENCE + getQualifiedName() + "\n\tOWNED BY " +
+                quote(ownedBy.schema()) + '.' +
+                quote(ownedBy.table()) + '.' +
+                quote(ownedBy.column());
+
+        script.addStatement(sb, SQLActionType.END);
     }
 
     @Override
@@ -223,7 +226,7 @@ public final class PgSequence extends PgAbstractStatement implements ISequence {
             sbSQL.append("\n\tCYCLE");
         }
 
-        final GenericColumn newOwnedBy = newSequence.ownedBy;
+        var newOwnedBy = newSequence.ownedBy;
         if (newOwnedBy == null && ownedBy != null) {
             sbSQL.append("\n\tOWNED BY NONE");
         }
@@ -281,11 +284,11 @@ public final class PgSequence extends PgAbstractStatement implements ISequence {
      *
      * @return column reference or null if not owned
      */
-    public GenericColumn getOwnedBy() {
+    public ObjectReference getOwnedBy() {
         return ownedBy;
     }
 
-    public void setOwnedBy(final GenericColumn ownedBy) {
+    public void setOwnedBy(final ObjectReference ownedBy) {
         this.ownedBy = ownedBy;
         resetHash();
     }

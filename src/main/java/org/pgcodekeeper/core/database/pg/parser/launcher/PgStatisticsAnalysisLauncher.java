@@ -49,7 +49,7 @@ public class PgStatisticsAnalysisLauncher extends AbstractAnalysisLauncher {
 
         if (stmt instanceof PgStatistics stat) {
             expr.addRawTableReference(
-                    new GenericColumn(stat.getForeignSchema(), stat.getForeignTable(), DbObjType.TABLE));
+                    new ObjectReference(stat.getForeignSchema(), stat.getForeignTable(), DbObjType.TABLE));
         }
 
         expr.analyze(new PgVex((VexContext) ctx));

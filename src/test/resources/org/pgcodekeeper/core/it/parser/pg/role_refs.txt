@@ -59,60 +59,60 @@ Reference: action = SET, offset = 2710, line number = 58, charPositionInLine = 0
 Reference: Object = testagg2(smallint) (AGGREGATE), action = ALTER, offset = 2807, line number = 60, charPositionInLine = 16
 Reference: Object = testagg4(smallint) (AGGREGATE), action = ALTER, offset = 2917, line number = 62, charPositionInLine = 16
 Reference: Object = testagg5(smallint) (AGGREGATE), action = ALTER, offset = 2975, line number = 63, charPositionInLine = 16
-Reference: Object = "CURRENT_USER SERVER sv1" (USER_MAPPING), action = CREATE, offset = 3033, line number = 64, charPositionInLine = 24
+Reference: Object = CURRENT_USER SERVER sv1 (USER_MAPPING), action = CREATE, offset = 3033, line number = 64, charPositionInLine = 24
 Reference: Object = sv1 (SERVER), action = null, offset = 3053, line number = 64, charPositionInLine = 44
-Reference: Object = "current_user SERVER sv2" (USER_MAPPING), action = CREATE, offset = 3112, line number = 65, charPositionInLine = 24
+Reference: Object = current_user SERVER sv2 (USER_MAPPING), action = CREATE, offset = 3112, line number = 65, charPositionInLine = 24
 Reference: Object = sv2 (SERVER), action = null, offset = 3134, line number = 65, charPositionInLine = 46
-Reference: Object = "user SERVER sv4" (USER_MAPPING), action = CREATE, offset = 3258, line number = 67, charPositionInLine = 24
+Reference: Object = user SERVER sv4 (USER_MAPPING), action = CREATE, offset = 3258, line number = 67, charPositionInLine = 24
 Reference: Object = sv4 (SERVER), action = null, offset = 3272, line number = 67, charPositionInLine = 38
-Reference: Object = "SESSION_USER SERVER sv5" (USER_MAPPING), action = CREATE, offset = 3325, line number = 68, charPositionInLine = 24
+Reference: Object = SESSION_USER SERVER sv5 (USER_MAPPING), action = CREATE, offset = 3325, line number = 68, charPositionInLine = 24
 Reference: Object = sv5 (SERVER), action = null, offset = 3345, line number = 68, charPositionInLine = 44
-Reference: Object = "public SERVER sv6" (USER_MAPPING), action = CREATE, offset = 3404, line number = 69, charPositionInLine = 24
+Reference: Object = public SERVER sv6 (USER_MAPPING), action = CREATE, offset = 3404, line number = 69, charPositionInLine = 24
 Reference: Object = sv6 (SERVER), action = null, offset = 3418, line number = 69, charPositionInLine = 38
-Reference: Object = "Public SERVER sv7" (USER_MAPPING), action = CREATE, offset = 3471, line number = 70, charPositionInLine = 24
+Reference: Object = Public SERVER sv7 (USER_MAPPING), action = CREATE, offset = 3471, line number = 70, charPositionInLine = 24
 Reference: Object = sv7 (SERVER), action = null, offset = 3487, line number = 70, charPositionInLine = 40
-Reference: Object = "regress_testrolx SERVER sv8" (USER_MAPPING), action = CREATE, offset = 3542, line number = 71, charPositionInLine = 24
+Reference: Object = regress_testrolx SERVER sv8 (USER_MAPPING), action = CREATE, offset = 3542, line number = 71, charPositionInLine = 24
 Reference: Object = sv8 (SERVER), action = null, offset = 3566, line number = 71, charPositionInLine = 48
-Reference: Object = "CURRENT_USER SERVER sv1" (USER_MAPPING), action = ALTER, offset = 3628, line number = 72, charPositionInLine = 23
-Reference: Object = "current_user SERVER sv2" (USER_MAPPING), action = ALTER, offset = 3714, line number = 73, charPositionInLine = 23
-Reference: Object = "USER SERVER sv3" (USER_MAPPING), action = ALTER, offset = 3804, line number = 74, charPositionInLine = 23
-Reference: Object = "user SERVER sv4" (USER_MAPPING), action = ALTER, offset = 3874, line number = 75, charPositionInLine = 23
-Reference: Object = "SESSION_USER SERVER sv5" (USER_MAPPING), action = ALTER, offset = 3948, line number = 76, charPositionInLine = 23
-Reference: Object = "public SERVER sv6" (USER_MAPPING), action = ALTER, offset = 4034, line number = 77, charPositionInLine = 23
-Reference: Object = "Public SERVER sv7" (USER_MAPPING), action = ALTER, offset = 4108, line number = 78, charPositionInLine = 23
-Reference: Object = "regress_testrolx SERVER sv8" (USER_MAPPING), action = ALTER, offset = 4186, line number = 79, charPositionInLine = 23
-Reference: Object = "CURRENT_USER SERVER sv1" (USER_MAPPING), action = DROP, offset = 4279, line number = 80, charPositionInLine = 22
-Reference: Object = "current_user SERVER sv2" (USER_MAPPING), action = DROP, offset = 4326, line number = 81, charPositionInLine = 22
-Reference: Object = "USER SERVER sv3" (USER_MAPPING), action = DROP, offset = 4375, line number = 82, charPositionInLine = 22
-Reference: Object = "user SERVER sv4" (USER_MAPPING), action = DROP, offset = 4414, line number = 83, charPositionInLine = 22
-Reference: Object = "SESSION_USER SERVER sv5" (USER_MAPPING), action = DROP, offset = 4455, line number = 84, charPositionInLine = 22
-Reference: Object = "public SERVER sv6" (USER_MAPPING), action = DROP, offset = 4502, line number = 85, charPositionInLine = 22
-Reference: Object = "Public SERVER sv7" (USER_MAPPING), action = DROP, offset = 4543, line number = 86, charPositionInLine = 22
-Reference: Object = "regress_testrolx SERVER sv8" (USER_MAPPING), action = DROP, offset = 4586, line number = 87, charPositionInLine = 22
-Reference: Object = "nonexistent SERVER sv" (USER_MAPPING), action = DROP, offset = 4637, line number = 88, charPositionInLine = 22
-Reference: Object = "CURRENT_USER SERVER sv1" (USER_MAPPING), action = CREATE, offset = 4684, line number = 89, charPositionInLine = 24
+Reference: Object = CURRENT_USER SERVER sv1 (USER_MAPPING), action = ALTER, offset = 3628, line number = 72, charPositionInLine = 23
+Reference: Object = current_user SERVER sv2 (USER_MAPPING), action = ALTER, offset = 3714, line number = 73, charPositionInLine = 23
+Reference: Object = USER SERVER sv3 (USER_MAPPING), action = ALTER, offset = 3804, line number = 74, charPositionInLine = 23
+Reference: Object = user SERVER sv4 (USER_MAPPING), action = ALTER, offset = 3874, line number = 75, charPositionInLine = 23
+Reference: Object = SESSION_USER SERVER sv5 (USER_MAPPING), action = ALTER, offset = 3948, line number = 76, charPositionInLine = 23
+Reference: Object = public SERVER sv6 (USER_MAPPING), action = ALTER, offset = 4034, line number = 77, charPositionInLine = 23
+Reference: Object = Public SERVER sv7 (USER_MAPPING), action = ALTER, offset = 4108, line number = 78, charPositionInLine = 23
+Reference: Object = regress_testrolx SERVER sv8 (USER_MAPPING), action = ALTER, offset = 4186, line number = 79, charPositionInLine = 23
+Reference: Object = CURRENT_USER SERVER sv1 (USER_MAPPING), action = DROP, offset = 4279, line number = 80, charPositionInLine = 22
+Reference: Object = current_user SERVER sv2 (USER_MAPPING), action = DROP, offset = 4326, line number = 81, charPositionInLine = 22
+Reference: Object = USER SERVER sv3 (USER_MAPPING), action = DROP, offset = 4375, line number = 82, charPositionInLine = 22
+Reference: Object = user SERVER sv4 (USER_MAPPING), action = DROP, offset = 4414, line number = 83, charPositionInLine = 22
+Reference: Object = SESSION_USER SERVER sv5 (USER_MAPPING), action = DROP, offset = 4455, line number = 84, charPositionInLine = 22
+Reference: Object = public SERVER sv6 (USER_MAPPING), action = DROP, offset = 4502, line number = 85, charPositionInLine = 22
+Reference: Object = Public SERVER sv7 (USER_MAPPING), action = DROP, offset = 4543, line number = 86, charPositionInLine = 22
+Reference: Object = regress_testrolx SERVER sv8 (USER_MAPPING), action = DROP, offset = 4586, line number = 87, charPositionInLine = 22
+Reference: Object = nonexistent SERVER sv (USER_MAPPING), action = DROP, offset = 4637, line number = 88, charPositionInLine = 22
+Reference: Object = CURRENT_USER SERVER sv1 (USER_MAPPING), action = CREATE, offset = 4684, line number = 89, charPositionInLine = 24
 Reference: Object = sv1 (SERVER), action = null, offset = 4704, line number = 89, charPositionInLine = 44
-Reference: Object = "current_user SERVER sv2" (USER_MAPPING), action = CREATE, offset = 4763, line number = 90, charPositionInLine = 24
+Reference: Object = current_user SERVER sv2 (USER_MAPPING), action = CREATE, offset = 4763, line number = 90, charPositionInLine = 24
 Reference: Object = sv2 (SERVER), action = null, offset = 4785, line number = 90, charPositionInLine = 46
-Reference: Object = "user SERVER sv4" (USER_MAPPING), action = CREATE, offset = 4909, line number = 92, charPositionInLine = 24
+Reference: Object = user SERVER sv4 (USER_MAPPING), action = CREATE, offset = 4909, line number = 92, charPositionInLine = 24
 Reference: Object = sv4 (SERVER), action = null, offset = 4923, line number = 92, charPositionInLine = 38
-Reference: Object = "SESSION_USER SERVER sv5" (USER_MAPPING), action = CREATE, offset = 4976, line number = 93, charPositionInLine = 24
+Reference: Object = SESSION_USER SERVER sv5 (USER_MAPPING), action = CREATE, offset = 4976, line number = 93, charPositionInLine = 24
 Reference: Object = sv5 (SERVER), action = null, offset = 4996, line number = 93, charPositionInLine = 44
-Reference: Object = "public SERVER sv6" (USER_MAPPING), action = CREATE, offset = 5055, line number = 94, charPositionInLine = 24
+Reference: Object = public SERVER sv6 (USER_MAPPING), action = CREATE, offset = 5055, line number = 94, charPositionInLine = 24
 Reference: Object = sv6 (SERVER), action = null, offset = 5069, line number = 94, charPositionInLine = 38
-Reference: Object = "Public SERVER sv7" (USER_MAPPING), action = CREATE, offset = 5122, line number = 95, charPositionInLine = 24
+Reference: Object = Public SERVER sv7 (USER_MAPPING), action = CREATE, offset = 5122, line number = 95, charPositionInLine = 24
 Reference: Object = sv7 (SERVER), action = null, offset = 5138, line number = 95, charPositionInLine = 40
-Reference: Object = "regress_testrolx SERVER sv8" (USER_MAPPING), action = CREATE, offset = 5193, line number = 96, charPositionInLine = 24
+Reference: Object = regress_testrolx SERVER sv8 (USER_MAPPING), action = CREATE, offset = 5193, line number = 96, charPositionInLine = 24
 Reference: Object = sv8 (SERVER), action = null, offset = 5217, line number = 96, charPositionInLine = 48
-Reference: Object = "CURRENT_USER SERVER sv1" (USER_MAPPING), action = DROP, offset = 5288, line number = 97, charPositionInLine = 32
-Reference: Object = "current_user SERVER sv2" (USER_MAPPING), action = DROP, offset = 5345, line number = 98, charPositionInLine = 32
-Reference: Object = "USER SERVER sv3" (USER_MAPPING), action = DROP, offset = 5404, line number = 99, charPositionInLine = 32
-Reference: Object = "user SERVER sv4" (USER_MAPPING), action = DROP, offset = 5453, line number = 100, charPositionInLine = 32
-Reference: Object = "SESSION_USER SERVER sv5" (USER_MAPPING), action = DROP, offset = 5504, line number = 101, charPositionInLine = 32
-Reference: Object = "public SERVER sv6" (USER_MAPPING), action = DROP, offset = 5561, line number = 102, charPositionInLine = 32
-Reference: Object = "Public SERVER sv7" (USER_MAPPING), action = DROP, offset = 5612, line number = 103, charPositionInLine = 32
-Reference: Object = "regress_testrolx SERVER sv8" (USER_MAPPING), action = DROP, offset = 5665, line number = 104, charPositionInLine = 32
-Reference: Object = "nonexistent SERVER sv9" (USER_MAPPING), action = DROP, offset = 5726, line number = 105, charPositionInLine = 32
+Reference: Object = CURRENT_USER SERVER sv1 (USER_MAPPING), action = DROP, offset = 5288, line number = 97, charPositionInLine = 32
+Reference: Object = current_user SERVER sv2 (USER_MAPPING), action = DROP, offset = 5345, line number = 98, charPositionInLine = 32
+Reference: Object = USER SERVER sv3 (USER_MAPPING), action = DROP, offset = 5404, line number = 99, charPositionInLine = 32
+Reference: Object = user SERVER sv4 (USER_MAPPING), action = DROP, offset = 5453, line number = 100, charPositionInLine = 32
+Reference: Object = SESSION_USER SERVER sv5 (USER_MAPPING), action = DROP, offset = 5504, line number = 101, charPositionInLine = 32
+Reference: Object = public SERVER sv6 (USER_MAPPING), action = DROP, offset = 5561, line number = 102, charPositionInLine = 32
+Reference: Object = Public SERVER sv7 (USER_MAPPING), action = DROP, offset = 5612, line number = 103, charPositionInLine = 32
+Reference: Object = regress_testrolx SERVER sv8 (USER_MAPPING), action = DROP, offset = 5665, line number = 104, charPositionInLine = 32
+Reference: Object = nonexistent SERVER sv9 (USER_MAPPING), action = DROP, offset = 5726, line number = 105, charPositionInLine = 32
 Reference: Object = testagg1(smallint) (FUNCTION), action = REVOKE, offset = 5794, line number = 106, charPositionInLine = 34
 Reference: Object = testagg2(smallint) (FUNCTION), action = REVOKE, offset = 5856, line number = 107, charPositionInLine = 34
 Reference: Object = testagg3(smallint) (FUNCTION), action = REVOKE, offset = 5918, line number = 108, charPositionInLine = 34

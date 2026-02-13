@@ -50,10 +50,12 @@ public interface IDatabase extends IStatementContainer {
     }
 
     /**
-     * @param genericColumn - object reference
-     * @return object from database by generic column
+     * @param objectReference - object reference
+     * @return object from database by reference, or null if not found
+     *
+     * @throws IllegalStateException if reference type is not supported by database
      */
-    IStatement getStatement(GenericColumn genericColumn);
+    IStatement getStatement(ObjectReference objectReference);
 
     @Override
     default IDatabase getDatabase() {

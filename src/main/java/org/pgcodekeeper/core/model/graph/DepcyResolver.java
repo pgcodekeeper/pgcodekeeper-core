@@ -348,7 +348,7 @@ public final class DepcyResolver {
         // skip sequence if its owned-by column is being dropped
         // sequence will be dropped implicitly with the column
         if (oldObj instanceof PgSequence seq) {
-            GenericColumn ownedBy = seq.getOwnedBy();
+            var ownedBy = seq.getOwnedBy();
             if (ownedBy != null && newDb.getStatement(ownedBy) == null) {
                 return;
             }
@@ -457,7 +457,7 @@ public final class DepcyResolver {
         // if owned-by column or table is already in drop list
         // then sequence will also be dropped implicitly, return true
         if (statement instanceof PgSequence seq) {
-            GenericColumn ownedBy = seq.getOwnedBy();
+            var ownedBy = seq.getOwnedBy();
             if (ownedBy != null) {
                 var column = oldDb.getStatement(ownedBy);
                 return column != null && (inDropsList(column) || inDropsList(column.getParent()));
@@ -535,7 +535,7 @@ public final class DepcyResolver {
 
         // create column when creating sequence with owned-by relationship
         if (newObj instanceof PgSequence seq) {
-            GenericColumn ownedBy = seq.getOwnedBy();
+            var ownedBy = seq.getOwnedBy();
             if (ownedBy != null && oldDb.getStatement(ownedBy) == null) {
                 var col = newDb.getStatement(ownedBy);
                 if (col != null) {

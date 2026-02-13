@@ -49,7 +49,7 @@ public final class PgIndicesReader extends PgAbstractSearchPathJdbcReader {
         }
         String schemaName = schema.getName();
         String indexName = res.getString("relname");
-        loader.setCurrentObject(new GenericColumn(schemaName, indexName, DbObjType.INDEX));
+        loader.setCurrentObject(new ObjectReference(schemaName, indexName, DbObjType.INDEX));
         PgIndex i = new PgIndex(indexName);
 
         String tablespace = res.getString("spcname");

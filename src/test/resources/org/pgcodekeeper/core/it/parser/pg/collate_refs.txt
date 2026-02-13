@@ -51,9 +51,9 @@ Reference: Object = test_schema.test11 (COLLATION), action = DROP, offset = 2593
 Reference: Object = test5 (COLLATION), action = DROP, offset = 2601, line number = 42, charPositionInLine = 42
 Reference: Object = test0 (COLLATION), action = DROP, offset = 2623, line number = 43, charPositionInLine = 15
 Reference: Object = test0 (COLLATION), action = DROP, offset = 2663, line number = 44, charPositionInLine = 25
-Reference: Object = "en-x-icu" (COLLATION), action = ALTER, offset = 2686, line number = 45, charPositionInLine = 16
+Reference: Object = en-x-icu (COLLATION), action = ALTER, offset = 2686, line number = 45, charPositionInLine = 16
 Reference: Object = test0 (COLLATION), action = CREATE, offset = 2731, line number = 46, charPositionInLine = 17
 Reference: Object = textrange_c (TYPE), action = CREATE, offset = 2759, line number = 47, charPositionInLine = 12
 Reference: Object = textrange_en_us (TYPE), action = CREATE, offset = 2822, line number = 48, charPositionInLine = 12
 Reference: Object = pg_catalog (SCHEMA), action = null, offset = 2901, line number = 49, charPositionInLine = 17
-Reference: Object = pg_catalog."default" (COLLATION), action = CREATE, offset = 2912, line number = 49, charPositionInLine = 28
+Reference: Object = pg_catalog.default (COLLATION), action = CREATE, offset = 2912, line number = 49, charPositionInLine = 28

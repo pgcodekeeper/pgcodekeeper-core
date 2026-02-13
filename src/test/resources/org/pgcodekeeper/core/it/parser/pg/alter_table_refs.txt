@@ -219,7 +219,7 @@ Reference: Object = attmp7 (TABLE), action = INSERT, offset = 12070, line number
 Reference: Object = attmp7 (TABLE), action = ALTER, offset = 12105, line number = 378, charPositionInLine = 12
 Reference: Object = attmp7.identity (CONSTRAINT), action = CREATE, offset = 12127, line number = 378, charPositionInLine = 34
 Reference: Object = attmp3 (TABLE), action = ALTER, offset = 12168, line number = 379, charPositionInLine = 12
-Reference: Object = attmp3."IDENTITY" (CONSTRAINT), action = CREATE, offset = 12190, line number = 379, charPositionInLine = 34
+Reference: Object = attmp3.IDENTITY (CONSTRAINT), action = CREATE, offset = 12190, line number = 379, charPositionInLine = 34
 Reference: Object = attmp3 (TABLE), action = ALTER, offset = 12241, line number = 380, charPositionInLine = 12
 Reference: Object = parent_noinh_convalid (TABLE), action = CREATE, offset = 12383, line number = 383, charPositionInLine = 13
 Reference: Object = child_noinh_convalid (TABLE), action = CREATE, offset = 12427, line number = 384, charPositionInLine = 13
@@ -607,7 +607,7 @@ Reference: action = VACUUM, offset = 34127, line number = 952, charPositionInLin
 Reference: Object = atacc1 (SCHEMA), action = null, offset = 34200, line number = 953, charPositionInLine = 18
 Reference: Object = atacc1.atacc1.a (COLUMN), action = COMMENT, offset = 34207, line number = 953, charPositionInLine = 25
 Reference: Object = atacc1 (SCHEMA), action = null, offset = 34241, line number = 954, charPositionInLine = 18
-Reference: Object = atacc1.atacc1."........pg.dropped.1........" (COLUMN), action = COMMENT, offset = 34248, line number = 954, charPositionInLine = 25
+Reference: Object = atacc1.atacc1.........pg.dropped.1........ (COLUMN), action = COMMENT, offset = 34248, line number = 954, charPositionInLine = 25
 Reference: Object = atacc1 (TABLE), action = ALTER, offset = 34305, line number = 955, charPositionInLine = 12
 Reference: Object = atacc1 (TABLE), action = ALTER, offset = 34351, line number = 956, charPositionInLine = 12
 Reference: Object = atacc1 (TABLE), action = ALTER, offset = 34426, line number = 957, charPositionInLine = 12
@@ -1009,7 +1009,7 @@ Reference: Object = alter1.ctype (TYPE), action = null, offset = 55052, line num
 Reference: Object = alter1 (SCHEMA), action = null, offset = 55059, line number = 1586, charPositionInLine = 42
 Reference: Object = alter1.ctype (TYPE), action = null, offset = 55066, line number = 1586, charPositionInLine = 49
 Reference: Object = alter1 (SCHEMA), action = null, offset = 55202, line number = 1589, charPositionInLine = 16
-Reference: Object = alter1."=" (OPERATOR), action = CREATE, offset = 55209, line number = 1589, charPositionInLine = 23
+Reference: Object = alter1.= (OPERATOR), action = CREATE, offset = 55209, line number = 1589, charPositionInLine = 23
 Reference: Object = alter1 (SCHEMA), action = null, offset = 55223, line number = 1589, charPositionInLine = 37
 Reference: Object = alter1.same(alter1.ctype, alter1.ctype) (FUNCTION), action = null, offset = 55230, line number = 1589, charPositionInLine = 44
 Reference: Object = alter1 (SCHEMA), action = null, offset = 55247, line number = 1589, charPositionInLine = 61
@@ -1043,7 +1043,7 @@ Reference: Object = alter1.plus1 (FUNCTION), action = ALTER, offset = 55879, lin
 Reference: Object = alter1 (SCHEMA), action = null, offset = 55922, line number = 1603, charPositionInLine = 13
 Reference: Object = alter1.posint (DOMAIN), action = ALTER, offset = 55929, line number = 1603, charPositionInLine = 20
 Reference: Object = alter1 (SCHEMA), action = null, offset = 55970, line number = 1604, charPositionInLine = 15
-Reference: Object = alter1."=" (OPERATOR), action = ALTER, offset = 55977, line number = 1604, charPositionInLine = 22
+Reference: Object = alter1.= (OPERATOR), action = ALTER, offset = 55977, line number = 1604, charPositionInLine = 22
 Reference: Object = alter1 (SCHEMA), action = null, offset = 56041, line number = 1605, charPositionInLine = 15
 Reference: Object = alter1.same (FUNCTION), action = ALTER, offset = 56048, line number = 1605, charPositionInLine = 22
 Reference: Object = alter1 (SCHEMA), action = null, offset = 56111, line number = 1606, charPositionInLine = 11

@@ -54,8 +54,8 @@ public final class PgUserMappingsReader extends PgAbstractJdbcReader {
 
         PgUserMapping usm = new PgUserMapping(user, server);
 
-        loader.setCurrentObject(new GenericColumn(usm.getName(), DbObjType.USER_MAPPING));
-        usm.addDependency(new GenericColumn(usm.getServer(), DbObjType.SERVER));
+        loader.setCurrentObject(new ObjectReference(usm.getName(), DbObjType.USER_MAPPING));
+        usm.addDependency(new ObjectReference(usm.getServer(), DbObjType.SERVER));
 
         String[] options = PgJdbcUtils.getColArray(res, "umoptions", true);
         if (options != null) {

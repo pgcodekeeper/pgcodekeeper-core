@@ -47,7 +47,7 @@ public class ChPoliciesReader extends AbstractJdbcReader<ChJdbcLoader> {
     protected void processResult(ResultSet res) throws SQLException {
         String policyName = res.getString("name");
 
-        loader.setCurrentObject(new GenericColumn(policyName, DbObjType.POLICY));
+        loader.setCurrentObject(new ObjectReference(policyName, DbObjType.POLICY));
 
         ChPolicy p = new ChPolicy(policyName);
 

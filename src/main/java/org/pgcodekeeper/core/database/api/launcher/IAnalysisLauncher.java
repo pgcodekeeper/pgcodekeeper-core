@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.launcher;
 
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
@@ -33,7 +33,7 @@ public interface IAnalysisLauncher {
 
     void updateStmt(IDatabase database);
 
-    Set<GenericColumn> launchAnalyze(List<Object> errors, IMetaContainer meta);
+    Set<ObjectReference> launchAnalyze(List<Object> errors, IMetaContainer meta);
 
     List<ObjectLocation> getReferences();
 

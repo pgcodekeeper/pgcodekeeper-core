@@ -139,14 +139,14 @@ public final class ChValueExpr extends ChAbstractExpr {
             return;
         }
 
-        GenericColumn parent = ref.getValue();
+        ObjectReference parent = ref.getValue();
         if (parent == null) {
             return;
         }
 
         var schemaName = QNameParser.getThirdName(ids);
         if (schemaName != null) {
-            addDependency(new GenericColumn(schemaName, DbObjType.SCHEMA), QNameParser.getThirdNameCtx(ids));
+            addDependency(new ObjectReference(schemaName, DbObjType.SCHEMA), QNameParser.getThirdNameCtx(ids));
         }
 
         var tableCtx = QNameParser.getSecondNameCtx(ids);
@@ -155,7 +155,7 @@ public final class ChValueExpr extends ChAbstractExpr {
             addDependency(parent, tableCtx);
         }
 
-        var column = new GenericColumn(parent.schema(), tName, columnName, DbObjType.COLUMN);
+        var column = new ObjectReference(parent.schema(), tName, columnName, DbObjType.COLUMN);
 
         addDependency(column, QNameParser.getFirstNameCtx(ids));
         addReference(parent, tableCtx);
@@ -194,7 +194,7 @@ public final class ChValueExpr extends ChAbstractExpr {
                 .filter(Objects::nonNull)
                 .toList();
         analyzeExprs(exprs);
-        GenericColumn depcy = new GenericColumn(funcName.getText(), DbObjType.FUNCTION);
+        ObjectReference depcy = new ObjectReference(funcName.getText(), DbObjType.FUNCTION);
         addDependency(depcy, funcName);
     }
 
@@ -240,7 +240,7 @@ public final class ChValueExpr extends ChAbstractExpr {
                                 Pair<IRelation, Pair<String, String>> relCol) {
         IRelation rel = relCol.getFirst();
         Pair<String, String> col = relCol.getSecond();
-        var column = new GenericColumn(rel.getSchemaName(), rel.getName(), col.getFirst(), DbObjType.COLUMN);
+        var column = new ObjectReference(rel.getSchemaName(), rel.getName(), col.getFirst(), DbObjType.COLUMN);
         addDependency(column, qualNameCtx);
     }
 
@@ -257,9 +257,9 @@ public final class ChValueExpr extends ChAbstractExpr {
             return;
         }
 
-        List<GenericColumn> tempDependencies = new ArrayList<>();
+        List<ObjectReference> tempDependencies = new ArrayList<>();
         for (var dependency : getDependencies()) {
-            var obj = dependency.getObj();
+            var obj = dependency.getObjectReference();
             if (obj.type() != DbObjType.TABLE) {
                 continue;
             }
@@ -268,7 +268,7 @@ public final class ChValueExpr extends ChAbstractExpr {
                 rel.getRelationColumns()
                 .filter(e -> isNeedColumn(e.getFirst(), namePart, include, contains))
                 .forEach(e -> tempDependencies.add(
-                        new GenericColumn(rel.getSchemaName(), rel.getName(), e.getFirst(), DbObjType.COLUMN)));
+                        new ObjectReference(rel.getSchemaName(), rel.getName(), e.getFirst(), DbObjType.COLUMN)));
             }
         }
         tempDependencies.forEach(e -> addDependency(e, lit));

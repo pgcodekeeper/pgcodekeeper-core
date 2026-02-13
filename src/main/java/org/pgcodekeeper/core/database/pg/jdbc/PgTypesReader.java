@@ -75,7 +75,7 @@ public final class PgTypesReader extends PgAbstractSearchPathJdbcReader {
     private PgDomain getDomain(ResultSet res, ISchema schema) throws SQLException {
         String schemaName = schema.getName();
         PgDomain d = new PgDomain(res.getString("typname"));
-        loader.setCurrentObject(new GenericColumn(schemaName, d.getName(), DbObjType.DOMAIN));
+        loader.setCurrentObject(new ObjectReference(schemaName, d.getName(), DbObjType.DOMAIN));
 
         String type = res.getString("dom_basetypefmt");
         IPgJdbcReader.checkTypeValidity(type);
@@ -136,7 +136,7 @@ public final class PgTypesReader extends PgAbstractSearchPathJdbcReader {
 
     private PgAbstractType getType(ResultSet res, String schemaName, String typtype) throws SQLException {
         String name = res.getString("typname");
-        loader.setCurrentObject(new GenericColumn(schemaName, name, DbObjType.TYPE));
+        loader.setCurrentObject(new ObjectReference(schemaName, name, DbObjType.TYPE));
         return switch (typtype) {
             case "b" -> getBaseType(res, name, schemaName);
             case "c" -> getCompositeType(res, name);

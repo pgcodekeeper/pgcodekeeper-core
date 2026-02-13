@@ -44,7 +44,7 @@ public final class MsTypesReader extends AbstractSearchPathJdbcReader<MsJdbcLoad
     protected void processResult(ResultSet res, ISchema schema)
             throws SQLException, XmlReaderException {
         String name = res.getString("name");
-        loader.setCurrentObject(new GenericColumn(schema.getName(), name, DbObjType.TYPE));
+        loader.setCurrentObject(new ObjectReference(schema.getName(), name, DbObjType.TYPE));
 
         MsType type = new MsType(name);
         String baseType = res.getString("base_type");
@@ -52,7 +52,7 @@ public final class MsTypesReader extends AbstractSearchPathJdbcReader<MsJdbcLoad
         if (assembly != null) {
             type.setAssemblyName(assembly);
             type.setAssemblyClass(res.getString("assembly_class"));
-            type.addDependency(new GenericColumn(assembly, DbObjType.ASSEMBLY));
+            type.addDependency(new ObjectReference(assembly, DbObjType.ASSEMBLY));
         } else if (baseType != null) {
             type.setBaseType(MsJdbcLoader.getMsType(type, null, baseType, false, res.getInt("size"),
                     res.getInt("precision"), res.getInt("scale")));

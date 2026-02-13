@@ -44,12 +44,12 @@ public final class MsStatisticsReader extends AbstractSearchPathJdbcReader<MsJdb
         var stat = new MsStatistics(name);
         var schemaName = schema.getName();
         var containerName = res.getString("cont_name");
-        loader.setCurrentObject(new GenericColumn(schemaName, containerName, name, DbObjType.STATISTICS));
+        loader.setCurrentObject(new ObjectReference(schemaName, containerName, name, DbObjType.STATISTICS));
 
         for (var col : MsXmlReader.readXML(res.getString("cols"))) {
             var colName = col.getString("name");
             stat.addCol(colName);
-            stat.addDependency(new GenericColumn(schemaName, containerName, colName, DbObjType.COLUMN));
+            stat.addDependency(new ObjectReference(schemaName, containerName, colName, DbObjType.COLUMN));
         }
 
         var filter = res.getString("filter_definition");

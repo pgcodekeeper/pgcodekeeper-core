@@ -42,7 +42,7 @@ public final class PgCollationsReader extends PgAbstractSearchPathJdbcReader {
     protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String schemaName = schema.getName();
         String collName = res.getString("collname");
-        loader.setCurrentObject(new GenericColumn(schemaName, collName, DbObjType.COLLATION));
+        loader.setCurrentObject(new ObjectReference(schemaName, collName, DbObjType.COLLATION));
 
         PgCollation coll = new PgCollation(collName);
 

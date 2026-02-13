@@ -331,7 +331,7 @@ public abstract class ParserAbstract<S extends IDatabase> {
         switch (type) {
             case ASSEMBLY, EXTENSION, EVENT_TRIGGER, FOREIGN_DATA_WRAPPER,
                  SERVER, SCHEMA, ROLE, USER, DATABASE:
-                return buildLocation(nameCtx, action, locationType, new GenericColumn(nameCtx.getText(), type));
+                return buildLocation(nameCtx, action, locationType, new ObjectReference(nameCtx.getText(), type));
             default:
                 break;
         }
@@ -352,25 +352,26 @@ public abstract class ParserAbstract<S extends IDatabase> {
 
         String name = nameCtx.getText();
         if (signature != null) {
+            // PG functions have a name with optional quoting, which is used when searching in the database
             name = PgDiffUtils.getQuotedName(name) + signature;
         }
         return switch (type) {
             case DOMAIN, FTS_CONFIGURATION, FTS_DICTIONARY, FTS_PARSER, FTS_TEMPLATE, OPERATOR, SEQUENCE, TABLE,
                  DICTIONARY, TYPE, VIEW, INDEX, STATISTICS, COLLATION, FUNCTION, PROCEDURE, AGGREGATE ->
                     buildLocation(nameCtx, action, locationType,
-                            new GenericColumn(schemaName, name, type));
+                            new ObjectReference(schemaName, name, type));
             case CONSTRAINT, TRIGGER, RULE, POLICY, COLUMN -> buildLocation(nameCtx, action, locationType,
-                    new GenericColumn(schemaName, QNameParser.getSecondName(ids), name, type));
+                    new ObjectReference(schemaName, QNameParser.getSecondName(ids), name, type));
             default -> null;
         };
     }
 
     protected ObjectLocation buildLocation(ParserRuleContext nameCtx, String action, LocationType locationType,
-                                           GenericColumn object) {
+                                           ObjectReference object) {
         return new ObjectLocation.Builder()
                 .setFilePath(fileName)
                 .setCtx(nameCtx)
-                .setObject(object)
+                .setReference(object)
                 .setAction(action)
                 .setLocationType(locationType)
                 .build();
@@ -391,7 +392,7 @@ public abstract class ParserAbstract<S extends IDatabase> {
         ObjectLocation loc = getLocation(ids, type, null, true, signature, LocationType.REFERENCE);
         if (loc != null && !isSystemSchema(loc.getSchema())) {
             if (!refMode) {
-                st.addDependency(loc.getObj());
+                st.addDependency(loc.getObjectReference());
             }
             addReference(loc);
         }

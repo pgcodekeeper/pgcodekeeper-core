@@ -43,7 +43,7 @@ public class MsFKReader extends AbstractSearchPathJdbcReader<MsJdbcLoader> imple
     protected void processResult(ResultSet res, ISchema schema)
             throws SQLException, XmlReaderException {
         String name = res.getString("name");
-        loader.setCurrentObject(new GenericColumn(schema.getName(), name, DbObjType.CONSTRAINT));
+        loader.setCurrentObject(new ObjectReference(schema.getName(), name, DbObjType.CONSTRAINT));
 
         var constrFk = new MsConstraintFk(name);
 
@@ -55,14 +55,14 @@ public class MsFKReader extends AbstractSearchPathJdbcReader<MsJdbcLoader> imple
 
         constrFk.setForeignSchema(fSchemaName);
         constrFk.setForeignTable(fTableName);
-        constrFk.addDependency(new GenericColumn(fSchemaName, fTableName, DbObjType.TABLE));
+        constrFk.addDependency(new ObjectReference(fSchemaName, fTableName, DbObjType.TABLE));
 
         for (MsXmlReader col : MsXmlReader.readXML(res.getString("cols"))) {
             String field = col.getString("f");
             String fCol = col.getString("r");
 
             constrFk.addForeignColumn(fCol);
-            constrFk.addDependency(new GenericColumn(fSchemaName, fTableName, fCol, DbObjType.COLUMN));
+            constrFk.addDependency(new ObjectReference(fSchemaName, fTableName, fCol, DbObjType.COLUMN));
             constrFk.addColumn(field);
         }
 

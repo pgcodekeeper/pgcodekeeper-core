@@ -140,7 +140,7 @@ public final class ChCreateDictionary extends ChParserAbstract {
             if (sourceDbName == null) {
                 sourceDbName = "default";
             }
-            dictionary.addDependency(new GenericColumn(sourceDbName, sourceTableName, DbObjType.TABLE));
+            dictionary.addDependency(new ObjectReference(sourceDbName, sourceTableName, DbObjType.TABLE));
         }
     }
 

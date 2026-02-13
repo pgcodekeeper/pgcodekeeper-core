@@ -71,7 +71,7 @@ public final class MetaFunction extends MetaStatement implements IFunction {
      * @param bareName   the bare function name without signature
      */
     public MetaFunction(String schemaName, String name, String bareName) {
-        super(new GenericColumn(schemaName, name, DbObjType.FUNCTION));
+        super(new ObjectReference(schemaName, name, DbObjType.FUNCTION));
         this.bareName = bareName;
     }
 

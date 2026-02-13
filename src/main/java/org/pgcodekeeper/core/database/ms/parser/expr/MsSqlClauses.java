@@ -116,12 +116,12 @@ public class MsSqlClauses extends MsAbstractExpr {
     private void enableDisableTrigger(Enable_disable_triggerContext edt) {
         Qualified_nameContext qualifiedName = edt.qualified_name();
         if (qualifiedName != null) {
-            GenericColumn cont = addObjectDepcy(qualifiedName, DbObjType.TABLE);
+            ObjectReference cont = addObjectDepcy(qualifiedName, DbObjType.TABLE);
             Names_referencesContext names = edt.names_references();
             if (names != null) {
                 for (Qualified_nameContext trig : names.qualified_name()) {
                     IdContext nameCtx = trig.name;
-                    addDependency(new GenericColumn(cont.schema(), cont.table(),
+                    addDependency(new ObjectReference(cont.schema(), cont.table(),
                             nameCtx.getText(), DbObjType.TRIGGER), nameCtx);
                 }
             }
@@ -129,18 +129,18 @@ public class MsSqlClauses extends MsAbstractExpr {
     }
 
     private void updateStatistics(Update_statisticsContext us) {
-        GenericColumn cont = addObjectDepcy(us.table, DbObjType.TABLE);
+        ObjectReference cont = addObjectDepcy(us.table, DbObjType.TABLE);
         Qualified_nameContext index = us.index;
         Names_referencesContext names;
         if (index != null) {
             IdContext nameCtx = index.name;
             addDependency(
-                    new GenericColumn(cont.schema(), cont.table(), nameCtx.getText(), DbObjType.TRIGGER), nameCtx);
+                    new ObjectReference(cont.schema(), cont.table(), nameCtx.getText(), DbObjType.TRIGGER), nameCtx);
         } else if ((names = us.names_references()) != null) {
             for (Qualified_nameContext ind : names.qualified_name()) {
                 IdContext nameCtx = ind.name;
                 addDependency(
-                        new GenericColumn(cont.schema(), cont.table(), nameCtx.getText(), DbObjType.TRIGGER), nameCtx);
+                        new ObjectReference(cont.schema(), cont.table(), nameCtx.getText(), DbObjType.TRIGGER), nameCtx);
             }
         }
     }

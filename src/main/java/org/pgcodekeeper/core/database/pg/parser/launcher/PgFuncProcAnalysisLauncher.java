@@ -33,10 +33,10 @@ public final class PgFuncProcAnalysisLauncher extends PgAbstractAnalysisLauncher
 
     /**
      * Contains pairs, each of which contains the name of the function argument
-     * and its full type name in GenericColumn object
+     * and its full type name in ObjectReference object
      * Used to set up namespace for function body analysis.
      */
-    private final List<Pair<String, GenericColumn>> funcArgs;
+    private final List<Pair<String, ObjectReference>> funcArgs;
     private final boolean isEnableFunctionBodiesDependencies;
 
     /**
@@ -49,7 +49,7 @@ public final class PgFuncProcAnalysisLauncher extends PgAbstractAnalysisLauncher
      * @param isEnableFunctionBodiesDependencies flag to control function body dependency collection
      */
     public PgFuncProcAnalysisLauncher(PgAbstractFunction stmt, SqlContext ctx,
-            String location, List<Pair<String, GenericColumn>> funcArgs, boolean isEnableFunctionBodiesDependencies) {
+                                      String location, List<Pair<String, ObjectReference>> funcArgs, boolean isEnableFunctionBodiesDependencies) {
         super(stmt, ctx, location);
         this.funcArgs = funcArgs;
         this.isEnableFunctionBodiesDependencies = isEnableFunctionBodiesDependencies;
@@ -65,7 +65,7 @@ public final class PgFuncProcAnalysisLauncher extends PgAbstractAnalysisLauncher
      * @param isEnableFunctionBodiesDependencies flag to control function body dependency collection
      */
     public PgFuncProcAnalysisLauncher(PgAbstractFunction stmt, Function_bodyContext ctx,
-            String location, List<Pair<String, GenericColumn>> funcArgs, boolean isEnableFunctionBodiesDependencies) {
+                                      String location, List<Pair<String, ObjectReference>> funcArgs, boolean isEnableFunctionBodiesDependencies) {
         super(stmt, ctx, location);
         this.funcArgs = funcArgs;
         this.isEnableFunctionBodiesDependencies = isEnableFunctionBodiesDependencies;
@@ -81,7 +81,7 @@ public final class PgFuncProcAnalysisLauncher extends PgAbstractAnalysisLauncher
      * @param isEnableFunctionBodiesDependencies flag to control function body dependency collection
      */
     public PgFuncProcAnalysisLauncher(PgAbstractFunction stmt, Plpgsql_functionContext ctx,
-            String location, List<Pair<String, GenericColumn>> funcArgs, boolean isEnableFunctionBodiesDependencies) {
+                                      String location, List<Pair<String, ObjectReference>> funcArgs, boolean isEnableFunctionBodiesDependencies) {
         super(stmt, ctx, location);
         this.funcArgs = funcArgs;
         this.isEnableFunctionBodiesDependencies = isEnableFunctionBodiesDependencies;
@@ -108,7 +108,7 @@ public final class PgFuncProcAnalysisLauncher extends PgAbstractAnalysisLauncher
 
     private void declareAnalyzerArgs(PgAbstractExprWithNmspc<? extends ParserRuleContext> analyzer) {
         for (int i = 0; i < funcArgs.size(); i++) {
-            Pair<String, GenericColumn> arg = funcArgs.get(i);
+            Pair<String, ObjectReference> arg = funcArgs.get(i);
             analyzer.declareNamespaceVar("$" + (i + 1), arg.getFirst(), arg.getSecond());
         }
     }

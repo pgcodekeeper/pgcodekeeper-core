@@ -57,13 +57,13 @@ public abstract class MsTableAbstract extends MsParserAbstract {
         var cols = body.fk;
         for (var col : cols.id()) {
             constrFk.addColumn(col.getText());
-            constrFk.addDependency(new GenericColumn(schema, table, col.getText(), DbObjType.COLUMN));
+            constrFk.addDependency(new ObjectReference(schema, table, col.getText(), DbObjType.COLUMN));
         }
 
         Qualified_nameContext ref = body.qualified_name();
         List<IdContext> ids = Arrays.asList(ref.schema, ref.name);
         ObjectLocation loc = addObjReference(ids, DbObjType.TABLE, null);
-        constrFk.addDependency(loc.getObj());
+        constrFk.addDependency(loc.getObjectReference());
 
         Name_list_in_bracketsContext columns = body.pk;
         String fSchemaName = getSchemaNameSafe(ids);
@@ -74,7 +74,7 @@ public abstract class MsTableAbstract extends MsParserAbstract {
             for (IdContext column : columns.id()) {
                 String fCol = column.getText();
                 constrFk.addForeignColumn(fCol);
-                constrFk.addDependency(new GenericColumn(fSchemaName, fTableName, fCol, DbObjType.COLUMN));
+                constrFk.addDependency(new ObjectReference(fSchemaName, fTableName, fCol, DbObjType.COLUMN));
             }
         }
 

@@ -39,13 +39,13 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
      * String-Reference pairs keep track of external table aliases and names.<br>
      * String-null pairs keep track of internal query names that have only the Alias.
      */
-    private final Map<String, GenericColumn> namespace = new HashMap<>();
+    private final Map<String, ObjectReference> namespace = new HashMap<>();
     /**
      * Unaliased namespace keeps track of tables that have no Alias.<br>
      * It has to be separate since same-named unaliased tables from different schemas can be used, requiring
      * qualification.
      */
-    private final Set<GenericColumn> unaliasedNamespace = new HashSet<>();
+    private final Set<ObjectReference> unaliasedNamespace = new HashSet<>();
 
     /**
      * CTE names that current level of FROM has access to.
@@ -74,21 +74,21 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
     }
 
     @Override
-    public Entry<String, GenericColumn> findReference(String schema, String name, String column) {
-        Entry<String, GenericColumn> ref = findReferenceInNmspc(schema, name);
+    public Entry<String, ObjectReference> findReference(String schema, String name, String column) {
+        Entry<String, ObjectReference> ref = findReferenceInNmspc(schema, name);
         return ref == null ? super.findReference(schema, name, column) : ref;
     }
 
-    private Entry<String, GenericColumn> findReferenceInNmspc(String schema, String name) {
+    private Entry<String, ObjectReference> findReferenceInNmspc(String schema, String name) {
         boolean found;
-        GenericColumn dereferenced = null;
+        ObjectReference dereferenced = null;
         if (schema == null && namespace.containsKey(name)) {
             found = true;
             dereferenced = namespace.get(name);
         } else if (!unaliasedNamespace.isEmpty()) {
             // simple empty check to save some allocations
             // it will almost always be empty
-            for (GenericColumn unaliased : unaliasedNamespace) {
+            for (ObjectReference unaliased : unaliasedNamespace) {
                 if (unaliased.table().equalsIgnoreCase(name) &&
                         (schema == null || unaliased.schema().equalsIgnoreCase(schema))) {
                     if (dereferenced == null) {
@@ -123,7 +123,7 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
      * Clients may use this to setup pseudo-variable names before expression
      * analysis.
      */
-    private void addReference(String alias, GenericColumn object) {
+    private void addReference(String alias, ObjectReference object) {
         if (namespace.containsKey(alias)) {
             log(Consts.DUPLICATE_ALIASES, alias);
             return;
@@ -145,7 +145,7 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
      *
      * @param qualifiedTable the table reference to add
      */
-    public void addRawTableReference(GenericColumn qualifiedTable) {
+    public void addRawTableReference(ObjectReference qualifiedTable) {
         boolean exists = !unaliasedNamespace.add(qualifiedTable);
         if (exists) {
             log(Messages.ChAbstractExprWithNmspc_log_dupl_unaliased_table, qualifiedTable.schema(), qualifiedTable.table());
@@ -161,8 +161,8 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
         return ret != null ? ret : super.findColumn(name);
     }
 
-    private Pair<IRelation, Pair<String, String>> findColumn(String name, Collection<GenericColumn> refs) {
-        for (GenericColumn ref : refs) {
+    private Pair<IRelation, Pair<String, String>> findColumn(String name, Collection<ObjectReference> refs) {
+        for (ObjectReference ref : refs) {
             if (ref != null) {
                 IRelation rel = findRelation(ref.schema(), ref.table());
                 if (rel == null) {
@@ -208,7 +208,7 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
     private void addNameReference(Qualified_nameContext name, Alias_clauseContext alias, boolean isFrom) {
         String firstName = QNameParser.getFirstName(name.identifier());
         boolean isCte = name.DOT().isEmpty() && hasCte(firstName);
-        GenericColumn depcy = null;
+        ObjectReference depcy = null;
         if (!isCte && isFrom) {
             depcy = addObjectDepcy(name);
         }

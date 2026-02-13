@@ -50,7 +50,7 @@ public class ChExpressionAnalysisLauncher extends AbstractAnalysisLauncher {
             String schemaName = table.getParent().getName();
             String rawTableReference = table.getName();
 
-            expr.addRawTableReference(new GenericColumn(schemaName, rawTableReference, DbObjType.TABLE));
+            expr.addRawTableReference(new ObjectReference(schemaName, rawTableReference, DbObjType.TABLE));
             expr.analyze((ExprContext) ctx);
             return expr.getDependencies();
         }

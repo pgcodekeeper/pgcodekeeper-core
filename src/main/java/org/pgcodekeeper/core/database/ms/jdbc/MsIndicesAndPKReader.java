@@ -47,7 +47,7 @@ public class MsIndicesAndPKReader extends AbstractSearchPathJdbcReader<MsJdbcLoa
         boolean isPrimaryKey = res.getBoolean("is_primary_key");
         boolean isUniqueConstraint = res.getBoolean("is_unique_constraint");
         DbObjType type = isPrimaryKey || isUniqueConstraint ? DbObjType.CONSTRAINT : DbObjType.INDEX;
-        loader.setCurrentObject(new GenericColumn(schema.getName(), name, type));
+        loader.setCurrentObject(new ObjectReference(schema.getName(), name, type));
 
         boolean isClustered = res.getBoolean("is_clustered");
 
@@ -107,7 +107,7 @@ public class MsIndicesAndPKReader extends AbstractSearchPathJdbcReader<MsJdbcLoa
                 simpleCol.setDesc(isDesc);
                 stmt.addColumn(simpleCol);
             }
-            stmt.addDependency(new GenericColumn(schema, parent, colName, DbObjType.COLUMN));
+            stmt.addDependency(new ObjectReference(schema, parent, colName, DbObjType.COLUMN));
         }
     }
 

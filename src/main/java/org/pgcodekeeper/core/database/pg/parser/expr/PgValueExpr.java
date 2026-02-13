@@ -197,7 +197,7 @@ public final class PgValueExpr extends PgAbstractExpr {
                 ctx = op.op_chars();
             } else {
                 schema = opSchemaCtx.getText();
-                addDependency(new GenericColumn(schema, DbObjType.SCHEMA), opSchemaCtx);
+                addDependency(new ObjectReference(schema, DbObjType.SCHEMA), opSchemaCtx);
                 ctx = op.all_simple_op();
             }
             operator = ctx.getText();
@@ -217,7 +217,7 @@ public final class PgValueExpr extends PgAbstractExpr {
                 availableOperators(schema));
 
         if (resultOperFunction != null) {
-            addDependency(new GenericColumn(resultOperFunction.getSchemaName(),
+            addDependency(new ObjectReference(resultOperFunction.getSchemaName(),
                     resultOperFunction.getName(), DbObjType.OPERATOR), ctx);
 
             String returns = resultOperFunction.getReturns();
@@ -482,7 +482,7 @@ public final class PgValueExpr extends PgAbstractExpr {
         ParserRuleContext id = QNameParser.getSchemaNameCtx(ids);
         if (id != null) {
             schemaName = id.getText();
-            addDependency(new GenericColumn(schemaName, DbObjType.SCHEMA), id);
+            addDependency(new ObjectReference(schemaName, DbObjType.SCHEMA), id);
         }
 
         List<Vex_or_named_notationContext> args = function.vex_or_named_notation();

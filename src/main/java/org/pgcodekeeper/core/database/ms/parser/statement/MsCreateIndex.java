@@ -19,7 +19,6 @@ import java.util.*;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
 import org.pgcodekeeper.core.database.ms.schema.*;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -76,7 +75,7 @@ public final class MsCreateIndex extends MsParserAbstract {
         if (nameList != null) {
             for (IdContext col : nameList.id()) {
                 index.addInclude(col.getText());
-                index.addDependency(new GenericColumn(schema, table, col.getText(), DbObjType.COLUMN));
+                index.addDependency(new ObjectReference(schema, table, col.getText(), DbObjType.COLUMN));
             }
         }
         var orderCols = ctx.order_cols;

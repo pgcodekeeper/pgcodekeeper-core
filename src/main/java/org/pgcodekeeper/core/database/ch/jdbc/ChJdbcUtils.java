@@ -37,7 +37,7 @@ final class ChJdbcUtils {
         if (roles != null) {
             for (String role : roles) {
                 addRoleMethod.accept(statement, role);
-                statement.addDependency(new GenericColumn(role, DbObjType.ROLE));
+                statement.addDependency(new ObjectReference(role, DbObjType.ROLE));
             }
         }
 
@@ -45,7 +45,7 @@ final class ChJdbcUtils {
         if (excepts != null) {
             for (String except : excepts) {
                 addExceptMethod.accept(statement, except);
-                statement.addDependency(new GenericColumn(except, DbObjType.ROLE));
+                statement.addDependency(new ObjectReference(except, DbObjType.ROLE));
             }
         }
     }

@@ -60,7 +60,7 @@ public class MsSelect extends MsAbstractExprWithNmspc<Select_statementContext> {
     }
 
     @Override
-    protected Entry<String, GenericColumn> findReferenceInNmspc(String schema, String name) {
+    protected Entry<String, ObjectReference> findReferenceInNmspc(String schema, String name) {
         return !inFrom || lateralAllowed ? super.findReferenceInNmspc(schema, name) : null;
     }
 
@@ -279,7 +279,7 @@ public class MsSelect extends MsAbstractExprWithNmspc<Select_statementContext> {
             boolean oldLateral = lateralAllowed;
             try {
                 lateralAllowed = true;
-                GenericColumn func = new MsValueExpr(this).functionCall(call);
+                ObjectReference func = new MsValueExpr(this).functionCall(call);
                 String funcAlias = alias != null ? alias.id().getText() : func != null ? func.table() : null;
                 if (funcAlias != null) {
                     addReference(funcAlias, null);

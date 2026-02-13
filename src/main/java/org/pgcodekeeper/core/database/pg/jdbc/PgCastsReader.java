@@ -59,7 +59,7 @@ public final class PgCastsReader extends PgAbstractJdbcReader {
         IPgJdbcReader.checkTypeValidity(target);
 
         PgCast cast = new PgCast(source, target);
-        loader.setCurrentObject(new GenericColumn(cast.getName(), DbObjType.CAST));
+        loader.setCurrentObject(new ObjectReference(cast.getName(), DbObjType.CAST));
 
         addDep(cast, source);
         addDep(cast, target);
@@ -92,7 +92,7 @@ public final class PgCastsReader extends PgAbstractJdbcReader {
                     if (schemaName != null && !PgDiffUtils.isSystemSchema(schemaName)) {
                         String funcName = PgParserAbstract.parseSignature(
                                 QNameParser.getFirstName(ids), ctx.function_args());
-                        cast.addDependency(new GenericColumn(schemaName, funcName, DbObjType.FUNCTION));
+                        cast.addDependency(new ObjectReference(schemaName, funcName, DbObjType.FUNCTION));
                     }
                 });
 
@@ -118,7 +118,7 @@ public final class PgCastsReader extends PgAbstractJdbcReader {
             QNameParser<ParserRuleContext> parser = PgParserUtils.parseQName(objectName);
             String schemaName = parser.getSchemaName();
             if (schemaName != null && !PgDiffUtils.isSystemSchema(schemaName)) {
-                statement.addDependency(new GenericColumn(schemaName, parser.getFirstName(), DbObjType.TYPE));
+                statement.addDependency(new ObjectReference(schemaName, parser.getFirstName(), DbObjType.TYPE));
             }
         }
     }

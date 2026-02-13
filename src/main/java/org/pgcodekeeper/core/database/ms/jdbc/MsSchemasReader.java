@@ -46,7 +46,7 @@ public class MsSchemasReader extends AbstractJdbcReader<MsJdbcLoader> implements
     @Override
     protected void processResult(ResultSet res) throws SQLException, XmlReaderException {
         String schemaName = res.getString("name");
-        loader.setCurrentObject(new GenericColumn(schemaName, DbObjType.SCHEMA));
+        loader.setCurrentObject(new ObjectReference(schemaName, DbObjType.SCHEMA));
         if (loader.isIgnoredSchema(schemaName)) {
             return;
         }

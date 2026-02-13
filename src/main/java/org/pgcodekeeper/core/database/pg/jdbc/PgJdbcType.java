@@ -133,17 +133,17 @@ public class PgJdbcType {
     }
 
     /**
-     * Returns the GenericColumn representation containing the type's schema and name.
+     * Returns the ObjectReference representation containing the type's schema and name.
      *
-     * @return the GenericColumn for this type
+     * @return the ObjectReference for this type
      */
-    public GenericColumn getQualifiedName() {
+    public ObjectReference toReference() {
         if (Consts.PG_CATALOG.equals(parentSchema)) {
             String dealias = DATA_TYPE_ALIASES.get(typeName);
-            return new GenericColumn(parentSchema, dealias == null ? typeName : dealias,
+            return new ObjectReference(parentSchema, dealias == null ? typeName : dealias,
                     DbObjType.TYPE);
         }
-        return new GenericColumn(parentSchema, typeName, DbObjType.TYPE);
+        return new ObjectReference(parentSchema, typeName, DbObjType.TYPE);
     }
 
     /**
@@ -153,7 +153,7 @@ public class PgJdbcType {
      */
     public void addTypeDepcy(AbstractStatement st) {
         if (oid > lastSysOid && !PgDiffUtils.isSystemSchema(parentSchema)) {
-            st.addDependency(new GenericColumn(parentSchema, typeName, DbObjType.TYPE));
+            st.addDependency(new ObjectReference(parentSchema, typeName, DbObjType.TYPE));
         }
     }
 }

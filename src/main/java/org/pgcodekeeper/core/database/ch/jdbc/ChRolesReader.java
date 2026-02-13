@@ -44,7 +44,7 @@ public final class ChRolesReader extends AbstractJdbcReader<ChJdbcLoader> {
     @Override
     protected void processResult(ResultSet result) throws SQLException {
         String name = result.getString("name");
-        loader.setCurrentObject(new GenericColumn(name, DbObjType.ROLE));
+        loader.setCurrentObject(new ObjectReference(name, DbObjType.ROLE));
 
         ChRole role = new ChRole(name);
         String storage = result.getString("storage");
