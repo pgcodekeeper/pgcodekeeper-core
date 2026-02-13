@@ -55,8 +55,8 @@ public abstract class PgAbstractSearchPathJdbcReader extends AbstractSearchPathJ
 
     protected void addDep(AbstractStatement statement, String schemaName, String name, DbObjType type) {
         if (schemaName != null && !PgDiffUtils.isSystemSchema(schemaName)) {
-            statement.addDependency(new GenericColumn(schemaName, DbObjType.SCHEMA));
-            statement.addDependency(new GenericColumn(schemaName, name, type));
+            statement.addDependency(new ObjectReference(schemaName, DbObjType.SCHEMA));
+            statement.addDependency(new ObjectReference(schemaName, name, type));
         }
     }
 

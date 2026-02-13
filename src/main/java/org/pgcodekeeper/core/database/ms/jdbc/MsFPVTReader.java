@@ -63,7 +63,7 @@ public final class MsFPVTReader extends AbstractSearchPathJdbcReader<MsJdbcLoade
             default -> DbObjType.FUNCTION;
         };
 
-        loader.setCurrentObject(new GenericColumn(schema.getName(), name, tt));
+        loader.setCurrentObject(new ObjectReference(schema.getName(), name, tt));
         boolean an = res.getBoolean("ansi_nulls");
         boolean qi = res.getBoolean("quoted_identifier");
         boolean isDisable = res.getBoolean("is_disabled");

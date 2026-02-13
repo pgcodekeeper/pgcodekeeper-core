@@ -65,7 +65,7 @@ public final class ChRelationsReader extends AbstractSearchPathJdbcReader<ChJdbc
     }
 
     private AbstractStatement getDictionary(ISchema schema, String name, String definition) {
-        loader.setCurrentObject(new GenericColumn(schema.getName(), name, DbObjType.DICTIONARY));
+        loader.setCurrentObject(new ObjectReference(schema.getName(), name, DbObjType.DICTIONARY));
         ChDictionary dict = new ChDictionary(name);
         loader.submitChAntlrTask(definition,
                 p -> p.ch_file().query(0).stmt().ddl_stmt().create_stmt().create_dictinary_stmt(),
@@ -75,7 +75,7 @@ public final class ChRelationsReader extends AbstractSearchPathJdbcReader<ChJdbc
     }
 
     private AbstractStatement getView(ISchema schema, String name, String definition) {
-        loader.setCurrentObject(new GenericColumn(schema.getName(), name, DbObjType.VIEW));
+        loader.setCurrentObject(new ObjectReference(schema.getName(), name, DbObjType.VIEW));
         ChView view = new ChView(name);
         loader.submitChAntlrTask(definition,
                 p -> new Pair<>(
@@ -88,7 +88,7 @@ public final class ChRelationsReader extends AbstractSearchPathJdbcReader<ChJdbc
     }
 
     private AbstractStatement getTable(ISchema schema, String name, String definition, String engineName) {
-        loader.setCurrentObject(new GenericColumn(schema.getName(), name, DbObjType.TABLE));
+        loader.setCurrentObject(new ObjectReference(schema.getName(), name, DbObjType.TABLE));
         ChTable table;
         if (engineName.endsWith("log")) {
             table = new ChTableLog(name);

@@ -24,7 +24,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.EventType;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.ISchema;
 import org.pgcodekeeper.core.database.base.schema.*;
@@ -580,7 +580,7 @@ class PgAntlrLoaderTest {
         PgSequence seq = new PgSequence("user_id_seq");
         seq.setMinMaxInc(1L, null, null, null, 0L);
         seq.setCache("1");
-        seq.setOwnedBy(new GenericColumn("public", "user_data", "id", DbObjType.COLUMN));
+        seq.setOwnedBy(new ObjectReference("public", "user_data", "id", DbObjType.COLUMN));
         schema.addChild(seq);
         seq.setOwner(POSTGRES);
 
@@ -830,7 +830,7 @@ class PgAntlrLoaderTest {
         seq.setCache("1");
         schema.addChild(seq);
 
-        seq.setOwnedBy(new GenericColumn("public", "test", "id", DbObjType.COLUMN));
+        seq.setOwnedBy(new ObjectReference("public", "test", "id", DbObjType.COLUMN));
 
         seq.setOwner("fordfrog");
 

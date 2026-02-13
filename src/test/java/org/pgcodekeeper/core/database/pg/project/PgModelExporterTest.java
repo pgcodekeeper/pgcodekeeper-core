@@ -21,9 +21,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
@@ -76,7 +76,7 @@ class PgModelExporterTest {
      */
     private IStatement getStatement(IDatabase db, String stmtName, DbObjType type) {
         String[] arr = Arrays.copyOf(stmtName.split("\\."), 3);
-        return db.getStatement(new GenericColumn(arr[0], arr[1], arr[2], type));
+        return db.getStatement(new ObjectReference(arr[0], arr[1], arr[2], type));
     }
 
     /**

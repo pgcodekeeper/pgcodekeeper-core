@@ -58,7 +58,7 @@ public final class PgConstraintsReader extends PgAbstractSearchPathJdbcReader {
         String schemaName = schema.getName();
         String constraintName = res.getString("conname");
         String[] params = PgJdbcUtils.getColArray(res, "reloptions", true);
-        loader.setCurrentObject(new GenericColumn(schemaName, tableName, constraintName, DbObjType.CONSTRAINT));
+        loader.setCurrentObject(new ObjectReference(schemaName, tableName, constraintName, DbObjType.CONSTRAINT));
         PgConstraint constr;
 
         String type = res.getString("contype");

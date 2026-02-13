@@ -165,7 +165,7 @@ public final class PgCreateFunction extends PgParserAbstract {
             }
         }
 
-        List<Pair<String, GenericColumn>> funcArgs = fillArguments(function);
+        List<Pair<String, ObjectReference>> funcArgs = fillArguments(function);
 
         Function_bodyContext body = ctx.function_body();
         if (body != null) {
@@ -263,7 +263,7 @@ public final class PgCreateFunction extends PgParserAbstract {
     }
 
     private void analyzeFunctionDefinition(PgAbstractFunction function, String language,
-                                           SconstContext definition, List<Pair<String, GenericColumn>> funcArgs) {
+                                           SconstContext definition, List<Pair<String, ObjectReference>> funcArgs) {
         Pair<String, Token> pair = unquoteQuotedString(definition);
         String def = pair.getFirst();
         Token start = pair.getSecond();
@@ -302,7 +302,7 @@ public final class PgCreateFunction extends PgParserAbstract {
     }
 
     private void analyzeFunctionBody(PgAbstractFunction function, Function_bodyContext body,
-                                     List<Pair<String, GenericColumn>> funcArgs) {
+                                     List<Pair<String, ObjectReference>> funcArgs) {
         // finalizer-only task, defers analyzer until finalizing stage
         AntlrTaskManager.submit(antlrTasks, () -> body,
                 funcCtx -> {
@@ -314,10 +314,10 @@ public final class PgCreateFunction extends PgParserAbstract {
 
     /**
      * Returns a list of pairs, each of which contains the name of the argument
-     * and its full type name in GenericColumn object (typeSchema, typeName, DbObjType.TYPE).
+     * and its full type name in ObjectReference object (typeSchema, typeName, DbObjType.TYPE).
      */
-    private List<Pair<String, GenericColumn>> fillArguments(PgAbstractFunction function) {
-        List<Pair<String, GenericColumn>> funcArgs = new ArrayList<>();
+    private List<Pair<String, ObjectReference>> fillArguments(PgAbstractFunction function) {
+        List<Pair<String, ObjectReference>> funcArgs = new ArrayList<>();
         for (Function_argumentsContext argument : ctx.function_parameters()
                 .function_args().function_arguments()) {
             Identifier_nontypeContext name = argument.identifier_nontype();
@@ -347,7 +347,7 @@ public final class PgCreateFunction extends PgParserAbstract {
             }
 
             function.addArgument(arg);
-            funcArgs.add(new Pair<>(argName, new GenericColumn(typeSchema, typeName, DbObjType.TYPE)));
+            funcArgs.add(new Pair<>(argName, new ObjectReference(typeSchema, typeName, DbObjType.TYPE)));
         }
         return funcArgs;
     }

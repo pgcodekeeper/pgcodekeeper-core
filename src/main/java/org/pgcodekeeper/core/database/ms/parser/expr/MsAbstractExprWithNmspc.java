@@ -44,13 +44,13 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
      * String-null pairs keep track of internal query names that have only the
      * Alias.
      */
-    private final Map<String, GenericColumn> namespace = new HashMap<>();
+    private final Map<String, ObjectReference> namespace = new HashMap<>();
     /**
      * Unaliased namespace keeps track of tables that have no Alias.<br>
      * It has to be separate since same-named unaliased tables from different
      * schemas can be used, requiring qualification.
      */
-    private final Set<GenericColumn> unaliasedNamespace = new HashSet<>();
+    private final Set<ObjectReference> unaliasedNamespace = new HashSet<>();
     /**
      * CTE names that current level of FROM has access to.
      */
@@ -70,22 +70,22 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
     }
 
     @Override
-    public Entry<String, GenericColumn> findReference(String schema, String name, String column) {
-        Entry<String, GenericColumn> ref = findReferenceInNmspc(schema, name);
+    public Entry<String, ObjectReference> findReference(String schema, String name, String column) {
+        Entry<String, ObjectReference> ref = findReferenceInNmspc(schema, name);
         return ref == null ? super.findReference(schema, name, column) : ref;
     }
 
-    protected Entry<String, GenericColumn> findReferenceInNmspc(String schema, String name) {
+    protected Entry<String, ObjectReference> findReferenceInNmspc(String schema, String name) {
         String loweredName = name.toLowerCase(Locale.ROOT);
         boolean found;
-        GenericColumn dereferenced = null;
+        ObjectReference dereferenced = null;
         if (schema == null && namespace.containsKey(loweredName)) {
             found = true;
             dereferenced = namespace.get(loweredName);
         } else if (!unaliasedNamespace.isEmpty()) {
             // simple empty check to save some allocations
             // it will almost always be empty
-            for (GenericColumn unaliased : unaliasedNamespace) {
+            for (ObjectReference unaliased : unaliasedNamespace) {
                 if (unaliased.table().equalsIgnoreCase(loweredName) &&
                         (schema == null || unaliased.schema().equalsIgnoreCase(schema))) {
                     if (dereferenced == null) {
@@ -116,8 +116,8 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
         return ret != null ? ret : super.findColumn(name);
     }
 
-    private Pair<IRelation, Pair<String, String>> findColumn(String name, Collection<GenericColumn> refs) {
-        for (GenericColumn ref : refs) {
+    private Pair<IRelation, Pair<String, String>> findColumn(String name, Collection<ObjectReference> refs) {
+        for (ObjectReference ref : refs) {
             if (ref == null) {
                 continue;
             }
@@ -144,7 +144,7 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
      * @param object the database object being referenced, may be null for internal query names
      * @return true if the reference was added successfully, false if alias already exists
      */
-    public boolean addReference(String alias, GenericColumn object) {
+    public boolean addReference(String alias, ObjectReference object) {
         String aliasCi = alias.toLowerCase(Locale.ROOT);
         boolean exists = namespace.containsKey(aliasCi);
         if (exists) {
@@ -161,18 +161,18 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
      *
      * @param qualifiedTable the fully qualified table reference to add
      */
-    public void addRawTableReference(GenericColumn qualifiedTable) {
+    public void addRawTableReference(ObjectReference qualifiedTable) {
         boolean exists = !unaliasedNamespace.add(qualifiedTable);
         if (exists) {
             log(Messages.MsAbstractExprWithNmspc_log_dupl_unaliased_table, qualifiedTable.schema(), qualifiedTable.table());
         }
     }
 
-    protected GenericColumn addNameReference(Qualified_nameContext name, As_table_aliasContext alias) {
+    protected ObjectReference addNameReference(Qualified_nameContext name, As_table_aliasContext alias) {
         String firstName = name.name.getText();
 
         boolean isCte = name.DOT().isEmpty() && hasCte(firstName);
-        GenericColumn depcy = null;
+        ObjectReference depcy = null;
         if (!isCte) {
             depcy = addObjectDepcy(name, DbObjType.TABLE);
         }

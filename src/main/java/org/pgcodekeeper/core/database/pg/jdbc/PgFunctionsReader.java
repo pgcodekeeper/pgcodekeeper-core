@@ -68,7 +68,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
     private PgAbstractFunction getFunc(ResultSet res, ISchema schema, String funcName) throws SQLException {
         boolean isProc = PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion()) && res.getBoolean("proisproc");
         PgAbstractFunction function = isProc ? new PgProcedure(funcName) : new PgFunction(funcName);
-        loader.setCurrentObject(new GenericColumn(schema.getName(), funcName, function.getStatementType()));
+        loader.setCurrentObject(new ObjectReference(schema.getName(), funcName, function.getStatementType()));
 
         function.setLanguageCost(res.getString("lang_name"), res.getFloat("procost"));
 
@@ -221,7 +221,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
     }
 
     private void fillBody(PgAbstractFunction function, IDatabase db, ResultSet res) throws SQLException {
-        List<Pair<String, GenericColumn>> argsQualTypes = fillArguments(function, res);
+        List<Pair<String, ObjectReference>> argsQualTypes = fillArguments(function, res);
 
         String body = "";
         String definition = res.getString("prosrc");
@@ -269,7 +269,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
 
     private PgAbstractFunction getAgg(ResultSet res, String schemaName,
                                     String funcName) throws SQLException {
-        loader.setCurrentObject(new GenericColumn(schemaName, funcName, DbObjType.AGGREGATE));
+        loader.setCurrentObject(new ObjectReference(schemaName, funcName, DbObjType.AGGREGATE));
         PgAggregate aggregate = new PgAggregate(funcName);
 
         switch (res.getString("aggkind")) {
@@ -438,11 +438,11 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
     }
 
     /**
-     * Returns a list of pairs, each of which contains the name of the argument and its full type name in GenericColumn
+     * Returns a list of pairs, each of which contains the name of the argument and its full type name in ObjectReference
      * object (typeSchema, typeName, DbObjType.TYPE).
      */
-    private List<Pair<String, GenericColumn>> fillArguments(PgAbstractFunction f,
-                                                            ResultSet res) throws SQLException {
+    private List<Pair<String, ObjectReference>> fillArguments(PgAbstractFunction f,
+                                                              ResultSet res) throws SQLException {
         StringBuilder sb = new StringBuilder();
         String[] argModes = PgJdbcUtils.getColArray(res, "proargmodes", true);
         String[] argNames = PgJdbcUtils.getColArray(res, "proargnames", true);
@@ -451,7 +451,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
 
         // It will be used for sending the arguments of function to the namespaces
         // in launcher for correct analysis.
-        List<Pair<String, GenericColumn>> argsQualifiedTypes = new ArrayList<>();
+        List<Pair<String, ObjectReference>> argsQualifiedTypes = new ArrayList<>();
 
         for (int i = 0; argTypes.length > i; i++) {
             String aMode = argModes != null ? argModes[i] : "i";
@@ -474,7 +474,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
             Argument a = f.new PgArgument(ArgMode.of(aMode), argName, argJdbcType.getFullName());
 
             if (!"o".equals(aMode)) {
-                argsQualifiedTypes.add(new Pair<>(argName, argJdbcType.getQualifiedName()));
+                argsQualifiedTypes.add(new Pair<>(argName, argJdbcType.toReference()));
             }
 
             f.addArgument(a);

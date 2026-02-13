@@ -382,9 +382,9 @@ public final class PgSelect extends PgAbstractExprWithNmspc<Select_stmtContext> 
         }
 
         for (IConstraintPk con : meta.getPrimaryKeys(dep.getSchema(), dep.getTable())) {
-            if (con.isPrimaryKey() && con.containsColumn(dep.getObjName())) {
+            if (con.isPrimaryKey() && con.containsColumn(dep.getName())) {
                 // implicit reference
-                vex.addDependency(new GenericColumn(con.getSchemaName(),
+                vex.addDependency(new ObjectReference(con.getSchemaName(),
                         con.getTableName(), con.getName(), DbObjType.CONSTRAINT), null);
             }
         }
@@ -405,15 +405,15 @@ public final class PgSelect extends PgAbstractExprWithNmspc<Select_stmtContext> 
     private static final Predicate<String> ANY = s -> true;
 
     private void unqualAster(List<ModPair<String, String>> cols) {
-        for (GenericColumn gc : unaliasedNamespace) {
-            addFilteredRelationColumnsDepcies(gc.schema(), gc.table(), ANY)
+        for (ObjectReference ref : unaliasedNamespace) {
+            addFilteredRelationColumnsDepcies(ref.schema(), ref.table(), ANY)
                     .map(Pair::copyMod)
                     .forEach(cols::add);
         }
 
-        for (GenericColumn gc : namespace.values()) {
-            if (gc != null) {
-                addFilteredRelationColumnsDepcies(gc.schema(), gc.table(), ANY)
+        for (ObjectReference ref : namespace.values()) {
+            if (ref != null) {
+                addFilteredRelationColumnsDepcies(ref.schema(), ref.table(), ANY)
                         .map(Pair::copyMod)
                         .forEach(cols::add);
             }
@@ -431,24 +431,24 @@ public final class PgSelect extends PgAbstractExprWithNmspc<Select_stmtContext> 
         ParserRuleContext relationCtx = QNameParser.getFirstNameCtx(ids);
         String relation = relationCtx.getText();
 
-        Entry<String, GenericColumn> ref = findReference(schema, relation, null);
+        Entry<String, ObjectReference> ref = findReference(schema, relation, null);
         if (ref == null) {
             log(Messages.Select_log_aster_qual_not_found, schema, relation);
             return false;
         }
-        GenericColumn relationGc = ref.getValue();
-        if (relationGc != null) {
+        ObjectReference relationRef = ref.getValue();
+        if (relationRef != null) {
             if (schemaCtx != null) {
-                addDependency(new GenericColumn(relationGc.schema(), DbObjType.SCHEMA), schemaCtx);
+                addDependency(new ObjectReference(relationRef.schema(), DbObjType.SCHEMA), schemaCtx);
             }
 
-            if (relationGc.getObjName().equals(relation)) {
-                addDependency(relationGc, relationCtx);
+            if (relationRef.getName().equals(relation)) {
+                addDependency(relationRef, relationCtx);
             } else {
-                addReference(relationGc, relationCtx);
+                addReference(relationRef, relationCtx);
             }
 
-            addFilteredRelationColumnsDepcies(relationGc.schema(), relationGc.table(), ANY)
+            addFilteredRelationColumnsDepcies(relationRef.schema(), relationRef.table(), ANY)
                     .map(Pair::copyMod)
                     .forEach(cols::add);
             return true;

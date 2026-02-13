@@ -42,14 +42,14 @@ Reference: action = SELECT, offset = 4077, line number = 182, charPositionInLine
 Reference: Object = foodomain (DOMAIN), action = CREATE, offset = 4425, line number = 193, charPositionInLine = 14
 Reference: Object = volfoo(text) (FUNCTION), action = CREATE, offset = 4461, line number = 195, charPositionInLine = 16
 Reference: Object = inline_eq(foodomain, foodomain) (FUNCTION), action = CREATE, offset = 4575, line number = 198, charPositionInLine = 16
-Reference: Object = "=" (OPERATOR), action = CREATE, offset = 4721, line number = 201, charPositionInLine = 16
+Reference: Object = = (OPERATOR), action = CREATE, offset = 4721, line number = 201, charPositionInLine = 16
 Reference: action = SELECT, offset = 4811, line number = 204, charPositionInLine = 0
 Reference: action = ROLLBACK, offset = 4897, line number = 206, charPositionInLine = 0
 Reference: action = BEGIN, offset = 5103, line number = 211, charPositionInLine = 0
 Reference: Object = arrdomain (DOMAIN), action = CREATE, offset = 5125, line number = 213, charPositionInLine = 14
 Reference: Object = make_ad(integer, integer) (FUNCTION), action = CREATE, offset = 5162, line number = 215, charPositionInLine = 16
 Reference: Object = ad_eq(arrdomain, arrdomain) (FUNCTION), action = CREATE, offset = 5324, line number = 222, charPositionInLine = 16
-Reference: Object = "=" (OPERATOR), action = CREATE, offset = 5445, line number = 225, charPositionInLine = 16
+Reference: Object = = (OPERATOR), action = CREATE, offset = 5445, line number = 225, charPositionInLine = 16
 Reference: action = SELECT, offset = 5531, line number = 228, charPositionInLine = 0
 Reference: action = ROLLBACK, offset = 5696, line number = 234, charPositionInLine = 0
 Reference: action = BEGIN, offset = 5769, line number = 237, charPositionInLine = 0

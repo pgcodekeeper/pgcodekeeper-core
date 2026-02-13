@@ -46,7 +46,7 @@ public final class PgForeignDataWrappersReader extends PgAbstractJdbcReader{
     @Override
     protected void processResult(ResultSet res) throws SQLException {
         String fdwName = res.getString("fdwname");
-        loader.setCurrentObject(new GenericColumn(fdwName, DbObjType.FOREIGN_DATA_WRAPPER));
+        loader.setCurrentObject(new ObjectReference(fdwName, DbObjType.FOREIGN_DATA_WRAPPER));
         PgForeignDataWrapper f = new PgForeignDataWrapper(fdwName);
 
         String fdwHandler = res.getString("fdwhandler");

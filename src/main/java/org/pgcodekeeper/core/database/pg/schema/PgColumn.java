@@ -608,7 +608,7 @@ public final class PgColumn extends PgAbstractStatement
      */
     public PgColumn getParentCol(PgAbstractTable tbl) {
         for (Inherits in : tbl.getInherits()) {
-            IStatement parent = getDatabase().getStatement(new GenericColumn(in.key(), in.value(), DbObjType.TABLE));
+            IStatement parent = getDatabase().getStatement(new ObjectReference(in.key(), in.value(), DbObjType.TABLE));
             if (parent == null) {
                 var msg = "There is no such object of inheritance as table: %s".formatted(in.getQualifiedName());
                 LOG.error(msg);

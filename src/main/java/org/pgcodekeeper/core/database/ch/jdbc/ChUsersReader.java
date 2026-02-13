@@ -47,7 +47,7 @@ public final class ChUsersReader extends AbstractJdbcReader<ChJdbcLoader> {
     @Override
     protected void processResult(ResultSet res) throws SQLException {
         String name = res.getString("name");
-        loader.setCurrentObject(new GenericColumn(name, DbObjType.USER));
+        loader.setCurrentObject(new ObjectReference(name, DbObjType.USER));
 
         ChUser user = new ChUser(name);
         String storage = res.getString("storage");

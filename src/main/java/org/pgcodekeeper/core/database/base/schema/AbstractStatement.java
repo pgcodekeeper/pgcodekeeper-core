@@ -46,7 +46,7 @@ public abstract class AbstractStatement implements IStatement, IHashable {
     protected final Set<IPrivilege> privileges = new LinkedHashSet<>();
 
     protected AbstractStatement parent;
-    protected final Set<GenericColumn> deps = new LinkedHashSet<>();
+    protected final Set<ObjectReference> deps = new LinkedHashSet<>();
 
     protected final StatementMeta meta = new StatementMeta();
 
@@ -156,12 +156,12 @@ public abstract class AbstractStatement implements IStatement, IHashable {
     }
 
     @Override
-    public Set<GenericColumn> getDependencies() {
+    public Set<ObjectReference> getDependencies() {
         return Collections.unmodifiableSet(deps);
     }
 
     @Override
-    public void addDependency(GenericColumn dep) {
+    public void addDependency(ObjectReference dep) {
         deps.add(dep);
     }
 

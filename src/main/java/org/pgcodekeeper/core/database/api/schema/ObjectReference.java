@@ -15,12 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
-
 import java.io.Serializable;
 
 /**
- * Represents a generic database object reference with schema, table, column, and type information.
+ * Represents an object reference with schema, table, column, and type information.
  * Used for identifying and referencing database objects across different contexts.
  *
  * @param schema the schema name
@@ -28,26 +26,26 @@ import java.io.Serializable;
  * @param column the column name
  * @param type   the database object type
  */
-public record GenericColumn(String schema, String table, String column, DbObjType type) implements Serializable {
+public record ObjectReference(String schema, String table, String column, DbObjType type) implements Serializable {
 
     /**
-     * Creates a generic column for a database object within a schema.
+     * Creates an object reference for a database object within a schema.
      *
      * @param schema the schema name
      * @param object the object name (table, view, function, etc.)
      * @param type   the database object type
      */
-    public GenericColumn(String schema, String object, DbObjType type) {
+    public ObjectReference(String schema, String object, DbObjType type) {
         this(schema, object, null, type);
     }
 
     /**
-     * Creates a generic column for a schema-level object.
+     * Creates an object reference for a schema-level object.
      *
      * @param schema the schema name
      * @param type   the database object type
      */
-    public GenericColumn(String schema, DbObjType type) {
+    public ObjectReference(String schema, DbObjType type) {
         this(schema, null, type);
     }
 
@@ -56,7 +54,7 @@ public record GenericColumn(String schema, String table, String column, DbObjTyp
      *
      * @return the column name if present, otherwise table name, otherwise schema name
      */
-    public String getObjName() {
+    public String getName() {
         if (column != null) {
             return column;
         }
@@ -70,47 +68,27 @@ public record GenericColumn(String schema, String table, String column, DbObjTyp
         return "";
     }
 
-    /**
-     * Gets the fully qualified name of this object.
-     *
-     * @return the qualified name as a string
-     */
-    public String getQualifiedName() {
-        return appendQualifiedName(new StringBuilder()).toString();
-    }
-
-    public StringBuilder appendQualifiedName(StringBuilder sb) {
-        if (type == DbObjType.CAST) {
-            sb.append(schema);
-            return sb;
-        }
-
+    public String getFullName() {
+        StringBuilder sb = new StringBuilder();
         if (schema != null) {
-            sb.append(PgDiffUtils.getQuotedName(schema));
+            sb.append(schema);
+            sb.append('.');
         }
         if (table != null) {
-            if (!sb.isEmpty()) {
-                sb.append('.');
-            }
-            if (type.in(DbObjType.FUNCTION, DbObjType.PROCEDURE, DbObjType.AGGREGATE)) {
-                sb.append(table);
-            } else {
-                sb.append(PgDiffUtils.getQuotedName(table));
-            }
+            sb.append(table);
+            sb.append('.');
         }
         if (column != null) {
-            if (!sb.isEmpty()) {
-                sb.append('.');
-            }
-            sb.append(PgDiffUtils.getQuotedName(column));
+            sb.append(column);
+            sb.append('.');
         }
-        return sb;
+
+        sb.setLength(sb.length() - 1);
+        return sb.toString();
     }
 
     @Override
     public String toString() {
-        return appendQualifiedName(new StringBuilder())
-                .append(" (").append(type).append(')')
-                .toString();
+        return getFullName() + " (" + type + ')';
     }
 }

@@ -50,7 +50,7 @@ public class MsExpressionAnalysisLauncher extends AbstractAnalysisLauncher {
             String schemaName = table.getParent().getName();
             String rawTableReference = table.getName();
 
-            expr.addRawTableReference(new GenericColumn(schemaName, rawTableReference, DbObjType.TABLE));
+            expr.addRawTableReference(new ObjectReference(schemaName, rawTableReference, DbObjType.TABLE));
             expr.analyze((ExpressionContext) ctx);
             return expr.getDependencies();
         }

@@ -42,7 +42,7 @@ public class MsSequencesReader extends AbstractSearchPathJdbcReader<MsJdbcLoader
     @Override
     protected void processResult(ResultSet res, ISchema schema) throws SQLException, XmlReaderException {
         String sequenceName = res.getString("name");
-        loader.setCurrentObject(new GenericColumn(schema.getName(), sequenceName, DbObjType.SEQUENCE));
+        loader.setCurrentObject(new ObjectReference(schema.getName(), sequenceName, DbObjType.SEQUENCE));
         MsSequence s = new MsSequence(sequenceName);
 
         String dataType = res.getString("data_type");

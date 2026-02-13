@@ -18,7 +18,7 @@ package org.pgcodekeeper.core.database.base.loader;
 import org.antlr.v4.runtime.Parser;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.loader.IJdbcLoader;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.ISchema;
 import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
@@ -54,7 +54,7 @@ public abstract class AbstractJdbcLoader<T extends IDatabase> extends AbstractLo
     protected final IgnoreSchemaList ignoreSchemaList;
     protected final Map<Object, ISchema> schemaIds = new HashMap<>();
 
-    private GenericColumn currentObject;
+    private ObjectReference currentObject;
 
     protected Map<Long, String> cachedRolesNamesByOid;
     protected Connection connection;
@@ -70,7 +70,7 @@ public abstract class AbstractJdbcLoader<T extends IDatabase> extends AbstractLo
     protected <P extends Parser, R> void submitAntlrTask(BiFunction<List<Object>, String, P> parserCreateFunction,
                                                          Function<P, R> parserCtxReader, Consumer<R> finalizer) {
         String location = getCurrentLocation();
-        GenericColumn object = this.currentObject;
+        ObjectReference object = this.currentObject;
         List<Object> list = new ArrayList<>();
         AntlrTaskManager.submit(antlrTasks, () -> {
             IMonitor.checkCancelled(monitor);
@@ -98,7 +98,7 @@ public abstract class AbstractJdbcLoader<T extends IDatabase> extends AbstractLo
         debug("%s", currentOperation);
     }
 
-    public void setCurrentObject(GenericColumn currentObject) {
+    public void setCurrentObject(ObjectReference currentObject) {
         this.currentObject = currentObject;
         debug(Messages.JdbcLoaderBase_log_current_obj, currentObject);
     }

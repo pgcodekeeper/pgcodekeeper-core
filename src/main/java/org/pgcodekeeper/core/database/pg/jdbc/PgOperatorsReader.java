@@ -43,7 +43,7 @@ public final class PgOperatorsReader extends PgAbstractSearchPathJdbcReader {
     protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String operSchemaName = schema.getName();
         String operName = res.getString("name");
-        loader.setCurrentObject(new GenericColumn(operSchemaName, operName, DbObjType.OPERATOR));
+        loader.setCurrentObject(new ObjectReference(operSchemaName, operName, DbObjType.OPERATOR));
         PgOperator oper = new PgOperator(operName);
 
         loader.setOwner(oper, res.getLong("owner"));

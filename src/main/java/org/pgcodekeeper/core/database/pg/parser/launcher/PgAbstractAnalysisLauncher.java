@@ -52,7 +52,7 @@ public abstract class PgAbstractAnalysisLauncher extends AbstractAnalysisLaunche
 
         PgValueExprWithNmspc valExprWithNmspc = new PgValueExprWithNmspc(meta);
         valExprWithNmspc.addRawTableReference(
-                new GenericColumn(schemaName, rawTableReference, DbObjType.TABLE));
+                new ObjectReference(schemaName, rawTableReference, DbObjType.TABLE));
         return analyze(ctx, valExprWithNmspc);
     }
 
@@ -73,7 +73,7 @@ public abstract class PgAbstractAnalysisLauncher extends AbstractAnalysisLaunche
         IStatement table = stmt.getParent();
         String schemaName = table.getParent().getName();
         String tableName = table.getName();
-        GenericColumn implicitTable = new GenericColumn(schemaName, tableName, DbObjType.TABLE);
+        ObjectReference implicitTable = new ObjectReference(schemaName, tableName, DbObjType.TABLE);
         analyzer.addReference("new", implicitTable);
         analyzer.addReference("old", implicitTable);
         return analyze(ctx, analyzer);

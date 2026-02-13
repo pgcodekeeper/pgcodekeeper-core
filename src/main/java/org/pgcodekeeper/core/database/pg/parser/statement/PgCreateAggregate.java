@@ -242,9 +242,9 @@ public final class PgCreateAggregate extends PgParserAbstract {
         }
     }
 
-    private GenericColumn getAggregateFunction(PgAggregate aggregate, List<ParserRuleContext> ids) {
+    private ObjectReference getAggregateFunction(PgAggregate aggregate, List<ParserRuleContext> ids) {
         String name = QNameParser.getFirstName(ids) + getParamFuncSignature(aggregate, AggFuncs.FINALFUNC);
-        return new GenericColumn(QNameParser.getSchemaName(ids),
+        return new ObjectReference(QNameParser.getSchemaName(ids),
                 name, DbObjType.FUNCTION);
     }
 

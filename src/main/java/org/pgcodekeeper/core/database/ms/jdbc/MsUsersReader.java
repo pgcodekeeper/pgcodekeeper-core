@@ -45,7 +45,7 @@ public class MsUsersReader extends AbstractJdbcReader<MsJdbcLoader> implements I
     @Override
     protected void processResult(ResultSet res) throws SQLException, XmlReaderException {
         String name = res.getString("name");
-        loader.setCurrentObject(new GenericColumn(name, DbObjType.USER));
+        loader.setCurrentObject(new ObjectReference(name, DbObjType.USER));
 
         MsUser user = new MsUser(name);
         user.setLogin(res.getString("loginname"));

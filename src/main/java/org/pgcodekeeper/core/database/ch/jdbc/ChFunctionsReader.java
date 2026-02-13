@@ -45,7 +45,7 @@ public final class ChFunctionsReader extends AbstractJdbcReader<ChJdbcLoader> {
     @Override
     protected void processResult(ResultSet result) throws SQLException {
         String name = result.getString("name");
-        loader.setCurrentObject(new GenericColumn(name, DbObjType.FUNCTION));
+        loader.setCurrentObject(new ObjectReference(name, DbObjType.FUNCTION));
 
         ChFunction function = new ChFunction(name);
         String definition = result.getString("create_query");

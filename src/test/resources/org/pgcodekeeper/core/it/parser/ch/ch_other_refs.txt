@@ -78,10 +78,10 @@ Reference: action = OPTIMIZE, offset = 4523, line number = 75, charPositionInLin
 Reference: action = RENAME, offset = 4570, line number = 76, charPositionInLine = 0
 Reference: action = RENAME, offset = 4618, line number = 77, charPositionInLine = 0
 Reference: action = RENAME, offset = 4669, line number = 78, charPositionInLine = 0
-Reference: Object = "01913_db" (SCHEMA), action = null, offset = 4728, line number = 79, charPositionInLine = 19
-Reference: Object = "01913_db".test_dictionary (DICTIONARY), action = CREATE, offset = 4739, line number = 79, charPositionInLine = 30
+Reference: Object = 01913_db (SCHEMA), action = null, offset = 4728, line number = 79, charPositionInLine = 19
+Reference: Object = 01913_db.test_dictionary (DICTIONARY), action = CREATE, offset = 4739, line number = 79, charPositionInLine = 30
 Reference: Object = buf (TABLE), action = CREATE, offset = 4910, line number = 80, charPositionInLine = 14
-Reference: Object = "join" (TABLE), action = CREATE, offset = 5009, line number = 81, charPositionInLine = 14
+Reference: Object = join (TABLE), action = CREATE, offset = 5009, line number = 81, charPositionInLine = 14
 Reference: Object = t1 (TABLE), action = CREATE, offset = 5092, line number = 82, charPositionInLine = 14
 Reference: Object = t1 (TABLE), action = CREATE, offset = 5149, line number = 83, charPositionInLine = 14
 Reference: action = ROLLBACK, offset = 5202, line number = 84, charPositionInLine = 0

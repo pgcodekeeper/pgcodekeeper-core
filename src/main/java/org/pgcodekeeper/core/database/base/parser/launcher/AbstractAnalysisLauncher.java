@@ -115,7 +115,7 @@ public abstract class AbstractAnalysisLauncher implements IAnalysisLauncher {
      * @return set of dependencies found
      */
     @Override
-    public Set<GenericColumn> launchAnalyze(List<Object> errors, IMetaContainer meta) {
+    public Set<ObjectReference> launchAnalyze(List<Object> errors, IMetaContainer meta) {
         // Duplicated objects don't have parent, skip them
         if (stmt.getParent() == null) {
             return Collections.emptySet();
@@ -123,11 +123,11 @@ public abstract class AbstractAnalysisLauncher implements IAnalysisLauncher {
 
         try {
             Set<ObjectLocation> locs = analyze(ctx, meta);
-            Set<GenericColumn> depcies = new LinkedHashSet<>();
+            Set<ObjectReference> depcies = new LinkedHashSet<>();
             EnumSet<DbObjType> disabledDepcies = getDisabledDepcies();
             for (ObjectLocation loc : locs) {
                 if (!disabledDepcies.contains(loc.getType())) {
-                    depcies.add(loc.getObj());
+                    depcies.add(loc.getObjectReference());
                 }
 
                 if (loc.getLineNumber() != 0) {

@@ -122,7 +122,7 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
 
     protected static void fillIncludingDepcy(Including_indexContext incl, AbstractStatement st, String schema, String table) {
         for (IdentifierContext inclCol : incl.identifier()) {
-            st.addDependency(new GenericColumn(schema, table, inclCol.getText(), DbObjType.COLUMN));
+            st.addDependency(new ObjectReference(schema, table, inclCol.getText(), DbObjType.COLUMN));
         }
     }
 
@@ -404,13 +404,13 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
         if (type == DbObjType.CAST) {
             ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
             return buildLocation(nameCtx, action, locationType,
-                    new GenericColumn(getCastName((Cast_nameContext) nameCtx), DbObjType.CAST));
+                    new ObjectReference(getCastName((Cast_nameContext) nameCtx), DbObjType.CAST));
         }
 
         if (type == DbObjType.USER_MAPPING) {
             ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
             return buildLocation(nameCtx, action, locationType,
-                    new GenericColumn(getUserMappingName((User_mapping_nameContext) nameCtx), DbObjType.USER_MAPPING));
+                    new ObjectReference(getUserMappingName((User_mapping_nameContext) nameCtx), DbObjType.USER_MAPPING));
         }
 
         return super.getLocation(ids, type, action, isDep, signature, locationType);

@@ -45,7 +45,7 @@ public final class PgEventTriggersReader extends PgAbstractJdbcReader {
     @Override
     protected void processResult(ResultSet res) throws SQLException {
         String evtName = res.getString("evtname");
-        loader.setCurrentObject(new GenericColumn(evtName, DbObjType.EVENT_TRIGGER));
+        loader.setCurrentObject(new ObjectReference(evtName, DbObjType.EVENT_TRIGGER));
 
         PgEventTrigger evt = new PgEventTrigger(evtName);
         evt.setEvent(res.getString("evtevent"));
@@ -72,7 +72,7 @@ public final class PgEventTriggersReader extends PgAbstractJdbcReader {
         String funcName = res.getString("proname");
         String funcSchema = res.getString("nspname");
         evt.setExecutable(funcSchema + '.' + funcName + "()");
-        evt.addDependency(new GenericColumn(funcSchema, funcName + "()", DbObjType.FUNCTION));
+        evt.addDependency(new ObjectReference(funcSchema, funcName + "()", DbObjType.FUNCTION));
 
         loader.setOwner(evt, res.getString("rolname"));
         loader.setComment(evt, res);

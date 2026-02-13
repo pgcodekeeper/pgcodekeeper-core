@@ -46,7 +46,7 @@ public class MsExtendedObjectsReader extends AbstractSearchPathJdbcReader<MsJdbc
         String name = res.getString("name");
         String funcType = res.getString("type");
         DbObjType type = "PC".equals(funcType) ? DbObjType.PROCEDURE : DbObjType.FUNCTION;
-        loader.setCurrentObject(new GenericColumn(schema.getName(), name, type));
+        loader.setCurrentObject(new ObjectReference(schema.getName(), name, type));
 
         String assembly = res.getString("assembly");
         String assemblyClass = res.getString("assembly_class");
@@ -75,7 +75,7 @@ public class MsExtendedObjectsReader extends AbstractSearchPathJdbcReader<MsJdbc
             func = localFunc;
         }
 
-        func.addDependency(new GenericColumn(assembly, DbObjType.ASSEMBLY));
+        func.addDependency(new ObjectReference(assembly, DbObjType.ASSEMBLY));
 
         String executeAs = res.getString("execute_as");
         func.addOption("EXECUTE AS " + (executeAs == null ? "CALLER" : executeAs));

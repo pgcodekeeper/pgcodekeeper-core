@@ -141,7 +141,7 @@ class PgObjReferencesTest {
 
         String actual = IntegrationTestUtils.getRefsAsString(db.getObjReferences()).strip();
 
-        Assertions.assertEquals("[]", loader.getErrors().toString());
+        IntegrationTestUtils.assertErrors(loader.getErrors());
         Assertions.assertEquals(expected, actual);
     }
 }

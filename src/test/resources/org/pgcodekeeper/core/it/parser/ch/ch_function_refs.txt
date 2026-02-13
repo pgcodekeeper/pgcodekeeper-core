@@ -1,4 +1,4 @@
-Reference: Object = "01856_test_function_1" (FUNCTION), action = CREATE, offset = 16, line number = 1, charPositionInLine = 16
+Reference: Object = 01856_test_function_1 (FUNCTION), action = CREATE, offset = 16, line number = 1, charPositionInLine = 16
 Reference: Object = test_function_2 (FUNCTION), action = CREATE, offset = 116, line number = 2, charPositionInLine = 16
 Reference: Object = test_function (FUNCTION), action = CREATE, offset = 170, line number = 3, charPositionInLine = 16
 Reference: Object = test_function_with_nested_function_arg (FUNCTION), action = CREATE, offset = 215, line number = 4, charPositionInLine = 16
@@ -21,8 +21,8 @@ Reference: Object = plusthreedays (FUNCTION), action = CREATE, offset = 1064, li
 Reference: Object = plusthreemonths (FUNCTION), action = CREATE, offset = 1124, line number = 21, charPositionInLine = 16
 Reference: Object = plustwo (FUNCTION), action = CREATE, offset = 1188, line number = 22, charPositionInLine = 16
 Reference: Object = f1 (FUNCTION), action = CREATE, offset = 1229, line number = 23, charPositionInLine = 16
-Reference: Object = "hasValidSizes17" (FUNCTION), action = CREATE, offset = 1261, line number = 24, charPositionInLine = 16
-Reference: Object = "from select" (FUNCTION), action = CREATE, offset = 1399, line number = 25, charPositionInLine = 16
+Reference: Object = hasValidSizes17 (FUNCTION), action = CREATE, offset = 1261, line number = 24, charPositionInLine = 16
+Reference: Object = from select (FUNCTION), action = CREATE, offset = 1399, line number = 25, charPositionInLine = 16
 Reference: Object = test_qual (FUNCTION), action = CREATE, offset = 1446, line number = 26, charPositionInLine = 16
 Reference: Object = emoji1 (FUNCTION), action = CREATE, offset = 1494, line number = 27, charPositionInLine = 16
 Reference: Object = emoji2 (FUNCTION), action = CREATE, offset = 1562, line number = 28, charPositionInLine = 16
@@ -30,6 +30,6 @@ Reference: Object = test_function_0 (FUNCTION), action = DROP, offset = 1633, li
 Reference: Object = test_function (FUNCTION), action = DROP, offset = 1664, line number = 31, charPositionInLine = 14
 Reference: Object = plusthreemonths (FUNCTION), action = DROP, offset = 1703, line number = 32, charPositionInLine = 24
 Reference: Object = plustwo (FUNCTION), action = DROP, offset = 1744, line number = 33, charPositionInLine = 24
-Reference: Object = "hasValidSizes17" (FUNCTION), action = DROP, offset = 1777, line number = 34, charPositionInLine = 24
+Reference: Object = hasValidSizes17 (FUNCTION), action = DROP, offset = 1777, line number = 34, charPositionInLine = 24
 Reference: Object = unknown_function (FUNCTION), action = DROP, offset = 1808, line number = 35, charPositionInLine = 14
-Reference: Object = "create" (FUNCTION), action = DROP, offset = 1840, line number = 36, charPositionInLine = 14
+Reference: Object = create (FUNCTION), action = DROP, offset = 1840, line number = 36, charPositionInLine = 14

@@ -70,7 +70,7 @@ public final class PgSequencesReader extends PgAbstractSearchPathJdbcReader {
     @Override
     protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String sequenceName = res.getString("relname");
-        loader.setCurrentObject(new GenericColumn(schema.getName(), sequenceName, DbObjType.SEQUENCE));
+        loader.setCurrentObject(new ObjectReference(schema.getName(), sequenceName, DbObjType.SEQUENCE));
         PgSequence s = new PgSequence(sequenceName);
 
         String refTable = res.getString("referenced_table_name");
@@ -98,7 +98,7 @@ public final class PgSequencesReader extends PgAbstractSearchPathJdbcReader {
         }
 
         if (refTable != null && identityType == null) {
-            s.setOwnedBy(new GenericColumn(schema.getName(), refTable, refColumn, DbObjType.COLUMN));
+            s.setOwnedBy(new ObjectReference(schema.getName(), refTable, refColumn, DbObjType.COLUMN));
         }
 
         if (identityType == null) {

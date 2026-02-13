@@ -45,7 +45,7 @@ public class PgSchemasReader extends PgAbstractJdbcReader {
     @Override
     protected void processResult(ResultSet res) throws SQLException {
         String schemaName = res.getString("nspname");
-        loader.setCurrentObject(new GenericColumn(schemaName, DbObjType.SCHEMA));
+        loader.setCurrentObject(new ObjectReference(schemaName, DbObjType.SCHEMA));
         if (loader.isIgnoredSchema(schemaName)) {
             return;
         }

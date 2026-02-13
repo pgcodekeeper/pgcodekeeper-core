@@ -53,7 +53,7 @@ public final class MetaRelation extends MetaStatement implements IRelation {
      * @param type         the database object type
      */
     public MetaRelation(String schemaName, String relationName, DbObjType type) {
-        super(new GenericColumn(schemaName, relationName, type));
+        super(new ObjectReference(schemaName, relationName, type));
     }
 
     @Override

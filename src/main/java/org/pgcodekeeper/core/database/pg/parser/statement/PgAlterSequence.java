@@ -67,9 +67,9 @@ public final class PgAlterSequence extends PgParserAbstract {
                 if (col.size() != 1
                         || (word = seqbody.col_name.identifier().tokens_nonreserved_except_function_type()) == null
                         || word.NONE() == null) {
-                    GenericColumn gc = new GenericColumn(QNameParser.getThirdName(col),
+                    ObjectReference ref = new ObjectReference(QNameParser.getThirdName(col),
                             QNameParser.getSecondName(col), QNameParser.getFirstName(col), DbObjType.COLUMN);
-                    doSafe(PgSequence::setOwnedBy, sequence, gc);
+                    doSafe(PgSequence::setOwnedBy, sequence, ref);
                     if (col.size() > 1) {
                         List<ParserRuleContext> tableIds = col.subList(0, col.size() - 1);
                         addObjReference(tableIds, DbObjType.TABLE, null);

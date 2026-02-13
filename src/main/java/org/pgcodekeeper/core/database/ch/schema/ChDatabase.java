@@ -231,42 +231,34 @@ public class ChDatabase extends ChAbstractStatement implements IDatabase {
         return dbDst;
     }
 
-    /**
-     * Resolves and returns a database statement based on the provided generic
-     * column specification.
-     *
-     * @param gc the generic column specification containing type and naming
-     *           information
-     * @return the resolved statement, or null if not found
-     */
     @Override
-    public final IStatement getStatement(GenericColumn gc) {
-        DbObjType type = gc.type();
+    public final IStatement getStatement(ObjectReference reference) {
+        DbObjType type = reference.type();
         if (type == DbObjType.DATABASE) {
             return this;
         }
 
         if (type.in(DbObjType.SCHEMA, DbObjType.POLICY, DbObjType.FUNCTION, DbObjType.USER, DbObjType.ROLE)) {
-            return getChild(gc.schema(), type);
+            return getChild(reference.schema(), type);
         }
 
-        ChSchema s = getSchema(gc.schema());
+        ChSchema s = getSchema(reference.schema());
         if (s == null) {
             return null;
         }
 
         return switch (type) {
-        case VIEW, TABLE, DICTIONARY -> s.getRelation(gc.table());
-        case FUNCTION -> resolveFunctionCall(gc.table());
-        case INDEX -> s.getIndexByName(gc.table());
+        case VIEW, TABLE, DICTIONARY -> s.getRelation(reference.table());
+        case FUNCTION -> resolveFunctionCall(reference.table());
+        case INDEX -> s.getIndexByName(reference.table());
         // handled in getStatement, left here for consistency
         case COLUMN -> {
-            var t = s.getTable(gc.table());
-            yield t == null ? null : t.getColumn(gc.column());
+            var t = s.getTable(reference.table());
+            yield t == null ? null : t.getColumn(reference.column());
         }
         case CONSTRAINT -> {
-            var sc = s.getStatementContainer(gc.table());
-            yield sc == null ? null : sc.getChild(gc.column(), type);
+            var sc = s.getStatementContainer(reference.table());
+            yield sc == null ? null : sc.getChild(reference.column(), type);
         }
         default -> throw new IllegalStateException("Unhandled DbObjType: " + type);
         };

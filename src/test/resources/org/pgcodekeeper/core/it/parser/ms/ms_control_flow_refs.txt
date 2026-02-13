@@ -27,7 +27,7 @@ Reference: action = SET, offset = 3470, line number = 112, charPositionInLine = 
 Reference: action = IF, offset = 3488, line number = 113, charPositionInLine = 0
 Reference: Object = findjobs (PROCEDURE), action = CREATE, offset = 3824, line number = 127, charPositionInLine = 17
 Reference: Object = dbo (SCHEMA), action = null, offset = 4557, line number = 155, charPositionInLine = 13
-Reference: Object = dbo."TestRethrow" (TABLE), action = CREATE, offset = 4561, line number = 155, charPositionInLine = 17
+Reference: Object = dbo.TestRethrow (TABLE), action = CREATE, offset = 4561, line number = 155, charPositionInLine = 17
 Reference: action = BEGIN, offset = 4600, line number = 158, charPositionInLine = 0
 Reference: action = EXEC, offset = 4946, line number = 172, charPositionInLine = 0
 Reference: action = DECLARE, offset = 5174, line number = 179, charPositionInLine = 0

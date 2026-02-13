@@ -44,11 +44,11 @@ public final class PgExtensionsReader extends PgAbstractJdbcReader {
     @Override
     protected void processResult(ResultSet res) throws SQLException {
         String extName = res.getString("extname");
-        loader.setCurrentObject(new GenericColumn(extName, DbObjType.EXTENSION));
+        loader.setCurrentObject(new ObjectReference(extName, DbObjType.EXTENSION));
         PgExtension e = new PgExtension(extName);
         e.setSchema(res.getString("namespace"));
         e.setRelocatable(res.getBoolean("extrelocatable"));
-        e.addDependency(new GenericColumn(e.getSchema(), DbObjType.SCHEMA));
+        e.addDependency(new ObjectReference(e.getSchema(), DbObjType.SCHEMA));
         loader.setComment(e, res);
         loader.setAuthor(e, res);
         db.addChild(e);

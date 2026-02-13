@@ -82,7 +82,7 @@ public class MsValueExpr extends MsAbstractExpr {
         }
     }
 
-    public GenericColumn functionCall(Function_callContext functionCall) {
+    public ObjectReference functionCall(Function_callContext functionCall) {
         Scalar_function_nameContext sfn;
         Qualified_nameContext seq;
         Function_callContext fc;
@@ -182,7 +182,7 @@ public class MsValueExpr extends MsAbstractExpr {
         }
     }
 
-    private GenericColumn function(Scalar_function_nameContext sfn) {
+    private ObjectReference function(Scalar_function_nameContext sfn) {
         Qualified_nameContext fullName = sfn.qualified_name();
         if (fullName != null) {
             return addObjectDepcy(fullName, DbObjType.FUNCTION);
@@ -266,9 +266,9 @@ public class MsValueExpr extends MsAbstractExpr {
         IdContext relationCtx = tableName.name;
         String relationName = relationCtx.getText();
 
-        Entry<String, GenericColumn> ref = findReference(null, relationName, null);
+        Entry<String, ObjectReference> ref = findReference(null, relationName, null);
         if (ref != null) {
-            GenericColumn table = ref.getValue();
+            ObjectReference table = ref.getValue();
             if (table != null) {
                 if (relationName.equals(table.table())) {
                     addDependency(table, relationCtx);

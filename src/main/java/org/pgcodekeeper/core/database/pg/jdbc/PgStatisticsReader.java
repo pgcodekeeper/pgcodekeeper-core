@@ -44,7 +44,7 @@ public final class PgStatisticsReader extends PgAbstractSearchPathJdbcReader {
     protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         String schemaName = schema.getName();
         String statisticsName = res.getString("stxname");
-        loader.setCurrentObject(new GenericColumn(schemaName, statisticsName, DbObjType.STATISTICS));
+        loader.setCurrentObject(new ObjectReference(schemaName, statisticsName, DbObjType.STATISTICS));
 
         PgStatistics stat = new PgStatistics(statisticsName);
 

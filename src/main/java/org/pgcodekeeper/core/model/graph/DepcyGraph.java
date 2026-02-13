@@ -191,7 +191,7 @@ public final class DepcyGraph {
     }
 
     private void processDeps(IStatement st) {
-        for (GenericColumn dep : st.getDependencies()) {
+        for (ObjectReference dep : st.getDependencies()) {
             IStatement depSt = db.getStatement(dep);
             if (depSt != null && !st.equals(depSt)) {
                 graph.addEdge(st, depSt);
@@ -212,7 +212,7 @@ public final class DepcyGraph {
         }
 
         IStatement cont = db.getStatement(
-                new GenericColumn(con.getForeignSchema(), con.getForeignTable(), DbObjType.TABLE));
+                new ObjectReference(con.getForeignSchema(), con.getForeignTable(), DbObjType.TABLE));
 
         if (cont instanceof IStatementContainer c) {
             for (IStatement refCon : c.getChildrenByType(DbObjType.CONSTRAINT)) {
@@ -237,7 +237,7 @@ public final class DepcyGraph {
      */
     private void createChildColToPartTblCol(PgPartitionTable tbl, PgColumn col) {
         for (Inherits in : tbl.getInherits()) {
-            IStatement parentTbl = db.getStatement(new GenericColumn(in.key(), in.value(), DbObjType.TABLE));
+            IStatement parentTbl = db.getStatement(new ObjectReference(in.key(), in.value(), DbObjType.TABLE));
             if (parentTbl == null) {
                 var msg = Messages.DepcyGraph_log_no_such_table.formatted(in.getQualifiedName());
                 LOG.error(msg);

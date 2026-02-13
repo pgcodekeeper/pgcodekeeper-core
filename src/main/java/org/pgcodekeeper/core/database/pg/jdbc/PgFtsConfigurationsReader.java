@@ -64,7 +64,7 @@ public final class PgFtsConfigurationsReader extends PgAbstractSearchPathJdbcRea
 
                 StringBuilder sb = new StringBuilder();
                 if (!Consts.PG_CATALOG.equals(dictSchema)) {
-                    config.addDependency(new GenericColumn(dictSchema, dictName, DbObjType.FTS_DICTIONARY));
+                    config.addDependency(new ObjectReference(dictSchema, dictName, DbObjType.FTS_DICTIONARY));
                     sb.append(PgDiffUtils.getQuotedName(dictSchema)).append('.');
                 }
 

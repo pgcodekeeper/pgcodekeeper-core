@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.database.ch.parser.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
@@ -202,14 +202,14 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
         ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
 
         if (type == DbObjType.FUNCTION) {
-            return buildLocation(nameCtx, action, locationType, new GenericColumn(nameCtx.getText(), type));
+            return buildLocation(nameCtx, action, locationType, new ObjectReference(nameCtx.getText(), type));
         }
 
         if (type == DbObjType.POLICY) {
             String shortName = nameCtx.getText();
             String tableName = getFullCtxText(QNameParser.getSchemaNameCtx(ids));
             String fullName = shortName + " ON " + tableName;
-            return buildLocation(nameCtx, action, locationType, new GenericColumn(fullName, type));
+            return buildLocation(nameCtx, action, locationType, new ObjectReference(fullName, type));
         }
 
         return super.getLocation(ids, type, action, isDep, signature, locationType);

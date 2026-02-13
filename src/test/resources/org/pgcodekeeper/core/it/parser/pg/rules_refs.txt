@@ -447,22 +447,22 @@ Reference: Object = rule_and_refint_t3 (TABLE), action = null, offset = 28508, l
 Reference: Object = rule_and_refint_t3 (TABLE), action = INSERT, offset = 28962, line number = 867, charPositionInLine = 12
 Reference: Object = rule_and_refint_t3 (TABLE), action = INSERT, offset = 29021, line number = 868, charPositionInLine = 12
 Reference: Object = rules_fooview (VIEW), action = CREATE, offset = 29135, line number = 874, charPositionInLine = 12
-Reference: Object = rules_fooview.rules_fooview."_RETURN" (RULE), action = DROP, offset = 29188, line number = 875, charPositionInLine = 10
+Reference: Object = rules_fooview.rules_fooview._RETURN (RULE), action = DROP, offset = 29188, line number = 875, charPositionInLine = 10
 Reference: Object = rules_fooview (SCHEMA), action = null, offset = 29201, line number = 875, charPositionInLine = 23
 Reference: Object = rules_fooview (VIEW), action = DROP, offset = 29226, line number = 876, charPositionInLine = 10
 Reference: Object = rules_fooview (TABLE), action = CREATE, offset = 29334, line number = 882, charPositionInLine = 13
 Reference: action = SELECT, offset = 29365, line number = 883, charPositionInLine = 0
-Reference: Object = rules_fooview."_RETURN" (RULE), action = CREATE, offset = 29413, line number = 885, charPositionInLine = 12
+Reference: Object = rules_fooview._RETURN (RULE), action = CREATE, offset = 29413, line number = 885, charPositionInLine = 12
 Reference: Object = rules_fooview (TABLE), action = null, offset = 29439, line number = 885, charPositionInLine = 38
 Reference: action = SELECT, offset = 29500, line number = 888, charPositionInLine = 0
 Reference: action = SELECT, offset = 29529, line number = 889, charPositionInLine = 0
 Reference: action = SELECT, offset = 29606, line number = 891, charPositionInLine = 0
 Reference: Object = rules_fooview (VIEW), action = DROP, offset = 29716, line number = 894, charPositionInLine = 10
 Reference: Object = rules_fooview (TABLE), action = CREATE, offset = 29809, line number = 897, charPositionInLine = 13
-Reference: Object = rules_fooview."_RETURN" (RULE), action = CREATE, offset = 29874, line number = 898, charPositionInLine = 12
+Reference: Object = rules_fooview._RETURN (RULE), action = CREATE, offset = 29874, line number = 898, charPositionInLine = 12
 Reference: Object = rules_fooview (TABLE), action = null, offset = 29900, line number = 898, charPositionInLine = 38
 Reference: Object = rules_fooview_part (TABLE), action = CREATE, offset = 30017, line number = 902, charPositionInLine = 13
-Reference: Object = rules_fooview_part."_RETURN" (RULE), action = CREATE, offset = 30094, line number = 903, charPositionInLine = 12
+Reference: Object = rules_fooview_part._RETURN (RULE), action = CREATE, offset = 30094, line number = 903, charPositionInLine = 12
 Reference: Object = rules_fooview_part (TABLE), action = null, offset = 30120, line number = 903, charPositionInLine = 38
 Reference: Object = id (TABLE), action = CREATE, offset = 30267, line number = 910, charPositionInLine = 13
 Reference: Object = test_1 (TABLE), action = CREATE, offset = 30381, line number = 912, charPositionInLine = 13

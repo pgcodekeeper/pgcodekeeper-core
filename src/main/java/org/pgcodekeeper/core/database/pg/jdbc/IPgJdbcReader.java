@@ -56,12 +56,12 @@ public interface IPgJdbcReader {
             QNameParser<ParserRuleContext> parser = PgParserUtils.parseQName(function);
             String schemaName = parser.getSchemaName();
             if (schemaName != null && !PgDiffUtils.isSystemSchema(schemaName)) {
-                statement.addDependency(new GenericColumn(schemaName, DbObjType.SCHEMA));
+                statement.addDependency(new ObjectReference(schemaName, DbObjType.SCHEMA));
                 String name = parser.getFirstName();
                 if (signature != null) {
                     name = PgDiffUtils.getQuotedName(name) + signature;
                 }
-                statement.addDependency(new GenericColumn(schemaName, name, DbObjType.FUNCTION));
+                statement.addDependency(new ObjectReference(schemaName, name, DbObjType.FUNCTION));
             }
         }
         setter.accept(statement, function);

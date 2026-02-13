@@ -95,7 +95,7 @@ public final class PgCreateSequence extends PgParserAbstract {
                 if (col.size() != 1
                         || (word = body.col_name.identifier().tokens_nonreserved_except_function_type()) == null
                         || word.NONE() == null) {
-                    sequence.setOwnedBy(new GenericColumn(QNameParser.getThirdName(col),
+                    sequence.setOwnedBy(new ObjectReference(QNameParser.getThirdName(col),
                             QNameParser.getSecondName(col), QNameParser.getFirstName(col), DbObjType.COLUMN));
                 }
             }

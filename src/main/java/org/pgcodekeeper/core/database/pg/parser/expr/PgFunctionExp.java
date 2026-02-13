@@ -19,7 +19,7 @@ import java.util.Map.Entry;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.pgcodekeeper.core.database.api.schema.GenericColumn;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.rulectx.*;
@@ -125,7 +125,7 @@ public final class PgFunctionExp extends PgAbstractExprWithNmspc<Plpgsql_functio
     }
 
     private void declareAlias(String alias, String variable) {
-        Entry<String, GenericColumn> ref = findReference(null, variable, null);
+        Entry<String, ObjectReference> ref = findReference(null, variable, null);
         if (ref != null) {
             addReference(alias, ref.getValue());
         } else {
@@ -392,7 +392,7 @@ public final class PgFunctionExp extends PgAbstractExprWithNmspc<Plpgsql_functio
         } else if ((col = additional.table_cols_list()) != null) {
             for (Inheritance_specified_table_colsContext tabl : col.inheritance_specified_table_cols()) {
                 List<ParserRuleContext> ids = PgParserAbstract.getIdentifiers(tabl.schema_qualified_name());
-                GenericColumn rel = addRelationDepcy(ids);
+                ObjectReference rel = addRelationDepcy(ids);
                 var columns = tabl.columns();
                 if (columns != null) {
                     for (IdentifierContext id : columns.identifier()) {

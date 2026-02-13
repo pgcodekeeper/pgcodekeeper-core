@@ -26,7 +26,7 @@ public interface ISubElement extends ISearchPath {
     }
 
     @Override
-    default GenericColumn toGenericColumn(DbObjType type) {
-        return new GenericColumn(getContainingSchema().getName(), getParent().getName(), getName(), type);
+    default ObjectReference toObjectReference() {
+        return new ObjectReference(getContainingSchema().getName(), getParent().getName(), getName(), getStatementType());
     }
 }

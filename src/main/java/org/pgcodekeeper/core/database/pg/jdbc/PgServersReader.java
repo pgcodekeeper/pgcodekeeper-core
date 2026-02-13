@@ -46,10 +46,10 @@ public final class PgServersReader extends PgAbstractJdbcReader {
     @Override
     protected void processResult(ResultSet res) throws SQLException {
         String srvName = res.getString("srvname");
-        loader.setCurrentObject(new GenericColumn(srvName, DbObjType.SERVER));
+        loader.setCurrentObject(new ObjectReference(srvName, DbObjType.SERVER));
         PgServer srv = new PgServer(srvName);
         srv.setFdw(res.getString("fdwname"));
-        srv.addDependency(new GenericColumn(srv.getFdw(), DbObjType.FOREIGN_DATA_WRAPPER));
+        srv.addDependency(new ObjectReference(srv.getFdw(), DbObjType.FOREIGN_DATA_WRAPPER));
         String srvType = res.getString("srvtype");
         if (srvType != null) {
             srv.setType(Utils.quoteString(srvType));

@@ -139,8 +139,8 @@ Reference: action = SELECT, offset = 17770, line number = 667, charPositionInLin
 Reference: action = SELECT, offset = 18277, line number = 682, charPositionInLine = 0
 Reference: action = SELECT, offset = 18476, line number = 688, charPositionInLine = 0
 Reference: action = USE, offset = 18829, line number = 697, charPositionInLine = 0
-Reference: Object = "HumanResources" (SCHEMA), action = null, offset = 18863, line number = 699, charPositionInLine = 7
-Reference: Object = "HumanResources"."Employee" (TABLE), action = UPDATE, offset = 18878, line number = 699, charPositionInLine = 22
+Reference: Object = HumanResources (SCHEMA), action = null, offset = 18863, line number = 699, charPositionInLine = 7
+Reference: Object = HumanResources.Employee (TABLE), action = UPDATE, offset = 18878, line number = 699, charPositionInLine = 22
 Reference: action = USE, offset = 19290, line number = 713, charPositionInLine = 0
 Reference: Object = dbo (SCHEMA), action = null, offset = 19333, line number = 715, charPositionInLine = 16
 Reference: Object = dbo.GetContactInformation (FUNCTION), action = CREATE, offset = 19337, line number = 715, charPositionInLine = 20

@@ -74,7 +74,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
         if (include != null) {
             for (IdContext col : include.name_list_in_brackets().id()) {
                 index.addInclude(col.getText());
-                index.addDependency(new GenericColumn(schema, table, col.getText(), DbObjType.COLUMN));
+                index.addDependency(new ObjectReference(schema, table, col.getText(), DbObjType.COLUMN));
             }
         }
         parseIndexOptions(index, rest.index_where(), rest.index_options(), rest.dataspace());
@@ -116,7 +116,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
             if (null != historyTable) {
                 var histSchemaName = historyTable.schema.getText();
                 var histTableName = historyTable.name.getText();
-                stmt.addDependency(new GenericColumn(histSchemaName, histTableName, DbObjType.TABLE));
+                stmt.addDependency(new ObjectReference(histSchemaName, histTableName, DbObjType.TABLE));
             }
         }
     }
@@ -171,7 +171,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
             String fSchemaName = getSchemaNameSafe(ids);
             String fTableName = QNameParser.getFirstName(ids);
             ObjectLocation loc = addObjReference(ids, DbObjType.TABLE, null);
-            GenericColumn fTable = loc.getObj();
+            ObjectReference fTable = loc.getObjectReference();
             constrFk.addDependency(fTable);
             constrFk.setForeignSchema(fSchemaName);
             constrFk.setForeignTable(fTableName);
@@ -180,7 +180,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
             if (column != null) {
                 String colFk = column.getText();
                 constrFk.addForeignColumn(colFk);
-                constrFk.addDependency(new GenericColumn(fSchemaName, fTableName, colFk, DbObjType.COLUMN));
+                constrFk.addDependency(new ObjectReference(fSchemaName, fTableName, colFk, DbObjType.COLUMN));
             }
             var del = constraintCtx.on_delete();
             if (del != null) {
@@ -303,7 +303,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
             simpCol.setDesc(orderCtx != null && orderCtx.DESC() != null);
             stmt.addColumn(simpCol);
             if (schema != null && table != null) {
-                stmt.addDependency(new GenericColumn(schema, table, name, DbObjType.COLUMN));
+                stmt.addDependency(new ObjectReference(schema, table, name, DbObjType.COLUMN));
             }
         }
     }
@@ -312,7 +312,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
         for (var col : cols) {
             var colName = col.id().getText();
             index.addOrderCol(colName);
-            index.addDependency(new GenericColumn(schema, table, colName, DbObjType.COLUMN));
+            index.addDependency(new ObjectReference(schema, table, colName, DbObjType.COLUMN));
         }
     }
 

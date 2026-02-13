@@ -109,10 +109,9 @@ public final class MetaUtils {
         if (loc != null && loc.getType() == type) {
             return loc;
         }
-        GenericColumn gc = st.toGenericColumn(type);
 
         return new ObjectLocation.Builder()
-                .setObject(gc)
+                .setReference(st.toObjectReference())
                 .setLocationType(LocationType.DEFINITION)
                 .build();
     }

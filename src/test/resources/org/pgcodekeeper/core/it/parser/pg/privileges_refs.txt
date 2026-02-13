@@ -81,7 +81,7 @@ Reference: Object = atest12 (TABLE), action = null, offset = 4060, line number =
 Reference: Object = atest12 (TABLE), action = null, offset = 4089, line number = 134, charPositionInLine = 16
 Reference: action = VACUUM, offset = 4107, line number = 135, charPositionInLine = 0
 Reference: Object = leak(integer, integer) (FUNCTION), action = CREATE, offset = 4148, line number = 137, charPositionInLine = 16
-Reference: Object = "<<<" (OPERATOR), action = CREATE, offset = 4267, line number = 140, charPositionInLine = 16
+Reference: Object = <<< (OPERATOR), action = CREATE, offset = 4267, line number = 140, charPositionInLine = 16
 Reference: Object = atest12v (VIEW), action = CREATE, offset = 4416, line number = 144, charPositionInLine = 12
 Reference: Object = atest12v (TABLE), action = GRANT, offset = 4483, line number = 146, charPositionInLine = 16
 Reference: Object = atest12v (TABLE), action = GRANT, offset = 4521, line number = 147, charPositionInLine = 18
@@ -89,7 +89,7 @@ Reference: action = EXPLAIN, offset = 4616, line number = 150, charPositionInLin
 Reference: action = EXPLAIN, offset = 4708, line number = 153, charPositionInLine = 0
 Reference: action = SET, offset = 4853, line number = 157, charPositionInLine = 0
 Reference: Object = leak2(integer, integer) (FUNCTION), action = CREATE, offset = 4916, line number = 159, charPositionInLine = 16
-Reference: Object = ">>>" (OPERATOR), action = CREATE, offset = 5069, line number = 162, charPositionInLine = 16
+Reference: Object = >>> (OPERATOR), action = CREATE, offset = 5069, line number = 162, charPositionInLine = 16
 Reference: action = EXPLAIN, offset = 5238, line number = 166, charPositionInLine = 0
 Reference: action = EXPLAIN, offset = 5374, line number = 169, charPositionInLine = 0
 Reference: action = SET, offset = 5523, line number = 172, charPositionInLine = 0
@@ -327,7 +327,7 @@ Reference: Object = castfunc (FUNCTION), action = DROP, offset = 19043, line num
 Reference: Object = priv_testdomain3a (DOMAIN), action = DROP, offset = 19078, line number = 519, charPositionInLine = 12
 Reference: Object = priv_testfunc5a(priv_testdomain1) (FUNCTION), action = CREATE, offset = 19114, line number = 521, charPositionInLine = 16
 Reference: Object = priv_testfunc6a(integer) (FUNCTION), action = CREATE, offset = 19211, line number = 522, charPositionInLine = 16
-Reference: Object = "!+!" (OPERATOR), action = CREATE, offset = 19327, line number = 524, charPositionInLine = 16
+Reference: Object = !+! (OPERATOR), action = CREATE, offset = 19327, line number = 524, charPositionInLine = 16
 Reference: Object = test5a (TABLE), action = CREATE, offset = 19424, line number = 526, charPositionInLine = 13
 Reference: Object = test6a (TABLE), action = CREATE, offset = 19473, line number = 527, charPositionInLine = 13
 Reference: Object = test10a (TABLE), action = CREATE, offset = 19512, line number = 528, charPositionInLine = 13
@@ -347,7 +347,7 @@ Reference: Object = priv_testdomain3b (DOMAIN), action = CREATE, offset = 20241,
 Reference: Object = castfunc(integer) (FUNCTION), action = CREATE, offset = 20283, line number = 553, charPositionInLine = 16
 Reference: Object = priv_testfunc5b(priv_testdomain1) (FUNCTION), action = CREATE, offset = 20392, line number = 555, charPositionInLine = 16
 Reference: Object = priv_testfunc6b(integer) (FUNCTION), action = CREATE, offset = 20489, line number = 556, charPositionInLine = 16
-Reference: Object = "!!" (OPERATOR), action = CREATE, offset = 20605, line number = 558, charPositionInLine = 16
+Reference: Object = !! (OPERATOR), action = CREATE, offset = 20605, line number = 558, charPositionInLine = 16
 Reference: Object = test5b (TABLE), action = CREATE, offset = 20682, line number = 560, charPositionInLine = 13
 Reference: Object = test6b (TABLE), action = CREATE, offset = 20731, line number = 561, charPositionInLine = 13
 Reference: Object = test10b (TABLE), action = CREATE, offset = 20770, line number = 562, charPositionInLine = 13
@@ -362,7 +362,7 @@ Reference: action = CREATE TABLE, offset = 21156, line number = 574, charPositio
 Reference: Object = priv_testtype1 (TYPE), action = REVOKE, offset = 21235, line number = 576, charPositionInLine = 19
 Reference: Object = priv_testagg1b (AGGREGATE), action = DROP, offset = 21280, line number = 579, charPositionInLine = 15
 Reference: Object = priv_testdomain2b (DOMAIN), action = DROP, offset = 21326, line number = 580, charPositionInLine = 12
-Reference: Object = "!!" (OPERATOR), action = DROP, offset = 21359, line number = 581, charPositionInLine = 14
+Reference: Object = !! (OPERATOR), action = DROP, offset = 21359, line number = 581, charPositionInLine = 14
 Reference: Object = priv_testfunc5b (FUNCTION), action = DROP, offset = 21402, line number = 582, charPositionInLine = 14
 Reference: Object = priv_testfunc6b (FUNCTION), action = DROP, offset = 21453, line number = 583, charPositionInLine = 14
 Reference: Object = test5b (TABLE), action = DROP, offset = 21488, line number = 584, charPositionInLine = 11

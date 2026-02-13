@@ -1,8 +1,8 @@
 Reference: action = SELECT, offset = 34, line number = 2, charPositionInLine = 0
 Reference: action = DECLARE, offset = 195, line number = 10, charPositionInLine = 0
 Reference: action = SELECT, offset = 212, line number = 11, charPositionInLine = 0
-Reference: Object = "MyTable" (TABLE), action = CREATE, offset = 450, line number = 23, charPositionInLine = 13
-Reference: Object = "MyTable" (TABLE), action = INSERT, offset = 506, line number = 24, charPositionInLine = 12
+Reference: Object = MyTable (TABLE), action = CREATE, offset = 450, line number = 23, charPositionInLine = 13
+Reference: Object = MyTable (TABLE), action = INSERT, offset = 506, line number = 24, charPositionInLine = 12
 Reference: action = SELECT, offset = 532, line number = 26, charPositionInLine = 0
 Reference: action = DECLARE, offset = 693, line number = 33, charPositionInLine = 0
 Reference: action = DECLARE, offset = 805, line number = 37, charPositionInLine = 0

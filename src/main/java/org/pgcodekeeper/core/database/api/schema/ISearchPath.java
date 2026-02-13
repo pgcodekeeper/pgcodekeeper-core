@@ -49,7 +49,7 @@ public interface ISearchPath extends IStatement {
     }
 
     @Override
-    default GenericColumn toGenericColumn(DbObjType type) {
-        return new GenericColumn(getSchemaName(), getName(), type);
+    default ObjectReference toObjectReference() {
+        return new ObjectReference(getSchemaName(), getName(), getStatementType());
     }
 }

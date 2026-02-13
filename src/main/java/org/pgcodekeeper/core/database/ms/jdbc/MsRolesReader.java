@@ -45,7 +45,7 @@ public class MsRolesReader extends AbstractJdbcReader<MsJdbcLoader> implements I
     @Override
     protected void processResult(ResultSet res) throws SQLException, XmlReaderException {
         String name = res.getString("name");
-        loader.setCurrentObject(new GenericColumn(name, DbObjType.ROLE));
+        loader.setCurrentObject(new ObjectReference(name, DbObjType.ROLE));
 
         MsRole role = new MsRole(name);
         loader.setOwner(role, res.getString("owner"));

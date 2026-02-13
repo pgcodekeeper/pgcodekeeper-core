@@ -114,7 +114,7 @@ Reference: action = BEGIN, offset = 8536, line number = 354, charPositionInLine 
 Reference: Object = target (TABLE), action = MERGE, offset = 8554, line number = 355, charPositionInLine = 11
 Reference: action = SELECT, offset = 8733, line number = 363, charPositionInLine = 0
 Reference: action = BEGIN, offset = 8825, line number = 366, charPositionInLine = 0
-Reference: Object = "SOURCE" (TABLE), action = DELETE, offset = 8844, line number = 367, charPositionInLine = 12
+Reference: Object = SOURCE (TABLE), action = DELETE, offset = 8844, line number = 367, charPositionInLine = 12
 Reference: Object = target (TABLE), action = MERGE, offset = 8877, line number = 368, charPositionInLine = 11
 Reference: Object = merge_actions (TABLE), action = CREATE, offset = 9273, line number = 384, charPositionInLine = 13
 Reference: Object = merge_actions (TABLE), action = INSERT, offset = 9326, line number = 385, charPositionInLine = 12

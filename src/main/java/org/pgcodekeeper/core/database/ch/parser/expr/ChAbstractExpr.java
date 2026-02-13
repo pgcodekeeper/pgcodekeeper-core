@@ -51,15 +51,15 @@ public abstract class ChAbstractExpr extends AbstractExpr {
         return ChDiffUtils.isSystemSchema(schema);
     }
 
-    protected final GenericColumn addObjectDepcy(Qualified_nameContext qualifiedName) {
+    protected final ObjectReference addObjectDepcy(Qualified_nameContext qualifiedName) {
         var ids = qualifiedName.identifier();
         var schemaCtx = QNameParser.getSchemaNameCtx(ids);
         var relationName = QNameParser.getFirstName(ids);
         var relationCtx = QNameParser.getFirstNameCtx(ids);
         var schemaName = schemaCtx != null ? schemaCtx.getText() : Consts.CH_DEFAULT_DB;
 
-        addDependency(new GenericColumn(schemaName, DbObjType.SCHEMA), schemaCtx);
-        GenericColumn dependency = new GenericColumn(schemaName, relationName, DbObjType.TABLE);
+        addDependency(new ObjectReference(schemaName, DbObjType.SCHEMA), schemaCtx);
+        ObjectReference dependency = new ObjectReference(schemaName, relationName, DbObjType.TABLE);
         addDependency(dependency, relationCtx);
         return dependency;
     }

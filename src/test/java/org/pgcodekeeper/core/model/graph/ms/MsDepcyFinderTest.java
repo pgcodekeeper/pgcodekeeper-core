@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
@@ -69,6 +68,6 @@ class MsDepcyFinderTest {
         String actual = String.join("\n", deps);
         String expected = TestUtils.readResource(fileName + expectedPostfix, getClass());
 
-        Assertions.assertEquals(expected.trim(), actual);
+        TestUtils.assertIgnoreNewLines(expected.trim(), actual);
     }
 }

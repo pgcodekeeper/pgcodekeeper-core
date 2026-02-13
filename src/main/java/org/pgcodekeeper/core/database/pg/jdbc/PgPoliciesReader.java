@@ -48,7 +48,7 @@ public class PgPoliciesReader extends PgAbstractSearchPathJdbcReader {
 
         String schemaName = schema.getName();
         String policyName = res.getString("polname");
-        loader.setCurrentObject(new GenericColumn(schemaName, tableName, policyName, DbObjType.POLICY));
+        loader.setCurrentObject(new ObjectReference(schemaName, tableName, policyName, DbObjType.POLICY));
 
         PgPolicy p = new PgPolicy(policyName);
 

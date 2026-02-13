@@ -20,12 +20,12 @@ Reference: Object = t (TABLE), action = null, offset = 723, line number = 10, ch
 Reference: Object = dbo.index_table1 (INDEX), action = CREATE, offset = 900, line number = 12, charPositionInLine = 26
 Reference: Object = dbo (SCHEMA), action = null, offset = 918, line number = 12, charPositionInLine = 44
 Reference: Object = dbo.table1 (TABLE), action = null, offset = 924, line number = 12, charPositionInLine = 50
-Reference: Object = s1."MyOrderedCCI" (INDEX), action = CREATE, offset = 1421, line number = 34, charPositionInLine = 35
+Reference: Object = s1.MyOrderedCCI (INDEX), action = CREATE, offset = 1421, line number = 34, charPositionInLine = 35
 Reference: Object = s1 (SCHEMA), action = null, offset = 1440, line number = 34, charPositionInLine = 54
 Reference: Object = s1.c1 (TABLE), action = null, offset = 1443, line number = 34, charPositionInLine = 57
-Reference: Object = "Sales".cci (INDEX), action = CREATE, offset = 1527, line number = 39, charPositionInLine = 35
-Reference: Object = "Sales" (SCHEMA), action = null, offset = 1534, line number = 39, charPositionInLine = 42
-Reference: Object = "Sales"."OrderLines" (TABLE), action = null, offset = 1540, line number = 39, charPositionInLine = 48
+Reference: Object = Sales.cci (INDEX), action = CREATE, offset = 1527, line number = 39, charPositionInLine = 35
+Reference: Object = Sales (SCHEMA), action = null, offset = 1534, line number = 39, charPositionInLine = 42
+Reference: Object = Sales.OrderLines (TABLE), action = null, offset = 1540, line number = 39, charPositionInLine = 48
 Reference: Object = dbo.idx_table1 (INDEX), action = CREATE, offset = 1632, line number = 43, charPositionInLine = 35
 Reference: Object = dbo (SCHEMA), action = null, offset = 1648, line number = 43, charPositionInLine = 51
 Reference: Object = dbo.table1 (TABLE), action = null, offset = 1654, line number = 43, charPositionInLine = 57
@@ -38,9 +38,9 @@ Reference: Object = dbo.table3 (TABLE), action = null, offset = 2034, line numbe
 Reference: Object = dbo.idx_table6 (INDEX), action = CREATE, offset = 2103, line number = 59, charPositionInLine = 25
 Reference: Object = dbo (SCHEMA), action = null, offset = 2119, line number = 59, charPositionInLine = 41
 Reference: Object = dbo.table6 (TABLE), action = null, offset = 2125, line number = 59, charPositionInLine = 47
-Reference: Object = "Purchasing"."IX_ProductVendor_BusinessEntityID" (INDEX), action = DROP, offset = 2302, line number = 66, charPositionInLine = 11
-Reference: Object = "Purchasing" (SCHEMA), action = null, offset = 2339, line number = 66, charPositionInLine = 48
-Reference: Object = "Purchasing"."ProductVendor" (TABLE), action = null, offset = 2350, line number = 66, charPositionInLine = 59
+Reference: Object = Purchasing.IX_ProductVendor_BusinessEntityID (INDEX), action = DROP, offset = 2302, line number = 66, charPositionInLine = 11
+Reference: Object = Purchasing (SCHEMA), action = null, offset = 2339, line number = 66, charPositionInLine = 48
+Reference: Object = Purchasing.ProductVendor (TABLE), action = null, offset = 2350, line number = 66, charPositionInLine = 59
 Reference: action = ALTER INDEX ALL, offset = 2381, line number = 69, charPositionInLine = 0
 Reference: action = ALTER INDEX ALL, offset = 2414, line number = 70, charPositionInLine = 0
 Reference: action = ALTER INDEX ALL, offset = 2453, line number = 71, charPositionInLine = 0

@@ -288,25 +288,19 @@ public final class PgDatabase extends PgAbstractStatement implements IDatabase {
         return found == 1 ? oper : null;
     }
 
-    /**
-     * Resolves and returns a database statement based on the provided generic column specification.
-     *
-     * @param gc the generic column specification containing type and naming information
-     * @return the resolved statement, or null if not found
-     */
     @Override
-    public final AbstractStatement getStatement(GenericColumn gc) {
-        DbObjType type = gc.type();
+    public final AbstractStatement getStatement(ObjectReference reference) {
+        DbObjType type = reference.type();
         if (type == DbObjType.DATABASE) {
             return this;
         }
 
         if (type.in(DbObjType.SCHEMA, DbObjType.EXTENSION, DbObjType.FOREIGN_DATA_WRAPPER, DbObjType.EVENT_TRIGGER,
                 DbObjType.SERVER, DbObjType.USER_MAPPING, DbObjType.CAST)) {
-            return getChild(gc.schema(), type);
+            return getChild(reference.schema(), type);
         }
 
-        PgSchema s = getSchema(gc.schema());
+        PgSchema s = getSchema(reference.schema());
         if (s == null) {
             return null;
         }
@@ -314,20 +308,20 @@ public final class PgDatabase extends PgAbstractStatement implements IDatabase {
         return switch (type) {
             case DOMAIN, SEQUENCE, VIEW, COLLATION, FTS_PARSER, FTS_TEMPLATE, FTS_DICTIONARY, FTS_CONFIGURATION,
                  STATISTICS ->
-                    s.getChild(gc.table(), type);
-            case TYPE -> (AbstractStatement) resolveTypeCall(s, gc.table());
-            case FUNCTION, PROCEDURE, AGGREGATE -> s.getFunction(gc.table());
-            case OPERATOR -> (AbstractStatement) resolveOperatorCall(s, gc.table());
-            case TABLE -> (AbstractStatement) s.getRelation(gc.table());
-            case INDEX -> s.getIndexByName(gc.table());
+                    s.getChild(reference.table(), type);
+            case TYPE -> (AbstractStatement) resolveTypeCall(s, reference.table());
+            case FUNCTION, PROCEDURE, AGGREGATE -> s.getFunction(reference.table());
+            case OPERATOR -> (AbstractStatement) resolveOperatorCall(s, reference.table());
+            case TABLE -> (AbstractStatement) s.getRelation(reference.table());
+            case INDEX -> s.getIndexByName(reference.table());
             // handled in getStatement, left here for consistency
             case COLUMN -> {
-                PgAbstractTable t = s.getTable(gc.table());
-                yield t == null ? null : t.getColumn(gc.column());
+                PgAbstractTable t = s.getTable(reference.table());
+                yield t == null ? null : t.getColumn(reference.column());
             }
             case CONSTRAINT, TRIGGER, RULE, POLICY -> {
-                var sc = s.getStatementContainer(gc.table());
-                yield sc == null ? null : sc.getChild(gc.column(), type);
+                var sc = s.getStatementContainer(reference.table());
+                yield sc == null ? null : sc.getChild(reference.column(), type);
             }
             default -> throw new IllegalStateException("Unhandled DbObjType: " + type);
         };
