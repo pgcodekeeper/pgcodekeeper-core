@@ -47,9 +47,9 @@ public final class MsRole extends MsAbstractStatement {
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("CREATE ROLE ");
-        sbSQL.append(getQuotedName(name));
+        sbSQL.append(getQuotedName());
         if (owner != null) {
-            sbSQL.append("\nAUTHORIZATION ").append(getQuotedName(owner));
+            sbSQL.append("\nAUTHORIZATION ").append(quote(owner));
         }
         script.addStatement(sbSQL);
 
@@ -96,8 +96,8 @@ public final class MsRole extends MsAbstractStatement {
 
     private void appendAlterRole(String member, SQLScript script, boolean needAddMember) {
         StringBuilder sql = new StringBuilder();
-        sql.append("ALTER ROLE ").append(getQuotedName(name));
-        sql.append(needAddMember ? " ADD " : " DROP ").append("MEMBER ").append(getQuotedName(member));
+        sql.append("ALTER ROLE ").append(getQuotedName());
+        sql.append(needAddMember ? " ADD " : " DROP ").append("MEMBER ").append(quote(member));
         script.addStatement(sql);
     }
 

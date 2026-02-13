@@ -48,9 +48,9 @@ public final class MsSchema extends MsAbstractStatement implements ISchema {
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("CREATE SCHEMA ");
-        sbSQL.append(getQuotedName(name));
+        sbSQL.append(getQuotedName());
         if (owner != null) {
-            sbSQL.append("\nAUTHORIZATION ").append(getQuotedName(owner));
+            sbSQL.append("\nAUTHORIZATION ").append(quote(owner));
         }
         script.addStatement(sbSQL);
         appendPrivileges(script);

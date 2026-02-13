@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
-
 import org.pgcodekeeper.core.script.SQLScript;
 
 import java.util.Map;
@@ -94,8 +92,8 @@ public interface ISimpleOptionContainer extends IOptionContainer {
         sql.append("ALTER ");
         if (type == DbObjType.COLUMN) {
             sql.append("TABLE ONLY ")
-                    .append(PgDiffUtils.getQuotedName(getParent().getParent().getName()))
-                    .append('.').append(PgDiffUtils.getQuotedName(getParent().getName()))
+                    .append(getParent().getParent().getQuotedName())
+                    .append('.').append(getParent().getQuotedName())
                     .append(" ALTER ");
         }
         sql.append(typeName).append(' ');
@@ -104,9 +102,9 @@ public interface ISimpleOptionContainer extends IOptionContainer {
             if (type == DbObjType.INDEX) {
                 parent = parent.getParent();
             }
-            sql.append(PgDiffUtils.getQuotedName(parent.getName())).append('.');
+            sql.append(parent.getQuotedName()).append('.');
         }
-        sql.append(PgDiffUtils.getQuotedName(getName())).append(action).append(option).append(")");
+        sql.append(getQuotedName()).append(action).append(option).append(")");
         script.addStatement(sql);
     }
 }

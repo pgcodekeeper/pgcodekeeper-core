@@ -68,7 +68,7 @@ public final class PgOperator extends PgAbstractStatement implements IOperator, 
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("CREATE OPERATOR ");
-        sbSQL.append(getQuotedName(getSchemaName())).append('.');
+        sbSQL.append(quote(getSchemaName())).append('.');
         sbSQL.append(getBareName());
         sbSQL.append(" (\n\tPROCEDURE = ");
         sbSQL.append(procedure);

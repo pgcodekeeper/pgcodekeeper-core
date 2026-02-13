@@ -197,8 +197,8 @@ public final class PgAggregate extends PgAbstractFunction {
 
     @Override
     public void appendFullName(StringBuilder sb) {
-        sb.append(getQuotedName(getSchemaName())).append('.');
-        sb.append(getQuotedName(name)).append('(');
+        sb.append(quote(getSchemaName())).append('.');
+        sb.append(getQuotedName()).append('(');
         if (arguments.isEmpty()) {
             sb.append('*');
         } else {

@@ -81,7 +81,7 @@ public abstract class PgAbstractRegularTable extends PgAbstractTable implements 
         }
 
         if (!Consts.HEAP.equals(method)) {
-            sql.append("\nUSING ").append(getQuotedName(method));
+            sql.append("\nUSING ").append(quote(method));
         }
 
         StringBuilder sb = new StringBuilder();

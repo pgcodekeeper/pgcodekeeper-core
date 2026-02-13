@@ -299,7 +299,7 @@ public abstract class PgAbstractTable extends PgAbstractStatementContainer imple
                     StringBuilder sql = new StringBuilder();
                     sql.append(getAlterTable(true));
                     sql.append(ALTER_COLUMN);
-                    sql.append(getQuotedName(column.getName()));
+                    sql.append(column.getQuotedName());
                     sql.append(" SET STATISTICS ");
                     sql.append(column.getStatistics());
                     script.addStatement(sql);
@@ -310,7 +310,7 @@ public abstract class PgAbstractTable extends PgAbstractStatementContainer imple
         PgSequence sequence = column.getSequence();
         sbOption.append(getAlterTable(false))
                 .append(ALTER_COLUMN)
-                .append(getQuotedName(column.getName()))
+                .append(column.getQuotedName())
                 .append(" ADD GENERATED ")
                 .append(column.getIdentityType())
                 .append(" AS IDENTITY (");
@@ -534,7 +534,7 @@ public abstract class PgAbstractTable extends PgAbstractStatementContainer imple
             StringBuilder sql = new StringBuilder();
             sql.append(getAlterTable(isInherit))
                     .append(ALTER_COLUMN)
-                    .append(getQuotedName(column.getName()))
+                    .append(column.getQuotedName())
                     .append(" SET STORAGE ")
                     .append(column.getStorage());
             script.addStatement(sql);
@@ -566,7 +566,7 @@ public abstract class PgAbstractTable extends PgAbstractStatementContainer imple
     }
 
     private String getAlterColumn(PgColumn column) {
-        return getAlterTable(true) + ALTER_COLUMN + getQuotedName(column.getName());
+        return getAlterTable(true) + ALTER_COLUMN + column.getQuotedName();
     }
 
     private void writeOptions(PgColumn column, SQLScript script, boolean isInherit) {
@@ -577,7 +577,7 @@ public abstract class PgAbstractTable extends PgAbstractStatementContainer imple
             StringBuilder sb = new StringBuilder();
             sb.append(getAlterTable(isInherit))
                     .append(ALTER_COLUMN)
-                    .append(getQuotedName(column.getName()))
+                    .append(column.getQuotedName())
                     .append(" SET (");
 
             for (Entry<String, String> option : opts.entrySet()) {
@@ -596,7 +596,7 @@ public abstract class PgAbstractTable extends PgAbstractStatementContainer imple
             StringBuilder sb = new StringBuilder();
             sb.append(getAlterTable(isInherit))
                     .append(ALTER_COLUMN)
-                    .append(getQuotedName(column.getName()))
+                    .append(column.getQuotedName())
                     .append(" OPTIONS (");
 
             for (Entry<String, String> option : fOpts.entrySet()) {
@@ -716,8 +716,7 @@ public abstract class PgAbstractTable extends PgAbstractStatementContainer imple
         script.addStatement(sbInsert);
 
         for (String colName : identityColsForMovingData) {
-            String quotedCol = getQuotedName(colName);
-            script.addStatement(RESTART_SEQUENCE_QUERY.formatted(tblTmpQName, quotedCol, tblQName));
+            script.addStatement(RESTART_SEQUENCE_QUERY.formatted(tblTmpQName, quote(colName), tblQName));
         }
     }
 
@@ -758,9 +757,8 @@ public abstract class PgAbstractTable extends PgAbstractStatementContainer imple
             return;
         }
 
-        var quoter = getQuoter();
-        String tblTmpQName = quoter.apply(getSchemaName()) + '.' + quoter.apply(tblTmpBareName);
-        String cols = colsForMovingData.stream().map(quoter).collect(Collectors.joining(", "));
+        String tblTmpQName = getParent().getQuotedName() + '.' + quote(tblTmpBareName);
+        String cols = colsForMovingData.stream().map(this::quote).collect(Collectors.joining(", "));
         List<String> identityColsForMovingData = identityCols == null ? Collections.emptyList()
                 : identityCols.stream().filter(colsForMovingData::contains).toList();
         writeInsert(script, newTable, tblTmpQName, identityColsForMovingData, cols);

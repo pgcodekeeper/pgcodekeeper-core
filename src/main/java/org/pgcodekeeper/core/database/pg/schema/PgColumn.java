@@ -80,7 +80,7 @@ public final class PgColumn extends PgAbstractStatement
 
     public String getFullDefinition() {
         final StringBuilder sbDefinition = new StringBuilder();
-        String cName = getQuotedName(name);
+        String cName = getQuotedName();
         sbDefinition.append(cName);
 
         if (type == null) {
@@ -89,7 +89,7 @@ public final class PgColumn extends PgAbstractStatement
             sbDefinition.append(' ');
             sbDefinition.append(type);
             if (compression != null) {
-                sbDefinition.append(COMPRESSION).append(getQuotedName(compression));
+                sbDefinition.append(COMPRESSION).append(quote(compression));
             }
 
             if (collation != null) {
@@ -138,11 +138,11 @@ public final class PgColumn extends PgAbstractStatement
             sb.append(getAlterTable(false));
             sb.append("\n\tADD COLUMN ");
             appendIfNotExists(sb, script.getSettings());
-            sb.append(getQuotedName(name))
+            sb.append(getQuotedName())
                     .append(' ')
                     .append(type);
             if (compression != null) {
-                sb.append(COMPRESSION).append(getQuotedName(compression));
+                sb.append(COMPRESSION).append(quote(compression));
             }
             if (collation != null) {
                 sb.append(COLLATE).append(collation);
@@ -212,7 +212,7 @@ public final class PgColumn extends PgAbstractStatement
         if (needAlterTable) {
             sb.append(getAlterTable(only));
         }
-        sb.append(ALTER_COLUMN).append(getQuotedName(column));
+        sb.append(ALTER_COLUMN).append(quote(column));
         return sb.toString();
     }
 
@@ -224,7 +224,7 @@ public final class PgColumn extends PgAbstractStatement
             if (optionExists) {
                 dropSb.append(IF_EXISTS);
             }
-            dropSb.append(getQuotedName(name));
+            dropSb.append(getQuotedName());
             script.addStatement(dropSb);
             return;
         }
@@ -432,7 +432,7 @@ public final class PgColumn extends PgAbstractStatement
             }
 
             if (settings.isPrintUsing() && !(parent instanceof IForeignTable)) {
-                sb.append(" USING ").append(getQuotedName(newColumn.name))
+                sb.append(" USING ").append(newColumn.getQuotedName())
                         .append("::").append(newType);
             }
             sb.append(isLastColumn ? ";" : ",");
@@ -501,8 +501,8 @@ public final class PgColumn extends PgAbstractStatement
         if (!isOldNotNull) {
             if (newColumn.defaultValue != null) {
                 String sql = "UPDATE " + parent.getQualifiedName() +
-                        "\n\tSET " + getQuotedName(name) +
-                        " = DEFAULT WHERE " + getQuotedName(name) +
+                        "\n\tSET " + getQuotedName() +
+                        " = DEFAULT WHERE " + getQuotedName() +
                         " IS" + NULL;
                 script.addStatement(sql);
             }
@@ -596,7 +596,7 @@ public final class PgColumn extends PgAbstractStatement
         if (newCompression == null || newCompression.equalsIgnoreCase(oldCompression)) {
             return;
         }
-        script.addStatement(getAlterTableColumn(true, name) + " SET COMPRESSION " + getQuotedName(newCompression));
+        script.addStatement(getAlterTableColumn(true, name) + " SET COMPRESSION " + quote(newCompression));
     }
 
     /**

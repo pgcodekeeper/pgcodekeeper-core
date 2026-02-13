@@ -69,7 +69,7 @@ public class ChConstraint extends ChAbstractStatement implements IConstraint {
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sb = new StringBuilder();
         appendAlterTable(sb);
-        sb.append(" ADD CONSTRAINT ").append(getQuotedName(name)).append(' ').append(getDefinition());
+        sb.append(" ADD CONSTRAINT ").append(getQuotedName()).append(' ').append(getDefinition());
         script.addStatement(sb);
     }
 
@@ -90,7 +90,7 @@ public class ChConstraint extends ChAbstractStatement implements IConstraint {
         if (optionExists) {
             sb.append(IF_EXISTS);
         }
-        sb.append(getQuotedName(name));
+        sb.append(getQuotedName());
         script.addStatement(sb);
     }
 

@@ -63,9 +63,9 @@ public final class MsTrigger extends MsAbstractStatement implements MsSourceStat
 
     @Override
     public StringBuilder appendName(StringBuilder sb) {
-        sb.append(getQuotedName(getSchemaName()))
+        sb.append(quote(getSchemaName()))
                 .append('.')
-                .append(getQuotedName(name))
+                .append(getQuotedName())
                 .append(" ON ")
                 .append(parent.getQualifiedName());
         return sb;
@@ -97,7 +97,7 @@ public final class MsTrigger extends MsAbstractStatement implements MsSourceStat
 
     @Override
     public void appendFullName(StringBuilder sb) {
-        sb.append(getQuotedName(getSchemaName())).append('.').append(getQuotedName(name));
+        sb.append(quote(getSchemaName())).append('.').append(getQuotedName());
     }
 
     @Override

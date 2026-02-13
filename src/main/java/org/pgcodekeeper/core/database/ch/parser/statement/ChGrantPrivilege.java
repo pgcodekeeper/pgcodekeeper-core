@@ -88,8 +88,7 @@ public final class ChGrantPrivilege extends ChParserAbstract {
                 addObjReference(List.of(user), st.getStatementType(), state);
                 // 1 privilege for each permission
                 for (String per : permissions) {
-                    addPrivilege(st, new ChPrivilege(state, per, objectName,
-                            st.getQuotedName(userName), isGrantOption));
+                    addPrivilege(st, new ChPrivilege(state, per, objectName, st.getQuotedName(), isGrantOption));
                 }
             }
         }

@@ -86,14 +86,14 @@ public final class PgIndex extends PgAbstractStatement implements IIndex {
         if (inherit != null || settings.isGenerateExists()) {
             sbSQL.append("IF NOT EXISTS ");
         }
-        sbSQL.append(getQuotedName(name))
+        sbSQL.append(getQuotedName())
                 .append(" ON ");
         if (parent instanceof PgAbstractRegularTable regTable && regTable.getPartitionBy() != null) {
             sbSQL.append("ONLY ");
         }
         sbSQL.append(parent.getQualifiedName());
         if (method != null) {
-            sbSQL.append(" USING ").append(getQuotedName(method));
+            sbSQL.append(" USING ").append(quote(method));
         }
         appendSimpleColumns(sbSQL, columns);
         appendIndexParam(sbSQL);
@@ -156,7 +156,7 @@ public final class PgIndex extends PgAbstractStatement implements IIndex {
     @Override
     public String getQualifiedName() {
         if (qualifiedName == null) {
-            qualifiedName = getQuotedName(getSchemaName()) + '.' + getQuotedName(name);
+            qualifiedName = quote(getSchemaName()) + '.' + getQuotedName();
         }
         return qualifiedName;
     }
@@ -175,11 +175,11 @@ public final class PgIndex extends PgAbstractStatement implements IIndex {
                 getDropSQL(script);
                 StringBuilder sql = new StringBuilder();
                 sql.append(ALTER_INDEX)
-                        .append(getQuotedName(getSchemaName()))
+                        .append(quote(getSchemaName()))
                         .append('.')
-                        .append(getQuotedName(tmpName))
+                        .append(quote(tmpName))
                         .append(" RENAME TO ")
-                        .append(getQuotedName(getName()));
+                        .append(getQuotedName());
                 script.addStatement(sql);
 
                 newIndex.appendComments(script);

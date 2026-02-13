@@ -60,9 +60,9 @@ public final class PgStatistics extends PgAbstractStatement implements IStatisti
         StatementUtils.appendCollection(sb, expressions, ", ", false);
         sb.append(" FROM ");
         if (foreignSchema != null) {
-            sb.append(getQuotedName(foreignSchema)).append('.');
+            sb.append(quote(foreignSchema)).append('.');
         }
-        sb.append(getQuotedName(foreignTable));
+        sb.append(quote(foreignTable));
         script.addStatement(sb);
 
         if (statistics >= 0) {

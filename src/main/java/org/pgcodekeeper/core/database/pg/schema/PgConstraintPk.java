@@ -130,7 +130,7 @@ public final class PgConstraintPk extends PgConstraint implements IConstraintPk,
             sbSQL.setLength(sbSQL.length() - 1);
             sbSQL
                     .append(", ")
-                    .append(getQuotedName(withoutOverlapsColumn))
+                    .append(quote(withoutOverlapsColumn))
                     .append(" WITHOUT OVERLAPS)");
         }
         appendIndexParam(sbSQL);

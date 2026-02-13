@@ -86,8 +86,8 @@ public final class MsType extends MsAbstractStatement implements IType, IStateme
                 sb.append(" NOT NULL");
             }
         } else if (assemblyName != null) {
-            sb.append("\nEXTERNAL NAME ").append(getQuotedName(assemblyName))
-                    .append('.').append(getQuotedName(assemblyClass));
+            sb.append("\nEXTERNAL NAME ").append(quote(assemblyName))
+                    .append('.').append(quote(assemblyClass));
         } else {
             sb.append(" AS TABLE(");
             for (String col : columns) {

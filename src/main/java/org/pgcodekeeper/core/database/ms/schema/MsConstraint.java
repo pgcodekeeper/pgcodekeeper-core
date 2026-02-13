@@ -49,7 +49,7 @@ public abstract class MsConstraint extends MsAbstractStatement implements IConst
         }
         sbSQL.append("\n\tADD ");
         if (!name.isEmpty()) {
-            sbSQL.append("CONSTRAINT ").append(getQuotedName(name)).append(' ');
+            sbSQL.append("CONSTRAINT ").append(getQuotedName()).append(' ');
         }
         sbSQL.append(getDefinition());
         script.addStatement(sbSQL);
@@ -63,7 +63,7 @@ public abstract class MsConstraint extends MsAbstractStatement implements IConst
             if (isDisabled) {
                 sb.append("NO");
             }
-            sb.append("CHECK CONSTRAINT ").append(getQuotedName(name));
+            sb.append("CHECK CONSTRAINT ").append(getQuotedName());
             script.addStatement(sb);
         }
     }
@@ -88,7 +88,7 @@ public abstract class MsConstraint extends MsAbstractStatement implements IConst
             if (newConstr.isDisabled) {
                 sb.append("NO");
             }
-            sb.append("CHECK CONSTRAINT ").append(getQuotedName(newConstr.name));
+            sb.append("CHECK CONSTRAINT ").append(newConstr.getQuotedName());
             script.addStatement(sb);
         }
 
@@ -105,7 +105,7 @@ public abstract class MsConstraint extends MsAbstractStatement implements IConst
         if (optionExists) {
             sbSQL.append(IF_EXISTS);
         }
-        sbSQL.append(getQuotedName(name));
+        sbSQL.append(getQuotedName());
         script.addStatement(sbSQL);
     }
 

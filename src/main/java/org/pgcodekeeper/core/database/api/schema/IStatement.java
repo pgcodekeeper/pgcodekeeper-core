@@ -250,10 +250,17 @@ public interface IStatement {
     String formatSql(String sql, int offset, int length, IFormatConfiguration formatConfiguration);
 
     /**
-     * @param name the name to quote
      * @return the quoted name
      */
-    default String getQuotedName(String name) {
+    default String getQuotedName() {
+       return quote(getBareName());
+    }
+
+    /**
+     * @param name string to quote
+     * @return the quoted string
+     */
+    default String quote(String name) {
         return getQuoter().apply(name);
     }
 

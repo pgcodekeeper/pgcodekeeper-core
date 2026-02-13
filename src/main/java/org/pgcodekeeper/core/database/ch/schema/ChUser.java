@@ -60,7 +60,7 @@ public final class ChUser extends ChAbstractStatement {
         final StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("CREATE USER ");
         appendIfNotExists(sbSQL, script.getSettings());
-        sbSQL.append(getQuotedName(name));
+        sbSQL.append(getQuotedName());
         if (!hosts.isEmpty()) {
             sbSQL.append(DELIM).append("HOST ").append(String.join(", ", hosts));
         }

@@ -107,9 +107,9 @@ public final class PgPartitionTable extends PgAbstractRegularTable implements IP
     private StringBuilder appendTablePartiton(String tableName, String state) {
         return new StringBuilder(ALTER_TABLE).append(tableName)
                 .append("\n\t%s PARTITION ".formatted(state))
-                .append(getQuotedName(parent.getName()))
+                .append(parent.getQuotedName())
                 .append('.')
-                .append(getQuotedName(name));
+                .append(getQuotedName());
     }
 
     @Override

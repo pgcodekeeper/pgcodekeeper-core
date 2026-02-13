@@ -63,9 +63,9 @@ public final class MsAssembly extends MsAbstractStatement {
     private void getAssemblyFullSQL(boolean isPreview, SQLScript script) {
         StringBuilder sql = new StringBuilder();
 
-        sql.append("CREATE ASSEMBLY ").append(getQuotedName(name));
+        sql.append("CREATE ASSEMBLY ").append(getQuotedName());
         if (owner != null) {
-            sql.append("\nAUTHORIZATION ").append(getQuotedName(owner));
+            sql.append("\nAUTHORIZATION ").append(quote(owner));
         }
 
         sql.append("\nFROM ");
@@ -94,7 +94,7 @@ public final class MsAssembly extends MsAbstractStatement {
         if (optionExists) {
             dropSb.append(IF_EXISTS);
         }
-        dropSb.append(getQuotedName(name)).append(" WITH NO DEPENDENTS");
+        dropSb.append(getQuotedName()).append(" WITH NO DEPENDENTS");
         script.addStatement(dropSb);
     }
 
@@ -127,7 +127,7 @@ public final class MsAssembly extends MsAbstractStatement {
     }
 
     private String getAlterAssebly() {
-        return "ALTER ASSEMBLY " + getQuotedName(name);
+        return "ALTER ASSEMBLY " + getQuotedName();
     }
 
     @Override

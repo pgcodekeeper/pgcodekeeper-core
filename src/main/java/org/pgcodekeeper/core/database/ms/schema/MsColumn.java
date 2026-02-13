@@ -65,7 +65,7 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
 
     public String getFullDefinition() {
         final StringBuilder sbDefinition = new StringBuilder();
-        sbDefinition.append(getQuotedName(name));
+        sbDefinition.append(getQuotedName());
         sbDefinition.append(' ');
         if (expression != null) {
             sbDefinition.append("AS ").append(expression);
@@ -111,7 +111,7 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
         if (defaultValue != null) {
             if (defaultName != null) {
                 sbDefinition.append(" CONSTRAINT ");
-                sbDefinition.append(getQuotedName(defaultName));
+                sbDefinition.append(quote(defaultName));
             }
             sbDefinition.append(" DEFAULT ");
             sbDefinition.append(defaultValue);
@@ -124,7 +124,7 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
     public void getCreationSQL(SQLScript script) {
         StringBuilder sql = new StringBuilder();
         sql.append(getAlterTable(false));
-        sql.append("\n\tADD ").append(getQuotedName(name)).append(' ');
+        sql.append("\n\tADD ").append(quote(name)).append(' ');
         if (expression != null) {
             sql.append("AS ").append(expression);
         } else {
@@ -165,7 +165,7 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
             }
 
             StringBuilder sqlAlter = new StringBuilder();
-            sqlAlter.append(getAlterColumn(name)).append(' ').append(type);
+            sqlAlter.append(getAlterColumn()).append(' ').append(type);
 
             if (collation != null) {
                 sqlAlter.append(COLLATE).append(collation);
@@ -199,9 +199,8 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
         if (isNeedDepcies != null && (oldOption || !PERSISTED.equalsIgnoreCase(optionName))) {
             isNeedDepcies.set(true);
         }
-        String sb = getAlterColumn(name) +
-                (newOption ? " ADD " : " DROP ") +
-                optionName;
+
+        String sb = getAlterColumn() + (newOption ? " ADD " : " DROP ") + optionName;
 
         // before adding the ROWGUIDCOL option to a column, we must first remove it from another
         var orderType = !newOption && ROWGUIDCOL.equalsIgnoreCase(optionName) ? SQLActionType.BEGIN : SQLActionType.MID;
@@ -263,7 +262,7 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
         }
 
         if (oldDefault != null) {
-            script.addStatement(getAlterTable(false) + "\n\tDROP CONSTRAINT " + getQuotedName(oldDefaultName));
+            script.addStatement(getAlterTable(false) + "\n\tDROP CONSTRAINT " + quote(oldDefaultName));
         }
 
         if (newDefault != null) {
@@ -271,10 +270,10 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
             sql.append(getAlterTable(false));
             sql.append("\n\tADD");
             if (newDefaultName != null) {
-                sql.append(" CONSTRAINT ").append(getQuotedName(newDefaultName));
+                sql.append(" CONSTRAINT ").append(quote(newDefaultName));
             }
             sql.append(" DEFAULT ").append(newDefault);
-            sql.append(" FOR ").append(getQuotedName(name));
+            sql.append(" FOR ").append(getQuotedName());
             script.addStatement(sql);
         }
     }
@@ -286,7 +285,7 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append(getAlterColumn(newColumn.name)).append(' ').append(newColumn.type);
+        sb.append(getAlterColumn()).append(' ').append(newColumn.type);
         if (newCollation != null) {
             sb.append(COLLATE).append(newCollation);
         }
@@ -307,7 +306,7 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append(getAlterColumn(newColumn.name)).append(' ').append(newColumn.type);
+        sb.append(getAlterColumn()).append(' ').append(newColumn.type);
         if (newColumn.collation != null) {
             sb.append(COLLATE).append(newColumn.collation);
         }
@@ -319,7 +318,7 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
     private void compareMaskingFunctions(MsColumn newColumn, SQLScript script) {
         if (!Objects.equals(newColumn.maskingFunction, maskingFunction)) {
             StringBuilder sb = new StringBuilder();
-            sb.append(getAlterColumn(newColumn.name));
+            sb.append(getAlterColumn());
             if (newColumn.maskingFunction != null) {
                 sb.append(" ADD MASKED WITH (FUNCTION = ").append(newColumn.maskingFunction).append(")");
             } else {
@@ -332,14 +331,14 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
     private void addUpdateStatement(SQLScript script) {
         StringBuilder sb = new StringBuilder();
         sb.append("UPDATE ").append(parent.getQualifiedName())
-                .append("\n\tSET ").append(getQuotedName(name))
+                .append("\n\tSET ").append(getQuotedName())
                 .append(" = DEFAULT WHERE ")
-                .append(getQuotedName(name)).append(" IS").append(NULL);
+                .append(getQuotedName()).append(" IS").append(NULL);
         script.addStatement(sb);
     }
 
-    private String getAlterColumn(String column) {
-        return ((MsTable) parent).getAlterTable(false) + ALTER_COLUMN + getQuotedName(column);
+    private String getAlterColumn() {
+        return ((MsTable) parent).getAlterTable(false) + ALTER_COLUMN + getQuotedName();
     }
 
     @Override
@@ -351,7 +350,7 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
         if (optionExists) {
             sb.append(IF_EXISTS);
         }
-        sb.append(getQuotedName(name));
+        sb.append(getQuotedName());
         script.addStatement(sb);
     }
 

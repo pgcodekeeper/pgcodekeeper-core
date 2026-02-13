@@ -116,7 +116,7 @@ public final class PgDomain extends PgAbstractStatement implements ISearchPath {
             if (constr.isNotValid()) {
                 notValids.add(constr);
             } else {
-                sql.append("\n\tCONSTRAINT ").append(getQuotedName(constr.getName()))
+                sql.append("\n\tCONSTRAINT ").append(constr.getQuotedName())
                         .append(' ').append(constr.getDefinition());
             }
         }

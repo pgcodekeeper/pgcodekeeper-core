@@ -16,8 +16,6 @@
 package org.pgcodekeeper.core.database.ch.schema;
 
 import java.util.*;
-import java.util.function.UnaryOperator;
-
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
@@ -97,7 +95,7 @@ public class ChPolicy extends ChAbstractStatement implements IPolicy {
             appendIfNotExists(sbSQL, script.getSettings());
         }
 
-        sbSQL.append(name);
+        sbSQL.append(getQualifiedName());
 
         if (event != null) {
             sbSQL.append("\n  FOR ").append(event);
@@ -175,7 +173,12 @@ public class ChPolicy extends ChAbstractStatement implements IPolicy {
     }
 
     @Override
-    public UnaryOperator<String> getQuoter() {
-        return (name) -> name;
+    public String getQualifiedName() {
+        return name;
+    }
+
+    @Override
+    public String getQuotedName() {
+        return name;
     }
 }

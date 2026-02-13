@@ -47,7 +47,7 @@ public final class MsStatistics extends MsAbstractStatement implements IStatisti
     @Override
     public void getCreationSQL(SQLScript script) {
         var sb = new StringBuilder("CREATE STATISTICS ");
-        sb.append(getQuotedName(name)).append(" ON ").append(parent.getQualifiedName());
+        sb.append(getQuotedName()).append(" ON ").append(parent.getQualifiedName());
         if (!cols.isEmpty()) {
             sb.append(' ');
             StatementUtils.appendCols(sb, cols, getQuoter());

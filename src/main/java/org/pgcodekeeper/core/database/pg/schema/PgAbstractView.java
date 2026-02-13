@@ -101,7 +101,7 @@ public abstract class PgAbstractView extends PgAbstractStatementContainer implem
     private void appendChildrenComments(SQLScript script) {
         for (final Entry<String, String> columnComment : columnComments.entrySet()) {
             script.addCommentStatement(COLUMN_COMMENT.formatted(getQualifiedName(),
-                    getQuotedName(columnComment.getKey()), columnComment.getValue()));
+                    quote(columnComment.getKey()), columnComment.getValue()));
         }
     }
 
@@ -112,7 +112,7 @@ public abstract class PgAbstractView extends PgAbstractStatementContainer implem
 
         sbSQL.append(" (");
         for (String columnName : columnNames) {
-            sbSQL.append(getQuotedName(columnName)).append(", ");
+            sbSQL.append(quote(columnName)).append(", ");
         }
         sbSQL.setLength(sbSQL.length() - 2);
         sbSQL.append(')');
@@ -154,7 +154,7 @@ public abstract class PgAbstractView extends PgAbstractStatementContainer implem
             String oldValue = columnComments.get(newColumn);
             if (!Objects.equals(oldValue, newValue)) {
                 script.addCommentStatement(COLUMN_COMMENT.formatted(getQualifiedName(),
-                        getQuotedName(newColumn), newValue));
+                        quote(newColumn), newValue));
             }
         }
 
@@ -163,7 +163,7 @@ public abstract class PgAbstractView extends PgAbstractStatementContainer implem
 
             if (!newView.columnComments.containsKey(oldColumn)) {
                 script.addCommentStatement(COLUMN_COMMENT.formatted(getQualifiedName(),
-                        getQuotedName(oldColumn), "NULL"));
+                        quote(oldColumn), "NULL"));
             }
         }
     }

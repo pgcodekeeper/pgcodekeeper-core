@@ -124,7 +124,7 @@ public final class MsTable extends MsAbstractStatementContainer implements ITabl
                 sbSQL.append("\t");
                 String name = con.getName();
                 if (!name.isEmpty()) {
-                    sbSQL.append("CONSTRAINT ").append(getQuotedName(name)).append(' ');
+                    sbSQL.append("CONSTRAINT ").append(quote(name)).append(' ');
                 }
                 sbSQL.append(con.getDefinition());
                 sbSQL.append(",\n");
@@ -138,8 +138,8 @@ public final class MsTable extends MsAbstractStatementContainer implements ITabl
     private void appendPeriodSystem(StringBuilder sb) {
         if (periodStartCol != null && periodEndCol != null) {
             sb.append(",\n\tPERIOD FOR SYSTEM_TIME (");
-            sb.append(getQuotedName(periodStartCol.getName())).append(", ");
-            sb.append(getQuotedName(periodEndCol.getName()));
+            sb.append(periodStartCol.getQuotedName()).append(", ");
+            sb.append(periodEndCol.getQuotedName());
             sb.append(")");
         }
     }
@@ -187,11 +187,11 @@ public final class MsTable extends MsAbstractStatementContainer implements ITabl
         }
 
         if (textImage != null) {
-            sbSQL.append("TEXTIMAGE_ON ").append(getQuotedName(textImage)).append(' ');
+            sbSQL.append("TEXTIMAGE_ON ").append(quote(textImage)).append(' ');
         }
 
         if (fileStream != null) {
-            sbSQL.append("FILESTREAM_ON ").append(getQuotedName(fileStream)).append(' ');
+            sbSQL.append("FILESTREAM_ON ").append(quote(fileStream)).append(' ');
         }
 
         if (sbSQL.length() > startLength) {
@@ -498,9 +498,8 @@ public final class MsTable extends MsAbstractStatementContainer implements ITabl
             return;
         }
 
-        var quoter = getQuoter();
-        String tblTmpQName = quoter.apply(getSchemaName()) + '.' + quoter.apply(tblTmpBareName);
-        String cols = colsForMovingData.stream().map(quoter).collect(Collectors.joining(", "));
+        String tblTmpQName = getParent().getQuotedName() + '.' + quote(tblTmpBareName);
+        String cols = colsForMovingData.stream().map(this::quote).collect(Collectors.joining(", "));
         List<String> identityColsForMovingData = identityCols == null ? Collections.emptyList()
                 : identityCols.stream().filter(colsForMovingData::contains).toList();
         writeInsert(script, newTable, tblTmpQName, identityColsForMovingData, cols);

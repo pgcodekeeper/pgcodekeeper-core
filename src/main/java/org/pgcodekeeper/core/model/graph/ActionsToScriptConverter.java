@@ -33,7 +33,6 @@ import org.pgcodekeeper.core.utils.Utils;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
 
 /**
  * Converts database action containers into executable SQL script statements.
@@ -379,10 +378,9 @@ public final class ActionsToScriptConverter {
     private void printDropTempTable(ITable table) {
         String tblTmpName = tblTmpNames.get(table.getQualifiedName());
         if (tblTmpName != null) {
-            UnaryOperator<String> quoter = table.getQuoter();
             StringBuilder sb = new StringBuilder();
             sb.append("DROP TABLE ")
-                    .append(quoter.apply(table.getParent().getName())).append('.').append(quoter.apply(tblTmpName));
+                    .append(table.getParent().getQuotedName()).append('.').append(table.quote(tblTmpName));
             script.addStatement(sb);
         }
     }

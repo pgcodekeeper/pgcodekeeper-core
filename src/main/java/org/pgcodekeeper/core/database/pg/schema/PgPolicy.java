@@ -121,7 +121,7 @@ public final class PgPolicy extends PgAbstractStatement implements ISubElement, 
 
     @Override
     public void appendFullName(StringBuilder sb) {
-        sb.append(getQuotedName(name)).append(" ON ").append(parent.getQualifiedName());
+        sb.append(getQuotedName()).append(" ON ").append(parent.getQualifiedName());
     }
 
     @Override

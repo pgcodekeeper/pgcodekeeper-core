@@ -131,7 +131,7 @@ public final class MsConstraintPk extends MsConstraint
     private void appendSimpleColumns(StringBuilder sbSQL, List<SimpleColumn> columns) {
         sbSQL.append(" (");
         for (var col : columns) {
-            sbSQL.append(getQuotedName(col.getName()));
+            sbSQL.append(quote(col.getName()));
             if (col.isDesc()) {
                 sbSQL.append(" DESC");
             }

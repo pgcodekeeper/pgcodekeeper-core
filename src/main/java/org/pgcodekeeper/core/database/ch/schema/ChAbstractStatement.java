@@ -48,7 +48,7 @@ public abstract class ChAbstractStatement extends AbstractStatement {
 
     @Override
     public String getRenameCommand(String newName) {
-        return RENAME_OBJECT_COMMAND.formatted(getStatementType(), getQualifiedName(), getQuotedName(newName));
+        return RENAME_OBJECT_COMMAND.formatted(getStatementType(), getQualifiedName(), quote(newName));
     }
 
     @Override

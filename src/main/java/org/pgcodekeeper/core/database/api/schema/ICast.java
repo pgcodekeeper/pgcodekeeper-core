@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
-import java.util.function.UnaryOperator;
-
 /**
  * Interface for database type cast operations.
  * Defines functionality for casting between different data types in various contexts.
@@ -72,10 +70,5 @@ public interface ICast extends IStatement {
     @Override
     default GenericColumn toGenericColumn(DbObjType type) {
         return new GenericColumn(getSimpleName(getSource(), getTarget()), type);
-    }
-
-    @Override
-    default UnaryOperator<String> getQuoter() {
-        return (name) -> name;
     }
 }

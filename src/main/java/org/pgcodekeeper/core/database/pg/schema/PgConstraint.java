@@ -69,7 +69,7 @@ public abstract class PgConstraint extends PgAbstractStatement implements IConst
         appendAlterTable(sbSQL);
         sbSQL.append("\n\tADD");
         if (!name.isEmpty()) {
-            sbSQL.append(" CONSTRAINT ").append(getQuotedName(name));
+            sbSQL.append(" CONSTRAINT ").append(getQuotedName());
         }
         sbSQL.append(' ');
         sbSQL.append(getDefinition());
@@ -103,7 +103,7 @@ public abstract class PgConstraint extends PgAbstractStatement implements IConst
             sbSQL.append("\n\n");
             appendAlterTable(sbSQL);
             sbSQL.append(" VALIDATE CONSTRAINT ")
-                    .append(getQuotedName(name))
+                    .append(getQuotedName())
                     .append(';');
         }
 
@@ -144,7 +144,7 @@ public abstract class PgConstraint extends PgAbstractStatement implements IConst
         if (optionExists) {
             sbSQL.append(IF_EXISTS);
         }
-        sbSQL.append(getQuotedName(name));
+        sbSQL.append(getQuotedName());
         script.addStatement(sbSQL);
     }
 
@@ -160,7 +160,7 @@ public abstract class PgConstraint extends PgAbstractStatement implements IConst
         if (isNotValid && !newConstr.isNotValid) {
             StringBuilder sbSQL = new StringBuilder();
             appendAlterTable(sbSQL);
-            sbSQL.append("\n\tVALIDATE CONSTRAINT ").append(getQuotedName(name));
+            sbSQL.append("\n\tVALIDATE CONSTRAINT ").append(getQuotedName());
             script.addStatement(sbSQL);
         }
 
@@ -177,7 +177,7 @@ public abstract class PgConstraint extends PgAbstractStatement implements IConst
     protected void appendCommentSql(SQLScript script) {
         StringBuilder sb = new StringBuilder();
         sb.append("COMMENT ON CONSTRAINT ");
-        sb.append(getQuotedName(name)).append(" ON ");
+        sb.append(getQuotedName()).append(" ON ");
         if (parent.getStatementType() == DbObjType.DOMAIN) {
             sb.append("DOMAIN ");
         }

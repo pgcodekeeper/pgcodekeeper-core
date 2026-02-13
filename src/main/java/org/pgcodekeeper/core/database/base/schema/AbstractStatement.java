@@ -24,7 +24,6 @@ import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.*;
-import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 /**
@@ -565,12 +564,11 @@ public abstract class AbstractStatement implements IStatement, IHashable {
     @Override
     public String getQualifiedName() {
         if (qualifiedName == null) {
-            UnaryOperator<String> quoter = getQuoter();
-            StringBuilder sb = new StringBuilder(quoter.apply(name));
+            StringBuilder sb = new StringBuilder(getQuotedName());
 
             AbstractStatement par = this.parent;
             while (par != null && !(par instanceof IDatabase)) {
-                sb.insert(0, '.').insert(0, quoter.apply(par.name));
+                sb.insert(0, '.').insert(0, par.getQuotedName());
                 par = par.parent;
             }
 
