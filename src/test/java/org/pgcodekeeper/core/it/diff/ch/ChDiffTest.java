@@ -18,14 +18,19 @@ package org.pgcodekeeper.core.it.diff.ch;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.ch.ChDatabaseProvider;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;
 
 import static org.pgcodekeeper.core.it.IntegrationTestUtils.*;
 
+/**
+ * Tests ClickHouse database
+ */
 class ChDiffTest {
+
+    private final ChDatabaseProvider databaseProvider = new ChDatabaseProvider();
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -62,10 +67,9 @@ class ChDiffTest {
             "drop_ch_user",
             "drop_ch_view",
             "revoke_ch_privilegies"
-
     })
     void diffTest(String fileNameTemplate) throws IOException, InterruptedException {
-        assertDiff(fileNameTemplate, DatabaseType.CH, ChDiffTest.class);
+        assertDiff(databaseProvider, fileNameTemplate, ChDiffTest.class);
     }
 
     /**
@@ -78,8 +82,7 @@ class ChDiffTest {
     void ignorePrivilegesTest(String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         settings.setIgnorePrivileges(true);
-        settings.setDbType(DatabaseType.CH);
-        String script = getScript(fileNameTemplate, settings, ChDiffTest.class);
+        String script = getScript(databaseProvider, fileNameTemplate, settings, ChDiffTest.class);
         assertResult(script, fileNameTemplate, ChDiffTest.class);
     }
 
@@ -91,8 +94,7 @@ class ChDiffTest {
         var fileNameTemplate = "ch_create_table_with_on_cluster";
         var settings = new CoreSettings();
         settings.setClusterName("test");
-        settings.setDbType(DatabaseType.CH);
-        String script = getScript(fileNameTemplate, settings, ChDiffTest.class);
+        String script = getScript(databaseProvider, fileNameTemplate, settings, ChDiffTest.class);
         assertResult(script, fileNameTemplate, ChDiffTest.class);
     }
 }

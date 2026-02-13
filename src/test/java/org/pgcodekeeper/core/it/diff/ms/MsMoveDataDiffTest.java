@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.it.diff.ms;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.ms.MsDatabaseProvider;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
 import org.pgcodekeeper.core.settings.CoreSettings;
@@ -27,7 +27,7 @@ import java.io.IOException;
 import static org.pgcodekeeper.core.it.IntegrationTestUtils.*;
 
 /**
- * Tests for migrate data option.
+ * Tests for MS SQL database migrate data option.
  *
  * @author Gulnaz Khazieva
  */
@@ -47,12 +47,12 @@ class MsMoveDataDiffTest {
     })
     void moveDataTest(String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
+        MsDatabaseProvider databaseProvider = new MsDatabaseProvider();
         settings.setDataMovementMode(true);
-        settings.setDbType(DatabaseType.MS);
         var dbOld = loadTestDump(
-                fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, MsMoveDataDiffTest.class, settings);
+                databaseProvider, fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, MsMoveDataDiffTest.class, settings);
         var dbNew = loadTestDump(
-                fileNameTemplate + FILES_POSTFIX.NEW_SQL, MsMoveDataDiffTest.class, settings);
+                databaseProvider, fileNameTemplate + FILES_POSTFIX.NEW_SQL, MsMoveDataDiffTest.class, settings);
 
         assertDiffSame(dbOld, fileNameTemplate, settings);
         assertDiffSame(dbNew, fileNameTemplate, settings);

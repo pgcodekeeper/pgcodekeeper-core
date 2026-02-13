@@ -28,6 +28,7 @@ import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.ISchema;
 import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
 import org.pgcodekeeper.core.database.pg.schema.*;
@@ -54,6 +55,7 @@ class PgAntlrLoaderTest {
     private static final String BOOLEAN = "boolean";
     private static final String CHARACTER_VARYING_40 = "character varying(40)";
     private static final String INTEGER = "integer";
+    private final PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
 
     void testDatabase(String fileName, IDatabase d, Path exportDir) throws IOException, InterruptedException {
         loadSchema(fileName, d);
@@ -64,7 +66,7 @@ class PgAntlrLoaderTest {
         // first test the dump loader itself
         var settings = new CoreSettings();
         settings.setKeepNewlines(true);
-        IDatabase d = loadTestDump(fileName, PgAntlrLoaderTest.class, settings);
+        IDatabase d = loadTestDump(databaseProvider, fileName, PgAntlrLoaderTest.class, settings);
 
         assertDiff(d, dbPredefined, settings, "PgDumpLoader: predefined object is not equal to file " + fileName);
 
@@ -77,7 +79,7 @@ class PgAntlrLoaderTest {
         // prepare db object from sql file
         var settings = new CoreSettings();
         settings.setKeepNewlines(true);
-        IDatabase dbFromFile = loadTestDump(fileName, PgAntlrLoaderTest.class, settings);
+        IDatabase dbFromFile = loadTestDump(databaseProvider, fileName, PgAntlrLoaderTest.class, settings);
 
         new PgModelExporter(exportDir, dbPredefined, Consts.UTF_8, settings).exportFull();
 

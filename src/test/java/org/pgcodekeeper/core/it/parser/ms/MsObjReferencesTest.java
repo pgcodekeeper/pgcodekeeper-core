@@ -20,7 +20,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.database.ms.loader.MsDumpLoader;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
@@ -77,7 +76,6 @@ class MsObjReferencesTest {
     })
     void compareMsReferences(final String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
-        settings.setDbType(DatabaseType.MS);
 
         String resource = fileNameTemplate + FILES_POSTFIX.SQL;
         var loader = new MsDumpLoader(() -> getClass().getResourceAsStream(resource), resource, settings);

@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.it.diff.ms;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.ms.MsDatabaseProvider;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;
@@ -30,6 +30,8 @@ import static org.pgcodekeeper.core.it.IntegrationTestUtils.*;
  * @author galiev_mr
  */
 class MsDiffTest {
+
+    private final MsDatabaseProvider databaseProvider = new MsDatabaseProvider();
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -334,7 +336,7 @@ class MsDiffTest {
             "alter_ms_table_column_and_view"
     })
     void diffTest(String fileNameTemplate) throws IOException, InterruptedException {
-        assertDiff(fileNameTemplate, DatabaseType.MS, MsDiffTest.class);
+        assertDiff(databaseProvider, fileNameTemplate, MsDiffTest.class);
     }
 
     @ParameterizedTest
@@ -346,9 +348,8 @@ class MsDiffTest {
     })
     void correctOrderScriptTest(String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
-        settings.setDbType(DatabaseType.MS);
         settings.setAddTransaction(true);
-        String script = getScript(fileNameTemplate, settings, MsDiffTest.class);
+        String script = getScript(databaseProvider, fileNameTemplate, settings, MsDiffTest.class);
         assertResult(script, fileNameTemplate, MsDiffTest.class);
     }
 }

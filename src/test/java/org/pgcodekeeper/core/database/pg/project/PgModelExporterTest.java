@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.database.base.project;
+package org.pgcodekeeper.core.database.pg.project;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,6 +25,7 @@ import org.pgcodekeeper.core.database.api.schema.GenericColumn;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.script.SQLScript;
@@ -33,7 +34,10 @@ import org.pgcodekeeper.core.settings.CoreSettings;
 import java.io.IOException;
 import java.util.Arrays;
 
-class ModelExporterTest {
+/**
+ * Test for PostgreSQL database model export functionality
+ */
+class PgModelExporterTest {
 
     @ParameterizedTest
     @CsvSource({
@@ -42,10 +46,11 @@ class ModelExporterTest {
     })
     void settingsTest(String template, String stmtName, DbObjType type) throws IOException, InterruptedException {
         var settings = new CoreSettings();
+        PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
         settings.setGenerateConstraintNotValid(true);
         settings.setGenerateExists(true);
 
-        IDatabase db = IntegrationTestUtils.loadTestDump(template + FILES_POSTFIX.SQL, getClass(), settings);
+        IDatabase db = IntegrationTestUtils.loadTestDump(databaseProvider, template + FILES_POSTFIX.SQL, getClass(), settings);
 
         var exporter = new PgModelExporter(null, db, Consts.UTF_8, settings);
         var stmt = getStatement(db, stmtName, type);

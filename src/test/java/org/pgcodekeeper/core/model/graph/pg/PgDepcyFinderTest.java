@@ -13,44 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.model.graph;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
-import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.FILES_POSTFIX;
-import org.pgcodekeeper.core.TestUtils;
-import org.pgcodekeeper.core.it.IntegrationTestUtils;
-import org.pgcodekeeper.core.settings.CoreSettings;
+package org.pgcodekeeper.core.model.graph.pg;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-class DepcyFinderTest {
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.pgcodekeeper.core.FILES_POSTFIX;
+import org.pgcodekeeper.core.TestUtils;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
+import org.pgcodekeeper.core.it.IntegrationTestUtils;
+import org.pgcodekeeper.core.model.graph.DepcyFinder;
+import org.pgcodekeeper.core.settings.CoreSettings;
+
+class PgDepcyFinderTest {
 
     @ParameterizedTest
     @CsvSource({
-            "ch_view, default.revenue0",
-            "ch_view_2, default.TestView",
-            "ch_view_3, default.goal_view",
-            "ch_view_4, default.view_join_inner_table",
-            "ch_view_5, default.view_aaa_bbb",
-            "ch_view_6, default.view_columns_transformers",
-            "ch_view_7, default.ch_view_7",
             // test analysis work on merge statement
             "function_merge, public.f1",
-            // test analysis work on window statement
-            "ms_view_window, dbo.v1",
-            // "ms_insert_name, public.sales5",
-            "ms_procedure, \\[dbo\\].\\[test_poc\\]",
-            // same test searching deps of object by name without quotes for MS
-            "ms_procedure, dbo.test_poc",
-            "ch_dictionary, default.dict",
-            // test searching deps of object by name without quotes and case insensitive mode for MS
-            "ms_UPPER_CASE, dbo.TEST_POC",
             "view, public.v1",
     })
     void compareReverseGraph(String fileName, String objectName) throws IOException, InterruptedException {
@@ -75,8 +60,6 @@ class DepcyFinderTest {
             "function_circle_quotes, 'public\\.\"Func1\"\\(.*'",
             //test searching deps of quoted function by name without quotes and parens for PG
             "function_circle_quotes, 'public\\.func1'",
-            //test searching deps of table with system versioning
-            "ms_sys_ver_table, '\\[dbo\\]\\.\\[t1\\]'",
             //test searching deps of table constraint
             "table_constraint, public.test_fk_1.fk",
     })
@@ -88,14 +71,11 @@ class DepcyFinderTest {
     void compareGraph(String fileName, FILES_POSTFIX expectedPostfix, String objectName, boolean isReverse)
             throws IOException, InterruptedException {
         var settings = new CoreSettings();
-        if (fileName.startsWith("ms_")) {
-            settings.setDbType(DatabaseType.MS);
-        } else if (fileName.startsWith("ch_")) {
-            settings.setDbType(DatabaseType.CH);
-        }
+        PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
+
         settings.setEnableFunctionBodiesDependencies(true);
 
-        IDatabase db = IntegrationTestUtils.loadTestDump(fileName + FILES_POSTFIX.SQL, getClass(), settings);
+        IDatabase db = IntegrationTestUtils.loadTestDump(databaseProvider, fileName + FILES_POSTFIX.SQL, getClass(), settings);
 
         var deps = DepcyFinder.byPatterns(10, isReverse, Collections.emptyList(), false, db, List.of(objectName));
         String actual = String.join("\n", deps);

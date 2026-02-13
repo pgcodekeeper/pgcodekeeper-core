@@ -20,14 +20,19 @@ import org.pgcodekeeper.core.ContextLocation;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
+import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
+import org.pgcodekeeper.core.database.ch.ChDatabaseProvider;
 import org.pgcodekeeper.core.database.ch.loader.ChDumpLoader;
 import org.pgcodekeeper.core.database.ch.loader.ChProjectLoader;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.database.ms.MsDatabaseProvider;
 import org.pgcodekeeper.core.database.ms.loader.MsDumpLoader;
 import org.pgcodekeeper.core.database.ms.loader.MsProjectLoader;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
+import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.database.pg.loader.PgProjectLoader;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
@@ -57,20 +62,27 @@ public final class IntegrationTestUtils {
     public static final String RESOURCE_MS_DUMP = "testing_ms_dump.sql";
     public static final List<String> IGNORED_SCHEMAS_LIST = List.of("worker", "country", "ignore1", "ignore4vrw");
 
-    public static IDatabase loadTestDump(String resource, Class<?> c, ISettings settings)
+    public static IDatabase loadTestDump(IDatabaseProvider databaseProvider, String resource, Class<?> c, ISettings settings)
             throws IOException, InterruptedException {
-        return loadTestDump(resource, c, settings, true);
+        return loadTestDump(databaseProvider, resource, c, settings, true);
     }
 
-    public static IDatabase loadTestDump(String resource, Class<?> c, ISettings settings, boolean analysis)
+    public static IDatabase loadTestDump(IDatabaseProvider databaseProvider, String resource, Class<?> c, ISettings settings, boolean analysis)
             throws IOException, InterruptedException {
         InputStreamProvider input = () -> c.getResourceAsStream(resource);
         String inputObjectName = "test/" + c.getName() + '/' + resource;
-        var loader = switch (settings.getDbType()) {
-            case PG -> new PgDumpLoader(input, inputObjectName, settings);
-            case MS -> new MsDumpLoader(input, inputObjectName, settings);
-            case CH -> new ChDumpLoader(input, inputObjectName, settings);
-        };
+
+        AbstractDumpLoader<?> loader;
+        if (databaseProvider instanceof MsDatabaseProvider) {
+            loader = new MsDumpLoader(input, inputObjectName, settings);
+        } else if (databaseProvider instanceof PgDatabaseProvider) {
+            loader = new PgDumpLoader(input, inputObjectName, settings);
+        } else if (databaseProvider instanceof ChDatabaseProvider) {
+            loader = new ChDumpLoader(input, inputObjectName, settings);
+        } else {
+            throw new UnsupportedOperationException();
+        }
+
         IDatabase db = loader.load();
         if (analysis) {
             FullAnalyze.fullAnalyze(db, loader.getErrors());
@@ -118,30 +130,29 @@ public final class IntegrationTestUtils {
         Files.writeString(dir.resolve(".pgcodekeeperignore"), rule);
     }
 
-    public static void assertDiff(String fileNameTemplate, DatabaseType dbType, Class<?> clazz)
+    public static void assertDiff(IDatabaseProvider databaseProvider, String fileNameTemplate, Class<?> clazz)
             throws IOException, InterruptedException {
         var settings = new CoreSettings();
-        settings.setDbType(dbType);
-        String script = getScript(fileNameTemplate, settings, clazz);
+        String script = getScript(databaseProvider, fileNameTemplate, settings, clazz);
         assertResult(script, fileNameTemplate, clazz);
     }
 
-    public static String getScript(String fileNameTemplate, CoreSettings settings, Class<?> clazz)
+    public static String getScript(IDatabaseProvider databaseProvider, String fileNameTemplate, CoreSettings settings, Class<?> clazz)
             throws IOException, InterruptedException {
-        IDatabase dbOld = loadTestDump(fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, settings);
+        IDatabase dbOld = loadTestDump(databaseProvider, fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, settings);
         assertDiffSame(dbOld, fileNameTemplate, settings);
 
-        IDatabase dbNew = loadTestDump(fileNameTemplate + FILES_POSTFIX.NEW_SQL, clazz, settings);
+        IDatabase dbNew = loadTestDump(databaseProvider, fileNameTemplate + FILES_POSTFIX.NEW_SQL, clazz, settings);
         assertDiffSame(dbNew, fileNameTemplate, settings);
 
         return PgCodeKeeperApi.diff(settings, dbOld, dbNew);
     }
 
-    public static void assertEqualsDependencies(String dbTemplate, String userTemplateName,
+    public static void assertEqualsDependencies(IDatabaseProvider databaseProvider, String dbTemplate, String userTemplateName,
                                                 Map<String, DbObjType> selected, Class<?> clazz, ISettings settings)
             throws IOException, InterruptedException {
-        IDatabase oldDbFull = loadTestDump(dbTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, settings);
-        IDatabase newDbFull = loadTestDump(dbTemplate + FILES_POSTFIX.NEW_SQL, clazz, settings);
+        IDatabase oldDbFull = loadTestDump(databaseProvider, dbTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, settings);
+        IDatabase newDbFull = loadTestDump(databaseProvider, dbTemplate + FILES_POSTFIX.NEW_SQL, clazz, settings);
 
         assertDiffSame(oldDbFull, dbTemplate, settings);
         assertDiffSame(newDbFull, dbTemplate, settings);

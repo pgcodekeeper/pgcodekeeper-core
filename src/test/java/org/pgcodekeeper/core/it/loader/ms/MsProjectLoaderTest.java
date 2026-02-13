@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
+import org.pgcodekeeper.core.database.ms.MsDatabaseProvider;
 import org.pgcodekeeper.core.database.ms.project.MsModelExporter;
 import org.pgcodekeeper.core.ignorelist.IgnoreParser;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
@@ -32,14 +32,17 @@ import java.nio.file.Path;
 
 import static org.pgcodekeeper.core.it.IntegrationTestUtils.*;
 
+/**
+ * Tests for MS SQL ProjectLoader functionality
+ */
 class MsProjectLoaderTest {
 
     @Test
     void testProjectLoaderWithIgnoredSchemas(@TempDir Path dir) throws IOException, InterruptedException {
         var settings = new CoreSettings();
-        settings.setDbType(DatabaseType.MS);
+        MsDatabaseProvider databaseProvider = new MsDatabaseProvider();
 
-        var msDbDump = loadTestDump(RESOURCE_MS_DUMP, IntegrationTestUtils.class, settings);
+        var msDbDump = loadTestDump(databaseProvider, RESOURCE_MS_DUMP, IntegrationTestUtils.class, settings);
 
         new MsModelExporter(dir, msDbDump, Consts.UTF_8, settings).exportFull();
 

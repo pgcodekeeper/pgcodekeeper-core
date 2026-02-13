@@ -18,9 +18,9 @@ package org.pgcodekeeper.core.it.depcies.ms;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.pgcodekeeper.core.database.api.schema.DatabaseType;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.ms.MsDatabaseProvider;
 import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;
@@ -29,11 +29,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * Тестирует сравнение БД с неполным выбором различающихся объектов
- *
- * @author botov_av
+ * Tests MS SQL database comparison with incomplete selection of differing objects
  */
 class MsDiffDepciesTest {
+
+    private final MsDatabaseProvider databaseProvider = new MsDatabaseProvider();
 
     private static Stream<Arguments> provideSelectedObjects() {
         return Stream.of(
@@ -60,8 +60,7 @@ class MsDiffDepciesTest {
     void dependencyTest(final String dbTemplate, String userTemplateName, Map<String, DbObjType> selectedObjs)
             throws IOException, InterruptedException {
         var settings = new CoreSettings();
-        settings.setDbType(DatabaseType.MS);
-        IntegrationTestUtils.assertEqualsDependencies(dbTemplate, userTemplateName, selectedObjs, getClass(), settings);
+        IntegrationTestUtils.assertEqualsDependencies(databaseProvider, dbTemplate, userTemplateName, selectedObjs, getClass(), settings);
     }
 
     private static Stream<Arguments> provideSelectedObjectsWithFunctionBody() {
@@ -86,8 +85,7 @@ class MsDiffDepciesTest {
     void dependencyWithFunctionBodyTest(final String dbTemplate, String userTemplateName,
                                    Map<String, DbObjType> selectedObjs) throws IOException, InterruptedException {
         var settings = new CoreSettings();
-        settings.setDbType(DatabaseType.MS);
         settings.setEnableFunctionBodiesDependencies(true);
-        IntegrationTestUtils.assertEqualsDependencies(dbTemplate, userTemplateName, selectedObjs, getClass(), settings);
+        IntegrationTestUtils.assertEqualsDependencies(databaseProvider, dbTemplate, userTemplateName, selectedObjs, getClass(), settings);
     }
 }
