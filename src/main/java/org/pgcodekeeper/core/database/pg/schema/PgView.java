@@ -52,7 +52,7 @@ public final class PgView extends PgAbstractView {
             sql.append("ALTER VIEW ");
             sql.append(getQualifiedName());
             sql.append(ALTER_COLUMN);
-            sql.append(getQuotedName(defaultValue.getKey()));
+            sql.append(quote(defaultValue.getKey()));
             sql.append(" SET DEFAULT ");
             sql.append(defaultValue.getValue());
             script.addStatement(sql);
@@ -114,7 +114,7 @@ public final class PgView extends PgAbstractView {
     private StringBuilder addAlterTable(String column, String state) {
         return new StringBuilder(ALTER_TABLE).append(getQualifiedName())
                 .append(ALTER_COLUMN)
-                .append(getQuotedName(column))
+                .append(quote(column))
                 .append(state).append(" DEFAULT");
     }
 

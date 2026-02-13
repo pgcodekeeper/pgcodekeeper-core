@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.io.Serial;
 import java.util.*;
 import java.util.Map.Entry;
-
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
@@ -109,7 +108,7 @@ public abstract class PgAbstractFunction extends PgAbstractStatement implements 
         sbSQL.append("CREATE OR REPLACE ");
         sbSQL.append(getStatementType());
         sbSQL.append(' ');
-        sbSQL.append(getQuotedName(getSchemaName())).append('.');
+        sbSQL.append(quote(getSchemaName())).append('.');
         appendFunctionSignature(sbSQL, true, true);
         if (getReturns() != null) {
             sbSQL.append(' ');
@@ -119,7 +118,7 @@ public abstract class PgAbstractFunction extends PgAbstractStatement implements 
         sbSQL.append("\n    ");
 
         if (language != null) {
-            sbSQL.append("LANGUAGE ").append(getQuotedName(language));
+            sbSQL.append("LANGUAGE ").append(quote(language));
         }
 
         if (!transforms.isEmpty()) {
@@ -205,7 +204,7 @@ public abstract class PgAbstractFunction extends PgAbstractStatement implements 
 
     @Override
     public void appendFullName(StringBuilder sb) {
-        sb.append(getQuotedName(parent.getName())).append('.');
+        sb.append(quote(parent.getName())).append('.');
         appendFunctionSignature(sb, false, true);
     }
 
@@ -225,7 +224,7 @@ public abstract class PgAbstractFunction extends PgAbstractStatement implements 
         }
         final int sigStart = sb.length();
 
-        sb.append(getQuotedName(name)).append('(');
+        sb.append(quote(name)).append('(');
         boolean addComma = false;
         for (final var argument : arguments) {
             if (!includeArgNames && ArgMode.OUT == argument.getMode()) {

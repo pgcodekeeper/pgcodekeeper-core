@@ -177,7 +177,7 @@ public class ChIndex extends ChAbstractStatement implements IIndex {
         if (optionExists) {
             sb.append(IF_EXISTS);
         }
-        sb.append(getQuotedName(name));
+        sb.append(getQuotedName());
         script.addStatement(sb);
     }
 

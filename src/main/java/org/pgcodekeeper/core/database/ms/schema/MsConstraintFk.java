@@ -114,8 +114,7 @@ public final class MsConstraintFk extends MsConstraint implements IConstraintFk 
         var sbSQL = new StringBuilder();
         sbSQL.append("FOREIGN KEY ");
         StatementUtils.appendCols(sbSQL, columns, getQuoter());
-        sbSQL.append(" REFERENCES ").append(getQuotedName(foreignSchema)).append('.')
-                .append(getQuotedName(foreignTable));
+        sbSQL.append(" REFERENCES ").append(quote(foreignSchema)).append('.').append(quote(foreignTable));
         if (!refs.isEmpty()) {
             sbSQL.append(' ');
             StatementUtils.appendCols(sbSQL, refs, getQuoter());

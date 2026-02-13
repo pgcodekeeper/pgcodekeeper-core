@@ -125,14 +125,14 @@ public final class PgServer extends PgAbstractStatement implements PgForeignOpti
         final StringBuilder sb = new StringBuilder();
         sb.append("CREATE SERVER ");
         appendIfNotExists(sb, script.getSettings());
-        sb.append(getQuotedName(name));
+        sb.append(getQuotedName());
         if (type != null) {
             sb.append(" TYPE ").append(type);
         }
         if (version != null) {
             sb.append(" VERSION ").append(version);
         }
-        sb.append(" FOREIGN DATA WRAPPER ").append(getQuotedName(fdw));
+        sb.append(" FOREIGN DATA WRAPPER ").append(quote(fdw));
         if (!options.isEmpty()) {
             sb.append(' ');
         }

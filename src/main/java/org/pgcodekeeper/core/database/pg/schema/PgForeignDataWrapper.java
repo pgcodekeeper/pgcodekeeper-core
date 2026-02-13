@@ -78,7 +78,7 @@ public final class PgForeignDataWrapper extends PgAbstractStatement
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sb = new StringBuilder();
         sb.append("CREATE FOREIGN DATA WRAPPER ");
-        sb.append(getQuotedName(name));
+        sb.append(getQuotedName());
         if (handler != null) {
             sb.append(" HANDLER ").append(handler);
         }

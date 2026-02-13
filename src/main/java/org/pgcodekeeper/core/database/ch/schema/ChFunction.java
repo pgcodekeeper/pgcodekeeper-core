@@ -77,7 +77,7 @@ public final class ChFunction extends ChAbstractStatement {
     @Override
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sb = new StringBuilder();
-        sb.append("CREATE FUNCTION ").append(getQuotedName(name)).append(" AS ");
+        sb.append("CREATE FUNCTION ").append(getQuotedName()).append(" AS ");
         fillArgs(sb);
         sb.append(" -> ").append(body);
         script.addStatement(sb);
@@ -127,10 +127,5 @@ public final class ChFunction extends ChAbstractStatement {
         }
         copy.setBody(body);
         return copy;
-    }
-
-    @Override
-    public GenericColumn toGenericColumn(DbObjType type) {
-        return new GenericColumn(getName(), type);
     }
 }

@@ -53,7 +53,7 @@ public final class ChRole extends ChAbstractStatement {
         final StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("CREATE ROLE ");
         appendIfNotExists(sbSQL, script.getSettings());
-        sbSQL.append(getQuotedName(name));
+        sbSQL.append(getQuotedName());
         if (!DEF_STORAGE.equals(storageType)) {
             sbSQL.append("\n\tIN ").append(storageType);
         }

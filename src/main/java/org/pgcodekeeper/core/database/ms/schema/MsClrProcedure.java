@@ -62,9 +62,9 @@ public final class MsClrProcedure extends MsAbstractClrFunction {
         }
 
         sbSQL.append("AS\nEXTERNAL NAME ");
-        sbSQL.append(getQuotedName(assembly)).append('.');
-        sbSQL.append(getQuotedName(assemblyClass)).append('.');
-        sbSQL.append(getQuotedName(assemblyMethod));
+        sbSQL.append(quote(assembly)).append('.');
+        sbSQL.append(quote(assemblyClass)).append('.');
+        sbSQL.append(quote(assemblyMethod));
     }
 
     @Override

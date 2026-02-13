@@ -141,8 +141,8 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
         sbSQL.append("FOREIGN KEY ");
         StatementUtils.appendCols(sbSQL, columns, getQuoter());
         appendPeriod(sbSQL, periodColumn);
-        sbSQL.append(" REFERENCES ").append(getQuotedName(foreignSchema)).append('.')
-                .append(getQuotedName(foreignTable));
+        sbSQL.append(" REFERENCES ").append(quote(foreignSchema)).append('.')
+                .append(quote(foreignTable));
         if (!refs.isEmpty()) {
             StatementUtils.appendCols(sbSQL, refs, getQuoter());
             appendPeriod(sbSQL, periodRefcolumn);
@@ -168,7 +168,7 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
             sbSQL.setLength(sbSQL.length() - 1);
             sbSQL
                     .append(", PERIOD ")
-                    .append(getQuotedName(periodColumn))
+                    .append(quote(periodColumn))
                     .append(")");
         }
     }
@@ -178,7 +178,7 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
         if (!super.compareUnalterable(newConstr)) {
             StringBuilder sb = new StringBuilder();
             appendAlterTable(sb);
-            sb.append("\n\tALTER CONSTRAINT ").append(getQuotedName(name));
+            sb.append("\n\tALTER CONSTRAINT ").append(getQuotedName());
 
             if (deferrable != newConstr.deferrable && !newConstr.deferrable) {
                 sb.append(" NOT DEFERRABLE");

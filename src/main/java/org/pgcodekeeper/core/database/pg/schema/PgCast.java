@@ -176,4 +176,9 @@ public final class PgCast extends PgAbstractStatement implements ICast {
         copy.setFunction(function);
         return copy;
     }
+
+    @Override
+    public String getQuotedName() {
+        return name;
+    }
 }

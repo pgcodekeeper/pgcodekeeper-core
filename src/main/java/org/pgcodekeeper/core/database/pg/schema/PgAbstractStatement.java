@@ -55,7 +55,7 @@ public abstract class PgAbstractStatement extends AbstractStatement {
         StringBuilder sb = new StringBuilder();
         sb.append("ALTER ").append(getTypeName()).append(' ');
         appendFullName(sb);
-        sb.append(" OWNER TO ").append(getQuotedName(owner));
+        sb.append(" OWNER TO ").append(quote(owner));
 
         script.addStatement(sb);
     }
@@ -146,7 +146,7 @@ public abstract class PgAbstractStatement extends AbstractStatement {
 
     @Override
     public String getRenameCommand(String newName) {
-        return RENAME_OBJECT_COMMAND.formatted(getStatementType(), getQualifiedName(), getQuotedName(newName));
+        return RENAME_OBJECT_COMMAND.formatted(getStatementType(), getQualifiedName(), quote(newName));
     }
 
     /**

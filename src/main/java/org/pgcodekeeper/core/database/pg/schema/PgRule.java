@@ -82,7 +82,7 @@ public class PgRule extends PgAbstractStatement implements IRule {
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("CREATE RULE ");
-        sbSQL.append(getQuotedName(name));
+        sbSQL.append(getQuotedName());
         sbSQL.append(" AS\n    ON ").append(event);
         sbSQL.append(" TO ").append(parent.getQualifiedName());
         if (condition != null && !condition.isEmpty()) {
@@ -142,13 +142,13 @@ public class PgRule extends PgAbstractStatement implements IRule {
                 .append(' ')
                 .append(enabledState)
                 .append(" RULE ")
-                .append(getQuotedName(rule.name));
+                .append(rule.getQuotedName());
         script.addStatement(sql);
     }
 
     @Override
     public void appendFullName(StringBuilder sb) {
-        sb.append(getQuotedName(name)).append(" ON ").append(parent.getQualifiedName());
+        sb.append(getQuotedName()).append(" ON ").append(parent.getQualifiedName());
     }
 
     @Override

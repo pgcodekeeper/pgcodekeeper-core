@@ -98,7 +98,7 @@ public final class MsIndex extends MsAbstractStatement implements IIndex {
                 sb.append(')');
             }
         } else {
-            sb.append(getQuotedName(name));
+            sb.append(getQuotedName());
             sb.append(' ');
             appendClustered(sb);
             if (options.keySet().stream().anyMatch("BUCKET_COUNT"::equalsIgnoreCase)) {
@@ -141,7 +141,7 @@ public final class MsIndex extends MsAbstractStatement implements IIndex {
 
     private void appendSimpleColumns(StringBuilder sbSQL, List<SimpleColumn> columns) {
         for (var col : columns) {
-            sbSQL.append(getQuotedName(col.getName()));
+            sbSQL.append(quote(col.getName()));
             if (col.isDesc()) {
                 sbSQL.append(" DESC");
             }
@@ -179,7 +179,7 @@ public final class MsIndex extends MsAbstractStatement implements IIndex {
 
     @Override
     public void appendFullName(StringBuilder sb) {
-        sb.append(getQuotedName(name)).append(" ON ").append(parent.getQualifiedName());
+        sb.append(getQuotedName()).append(" ON ").append(parent.getQualifiedName());
     }
 
     @Override

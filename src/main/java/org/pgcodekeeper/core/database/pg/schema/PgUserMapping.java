@@ -57,7 +57,7 @@ public final class PgUserMapping extends PgAbstractStatement implements PgForeig
     @Override
     public String getQualifiedName() {
         if (qualifiedName == null) {
-            qualifiedName = getQuotedName(user) + " SERVER " + getQuotedName(server);
+            qualifiedName = quote(user) + " SERVER " + quote(server);
         }
 
         return qualifiedName;
@@ -147,5 +147,10 @@ public final class PgUserMapping extends PgAbstractStatement implements PgForeig
     @Override
     public String getAlterHeader() {
         return "ALTER USER MAPPING FOR " + getQualifiedName();
+    }
+
+    @Override
+    public String getQuotedName() {
+        return name;
     }
 }

@@ -59,7 +59,7 @@ public abstract class MsAbstractStatement extends AbstractStatement {
             sb.append(type).append("::");
         }
 
-        sb.append(getQualifiedName()).append(" TO ").append(getQuotedName(owner));
+        sb.append(getQualifiedName()).append(" TO ").append(quote(owner));
 
         script.addStatement(sb);
     }

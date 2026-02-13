@@ -48,7 +48,7 @@ public final class PgCompositeType extends PgAbstractType implements ICompositeT
     protected void appendDef(StringBuilder sb) {
         sb.append(" AS (");
         for (PgColumn attr : attrs) {
-            sb.append("\n\t").append(getQuotedName(attr.getName()))
+            sb.append("\n\t").append(quote(attr.getName()))
                     .append(' ').append(attr.getType());
 
             if (attr.getCollation() != null) {
@@ -129,7 +129,7 @@ public final class PgCompositeType extends PgAbstractType implements ICompositeT
     private void appendAlterAttribute(StringBuilder attrSb, String action, String delimiter,
                                       PgColumn attr) {
         attrSb.append("\n\t").append(action).append(" ATTRIBUTE ")
-                .append(getQuotedName(attr.getName()))
+                .append(attr.getQuotedName())
                 .append(delimiter);
         if (!"DROP".equals(action)) {
             attrSb.append(attr.getType());

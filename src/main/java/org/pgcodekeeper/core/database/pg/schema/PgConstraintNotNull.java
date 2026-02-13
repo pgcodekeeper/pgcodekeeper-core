@@ -50,7 +50,7 @@ public class PgConstraintNotNull extends PgConstraint {
     @Override
     public String getDefinition() {
         var sb = new StringBuilder(NOT_NULL);
-        sb.append(" ").append(getQuotedName(getParent().getName()));
+        sb.append(" ").append(getParent().getQuotedName());
         if (isNoInherit){
             sb.append(NO_INHERIT);
         }
@@ -60,7 +60,7 @@ public class PgConstraintNotNull extends PgConstraint {
 
     public void getDefinitionForColumn(StringBuilder sb) {
         if (hasCustomName() || comment != null) {
-            sb.append(" CONSTRAINT ").append(getQuotedName(name));
+            sb.append(" CONSTRAINT ").append(getQuotedName());
         }
         sb.append(" ").append(NOT_NULL);
         if (isNoInherit) {
@@ -72,7 +72,7 @@ public class PgConstraintNotNull extends PgConstraint {
     public String getRenameCommand(String newName) {
         var sb = new StringBuilder();
         appendAlterTable(sb);
-        sb.append("\n\tRENAME CONSTRAINT ").append(getQuotedName(name)).append(" TO ").append(getQuotedName(newName));
+        sb.append("\n\tRENAME CONSTRAINT ").append(getQuotedName()).append(" TO ").append(quote(newName));
         return sb.toString();
     }
 
@@ -87,7 +87,7 @@ public class PgConstraintNotNull extends PgConstraint {
         var sb = new StringBuilder();
         appendAlterTable(sb);
         sb.append("\n\tALTER CONSTRAINT ");
-        sb.append(getQuotedName(newConstr.name));
+        sb.append(newConstr.getQuotedName());
         sb.append(newNoInherit ? NO_INHERIT : " INHERIT");
         script.addStatement(sb);
     }
@@ -136,7 +136,7 @@ public class PgConstraintNotNull extends PgConstraint {
     @Override
     protected void appendCommentSql(SQLScript script) {
         String sb = "COMMENT ON CONSTRAINT " +
-                getQuotedName(name) + " ON " +
+                getQuotedName() + " ON " +
                 getTable().getQualifiedName() + " IS " + (checkComments() ? comment : "NULL");
         script.addCommentStatement(sb);
     }

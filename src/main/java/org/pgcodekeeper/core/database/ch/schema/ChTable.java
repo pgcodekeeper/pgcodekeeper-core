@@ -438,9 +438,8 @@ public class ChTable extends ChAbstractStatement implements ITable, IOptionConta
             return;
         }
 
-        var quoter = getQuoter();
-        String tblTmpQName = quoter.apply(getSchemaName()) + '.' + quoter.apply(tblTmpBareName);
-        String cols = colsForMovingData.stream().map(quoter).collect(Collectors.joining(", "));
+        String tblTmpQName = getParent().getQuotedName() + '.' + quote(tblTmpBareName);
+        String cols = colsForMovingData.stream().map(this::quote).collect(Collectors.joining(", "));
         List<String> identityColsForMovingData = identityCols == null ? Collections.emptyList()
                 : identityCols.stream().filter(colsForMovingData::contains).toList();
         writeInsert(script, newTable, tblTmpQName, identityColsForMovingData, cols);

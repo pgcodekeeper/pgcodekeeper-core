@@ -92,7 +92,7 @@ public final class PgExtension extends PgAbstractStatement {
             }
             StringBuilder sql = new StringBuilder();
             sql.append("ALTER EXTENSION ")
-                    .append(getQuotedName(name))
+                    .append(getQuotedName())
                     .append(" SET SCHEMA ")
                     .append(newExt.getSchema());
             script.addStatement(sql);

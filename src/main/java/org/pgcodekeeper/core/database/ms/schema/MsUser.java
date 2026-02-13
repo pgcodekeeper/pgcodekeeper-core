@@ -52,14 +52,14 @@ public final class MsUser extends MsAbstractStatement {
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
         sbSQL.append("CREATE USER ");
-        sbSQL.append(getQuotedName(name));
+        sbSQL.append(getQuotedName());
         if (login != null) {
-            sbSQL.append(" FOR LOGIN ").append(getQuotedName(login));
+            sbSQL.append(" FOR LOGIN ").append(quote(login));
         }
         if (schema != null || language != null || allowEncrypted) {
             sbSQL.append(" WITH ");
             if (schema != null) {
-                sbSQL.append("DEFAULT_SCHEMA = ").append(getQuotedName(schema)).append(", ");
+                sbSQL.append("DEFAULT_SCHEMA = ").append(quote(schema)).append(", ");
             }
             if (language != null) {
                 sbSQL.append("DEFAULT_LANGUAGE = ").append(language).append(", ");
@@ -81,7 +81,7 @@ public final class MsUser extends MsAbstractStatement {
         StringBuilder sbSql = new StringBuilder();
 
         if (!Objects.equals(login, newUser.login)) {
-            sbSql.append("LOGIN = ").append(getQuotedName(newUser.login)).append(", ");
+            sbSql.append("LOGIN = ").append(quote(newUser.login)).append(", ");
         }
 
         String newSchema = newUser.schema;
@@ -89,7 +89,7 @@ public final class MsUser extends MsAbstractStatement {
             if (newSchema == null) {
                 newSchema = Consts.DBO;
             }
-            sbSql.append("DEFAULT_SCHEMA = ").append(getQuotedName(newSchema)).append(", ");
+            sbSql.append("DEFAULT_SCHEMA = ").append(quote(newSchema)).append(", ");
         }
         if (!Objects.equals(language, newUser.language)) {
             sbSql.append("DEFAULT_LANGUAGE = ")
@@ -104,8 +104,7 @@ public final class MsUser extends MsAbstractStatement {
         if (!sbSql.isEmpty()) {
             sbSql.setLength(sbSql.length() - 2);
             StringBuilder sql = new StringBuilder();
-            sql.append("ALTER USER ").append(getQuotedName(name))
-                    .append(" WITH ").append(sbSql);
+            sql.append("ALTER USER ").append(getQuotedName()).append(" WITH ").append(sbSql);
             script.addStatement(sql);
         }
 

@@ -59,7 +59,7 @@ public abstract class PgAbstractForeignTable extends PgAbstractTable implements 
 
     @Override
     public void appendOptions(StringBuilder sqlOption) {
-        sqlOption.append("\nSERVER ").append(getQuotedName(serverName));
+        sqlOption.append("\nSERVER ").append(quote(serverName));
         if (!options.isEmpty()) {
             sqlOption.append('\n');
         }

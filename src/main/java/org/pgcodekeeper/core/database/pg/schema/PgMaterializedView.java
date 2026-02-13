@@ -50,7 +50,7 @@ public final class PgMaterializedView extends PgAbstractView {
     @Override
     protected void appendOptions(StringBuilder sbSQL) {
         if (!Consts.HEAP.equals(method)) {
-            sbSQL.append("\nUSING ").append(getQuotedName(method));
+            sbSQL.append("\nUSING ").append(quote(method));
         }
 
         super.appendOptions(sbSQL);

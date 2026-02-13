@@ -43,7 +43,7 @@ public final class ChTableLog extends ChTable {
     protected void appendTableBody(StringBuilder sb) {
         super.appendTableBody(sb);
         for (var constr : constrs) {
-            sb.append("\n\tCONSTRAINT ").append(getQuotedName(constr.getName())).append(' ')
+            sb.append("\n\tCONSTRAINT ").append(constr.getQuotedName()).append(' ')
                     .append(constr.getDefinition()).append(',');
         }
     }

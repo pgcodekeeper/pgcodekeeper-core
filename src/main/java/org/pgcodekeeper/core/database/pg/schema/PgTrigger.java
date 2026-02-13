@@ -88,7 +88,7 @@ public final class PgTrigger extends PgAbstractStatement implements ITrigger {
             sbSQL.append(" CONSTRAINT");
         }
         sbSQL.append(" TRIGGER ");
-        sbSQL.append(getQuotedName(name));
+        sbSQL.append(getQuotedName());
         sbSQL.append("\n\t");
         sbSQL.append(tgType == TgTypes.INSTEAD_OF ? "INSTEAD OF" : tgType);
 
@@ -111,7 +111,7 @@ public final class PgTrigger extends PgAbstractStatement implements ITrigger {
             if (!updateColumns.isEmpty()) {
                 sbSQL.append(" OF ");
                 for (String updateColumn : updateColumns) {
-                    sbSQL.append(getQuotedName(updateColumn));
+                    sbSQL.append(quote(updateColumn));
                     sbSQL.append(", ");
                 }
                 sbSQL.setLength(sbSQL.length() - 2);
@@ -208,7 +208,7 @@ public final class PgTrigger extends PgAbstractStatement implements ITrigger {
                 .append(' ')
                 .append(enabledState.getValue())
                 .append(" TRIGGER ")
-                .append(getQuotedName(trigger.name));
+                .append(trigger.getQuotedName());
         script.addStatement(sql);
     }
 
@@ -219,7 +219,7 @@ public final class PgTrigger extends PgAbstractStatement implements ITrigger {
 
     @Override
     public void appendFullName(StringBuilder sb) {
-        sb.append(getQuotedName(name)).append(" ON ").append(parent.getQualifiedName());
+        sb.append(getQuotedName()).append(" ON ").append(parent.getQualifiedName());
     }
 
     public void setType(final TgTypes tgType) {
