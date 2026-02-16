@@ -19,12 +19,12 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.settings.ISettings;
 
@@ -184,7 +184,7 @@ public final class PgCommentOn extends PgParserAbstract {
                             .reduce((a, b) -> b.getStatementType() == DbObjType.INDEX ? b : a)
                             .orElse(null),
                     schema, nameCtx);
-        } else if (obj.SCHEMA() != null && !Consts.PUBLIC.equals(name)) {
+        } else if (obj.SCHEMA() != null && !PgConsts.DEFAULT_SCHEMA.equals(name)) {
             type = DbObjType.SCHEMA;
             st = getSafe(PgDatabase::getSchema, db, nameCtx);
         } else if (obj.SEQUENCE() != null) {

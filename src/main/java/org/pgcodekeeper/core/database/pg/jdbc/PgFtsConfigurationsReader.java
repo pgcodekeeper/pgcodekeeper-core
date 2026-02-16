@@ -18,12 +18,12 @@ package org.pgcodekeeper.core.database.pg.jdbc;
 import java.sql.*;
 import java.util.*;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.schema.PgFtsConfiguration;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 
 /**
  * Reader for PostgreSQL full-text search configurations.
@@ -63,7 +63,7 @@ public final class PgFtsConfigurationsReader extends PgAbstractSearchPathJdbcRea
                 String dictName = dictionaries[i];
 
                 StringBuilder sb = new StringBuilder();
-                if (!Consts.PG_CATALOG.equals(dictSchema)) {
+                if (!PgConsts.PG_CATALOG.equals(dictSchema)) {
                     config.addDependency(new ObjectReference(dictSchema, dictName, DbObjType.FTS_DICTIONARY));
                     sb.append(PgDiffUtils.getQuotedName(dictSchema)).append('.');
                 }

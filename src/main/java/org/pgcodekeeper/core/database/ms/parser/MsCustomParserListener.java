@@ -19,12 +19,12 @@ import java.util.*;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.base.parser.CustomParserListener;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
 import org.pgcodekeeper.core.database.ms.parser.statement.*;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
+import org.pgcodekeeper.core.database.ms.utils.MsConsts;
 import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
 import org.pgcodekeeper.core.settings.DiffSettings;
 
@@ -79,9 +79,9 @@ public final class MsCustomParserListener extends CustomParserListener<MsDatabas
 
     private void endBatch(Go_statementContext goCtx) {
         ObjectLocation loc = new ObjectLocation.Builder()
-                .setAction(Consts.GO)
+                .setAction(MsConsts.GO)
                 .setCtx(goCtx)
-                .setSql(Consts.GO)
+                .setSql(MsConsts.GO)
                 .build();
 
         safeParseStatement(() -> db.addReference(filename, loc), goCtx);

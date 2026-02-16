@@ -20,7 +20,7 @@ import java.util.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.Argument;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 
 /**
  * Represents a database function metadata object.

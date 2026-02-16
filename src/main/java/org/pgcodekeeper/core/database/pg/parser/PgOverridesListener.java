@@ -20,7 +20,6 @@ import java.util.function.BiFunction;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.*;
 import org.pgcodekeeper.core.database.base.schema.*;
@@ -28,6 +27,7 @@ import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.statement.*;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.schema.PgSchema;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
 import org.pgcodekeeper.core.settings.DiffSettings;
@@ -107,7 +107,7 @@ public final class PgOverridesListener extends CustomParserListener<PgDatabase>
         }
 
         PgSchema st = (PgSchema) getSafe(IDatabase::getSchema, db, ctx.name);
-        if (Consts.PUBLIC.equals(st.getName()) && "postgres".equals(owner.getText())) {
+        if (PgConsts.DEFAULT_SCHEMA.equals(st.getName()) && "postgres".equals(owner.getText())) {
             return;
         }
 

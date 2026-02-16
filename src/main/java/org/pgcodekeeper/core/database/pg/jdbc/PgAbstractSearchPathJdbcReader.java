@@ -20,9 +20,9 @@ import java.util.function.BiConsumer;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.*;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.schema.ICompressOptionContainer;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.utils.Utils;
 
 public abstract class PgAbstractSearchPathJdbcReader extends AbstractSearchPathJdbcReader<PgJdbcLoader> implements IPgJdbcReader {

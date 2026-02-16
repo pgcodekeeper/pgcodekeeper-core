@@ -19,9 +19,9 @@ import java.sql.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateFdw;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
 import org.pgcodekeeper.core.database.pg.schema.*;
 
 /**
@@ -61,7 +61,7 @@ public final class PgForeignDataWrappersReader extends PgAbstractJdbcReader{
 
         String[] options = PgJdbcUtils.getColArray(res, "fdwoptions", true);
         if (options != null) {
-            ParserAbstract.fillOptionParams(options, f::addOption, false, true, false);
+            PgParserAbstract.fillOptionParams(options, f::addOption, false, true, false);
         }
         loader.setComment(f, res);
         loader.setOwner(f, res.getLong("fdwowner"));

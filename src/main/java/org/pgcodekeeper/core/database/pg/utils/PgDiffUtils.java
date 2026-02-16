@@ -17,13 +17,12 @@
  *
  * Distributed under MIT license
  *******************************************************************************/
-package org.pgcodekeeper.core.database.pg;
+package org.pgcodekeeper.core.database.pg.utils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.sql.Keyword;
 import org.pgcodekeeper.core.sql.Keyword.KeywordCategory;
 
@@ -33,6 +32,8 @@ import org.pgcodekeeper.core.sql.Keyword.KeywordCategory;
  * @author fordfrog
  */
 public final class PgDiffUtils {
+
+    private static final String INFORMATION_SCHEMA = "information_schema";
 
     private static final int MAX_IDENTIFIER_LEN = 64;
 
@@ -281,15 +282,21 @@ public final class PgDiffUtils {
      * @return the adjusted length that doesn't split UTF-8 characters
      */
     private static int clipToValidUtf8(byte[] bytes, int length) {
-        if (length <= 0) return 0;
-        if (length >= bytes.length) return bytes.length;
+        if (length <= 0) {
+            return 0;
+        }
+        if (length >= bytes.length) {
+            return bytes.length;
+        }
 
         int startOfLastChar = length - 1;
         while (startOfLastChar >= 0 && (bytes[startOfLastChar] & 0xC0) == 0x80) {
             startOfLastChar--;
         }
 
-        if (startOfLastChar < 0) return 0;
+        if (startOfLastChar < 0) {
+            return 0;
+        }
 
         int firstByte = bytes[startOfLastChar] & 0xFF;
         int charLen;
@@ -318,7 +325,7 @@ public final class PgDiffUtils {
      * @return true if the schema is 'pg_catalog' or 'information_schema', false otherwise
      */
     public static boolean isSystemSchema(String schema) {
-        return Consts.PG_CATALOG.equalsIgnoreCase(schema)
-                || Consts.INFORMATION_SCHEMA.equalsIgnoreCase(schema);
+        return PgConsts.PG_CATALOG.equalsIgnoreCase(schema)
+                || INFORMATION_SCHEMA.equalsIgnoreCase(schema);
     }
 }

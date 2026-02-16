@@ -15,13 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.parser.expr;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.parser.antlr.AbstractExpr;
-import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
+import org.pgcodekeeper.core.database.ch.utils.ChConsts;
+import org.pgcodekeeper.core.database.ch.utils.ChDiffUtils;
 
 /**
  * Abstract base class for ClickHouse SQL expression parsing and dependency analysis.
@@ -56,7 +56,7 @@ public abstract class ChAbstractExpr extends AbstractExpr {
         var schemaCtx = QNameParser.getSchemaNameCtx(ids);
         var relationName = QNameParser.getFirstName(ids);
         var relationCtx = QNameParser.getFirstNameCtx(ids);
-        var schemaName = schemaCtx != null ? schemaCtx.getText() : Consts.CH_DEFAULT_DB;
+        var schemaName = schemaCtx != null ? schemaCtx.getText() : ChConsts.DEFAULT_DB;
 
         addDependency(new ObjectReference(schemaName, DbObjType.SCHEMA), schemaCtx);
         ObjectReference dependency = new ObjectReference(schemaName, relationName, DbObjType.TABLE);

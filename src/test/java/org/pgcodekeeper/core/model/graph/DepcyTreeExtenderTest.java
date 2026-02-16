@@ -19,10 +19,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
 import org.pgcodekeeper.core.settings.DiffSettings;
@@ -109,7 +109,7 @@ class Predefined1 implements TreeElementCreator {
 
     @Override
     public void setUserSelection(TreeElement database) {
-        TreeElement publicSchema = new TreeElement(Consts.PUBLIC, DbObjType.SCHEMA, DiffSide.BOTH);
+        TreeElement publicSchema = new TreeElement(PgConsts.DEFAULT_SCHEMA, DbObjType.SCHEMA, DiffSide.BOTH);
         database.addChild(publicSchema);
 
         TreeElement table = new TreeElement("t1", DbObjType.TABLE, DiffSide.BOTH);
@@ -141,7 +141,7 @@ class Predefined2 implements TreeElementCreator {
 
     @Override
     public void setUserSelection(TreeElement database) {
-        TreeElement publicSchema = new TreeElement(Consts.PUBLIC, DbObjType.SCHEMA, DiffSide.BOTH);
+        TreeElement publicSchema = new TreeElement(PgConsts.DEFAULT_SCHEMA, DbObjType.SCHEMA, DiffSide.BOTH);
         database.addChild(publicSchema);
 
         TreeElement seq = new TreeElement("s1", DbObjType.SEQUENCE, DiffSide.BOTH);
@@ -165,7 +165,7 @@ class Predefined3 implements TreeElementCreator {
 
     @Override
     public void setUserSelection(TreeElement database) {
-        TreeElement publicSchema = new TreeElement(Consts.PUBLIC, DbObjType.SCHEMA, DiffSide.BOTH);
+        TreeElement publicSchema = new TreeElement(PgConsts.DEFAULT_SCHEMA, DbObjType.SCHEMA, DiffSide.BOTH);
         database.addChild(publicSchema);
 
         TreeElement seq = new TreeElement("s1", DbObjType.SEQUENCE, DiffSide.RIGHT);
@@ -192,7 +192,7 @@ class Predefined4 implements TreeElementCreator {
 
     @Override
     public void setUserSelection(TreeElement database) {
-        TreeElement publicSchema = new TreeElement(Consts.PUBLIC, DbObjType.SCHEMA, DiffSide.BOTH);
+        TreeElement publicSchema = new TreeElement(PgConsts.DEFAULT_SCHEMA, DbObjType.SCHEMA, DiffSide.BOTH);
         database.addChild(publicSchema);
 
         TreeElement seq = new TreeElement("s1", DbObjType.SEQUENCE, DiffSide.RIGHT);
@@ -242,7 +242,7 @@ class Predefined6 implements TreeElementCreator {
 
     @Override
     public void setUserSelection(TreeElement database) {
-        TreeElement publicSchema = new TreeElement(Consts.PUBLIC, DbObjType.SCHEMA, DiffSide.BOTH);
+        TreeElement publicSchema = new TreeElement(PgConsts.DEFAULT_SCHEMA, DbObjType.SCHEMA, DiffSide.BOTH);
         database.addChild(publicSchema);
 
         TreeElement table = new TreeElement("t1", DbObjType.TABLE, DiffSide.BOTH);
@@ -255,7 +255,7 @@ class Predefined6 implements TreeElementCreator {
 
     @Override
     public Set<TreeElement> getDepcySet(IDatabase source, IDatabase target, TreeElement tree) {
-        TreeElement func = tree.findElement(target.getSchema(Consts.PUBLIC).getChild("f1()", DbObjType.FUNCTION));
+        TreeElement func = tree.findElement(target.getSchema(PgConsts.DEFAULT_SCHEMA).getChild("f1()", DbObjType.FUNCTION));
         return new HashSet<>(Arrays.asList(func));
     }
 }

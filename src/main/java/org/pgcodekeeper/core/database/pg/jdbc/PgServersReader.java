@@ -19,8 +19,8 @@ import java.sql.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.utils.Utils;
 
@@ -62,7 +62,7 @@ public final class PgServersReader extends PgAbstractJdbcReader {
 
         String[] options = PgJdbcUtils.getColArray(res, "srvoptions", true);
         if (options != null) {
-            ParserAbstract.fillOptionParams(options, srv::addOption, false, true, false);
+            PgParserAbstract.fillOptionParams(options, srv::addOption, false, true, false);
         }
         loader.setComment(srv, res);
         loader.setOwner(srv, res.getLong("srvowner"));

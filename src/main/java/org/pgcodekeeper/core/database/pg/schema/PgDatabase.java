@@ -21,12 +21,12 @@ package org.pgcodekeeper.core.database.pg.schema;
 
 import java.util.*;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.jdbc.ISupportedVersion;
 import org.pgcodekeeper.core.database.api.launcher.IAnalysisLauncher;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.jdbc.PgSupportedVersion;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
@@ -242,7 +242,7 @@ public final class PgDatabase extends PgAbstractStatement implements IDatabase {
     public void concat(IStatement st) {
         DbObjType type = st.getStatementType();
         String name = st.getName();
-        if (type != DbObjType.SCHEMA || !Consts.PUBLIC.equals(name) || st.hasChildren()) {
+        if (type != DbObjType.SCHEMA || !PgConsts.DEFAULT_SCHEMA.equals(name) || st.hasChildren()) {
             // skip empty public schema
             IDatabase.super.concat(st);
         }

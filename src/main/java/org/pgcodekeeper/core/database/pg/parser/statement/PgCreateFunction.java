@@ -19,16 +19,16 @@ import java.util.*;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
-import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.Consts.FUNC_SIGN;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.*;
 import org.pgcodekeeper.core.database.base.schema.Argument;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.launcher.*;
 import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts.FUNC_SIGN;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.*;
 
@@ -322,7 +322,7 @@ public final class PgCreateFunction extends PgParserAbstract {
                 .function_args().function_arguments()) {
             Identifier_nontypeContext name = argument.identifier_nontype();
             String argName = name != null ? name.getText() : null;
-            String typeSchema = Consts.PG_CATALOG;
+            String typeSchema = PgConsts.PG_CATALOG;
             String typeName;
 
             Data_typeContext dataType = argument.data_type();

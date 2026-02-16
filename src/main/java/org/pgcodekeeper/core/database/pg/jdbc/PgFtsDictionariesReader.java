@@ -20,10 +20,10 @@ import java.sql.*;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.ISchema;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
 import org.pgcodekeeper.core.database.pg.schema.PgFtsDictionary;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 
 /**
  * Reader for PostgreSQL full-text search dictionaries.
@@ -47,7 +47,7 @@ public final class PgFtsDictionariesReader extends PgAbstractSearchPathJdbcReade
 
         String options = res.getString("dictinitoption");
         if (options != null) {
-            ParserAbstract.fillOptionParams(options.replace(" = ", "=").split(", "), dic::addOption, false, false, true);
+            PgParserAbstract.fillOptionParams(options.replace(" = ", "=").split(", "), dic::addOption, false, false, true);
         }
 
         loader.setOwner(dic, res.getLong("dictowner"));

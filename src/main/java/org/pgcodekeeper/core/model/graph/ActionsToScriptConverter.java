@@ -17,11 +17,11 @@ package org.pgcodekeeper.core.model.graph;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.ms.MsDiffUtils;
 import org.pgcodekeeper.core.database.ms.schema.MsColumn;
 import org.pgcodekeeper.core.database.ms.schema.MsConstraintPk;
 import org.pgcodekeeper.core.database.ms.schema.MsTable;
 import org.pgcodekeeper.core.database.ms.schema.MsView;
+import org.pgcodekeeper.core.database.ms.utils.MsDiffUtils;
 import org.pgcodekeeper.core.database.pg.schema.PgColumn;
 import org.pgcodekeeper.core.database.pg.schema.PgPartitionTable;
 import org.pgcodekeeper.core.database.pg.schema.PgSequence;

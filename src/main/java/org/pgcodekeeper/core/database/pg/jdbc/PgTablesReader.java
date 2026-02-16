@@ -21,13 +21,13 @@ import java.util.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.launcher.PgVexAnalysisLauncher;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgAlterTable;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
 import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.utils.*;
 
 /**
@@ -88,12 +88,12 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
         // STORAGE PARAMETERS
         String[] opts = PgJdbcUtils.getColArray(res, "reloptions", true);
         if (opts != null) {
-            ParserAbstract.fillOptionParams(opts, t::addOption, false, false, false);
+            PgParserAbstract.fillOptionParams(opts, t::addOption, false, false, false);
         }
 
         String[] toast = PgJdbcUtils.getColArray(res, "toast_reloptions", true);
         if (toast != null) {
-            ParserAbstract.fillOptionParams(toast, t::addOption, true, false, false);
+            PgParserAbstract.fillOptionParams(toast, t::addOption, true, false, false);
         }
 
         if (!PgSupportedVersion.GP_VERSION_7.isLE(loader.getVersion()) && res.getBoolean("has_oids")) {
@@ -150,7 +150,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
 
         String[] foptions = PgJdbcUtils.getColArray(res, "ftoptions", true);
         if (foptions != null) {
-            ParserAbstract.fillOptionParams(foptions, t::addOption, false, true, false);
+            PgParserAbstract.fillOptionParams(foptions, t::addOption, false, true, false);
         }
 
         return t;
@@ -287,10 +287,10 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
             loader.getCachedTypeByOid(colTypeIds[i]).addTypeDepcy(column);
 
             if (colOptions[i] != null) {
-                ParserAbstract.fillOptionParams(colOptions[i].split(","), column::addOption, false, false, false);
+                PgParserAbstract.fillOptionParams(colOptions[i].split(","), column::addOption, false, false, false);
             }
             if (colFOptions[i] != null) {
-                ParserAbstract.fillOptionParams(colFOptions[i].split(","), column::addForeignOption, false, true, false);
+                PgParserAbstract.fillOptionParams(colFOptions[i].split(","), column::addForeignOption, false, true, false);
             }
             if (loader.isGreenplumDb() && colEncOptions[i] != null && !column.isInherit()) {
                 fillCompressOptions(column, colEncOptions[i]);
@@ -461,12 +461,12 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
                 options.add(optionName + "=" + ftoptionValues[i]);
             }
 
-            ParserAbstract.fillOptionParams(options.toArray(String[]::new), extTable::addOption,
+            PgParserAbstract.fillOptionParams(options.toArray(String[]::new), extTable::addOption,
                     false, true, false);
         } else {
             String options = PgDiffUtils.unquoteQuotedString(res.getString("options"), 1);
             if (!options.isBlank()) {
-                ParserAbstract.fillOptionParams(options.split(","), extTable::addOption, false, true, false);
+                PgParserAbstract.fillOptionParams(options.split(","), extTable::addOption, false, true, false);
             }
             extTable.setFormatOptions(appendFormatOptions(formatOptions));
         }

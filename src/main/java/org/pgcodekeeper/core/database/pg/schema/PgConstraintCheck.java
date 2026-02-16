@@ -17,9 +17,7 @@ package org.pgcodekeeper.core.database.pg.schema;
 
 import java.util.Objects;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.hasher.Hasher;
-
 /**
  * PostgreSQL CHECK constraint implementation.
  * CHECK constraints enforce domain integrity by limiting the values
@@ -86,6 +84,6 @@ public final class PgConstraintCheck extends PgConstraint {
 
     @Override
     public String getErrorCode() {
-        return Consts.DUPLICATE_OBJECT;
+        return DUPLICATE_OBJECT;
     }
 }

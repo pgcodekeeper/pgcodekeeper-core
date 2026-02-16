@@ -17,7 +17,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 
 import java.util.*;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
@@ -111,7 +110,7 @@ public final class PgConstraintPk extends PgConstraint implements IConstraintPk,
 
     @Override
     public String getErrorCode() {
-        return isPrimaryKey ? Consts.INVALID_DEFINITION : Consts.DUPLICATE_RELATION;
+        return isPrimaryKey ? INVALID_DEFINITION : DUPLICATE_RELATION;
     }
 
     @Override

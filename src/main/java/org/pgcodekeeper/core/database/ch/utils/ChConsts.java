@@ -13,29 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core;
+package org.pgcodekeeper.core.database.ch.utils;
 
 /**
- * Stores string constants
- *
- * @author Anton Ryabinin
+ * Constants related to ClickHouse databases and system schemas.
+ * <p>
+ * This class provides a collection of string constants for commonly used
+ * ClickHouse database names and system schema identifiers.
+ * </p>
  */
-public final class Consts {
+public final class ChConsts {
 
-    /**
-     * Prefer using StandardCharsets instead of this String representation.
-     */
-    public static final String UTF_8 = "UTF-8";
-    public static final String UTC = "UTC";
+    public static final String DEFAULT_DB = "default";
 
-    public static final String POOL_SIZE = "ru.taximaxim.codekeeper.parser.poolsize";
-
-    public static final String FILENAME_WORKING_DIR_MARKER = ".pgcodekeeper";
-    public static final String VERSION_PROP_NAME = "version";
-    public static final String EXPORT_CURRENT_VERSION = "0.6.0";
-
-    public static final String JDBC_SUCCESS = "success";
-
-    private Consts() {
+    private ChConsts() {
     }
 }

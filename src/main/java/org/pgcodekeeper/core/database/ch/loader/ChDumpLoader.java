@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.loader;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.parser.AntlrTask;
 import org.pgcodekeeper.core.database.ch.parser.ChCustomParserListener;
@@ -24,6 +23,7 @@ import org.pgcodekeeper.core.database.ch.parser.ChParserUtils;
 import org.pgcodekeeper.core.database.ch.parser.IChContextProcessor;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.database.ch.schema.ChSchema;
+import org.pgcodekeeper.core.database.ch.utils.ChConsts;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
@@ -50,7 +50,7 @@ public class ChDumpLoader extends AbstractDumpLoader<ChDatabase> {
 
     @Override
     protected ChSchema createDefaultSchema() {
-        return new ChSchema(Consts.CH_DEFAULT_DB);
+        return new ChSchema(ChConsts.DEFAULT_DB);
     }
 
     @Override

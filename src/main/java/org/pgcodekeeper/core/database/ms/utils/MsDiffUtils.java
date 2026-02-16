@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.database.ms;
+package org.pgcodekeeper.core.database.ms.utils;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.sql.Keyword;
 import org.pgcodekeeper.core.sql.Keyword.KeywordCategory;
 
@@ -23,6 +22,8 @@ import org.pgcodekeeper.core.sql.Keyword.KeywordCategory;
  * Utility class for handling quoting and unquoting of identifiers and literals in Microsoft SQL.
  */
 public class MsDiffUtils {
+
+    private static final String SYS = "sys";
 
     /**
      * Quotes an identifier using Microsoft SQL square bracket syntax.
@@ -56,8 +57,7 @@ public class MsDiffUtils {
 
         if (!allowKeywords) {
             Keyword keyword = Keyword.KEYWORDS.get(id);
-            return keyword == null || keyword.getCategory() == KeywordCategory.UNRESERVED_KEYWORD;
-        }
+            return keyword == null || keyword.getCategory() == KeywordCategory.UNRESERVED_KEYWORD;        }
 
         return true;
     }
@@ -127,7 +127,7 @@ public class MsDiffUtils {
      * @return true if the schema is 'sys', false otherwise
      */
     public static boolean isSystemSchema(String schema) {
-        return Consts.SYS.equalsIgnoreCase(schema);
+        return SYS.equalsIgnoreCase(schema);
     }
 
     private MsDiffUtils() {

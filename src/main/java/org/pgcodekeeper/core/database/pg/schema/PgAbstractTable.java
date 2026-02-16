@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.base.schema.StatementUtils;
@@ -546,7 +545,7 @@ public abstract class PgAbstractTable extends PgAbstractStatementContainer imple
             if (script.getSettings().isGenerateExistDoBlock()) {
                 StringBuilder tmpSb = new StringBuilder();
                 writeSequences(column, tmpSb);
-                appendSqlWrappedInDo(sbSeq, tmpSb, Consts.DUPLICATE_RELATION);
+                appendSqlWrappedInDo(sbSeq, tmpSb, DUPLICATE_RELATION);
             } else {
                 writeSequences(column, sbSeq);
                 sbSeq.setLength(sbSeq.length() - 1);

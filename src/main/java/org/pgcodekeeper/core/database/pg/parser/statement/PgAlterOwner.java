@@ -18,12 +18,12 @@ package org.pgcodekeeper.core.database.pg.parser.statement;
 import java.util.*;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.settings.ISettings;
 
 /**
@@ -156,7 +156,7 @@ public final class PgAlterOwner extends PgParserAbstract {
         }
 
         if (st == null || (type == DbObjType.SCHEMA
-                && Consts.PUBLIC.equals(nameCtx.getText()) && "postgres".equals(name.getText()))) {
+                && PgConsts.DEFAULT_SCHEMA.equals(nameCtx.getText()) && "postgres".equals(name.getText()))) {
             return;
         }
 

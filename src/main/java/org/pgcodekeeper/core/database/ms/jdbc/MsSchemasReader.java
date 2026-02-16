@@ -15,12 +15,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.jdbc;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcReader;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
+import org.pgcodekeeper.core.database.ms.utils.MsConsts;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.ms.schema.MsSchema;
 import org.pgcodekeeper.core.exception.XmlReaderException;
@@ -57,7 +57,7 @@ public class MsSchemasReader extends AbstractJdbcReader<MsJdbcLoader> implements
 
         MsSchema schema = new MsSchema(schemaName);
         String owner = res.getString("owner");
-        if (!schemaName.equalsIgnoreCase(Consts.DBO) || !owner.equalsIgnoreCase(Consts.DBO)) {
+        if (!MsConsts.DEFAULT_SCHEMA.equalsIgnoreCase(schemaName) || !MsConsts.DEFAULT_SCHEMA.equalsIgnoreCase(owner)) {
             loader.setOwner(schema, owner);
         }
 

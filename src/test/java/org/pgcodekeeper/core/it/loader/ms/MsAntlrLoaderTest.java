@@ -27,6 +27,7 @@ import org.pgcodekeeper.core.database.ms.MsDatabaseProvider;
 import org.pgcodekeeper.core.database.ms.loader.MsDumpLoader;
 import org.pgcodekeeper.core.database.ms.project.MsModelExporter;
 import org.pgcodekeeper.core.database.ms.schema.*;
+import org.pgcodekeeper.core.database.ms.utils.MsConsts;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.DiffSettings;
@@ -236,7 +237,7 @@ class MsAntlrLoaderTest {
         ISchema schema = new MsSchema("msschema");
         d.addChild(schema);
 
-        schema = d.getSchema(Consts.DBO);
+        schema = d.getSchema(MsConsts.DEFAULT_SCHEMA);
 
         MsTable table = new MsTable("contacts");
         table.setAnsiNulls(true);

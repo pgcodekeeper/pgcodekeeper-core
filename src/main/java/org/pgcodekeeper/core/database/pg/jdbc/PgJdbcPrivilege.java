@@ -19,8 +19,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 
 /**
  * Parser for aclItem arrays

@@ -21,7 +21,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 
 import java.util.Objects;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
@@ -34,7 +33,7 @@ import org.pgcodekeeper.core.script.SQLScript;
 public final class PgMaterializedView extends PgAbstractView {
 
     private String distribution;
-    private String method = Consts.HEAP;
+    private String method = HEAP;
     private String tablespace;
     private boolean isWithData;
 
@@ -49,7 +48,7 @@ public final class PgMaterializedView extends PgAbstractView {
 
     @Override
     protected void appendOptions(StringBuilder sbSQL) {
-        if (!Consts.HEAP.equals(method)) {
+        if (!HEAP.equals(method)) {
             sbSQL.append("\nUSING ").append(quote(method));
         }
 
@@ -81,7 +80,7 @@ public final class PgMaterializedView extends PgAbstractView {
         if (!Objects.equals(tablespace, newSpace)) {
             StringBuilder sql = new StringBuilder();
             sql.append(ALTER_TABLE).append(newMatView.getQualifiedName()).append("\n\tSET TABLESPACE ");
-            sql.append(newSpace == null ? Consts.PG_DEFAULT : newSpace);
+            sql.append(newSpace == null ? PG_DEFAULT : newSpace);
             script.addStatement(sql);
         }
 

@@ -19,11 +19,11 @@ import java.util.*;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.base.parser.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.statement.*;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
 import org.pgcodekeeper.core.settings.DiffSettings;
@@ -270,7 +270,7 @@ public final class PgCustomParserListener extends CustomParserListener<PgDatabas
         switch (confParam.toLowerCase(Locale.ROOT)) {
             case "search_path":
                 if (ParserListenerMode.NORMAL == mode
-                        && (vex.size() != 1 || !Consts.PG_CATALOG.equals(confValue))) {
+                        && (vex.size() != 1 || !PgConsts.PG_CATALOG.equals(confValue))) {
                     throw new UnresolvedReferenceException("Unsupported search_path", ctx.start);
                 }
                 break;

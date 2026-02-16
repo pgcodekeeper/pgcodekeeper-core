@@ -17,7 +17,7 @@ package org.pgcodekeeper.core.database.pg.schema;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.AbstractPrivilege;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.script.SQLScript;
 
 /**

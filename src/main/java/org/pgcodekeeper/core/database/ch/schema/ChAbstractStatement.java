@@ -17,8 +17,8 @@ package org.pgcodekeeper.core.database.ch.schema;
 
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.ch.formatter.ChFormatter;
+import org.pgcodekeeper.core.database.ch.utils.ChDiffUtils;
 import org.pgcodekeeper.core.script.SQLScript;
 
 import java.util.function.UnaryOperator;
