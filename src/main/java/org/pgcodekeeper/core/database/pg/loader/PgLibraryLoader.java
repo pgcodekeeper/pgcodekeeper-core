@@ -20,9 +20,7 @@ import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.base.loader.AbstractLibraryLoader;
 import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.monitor.NullMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.nio.file.Path;
 import java.util.Set;
@@ -30,8 +28,8 @@ import java.util.Set;
 public class PgLibraryLoader extends AbstractLibraryLoader<PgDatabase> {
 
     public PgLibraryLoader(PgDatabase database, Path metaPath, Set<String> loadedPaths,
-                           ISettings settings, IMonitor monitor) {
-        super(database, metaPath, loadedPaths, settings, monitor);
+                           DiffSettings diffSettings) {
+        super(database, metaPath, loadedPaths, diffSettings);
     }
 
     @Override
@@ -40,24 +38,23 @@ public class PgLibraryLoader extends AbstractLibraryLoader<PgDatabase> {
     }
 
     @Override
-    protected PgDumpLoader getDumpLoader(Path p, ISettings settings) {
-        return new PgDumpLoader(p, settings);
+    protected PgDumpLoader getDumpLoader(Path p, DiffSettings diffSettings) {
+        return new PgDumpLoader(p, diffSettings);
     }
 
     @Override
-    protected PgJdbcLoader createJdbcLoader(String url, ISettings settings) {
-        // FIXME IgnoreSchemaList?
+    protected PgJdbcLoader createJdbcLoader(String url, DiffSettings diffSettings) {
         IJdbcConnector con = new PgJdbcConnector(url);
-        return new PgJdbcLoader(con, Consts.UTC, settings, monitor, null);
+        return new PgJdbcLoader(con, Consts.UTC, diffSettings);
     }
 
     @Override
-    protected PgProjectLoader getProjectLoader(Path p, ISettings copySettings) {
-        return new PgProjectLoader(p, copySettings, new NullMonitor(), null);
+    protected PgProjectLoader getProjectLoader(Path p, DiffSettings diffSettings) {
+        return new PgProjectLoader(p, diffSettings);
     }
 
     @Override
     protected PgLibraryLoader getCopy(PgDatabase db) {
-        return new PgLibraryLoader(db, metaPath, loadedPaths, settings, monitor);
+        return new PgLibraryLoader(db, metaPath, loadedPaths, diffSettings);
     }
 }

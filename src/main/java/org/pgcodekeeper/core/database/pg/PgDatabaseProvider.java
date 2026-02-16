@@ -27,9 +27,7 @@ import org.pgcodekeeper.core.database.pg.parser.PgCustomAntlrErrorStrategy;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLLexer;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -67,21 +65,22 @@ public class PgDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public PgDatabase getDatabaseFromJdbc(String url, ISettings settings, IMonitor monitor, IgnoreSchemaList ignoreSchemaList)
+    public PgDatabase getDatabaseFromJdbc(String url, DiffSettings diffSettings)
             throws IOException, InterruptedException {
-        String timezone = settings.getTimeZone() == null ? Consts.UTC : settings.getTimeZone();
-        return new PgJdbcLoader(getJdbcConnector(url), timezone, settings, monitor, ignoreSchemaList).loadAndAnalyze();
+        String timezone = diffSettings.getSettings().getTimeZone() == null
+                ? Consts.UTC : diffSettings.getSettings().getTimeZone();
+        return new PgJdbcLoader(getJdbcConnector(url), timezone, diffSettings).loadAndAnalyze();
     }
 
     @Override
-    public PgDatabase getDatabaseFromDump(Path path, ISettings settings, IMonitor monitor)
+    public PgDatabase getDatabaseFromDump(Path path, DiffSettings diffSettings)
             throws IOException, InterruptedException {
-        return new PgDumpLoader(path, settings, monitor).loadAndAnalyze();
+        return new PgDumpLoader(path, diffSettings).loadAndAnalyze();
     }
 
     @Override
-    public PgDatabase getDatabaseFromProject(Path path, ISettings settings, IMonitor monitor,
-                                            IgnoreSchemaList ignoreSchemaList) throws IOException, InterruptedException {
-        return new PgProjectLoader(path, settings, monitor, ignoreSchemaList).loadAndAnalyze();
+    public PgDatabase getDatabaseFromProject(Path path, DiffSettings diffSettings)
+            throws IOException, InterruptedException {
+        return new PgProjectLoader(path, diffSettings).loadAndAnalyze();
     }
 }

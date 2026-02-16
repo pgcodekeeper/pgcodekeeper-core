@@ -44,7 +44,7 @@ public class ChSchemasReader extends AbstractJdbcReader<ChJdbcLoader> {
     @Override
     protected void processResult(ResultSet result) throws SQLException {
         String schemaName = result.getString("name");
-        if (loader.isIgnoredSchema(schemaName)) {
+        if (!loader.isAllowedSchema(schemaName)) {
             return;
         }
         loader.setCurrentObject(new ObjectReference(schemaName, DbObjType.SCHEMA));

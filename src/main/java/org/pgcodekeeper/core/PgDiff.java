@@ -40,6 +40,7 @@ import org.pgcodekeeper.core.model.graph.DbObject;
 import org.pgcodekeeper.core.model.graph.DepcyResolver;
 import org.pgcodekeeper.core.script.SQLActionType;
 import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Utils;
 import org.slf4j.Logger;
@@ -67,16 +68,19 @@ public class PgDiff {
 
     private static final String EMPTY_SCRIPT = ""; // $NON-NLS-1$
 
-    protected final ISettings settings;
-    protected final List<Object> errors = new ArrayList<>();
+    private final DiffSettings diffSettings;
+    private final ISettings settings;
+    private final List<Object> errors;
 
     /**
      * Creates a new PgDiff instance with the specified settings.
      *
-     * @param settings the configuration settings for the diff operation
+     * @param diffSettings unified context object containing settings, ignore list, and error accumulator
      */
-    public PgDiff(ISettings settings) {
-        this.settings = settings;
+    public PgDiff(DiffSettings diffSettings) {
+        this.diffSettings = diffSettings;
+        settings = diffSettings.getSettings();
+        errors = diffSettings.getErrors();
     }
 
     public List<Object> getErrors() {
@@ -87,30 +91,24 @@ public class PgDiff {
      * Gets selected elements from root, compares them between source and target
      * and generates a migration script.
      *
-     * @param root                        the root of the diff tree
-     * @param oldDb                       the source database schema
-     * @param newDb                       the target database schema
-     * @param additionalDependenciesOldDb additional dependencies in old database
-     * @param additionalDependenciesNewDb additional dependencies in new database
-     * @param ignoreList                  list of objects to ignore during comparison
+     * @param root  the root of the diff tree
+     * @param oldDb the source database schema
+     * @param newDb the target database schema
      * @return SQL migration script
      * @throws IOException if an I/O error occurs
      */
     public String diff(TreeElement root,
                        IDatabase oldDb,
-                       IDatabase newDb,
-                       List<Entry<IStatement, IStatement>> additionalDependenciesOldDb,
-                       List<Entry<IStatement, IStatement>> additionalDependenciesNewDb,
-                       IgnoreList ignoreList)
+                       IDatabase newDb)
             throws IOException {
-        List<TreeElement> selected = getSelectedElements(root, ignoreList);
+        List<TreeElement> selected = getSelectedElements(root, diffSettings.getIgnoreList());
         if (selected.isEmpty()) {
             return EMPTY_SCRIPT;
         }
 
         Set<IStatement> toRefresh = new LinkedHashSet<>();
-        var actions = resolveDependencies(selected, oldDb, newDb, additionalDependenciesOldDb,
-                additionalDependenciesNewDb, toRefresh);
+        var actions = resolveDependencies(selected, oldDb, newDb, diffSettings.getAdditionalDependencies(),
+                diffSettings.getAdditionalDependencies(), toRefresh);
         if (actions.isEmpty()) {
             return EMPTY_SCRIPT;
         }
@@ -233,16 +231,16 @@ public class PgDiff {
             IStatement oldStatement = null;
             IStatement newStatement = null;
             switch (st.getSide()) {
-            case LEFT:
-                oldStatement = st.getStatement(oldDb);
-                break;
-            case BOTH:
-                oldStatement = st.getStatement(oldDb);
-                newStatement = st.getStatement(newDb);
-                break;
-            case RIGHT:
-                newStatement = st.getStatement(newDb);
-                break;
+                case LEFT:
+                    oldStatement = st.getStatement(oldDb);
+                    break;
+                case BOTH:
+                    oldStatement = st.getStatement(oldDb);
+                    newStatement = st.getStatement(newDb);
+                    break;
+                case RIGHT:
+                    newStatement = st.getStatement(newDb);
+                    break;
             }
             objects.add(new DbObject(oldStatement, newStatement));
         }
@@ -252,7 +250,7 @@ public class PgDiff {
 
     @Deprecated
     private void addColumnsAsElements(IDatabase oldDb, IDatabase newDb,
-            List<TreeElement> selected) {
+                                      List<TreeElement> selected) {
         List<TreeElement> tempColumns = new ArrayList<>();
         for (TreeElement el : selected) {
             if (el.getType() == DbObjType.TABLE && el.getSide() == DiffSide.BOTH) {

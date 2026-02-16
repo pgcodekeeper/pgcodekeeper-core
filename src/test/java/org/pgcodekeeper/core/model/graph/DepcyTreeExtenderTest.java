@@ -25,7 +25,7 @@ import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
-import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -69,14 +69,14 @@ class DepcyTreeExtenderTest {
         /*
          * Index of the file that should be tested.
          */
-        var settings = new CoreSettings();
         PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
 
         String fileName = "depcy_schema_" + fileIndex + ".sql";
         String targetFileName = "depcy_schema_new_" + fileIndex + ".sql";
 
-        IDatabase dbSource = loadTestDump(databaseProvider, fileName, DepcyTreeExtenderTest.class, settings);
-        IDatabase dbTarget = loadTestDump(databaseProvider, targetFileName, DepcyTreeExtenderTest.class, settings);
+        var diffSettings = new DiffSettings();
+        IDatabase dbSource = loadTestDump(databaseProvider, fileName, DepcyTreeExtenderTest.class, diffSettings);
+        IDatabase dbTarget = loadTestDump(databaseProvider, targetFileName, DepcyTreeExtenderTest.class, diffSettings);
 
         TreeElement tree = new TreeElement("Database", DbObjType.DATABASE, DiffSide.BOTH);
         predefined.setUserSelection(tree);

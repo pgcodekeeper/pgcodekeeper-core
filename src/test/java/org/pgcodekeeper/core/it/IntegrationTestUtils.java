@@ -21,9 +21,13 @@ import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
+import org.pgcodekeeper.core.database.base.parser.FullAnalyze;
 import org.pgcodekeeper.core.database.ch.ChDatabaseProvider;
 import org.pgcodekeeper.core.database.ch.loader.ChDumpLoader;
 import org.pgcodekeeper.core.database.ch.loader.ChProjectLoader;
@@ -36,12 +40,10 @@ import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.database.pg.loader.PgProjectLoader;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
-import org.pgcodekeeper.core.database.base.parser.FullAnalyze;
 import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
-import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
@@ -62,30 +64,32 @@ public final class IntegrationTestUtils {
     public static final String RESOURCE_MS_DUMP = "testing_ms_dump.sql";
     public static final List<String> IGNORED_SCHEMAS_LIST = List.of("worker", "country", "ignore1", "ignore4vrw");
 
-    public static IDatabase loadTestDump(IDatabaseProvider databaseProvider, String resource, Class<?> c, ISettings settings)
+    public static IDatabase loadTestDump(IDatabaseProvider databaseProvider, String resource, Class<?> c,
+                                         DiffSettings diffSettings)
             throws IOException, InterruptedException {
-        return loadTestDump(databaseProvider, resource, c, settings, true);
+        return loadTestDump(databaseProvider, resource, c, diffSettings, true);
     }
 
-    public static IDatabase loadTestDump(IDatabaseProvider databaseProvider, String resource, Class<?> c, ISettings settings, boolean analysis)
+    public static IDatabase loadTestDump(IDatabaseProvider databaseProvider, String resource, Class<?> c,
+                                         DiffSettings diffSettings, boolean analysis)
             throws IOException, InterruptedException {
         InputStreamProvider input = () -> c.getResourceAsStream(resource);
         String inputObjectName = "test/" + c.getName() + '/' + resource;
 
         AbstractDumpLoader<?> loader;
         if (databaseProvider instanceof MsDatabaseProvider) {
-            loader = new MsDumpLoader(input, inputObjectName, settings);
+            loader = new MsDumpLoader(input, inputObjectName, diffSettings);
         } else if (databaseProvider instanceof PgDatabaseProvider) {
-            loader = new PgDumpLoader(input, inputObjectName, settings);
+            loader = new PgDumpLoader(input, inputObjectName, diffSettings);
         } else if (databaseProvider instanceof ChDatabaseProvider) {
-            loader = new ChDumpLoader(input, inputObjectName, settings);
+            loader = new ChDumpLoader(input, inputObjectName, diffSettings);
         } else {
             throw new UnsupportedOperationException();
         }
 
         IDatabase db = loader.load();
         if (analysis) {
-            FullAnalyze.fullAnalyze(db, loader.getErrors());
+            FullAnalyze.fullAnalyze(db, diffSettings.getErrors());
         }
 
         assertErrors(loader.getErrors());
@@ -100,14 +104,14 @@ public final class IntegrationTestUtils {
         Assertions.assertEquals("", errorsString);
     }
 
-    public static void assertDiffSame(IDatabase db, String template, ISettings settings)
+    public static void assertDiffSame(IDatabase db, String template, DiffSettings diffSettings)
             throws IOException, InterruptedException {
-        assertDiff(db, db, settings, "File name template: " + template);
+        assertDiff(db, db, diffSettings, "File name template: " + template);
     }
 
-    public static void assertDiff(IDatabase oldDb, IDatabase newDb, ISettings settings, String errorMessage)
+    public static void assertDiff(IDatabase oldDb, IDatabase newDb, DiffSettings diffSettings, String errorMessage)
             throws IOException, InterruptedException {
-        String script = PgCodeKeeperApi.diff(settings, oldDb, newDb);
+        String script = PgCodeKeeperApi.diff(oldDb, newDb, diffSettings);
         Assertions.assertEquals("", script.trim(), errorMessage);
     }
 
@@ -136,35 +140,36 @@ public final class IntegrationTestUtils {
 
     public static void assertDiff(IDatabaseProvider databaseProvider, String fileNameTemplate, Class<?> clazz)
             throws IOException, InterruptedException {
-        var settings = new CoreSettings();
-        String script = getScript(databaseProvider, fileNameTemplate, settings, clazz);
+        var diffSettings = new DiffSettings(new CoreSettings());
+        String script = getScript(databaseProvider, fileNameTemplate, diffSettings, clazz);
         assertResult(script, fileNameTemplate, clazz);
     }
 
-    public static String getScript(IDatabaseProvider databaseProvider, String fileNameTemplate, CoreSettings settings, Class<?> clazz)
+    public static String getScript(IDatabaseProvider databaseProvider, String fileNameTemplate,
+                                   DiffSettings diffSettings, Class<?> clazz)
             throws IOException, InterruptedException {
-        IDatabase dbOld = loadTestDump(databaseProvider, fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, settings);
-        assertDiffSame(dbOld, fileNameTemplate, settings);
+        IDatabase dbOld = loadTestDump(databaseProvider, fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, diffSettings);
+        assertDiffSame(dbOld, fileNameTemplate, diffSettings);
 
-        IDatabase dbNew = loadTestDump(databaseProvider, fileNameTemplate + FILES_POSTFIX.NEW_SQL, clazz, settings);
-        assertDiffSame(dbNew, fileNameTemplate, settings);
+        IDatabase dbNew = loadTestDump(databaseProvider, fileNameTemplate + FILES_POSTFIX.NEW_SQL, clazz, diffSettings);
+        assertDiffSame(dbNew, fileNameTemplate, diffSettings);
 
-        return PgCodeKeeperApi.diff(settings, dbOld, dbNew);
+        return PgCodeKeeperApi.diff(dbOld, dbNew, diffSettings);
     }
 
     public static void assertEqualsDependencies(IDatabaseProvider databaseProvider, String dbTemplate, String userTemplateName,
-                                                Map<String, DbObjType> selected, Class<?> clazz, ISettings settings)
+                                                Map<String, DbObjType> selected, Class<?> clazz, DiffSettings diffSettings)
             throws IOException, InterruptedException {
-        IDatabase oldDbFull = loadTestDump(databaseProvider, dbTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, settings);
-        IDatabase newDbFull = loadTestDump(databaseProvider, dbTemplate + FILES_POSTFIX.NEW_SQL, clazz, settings);
+        IDatabase oldDbFull = loadTestDump(databaseProvider, dbTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, diffSettings);
+        IDatabase newDbFull = loadTestDump(databaseProvider, dbTemplate + FILES_POSTFIX.NEW_SQL, clazz, diffSettings);
 
-        assertDiffSame(oldDbFull, dbTemplate, settings);
-        assertDiffSame(newDbFull, dbTemplate, settings);
+        assertDiffSame(oldDbFull, dbTemplate, diffSettings);
+        assertDiffSame(newDbFull, dbTemplate, diffSettings);
 
-        TreeElement tree = DiffTree.create(settings, oldDbFull, newDbFull, null);
+        TreeElement tree = DiffTree.create(diffSettings.getSettings(), oldDbFull, newDbFull, null);
 
         setSelected(selected, tree, oldDbFull, newDbFull);
-        String script = PgCodeKeeperApi.diff(settings, tree, oldDbFull, newDbFull, null, null, null);
+        String script = PgCodeKeeperApi.diff(tree, oldDbFull, newDbFull, diffSettings);
         var userSelTemplate = null == userTemplateName ? dbTemplate : dbTemplate + "_" + userTemplateName;
         assertResult(script, userSelTemplate, clazz);
     }
@@ -219,18 +224,18 @@ public final class IntegrationTestUtils {
     }
 
     public static AbstractProjectLoader<?> createProjectLoader(Path dirPath, ISettings settings, IDatabase database) {
-        return createProjectLoader(dirPath, settings, database, null, null);
+        return createProjectLoader(dirPath, new DiffSettings(settings), database);
     }
 
-    public static AbstractProjectLoader<?> createProjectLoader(Path dirPath, ISettings settings, IDatabase database,
-                                                               IMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
+    public static AbstractProjectLoader<?> createProjectLoader(Path dirPath, DiffSettings diffSettings,
+                                                               IDatabase database) {
         AbstractProjectLoader<?> loader;
         if (database instanceof PgDatabase) {
-            loader = new PgProjectLoader(dirPath, settings, monitor, ignoreSchemaList);
+            loader = new PgProjectLoader(dirPath, diffSettings);
         } else if (database instanceof MsDatabase) {
-            loader = new MsProjectLoader(dirPath, settings, monitor, ignoreSchemaList);
+            loader = new MsProjectLoader(dirPath, diffSettings);
         } else if (database instanceof ChDatabase) {
-            loader = new ChProjectLoader(dirPath, settings, monitor, ignoreSchemaList);
+            loader = new ChProjectLoader(dirPath, diffSettings);
         } else {
             throw new IllegalStateException("Unknown database type");
         }

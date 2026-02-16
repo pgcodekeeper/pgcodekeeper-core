@@ -19,6 +19,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.database.ms.MsDatabaseProvider;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 
@@ -349,7 +350,8 @@ class MsDiffTest {
     void correctOrderScriptTest(String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         settings.setAddTransaction(true);
-        String script = getScript(databaseProvider, fileNameTemplate, settings, MsDiffTest.class);
+        var diffSettings = new DiffSettings(settings);
+        String script = getScript(databaseProvider, fileNameTemplate, diffSettings, MsDiffTest.class);
         assertResult(script, fileNameTemplate, MsDiffTest.class);
     }
 }

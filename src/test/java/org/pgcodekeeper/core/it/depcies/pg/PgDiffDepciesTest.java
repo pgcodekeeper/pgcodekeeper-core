@@ -18,10 +18,11 @@ package org.pgcodekeeper.core.it.depcies.pg;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
+import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -273,7 +274,8 @@ class PgDiffDepciesTest {
     @MethodSource("provideSelectedObjects")
     void dependencyTest(final String dbTemplate, String userTemplateName, Map<String, DbObjType> selectedObjs)
             throws IOException, InterruptedException {
-        IntegrationTestUtils.assertEqualsDependencies(databaseProvider, dbTemplate, userTemplateName, selectedObjs, getClass(), new CoreSettings());
+        IntegrationTestUtils.assertEqualsDependencies(databaseProvider, dbTemplate, userTemplateName, selectedObjs,
+                getClass(), new DiffSettings());
     }
 
     private static Stream<Arguments> provideSelectedObjectsWithFunctionBody() {
@@ -332,9 +334,10 @@ class PgDiffDepciesTest {
     @ParameterizedTest
     @MethodSource("provideSelectedObjectsWithFunctionBody")
     void dependencyWithFunctionBodyTest(final String dbTemplate, String userTemplateName,
-                                         Map<String, DbObjType> selectedObjs) throws IOException, InterruptedException {
+                                        Map<String, DbObjType> selectedObjs) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         settings.setEnableFunctionBodiesDependencies(true);
-        IntegrationTestUtils.assertEqualsDependencies(databaseProvider, dbTemplate, userTemplateName, selectedObjs, getClass(), settings);
+        IntegrationTestUtils.assertEqualsDependencies(databaseProvider, dbTemplate, userTemplateName, selectedObjs,
+                getClass(), new DiffSettings(settings));
     }
 }

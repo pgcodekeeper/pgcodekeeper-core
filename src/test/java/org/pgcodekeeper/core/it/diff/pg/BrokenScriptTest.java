@@ -19,9 +19,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
-import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
-import org.pgcodekeeper.core.database.base.parser.FullAnalyze;
+import org.pgcodekeeper.core.TestUtils;
+import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 
@@ -33,18 +34,15 @@ class BrokenScriptTest {
             "broken_duplicated_index, line 5:1 INDEX i already exists for TABLE t1"
     })
     void brokenScriptTest(String fileNameTemplate, String expectedError) throws IOException, InterruptedException {
-        var settings = new CoreSettings();
-
+        var provider = new PgDatabaseProvider();
         String resource = fileNameTemplate + FILES_POSTFIX.SQL;
-        var loader = new PgDumpLoader(() -> getClass().getResourceAsStream(resource), resource, settings);
-        var db = loader.load();
-        FullAnalyze.fullAnalyze(db, loader.getErrors());
-        var errors = loader.getErrors();
+        var diffSettings = new DiffSettings(new CoreSettings());
+
+        provider.getDatabaseFromDump(TestUtils.getFilePath(resource, getClass()), diffSettings);
+        var errors = diffSettings.getErrors();
 
         Assertions.assertEquals(1, errors.size());
-
         String actualError = errors.get(0).toString();
-
         if (!actualError.endsWith(expectedError)) {
             Assertions.assertEquals(expectedError, actualError);
         }

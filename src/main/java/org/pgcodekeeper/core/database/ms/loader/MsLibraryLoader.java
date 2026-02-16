@@ -19,8 +19,7 @@ import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.base.loader.AbstractLibraryLoader;
 import org.pgcodekeeper.core.database.ms.jdbc.MsJdbcConnector;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.nio.file.Path;
 import java.util.Set;
@@ -28,8 +27,8 @@ import java.util.Set;
 public class MsLibraryLoader extends AbstractLibraryLoader<MsDatabase> {
 
     public MsLibraryLoader(MsDatabase database, Path metaPath, Set<String> loadedPaths,
-                           ISettings settings, IMonitor monitor) {
-        super(database, metaPath, loadedPaths, settings, monitor);
+                           DiffSettings diffSettings) {
+        super(database, metaPath, loadedPaths, diffSettings);
     }
 
     @Override
@@ -38,24 +37,23 @@ public class MsLibraryLoader extends AbstractLibraryLoader<MsDatabase> {
     }
 
     @Override
-    protected MsDumpLoader getDumpLoader(Path p, ISettings settings) {
-        return new MsDumpLoader(p, settings);
+    protected MsDumpLoader getDumpLoader(Path p, DiffSettings diffSettings) {
+        return new MsDumpLoader(p, diffSettings);
     }
 
     @Override
-    protected MsJdbcLoader createJdbcLoader(String url, ISettings settings) {
-        // FIXME IgnoreSchemaList?
+    protected MsJdbcLoader createJdbcLoader(String url, DiffSettings diffSettings) {
         IJdbcConnector con = new MsJdbcConnector(url);
-        return new MsJdbcLoader(con, settings, monitor, null);
+        return new MsJdbcLoader(con, diffSettings);
     }
 
     @Override
-    protected MsProjectLoader getProjectLoader(Path p, ISettings copySettings) {
-        return new MsProjectLoader(p, copySettings, monitor, null);
+    protected MsProjectLoader getProjectLoader(Path p, DiffSettings diffSettings) {
+        return new MsProjectLoader(p, diffSettings);
     }
 
     @Override
     protected MsLibraryLoader getCopy(MsDatabase db) {
-        return new MsLibraryLoader(db, metaPath, loadedPaths, settings, monitor);
+        return new MsLibraryLoader(db, metaPath, loadedPaths, diffSettings);
     }
 }

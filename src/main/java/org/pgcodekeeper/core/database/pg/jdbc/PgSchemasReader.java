@@ -15,13 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import java.sql.*;
-
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
-import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgSchema;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * Reader for PostgreSQL schemas.
@@ -46,7 +49,7 @@ public class PgSchemasReader extends PgAbstractJdbcReader {
     protected void processResult(ResultSet res) throws SQLException {
         String schemaName = res.getString("nspname");
         loader.setCurrentObject(new ObjectReference(schemaName, DbObjType.SCHEMA));
-        if (loader.isIgnoredSchema(schemaName)) {
+        if (!loader.isAllowedSchema(schemaName)) {
             return;
         }
 

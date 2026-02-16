@@ -18,11 +18,6 @@ package org.pgcodekeeper.core.it.jdbc.pg;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.pgcodekeeper.core.database.pg.jdbc.PgSupportedVersion;
-import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
-import org.pgcodekeeper.core.it.jdbc.base.JdbcLoaderTest;
-import org.pgcodekeeper.core.utils.InputStreamProvider;
-import org.pgcodekeeper.core.utils.testcontainer.TestContainerType;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
@@ -33,13 +28,20 @@ import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.parser.ScriptParser;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
+import org.pgcodekeeper.core.database.pg.jdbc.PgSupportedVersion;
+import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
+import org.pgcodekeeper.core.it.jdbc.base.JdbcLoaderTest;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.InputStreamProvider;
+import org.pgcodekeeper.core.utils.testcontainer.TestContainerType;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 
@@ -71,25 +73,29 @@ class PgGpJdbcLoaderTest extends JdbcLoaderTest {
     }
 
     protected void jdbcLoaderTest(String dumpFileName, String ignoreListName, String url, CoreSettings settings,
-            PgSupportedVersion version) throws Exception {
+                                  PgSupportedVersion version) throws Exception {
         settings.setEnableFunctionBodiesDependencies(true);
-        var path = TestUtils.getPathToResource(dumpFileName, getClass());
-        var dumpDb = databaseProvider.getDatabaseFromDump(path, settings, new NullMonitor());
+        var diffSettings = new DiffSettings(settings);
+        var path = TestUtils.getFilePath(dumpFileName, getClass());
+        var dumpDb = databaseProvider.getDatabaseFromDump(path, diffSettings);
         dumpDb.setVersion(version);
-        var script = Files.readString(TestUtils.getPathToResource(dumpFileName, getClass()));
+        var script = Files.readString(TestUtils.getFilePath(dumpFileName, getClass()));
 
         var loader = createDumpLoader(() -> new ByteArrayInputStream(script.getBytes(StandardCharsets.UTF_8)),
                 dumpFileName, settings, databaseProvider);
         ScriptParser parser = new ScriptParser(loader, dumpFileName, script);
 
-        var startConfDb = databaseProvider.getDatabaseFromJdbc(url, settings, new NullMonitor(), null);
+        var startConfDb = databaseProvider.getDatabaseFromJdbc(url, diffSettings);
         IJdbcConnector connector = new PgJdbcConnector(url);
         try {
             new JdbcRunner(new NullMonitor()).runBatches(connector, parser.batch(), null);
 
-            var remoteDb = databaseProvider.getDatabaseFromJdbc(url, settings, new NullMonitor(), null);
-            List<String> ignoreLists = List.of(TestUtils.getFilePath(ignoreListName, getClass()));
-            var actual = PgCodeKeeperApi.diff(settings, dumpDb, remoteDb, ignoreLists);
+            var remoteDb = databaseProvider.getDatabaseFromJdbc(url, diffSettings);
+            List<Path> ignoreLists = List.of(TestUtils.getFilePath(ignoreListName, getClass()));
+            for (var ignoreList : ignoreLists) {
+                diffSettings.addIgnoreList(ignoreList);
+            }
+            var actual = PgCodeKeeperApi.diff(dumpDb, remoteDb, diffSettings);
             Assertions.assertEquals("", actual, "Incorrect run dump %s on Database".formatted(dumpFileName));
         } finally {
             clearDb(settings, startConfDb, connector, url, databaseProvider);
@@ -98,7 +104,7 @@ class PgGpJdbcLoaderTest extends JdbcLoaderTest {
 
     @Override
     protected AbstractDumpLoader<?> createDumpLoader(InputStreamProvider input, String inputObjectName,
-            ISettings settings, IDatabaseProvider databaseProvider) {
-        return new PgDumpLoader(input, inputObjectName, settings);
+                                                     ISettings settings, IDatabaseProvider databaseProvider) {
+        return new PgDumpLoader(input, inputObjectName, new DiffSettings(settings));
     }
 }

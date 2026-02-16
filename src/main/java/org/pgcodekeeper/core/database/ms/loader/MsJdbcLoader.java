@@ -30,10 +30,8 @@ import org.pgcodekeeper.core.database.ms.jdbc.*;
 import org.pgcodekeeper.core.database.ms.parser.MsParserUtils;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser;
 import org.pgcodekeeper.core.database.ms.schema.*;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,14 +51,11 @@ public final class MsJdbcLoader extends AbstractJdbcLoader<MsDatabase> {
     /**
      * Creates a new Microsoft SQL Server JDBC loader with the specified parameters.
      *
-     * @param connector        the JDBC connector for establishing database connections
-     * @param settings         loader settings and configuration
-     * @param monitor          progress monitor for tracking loading progress
-     * @param ignoreSchemaList list of schemas to ignore during loading
+     * @param connector    the JDBC connector for establishing database connections
+     * @param diffSettings unified context object containing settings, ignore list, and error accumulator
      */
-    public MsJdbcLoader(IJdbcConnector connector, ISettings settings,
-                        IMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
-        super(connector, monitor, settings, ignoreSchemaList);
+    public MsJdbcLoader(IJdbcConnector connector, DiffSettings diffSettings) {
+        super(connector, diffSettings);
     }
 
     @Override
@@ -171,7 +166,7 @@ public final class MsJdbcLoader extends AbstractJdbcLoader<MsDatabase> {
     }
 
     public void setPrivileges(AbstractStatement st, List<MsXmlReader> privs) {
-        if (settings.isIgnorePrivileges()) {
+        if (getSettings().isIgnorePrivileges()) {
             return;
         }
 

@@ -21,15 +21,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
-import org.pgcodekeeper.core.it.IntegrationTestUtils;
-import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.loader.PgLibraryLoader;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -42,7 +41,7 @@ class LibDiffTest {
             "no_same_objects",
             "with_same_objects"
     })
-    void diffWithIgnoreTest(String fileNameTemplate) throws IOException, InterruptedException, URISyntaxException {
+    void diffWithIgnoreTest(String fileNameTemplate) throws IOException, InterruptedException {
         testLibrary(fileNameTemplate, List.of(fileNameTemplate + FILES_POSTFIX.LIBRARY_SQL), true);
     }
 
@@ -52,32 +51,34 @@ class LibDiffTest {
             "no_same_objects",
             "with_same_objects"
     })
-    void diffNoIgnoreTest(String fileNameTemplate) throws IOException, InterruptedException, URISyntaxException {
+    void diffNoIgnoreTest(String fileNameTemplate) throws IOException, InterruptedException {
         testLibrary(fileNameTemplate, List.of(fileNameTemplate + FILES_POSTFIX.LIBRARY_SQL), false);
     }
 
     @Test
-    void diffMultipleLibTest() throws IOException, InterruptedException, URISyntaxException {
+    void diffMultipleLibTest() throws IOException, InterruptedException {
         List<String> libList = List.of("multiple_libs_lib1.sql", "multiple_libs_lib2.sql", "multiple_libs_lib3.sql");
         testLibrary("multiple_libs", libList, true);
     }
 
     private void testLibrary(String fileNameTemplate, List<String> libList, boolean isIgnorePrivileges)
-            throws IOException, InterruptedException, URISyntaxException {
+            throws IOException, InterruptedException {
         var settings = new CoreSettings();
         PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
         settings.setIgnorePrivileges(isIgnorePrivileges);
+        var diffSettings = new DiffSettings(settings);
         List<String> libs = new ArrayList<>();
         for (String lib : libList) {
-            libs.add(TestUtils.getPathToResource(lib, getClass()).toString());
+            libs.add(TestUtils.getFilePath(lib, getClass()).toString());
         }
         PgDatabase dbOld = new PgDatabase();
-        PgDatabase dbNew = (PgDatabase) IntegrationTestUtils.loadTestDump(databaseProvider, fileNameTemplate + FILES_POSTFIX.NEW_SQL, getClass(), settings);
-        PgLibraryLoader loader = new PgLibraryLoader(dbNew, null, new HashSet<>(), settings, new NullMonitor());
+        PgDatabase dbNew = (PgDatabase) IntegrationTestUtils.loadTestDump(databaseProvider,
+                fileNameTemplate + FILES_POSTFIX.NEW_SQL, getClass(), diffSettings);
 
+        PgLibraryLoader loader = new PgLibraryLoader(dbNew, null, new HashSet<>(), diffSettings);
         loader.loadLibraries(isIgnorePrivileges, libs);
 
-        String script = PgCodeKeeperApi.diff(settings, dbOld, dbNew);
+        String script = PgCodeKeeperApi.diff(dbOld, dbNew, diffSettings);
 
         IntegrationTestUtils.assertResult(script, fileNameTemplate, getClass());
     }

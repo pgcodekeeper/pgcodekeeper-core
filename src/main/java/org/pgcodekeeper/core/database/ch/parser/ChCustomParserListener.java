@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.parser;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.base.parser.CustomParserListener;
@@ -24,8 +22,7 @@ import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
 import org.pgcodekeeper.core.database.ch.parser.statement.*;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 /**
  * Custom ANTLR listener for parsing ClickHouse SQL statements.
@@ -36,16 +33,14 @@ public final class ChCustomParserListener extends CustomParserListener<ChDatabas
     /**
      * Creates a new ClickHouse SQL parser listener.
      *
-     * @param database the target database schema to populate
-     * @param filename name of the file being parsed
-     * @param mode     parsing mode
-     * @param errors   list to collect parsing errors
-     * @param monitor  progress monitor for cancellation support
-     * @param settings application settings
+     * @param database     the target database schema to populate
+     * @param filename     name of the file being parsed
+     * @param mode         parsing mode
+     * @param diffSettings unified context object containing settings, monitor, and error accumulator
      */
     public ChCustomParserListener(ChDatabase database, String filename, ParserListenerMode mode,
-                                     List<Object> errors, IMonitor monitor, ISettings settings) {
-        super(database, filename, mode, errors, monitor, settings);
+                                     DiffSettings diffSettings) {
+        super(database, filename, mode, diffSettings);
     }
 
     @Override
@@ -69,7 +64,7 @@ public final class ChCustomParserListener extends CustomParserListener<ChDatabas
             } else if ((dropCtx = ddlStmt.drop_stmt()) != null) {
                 drop(dropCtx);
             } else if ((privilStmt = ddlStmt.privilegy_stmt()) != null) {
-                safeParseStatement(new ChGrantPrivilege(privilStmt, db, null, settings), ddlStmt);
+                safeParseStatement(new ChGrantPrivilege(privilStmt, db, null, getSettings()), ddlStmt);
             } else {
                 addToQueries(query, getAction(query));
             }
@@ -88,21 +83,21 @@ public final class ChCustomParserListener extends CustomParserListener<ChDatabas
         Create_role_stmtContext createRole;
         Create_dictinary_stmtContext createDictionary;
         if ((createDatabase = ctx.create_database_stmt()) != null) {
-            p = new ChCreateSchema(createDatabase, db, settings);
+            p = new ChCreateSchema(createDatabase, db, getSettings());
         } else if ((createTable = ctx.create_table_stmt()) != null) {
-            p = new ChCreateTable(createTable, db, settings);
+            p = new ChCreateTable(createTable, db, getSettings());
         } else if ((createView = ctx.create_view_stmt()) != null) {
-            p = new ChCreateView(createView, db, stream, settings);
+            p = new ChCreateView(createView, db, stream, getSettings());
         } else if ((createFunc = ctx.create_function_stmt()) != null) {
-            p = new ChCreateFunction(createFunc, db, settings);
+            p = new ChCreateFunction(createFunc, db, getSettings());
         } else if ((createUser = ctx.create_user_stmt()) != null) {
-            p = new ChCreateUser(createUser, db, settings);
+            p = new ChCreateUser(createUser, db, getSettings());
         } else if ((createRole = ctx.create_role_stmt()) != null) {
-            p = new ChCreateRole(createRole, db, settings);
+            p = new ChCreateRole(createRole, db, getSettings());
         } else if (ctx.create_policy_stmt() != null) {
-            p = new ChCreatePolicy(ctx.create_policy_stmt(), db, settings);
+            p = new ChCreatePolicy(ctx.create_policy_stmt(), db, getSettings());
         } else if ((createDictionary = ctx.create_dictinary_stmt()) != null) {
-            p = new ChCreateDictionary(createDictionary, db, settings);
+            p = new ChCreateDictionary(createDictionary, db, getSettings());
         } else {
             addToQueries(ctx, getAction(ctx));
             return;
@@ -120,7 +115,7 @@ public final class ChCustomParserListener extends CustomParserListener<ChDatabas
                 || element.USER() != null
                 || element.ROLE() != null
                 || element.DICTIONARY() != null) {
-            p = new ChDropStatement(ctx, db, settings);
+            p = new ChDropStatement(ctx, db, getSettings());
         } else {
             addToQueries(ctx, getAction(ctx));
             return;
@@ -132,11 +127,11 @@ public final class ChCustomParserListener extends CustomParserListener<ChDatabas
         ChParserAbstract p;
         Alter_table_stmtContext altertableCtx = ctx.alter_table_stmt();
         if (altertableCtx != null) {
-            p = new ChAlterTable(altertableCtx, db, settings);
+            p = new ChAlterTable(altertableCtx, db, getSettings());
         } else if (ctx.alter_policy_stmt() != null
                 || ctx.alter_user_stmt() != null
                 || ctx.alter_role_stmt() != null) {
-            p = new ChAlterOther(ctx, db, settings);
+            p = new ChAlterOther(ctx, db, getSettings());
         } else {
             addToQueries(ctx, getAction(ctx));
             return;

@@ -26,10 +26,10 @@ import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
-import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -49,8 +49,10 @@ class PgModelExporterTest {
         PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
         settings.setGenerateConstraintNotValid(true);
         settings.setGenerateExists(true);
+        var diffSettings = new DiffSettings(settings);
 
-        IDatabase db = IntegrationTestUtils.loadTestDump(databaseProvider, template + FILES_POSTFIX.SQL, getClass(), settings);
+        IDatabase db = IntegrationTestUtils.loadTestDump(databaseProvider, template + FILES_POSTFIX.SQL,
+                getClass(), diffSettings);
 
         var exporter = new PgModelExporter(null, db, Consts.UTF_8, settings);
         var stmt = getStatement(db, stmtName, type);

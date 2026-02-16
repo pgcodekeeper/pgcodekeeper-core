@@ -1,10 +1,3 @@
-package org.pgcodekeeper.core.utils.testcontainer;
-
-import org.pgcodekeeper.core.database.ms.jdbc.MsSupportedVersion;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.startupcheck.MinimumDurationRunningStartupCheckStrategy;
-import org.testcontainers.mssqlserver.MSSQLServerContainer;
-
 /*******************************************************************************
  * Copyright 2017-2026 TAXTELECOM, LLC
  *
@@ -20,6 +13,13 @@ import org.testcontainers.mssqlserver.MSSQLServerContainer;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+package org.pgcodekeeper.core.utils.testcontainer;
+
+import org.pgcodekeeper.core.database.ms.jdbc.MsSupportedVersion;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.startupcheck.MinimumDurationRunningStartupCheckStrategy;
+import org.testcontainers.mssqlserver.MSSQLServerContainer;
+
 import java.time.Duration;
 
 final class Ms16TestContainer implements ITestContainer {

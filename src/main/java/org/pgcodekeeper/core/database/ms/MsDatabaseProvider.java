@@ -26,9 +26,7 @@ import org.pgcodekeeper.core.database.ms.parser.MsCustomAntlrErrorStrategy;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLLexer;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -66,20 +64,20 @@ public class MsDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public MsDatabase getDatabaseFromJdbc(String url, ISettings settings, IMonitor monitor,
-                                          IgnoreSchemaList ignoreSchemaList) throws IOException, InterruptedException {
-        return new MsJdbcLoader(getJdbcConnector(url), settings, monitor, ignoreSchemaList).loadAndAnalyze();
-    }
-
-    @Override
-    public MsDatabase getDatabaseFromDump(Path path, ISettings settings, IMonitor monitor)
+    public MsDatabase getDatabaseFromJdbc(String url, DiffSettings diffSettings)
             throws IOException, InterruptedException {
-        return new MsDumpLoader(path, settings, monitor).loadAndAnalyze();
+        return new MsJdbcLoader(getJdbcConnector(url), diffSettings).loadAndAnalyze();
     }
 
     @Override
-    public MsDatabase getDatabaseFromProject(Path path, ISettings settings, IMonitor monitor,
-                                            IgnoreSchemaList ignoreSchemaList) throws IOException, InterruptedException {
-        return new MsProjectLoader(path, settings, monitor, ignoreSchemaList).loadAndAnalyze();
+    public MsDatabase getDatabaseFromDump(Path path, DiffSettings diffSettings)
+            throws IOException, InterruptedException {
+        return new MsDumpLoader(path, diffSettings).loadAndAnalyze();
+    }
+
+    @Override
+    public MsDatabase getDatabaseFromProject(Path path, DiffSettings diffSettings)
+            throws IOException, InterruptedException {
+        return new MsProjectLoader(path, diffSettings).loadAndAnalyze();
     }
 }

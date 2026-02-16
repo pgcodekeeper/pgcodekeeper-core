@@ -27,6 +27,7 @@ import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.exception.*;
 import org.pgcodekeeper.core.monitor.IMonitor;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,28 +45,30 @@ public class CustomParserListener<T extends IDatabase> {
     protected final T db;
     protected final ParserListenerMode mode;
     protected final String filename;
-    protected final List<Object> errors;
-    protected final ISettings settings;
-    private final IMonitor monitor;
+    protected final DiffSettings diffSettings;
 
     /**
      * Creates a new parser listener for building database schemas.
      *
-     * @param database the target database schema
-     * @param filename name of the file being parsed
-     * @param mode     parsing mode
-     * @param errors   list to collect parsing errors
-     * @param monitor  progress monitor for cancellation support
-     * @param settings application settings
+     * @param database     the target database schema
+     * @param filename     name of the file being parsed
+     * @param mode         parsing mode
+     * @param diffSettings unified context object containing settings, monitor, and error accumulator
      */
     public CustomParserListener(T database, String filename,
-                                ParserListenerMode mode, List<Object> errors, IMonitor monitor, ISettings settings) {
+                                ParserListenerMode mode, DiffSettings diffSettings) {
         this.db = database;
-        this.errors = errors;
-        this.monitor = monitor;
         this.filename = filename;
         this.mode = mode;
-        this.settings = settings;
+        this.diffSettings = diffSettings;
+    }
+
+    public ISettings getSettings() {
+        return diffSettings.getSettings();
+    }
+
+    public IMonitor getMonitor() {
+        return diffSettings.getMonitor();
     }
 
     /**
@@ -77,15 +80,15 @@ public class CustomParserListener<T extends IDatabase> {
 
     protected void safeParseStatement(Runnable r, ParserRuleContext ctx) {
         try {
-            IMonitor.checkCancelled(monitor);
+            IMonitor.checkCancelled(getMonitor());
             r.run();
         } catch (UnresolvedReferenceException ex) {
-            errors.add(handleUnresolvedReference(ex, filename));
+            diffSettings.addError(handleUnresolvedReference(ex, filename));
         } catch (InterruptedException ex) {
             throw new MonitorCancelledRuntimeException();
         } catch (Exception e) {
             if (ctx != null) {
-                errors.add(handleParserContextException(e, filename, ctx));
+                diffSettings.addError(handleParserContextException(e, filename, ctx));
             } else {
                 LOG.error("Statement context is missing", e);
             }

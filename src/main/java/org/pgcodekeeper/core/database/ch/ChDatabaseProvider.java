@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.ch;
 import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
-import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;
 import org.pgcodekeeper.core.database.ch.loader.ChDumpLoader;
 import org.pgcodekeeper.core.database.ch.loader.ChJdbcLoader;
@@ -27,9 +26,7 @@ import org.pgcodekeeper.core.database.ch.parser.ChCustomAntlrErrorStrategy;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHLexer;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -67,20 +64,20 @@ public class ChDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public ChDatabase getDatabaseFromJdbc(String url, ISettings settings, IMonitor monitor,
-                                          IgnoreSchemaList ignoreSchemaList) throws IOException, InterruptedException {
-        return new ChJdbcLoader(getJdbcConnector(url), settings, monitor, ignoreSchemaList).loadAndAnalyze();
-    }
-
-    @Override
-    public IDatabase getDatabaseFromDump(Path path, ISettings settings, IMonitor monitor)
+    public ChDatabase getDatabaseFromJdbc(String url, DiffSettings diffSettings)
             throws IOException, InterruptedException {
-        return new ChDumpLoader(path, settings, monitor).loadAndAnalyze();
+        return new ChJdbcLoader(getJdbcConnector(url), diffSettings).loadAndAnalyze();
     }
 
     @Override
-    public IDatabase getDatabaseFromProject(Path path, ISettings settings, IMonitor monitor,
-                                            IgnoreSchemaList ignoreSchemaList) throws IOException, InterruptedException {
-        return new ChProjectLoader(path, settings, monitor, ignoreSchemaList).loadAndAnalyze();
+    public ChDatabase getDatabaseFromDump(Path path, DiffSettings diffSettings)
+            throws IOException, InterruptedException {
+        return new ChDumpLoader(path, diffSettings).loadAndAnalyze();
+    }
+
+    @Override
+    public ChDatabase getDatabaseFromProject(Path path, DiffSettings diffSettings)
+            throws IOException, InterruptedException {
+        return new ChProjectLoader(path, diffSettings).loadAndAnalyze();
     }
 }

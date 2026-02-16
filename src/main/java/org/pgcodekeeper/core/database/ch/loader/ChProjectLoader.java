@@ -20,9 +20,7 @@ import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
 import org.pgcodekeeper.core.database.ch.project.ChWorkDirs;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.Utils;
 
 import java.io.IOException;
@@ -35,17 +33,8 @@ import java.util.stream.Stream;
  */
 public class ChProjectLoader extends AbstractProjectLoader<ChDatabase> {
 
-    /**
-     * Creates a new ClickHouse project loader with full configuration.
-     *
-     * @param dirPath          path to the project directory
-     * @param settings         loader settings and configuration
-     * @param monitor          progress monitor for tracking loading progress (can be null)
-     * @param ignoreSchemaList list of schemas to ignore during loading (can be null)
-     */
-    public ChProjectLoader(Path dirPath, ISettings settings,
-                           IMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
-        super(dirPath, settings, monitor, ignoreSchemaList);
+    public ChProjectLoader(Path dirPath, DiffSettings diffSettings) {
+        super(dirPath, diffSettings);
     }
 
     @Override
@@ -55,7 +44,7 @@ public class ChProjectLoader extends AbstractProjectLoader<ChDatabase> {
 
     @Override
     protected AbstractDumpLoader<ChDatabase> createDumpLoader(Path file) {
-        return new ChDumpLoader(file, settings, monitor);
+        return new ChDumpLoader(file, diffSettings);
     }
 
     @Override

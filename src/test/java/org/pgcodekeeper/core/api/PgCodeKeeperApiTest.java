@@ -24,19 +24,15 @@ import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.database.pg.loader.PgProjectLoader;
-import org.pgcodekeeper.core.exception.PgCodeKeeperException;
-import org.pgcodekeeper.core.ignorelist.IIgnoreList;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -65,7 +61,7 @@ class PgCodeKeeperApiTest {
         var newDb = loadDatabaseFromDump(getFilePath(testName + NEW), settings);
         var expectedDiff = getExpectedDiff(testName);
 
-        String actual = PgCodeKeeperApi.diff(settings, oldDb, newDb);
+        String actual = PgCodeKeeperApi.diff(oldDb, newDb, new DiffSettings(settings));
 
         TestUtils.assertIgnoreNewLines(expectedDiff, actual);
     }
@@ -80,7 +76,9 @@ class PgCodeKeeperApiTest {
         var ignoreListPath = getFilePath("ignore.pgcodekeeperignore");
         var expectedDiff = getExpectedDiff(testName);
 
-        String actual = PgCodeKeeperApi.diff(settings, oldDb, newDb, List.of(ignoreListPath));
+        var diffSettings = new DiffSettings(settings);
+        diffSettings.addIgnoreList(ignoreListPath);
+        String actual = PgCodeKeeperApi.diff(oldDb, newDb, diffSettings);
 
         TestUtils.assertIgnoreNewLines(expectedDiff, actual);
     }
@@ -92,7 +90,7 @@ class PgCodeKeeperApiTest {
         var exportedTableFile = tempDir.resolve(TABLES_DIRECTORY + "test_table.sql");
         var expectedContent = getFileContent(dumpFileName);
 
-        PgCodeKeeperApi.export(settings, db, tempDir.toString());
+        PgCodeKeeperApi.export(db, tempDir, new DiffSettings(settings));
 
         assertFileContent(exportedTableFile, expectedContent);
     }
@@ -105,17 +103,19 @@ class PgCodeKeeperApiTest {
         var expectedContent = getFileContent("test_export_with_ignore_list_exported.sql");
         var ignoreListPath = getFilePath("test_export_with_ignore_list.pgcodekeeperignore");
 
-        PgCodeKeeperApi.export(settings, db, tempDir.toString(), List.of(ignoreListPath), new NullMonitor());
+        var diffSettings = new DiffSettings(settings, new NullMonitor());
+        diffSettings.addIgnoreList(ignoreListPath);
+        PgCodeKeeperApi.export(db, tempDir, diffSettings);
 
         assertFileContent(exportedTableFile, expectedContent);
         assertFalse(Files.exists(ignoredTableFile));
     }
 
     @Test
-    void updateProjectTest(@TempDir Path tempDir) throws PgCodeKeeperException, IOException, InterruptedException {
+    void updateProjectTest(@TempDir Path tempDir) throws IOException, InterruptedException {
         // Setup project structure with initial tables
         setupUpdateProjectStructure(tempDir);
-        var oldDb = loadDatabaseFromProject(tempDir.toString(), settings);
+        var oldDb = loadDatabaseFromProject(tempDir, settings);
         var newDb = loadDatabaseFromDump(getFilePath("test_update_project_new_dump.sql"), settings);
         var expectedContent = getFileContent("test_update_project_new_dump.sql");
 
@@ -123,7 +123,7 @@ class PgCodeKeeperApiTest {
         Path firstTableFile = tablesDir.resolve("first_table.sql");
         Path secondTableFile = tablesDir.resolve("second_table.sql");
 
-        PgCodeKeeperApi.update(settings, oldDb, newDb, tempDir.toString());
+        PgCodeKeeperApi.update(oldDb, newDb, tempDir, new DiffSettings(settings));
 
         // Verify first table was removed and second table was updated
         assertFalse(Files.exists(firstTableFile));
@@ -134,7 +134,7 @@ class PgCodeKeeperApiTest {
     void updateProjectWithIgnoreListTest(@TempDir Path tempDir) throws IOException, InterruptedException {
         // Setup project structure with initial tables
         setupUpdateProjectStructure(tempDir);
-        var oldDb = loadDatabaseFromProject(tempDir.toString(), settings);
+        var oldDb = loadDatabaseFromProject(tempDir, settings);
         var newDb = loadDatabaseFromDump(getFilePath("test_update_project_new_dump.sql"), settings);
         var ignoreListPath = getFilePath("test_update_project_ignore_list.pgcodekeeperignore");
 
@@ -145,7 +145,9 @@ class PgCodeKeeperApiTest {
         Path firstTableFile = tablesDir.resolve("first_table.sql");
         Path secondTableFile = tablesDir.resolve("second_table.sql");
 
-        PgCodeKeeperApi.update(settings, oldDb, newDb, tempDir.toString(), List.of(ignoreListPath), new NullMonitor());
+        var diffSettings = new DiffSettings(settings, new NullMonitor());
+        diffSettings.addIgnoreList(ignoreListPath);
+        PgCodeKeeperApi.update(oldDb, newDb, tempDir, diffSettings);
 
         // Verify both tables exist and have correct content
         assertFileContent(firstTableFile, expectedFirstTableContent);
@@ -162,18 +164,17 @@ class PgCodeKeeperApiTest {
         Path secondTableFile = tablesDir.resolve("second_table.sql");
 
         // Copy test files to project structure
-        Files.copy(Paths.get(getFilePath("test_update_project_old_public.sql")), schemaFile, StandardCopyOption.REPLACE_EXISTING);
-        Files.copy(Paths.get(getFilePath("test_update_project_old_first_table.sql")), firstTableFile, StandardCopyOption.REPLACE_EXISTING);
-        Files.copy(Paths.get(getFilePath("test_update_project_old_second_table.sql")), secondTableFile, StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(getFilePath("test_update_project_old_public.sql"), schemaFile, StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(getFilePath("test_update_project_old_first_table.sql"), firstTableFile, StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(getFilePath("test_update_project_old_second_table.sql"), secondTableFile, StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private String getFilePath(String fileName) {
+    private Path getFilePath(String fileName) {
         return TestUtils.getFilePath(fileName, getClass());
     }
 
     private String getFileContent(String fileName) throws IOException {
-        var path = Path.of(getFilePath(fileName));
-        return Files.readString(path);
+        return Files.readString(getFilePath(fileName));
     }
 
     private String getExpectedDiff(String baseName) throws IOException {
@@ -186,14 +187,14 @@ class PgCodeKeeperApiTest {
         TestUtils.assertIgnoreNewLines(expectedContent, actualContent);
     }
 
-    private static IDatabase loadDatabaseFromDump(String pathToFile, ISettings settings)
+    private static IDatabase loadDatabaseFromDump(Path pathToFile, ISettings settings)
             throws IOException, InterruptedException {
-        return (new PgDumpLoader(Path.of(pathToFile), settings)).load();
+        return (new PgDumpLoader(pathToFile, new DiffSettings(settings))).load();
     }
 
-    private static IDatabase loadDatabaseFromProject(String projectPath, ISettings settings)
+    private static IDatabase loadDatabaseFromProject(Path projectPath, ISettings settings)
             throws IOException, InterruptedException {
-        var ignoreSchemaList = IIgnoreList.parseIgnoreList((String) null, new IgnoreSchemaList());
-        return new PgProjectLoader(Path.of(projectPath), settings, null, ignoreSchemaList).loadAndAnalyze();
+        DiffSettings diffSettings = new DiffSettings(settings);
+        return new PgProjectLoader(projectPath, diffSettings).loadAndAnalyze();
     }
 }

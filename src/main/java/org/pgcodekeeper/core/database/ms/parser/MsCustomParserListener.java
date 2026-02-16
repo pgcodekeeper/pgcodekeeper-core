@@ -26,8 +26,7 @@ import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
 import org.pgcodekeeper.core.database.ms.parser.statement.*;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 /**
  * Custom ANTLR listener for parsing Microsoft SQL Server (T-SQL) statements.
@@ -42,16 +41,14 @@ public final class MsCustomParserListener extends CustomParserListener<MsDatabas
     /**
      * Creates a new Microsoft SQL Server parser listener.
      *
-     * @param database the target database schema to populate
-     * @param filename name of the file being parsed
-     * @param mode     parsing mode
-     * @param errors   list to collect parsing errors
-     * @param monitor  progress monitor for cancellation support
-     * @param settings application settings
+     * @param database     the target database schema to populate
+     * @param filename     name of the file being parsed
+     * @param mode         parsing mode
+     * @param diffSettings unified context object containing settings, monitor, and error accumulator
      */
-    public MsCustomParserListener(MsDatabase database, String filename, ParserListenerMode mode, List<Object> errors,
-                                    IMonitor monitor, ISettings settings) {
-        super(database, filename, mode, errors, monitor, settings);
+    public MsCustomParserListener(MsDatabase database, String filename, ParserListenerMode mode,
+                                    DiffSettings diffSettings) {
+        super(database, filename, mode, diffSettings);
     }
 
     /**
@@ -109,7 +106,7 @@ public final class MsCustomParserListener extends CustomParserListener<MsDatabas
             } else if ((alter = ddl.schema_alter()) != null) {
                 alter(alter);
             } else if ((disable = ddl.enable_disable_trigger()) != null) {
-                safeParseStatement(new MsDisableTrigger(disable, db, settings), disable);
+                safeParseStatement(new MsDisableTrigger(disable, db, getSettings()), disable);
                 addToQueries(disable, getAction(disable));
             } else if ((drop = ddl.schema_drop()) != null) {
                 drop(drop);
@@ -121,11 +118,11 @@ public final class MsCustomParserListener extends CustomParserListener<MsDatabas
             Insert_statementContext insert = dml.insert_statement();
             Delete_statementContext delete = dml.delete_statement();
             if (update != null) {
-                safeParseStatement(new MsUpdateStatement(update, db, settings), update);
+                safeParseStatement(new MsUpdateStatement(update, db, getSettings()), update);
             } else if (insert != null) {
-                safeParseStatement(new MsInsertStatement(insert, db, settings), insert);
+                safeParseStatement(new MsInsertStatement(insert, db, getSettings()), insert);
             } else if (delete != null) {
-                safeParseStatement(new MsDeleteStatement(delete, db, settings), delete);
+                safeParseStatement(new MsDeleteStatement(delete, db, getSettings()), delete);
             } else {
                 addToQueries(dml, getAction(dml));
             }
@@ -137,7 +134,7 @@ public final class MsCustomParserListener extends CustomParserListener<MsDatabas
                 addToQueries(set, getAction(set));
             } else if ((security = ast.security_statement()) != null
                     && security.rule_common() != null) {
-                safeParseStatement(new MsGrantPrivilege(security.rule_common(), db, settings), security);
+                safeParseStatement(new MsGrantPrivilege(security.rule_common(), db, getSettings()), security);
             } else {
                 addToQueries(ast, getAction(ast));
             }
@@ -150,27 +147,27 @@ public final class MsCustomParserListener extends CustomParserListener<MsDatabas
         Batch_statement_bodyContext body = ctx.batch_statement_body();
 
         if (ctx.ALTER() != null) {
-            safeParseStatement(new MsAlterBatch(body, db, stream, settings), body);
+            safeParseStatement(new MsAlterBatch(body, db, stream, getSettings()), body);
             return;
         }
 
         MsParserAbstract p;
 
         if (ctx.create_schema() != null) {
-            p = new MsCreateSchema(ctx.create_schema(), db, settings);
+            p = new MsCreateSchema(ctx.create_schema(), db, getSettings());
         } else if (body.create_or_alter_procedure() != null) {
-            p = new MsCreateProcedure(ctx, db, ansiNulls, quotedIdentifier, stream, settings);
+            p = new MsCreateProcedure(ctx, db, ansiNulls, quotedIdentifier, stream, getSettings());
         } else if (body.create_or_alter_function() != null) {
-            p = new MsCreateFunction(ctx, db, ansiNulls, quotedIdentifier, stream, settings);
+            p = new MsCreateFunction(ctx, db, ansiNulls, quotedIdentifier, stream, getSettings());
         } else if (body.create_or_alter_view() != null) {
-            p = new MsCreateView(ctx, db, ansiNulls, quotedIdentifier, stream, settings);
+            p = new MsCreateView(ctx, db, ansiNulls, quotedIdentifier, stream, getSettings());
         } else if (body.create_or_alter_trigger() != null) {
             Create_or_alter_triggerContext triggerCtx = body.create_or_alter_trigger();
             if (triggerCtx.SERVER() != null || triggerCtx.DATABASE() != null) {
                 addToQueries(ctx, "CREATE TRIGGER");
                 return;
             }
-            p = new MsCreateTrigger(ctx, db, ansiNulls, quotedIdentifier, stream, settings);
+            p = new MsCreateTrigger(ctx, db, ansiNulls, quotedIdentifier, stream, getSettings());
         } else {
             addToQueries(ctx, getAction(ctx));
             return;
@@ -183,21 +180,21 @@ public final class MsCustomParserListener extends CustomParserListener<MsDatabas
     private void create(Schema_createContext ctx) {
         MsParserAbstract p;
         if (ctx.create_sequence() != null) {
-            p = new MsCreateSequence(ctx.create_sequence(), db, settings);
+            p = new MsCreateSequence(ctx.create_sequence(), db, getSettings());
         } else if (ctx.create_index() != null) {
-            p = new MsCreateIndex(ctx.create_index(), db, settings);
+            p = new MsCreateIndex(ctx.create_index(), db, getSettings());
         } else if (ctx.create_table() != null) {
-            p = new MsCreateTable(ctx.create_table(), db, ansiNulls, settings);
+            p = new MsCreateTable(ctx.create_table(), db, ansiNulls, getSettings());
         } else if (ctx.create_assembly() != null) {
-            p = new MsCreateAssembly(ctx.create_assembly(), db, settings);
+            p = new MsCreateAssembly(ctx.create_assembly(), db, getSettings());
         } else if (ctx.create_db_role() != null) {
-            p = new MsCreateRole(ctx.create_db_role(), db, settings);
+            p = new MsCreateRole(ctx.create_db_role(), db, getSettings());
         } else if (ctx.create_user() != null) {
-            p = new MsCreateUser(ctx.create_user(), db, settings);
+            p = new MsCreateUser(ctx.create_user(), db, getSettings());
         } else if (ctx.create_type() != null) {
-            p = new MsCreateType(ctx.create_type(), db, settings);
+            p = new MsCreateType(ctx.create_type(), db, getSettings());
         } else if (ctx.create_statistics() != null) {
-            p = new MsCreateStatistics(ctx.create_statistics(), db, settings);
+            p = new MsCreateStatistics(ctx.create_statistics(), db, getSettings());
         } else {
             addToQueries(ctx, getAction(ctx));
             return;
@@ -208,17 +205,17 @@ public final class MsCustomParserListener extends CustomParserListener<MsDatabas
     private void alter(Schema_alterContext ctx) {
         MsParserAbstract p;
         if (ctx.alter_authorization() != null) {
-            p = new MsAlterAuthorization(ctx.alter_authorization(), db, settings);
+            p = new MsAlterAuthorization(ctx.alter_authorization(), db, getSettings());
         } else if (ctx.alter_table() != null) {
-            p = new MsAlterTable(ctx.alter_table(), db, settings);
+            p = new MsAlterTable(ctx.alter_table(), db, getSettings());
         } else if (ctx.alter_assembly() != null) {
-            p = new MsAlterAssembly(ctx.alter_assembly(), db, settings);
+            p = new MsAlterAssembly(ctx.alter_assembly(), db, getSettings());
         } else if (ctx.alter_db_role() != null) {
-            p = new MsAlterRole(ctx.alter_db_role(), db, settings);
+            p = new MsAlterRole(ctx.alter_db_role(), db, getSettings());
         } else if (ctx.alter_schema_sql() != null
                 || ctx.alter_user() != null
                 || ctx.alter_sequence() != null) {
-            p = new MsAlterOther(ctx, db, settings);
+            p = new MsAlterOther(ctx, db, getSettings());
         } else {
             addToQueries(ctx, getAction(ctx));
             return;
@@ -231,7 +228,7 @@ public final class MsCustomParserListener extends CustomParserListener<MsDatabas
         if (ctx.drop_assembly() != null
                 || ctx.drop_index() != null
                 || ctx.drop_statements() != null) {
-            p = new MsDropStatement(ctx, db, settings);
+            p = new MsDropStatement(ctx, db, getSettings());
         } else {
             addToQueries(ctx, getAction(ctx));
             return;

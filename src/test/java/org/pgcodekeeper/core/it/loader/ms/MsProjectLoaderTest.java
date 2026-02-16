@@ -21,11 +21,9 @@ import org.junit.jupiter.api.io.TempDir;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.ms.MsDatabaseProvider;
 import org.pgcodekeeper.core.database.ms.project.MsModelExporter;
-import org.pgcodekeeper.core.ignorelist.IgnoreParser;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
-import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -41,23 +39,16 @@ class MsProjectLoaderTest {
     void testProjectLoaderWithIgnoredSchemas(@TempDir Path dir) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         MsDatabaseProvider databaseProvider = new MsDatabaseProvider();
-
-        var msDbDump = loadTestDump(databaseProvider, RESOURCE_MS_DUMP, IntegrationTestUtils.class, settings);
+        DiffSettings diffSettings = new DiffSettings(settings);
+        var msDbDump = loadTestDump(databaseProvider, RESOURCE_MS_DUMP, IntegrationTestUtils.class, diffSettings);
 
         new MsModelExporter(dir, msDbDump, Consts.UTF_8, settings).exportFull();
 
         createIgnoredSchemaFile(dir);
-        Path listFile = dir.resolve(".pgcodekeeperignoreschema");
 
-        // load ignored schema list
-        IgnoreSchemaList ignoreSchemaList = new IgnoreSchemaList();
-        IgnoreParser ignoreParser = new IgnoreParser(ignoreSchemaList);
-        ignoreParser.parse(listFile);
+        var db = IntegrationTestUtils.createProjectLoader(dir, diffSettings, msDbDump).load();
 
-        var loader = IntegrationTestUtils
-                .createProjectLoader(dir, settings, msDbDump, new NullMonitor(), ignoreSchemaList).load();
-
-        for (var dbSchema : loader.getSchemas()) {
+        for (var dbSchema : db.getSchemas()) {
             if (IGNORED_SCHEMAS_LIST.contains(dbSchema.getName())) {
                 Assertions.fail("Ignored Schema loaded " + dbSchema.getName());
             } else {

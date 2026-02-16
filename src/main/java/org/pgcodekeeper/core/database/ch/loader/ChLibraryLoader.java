@@ -19,8 +19,7 @@ import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.base.loader.AbstractLibraryLoader;
 import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.nio.file.Path;
 import java.util.Set;
@@ -28,8 +27,8 @@ import java.util.Set;
 public class ChLibraryLoader extends AbstractLibraryLoader<ChDatabase> {
 
     public ChLibraryLoader(ChDatabase database, Path metaPath, Set<String> loadedPaths,
-                           ISettings settings, IMonitor monitor) {
-        super(database, metaPath, loadedPaths, settings, monitor);
+                           DiffSettings diffSettings) {
+        super(database, metaPath, loadedPaths, diffSettings);
     }
 
     @Override
@@ -38,24 +37,23 @@ public class ChLibraryLoader extends AbstractLibraryLoader<ChDatabase> {
     }
 
     @Override
-    protected ChDumpLoader getDumpLoader(Path p, ISettings settings) {
-        return new ChDumpLoader(p, settings);
+    protected ChDumpLoader getDumpLoader(Path p, DiffSettings diffSettings) {
+        return new ChDumpLoader(p, diffSettings);
     }
 
     @Override
-    protected ChJdbcLoader createJdbcLoader(String url, ISettings settings) {
-        // FIXME IgnoreSchemaList?
+    protected ChJdbcLoader createJdbcLoader(String url, DiffSettings diffSettings) {
         IJdbcConnector con = new ChJdbcConnector(url);
-        return new ChJdbcLoader(con, settings, monitor, null);
+        return new ChJdbcLoader(con, diffSettings);
     }
 
     @Override
-    protected ChProjectLoader getProjectLoader(Path p, ISettings copySettings) {
-        return new ChProjectLoader(p, copySettings, monitor, null);
+    protected ChProjectLoader getProjectLoader(Path p, DiffSettings diffSettings) {
+        return new ChProjectLoader(p, diffSettings);
     }
 
     @Override
     protected ChLibraryLoader getCopy(ChDatabase db) {
-        return new ChLibraryLoader(db, metaPath, loadedPaths, settings, monitor);
+        return new ChLibraryLoader(db, metaPath, loadedPaths, diffSettings);
     }
 }

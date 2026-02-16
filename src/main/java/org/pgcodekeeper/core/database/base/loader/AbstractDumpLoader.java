@@ -18,12 +18,11 @@ package org.pgcodekeeper.core.database.base.loader;
 import org.pgcodekeeper.core.database.api.loader.IDumpLoader;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.AntlrTask;
+import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.base.schema.StatementOverride;
-import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.monitor.NullMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.io.IOException;
@@ -45,29 +44,25 @@ public abstract class AbstractDumpLoader<T extends IDatabase> extends AbstractLo
     protected Map<AbstractStatement, StatementOverride> overrides;
 
     protected AbstractDumpLoader(InputStreamProvider input, String inputObjectName,
-                                 ISettings settings, IMonitor monitor, int monitoringLevel) {
-        super(settings, monitor);
+                                 DiffSettings diffSettings, int monitoringLevel) {
+        super(diffSettings);
         this.input = input;
         this.inputObjectName = inputObjectName;
         this.monitoringLevel = monitoringLevel;
     }
 
-    protected AbstractDumpLoader(InputStreamProvider input, String inputObjectName, ISettings settings) {
-        this(input, inputObjectName, settings, new NullMonitor(), 0);
+    protected AbstractDumpLoader(InputStreamProvider input, String inputObjectName, DiffSettings diffSettings) {
+        this(input, inputObjectName, diffSettings, 0);
     }
 
-    protected AbstractDumpLoader(Path inputFile, ISettings settings, IMonitor monitor) {
-        this(() -> Files.newInputStream(inputFile), inputFile.toString(), settings, monitor, 1);
-    }
-
-    protected AbstractDumpLoader(Path inputFile, ISettings settings) {
-        this(() -> Files.newInputStream(inputFile), inputFile.toString(), settings, new NullMonitor(), 0);
+    protected AbstractDumpLoader(Path inputFile, DiffSettings diffSettings) {
+        this(() -> Files.newInputStream(inputFile), inputFile.toString(), diffSettings, 1);
     }
 
     @Override
     public T load() throws IOException, InterruptedException {
         var db = createDatabaseWithSchema();
-        IMonitor.checkCancelled(monitor);
+        IMonitor.checkCancelled(getMonitor());
         loadWithoutAnalyze(db, antlrTasks);
         finishLoaders();
         return db;
@@ -98,9 +93,4 @@ public abstract class AbstractDumpLoader<T extends IDatabase> extends AbstractLo
     protected abstract T createDatabase();
 
     protected abstract ISchema createDefaultSchema();
-
-    @Override
-    protected void prepare() {
-        // no impl
-    }
 }
