@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.database.base.schema;
+package org.pgcodekeeper.core.database.pg.schema;
 
 import java.util.Objects;
 
