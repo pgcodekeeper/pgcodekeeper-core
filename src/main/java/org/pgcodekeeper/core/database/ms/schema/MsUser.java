@@ -17,8 +17,8 @@ package org.pgcodekeeper.core.database.ms.schema;
 
 import java.util.Objects;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.ms.utils.MsConsts;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -87,7 +87,7 @@ public final class MsUser extends MsAbstractStatement {
         String newSchema = newUser.schema;
         if (!Objects.equals(schema, newSchema)) {
             if (newSchema == null) {
-                newSchema = Consts.DBO;
+                newSchema = MsConsts.DEFAULT_SCHEMA;
             }
             sbSql.append("DEFAULT_SCHEMA = ").append(quote(newSchema)).append(", ");
         }
@@ -119,7 +119,7 @@ public final class MsUser extends MsAbstractStatement {
      * @param schema the default schema name
      */
     public void setSchema(String schema) {
-        if (Consts.DBO.equals(schema)) {
+        if (MsConsts.DEFAULT_SCHEMA.equals(schema)) {
             return;
         }
         this.schema = schema;

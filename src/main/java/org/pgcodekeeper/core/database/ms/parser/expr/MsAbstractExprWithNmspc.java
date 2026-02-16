@@ -20,7 +20,6 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
@@ -148,7 +147,7 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
         String aliasCi = alias.toLowerCase(Locale.ROOT);
         boolean exists = namespace.containsKey(aliasCi);
         if (exists) {
-            log(Consts.DUPLICATE_ALIASES, aliasCi);
+            log(DUPLICATE_ALIASES, aliasCi);
         } else {
             namespace.put(aliasCi, object);
         }

@@ -21,13 +21,13 @@ import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.rulectx.PgSelectStmt;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.utils.*;
 
@@ -218,7 +218,7 @@ public abstract class PgAbstractExprWithNmspc<T extends ParserRuleContext> exten
      * @param argType var type
      */
     public void declareNamespaceVar(String alias, String name, ObjectReference argType) {
-        if (Consts.PG_CATALOG.equals(argType.schema())) {
+        if (PgConsts.PG_CATALOG.equals(argType.schema())) {
             String type = argType.table().toLowerCase(Locale.ROOT);
 
             int firstParen = type.indexOf('(');
@@ -231,7 +231,7 @@ public abstract class PgAbstractExprWithNmspc<T extends ParserRuleContext> exten
                 type = type.substring(0, firstBracket);
             }
 
-            if (Consts.SYS_TYPES.contains(type.trim())) {
+            if (PgConsts.SYS_TYPES.contains(type.trim())) {
                 addVarToPrims(alias, name, argType.table());
                 return;
             }
@@ -273,7 +273,7 @@ public abstract class PgAbstractExprWithNmspc<T extends ParserRuleContext> exten
     public boolean addReference(String alias, ObjectReference object) {
         boolean exists = namespace.containsKey(alias);
         if (exists) {
-            log(Consts.DUPLICATE_ALIASES, alias);
+            log(DUPLICATE_ALIASES, alias);
         } else {
             namespace.put(alias, object);
         }

@@ -19,7 +19,7 @@ import java.io.*;
 import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.hasher.*;
 
 /**

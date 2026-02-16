@@ -15,11 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.schema.PgSchema;
 
@@ -56,7 +56,7 @@ public class PgSchemasReader extends PgAbstractJdbcReader {
         PgSchema s = new PgSchema(schemaName);
         long owner = res.getLong("nspowner");
 
-        if (!schemaName.equals(Consts.PUBLIC)) {
+        if (!PgConsts.DEFAULT_SCHEMA.equals(schemaName)) {
             loader.setOwner(s, owner);
             loader.setComment(s, res);
         } else if (!"postgres".equals(loader.getRoleByOid(owner))) {

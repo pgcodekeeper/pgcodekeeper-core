@@ -17,10 +17,10 @@ package org.pgcodekeeper.core.database.pg.jdbc;
 
 import java.util.*;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 
 /**
  * Represents a PostgreSQL data type with schema qualification and array type handling.
@@ -89,7 +89,7 @@ public class PgJdbcType {
      * @return the qualified type name
      */
     public String getSchemaQualifiedName(String targetSchemaName) {
-        if (Consts.PG_CATALOG.equals(parentSchema)) {
+        if (PgConsts.PG_CATALOG.equals(parentSchema)) {
             String dealias = DATA_TYPE_ALIASES.get(typeName);
             return dealias == null ? PgDiffUtils.getQuotedName(typeName) : dealias;
         }
@@ -138,7 +138,7 @@ public class PgJdbcType {
      * @return the ObjectReference for this type
      */
     public ObjectReference toReference() {
-        if (Consts.PG_CATALOG.equals(parentSchema)) {
+        if (PgConsts.PG_CATALOG.equals(parentSchema)) {
             String dealias = DATA_TYPE_ALIASES.get(typeName);
             return new ObjectReference(parentSchema, dealias == null ? typeName : dealias,
                     DbObjType.TYPE);

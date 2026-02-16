@@ -20,11 +20,11 @@ import java.sql.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateTrigger;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.database.pg.schema.PgTrigger.TgTypes;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 
 /**
  * Reader for PostgreSQL triggers.

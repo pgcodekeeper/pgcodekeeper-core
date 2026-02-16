@@ -29,6 +29,8 @@ import java.util.*;
 public abstract class PgAbstractStatementContainer extends PgAbstractStatement
         implements IRelation, IStatementContainer, ISearchPath {
 
+    protected static final String HEAP = "heap";
+
     private final Map<String, PgIndex> indexes = new LinkedHashMap<>();
     private final Map<String, PgTrigger> triggers = new LinkedHashMap<>();
     private final Map<String, PgRule> rules = new LinkedHashMap<>();

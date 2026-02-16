@@ -20,9 +20,9 @@ import java.sql.*;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.jdbc.*;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.ch.loader.ChJdbcLoader;
 import org.pgcodekeeper.core.database.ch.schema.*;
+import org.pgcodekeeper.core.database.ch.utils.ChDiffUtils;
 
 /**
  * Reader for ClickHouse privileges.

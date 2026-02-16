@@ -17,7 +17,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 
 import java.util.*;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
@@ -185,6 +184,6 @@ public final class PgConstraintExclude extends PgConstraint implements PgIndexPa
 
     @Override
     public String getErrorCode() {
-        return Consts.DUPLICATE_RELATION;
+        return DUPLICATE_RELATION;
     }
 }

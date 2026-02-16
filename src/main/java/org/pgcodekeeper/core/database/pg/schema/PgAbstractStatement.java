@@ -15,14 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IPrivilege;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.formatter.PgFormatter;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.script.SQLScript;
 
 import java.util.*;
@@ -31,6 +31,10 @@ import java.util.function.UnaryOperator;
 public abstract class PgAbstractStatement extends AbstractStatement {
 
     private static final String RENAME_OBJECT_COMMAND = "ALTER %s %s RENAME TO %s";
+
+    // If table (maybe with sequence) exists we get this error code.
+    protected static final String DUPLICATE_RELATION = "'42P07'";
+    protected static final String PG_DEFAULT = "pg_default";
 
     protected PgAbstractStatement(String name) {
         super(name);
@@ -100,7 +104,7 @@ public abstract class PgAbstractStatement extends AbstractStatement {
     public void addPrivilege(IPrivilege privilege) {
         String locOwner;
         if (owner == null && getStatementType() == DbObjType.SCHEMA
-                && Consts.PUBLIC.equals(getName())) {
+                && PgConsts.DEFAULT_SCHEMA.equals(getName())) {
             locOwner = "postgres";
         } else {
             locOwner = owner;

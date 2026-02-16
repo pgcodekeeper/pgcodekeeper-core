@@ -16,8 +16,8 @@
 package org.pgcodekeeper.core.database.api.schema;
 
 import org.pgcodekeeper.core.script.SQLScript;
-
 import java.util.Map;
+
 /**
  * Interface for database objects that support simple option management with ALTER statements.
  * Provides default implementation for comparing and updating options using SET and RESET syntax.

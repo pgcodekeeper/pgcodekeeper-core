@@ -18,8 +18,8 @@ package org.pgcodekeeper.core.database.ms.jdbc;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
+import org.pgcodekeeper.core.database.ms.utils.MsConsts;
 
 import com.microsoft.sqlserver.jdbc.SQLServerDriver;
 
@@ -28,8 +28,9 @@ import com.microsoft.sqlserver.jdbc.SQLServerDriver;
  */
 public class MsJdbcConnector extends AbstractJdbcConnector {
 
-    private static final String URL_START_MS = "jdbc:sqlserver:";
+    protected static final String TRUST_CERT = "trustServerCertificate";
 
+    private static final String URL_START_MS = "jdbc:sqlserver:";
     private static final int DEFAULT_PORT = 1433;
 
     /**
@@ -53,15 +54,15 @@ public class MsJdbcConnector extends AbstractJdbcConnector {
     @Override
     protected Properties makeProperties() {
         Properties props = super.makeProperties();
-        if (!getUrl().contains(Consts.TRUST_CERT)) {
+        if (!getUrl().contains(TRUST_CERT)) {
             // revert to pre-10.x jdbc driver behavior unless told otherwise
-            props.setProperty(Consts.TRUST_CERT, "true");
+            props.setProperty(TRUST_CERT, "true");
         }
         return props;
     }
 
     @Override
     public String getBatchDelimiter() {
-        return Consts.GO;
+        return MsConsts.GO;
     }
 }

@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.database.ch;
-
-import org.pgcodekeeper.core.Consts;
+package org.pgcodekeeper.core.database.ch.utils;
 
 /**
  * Utility class for handling quoting and unquoting of identifiers and literals in ClickHouse.
  */
 public class ChDiffUtils {
+
+    private static final String INFORMATION_SCHEMA = "information_schema";
+    private static final String SYSTEM = "system";
 
     /**
      * Returns the name quoted with backticks (`) if it's not a valid identifier.
@@ -127,8 +128,7 @@ public class ChDiffUtils {
      * @return true if the schema is 'system' or 'information_schema', false otherwise
      */
     public static boolean isSystemSchema(String schema) {
-        return Consts.SYSTEM.equalsIgnoreCase(schema)
-                || Consts.INFORMATION_SCHEMA.equalsIgnoreCase(schema);
+        return SYSTEM.equalsIgnoreCase(schema) || INFORMATION_SCHEMA.equalsIgnoreCase(schema);
     }
 
     private ChDiffUtils() {

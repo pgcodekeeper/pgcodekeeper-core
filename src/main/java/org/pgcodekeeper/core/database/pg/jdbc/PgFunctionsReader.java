@@ -18,13 +18,10 @@ package org.pgcodekeeper.core.database.pg.jdbc;
 import java.sql.*;
 import java.util.*;
 
-import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.Consts.FUNC_SIGN;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.VexContext;
@@ -32,6 +29,9 @@ import org.pgcodekeeper.core.database.pg.parser.launcher.*;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateAggregate;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.database.pg.schema.PgAggregate.*;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts.FUNC_SIGN;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.*;
 
@@ -418,7 +418,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
             return null;
         }
         StringBuilder sb = new StringBuilder();
-        if (!Consts.PG_CATALOG.equalsIgnoreCase(schemaName)) {
+        if (!PgConsts.PG_CATALOG.equalsIgnoreCase(schemaName)) {
             addDep(agg, schemaName, funcName + PgCreateAggregate.getParamFuncSignature(agg, funcType),
                     DbObjType.FUNCTION);
             sb.append(PgDiffUtils.getQuotedName(schemaName)).append('.');

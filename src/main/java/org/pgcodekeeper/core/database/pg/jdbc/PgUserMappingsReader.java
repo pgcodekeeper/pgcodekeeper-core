@@ -19,8 +19,8 @@ import java.sql.*;
 
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
 import org.pgcodekeeper.core.database.pg.schema.*;
 
 /**
@@ -59,7 +59,7 @@ public final class PgUserMappingsReader extends PgAbstractJdbcReader {
 
         String[] options = PgJdbcUtils.getColArray(res, "umoptions", true);
         if (options != null) {
-            ParserAbstract.fillOptionParams(options, usm::addOption, false, true, false);
+            PgParserAbstract.fillOptionParams(options, usm::addOption, false, true, false);
         }
 
         loader.setAuthor(usm, res);

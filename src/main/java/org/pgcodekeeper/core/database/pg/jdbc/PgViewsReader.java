@@ -20,10 +20,10 @@ import java.sql.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.launcher.*;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.utils.Pair;
 import org.pgcodekeeper.core.utils.Utils;
@@ -128,7 +128,7 @@ public final class PgViewsReader extends PgAbstractSearchPathJdbcReader {
         // STORAGE PARAMETRS
         String[] options = PgJdbcUtils.getColArray(res, "reloptions", true);
         if (options != null) {
-            ParserAbstract.fillOptionParams(options, v::addOption, false, false, false);
+            PgParserAbstract.fillOptionParams(options, v::addOption, false, false, false);
         }
 
         schema.addChild(v);

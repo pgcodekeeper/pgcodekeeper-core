@@ -25,10 +25,10 @@ import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
 import org.pgcodekeeper.core.database.base.formatter.*;
 import org.pgcodekeeper.core.database.base.formatter.FormatItem;
 import org.pgcodekeeper.core.database.base.parser.CodeUnitToken;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.utils.Pair;
 
 /**

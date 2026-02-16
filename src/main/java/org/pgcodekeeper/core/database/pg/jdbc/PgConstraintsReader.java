@@ -20,9 +20,9 @@ import java.sql.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgAlterTable;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.utils.Pair;
 
@@ -84,7 +84,7 @@ public final class PgConstraintsReader extends PgAbstractSearchPathJdbcReader {
         }
 
         if (params != null) {
-            ParserAbstract.fillOptionParams(params, ((PgIndexParamContainer) constr)::addParam, false, false, false);
+            PgParserAbstract.fillOptionParams(params, ((PgIndexParamContainer) constr)::addParam, false, false, false);
         }
 
         String definition = res.getString("definition");
@@ -106,7 +106,7 @@ public final class PgConstraintsReader extends PgAbstractSearchPathJdbcReader {
     private void readNotNullConstraint(ResultSet res, PgAbstractTable table,
             String constraintName) throws SQLException {
         String columnName = res.getString("col_name");
-        PgColumn column = (PgColumn) table.getColumn(columnName);
+        PgColumn column = table.getColumn(columnName);
         if (column == null) {
             if (table.hasInherits()) {
                 column = new PgColumn(columnName);

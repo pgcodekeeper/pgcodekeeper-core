@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.ISimpleOptionContainer;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.*;
@@ -40,7 +39,7 @@ public abstract class PgAbstractRegularTable extends PgAbstractTable implements 
     private boolean isForceSecurity;
     private String partitionBy;
     private String distribution;
-    private String method = Consts.HEAP;
+    private String method = HEAP;
 
     /**
      * Creates a new PostgreSQL regular table.
@@ -80,7 +79,7 @@ public abstract class PgAbstractRegularTable extends PgAbstractTable implements 
             sql.append(partitionBy);
         }
 
-        if (!Consts.HEAP.equals(method)) {
+        if (!HEAP.equals(method)) {
             sql.append("\nUSING ").append(quote(method));
         }
 
@@ -149,7 +148,7 @@ public abstract class PgAbstractRegularTable extends PgAbstractTable implements 
                     .append("\n\tSET TABLESPACE ");
 
             String newSpace = newRegTable.tablespace;
-            sql.append(newSpace == null ? Consts.PG_DEFAULT : newSpace);
+            sql.append(newSpace == null ? PG_DEFAULT : newSpace);
             script.addStatement(sql);
         }
 

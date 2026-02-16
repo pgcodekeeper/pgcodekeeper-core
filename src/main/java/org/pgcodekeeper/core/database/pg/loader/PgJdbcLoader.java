@@ -20,17 +20,17 @@ import java.sql.*;
 import java.util.*;
 import java.util.function.*;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.loader.AbstractJdbcLoader;
 import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.jdbc.*;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser;
 import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.Utils;
@@ -42,6 +42,9 @@ import org.pgcodekeeper.core.utils.Utils;
  * Extends JdbcLoaderBase to provide PostgreSQL-specific loading functionality.
  */
 public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
+
+    private static final String GREENPLUM = "Greenplum";
+    private static final String EXTENSION_VERSION = "1.";
 
     private static final String QUERY_CHECK_GREENPLUM = new QueryBuilder()
             .column("version()")
@@ -205,7 +208,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
         setCurrentOperation(Messages.JdbcLoaderBase_log_check_gp_db);
         try (ResultSet res = getRunner().runScript(statement, QUERY_CHECK_GREENPLUM)) {
             if (res.next()) {
-                isGreenplumDb = res.getString(1).contains(Consts.GREENPLUM);
+                isGreenplumDb = res.getString(1).contains(GREENPLUM);
             }
         }
         debug(Messages.JdbcLoaderBase_log_get_result_gp, isGreenplumDb);
@@ -271,9 +274,9 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
         try (ResultSet res = runner.runScript(statement, QUERY_CHECK_TIMESTAMPS)) {
             while (res.next()) {
                 String extVersion = res.getString("extversion");
-                if (!extVersion.startsWith(Consts.EXTENSION_VERSION)) {
+                if (!extVersion.startsWith(EXTENSION_VERSION)) {
                     var msg = Messages.JdbcLoaderBase_log_old_version_used.formatted(extVersion,
-                            Consts.EXTENSION_VERSION);
+                            EXTENSION_VERSION);
                     info(msg);
                 } else if (res.getBoolean("disabled")) {
                     info(Messages.JdbcLoaderBase_log_event_trigger_disabled);
@@ -328,7 +331,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
         }
 
         String owner = st.getOwner();
-        if (owner == null && type == DbObjType.SCHEMA && Consts.PUBLIC.equals(st.getName())) {
+        if (owner == null && type == DbObjType.SCHEMA && PgConsts.DEFAULT_SCHEMA.equals(st.getName())) {
             owner = "postgres";
         }
 

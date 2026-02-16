@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.loader;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.parser.AntlrTask;
 import org.pgcodekeeper.core.database.pg.parser.IPgContextProcessor;
@@ -24,6 +23,7 @@ import org.pgcodekeeper.core.database.pg.parser.PgOverridesListener;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.schema.PgSchema;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
@@ -50,7 +50,7 @@ public class PgDumpLoader extends AbstractDumpLoader<PgDatabase> {
 
     @Override
     protected PgSchema createDefaultSchema() {
-        return new PgSchema(Consts.PUBLIC);
+        return new PgSchema(PgConsts.DEFAULT_SCHEMA);
     }
 
     @Override

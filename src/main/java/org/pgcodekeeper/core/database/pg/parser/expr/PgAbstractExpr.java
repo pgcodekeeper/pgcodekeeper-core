@@ -22,15 +22,15 @@ import java.util.stream.Stream;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.*;
 import org.pgcodekeeper.core.database.base.parser.antlr.AbstractExpr;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.database.base.parser.FullAnalyze;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.utils.*;
@@ -93,7 +93,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
         String name = nameCtx.getText();
 
         if (schemaCtx == null) {
-            return new ObjectReference(Consts.PG_CATALOG, name, type);
+            return new ObjectReference(PgConsts.PG_CATALOG, name, type);
         }
         String schemaName = schemaCtx.getText();
         ObjectReference depcy = new ObjectReference(schemaName, name, type);
@@ -105,7 +105,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
     protected ObjectReference addTypeDepcy(Data_typeContext type) {
         Schema_qualified_name_nontypeContext typeName = type.predefined_type().schema_qualified_name_nontype();
         if (typeName == null) {
-            return new ObjectReference(Consts.PG_CATALOG, PgParserAbstract.getTypeName(type),
+            return new ObjectReference(PgConsts.PG_CATALOG, PgParserAbstract.getTypeName(type),
                     DbObjType.TYPE);
         }
         return addTypeDepcy(typeName);
@@ -390,7 +390,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
     @Override
     protected String getSchemaName(String schemaName) {
         if (schemaName == null) {
-            return Consts.PG_CATALOG;
+            return PgConsts.PG_CATALOG;
         }
         return super.getSchemaName(schemaName);
     }

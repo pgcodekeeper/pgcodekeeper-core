@@ -20,7 +20,6 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
@@ -125,7 +124,7 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
      */
     private void addReference(String alias, ObjectReference object) {
         if (namespace.containsKey(alias)) {
-            log(Consts.DUPLICATE_ALIASES, alias);
+            log(DUPLICATE_ALIASES, alias);
             return;
         }
         namespace.put(alias, object);

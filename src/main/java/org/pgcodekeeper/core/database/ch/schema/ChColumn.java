@@ -19,7 +19,7 @@ import org.pgcodekeeper.core.database.api.schema.IColumn;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
-import org.pgcodekeeper.core.database.ch.ChDiffUtils;
+import org.pgcodekeeper.core.database.ch.utils.ChDiffUtils;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;

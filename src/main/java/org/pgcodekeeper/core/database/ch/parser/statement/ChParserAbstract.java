@@ -24,11 +24,11 @@ import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.ch.ChDiffUtils;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
 import org.pgcodekeeper.core.database.ch.parser.launcher.ChExpressionAnalysisLauncher;
 import org.pgcodekeeper.core.database.ch.project.ChWorkDirs;
 import org.pgcodekeeper.core.database.ch.schema.*;
+import org.pgcodekeeper.core.database.ch.utils.ChDiffUtils;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.nio.file.Path;

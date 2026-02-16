@@ -15,11 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.parser.statement;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.ISchema;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.settings.ISettings;
 
 /**
@@ -56,7 +56,7 @@ public final class PgCreateSchema extends PgParserAbstract {
         User_nameContext user = ctx.user_name();
         IdentifierContext userName = user == null ? null : user.identifier();
         if (userName != null && !settings.isIgnorePrivileges()
-                && (!Consts.PUBLIC.equals(nameCtx.getText()) || !"postgres".equals(userName.getText()))) {
+                && (!PgConsts.DEFAULT_SCHEMA.equals(nameCtx.getText()) || !"postgres".equals(userName.getText()))) {
             schema.setOwner(userName.getText());
         }
     }

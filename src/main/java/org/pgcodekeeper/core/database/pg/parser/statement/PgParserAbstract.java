@@ -26,18 +26,20 @@ import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.base.schema.Argument;
 import org.pgcodekeeper.core.database.base.schema.SimpleColumn;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.project.PgWorkDirs;
 import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Pair;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 /**
@@ -118,6 +120,54 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
         } else if (nullOrd.FIRST() != null) {
             sCol.setNullsOrdering(" NULLS FIRST");
         }
+    }
+
+    /**
+     * Processes option parameters into key-value pairs.
+     *
+     * @param options    the option strings to parse
+     * @param c          the consumer to receive each key-value pair
+     * @param isToast    whether these are TOAST options
+     * @param forceQuote whether to force quoting of values
+     * @param isQuoted   whether values are already quoted
+     */
+    public static void fillOptionParams(String[] options, BiConsumer<String, String> c,
+                                        boolean isToast, boolean forceQuote, boolean isQuoted) {
+        for (String pair : options) {
+            int sep = pair.indexOf('=');
+            String option;
+            String value;
+            if (sep == -1) {
+                option = pair;
+                value = "";
+            } else {
+                option = pair.substring(0, sep);
+                value = pair.substring(sep + 1);
+            }
+            if (!isQuoted && (forceQuote || !PgDiffUtils.isValidId(value, false, false))) {
+                // only quote non-ids, do not quote columns
+                // pg_dump behavior
+                value = Utils.quoteString(value);
+            }
+            fillOptionParams(value, option, isToast, c);
+        }
+    }
+
+    /**
+     * Processes a single option parameter.
+     *
+     * @param value   the option value
+     * @param option  the option name
+     * @param isToast whether this is a TOAST option
+     * @param c       the consumer to receive the key-value pair
+     */
+    public static void fillOptionParams(String value, String option, boolean isToast,
+                                        BiConsumer<String, String> c) {
+        String quotedOption = PgDiffUtils.getQuotedName(option);
+        if (isToast) {
+            quotedOption = "toast." + quotedOption;
+        }
+        c.accept(quotedOption, value);
     }
 
     protected static void fillIncludingDepcy(Including_indexContext incl, AbstractStatement st, String schema, String table) {
@@ -272,8 +322,7 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
                 return "boolean";
             case "float8":
                 return "double precision";
-            case "int":
-            case "int4":
+            case "int", "int4":
                 return "integer";
             case "float4":
                 return "real";

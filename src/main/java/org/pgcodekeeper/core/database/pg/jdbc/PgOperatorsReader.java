@@ -17,12 +17,12 @@ package org.pgcodekeeper.core.database.pg.jdbc;
 
 import java.sql.*;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.schema.PgOperator;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 
 /**
  * Reader for PostgreSQL operators.
@@ -110,7 +110,7 @@ public final class PgOperatorsReader extends PgAbstractSearchPathJdbcReader {
 
     private String getProcessedName(PgOperator oper, String schemaName, String funcName) {
         StringBuilder sb = new StringBuilder();
-        if (!Consts.PG_CATALOG.equalsIgnoreCase(schemaName)) {
+        if (!PgConsts.PG_CATALOG.equalsIgnoreCase(schemaName)) {
             sb.append(PgDiffUtils.getQuotedName(schemaName)).append('.');
             addDep(oper, schemaName, funcName + oper.getArguments(), DbObjType.FUNCTION);
         }

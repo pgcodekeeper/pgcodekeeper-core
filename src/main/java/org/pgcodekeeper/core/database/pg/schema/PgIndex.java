@@ -21,7 +21,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 
 import java.util.*;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
@@ -194,7 +193,7 @@ public final class PgIndex extends PgAbstractStatement implements IIndex {
                     .append(" SET TABLESPACE ");
 
             String newSpace = newIndex.tablespace;
-            sql.append(newSpace == null ? Consts.PG_DEFAULT : newSpace);
+            sql.append(newSpace == null ? PG_DEFAULT : newSpace);
             script.addStatement(sql);
         }
 

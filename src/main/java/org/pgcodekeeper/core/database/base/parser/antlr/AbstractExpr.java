@@ -32,6 +32,10 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractExpr {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractExpr.class);
+    /**
+     * Log message when in the SELECT part aliases is duplicate
+     */
+    protected static final String DUPLICATE_ALIASES = "Duplicate aliases entry: %s";
 
     private final Set<ObjectLocation> dependencies;
 

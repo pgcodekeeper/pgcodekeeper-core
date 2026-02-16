@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.loader;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
@@ -25,6 +24,7 @@ import org.pgcodekeeper.core.database.base.parser.AntlrTaskManager;
 import org.pgcodekeeper.core.database.ms.project.MsWorkDirs;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.ms.schema.MsSchema;
+import org.pgcodekeeper.core.database.ms.utils.MsConsts;
 import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
@@ -73,15 +73,15 @@ public class MsProjectLoader extends AbstractProjectLoader<MsDatabase> {
     }
 
     private void addDboSchema(MsDatabase db) {
-        if (!db.containsSchema(Consts.DBO)) {
-            MsSchema schema = new MsSchema(Consts.DBO);
+        if (!db.containsSchema(MsConsts.DEFAULT_SCHEMA)) {
+            MsSchema schema = new MsSchema(MsConsts.DEFAULT_SCHEMA);
             ObjectLocation loc = new ObjectLocation.Builder()
-                    .setReference(new ObjectReference(Consts.DBO, DbObjType.SCHEMA))
+                    .setReference(new ObjectReference(MsConsts.DEFAULT_SCHEMA, DbObjType.SCHEMA))
                     .build();
 
             schema.setLocation(loc);
             db.addSchema(schema);
-            db.setDefaultSchema(Consts.DBO);
+            db.setDefaultSchema(MsConsts.DEFAULT_SCHEMA);
         }
     }
 

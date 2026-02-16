@@ -27,8 +27,6 @@ import org.pgcodekeeper.core.database.api.schema.EventType;
 import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.ISchema;
-import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.Argument;
 import org.pgcodekeeper.core.database.base.schema.SimpleColumn;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
@@ -36,6 +34,7 @@ import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.database.pg.schema.PgTrigger.TgTypes;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.DiffSettings;
@@ -223,7 +222,7 @@ class PgAntlrLoaderTest {
         d.addChild(ext);
         ext.setComment("'PostGIS geometry, geography, and raster spatial types and functions'");
 
-        schema = d.getSchema(Consts.PUBLIC);
+        schema = d.getSchema(PgConsts.DEFAULT_SCHEMA);
 
         PgAbstractTable table = new PgSimpleTable("contacts");
         schema.addChild(table);

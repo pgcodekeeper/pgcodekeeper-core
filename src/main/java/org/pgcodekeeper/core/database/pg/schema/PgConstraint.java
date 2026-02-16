@@ -34,6 +34,11 @@ import java.util.Collections;
  */
 public abstract class PgConstraint extends PgAbstractStatement implements IConstraint, ISubElement {
 
+    //If PK exists we get this error code.
+    protected static final String INVALID_DEFINITION = "'42P16'";
+    //If object exists we get this error code.
+    protected static final String DUPLICATE_OBJECT = "'42710'";
+
     protected boolean deferrable;
     protected boolean initially;
     protected boolean notEnforced;

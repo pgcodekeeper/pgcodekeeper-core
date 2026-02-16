@@ -20,7 +20,6 @@ import java.util.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
@@ -30,6 +29,7 @@ import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.rulectx.PgVex;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.utils.*;
 
@@ -168,7 +168,7 @@ public final class PgValueExpr extends PgAbstractExpr {
         Schema_qualified_name_nontypeContext customType = dataType.predefined_type().schema_qualified_name_nontype();
         IdentifierContext typeSchema = customType == null ? null : customType.identifier();
         // TODO remove when tokens are refactored
-        if (customType != null && (typeSchema == null || Consts.PG_CATALOG.equals(typeSchema.getText()))
+        if (customType != null && (typeSchema == null || PgConsts.PG_CATALOG.equals(typeSchema.getText()))
                 && dataType.ARRAY() == null && dataType.array_type().isEmpty() && dataType.SETOF() == null) {
             // check simple built-in types for reg*** casts
             Value_expression_primaryContext castPrimary = operand.primary();
@@ -189,7 +189,7 @@ public final class PgValueExpr extends PgAbstractExpr {
 
     private ModPair<String, String> op(PgVex vex, List<ModPair<String, String>> operandsList,
                                        String operator, OpContext op) {
-        String schema = Consts.PG_CATALOG;
+        String schema = PgConsts.PG_CATALOG;
         ParserRuleContext ctx = null;
         if (op != null) {
             IdentifierContext opSchemaCtx = op.identifier();
