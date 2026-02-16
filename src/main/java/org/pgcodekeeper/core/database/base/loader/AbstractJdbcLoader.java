@@ -25,10 +25,9 @@ import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
 import org.pgcodekeeper.core.database.base.parser.AntlrTaskManager;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.exception.MonitorCancelledRuntimeException;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.Utils;
 
 import java.sql.Connection;
@@ -51,7 +50,6 @@ public abstract class AbstractJdbcLoader<T extends IDatabase> extends AbstractLo
 
     protected final JdbcRunner runner;
     protected final IJdbcConnector connector;
-    protected final IgnoreSchemaList ignoreSchemaList;
     protected final Map<Object, ISchema> schemaIds = new HashMap<>();
 
     private ObjectReference currentObject;
@@ -60,11 +58,10 @@ public abstract class AbstractJdbcLoader<T extends IDatabase> extends AbstractLo
     protected Connection connection;
     protected Statement statement;
 
-    protected AbstractJdbcLoader(IJdbcConnector connector, IMonitor monitor, ISettings settings, IgnoreSchemaList ignoreSchemaList) {
-        super(settings, monitor);
+    protected AbstractJdbcLoader(IJdbcConnector connector, DiffSettings diffSettings) {
+        super(diffSettings);
         this.connector = connector;
-        this.runner = new JdbcRunner(monitor);
-        this.ignoreSchemaList = ignoreSchemaList;
+        this.runner = new JdbcRunner(getMonitor());
     }
 
     protected <P extends Parser, R> void submitAntlrTask(BiFunction<List<Object>, String, P> parserCreateFunction,
@@ -73,12 +70,12 @@ public abstract class AbstractJdbcLoader<T extends IDatabase> extends AbstractLo
         ObjectReference object = this.currentObject;
         List<Object> list = new ArrayList<>();
         AntlrTaskManager.submit(antlrTasks, () -> {
-            IMonitor.checkCancelled(monitor);
+            IMonitor.checkCancelled(getMonitor());
             P p = parserCreateFunction.apply(list, location);
             return parserCtxReader.apply(p);
         }, r -> {
-            errors.addAll(list);
-            if (monitor.isCanceled()) {
+            diffSettings.addErrors(list);
+            if (getMonitor().isCanceled()) {
                 throw new MonitorCancelledRuntimeException();
             }
             setCurrentObject(object);
@@ -87,7 +84,7 @@ public abstract class AbstractJdbcLoader<T extends IDatabase> extends AbstractLo
     }
 
     public void setOwner(AbstractStatement st, String owner) {
-        if (!settings.isIgnorePrivileges()) {
+        if (!getSettings().isIgnorePrivileges()) {
             st.setOwner(owner);
         }
     }
@@ -120,7 +117,7 @@ public abstract class AbstractJdbcLoader<T extends IDatabase> extends AbstractLo
     public final void setComment(AbstractStatement f, ResultSet res) throws SQLException {
         String comment = res.getString("description");
         if (comment != null && !comment.isEmpty()) {
-            f.setComment(Utils.checkNewLines(Utils.quoteString(comment), settings.isKeepNewlines()));
+            f.setComment(Utils.checkNewLines(Utils.quoteString(comment), getSettings().isKeepNewlines()));
         }
     }
 
@@ -134,14 +131,6 @@ public abstract class AbstractJdbcLoader<T extends IDatabase> extends AbstractLo
 
     public Connection getConnection() {
         return connection;
-    }
-
-    public boolean isIgnoredSchema(String schemaName) {
-        return ignoreSchemaList != null && !ignoreSchemaList.getNameStatus(schemaName);
-    }
-
-    public IMonitor getMonitor() {
-        return monitor;
     }
 
     public String getCurrentLocation() {

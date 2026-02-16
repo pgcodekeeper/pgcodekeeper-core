@@ -31,10 +31,8 @@ import org.pgcodekeeper.core.database.pg.jdbc.*;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser;
 import org.pgcodekeeper.core.database.pg.schema.*;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.Utils;
 
 /**
@@ -110,14 +108,12 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
     /**
      * Creates a new PostgreSQL JDBC loader with the specified parameters.
      *
-     * @param connector        the JDBC connector for establishing database connections
-     * @param timezone         the timezone to set for the database connection
-     * @param settings         loader settings and configuration
-     * @param monitor          progress monitor for tracking loading progress
+     * @param connector    the JDBC connector for establishing database connections
+     * @param timezone     the timezone to set for the database connection
+     * @param diffSettings unified context object containing settings, ignore list, and error accumulator
      */
-    public PgJdbcLoader(IJdbcConnector connector, String timezone, ISettings settings,
-                        IMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
-        super(connector, monitor, settings, ignoreSchemaList);
+    public PgJdbcLoader(IJdbcConnector connector, String timezone, DiffSettings diffSettings) {
+        super(connector, diffSettings);
         this.timezone = timezone;
     }
 
@@ -258,7 +254,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
     }
 
     protected void queryRoles() throws SQLException, InterruptedException {
-        if (settings.isIgnorePrivileges()) {
+        if (getSettings().isIgnorePrivileges()) {
             return;
         }
         cachedRolesNamesByOid = new HashMap<>();
@@ -292,7 +288,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
         setCurrentOperation(Messages.JdbcLoaderBase_log_get_obj_count);
         try (ResultSet resCount = runner.runScript(statement, QUERY_TOTAL_OBJECTS_COUNT)) {
             int count = resCount.next() ? resCount.getInt(1) : DEFAULT_OBJECTS_COUNT;
-            monitor.setWorkRemaining(count);
+            getMonitor().setWorkRemaining(count);
             debug(Messages.JdbcLoaderBase_log_get_total_obj_count, count);
         }
     }
@@ -341,7 +337,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
     }
 
     public void setOwner(AbstractStatement statement, long ownerOid) {
-        if (!settings.isIgnorePrivileges()) {
+        if (!getSettings().isIgnorePrivileges()) {
             statement.setOwner(getRoleByOid(ownerOid));
         }
     }
@@ -369,7 +365,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
      */
     private void setPrivileges(AbstractStatement st, String stSignature,
                                String aclItemsArrayAsString, String owner, String columnId, String schemaName) {
-        if (aclItemsArrayAsString == null || settings.isIgnorePrivileges()) {
+        if (aclItemsArrayAsString == null || getSettings().isIgnorePrivileges()) {
             return;
         }
         DbObjType type = st.getStatementType();
@@ -505,7 +501,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
     }
 
     public String getRoleByOid(long oid) {
-        if (settings.isIgnorePrivileges()) {
+        if (getSettings().isIgnorePrivileges()) {
             return null;
         }
         return oid == 0 ? "PUBLIC" : cachedRolesNamesByOid.get(oid);

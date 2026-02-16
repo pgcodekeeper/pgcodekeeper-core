@@ -15,14 +15,18 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.jdbc;
 
-import java.sql.*;
-
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.jdbc.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
+import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcReader;
+import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
-import org.pgcodekeeper.core.database.ms.schema.*;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
+import org.pgcodekeeper.core.database.ms.schema.MsSchema;
 import org.pgcodekeeper.core.exception.XmlReaderException;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * Reader for Microsoft SQL schemas.
@@ -47,7 +51,7 @@ public class MsSchemasReader extends AbstractJdbcReader<MsJdbcLoader> implements
     protected void processResult(ResultSet res) throws SQLException, XmlReaderException {
         String schemaName = res.getString("name");
         loader.setCurrentObject(new ObjectReference(schemaName, DbObjType.SCHEMA));
-        if (loader.isIgnoredSchema(schemaName)) {
+        if (!loader.isAllowedSchema(schemaName)) {
             return;
         }
 

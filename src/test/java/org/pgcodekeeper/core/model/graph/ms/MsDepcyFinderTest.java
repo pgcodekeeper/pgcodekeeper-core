@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph.ms;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
@@ -28,6 +24,12 @@ import org.pgcodekeeper.core.database.ms.MsDatabaseProvider;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.model.graph.DepcyFinder;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+
 
 class MsDepcyFinderTest {
 
@@ -62,7 +64,8 @@ class MsDepcyFinderTest {
 
         settings.setEnableFunctionBodiesDependencies(true);
 
-        IDatabase db = IntegrationTestUtils.loadTestDump(databaseProvider, fileName + FILES_POSTFIX.SQL, getClass(), settings);
+        IDatabase db = IntegrationTestUtils.loadTestDump(databaseProvider, fileName + FILES_POSTFIX.SQL,
+                getClass(), new DiffSettings(settings));
 
         var deps = DepcyFinder.byPatterns(10, isReverse, Collections.emptyList(), false, db, List.of(objectName));
         String actual = String.join("\n", deps);

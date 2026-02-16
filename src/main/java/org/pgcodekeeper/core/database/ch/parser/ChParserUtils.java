@@ -30,6 +30,7 @@ import org.pgcodekeeper.core.exception.MonitorCancelledRuntimeException;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.monitor.NullMonitor;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 import org.pgcodekeeper.core.utils.Pair;
 
@@ -86,17 +87,18 @@ public final class ChParserUtils {
      * Parses ClickHouse SQL stream asynchronously.
      *
      * @param inputStream      provider of the input stream
-     * @param charsetName      character encoding of the stream
      * @param parsedObjectName name of the object being parsed
-     * @param errors           list to collect parsing errors
-     * @param mon              progress monitor for cancellation support
+     * @param diffSettings     unified context object containing settings, monitor, and error accumulator
      * @param monitoringLevel  level of parse tree monitoring
      * @param listener         processor for the parsed content
      * @param antlrTasks       queue for parser tasks
      */
-    public static void parseSqlStream(InputStreamProvider inputStream, String charsetName, String parsedObjectName,
-                                        List<Object> errors, IMonitor mon, int monitoringLevel, IChContextProcessor listener,
+    public static void parseSqlStream(InputStreamProvider inputStream, String parsedObjectName,
+                                        DiffSettings diffSettings, int monitoringLevel, IChContextProcessor listener,
                                         Queue<AntlrTask<?>> antlrTasks) {
+        List<Object> errors = diffSettings.getErrors();
+        IMonitor mon = diffSettings.getMonitor();
+        String charsetName = diffSettings.getSettings().getInCharsetName();
         AntlrTaskManager.submit(antlrTasks, () -> {
             IMonitor.checkCancelled(mon);
             try (InputStream stream = inputStream.getStream()) {

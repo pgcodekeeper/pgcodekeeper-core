@@ -18,7 +18,6 @@ package org.pgcodekeeper.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,19 +37,14 @@ public final class TestUtils {
         }
     }
 
-    public static Path getPathToResource(String resourceName, Class<?> clazz) throws URISyntaxException {
-        URL url = clazz.getResource(resourceName);
-        return Paths.get(url.toURI());
-    }
-
-    public static String getFilePath(String resourceName, Class<?> clazz) {
+    public static Path getFilePath(String resourceName, Class<?> clazz) {
         var resource = clazz.getResource(resourceName);
         if (resource == null) {
             throw new IllegalArgumentException("Test resource not found: " + resourceName);
         }
 
         try {
-            return Paths.get(resource.toURI()).toString();
+            return Paths.get(resource.toURI());
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Invalid resource URI: " + resourceName, e);
         }

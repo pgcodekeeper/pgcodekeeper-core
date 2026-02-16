@@ -17,12 +17,13 @@ package org.pgcodekeeper.core.it.diff.pg;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 
@@ -60,15 +61,16 @@ class PgMoveDataDiffTest {
         var settings = new CoreSettings();
         PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
         settings.setDataMovementMode(true);
+        var diffSettings = new DiffSettings(settings);
         IDatabase dbOld = loadTestDump(
-                databaseProvider, fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, PgMoveDataDiffTest.class, settings);
+                databaseProvider, fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, PgMoveDataDiffTest.class, diffSettings);
         IDatabase dbNew = loadTestDump(
-                databaseProvider, fileNameTemplate + FILES_POSTFIX.NEW_SQL, PgMoveDataDiffTest.class, settings);
+                databaseProvider, fileNameTemplate + FILES_POSTFIX.NEW_SQL, PgMoveDataDiffTest.class, diffSettings);
 
-        IntegrationTestUtils.assertDiffSame(dbOld, fileNameTemplate, settings);
-        IntegrationTestUtils.assertDiffSame(dbNew, fileNameTemplate, settings);
+        IntegrationTestUtils.assertDiffSame(dbOld, fileNameTemplate, diffSettings);
+        IntegrationTestUtils.assertDiffSame(dbNew, fileNameTemplate, diffSettings);
 
-        String script = PgCodeKeeperApi.diff(settings, dbOld, dbNew);
+        String script = PgCodeKeeperApi.diff(dbOld, dbNew, diffSettings);
         String content = script.replaceAll("([0-9a-fA-F]{32})", "randomly_generated_part");
 
         IntegrationTestUtils.assertResult(content, fileNameTemplate, PgMoveDataDiffTest.class);

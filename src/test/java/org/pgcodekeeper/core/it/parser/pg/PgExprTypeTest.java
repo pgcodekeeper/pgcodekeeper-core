@@ -25,18 +25,19 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
-import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
-import org.pgcodekeeper.core.database.pg.PgDiffUtils;
-import org.pgcodekeeper.core.utils.Utils;
-import org.pgcodekeeper.core.it.IntegrationTestUtils;
-import org.pgcodekeeper.core.database.base.parser.FullAnalyze;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IRelation;
+import org.pgcodekeeper.core.database.base.parser.FullAnalyze;
 import org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;
 import org.pgcodekeeper.core.database.base.schema.meta.MetaUtils;
+import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
+import org.pgcodekeeper.core.database.pg.PgDiffUtils;
+import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.Pair;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -102,7 +103,7 @@ class PgExprTypeTest {
         PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
 
         IDatabase dbNew = IntegrationTestUtils.loadTestDump(databaseProvider,
-                fileNameTemplate + postfix, PgExprTypeTest.class, settings, false);
+                fileNameTemplate + postfix, PgExprTypeTest.class, new DiffSettings(settings), false);
         MetaContainer metaDb = MetaUtils.createTreeFromDb(dbNew);
         FullAnalyze.fullAnalyze(dbNew, metaDb, new ArrayList<>());
         return metaDb;

@@ -15,16 +15,21 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.parser.statement;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
-import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.database.pg.schema.PgColumn;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgSchema;
+import org.pgcodekeeper.core.database.pg.schema.PgSequence;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.settings.ISettings;
+
+import java.util.List;
 
 /**
  * Parser for PostgreSQL ALTER SEQUENCE statements.
@@ -85,7 +90,7 @@ public final class PgAlterSequence extends PgParserAbstract {
 
     /**
      * Searches column generated sequence and set to {@link PgSequence} field isLogged false. We must look for by
-     * {@link PgColumn} field because generated sequence not be the child element of {@link AbstractSchema}
+     * {@link PgColumn} field because generated sequence not be the child element of {@link PgSchema}
      *
      * @param loggedCtx - {@link Set_loggedContext}
      * @param ids       - list of {@link ParserRuleContext} where store {@link PgSequence} qualified name

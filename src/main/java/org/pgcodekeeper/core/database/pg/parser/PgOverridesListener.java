@@ -30,8 +30,7 @@ import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.schema.PgSchema;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 /**
  * Custom ANTLR listener for processing PostgreSQL SQL statements with override support.
@@ -45,17 +44,15 @@ public final class PgOverridesListener extends CustomParserListener<PgDatabase>
     /**
      * Creates a new listener with override support.
      *
-     * @param db        the target database schema
-     * @param filename  name of the file being parsed
-     * @param mode      parsing mode
-     * @param errors    list to collect parsing errors
-     * @param mon       progress monitor for cancellation support
-     * @param overrides map of statement overrides to apply
-     * @param settings  application settings
+     * @param db           the target database schema
+     * @param filename     name of the file being parsed
+     * @param mode         parsing mode
+     * @param diffSettings unified context object containing settings, monitor, and error accumulator
+     * @param overrides    map of statement overrides to apply
      */
-    public PgOverridesListener(PgDatabase db, String filename, ParserListenerMode mode, List<Object> errors,
-                                IMonitor mon, Map<AbstractStatement, StatementOverride> overrides, ISettings settings) {
-        super(db, filename, mode, errors, mon, settings);
+    public PgOverridesListener(PgDatabase db, String filename, ParserListenerMode mode,
+                                DiffSettings diffSettings, Map<AbstractStatement, StatementOverride> overrides) {
+        super(db, filename, mode, diffSettings);
         this.overrides = overrides;
     }
 
@@ -86,7 +83,7 @@ public final class PgOverridesListener extends CustomParserListener<PgDatabase>
         Rule_commonContext rule = ctx.rule_common();
         Create_schema_statementContext schema;
         if (rule != null) {
-            safeParseStatement(new PgGrantPrivilege(rule, db, overrides, settings), ctx);
+            safeParseStatement(new PgGrantPrivilege(rule, db, overrides, getSettings()), ctx);
         } else if ((schema = ctx.create_schema_statement()) != null) {
             safeParseStatement(() -> createSchema(schema), ctx);
         }
@@ -96,7 +93,7 @@ public final class PgOverridesListener extends CustomParserListener<PgDatabase>
         Alter_owner_statementContext owner = ctx.alter_owner_statement();
         Alter_table_statementContext ats;
         if (owner != null) {
-            safeParseStatement(new PgAlterOwner(owner, db, overrides, settings), ctx);
+            safeParseStatement(new PgAlterOwner(owner, db, overrides, getSettings()), ctx);
         } else if ((ats = ctx.alter_table_statement()) != null) {
             safeParseStatement(() -> alterTable(ats), ctx);
         }
@@ -105,7 +102,7 @@ public final class PgOverridesListener extends CustomParserListener<PgDatabase>
     private void createSchema(Create_schema_statementContext ctx) {
         User_nameContext user = ctx.user_name();
         IdentifierContext owner = user == null ? null : user.identifier();
-        if (settings.isIgnorePrivileges() || owner == null) {
+        if (getSettings().isIgnorePrivileges() || owner == null) {
             return;
         }
 

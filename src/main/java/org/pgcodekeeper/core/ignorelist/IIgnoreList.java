@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.ignorelist;
 
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -58,18 +58,18 @@ public interface IIgnoreList {
      * the provided ignore list instance with the parsed rules.
      * If the path is null, returns the ignore list without parsing.
      *
-     * @param <T> the type of ignore list that extends IIgnoreList
-     * @param path the file path to parse ignore rules from, can be null
+     * @param <T>        the type of ignore list that extends IIgnoreList
+     * @param path       the file path to parse ignore rules from, can be null
      * @param ignoreList the ignore list instance to populate with parsed rules
      * @return the populated ignore list instance, or the original instance if path is null
      * @throws IOException if an I/O error occurs while reading the file
      */
-    static <T extends IIgnoreList> T parseIgnoreList(String path, T ignoreList) throws IOException {
+    static <T extends IIgnoreList> T parseIgnoreList(Path path, T ignoreList) throws IOException {
         if (path == null) {
             return ignoreList;
         }
         IgnoreParser ignoreParser = new IgnoreParser(ignoreList);
-        ignoreParser.parse(Paths.get(path));
+        ignoreParser.parse(path);
 
         return ignoreList;
     }

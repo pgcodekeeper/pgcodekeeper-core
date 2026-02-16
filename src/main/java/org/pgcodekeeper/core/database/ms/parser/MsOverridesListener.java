@@ -26,8 +26,7 @@ import org.pgcodekeeper.core.database.ms.parser.statement.*;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 /**
  * Custom ANTLR listener for processing Microsoft SQL Server (T-SQL) statements with override support.
@@ -41,17 +40,15 @@ public final class MsOverridesListener extends CustomParserListener<MsDatabase>
     /**
      * Creates a new T-SQL listener with override support.
      *
-     * @param db        the target Microsoft SQL Server database schema
-     * @param filename  name of the file being parsed
-     * @param mode      parsing mode (NORMAL or SCRIPT)
-     * @param errors    list to collect parsing errors
-     * @param mon       progress monitor for cancellation support
-     * @param overrides map of statement overrides to apply
-     * @param settings  application settings
+     * @param db           the target Microsoft SQL Server database schema
+     * @param filename     name of the file being parsed
+     * @param mode         parsing mode (NORMAL or SCRIPT)
+     * @param diffSettings unified context object containing settings, monitor, and error accumulator
+     * @param overrides    map of statement overrides to apply
      */
-    public MsOverridesListener(MsDatabase db, String filename, ParserListenerMode mode, List<Object> errors,
-                                 IMonitor mon, Map<AbstractStatement, StatementOverride> overrides, ISettings settings) {
-        super(db, filename, mode, errors, mon, settings);
+    public MsOverridesListener(MsDatabase db, String filename, ParserListenerMode mode,
+                                 DiffSettings diffSettings, Map<AbstractStatement, StatementOverride> overrides) {
+        super(db, filename, mode, diffSettings);
         this.overrides = overrides;
     }
 
@@ -80,7 +77,7 @@ public final class MsOverridesListener extends CustomParserListener<MsDatabase>
     private void clause(St_clauseContext st) {
         Ddl_clauseContext ddl = st.ddl_clause();
         Another_statementContext ast;
-        if (ddl != null && !settings.isIgnorePrivileges()) {
+        if (ddl != null && !getSettings().isIgnorePrivileges()) {
             Schema_createContext create = ddl.schema_create();
             Schema_alterContext alter;
             if (create != null) {
@@ -91,7 +88,7 @@ public final class MsOverridesListener extends CustomParserListener<MsDatabase>
         } else if ((ast = st.another_statement()) != null) {
             Security_statementContext ss;
             if ((ss = ast.security_statement()) != null && ss.rule_common() != null) {
-                safeParseStatement(new MsGrantPrivilege(ss.rule_common(), db, overrides, settings), ss);
+                safeParseStatement(new MsGrantPrivilege(ss.rule_common(), db, overrides, getSettings()), ss);
             }
         }
     }
@@ -106,7 +103,7 @@ public final class MsOverridesListener extends CustomParserListener<MsDatabase>
     private void alter(Schema_alterContext ctx) {
         if (ctx.alter_authorization() != null) {
             safeParseStatement(new MsAlterAuthorization(
-                    ctx.alter_authorization(), db, overrides, settings), ctx);
+                    ctx.alter_authorization(), db, overrides, getSettings()), ctx);
         }
     }
 

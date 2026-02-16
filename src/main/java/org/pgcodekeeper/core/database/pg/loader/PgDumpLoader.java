@@ -18,11 +18,13 @@ package org.pgcodekeeper.core.database.pg.loader;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.parser.AntlrTask;
-import org.pgcodekeeper.core.database.pg.parser.*;
+import org.pgcodekeeper.core.database.pg.parser.IPgContextProcessor;
+import org.pgcodekeeper.core.database.pg.parser.PgCustomParserListener;
+import org.pgcodekeeper.core.database.pg.parser.PgOverridesListener;
+import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.schema.PgSchema;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.nio.file.Path;
@@ -33,16 +35,12 @@ import java.util.Queue;
  */
 public class PgDumpLoader extends AbstractDumpLoader<PgDatabase> {
 
-    public PgDumpLoader(InputStreamProvider input, String inputObjectName, ISettings settings) {
-        super(input, inputObjectName, settings);
+    public PgDumpLoader(InputStreamProvider input, String inputObjectName, DiffSettings diffSettings) {
+        super(input, inputObjectName, diffSettings);
     }
 
-    public PgDumpLoader(Path inputFile, ISettings settings, IMonitor monitor) {
-        super(inputFile, settings, monitor);
-    }
-
-    public PgDumpLoader(Path inputFile, ISettings settings) {
-        super(inputFile, settings);
+    public PgDumpLoader(Path inputFile, DiffSettings diffSettings) {
+        super(inputFile, diffSettings);
     }
 
     @Override
@@ -59,13 +57,10 @@ public class PgDumpLoader extends AbstractDumpLoader<PgDatabase> {
     public void loadWithoutAnalyze(PgDatabase db, Queue<AntlrTask<?>> antlrTasks) {
         IPgContextProcessor listener;
         if (overrides != null) {
-            listener = new PgOverridesListener(db, inputObjectName, mode, errors,
-                    monitor, overrides, settings);
+            listener = new PgOverridesListener(db, inputObjectName, mode, diffSettings, overrides);
         } else {
-            listener = new PgCustomParserListener(db, inputObjectName, mode, errors,
-                    antlrTasks, monitor, settings);
+            listener = new PgCustomParserListener(db, inputObjectName, mode, diffSettings, antlrTasks);
         }
-        PgParserUtils.parseSqlStream(input, settings.getInCharsetName(), inputObjectName,
-                errors, monitor, monitoringLevel, listener, antlrTasks);
+        PgParserUtils.parseSqlStream(input, inputObjectName, diffSettings, monitoringLevel, listener, antlrTasks);
     }
 }

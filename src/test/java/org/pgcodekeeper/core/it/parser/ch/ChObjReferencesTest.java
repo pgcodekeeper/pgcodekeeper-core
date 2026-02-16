@@ -24,6 +24,7 @@ import org.pgcodekeeper.core.database.ch.loader.ChDumpLoader;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 
@@ -54,7 +55,8 @@ class ChObjReferencesTest {
         var settings = new CoreSettings();
 
         String resource = fileNameTemplate + FILES_POSTFIX.SQL;
-        var loader = new ChDumpLoader(() -> getClass().getResourceAsStream(resource), resource, settings);
+        var diffSettings = new DiffSettings(settings);
+        var loader = new ChDumpLoader(() -> getClass().getResourceAsStream(resource), resource, diffSettings);
         loader.setMode(ParserListenerMode.REF);
         var db = loader.load();
 
@@ -63,7 +65,7 @@ class ChObjReferencesTest {
 
         String actual = IntegrationTestUtils.getRefsAsString(db.getObjReferences()).strip();
 
-        IntegrationTestUtils.assertErrors(loader.getErrors());
+        IntegrationTestUtils.assertErrors(diffSettings.getErrors());
         Assertions.assertEquals(expected, actual);
     }
 }

@@ -24,6 +24,7 @@ import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 
@@ -132,7 +133,8 @@ class PgObjReferencesTest {
     })
     void comparePgReferences(final String fileNameTemplate) throws IOException, InterruptedException {
         String resource = fileNameTemplate + FILES_POSTFIX.SQL;
-        var loader = new PgDumpLoader(() -> getClass().getResourceAsStream(resource), resource, new CoreSettings());
+        var diffSettings = new DiffSettings(new CoreSettings());
+        var loader = new PgDumpLoader(() -> getClass().getResourceAsStream(resource), resource, diffSettings);
         loader.setMode(ParserListenerMode.REF);
         var db = loader.load();
 

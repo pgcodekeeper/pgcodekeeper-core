@@ -18,11 +18,13 @@ package org.pgcodekeeper.core.database.ms.loader;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.parser.AntlrTask;
-import org.pgcodekeeper.core.database.ms.parser.*;
+import org.pgcodekeeper.core.database.ms.parser.IMsContextProcessor;
+import org.pgcodekeeper.core.database.ms.parser.MsCustomParserListener;
+import org.pgcodekeeper.core.database.ms.parser.MsOverridesListener;
+import org.pgcodekeeper.core.database.ms.parser.MsParserUtils;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.ms.schema.MsSchema;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.nio.file.Path;
@@ -33,16 +35,12 @@ import java.util.Queue;
  */
 public class MsDumpLoader extends AbstractDumpLoader<MsDatabase> {
 
-    public MsDumpLoader(InputStreamProvider input, String inputObjectName, ISettings settings) {
-        super(input, inputObjectName, settings);
+    public MsDumpLoader(InputStreamProvider input, String inputObjectName, DiffSettings diffSettings) {
+        super(input, inputObjectName, diffSettings);
     }
 
-    public MsDumpLoader(Path inputFile, ISettings settings, IMonitor monitor) {
-        super(inputFile, settings, monitor);
-    }
-
-    public MsDumpLoader(Path inputFile, ISettings settings) {
-        super(inputFile, settings);
+    public MsDumpLoader(Path inputFile, DiffSettings diffSettings) {
+        super(inputFile, diffSettings);
     }
 
     @Override
@@ -59,13 +57,10 @@ public class MsDumpLoader extends AbstractDumpLoader<MsDatabase> {
     public void loadWithoutAnalyze(MsDatabase db, Queue<AntlrTask<?>> antlrTasks) {
         IMsContextProcessor listener;
         if (overrides != null) {
-            listener = new MsOverridesListener(db, inputObjectName, mode, errors,
-                    monitor, overrides, settings);
+            listener = new MsOverridesListener(db, inputObjectName, mode, diffSettings, overrides);
         } else {
-            listener = new MsCustomParserListener(db, inputObjectName, mode, errors,
-                    monitor, settings);
+            listener = new MsCustomParserListener(db, inputObjectName, mode, diffSettings);
         }
-        MsParserUtils.parseSqlStream(input, settings.getInCharsetName(), inputObjectName,
-                errors, monitor, monitoringLevel, listener, antlrTasks);
+        MsParserUtils.parseSqlStream(input, inputObjectName, diffSettings, monitoringLevel, listener, antlrTasks);
     }
 }

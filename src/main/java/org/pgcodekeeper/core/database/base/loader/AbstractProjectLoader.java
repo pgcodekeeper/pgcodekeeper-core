@@ -17,9 +17,7 @@ package org.pgcodekeeper.core.database.base.loader;
 
 import org.pgcodekeeper.core.database.api.loader.IProjectLoader;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.Utils;
 
 import java.io.IOException;
@@ -39,16 +37,17 @@ import java.util.stream.Stream;
 public abstract class AbstractProjectLoader<T extends IDatabase> extends AbstractLoader<T>
         implements IProjectLoader {
 
+    private static final String IGNORE_FILE = ".pgcodekeeperignore";
+    private static final String IGNORE_SCHEMA_FILE = ".pgcodekeeperignoreschema";
+
     protected final Queue<AbstractDumpLoader<T>> dumpLoaders = new ArrayDeque<>();
 
     private final Path dirPath;
-    private final IgnoreSchemaList ignoreSchemaList;
 
-    protected AbstractProjectLoader(Path dirPath, ISettings settings,
-                                    IMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
-        super(settings, monitor);
+    protected AbstractProjectLoader(Path dirPath, DiffSettings diffSettings) {
+        super(diffSettings);
         this.dirPath = dirPath;
-        this.ignoreSchemaList = ignoreSchemaList;
+        readIgnoreLists();
     }
 
     @Override
@@ -89,10 +88,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
     @Override
     protected void finishLoaders() throws InterruptedException, IOException {
         super.finishLoaders();
-        AbstractDumpLoader<T> l;
-        while ((l = dumpLoaders.poll()) != null) {
-            errors.addAll(l.getErrors());
-        }
+        dumpLoaders.clear();
     }
 
     protected boolean filterFile(Path f, Predicate<String> checkFilename) {
@@ -103,12 +99,19 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
         return checkFilename == null || checkFilename.test(fileName);
     }
 
-    protected boolean isAllowedSchema(String resourceName) {
-        return ignoreSchemaList == null || ignoreSchemaList.getNameStatus(resourceName.split("\\.")[0]);
-    }
+    private void readIgnoreLists() {
+        try {
+            Path ignoreFile = dirPath.resolve(IGNORE_FILE);
+            if (Files.isRegularFile(ignoreFile)) {
+                diffSettings.addIgnoreList(ignoreFile);
+            }
 
-    @Override
-    protected void prepare() {
-        // no impl
+            Path ignoreSchemaFile = dirPath.resolve(IGNORE_SCHEMA_FILE);
+            if (Files.isRegularFile(ignoreSchemaFile)) {
+                diffSettings.addIgnoreSchemaList(ignoreSchemaFile);
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to read ignore lists", e);
+        }
     }
 }

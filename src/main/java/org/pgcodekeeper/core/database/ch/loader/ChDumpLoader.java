@@ -18,11 +18,13 @@ package org.pgcodekeeper.core.database.ch.loader;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.parser.AntlrTask;
-import org.pgcodekeeper.core.database.ch.parser.*;
+import org.pgcodekeeper.core.database.ch.parser.ChCustomParserListener;
+import org.pgcodekeeper.core.database.ch.parser.ChOverridesListener;
+import org.pgcodekeeper.core.database.ch.parser.ChParserUtils;
+import org.pgcodekeeper.core.database.ch.parser.IChContextProcessor;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.database.ch.schema.ChSchema;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.nio.file.Path;
@@ -33,16 +35,12 @@ import java.util.Queue;
  */
 public class ChDumpLoader extends AbstractDumpLoader<ChDatabase> {
 
-    public ChDumpLoader(InputStreamProvider input, String inputObjectName, ISettings settings) {
-        super(input, inputObjectName, settings);
+    public ChDumpLoader(InputStreamProvider input, String inputObjectName, DiffSettings diffSettings) {
+        super(input, inputObjectName, diffSettings);
     }
 
-    public ChDumpLoader(Path inputFile, ISettings settings, IMonitor monitor) {
-        super(inputFile, settings, monitor);
-    }
-
-    public ChDumpLoader(Path inputFile, ISettings settings) {
-        super(inputFile, settings);
+    public ChDumpLoader(Path inputFile, DiffSettings diffSettings) {
+        super(inputFile, diffSettings);
     }
 
     @Override
@@ -59,13 +57,10 @@ public class ChDumpLoader extends AbstractDumpLoader<ChDatabase> {
     public void loadWithoutAnalyze(ChDatabase db, Queue<AntlrTask<?>> antlrTasks) {
         IChContextProcessor listener;
         if (overrides != null) {
-            listener = new ChOverridesListener(db, inputObjectName, mode, errors,
-                    monitor, overrides, settings);
+            listener = new ChOverridesListener(db, inputObjectName, mode, diffSettings, overrides);
         } else {
-            listener = new ChCustomParserListener(db, inputObjectName, mode, errors,
-                    monitor, settings);
+            listener = new ChCustomParserListener(db, inputObjectName, mode, diffSettings);
         }
-        ChParserUtils.parseSqlStream(input, settings.getInCharsetName(), inputObjectName,
-                errors, monitor, monitoringLevel, listener, antlrTasks);
+        ChParserUtils.parseSqlStream(input, inputObjectName, diffSettings, monitoringLevel, listener, antlrTasks);
     }
 }

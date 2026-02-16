@@ -20,18 +20,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.database.api.schema.ISchema;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
 import org.pgcodekeeper.core.ignorelist.IgnoreList;
 import org.pgcodekeeper.core.ignorelist.IgnoreParser;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeFlattener;
-import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -49,23 +47,16 @@ class PgProjectLoaderTest {
     @Test
     void testProjectLoaderWithIgnoredSchemas(@TempDir Path dir) throws IOException, InterruptedException {
         var settings = new CoreSettings();
-
-        IDatabase dbDump = loadTestDump(databaseProvider, RESOURCE_DUMP, IntegrationTestUtils.class, settings);
+        DiffSettings diffSettings = new DiffSettings(settings);
+        IDatabase dbDump = loadTestDump(databaseProvider, RESOURCE_DUMP, IntegrationTestUtils.class, diffSettings);
 
         new PgModelExporter(dir, dbDump, Consts.UTF_8, settings).exportFull();
 
         createIgnoredSchemaFile(dir);
-        Path listFile = dir.resolve(".pgcodekeeperignoreschema");
 
-        // load ignored schema list
-        IgnoreSchemaList ignoreSchemaList = new IgnoreSchemaList();
-        IgnoreParser ignoreParser = new IgnoreParser(ignoreSchemaList);
-        ignoreParser.parse(listFile);
+        IDatabase db = IntegrationTestUtils.createProjectLoader(dir, diffSettings, dbDump).load();
 
-        IDatabase loader = IntegrationTestUtils
-                .createProjectLoader(dir, settings, dbDump, new NullMonitor(), ignoreSchemaList).load();
-
-        for (ISchema dbSchema : loader.getSchemas()) {
+        for (var dbSchema : db.getSchemas()) {
             if (IGNORED_SCHEMAS_LIST.contains(dbSchema.getName())) {
                 Assertions.fail("Ignored Schema loaded " + dbSchema.getName());
             } else {
@@ -78,8 +69,9 @@ class PgProjectLoaderTest {
     @Test
     void testModelExporterWithIgnoredLists(@TempDir Path dir) throws IOException, InterruptedException {
         var settings = new CoreSettings();
+        var diffSettings = new DiffSettings(settings);
 
-        IDatabase dbDump = loadTestDump(databaseProvider, RESOURCE_DUMP, IntegrationTestUtils.class, settings);
+        IDatabase dbDump = loadTestDump(databaseProvider, RESOURCE_DUMP, IntegrationTestUtils.class, diffSettings);
         TreeElement root = DiffTree.create(settings, dbDump, null, null);
         root.setAllChecked();
 

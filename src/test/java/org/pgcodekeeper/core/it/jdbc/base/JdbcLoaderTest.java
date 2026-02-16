@@ -24,6 +24,7 @@ import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.parser.ScriptParser;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
@@ -39,16 +40,17 @@ public abstract class JdbcLoaderTest {
     protected void clearDb(CoreSettings settings, IDatabase startConfDb,
                            IJdbcConnector connector, String url, IDatabaseProvider databaseProvider)
             throws IOException, InterruptedException, SQLException {
-        var oldDb = databaseProvider.getDatabaseFromJdbc(url, settings, new NullMonitor(), null);
-        var dropScript = PgCodeKeeperApi.diff(settings, oldDb, startConfDb);
+        var diffSettings = new DiffSettings(settings);
+        var oldDb = databaseProvider.getDatabaseFromJdbc(url, diffSettings);
+        var dropScript = PgCodeKeeperApi.diff(oldDb, startConfDb, diffSettings);
 
         var loader = createDumpLoader(() -> new ByteArrayInputStream(dropScript.getBytes(StandardCharsets.UTF_8)),
                 CLEAN_DB_SCRIPT, settings, databaseProvider);
         new JdbcRunner(new NullMonitor()).runBatches(connector,
                 new ScriptParser(loader, CLEAN_DB_SCRIPT, dropScript).batch(), null);
 
-        var newDb = databaseProvider.getDatabaseFromJdbc(url, settings, new NullMonitor(), null);
-        var diff = PgCodeKeeperApi.diff(settings, startConfDb, newDb);
+        var newDb = databaseProvider.getDatabaseFromJdbc(url, diffSettings);
+        var diff = PgCodeKeeperApi.diff(startConfDb, newDb, diffSettings);
         if (!diff.isEmpty()) {
             throw new IllegalStateException("Database cleared incorrect. in database:\n\n" + diff);
         }

@@ -25,9 +25,7 @@ import org.pgcodekeeper.core.database.base.parser.AntlrTaskManager;
 import org.pgcodekeeper.core.database.ms.project.MsWorkDirs;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.ms.schema.MsSchema;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -37,17 +35,8 @@ import java.nio.file.Path;
  */
 public class MsProjectLoader extends AbstractProjectLoader<MsDatabase> {
 
-    /**
-     * Creates a new MS SQL project loader with full configuration.
-     *
-     * @param dirPath          path to the project directory
-     * @param settings         loader settings and configuration
-     * @param monitor          progress monitor for tracking loading progress (can be null)
-     * @param ignoreSchemaList list of schemas to ignore during loading (can be null)
-     */
-    public MsProjectLoader(Path dirPath, ISettings settings,
-                           IMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
-        super(dirPath, settings, monitor, ignoreSchemaList);
+    public MsProjectLoader(Path dirPath, DiffSettings diffSettings) {
+        super(dirPath, diffSettings);
     }
 
     @Override
@@ -57,14 +46,14 @@ public class MsProjectLoader extends AbstractProjectLoader<MsDatabase> {
 
     @Override
     protected AbstractDumpLoader<MsDatabase> createDumpLoader(Path file) {
-        return new MsDumpLoader(file, settings, monitor);
+        return new MsDumpLoader(file, diffSettings);
     }
 
     @Override
     protected void loadStructure(Path dir, MsDatabase db) throws InterruptedException, IOException {
         Path securityFolder = dir.resolve(MsWorkDirs.SECURITY);
 
-        loadSubdir(securityFolder, MsWorkDirs.SCHEMAS, db, this::isAllowedSchema);
+        loadSubdir(securityFolder, MsWorkDirs.SCHEMAS, db, fileName -> isAllowedSchema(fileName.split("\\.")[0]));
         // DBO schema check requires schema loads to finish first
         AntlrTaskManager.finish(antlrTasks);
         collectDumpLoaderErrors();
@@ -75,8 +64,8 @@ public class MsProjectLoader extends AbstractProjectLoader<MsDatabase> {
 
         for (String dirSub : MsWorkDirs.getDirectoryNames()) {
             if (MsWorkDirs.isInSchema(dirSub)) {
-                // get schema name from file names and filter
-                loadSubdir(dir, dirSub, db, this::isAllowedSchema);
+                // get schema name from file names (format: schema.objectname.sql) and filter
+                loadSubdir(dir, dirSub, db, fileName -> isAllowedSchema(fileName.split("\\.")[0]));
                 continue;
             }
             loadSubdir(dir, dirSub, db);
@@ -97,7 +86,6 @@ public class MsProjectLoader extends AbstractProjectLoader<MsDatabase> {
     }
 
     private void collectDumpLoaderErrors() {
-        dumpLoaders.forEach(l -> errors.addAll(l.getErrors()));
         dumpLoaders.clear();
     }
 }

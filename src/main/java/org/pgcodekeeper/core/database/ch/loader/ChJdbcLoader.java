@@ -27,10 +27,8 @@ import org.pgcodekeeper.core.database.ch.jdbc.*;
 import org.pgcodekeeper.core.database.ch.parser.ChParserUtils;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,14 +45,11 @@ public final class ChJdbcLoader extends AbstractJdbcLoader<ChDatabase> {
     /**
      * Creates a new ClickHouse JDBC loader with the specified parameters.
      *
-     * @param connector        the JDBC connector for establishing database connections
-     * @param settings         loader settings and configuration
-     * @param monitor          progress monitor for tracking loading progress
-     * @param ignoreSchemaList list of schemas to ignore during loading
+     * @param connector    the JDBC connector for establishing database connections
+     * @param diffSettings unified context object containing settings, ignore list, and error accumulator
      */
-    public ChJdbcLoader(IJdbcConnector connector, ISettings settings, IMonitor monitor,
-                        IgnoreSchemaList ignoreSchemaList) {
-        super(connector, monitor, settings, ignoreSchemaList);
+    public ChJdbcLoader(IJdbcConnector connector, DiffSettings diffSettings) {
+        super(connector, diffSettings);
     }
 
     @Override

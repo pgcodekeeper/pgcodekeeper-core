@@ -21,13 +21,14 @@ import org.pgcodekeeper.core.database.base.parser.AntlrTask;
 import org.pgcodekeeper.core.database.base.parser.AntlrTaskManager;
 import org.pgcodekeeper.core.database.base.parser.FullAnalyze;
 import org.pgcodekeeper.core.monitor.IMonitor;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 
@@ -38,31 +39,26 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractLoader.class);
 
-    protected final List<Object> errors = new ArrayList<>();
     protected final Queue<AntlrTask<?>> antlrTasks = new ArrayDeque<>();
-    protected final Queue<AbstractLoader<T>> launchedLoaders = new ArrayDeque<>();
 
-    protected final ISettings settings;
-    protected final IMonitor monitor;
+    protected final DiffSettings diffSettings;
 
     protected String currentOperation;
     protected int version;
 
-    protected AbstractLoader(ISettings settings, IMonitor monitor) {
-        this.settings = settings;
-        this.monitor = monitor;
-        prepare();
+    protected AbstractLoader(DiffSettings diffSettings) {
+        this.diffSettings = diffSettings;
     }
 
     @Override
     public abstract T load() throws IOException, InterruptedException;
 
     public List<Object> getErrors() {
-        return errors;
+        return Collections.unmodifiableList(diffSettings.getErrors());
     }
 
     public void addError(Object error) {
-        errors.add(error);
+        diffSettings.addError(error);
     }
 
     /**
@@ -74,24 +70,12 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
      */
     public T loadAndAnalyze() throws IOException, InterruptedException {
         T db = load();
-        FullAnalyze.fullAnalyze(db, errors);
+        FullAnalyze.fullAnalyze(db, diffSettings.getErrors());
         return db;
-    }
-
-    protected void prepare() {
-        // subclasses will override if needed
     }
 
     protected void finishLoaders() throws InterruptedException, IOException {
         AntlrTaskManager.finish(antlrTasks);
-        AbstractLoader<T> l;
-        while ((l = launchedLoaders.poll()) != null) {
-            finishLoader(l);
-        }
-    }
-
-    protected void finishLoader(AbstractLoader<T> l) {
-        errors.addAll(l.getErrors());
     }
 
     protected void debug(String message, Object... args) {
@@ -113,9 +97,16 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
      */
     protected abstract T createDatabase();
 
-
     @Override
     public ISettings getSettings() {
-        return settings;
+        return diffSettings.getSettings();
+    }
+
+    public IMonitor getMonitor() {
+        return diffSettings.getMonitor();
+    }
+
+    public boolean isAllowedSchema(String schemaName) {
+        return diffSettings.isAllowedSchema(schemaName);
     }
 }

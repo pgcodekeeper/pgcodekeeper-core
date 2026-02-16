@@ -28,6 +28,9 @@ import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.ISchema;
 import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.base.schema.Argument;
+import org.pgcodekeeper.core.database.base.schema.SimpleColumn;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
@@ -35,7 +38,7 @@ import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.database.pg.schema.PgTrigger.TgTypes;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -66,20 +69,22 @@ class PgAntlrLoaderTest {
         // first test the dump loader itself
         var settings = new CoreSettings();
         settings.setKeepNewlines(true);
-        IDatabase d = loadTestDump(databaseProvider, fileName, PgAntlrLoaderTest.class, settings);
+        var diffSettings = new DiffSettings(settings);
+        IDatabase d = loadTestDump(databaseProvider, fileName, PgAntlrLoaderTest.class, diffSettings);
 
-        assertDiff(d, dbPredefined, settings, "PgDumpLoader: predefined object is not equal to file " + fileName);
+        assertDiff(d, dbPredefined, diffSettings, "PgDumpLoader: predefined object is not equal to file " + fileName);
 
         // test deepCopy mechanism
-        assertDiff(d, (IDatabase) d.deepCopy(), settings, "PgStatement deep copy altered");
-        assertDiff(dbPredefined, d, settings, "PgStatement deep copy altered original");
+        assertDiff(d, (IDatabase) d.deepCopy(), diffSettings, "PgStatement deep copy altered");
+        assertDiff(dbPredefined, d, diffSettings, "PgStatement deep copy altered original");
     }
 
     void exportFullDb(String fileName, IDatabase dbPredefined, Path exportDir) throws IOException, InterruptedException {
         // prepare db object from sql file
         var settings = new CoreSettings();
         settings.setKeepNewlines(true);
-        IDatabase dbFromFile = loadTestDump(databaseProvider, fileName, PgAntlrLoaderTest.class, settings);
+        var diffSettings = new DiffSettings(settings);
+        IDatabase dbFromFile = loadTestDump(databaseProvider, fileName, PgAntlrLoaderTest.class, diffSettings);
 
         new PgModelExporter(exportDir, dbPredefined, Consts.UTF_8, settings).exportFull();
 
@@ -88,10 +93,10 @@ class PgAntlrLoaderTest {
 
         // check the same db similarity before and after export
 
-        assertDiff(dbPredefined, dbAfterExport, settings, "Predefined object PgDB" + fileName +
+        assertDiff(dbPredefined, dbAfterExport, diffSettings, "Predefined object PgDB" + fileName +
                 " is not equal to exported'n'loaded.");
 
-        assertDiff(dbAfterExport, dbFromFile, settings,
+        assertDiff(dbAfterExport, dbFromFile, diffSettings,
                 "Exported predefined object is not equal to file " + fileName);
     }
 
@@ -953,7 +958,7 @@ class PgAntlrLoaderTest {
     }
 
     private static PgDatabase createDumpDB() {
-        ISettings settings = new CoreSettings();
-        return new PgDumpLoader(() -> null, null, settings).createDatabaseWithSchema();
+        DiffSettings diffSettings = new DiffSettings(new CoreSettings());
+        return new PgDumpLoader(() -> null, null, diffSettings).createDatabaseWithSchema();
     }
 }

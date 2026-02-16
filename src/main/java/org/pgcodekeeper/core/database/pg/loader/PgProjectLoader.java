@@ -20,9 +20,7 @@ import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
 import org.pgcodekeeper.core.database.pg.project.PgWorkDirs;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.Utils;
 
 import java.io.IOException;
@@ -35,17 +33,8 @@ import java.util.stream.Stream;
  */
 public class PgProjectLoader extends AbstractProjectLoader<PgDatabase> {
 
-    /**
-     * Creates a new PostgreSQL project loader with full configuration.
-     *
-     * @param dirPath          path to the project directory
-     * @param settings         loader settings and configuration
-     * @param monitor          progress monitor for tracking loading progress (can be null)
-     * @param ignoreSchemaList list of schemas to ignore during loading (can be null)
-     */
-    public PgProjectLoader(Path dirPath, ISettings settings,
-                           IMonitor monitor, IgnoreSchemaList ignoreSchemaList) {
-        super(dirPath, settings, monitor, ignoreSchemaList);
+    public PgProjectLoader(Path dirPath, DiffSettings diffSettings) {
+        super(dirPath, diffSettings);
     }
 
     @Override
@@ -55,7 +44,7 @@ public class PgProjectLoader extends AbstractProjectLoader<PgDatabase> {
 
     @Override
     protected AbstractDumpLoader<PgDatabase> createDumpLoader(Path file) {
-        return new PgDumpLoader(file, settings, monitor);
+        return new PgDumpLoader(file, diffSettings);
     }
 
     @Override

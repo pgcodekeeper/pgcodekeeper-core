@@ -25,11 +25,11 @@ import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.base.project.PartialExportTestFileVisitor;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
-import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
 import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeFlattener;
 import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
@@ -104,13 +104,15 @@ class PgPartialExporterTest {
 
     @BeforeAll
     static void initDiffTree() throws InterruptedException, IOException {
-       PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
+        PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
         String sourceFilename = "TestPartialExportSource.sql";
         String targetFilename = "TestPartialExportTarget.sql";
         var settings = new CoreSettings();
         settings.setInCharsetName(Consts.UTF_8);
-        dbSource = loadTestDump(databaseProvider, sourceFilename, PgPartialExporterTest.class, settings, false);
-        dbTarget = loadTestDump(databaseProvider, targetFilename, PgPartialExporterTest.class, settings, false);
+        var diffSettings = new DiffSettings(settings);
+
+        dbSource = loadTestDump(databaseProvider, sourceFilename, PgPartialExporterTest.class, diffSettings, false);
+        dbTarget = loadTestDump(databaseProvider, targetFilename, PgPartialExporterTest.class, diffSettings, false);
 
         Assertions.assertNotNull(dbSource);
         Assertions.assertNotNull(dbTarget);

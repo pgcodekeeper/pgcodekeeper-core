@@ -18,9 +18,7 @@ package org.pgcodekeeper.core.database.api;
 import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -65,42 +63,32 @@ public interface IDatabaseProvider {
     IJdbcConnector getJdbcConnector(String url);
 
     /**
-     * @param url              full jdbc url
-     * @param settings         configuration settings for database comparison and migration operations
-     * @param monitor          progress monitor
-     * @param ignoreSchemaList list of ignored schema
+     * @param url          full jdbc url
+     * @param diffSettings unified context object containing settings, monitor, ignore schema list, and error accumulator
      * @return a database
      * @see IDatabase
-     * @see ISettings
-     * @see IMonitor
-     * @see IgnoreSchemaList
+     * @see DiffSettings
      */
-    IDatabase getDatabaseFromJdbc(String url, ISettings settings, IMonitor monitor, IgnoreSchemaList ignoreSchemaList)
+    IDatabase getDatabaseFromJdbc(String url, DiffSettings diffSettings)
             throws IOException, InterruptedException;
 
     /**
-     * @param path     path to dump
-     * @param settings configuration settings for database comparison and migration operations
-     * @param monitor  progress monitor
+     * @param path         path to dump
+     * @param diffSettings unified context object containing settings, monitor, and error accumulator
      * @return a database
      * @see IDatabase
-     * @see ISettings
-     * @see IMonitor
+     * @see DiffSettings
      */
-    IDatabase getDatabaseFromDump(Path path, ISettings settings, IMonitor monitor)
+    IDatabase getDatabaseFromDump(Path path, DiffSettings diffSettings)
             throws IOException, InterruptedException;
 
     /**
-     * @param path             path to project directory
-     * @param settings         configuration settings for database comparison and migration operations
-     * @param monitor          progress monitor
-     * @param ignoreSchemaList list of ignored schema
+     * @param path         path to project directory
+     * @param diffSettings unified context object containing settings, monitor, ignore schema list, and error accumulator
      * @return a database
      * @see IDatabase
-     * @see ISettings
-     * @see IMonitor
-     * @see IgnoreSchemaList
+     * @see DiffSettings
      */
-    IDatabase getDatabaseFromProject(Path path, ISettings settings, IMonitor monitor, IgnoreSchemaList ignoreSchemaList)
+    IDatabase getDatabaseFromProject(Path path, DiffSettings diffSettings)
             throws IOException, InterruptedException;
 }

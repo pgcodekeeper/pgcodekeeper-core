@@ -26,8 +26,7 @@ import org.pgcodekeeper.core.database.pg.parser.statement.*;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 /**
  * Custom ANTLR listener for parsing PostgreSQL SQL statements.
@@ -44,17 +43,15 @@ public final class PgCustomParserListener extends CustomParserListener<PgDatabas
     /**
      * Creates a new PostgreSQL SQL parser listener.
      *
-     * @param database   the target database schema to populate
-     * @param filename   name of the file being parsed
-     * @param mode       parsing mode
-     * @param errors     list to collect parsing errors
-     * @param antlrTasks queue for asynchronous parsing tasks
-     * @param monitor    progress monitor for cancellation support
-     * @param settings   application settings
+     * @param database     the target database schema to populate
+     * @param filename     name of the file being parsed
+     * @param mode         parsing mode
+     * @param diffSettings unified context object containing settings, monitor, and error accumulator
+     * @param antlrTasks   queue for asynchronous parsing tasks
      */
     public PgCustomParserListener(PgDatabase database, String filename, ParserListenerMode mode,
-                                   List<Object> errors, Queue<AntlrTask<?>> antlrTasks, IMonitor monitor, ISettings settings) {
-        super(database, filename, mode, errors, monitor, settings);
+                                   DiffSettings diffSettings, Queue<AntlrTask<?>> antlrTasks) {
+        super(database, filename, mode, diffSettings);
         this.antlrTasks = antlrTasks;
     }
 
@@ -106,66 +103,66 @@ public final class PgCustomParserListener extends CustomParserListener<PgDatabas
     private void create(Schema_createContext ctx, CommonTokenStream stream) {
         PgParserAbstract p;
         if (ctx.create_table_statement() != null) {
-            p = new PgCreateTable(ctx.create_table_statement(), db, tablespace, accessMethod, oids, stream, settings,
+            p = new PgCreateTable(ctx.create_table_statement(), db, tablespace, accessMethod, oids, stream, getSettings(),
                     antlrTasks);
         } else if (ctx.create_foreign_table_statement() != null) {
-            p = new PgCreateForeignTable(ctx.create_foreign_table_statement(), db, stream, settings);
+            p = new PgCreateForeignTable(ctx.create_foreign_table_statement(), db, stream, getSettings());
         } else if (ctx.create_table_external_statement() != null) {
-            p = new GpCreateExternalTable(db, stream, ctx.create_table_external_statement(), settings);
+            p = new GpCreateExternalTable(db, stream, ctx.create_table_external_statement(), getSettings());
         } else if (ctx.create_index_statement() != null) {
-            p = new PgCreateIndex(ctx.create_index_statement(), db, tablespace, stream, settings);
+            p = new PgCreateIndex(ctx.create_index_statement(), db, tablespace, stream, getSettings());
         } else if (ctx.create_extension_statement() != null) {
-            p = new PgCreateExtension(ctx.create_extension_statement(), db, settings);
+            p = new PgCreateExtension(ctx.create_extension_statement(), db, getSettings());
         } else if (ctx.create_foreign_data_wrapper_statement() != null) {
-            p = new PgCreateFdw(ctx.create_foreign_data_wrapper_statement(), db, settings);
+            p = new PgCreateFdw(ctx.create_foreign_data_wrapper_statement(), db, getSettings());
         } else if (ctx.create_server_statement() != null) {
-            p = new PgCreateServer(ctx.create_server_statement(), db, settings);
+            p = new PgCreateServer(ctx.create_server_statement(), db, getSettings());
         } else if (ctx.create_cast_statement() != null) {
-            p = new PgCreateCast(ctx.create_cast_statement(), db, settings);
+            p = new PgCreateCast(ctx.create_cast_statement(), db, getSettings());
         } else if (ctx.create_user_mapping_statement() != null) {
-            p = new PgCreateUserMapping(ctx.create_user_mapping_statement(), db, settings);
+            p = new PgCreateUserMapping(ctx.create_user_mapping_statement(), db, getSettings());
         } else if (ctx.create_trigger_statement() != null) {
-            p = new PgCreateTrigger(ctx.create_trigger_statement(), db, settings);
+            p = new PgCreateTrigger(ctx.create_trigger_statement(), db, getSettings());
         } else if (ctx.create_rewrite_statement() != null) {
-            p = new PgCreateRule(ctx.create_rewrite_statement(), db, settings);
+            p = new PgCreateRule(ctx.create_rewrite_statement(), db, getSettings());
         } else if (ctx.create_policy_statement() != null) {
-            p = new PgCreatePolicy(ctx.create_policy_statement(), db, settings);
+            p = new PgCreatePolicy(ctx.create_policy_statement(), db, getSettings());
         } else if (ctx.create_collation_statement() != null) {
-            p = new PgCreateCollation(ctx.create_collation_statement(), db, settings);
+            p = new PgCreateCollation(ctx.create_collation_statement(), db, getSettings());
         } else if (ctx.create_function_statement() != null) {
-            p = new PgCreateFunction(ctx.create_function_statement(), db, errors, antlrTasks, settings);
+            p = new PgCreateFunction(ctx.create_function_statement(), db, diffSettings.getErrors(), antlrTasks, getSettings());
         } else if (ctx.create_aggregate_statement() != null) {
-            p = new PgCreateAggregate(ctx.create_aggregate_statement(), db, settings);
+            p = new PgCreateAggregate(ctx.create_aggregate_statement(), db, getSettings());
         } else if (ctx.create_operator_statement() != null) {
-            p = new PgCreateOperator(ctx.create_operator_statement(), db, settings);
+            p = new PgCreateOperator(ctx.create_operator_statement(), db, getSettings());
         } else if (ctx.create_sequence_statement() != null) {
-            p = new PgCreateSequence(ctx.create_sequence_statement(), db, settings);
+            p = new PgCreateSequence(ctx.create_sequence_statement(), db, getSettings());
         } else if (ctx.create_schema_statement() != null) {
-            p = new PgCreateSchema(ctx.create_schema_statement(), db, settings);
+            p = new PgCreateSchema(ctx.create_schema_statement(), db, getSettings());
         } else if (ctx.create_view_statement() != null) {
-            p = new PgCreateView(ctx.create_view_statement(), db, tablespace, accessMethod, stream, settings);
+            p = new PgCreateView(ctx.create_view_statement(), db, tablespace, accessMethod, stream, getSettings());
         } else if (ctx.create_type_statement() != null) {
-            p = new PgCreateType(ctx.create_type_statement(), db, settings);
+            p = new PgCreateType(ctx.create_type_statement(), db, getSettings());
         } else if (ctx.create_domain_statement() != null) {
-            p = new PgCreateDomain(ctx.create_domain_statement(), db, stream, settings);
+            p = new PgCreateDomain(ctx.create_domain_statement(), db, stream, getSettings());
         } else if (ctx.create_fts_configuration_statement() != null) {
-            p = new PgCreateFtsConfiguration(ctx.create_fts_configuration_statement(), db, settings);
+            p = new PgCreateFtsConfiguration(ctx.create_fts_configuration_statement(), db, getSettings());
         } else if (ctx.create_fts_template_statement() != null) {
-            p = new PgCreateFtsTemplate(ctx.create_fts_template_statement(), db, settings);
+            p = new PgCreateFtsTemplate(ctx.create_fts_template_statement(), db, getSettings());
         } else if (ctx.create_fts_parser_statement() != null) {
-            p = new PgCreateFtsParser(ctx.create_fts_parser_statement(), db, settings);
+            p = new PgCreateFtsParser(ctx.create_fts_parser_statement(), db, getSettings());
         } else if (ctx.create_event_trigger_statement() != null) {
-            p = new PgCreateEventTrigger(ctx.create_event_trigger_statement(), db, settings);
+            p = new PgCreateEventTrigger(ctx.create_event_trigger_statement(), db, getSettings());
         } else if (ctx.create_fts_dictionary_statement() != null) {
-            p = new PgCreateFtsDictionary(ctx.create_fts_dictionary_statement(), db, settings);
+            p = new PgCreateFtsDictionary(ctx.create_fts_dictionary_statement(), db, getSettings());
         } else if (ctx.comment_on_statement() != null) {
-            p = new PgCommentOn(ctx.comment_on_statement(), db, settings);
+            p = new PgCommentOn(ctx.comment_on_statement(), db, getSettings());
         } else if (ctx.rule_common() != null) {
-            p = new PgGrantPrivilege(ctx.rule_common(), db, settings);
+            p = new PgGrantPrivilege(ctx.rule_common(), db, getSettings());
         } else if (ctx.create_database_statement() != null) {
-            p = new PgCreateDatabase(ctx.create_database_statement(), db, settings);
+            p = new PgCreateDatabase(ctx.create_database_statement(), db, getSettings());
         } else if (ctx.create_statistics_statement() != null) {
-            p = new PgCreateStatistics(ctx.create_statistics_statement(), db, stream, settings);
+            p = new PgCreateStatistics(ctx.create_statistics_statement(), db, stream, getSettings());
         } else if (ctx.set_statement() != null) {
             Set_statementContext setCtx = ctx.set_statement();
             set(setCtx);
@@ -181,21 +178,21 @@ public final class PgCustomParserListener extends CustomParserListener<PgDatabas
     private void alter(Schema_alterContext ctx, CommonTokenStream stream) {
         PgParserAbstract p;
         if (ctx.alter_table_statement() != null) {
-            p = new PgAlterTable(ctx.alter_table_statement(), db, tablespace, stream, settings);
+            p = new PgAlterTable(ctx.alter_table_statement(), db, tablespace, stream, getSettings());
         } else if (ctx.alter_index_statement() != null) {
-            p = new PgAlterIndex(ctx.alter_index_statement(), db, settings);
+            p = new PgAlterIndex(ctx.alter_index_statement(), db, getSettings());
         } else if (ctx.alter_sequence_statement() != null) {
-            p = new PgAlterSequence(ctx.alter_sequence_statement(), db, settings);
+            p = new PgAlterSequence(ctx.alter_sequence_statement(), db, getSettings());
         } else if (ctx.alter_view_statement() != null) {
-            p = new PgAlterView(ctx.alter_view_statement(), db, stream, settings);
+            p = new PgAlterView(ctx.alter_view_statement(), db, stream, getSettings());
         } else if (ctx.alter_materialized_view_statement() != null) {
-            p = new PgAlterMatView(ctx.alter_materialized_view_statement(), db, settings);
+            p = new PgAlterMatView(ctx.alter_materialized_view_statement(), db, getSettings());
         } else if (ctx.alter_domain_statement() != null) {
-            p = new PgAlterDomain(ctx.alter_domain_statement(), db, settings);
+            p = new PgAlterDomain(ctx.alter_domain_statement(), db, getSettings());
         } else if (ctx.alter_fts_statement() != null) {
-            p = new PgAlterFtsStatement(ctx.alter_fts_statement(), db, settings);
+            p = new PgAlterFtsStatement(ctx.alter_fts_statement(), db, getSettings());
         } else if (ctx.alter_owner_statement() != null) {
-            p = new PgAlterOwner(ctx.alter_owner_statement(), db, settings);
+            p = new PgAlterOwner(ctx.alter_owner_statement(), db, getSettings());
         } else if (ctx.alter_database_statement() != null
                 || ctx.alter_extension_statement() != null
                 || ctx.alter_function_statement() != null
@@ -209,7 +206,7 @@ public final class PgCustomParserListener extends CustomParserListener<PgDatabas
                 || ctx.alter_event_trigger_statement() != null
                 || ctx.alter_user_mapping_statement() != null
                 || ctx.alter_statistics_statement() != null) {
-            p = new PgAlterOther(ctx, db, settings);
+            p = new PgAlterOther(ctx, db, getSettings());
         } else {
             addToQueries(ctx, getAction(ctx));
             return;
@@ -228,7 +225,7 @@ public final class PgCustomParserListener extends CustomParserListener<PgDatabas
                 || ctx.drop_cast_statement() != null
                 || ctx.drop_policy_statement() != null
                 || ctx.drop_user_mapping_statement() != null) {
-            p = new PgDropStatement(ctx, db, settings);
+            p = new PgDropStatement(ctx, db, getSettings());
         } else {
             addToQueries(ctx, getAction(ctx));
             return;
@@ -239,13 +236,13 @@ public final class PgCustomParserListener extends CustomParserListener<PgDatabas
     private void data(Data_statementContext ctx) {
         PgParserAbstract p;
         if (ctx.update_stmt_for_psql() != null) {
-            p = new PgUpdateStatement(ctx.update_stmt_for_psql(), db, settings);
+            p = new PgUpdateStatement(ctx.update_stmt_for_psql(), db, getSettings());
         } else if (ctx.insert_stmt_for_psql() != null) {
-            p = new PgInsertStatement(ctx.insert_stmt_for_psql(), db, settings);
+            p = new PgInsertStatement(ctx.insert_stmt_for_psql(), db, getSettings());
         } else if (ctx.delete_stmt_for_psql() != null) {
-            p = new PgDeleteStatement(ctx.delete_stmt_for_psql(), db, settings);
+            p = new PgDeleteStatement(ctx.delete_stmt_for_psql(), db, getSettings());
         } else if (ctx.merge_stmt_for_psql() != null) {
-            p = new PgMergeStatement(ctx.merge_stmt_for_psql(), db, settings);
+            p = new PgMergeStatement(ctx.merge_stmt_for_psql(), db, getSettings());
         } else {
             addToQueries(ctx, getAction(ctx));
             return;
