@@ -27,12 +27,13 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Foreign data wrappers are libraries that provide access to external data sources,
  * allowing PostgreSQL to query data from other databases or systems.
  */
-public final class PgForeignDataWrapper extends PgAbstractStatement
+public class PgForeignDataWrapper extends PgAbstractStatement
         implements PgForeignOptionContainer {
+
+    private final Map<String, String> options = new LinkedHashMap<>();
 
     private String handler;
     private String validator;
-    private final Map<String, String> options = new LinkedHashMap<>();
 
     /**
      * Creates a new PostgreSQL foreign data wrapper.
@@ -46,27 +47,6 @@ public final class PgForeignDataWrapper extends PgAbstractStatement
     @Override
     public String getAlterHeader() {
         return "ALTER FOREIGN DATA WRAPPER " + getQualifiedName();
-    }
-
-    @Override
-    public Map<String, String> getOptions() {
-        return Collections.unmodifiableMap(options);
-    }
-
-    @Override
-    public void addOption(String key, String value) {
-        options.put(key, value);
-        resetHash();
-    }
-
-    public void setHandler(String handler) {
-        this.handler = handler;
-        resetHash();
-    }
-
-    public void setValidator(String validator) {
-        this.validator = validator;
-        resetHash();
     }
 
     @Override
@@ -135,6 +115,27 @@ public final class PgForeignDataWrapper extends PgAbstractStatement
     }
 
     @Override
+    public Map<String, String> getOptions() {
+        return Collections.unmodifiableMap(options);
+    }
+
+    @Override
+    public void addOption(String key, String value) {
+        options.put(key, value);
+        resetHash();
+    }
+
+    public void setHandler(String handler) {
+        this.handler = handler;
+        resetHash();
+    }
+
+    public void setValidator(String validator) {
+        this.validator = validator;
+        resetHash();
+    }
+
+    @Override
     public void computeHash(Hasher hasher) {
         hasher.put(handler);
         hasher.put(validator);
@@ -146,13 +147,11 @@ public final class PgForeignDataWrapper extends PgAbstractStatement
         if (this == obj) {
             return true;
         }
-
-        if (obj instanceof PgForeignDataWrapper fdw && super.compare(obj)) {
-            return Objects.equals(handler, fdw.handler)
-                    && Objects.equals(validator, fdw.validator)
-                    && Objects.equals(options, fdw.options);
-        }
-        return false;
+        return obj instanceof PgForeignDataWrapper fdw
+                && super.compare(fdw)
+                && Objects.equals(handler, fdw.handler)
+                && Objects.equals(validator, fdw.validator)
+                && Objects.equals(options, fdw.options);
     }
 
     @Override

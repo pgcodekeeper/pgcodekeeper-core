@@ -27,10 +27,11 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a ClickHouse user-defined function.
  * ClickHouse functions are lambda expressions with parameters and a body.
  */
-public final class ChFunction extends ChAbstractStatement {
+public class ChFunction extends ChAbstractStatement {
+
+    private final List<Argument> arguments = new ArrayList<>();
 
     private String body;
-    private final List<Argument> arguments = new ArrayList<>();
 
     /**
      * Creates a new ClickHouse function with the specified name.
@@ -39,34 +40,6 @@ public final class ChFunction extends ChAbstractStatement {
      */
     public ChFunction(String name) {
         super(name);
-    }
-
-    /**
-     * Returns the function body expression.
-     *
-     * @return the function body
-     */
-    public String getBody() {
-        return body;
-    }
-
-    public void setBody(String body) {
-        this.body = body;
-        resetHash();
-    }
-
-    public List<IArgument> getArguments() {
-        return Collections.unmodifiableList(arguments);
-    }
-
-    /**
-     * Adds an argument to this function.
-     *
-     * @param argument the argument to add
-     */
-    public void addArgument(Argument argument) {
-        arguments.add(argument);
-        resetHash();
     }
 
     @Override
@@ -96,6 +69,34 @@ public final class ChFunction extends ChAbstractStatement {
             return ObjectState.RECREATE;
         }
         return ObjectState.NOTHING;
+    }
+
+    /**
+     * Returns the function body expression.
+     *
+     * @return the function body
+     */
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+        resetHash();
+    }
+
+    public List<IArgument> getArguments() {
+        return Collections.unmodifiableList(arguments);
+    }
+
+    /**
+     * Adds an argument to this function.
+     *
+     * @param argument the argument to add
+     */
+    public void addArgument(Argument argument) {
+        arguments.add(argument);
+        resetHash();
     }
 
     @Override

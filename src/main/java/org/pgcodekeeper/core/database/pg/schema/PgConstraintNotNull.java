@@ -32,8 +32,10 @@ import org.pgcodekeeper.core.script.SQLScript;
  */
 public class PgConstraintNotNull extends PgConstraint {
 
-    private static final String NOT_NULL = "NOT NULL";
     public static final String NO_INHERIT = " NO INHERIT";
+
+    private static final String NOT_NULL = "NOT NULL";
+
     private boolean isNoInherit;
     private String defaultName;
 
@@ -91,6 +93,24 @@ public class PgConstraintNotNull extends PgConstraint {
         script.addStatement(sb);
     }
 
+    @Override
+    protected void appendAlterTable(StringBuilder sb) {
+        sb.append("ALTER TABLE ").append(getTable().getQualifiedName());
+    }
+
+    @Override
+    protected void appendCommentSql(SQLScript script) {
+        String sb = "COMMENT ON CONSTRAINT " +
+                getQuotedName() + " ON " +
+                getTable().getQualifiedName() + " IS " + (checkComments() ? comment : "NULL");
+        script.addCommentStatement(sb);
+    }
+
+    @Override
+    public String getErrorCode() {
+        return DUPLICATE_OBJECT;
+    }
+
     public void setNoInherit(boolean noInherit) {
         isNoInherit = noInherit;
         resetHash();
@@ -123,21 +143,8 @@ public class PgConstraintNotNull extends PgConstraint {
         return comment != null || isNotValid || isNoInherit || hasCustomName();
     }
 
-    @Override
-    protected void appendAlterTable(StringBuilder sb) {
-        sb.append("ALTER TABLE ").append(getTable().getQualifiedName());
-    }
-
     private AbstractStatement getTable() {
         return getParent().getParent();
-    }
-
-    @Override
-    protected void appendCommentSql(SQLScript script) {
-        String sb = "COMMENT ON CONSTRAINT " +
-                getQuotedName() + " ON " +
-                getTable().getQualifiedName() + " IS " + (checkComments() ? comment : "NULL");
-        script.addCommentStatement(sb);
     }
 
     @Override
@@ -148,11 +155,11 @@ public class PgConstraintNotNull extends PgConstraint {
 
     @Override
     public boolean compare(IStatement obj) {
-        if (obj instanceof PgConstraintNotNull con && super.compare(con)) {
-            return isNoInherit == con.isNoInherit;
+        if (this == obj) {
+            return true;
         }
-
-        return false;
+        return obj instanceof PgConstraintNotNull con && super.compare(con)
+                && isNoInherit == con.isNoInherit;
     }
 
     @Override
@@ -160,10 +167,5 @@ public class PgConstraintNotNull extends PgConstraint {
         var con = new PgConstraintNotNull(name);
         con.setNoInherit(isNoInherit);
         return con;
-    }
-
-    @Override
-    public String getErrorCode() {
-        return DUPLICATE_OBJECT;
     }
 }

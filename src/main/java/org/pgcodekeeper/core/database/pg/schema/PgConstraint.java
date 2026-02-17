@@ -53,21 +53,6 @@ public abstract class PgConstraint extends PgAbstractStatement implements IConst
         super(name);
     }
 
-    public void setDeferrable(boolean deferrable) {
-        this.deferrable = deferrable;
-        resetHash();
-    }
-
-    public void setInitially(boolean initially) {
-        this.initially = initially;
-        resetHash();
-    }
-
-    public void setNotEnforced(boolean notEnforced) {
-        this.notEnforced = notEnforced;
-        resetHash();
-    }
-
     @Override
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
@@ -142,18 +127,6 @@ public abstract class PgConstraint extends PgAbstractStatement implements IConst
     }
 
     @Override
-    public void getDropSQL(SQLScript script, boolean optionExists) {
-        final StringBuilder sbSQL = new StringBuilder();
-        appendAlterTable(sbSQL);
-        sbSQL.append("\n\tDROP CONSTRAINT ");
-        if (optionExists) {
-            sbSQL.append(IF_EXISTS);
-        }
-        sbSQL.append(getQuotedName());
-        script.addStatement(sbSQL);
-    }
-
-    @Override
     public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
         int startSize = script.getSize();
         PgConstraint newConstr = (PgConstraint) newCondition;
@@ -190,6 +163,27 @@ public abstract class PgConstraint extends PgAbstractStatement implements IConst
         script.addCommentStatement(sb.toString());
     }
 
+    @Override
+    public void getDropSQL(SQLScript script, boolean optionExists) {
+        final StringBuilder sbSQL = new StringBuilder();
+        appendAlterTable(sbSQL);
+        sbSQL.append("\n\tDROP CONSTRAINT ");
+        if (optionExists) {
+            sbSQL.append(IF_EXISTS);
+        }
+        sbSQL.append(getQuotedName());
+        script.addStatement(sbSQL);
+    }
+
+    @Override
+    public boolean containsColumn(String name) {
+        return getColumns().contains(name);
+    }
+
+    protected abstract String getErrorCode();
+
+    protected abstract PgConstraint getConstraintCopy();
+
     public void setNotValid(boolean isNotValid) {
         this.isNotValid = isNotValid;
         resetHash();
@@ -197,6 +191,31 @@ public abstract class PgConstraint extends PgAbstractStatement implements IConst
 
     public boolean isNotValid() {
         return isNotValid;
+    }
+
+    public void setDeferrable(boolean deferrable) {
+        this.deferrable = deferrable;
+        resetHash();
+    }
+
+    public void setInitially(boolean initially) {
+        this.initially = initially;
+        resetHash();
+    }
+
+    public void setNotEnforced(boolean notEnforced) {
+        this.notEnforced = notEnforced;
+        resetHash();
+    }
+
+    @Override
+    public String getTableName() {
+        return parent.getName();
+    }
+
+    @Override
+    public Collection<String> getColumns() {
+        return Collections.emptySet();
     }
 
     @Override
@@ -229,23 +248,4 @@ public abstract class PgConstraint extends PgAbstractStatement implements IConst
         con.setNotEnforced(notEnforced);
         return con;
     }
-
-    @Override
-    public String getTableName() {
-        return parent.getName();
-    }
-
-    @Override
-    public boolean containsColumn(String name) {
-        return getColumns().contains(name);
-    }
-
-    @Override
-    public Collection<String> getColumns() {
-        return Collections.emptySet();
-    }
-
-    protected abstract String getErrorCode();
-
-    protected abstract PgConstraint getConstraintCopy();
 }

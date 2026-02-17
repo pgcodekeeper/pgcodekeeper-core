@@ -28,8 +28,8 @@ import java.util.Collections;
  */
 public abstract class MsConstraint extends MsAbstractStatement implements IConstraint {
 
+    private boolean isNotValid;
     private boolean isDisabled;
-    protected boolean isNotValid;
 
     /**
      * Creates a new Microsoft SQL constraint with the specified name.
@@ -95,8 +95,6 @@ public abstract class MsConstraint extends MsAbstractStatement implements IConst
         return getObjectState(script, startSize);
     }
 
-    protected abstract boolean compareUnalterable(MsConstraint newConstr);
-
     @Override
     public void getDropSQL(SQLScript script, boolean optionExists) {
         final StringBuilder sbSQL = new StringBuilder();
@@ -109,45 +107,24 @@ public abstract class MsConstraint extends MsAbstractStatement implements IConst
         script.addStatement(sbSQL);
     }
 
+    private void appendAlterTable(StringBuilder sb) {
+        sb.append("ALTER ").append(parent.getStatementType().name()).append(' ');
+        sb.append(getParent().getQualifiedName());
+    }
+
+    protected abstract boolean compareUnalterable(MsConstraint newConstr);
+
+    protected abstract MsConstraint getConstraintCopy();
+
     public void setDisabled(boolean isDisabled) {
         this.isDisabled = isDisabled;
         resetHash();
-    }
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(isDisabled);
-        hasher.put(isNotValid);
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        if (obj instanceof MsConstraint con && super.compare(obj)) {
-            return isDisabled == con.isDisabled
-                    && isNotValid == con.isNotValid;
-        }
-        return false;
-    }
-
-    @Override
-    protected MsConstraint getCopy() {
-        MsConstraint constraintDst = getConstraintCopy();
-        constraintDst.setDisabled(isDisabled);
-        constraintDst.setNotValid(isNotValid);
-        return constraintDst;
     }
 
     public void setNotValid(boolean isNotValid) {
         this.isNotValid = isNotValid;
         resetHash();
     }
-
-    private void appendAlterTable(StringBuilder sb) {
-        sb.append("ALTER ").append(parent.getStatementType().name()).append(' ');
-        sb.append(getParent().getQualifiedName());
-    }
-
-    protected abstract MsConstraint getConstraintCopy();
 
     @Override
     public Collection<String> getColumns() {
@@ -162,5 +139,27 @@ public abstract class MsConstraint extends MsAbstractStatement implements IConst
     @Override
     public String getTableName() {
         return parent.getName();
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(isDisabled);
+        hasher.put(isNotValid);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return obj instanceof MsConstraint con
+                && super.compare(obj)
+                && isDisabled == con.isDisabled
+                && isNotValid == con.isNotValid;
+    }
+
+    @Override
+    protected MsConstraint getCopy() {
+        MsConstraint constraintDst = getConstraintCopy();
+        constraintDst.setDisabled(isDisabled);
+        constraintDst.setNotValid(isNotValid);
+        return constraintDst;
     }
 }

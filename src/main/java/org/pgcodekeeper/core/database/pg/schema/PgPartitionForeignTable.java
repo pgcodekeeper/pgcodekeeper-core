@@ -18,6 +18,7 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.IPartitionTable;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
@@ -30,7 +31,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * @author galiev_mr
  * @since 4.1.1
  */
-public final class PgPartitionForeignTable extends PgAbstractForeignTable implements IPartitionTable {
+public class PgPartitionForeignTable extends PgAbstractForeignTable implements IPartitionTable {
 
     private final String partitionBounds;
 
@@ -60,7 +61,7 @@ public final class PgPartitionForeignTable extends PgAbstractForeignTable implem
     protected boolean isNeedRecreate(PgAbstractTable newTable) {
         return super.isNeedRecreate(newTable)
                 || !(Objects.equals(partitionBounds, ((PgPartitionForeignTable) newTable).partitionBounds))
-                || !inherits.equals(((PgAbstractTable) newTable).inherits);
+                || !inherits.equals(newTable.inherits);
     }
 
     @Override
@@ -93,8 +94,14 @@ public final class PgPartitionForeignTable extends PgAbstractForeignTable implem
     }
 
     @Override
-    protected PgAbstractTable getTableCopy() {
-        return new PgPartitionForeignTable(name, serverName, partitionBounds);
+    public void computeHash(Hasher hasher) {
+        super.computeHash(hasher);
+        hasher.put(partitionBounds);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
     }
 
     @Override
@@ -105,8 +112,7 @@ public final class PgPartitionForeignTable extends PgAbstractForeignTable implem
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        super.computeHash(hasher);
-        hasher.put(partitionBounds);
+    protected PgAbstractTable getTableCopy() {
+        return new PgPartitionForeignTable(name, serverName, partitionBounds);
     }
 }

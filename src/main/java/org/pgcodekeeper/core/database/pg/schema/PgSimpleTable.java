@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
 /**
@@ -25,7 +26,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * @author galiev_mr
  * @since 4.1.1
  */
-public final class PgSimpleTable extends PgAbstractRegularTable {
+public class PgSimpleTable extends PgAbstractRegularTable {
 
     /**
      * Creates a new PostgreSQL simple table.
@@ -53,11 +54,6 @@ public final class PgSimpleTable extends PgAbstractRegularTable {
     }
 
     @Override
-    protected PgAbstractTable getTableCopy() {
-        return new PgSimpleTable(name);
-    }
-
-    @Override
     protected void compareTableTypes(PgAbstractTable newTable, SQLScript script) {
         if (newTable instanceof PgAbstractRegularTable regTable) {
             regTable.convertTable(script);
@@ -67,5 +63,15 @@ public final class PgSimpleTable extends PgAbstractRegularTable {
     @Override
     protected void convertTable(SQLScript script) {
         // no implements
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
+    }
+
+    @Override
+    protected PgAbstractTable getTableCopy() {
+        return new PgSimpleTable(name);
     }
 }

@@ -17,13 +17,14 @@ package org.pgcodekeeper.core.database.pg.schema;
 
 import java.util.Objects;
 
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 /**
  * PostgreSQL CHECK constraint implementation.
  * CHECK constraints enforce domain integrity by limiting the values
  * that can be placed in a column based on a Boolean expression.
  */
-public final class PgConstraintCheck extends PgConstraint {
+public class PgConstraintCheck extends PgConstraint {
 
     private boolean isInherit = true;
     private String expression;
@@ -37,16 +38,6 @@ public final class PgConstraintCheck extends PgConstraint {
         super(name);
     }
 
-    public void setInherit(boolean isInherit) {
-        this.isInherit = isInherit;
-        resetHash();
-    }
-
-    public void setExpression(String expression) {
-        this.expression = expression;
-        resetHash();
-    }
-
     @Override
     public String getDefinition() {
         var sbSQL = new StringBuilder();
@@ -58,10 +49,30 @@ public final class PgConstraintCheck extends PgConstraint {
     }
 
     @Override
+    public String getErrorCode() {
+        return DUPLICATE_OBJECT;
+    }
+
+    public void setInherit(boolean isInherit) {
+        this.isInherit = isInherit;
+        resetHash();
+    }
+
+    public void setExpression(String expression) {
+        this.expression = expression;
+        resetHash();
+    }
+
+    @Override
     public void computeHash(Hasher hasher) {
         super.computeHash(hasher);
         hasher.put(isInherit);
         hasher.put(expression);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
     }
 
     @Override
@@ -80,10 +91,5 @@ public final class PgConstraintCheck extends PgConstraint {
         con.setInherit(isInherit);
         con.setExpression(expression);
         return con;
-    }
-
-    @Override
-    public String getErrorCode() {
-        return DUPLICATE_OBJECT;
     }
 }

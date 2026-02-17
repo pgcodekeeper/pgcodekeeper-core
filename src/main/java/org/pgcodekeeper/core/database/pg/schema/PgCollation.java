@@ -26,7 +26,13 @@ import org.pgcodekeeper.core.script.SQLScript;
  * PostgreSQL collation implementation.
  * Represents a collation object that defines how text values are sorted and compared.
  */
-public final class PgCollation extends PgAbstractStatement implements ISearchPath {
+public class PgCollation extends PgAbstractStatement implements ISearchPath {
+
+    private String lcCollate;
+    private String lcCtype;
+    private String provider;
+    private boolean deterministic = true;
+    private String rules;
 
     /**
      * Creates a new PostgreSQL collation.
@@ -37,40 +43,9 @@ public final class PgCollation extends PgAbstractStatement implements ISearchPat
         super(name);
     }
 
-    private String lcCollate;
-    private String lcCtype;
-    private String provider;
-    private boolean deterministic = true;
-    private String rules;
-
     @Override
     public DbObjType getStatementType() {
         return DbObjType.COLLATION;
-    }
-
-    public void setDeterministic(boolean deterministic) {
-        this.deterministic = deterministic;
-        resetHash();
-    }
-
-    public void setLcCollate(final String lcCollate) {
-        this.lcCollate = lcCollate;
-        resetHash();
-    }
-
-    public void setLcCtype(final String lcCtype) {
-        this.lcCtype = lcCtype;
-        resetHash();
-    }
-
-    public void setProvider(final String provider) {
-        this.provider = provider;
-        resetHash();
-    }
-
-    public void setRules(final String rules) {
-        this.rules = rules;
-        resetHash();
     }
 
     @Override
@@ -118,6 +93,31 @@ public final class PgCollation extends PgAbstractStatement implements ISearchPat
         return getObjectState(script, startSize);
     }
 
+    public void setDeterministic(boolean deterministic) {
+        this.deterministic = deterministic;
+        resetHash();
+    }
+
+    public void setLcCollate(final String lcCollate) {
+        this.lcCollate = lcCollate;
+        resetHash();
+    }
+
+    public void setLcCtype(final String lcCtype) {
+        this.lcCtype = lcCtype;
+        resetHash();
+    }
+
+    public void setProvider(final String provider) {
+        this.provider = provider;
+        resetHash();
+    }
+
+    public void setRules(final String rules) {
+        this.rules = rules;
+        resetHash();
+    }
+
     @Override
     public void computeHash(Hasher hasher) {
         hasher.put(deterministic);
@@ -132,11 +132,9 @@ public final class PgCollation extends PgAbstractStatement implements ISearchPat
         if (this == obj) {
             return true;
         }
-
-        if (obj instanceof PgCollation coll && super.compare(obj)) {
-            return compareUnalterable(coll);
-        }
-        return false;
+        return obj instanceof PgCollation coll
+                && super.compare(obj)
+                && compareUnalterable(coll);
     }
 
     private boolean compareUnalterable(PgCollation coll) {

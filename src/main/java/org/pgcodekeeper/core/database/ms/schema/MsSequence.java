@@ -29,12 +29,11 @@ import org.slf4j.LoggerFactory;
  * Represents a Microsoft SQL sequence object.
  * Sequences generate sequential numeric values and are commonly used for primary keys and unique identifiers.
  */
-public final class MsSequence extends MsAbstractStatement implements ISequence {
+public class MsSequence extends MsAbstractStatement implements ISequence {
 
     private static final Logger LOG = LoggerFactory.getLogger(MsSequence.class);
 
     private static final String BIGINT = "bigint";
-
     private static final List<Pair<String, String>> relationColumns = List.of(
             new Pair<>("sequence_name", "name"), new Pair<>("last_value", BIGINT),
             new Pair<>("start_value", BIGINT), new Pair<>("increment_by", BIGINT),
@@ -75,7 +74,7 @@ public final class MsSequence extends MsAbstractStatement implements ISequence {
         appendPrivileges(script);
     }
 
-    public void fillSequenceBody(StringBuilder sbSQL) {
+    private void fillSequenceBody(StringBuilder sbSQL) {
         if (startWith != null) {
             sbSQL.append("\n\tSTART WITH ");
             sbSQL.append(startWith);
@@ -214,68 +213,6 @@ public final class MsSequence extends MsAbstractStatement implements ISequence {
         resetHash();
     }
 
-    public void setCached(boolean isCached) {
-        this.isCached = isCached;
-        resetHash();
-    }
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(isCached);
-        hasher.put(cache);
-        hasher.put(cycle);
-        hasher.put(increment);
-        hasher.put(maxValue);
-        hasher.put(minValue);
-        hasher.put(dataType);
-        hasher.put(startWith);
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        if (obj instanceof MsSequence seq && super.compare(obj)) {
-            return isCached == seq.isCached
-                    && Objects.equals(cache, seq.cache)
-                    && cycle == seq.cycle
-                    && Objects.equals(increment, seq.increment)
-                    && Objects.equals(maxValue, seq.maxValue)
-                    && Objects.equals(minValue, seq.minValue)
-                    && Objects.equals(dataType, seq.dataType)
-                    && Objects.equals(startWith, seq.startWith);
-        }
-
-        return false;
-    }
-
-    @Override
-    protected MsSequence getCopy() {
-        MsSequence copy = new MsSequence(name);
-        copy.setCached(isCached);
-        copy.setCache(cache);
-        copy.setCycle(cycle);
-        copy.increment = increment;
-        copy.maxValue = maxValue;
-        copy.minValue = minValue;
-        copy.dataType = dataType;
-        copy.setStartWith(startWith);
-        return copy;
-    }
-
-    public void setStartWith(String startWith) {
-        this.startWith = startWith;
-        resetHash();
-    }
-
-    public void setCycle(boolean cycle) {
-        this.cycle = cycle;
-        resetHash();
-    }
-
-    public void setCache(String cache) {
-        this.cache = cache;
-        resetHash();
-    }
-
     private long getBoundaryTypeVal(String type, boolean needMaxVal, long precision) {
         return switch (type) {
             case "tinyint" -> needMaxVal ? 255 : 0;
@@ -295,8 +232,71 @@ public final class MsSequence extends MsAbstractStatement implements ISequence {
         };
     }
 
+    public void setCached(boolean isCached) {
+        this.isCached = isCached;
+        resetHash();
+    }
+
+    public void setStartWith(String startWith) {
+        this.startWith = startWith;
+        resetHash();
+    }
+
+    public void setCycle(boolean cycle) {
+        this.cycle = cycle;
+        resetHash();
+    }
+
+    public void setCache(String cache) {
+        this.cache = cache;
+        resetHash();
+    }
+
     @Override
     public Stream<Pair<String, String>> getRelationColumns() {
         return relationColumns.stream();
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(isCached);
+        hasher.put(cache);
+        hasher.put(cycle);
+        hasher.put(increment);
+        hasher.put(maxValue);
+        hasher.put(minValue);
+        hasher.put(dataType);
+        hasher.put(startWith);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+        return obj instanceof MsSequence seq
+                && super.compare(obj)
+                && isCached == seq.isCached
+                && Objects.equals(cache, seq.cache)
+                && cycle == seq.cycle
+                && Objects.equals(increment, seq.increment)
+                && Objects.equals(maxValue, seq.maxValue)
+                && Objects.equals(minValue, seq.minValue)
+                && Objects.equals(dataType, seq.dataType)
+                && Objects.equals(startWith, seq.startWith);
+    }
+
+    @Override
+    protected MsSequence getCopy() {
+        MsSequence copy = new MsSequence(name);
+        copy.setCached(isCached);
+        copy.setCache(cache);
+        copy.setCycle(cycle);
+        copy.increment = increment;
+        copy.maxValue = maxValue;
+        copy.minValue = minValue;
+        copy.dataType = dataType;
+        copy.setStartWith(startWith);
+        return copy;
     }
 }

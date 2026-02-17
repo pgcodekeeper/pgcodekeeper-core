@@ -27,7 +27,7 @@ import java.util.stream.Stream;
  * Represents a Microsoft SQL schema that contains database objects like tables, views, functions, and procedures.
  * Provides SQL generation for schema creation and management.
  */
-public final class MsSchema extends MsAbstractStatement implements ISchema {
+public class MsSchema extends MsAbstractStatement implements ISchema {
 
     private final Map<String, MsAbstractCommonFunction> functions = new LinkedHashMap<>();
     private final Map<String, MsSequence> sequences = new LinkedHashMap<>();
@@ -261,42 +261,6 @@ public final class MsSchema extends MsAbstractStatement implements ISchema {
         addUnique(types, type);
     }
 
-    @Override
-    protected void computeChildrenHash(Hasher hasher) {
-        hasher.putUnordered(sequences);
-        hasher.putUnordered(functions);
-        hasher.putUnordered(views);
-        hasher.putUnordered(tables);
-        hasher.putUnordered(types);
-    }
-
-    @Override
-    public boolean compareChildren(AbstractStatement obj) {
-        if (obj instanceof MsSchema schema) {
-            return sequences.equals(schema.sequences)
-                    && functions.equals(schema.functions)
-                    && views.equals(schema.views)
-                    && tables.equals(schema.tables)
-                    && types.equals(schema.types);
-        }
-        return false;
-    }
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        // all hashable fields in AbstractStatement
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        return this == obj || obj instanceof MsSchema && super.compare(obj);
-    }
-
-    @Override
-    protected MsSchema getCopy() {
-        return new MsSchema(name);
-    }
-
     /**
      * Finds an index by name across all tables and views in this schema.
      *
@@ -326,5 +290,39 @@ public final class MsSchema extends MsAbstractStatement implements ISchema {
      */
     public Collection<IFunction> getFunctions() {
         return Collections.unmodifiableCollection(functions.values());
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        // all hashable fields in AbstractStatement
+    }
+
+    @Override
+    protected void computeChildrenHash(Hasher hasher) {
+        hasher.putUnordered(sequences);
+        hasher.putUnordered(functions);
+        hasher.putUnordered(views);
+        hasher.putUnordered(tables);
+        hasher.putUnordered(types);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || (obj instanceof MsSchema && super.compare(obj));
+    }
+
+    @Override
+    public boolean compareChildren(AbstractStatement obj) {
+        return obj instanceof MsSchema schema
+                && sequences.equals(schema.sequences)
+                && functions.equals(schema.functions)
+                && views.equals(schema.views)
+                && tables.equals(schema.tables)
+                && types.equals(schema.types);
+    }
+
+    @Override
+    protected MsSchema getCopy() {
+        return new MsSchema(name);
     }
 }

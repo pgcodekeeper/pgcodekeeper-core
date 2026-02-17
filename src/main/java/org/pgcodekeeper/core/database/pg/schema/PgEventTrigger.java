@@ -27,10 +27,11 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Event triggers fire automatically when specified database events occur,
  * such as DDL commands or user login attempts.
  */
-public final class PgEventTrigger extends PgAbstractStatement {
+public class PgEventTrigger extends PgAbstractStatement {
+
+    private final List<String> tags = new ArrayList<>();
 
     private String executable;
-    private final List<String> tags = new ArrayList<>();
     private String event;
     private String mode;
 
@@ -101,40 +102,6 @@ public final class PgEventTrigger extends PgAbstractStatement {
         return DbObjType.EVENT_TRIGGER;
     }
 
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(executable);
-        hasher.put(tags);
-        hasher.put(event);
-        hasher.put(mode);
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj instanceof PgEventTrigger newEventTrigger && super.compare(obj)) {
-            return Objects.equals(executable, newEventTrigger.executable)
-                    && Objects.equals(tags, newEventTrigger.tags)
-                    && Objects.equals(event, newEventTrigger.event)
-                    && Objects.equals(mode, newEventTrigger.mode);
-        }
-
-        return false;
-    }
-
-    @Override
-    protected AbstractStatement getCopy() {
-        PgEventTrigger evt = new PgEventTrigger(name);
-        evt.setExecutable(executable);
-        evt.tags.addAll(tags);
-        evt.setEvent(event);
-        evt.setMode(mode);
-
-        return evt;
-    }
-
     public void setExecutable(String executable) {
         this.executable = executable;
         resetHash();
@@ -158,5 +125,36 @@ public final class PgEventTrigger extends PgAbstractStatement {
     public void setMode(String mode) {
         this.mode = mode;
         resetHash();
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(executable);
+        hasher.put(tags);
+        hasher.put(event);
+        hasher.put(mode);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+        return obj instanceof PgEventTrigger newEventTrigger && super.compare(obj)
+                && Objects.equals(executable, newEventTrigger.executable)
+                && Objects.equals(tags, newEventTrigger.tags)
+                && Objects.equals(event, newEventTrigger.event)
+                && Objects.equals(mode, newEventTrigger.mode);
+    }
+
+    @Override
+    protected AbstractStatement getCopy() {
+        PgEventTrigger evt = new PgEventTrigger(name);
+        evt.setExecutable(executable);
+        evt.tags.addAll(tags);
+        evt.setEvent(event);
+        evt.setMode(mode);
+
+        return evt;
     }
 }

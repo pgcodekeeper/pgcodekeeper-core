@@ -23,6 +23,7 @@ import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IFunction;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
@@ -30,14 +31,9 @@ import org.pgcodekeeper.core.hasher.Hasher;
  * Represents a regular PostgreSQL function (as opposed to procedures or aggregates)
  * with a return type and function body.
  */
-public final class PgFunction extends PgAbstractFunction {
+public class PgFunction extends PgAbstractFunction {
 
     private String returns;
-
-    @Override
-    public DbObjType getStatementType() {
-        return DbObjType.FUNCTION;
-    }
 
     /**
      * Creates a new PostgreSQL function.
@@ -49,14 +45,13 @@ public final class PgFunction extends PgAbstractFunction {
     }
 
     @Override
-    public String getReturns() {
-        return returns;
+    public DbObjType getStatementType() {
+        return DbObjType.FUNCTION;
     }
 
     @Override
-    public void setReturns(String returns) {
-        this.returns = returns;
-        resetHash();
+    public String getReturns() {
+        return returns;
     }
 
     @Override
@@ -69,17 +64,26 @@ public final class PgFunction extends PgAbstractFunction {
     }
 
     @Override
+    public void setReturns(String returns) {
+        this.returns = returns;
+        resetHash();
+    }
+
+    @Override
     public void computeHash(Hasher hasher) {
         super.computeHash(hasher);
         hasher.put(returns);
     }
 
     @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
+    }
+
+    @Override
     protected boolean compareUnalterable(PgAbstractFunction function) {
-        if (function instanceof PgFunction pgFunc && super.compareUnalterable(function)) {
-            return Objects.equals(returns, pgFunc.getReturns());
-        }
-        return false;
+        return function instanceof PgFunction pgFunc && super.compareUnalterable(function)
+                && Objects.equals(returns, pgFunc.getReturns());
     }
 
     @Override

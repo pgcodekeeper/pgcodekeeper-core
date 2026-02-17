@@ -28,15 +28,10 @@ import org.pgcodekeeper.core.script.SQLScript;
  *
  * @author Alexander Levsha
  */
-public final class PgExtension extends PgAbstractStatement {
+public class PgExtension extends PgAbstractStatement {
 
     private String schema;
     private boolean relocatable;
-
-    @Override
-    public DbObjType getStatementType() {
-        return DbObjType.EXTENSION;
-    }
 
     /**
      * Creates a new PostgreSQL extension.
@@ -47,22 +42,9 @@ public final class PgExtension extends PgAbstractStatement {
         super(name);
     }
 
-    /**
-     * Gets the schema where this extension is installed.
-     *
-     * @return schema name or null if using default
-     */
-    public String getSchema() {
-        return schema;
-    }
-
-    public void setSchema(final String schema) {
-        this.schema = schema;
-        resetHash();
-    }
-
-    public void setRelocatable(boolean relocatable) {
-        this.relocatable = relocatable;
+    @Override
+    public DbObjType getStatementType() {
+        return DbObjType.EXTENSION;
     }
 
     @Override
@@ -104,6 +86,24 @@ public final class PgExtension extends PgAbstractStatement {
         return getObjectState(isNeedDepcies, script, startSize);
     }
 
+    /**
+     * Gets the schema where this extension is installed.
+     *
+     * @return schema name or null if using default
+     */
+    public String getSchema() {
+        return schema;
+    }
+
+    public void setSchema(final String schema) {
+        this.schema = schema;
+        resetHash();
+    }
+
+    public void setRelocatable(boolean relocatable) {
+        this.relocatable = relocatable;
+    }
+
     @Override
     public void computeHash(Hasher hasher) {
         hasher.put(schema);
@@ -114,12 +114,8 @@ public final class PgExtension extends PgAbstractStatement {
         if (this == obj) {
             return true;
         }
-
-        if (obj instanceof PgExtension ext && super.compare(obj)) {
-            return Objects.equals(schema, ext.schema);
-        }
-
-        return false;
+        return obj instanceof PgExtension ext && super.compare(obj)
+                && Objects.equals(schema, ext.schema);
     }
 
     @Override

@@ -27,60 +27,14 @@ import org.pgcodekeeper.core.utils.Utils;
  * A domain is a user-defined data type that is based on another underlying type,
  * with optional constraints, default values, and NOT NULL specifications.
  */
-public final class PgDomain extends PgAbstractStatement implements ISearchPath {
+public class PgDomain extends PgAbstractStatement implements ISearchPath {
+
+    private final List<PgConstraint> constraints = new ArrayList<>();
 
     private String dataType;
     private String collation;
     private String defaultValue;
     private boolean notNull;
-    private final List<PgConstraint> constraints = new ArrayList<>();
-
-    public void setDataType(String dataType) {
-        this.dataType = dataType;
-        resetHash();
-    }
-
-    public void setCollation(String collation) {
-        this.collation = collation;
-        resetHash();
-    }
-
-    public void setDefaultValue(String defaultValue) {
-        this.defaultValue = defaultValue;
-        resetHash();
-    }
-
-    public void setNotNull(boolean notNull) {
-        this.notNull = notNull;
-        resetHash();
-    }
-
-    /**
-     * Returns a constraint by name.
-     *
-     * @param name constraint name
-     * @return constraint or null if not found
-     */
-    public PgConstraint getConstraint(String name) {
-        for (PgConstraint c : constraints) {
-            if (c.getName().equals(name)) {
-                return c;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Adds a constraint to this domain.
-     *
-     * @param constraint constraint to add
-     */
-    public void addConstraint(PgConstraint constraint) {
-        assertUnique(getConstraint(constraint.getName()), constraint);
-        constraints.add(constraint);
-        constraint.setParent(this);
-        resetHash();
-    }
 
     /**
      * Creates a new PostgreSQL domain.
@@ -197,6 +151,53 @@ public final class PgDomain extends PgAbstractStatement implements ISearchPath {
         }
     }
 
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
+        resetHash();
+    }
+
+    public void setCollation(String collation) {
+        this.collation = collation;
+        resetHash();
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
+        resetHash();
+    }
+
+    public void setNotNull(boolean notNull) {
+        this.notNull = notNull;
+        resetHash();
+    }
+
+    /**
+     * Returns a constraint by name.
+     *
+     * @param name constraint name
+     * @return constraint or null if not found
+     */
+    public PgConstraint getConstraint(String name) {
+        for (PgConstraint c : constraints) {
+            if (c.getName().equals(name)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Adds a constraint to this domain.
+     *
+     * @param constraint constraint to add
+     */
+    public void addConstraint(PgConstraint constraint) {
+        assertUnique(getConstraint(constraint.getName()), constraint);
+        constraints.add(constraint);
+        constraint.setParent(this);
+        resetHash();
+    }
+
     @Override
     public void computeHash(Hasher hasher) {
         hasher.put(dataType);
@@ -211,16 +212,12 @@ public final class PgDomain extends PgAbstractStatement implements ISearchPath {
         if (this == obj) {
             return true;
         }
-
-        if (obj instanceof PgDomain dom && super.compare(obj)) {
-            return Objects.equals(dataType, dom.dataType)
-                    && Objects.equals(collation, dom.collation)
-                    && Objects.equals(defaultValue, dom.defaultValue)
-                    && notNull == dom.notNull
-                    && Utils.setLikeEquals(constraints, dom.constraints);
-        }
-
-        return false;
+        return obj instanceof PgDomain dom && super.compare(obj)
+                && Objects.equals(dataType, dom.dataType)
+                && Objects.equals(collation, dom.collation)
+                && Objects.equals(defaultValue, dom.defaultValue)
+                && notNull == dom.notNull
+                && Utils.setLikeEquals(constraints, dom.constraints);
     }
 
     @Override

@@ -25,7 +25,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
  * Range types store ranges of values for a given subtype, such as int4range for integers
  * or tsrange for timestamps. They support inclusion/exclusion bounds and various operations.
  */
-public final class PgRangeType extends PgAbstractType {
+public class PgRangeType extends PgAbstractType {
 
     private String subtype;
     private String subtypeOpClass;
@@ -107,10 +107,11 @@ public final class PgRangeType extends PgAbstractType {
 
     @Override
     public boolean compare(IStatement obj) {
-        if (obj instanceof PgRangeType type && super.compare(type)) {
-            return compareUnalterable(type);
+        if (this == obj) {
+            return true;
         }
-        return false;
+        return obj instanceof PgRangeType type && super.compare(type)
+                && compareUnalterable(type);
     }
 
     @Override

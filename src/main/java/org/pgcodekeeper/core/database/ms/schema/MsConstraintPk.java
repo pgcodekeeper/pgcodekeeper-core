@@ -26,15 +26,15 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a Microsoft SQL PRIMARY KEY or UNIQUE constraint.
  * Supports both clustered and non-clustered indexes with various options.
  */
-public final class MsConstraintPk extends MsConstraint
-        implements IConstraintPk, IOptionContainer, ISimpleColumnContainer {
+public class MsConstraintPk extends MsConstraint implements IConstraintPk, IOptionContainer, ISimpleColumnContainer {
 
     private final boolean isPrimaryKey;
-    private boolean isClustered;
-    private String dataSpace;
     private final List<String> columnNames = new ArrayList<>();
     private final List<SimpleColumn> columns = new ArrayList<>();
     private final Map<String, String> options = new HashMap<>();
+
+    private boolean isClustered;
+    private String dataSpace;
 
     /**
      * Creates a new Microsoft SQL PRIMARY KEY or UNIQUE constraint.
@@ -45,6 +45,46 @@ public final class MsConstraintPk extends MsConstraint
     public MsConstraintPk(String name, boolean isPrimaryKey) {
         super(name);
         this.isPrimaryKey = isPrimaryKey;
+    }
+
+    @Override
+    public String getDefinition() {
+        final StringBuilder sbSQL = new StringBuilder();
+        sbSQL.append(isPrimaryKey ? "PRIMARY KEY " : "UNIQUE ");
+        if (!isClustered) {
+            sbSQL.append("NON");
+        }
+        sbSQL.append("CLUSTERED ");
+        if (options.keySet().stream().anyMatch("BUCKET_COUNT"::equalsIgnoreCase)) {
+            sbSQL.append(" HASH");
+        }
+        appendSimpleColumns(sbSQL, columns);
+        if (!options.isEmpty()) {
+            sbSQL.append(" WITH");
+            StatementUtils.appendOptionsWithParen(sbSQL, options, " = ");
+        }
+        if (dataSpace != null) {
+            sbSQL.append(" ON ").append(dataSpace);
+        }
+        return sbSQL.toString();
+    }
+
+    private void appendSimpleColumns(StringBuilder sbSQL, List<SimpleColumn> columns) {
+        sbSQL.append(" (");
+        for (var col : columns) {
+            sbSQL.append(quote(col.getName()));
+            if (col.isDesc()) {
+                sbSQL.append(" DESC");
+            }
+            sbSQL.append(", ");
+        }
+        sbSQL.setLength(sbSQL.length() - 2);
+        sbSQL.append(')');
+    }
+
+    @Override
+    public void compareOptions(IOptionContainer newContainer, SQLScript script) {
+        // no implementation
     }
 
     @Override
@@ -107,41 +147,6 @@ public final class MsConstraintPk extends MsConstraint
     }
 
     @Override
-    public String getDefinition() {
-        final StringBuilder sbSQL = new StringBuilder();
-        sbSQL.append(isPrimaryKey ? "PRIMARY KEY " : "UNIQUE ");
-        if (!isClustered) {
-            sbSQL.append("NON");
-        }
-        sbSQL.append("CLUSTERED ");
-        if (options.keySet().stream().anyMatch("BUCKET_COUNT"::equalsIgnoreCase)) {
-            sbSQL.append(" HASH");
-        }
-        appendSimpleColumns(sbSQL, columns);
-        if (!options.isEmpty()) {
-            sbSQL.append(" WITH");
-            StatementUtils.appendOptionsWithParen(sbSQL, options, " = ");
-        }
-        if (dataSpace != null) {
-            sbSQL.append(" ON ").append(dataSpace);
-        }
-        return sbSQL.toString();
-    }
-
-    private void appendSimpleColumns(StringBuilder sbSQL, List<SimpleColumn> columns) {
-        sbSQL.append(" (");
-        for (var col : columns) {
-            sbSQL.append(quote(col.getName()));
-            if (col.isDesc()) {
-                sbSQL.append(" DESC");
-            }
-            sbSQL.append(", ");
-        }
-        sbSQL.setLength(sbSQL.length() - 2);
-        sbSQL.append(')');
-    }
-
-    @Override
     public void computeHash(Hasher hasher) {
         super.computeHash(hasher);
         hasher.put(isPrimaryKey);
@@ -156,25 +161,19 @@ public final class MsConstraintPk extends MsConstraint
         if (this == obj) {
             return true;
         }
-
-        if (obj instanceof MsConstraintPk con && super.compare(obj)) {
-            return compareUnalterable(con);
-        }
-
-        return false;
+        return obj instanceof MsConstraintPk con
+                && super.compare(con)
+                && compareUnalterable(con);
     }
 
     @Override
     protected boolean compareUnalterable(MsConstraint obj) {
-        if (obj instanceof MsConstraintPk con) {
-            return isPrimaryKey == con.isPrimaryKey
-                    && isClustered == con.isClustered
-                    && Objects.equals(dataSpace, con.dataSpace)
-                    && Objects.equals(columns, con.columns)
-                    && Objects.equals(options, con.options);
-        }
-
-        return false;
+        return obj instanceof MsConstraintPk con
+                && isPrimaryKey == con.isPrimaryKey
+                && isClustered == con.isClustered
+                && Objects.equals(dataSpace, con.dataSpace)
+                && Objects.equals(columns, con.columns)
+                && Objects.equals(options, con.options);
     }
 
     @Override
@@ -186,10 +185,5 @@ public final class MsConstraintPk extends MsConstraint
         con.columns.addAll(columns);
         con.options.putAll(options);
         return con;
-    }
-
-    @Override
-    public void compareOptions(IOptionContainer newContainer, SQLScript script) {
-        // no implementation
     }
 }

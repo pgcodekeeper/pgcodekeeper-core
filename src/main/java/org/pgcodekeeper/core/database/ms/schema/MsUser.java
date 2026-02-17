@@ -26,7 +26,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a Microsoft SQL database user that can be associated with a login
  * and have specific schema, language, and encryption settings.
  */
-public final class MsUser extends MsAbstractStatement {
+public class MsUser extends MsAbstractStatement {
 
     // TODO PASSWORD, DEFAULT_LANGUAGE, ALLOW_ENCRYPTED_VALUE_MODIFICATIONS
     private String schema;
@@ -154,14 +154,12 @@ public final class MsUser extends MsAbstractStatement {
         if (obj == this) {
             return true;
         }
-
-        if (obj instanceof MsUser user && super.compare(obj)) {
-            return Objects.equals(schema, user.schema)
-                    && Objects.equals(login, user.login)
-                    && Objects.equals(language, user.language)
-                    && allowEncrypted == user.allowEncrypted;
-        }
-        return false;
+        return obj instanceof MsUser user
+                && super.compare(user)
+                && Objects.equals(schema, user.schema)
+                && Objects.equals(login, user.login)
+                && Objects.equals(language, user.language)
+                && allowEncrypted == user.allowEncrypted;
     }
 
     @Override

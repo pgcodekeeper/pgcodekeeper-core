@@ -26,11 +26,12 @@ import org.pgcodekeeper.core.settings.ISettings;
  * Represents a Microsoft SQL assembly.
  * Assemblies allow running .NET code within SQL Server.
  */
-public final class MsAssembly extends MsAbstractStatement {
+public class MsAssembly extends MsAbstractStatement {
 
     private static final int PREVIEW_LENGTH = 256 * 4;
 
     private final List<String> binaries = new ArrayList<>();
+
     private String permission = "SAFE";
     private boolean isVisible = true;
 
@@ -86,18 +87,6 @@ public final class MsAssembly extends MsAbstractStatement {
         appendPrivileges(script);
     }
 
-
-    @Override
-    public void getDropSQL(SQLScript script, boolean optionExists) {
-        StringBuilder dropSb = new StringBuilder();
-        dropSb.append("DROP ASSEMBLY ");
-        if (optionExists) {
-            dropSb.append(IF_EXISTS);
-        }
-        dropSb.append(getQuotedName()).append(" WITH NO DEPENDENTS");
-        script.addStatement(dropSb);
-    }
-
     @Override
     public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
         int startSize = script.getSize();
@@ -131,34 +120,14 @@ public final class MsAssembly extends MsAbstractStatement {
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(isVisible);
-        hasher.put(permission);
-        hasher.put(binaries);
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        if (this == obj) {
-            return true;
+    public void getDropSQL(SQLScript script, boolean optionExists) {
+        StringBuilder dropSb = new StringBuilder();
+        dropSb.append("DROP ASSEMBLY ");
+        if (optionExists) {
+            dropSb.append(IF_EXISTS);
         }
-
-        if (obj instanceof MsAssembly as && super.compare(obj)) {
-            return Objects.equals(isVisible, as.isVisible)
-                    && Objects.equals(permission, as.permission)
-                    && binaries.equals(as.binaries);
-        }
-
-        return false;
-    }
-
-    @Override
-    protected MsAssembly getCopy() {
-        MsAssembly assDst = new MsAssembly(name);
-        assDst.setVisible(isVisible);
-        assDst.setPermission(permission);
-        assDst.binaries.addAll(binaries);
-        return assDst;
+        dropSb.append(getQuotedName()).append(" WITH NO DEPENDENTS");
+        script.addStatement(dropSb);
     }
 
     public void setPermission(final String permission) {
@@ -179,5 +148,33 @@ public final class MsAssembly extends MsAbstractStatement {
     public void setVisible(final boolean isVisible) {
         this.isVisible = isVisible;
         resetHash();
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(isVisible);
+        hasher.put(permission);
+        hasher.put(binaries);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+        return obj instanceof MsAssembly as
+                && super.compare(as)
+                && Objects.equals(isVisible, as.isVisible)
+                && Objects.equals(permission, as.permission)
+                && binaries.equals(as.binaries);
+    }
+
+    @Override
+    protected MsAssembly getCopy() {
+        MsAssembly assDst = new MsAssembly(name);
+        assDst.setVisible(isVisible);
+        assDst.setPermission(permission);
+        assDst.binaries.addAll(binaries);
+        return assDst;
     }
 }

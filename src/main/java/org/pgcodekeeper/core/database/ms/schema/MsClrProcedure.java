@@ -24,7 +24,7 @@ import org.pgcodekeeper.core.database.base.schema.*;
  * Represents a Microsoft SQL CLR stored procedure.
  * CLR procedures are implemented in managed code and executed within the SQL Server runtime.
  */
-public final class MsClrProcedure extends MsAbstractClrFunction {
+public class MsClrProcedure extends MsAbstractClrFunction {
 
     /**
      * Creates a new Microsoft SQL CLR procedure.
@@ -68,11 +68,6 @@ public final class MsClrProcedure extends MsAbstractClrFunction {
     }
 
     @Override
-    public boolean needDrop(IFunction newFunction) {
-        return newFunction instanceof MsProcedure;
-    }
-
-    @Override
     public String getDeclaration(Argument arg) {
         final StringBuilder sbString = new StringBuilder();
 
@@ -101,6 +96,16 @@ public final class MsClrProcedure extends MsAbstractClrFunction {
         }
 
         return sbString.toString();
+    }
+
+    @Override
+    public boolean needDrop(IFunction newFunction) {
+        return newFunction instanceof MsProcedure;
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
     }
 
     @Override

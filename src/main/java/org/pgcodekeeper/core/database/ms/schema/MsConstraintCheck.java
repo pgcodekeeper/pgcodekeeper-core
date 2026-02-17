@@ -23,7 +23,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
 /**
  * Represents a Microsoft SQL CHECK constraint that validates column values against a boolean expression.
  */
-public final class MsConstraintCheck extends MsConstraint {
+public class MsConstraintCheck extends MsConstraint {
 
     private boolean isNotForRepl;
     private String expression;
@@ -37,16 +37,6 @@ public final class MsConstraintCheck extends MsConstraint {
         super(name);
     }
 
-    public void setNotForRepl(boolean isNotForRepl) {
-        this.isNotForRepl = isNotForRepl;
-        resetHash();
-    }
-
-    public void setExpression(String expression) {
-        this.expression = expression;
-        resetHash();
-    }
-
     @Override
     public String getDefinition() {
         var sbSQL = new StringBuilder();
@@ -58,6 +48,15 @@ public final class MsConstraintCheck extends MsConstraint {
         return sbSQL.toString();
     }
 
+    public void setNotForRepl(boolean isNotForRepl) {
+        this.isNotForRepl = isNotForRepl;
+        resetHash();
+    }
+
+    public void setExpression(String expression) {
+        this.expression = expression;
+        resetHash();
+    }
 
     @Override
     public void computeHash(Hasher hasher) {
@@ -68,19 +67,19 @@ public final class MsConstraintCheck extends MsConstraint {
 
     @Override
     public boolean compare(IStatement obj) {
-        if (obj instanceof MsConstraintCheck check && super.compare(obj)) {
-            return compareUnalterable(check);
+        if (this == obj) {
+            return true;
         }
-        return false;
+        return obj instanceof MsConstraintCheck check
+                && super.compare(obj)
+                && compareUnalterable(check);
     }
 
     @Override
     protected boolean compareUnalterable(MsConstraint newConstr) {
-        if (newConstr instanceof MsConstraintCheck con) {
-            return isNotForRepl == con.isNotForRepl
-                    && Objects.equals(expression, con.expression);
-        }
-        return false;
+        return newConstr instanceof MsConstraintCheck con
+                && isNotForRepl == con.isNotForRepl
+                && Objects.equals(expression, con.expression);
     }
 
     @Override

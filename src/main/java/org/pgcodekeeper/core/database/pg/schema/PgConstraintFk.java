@@ -27,13 +27,14 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Foreign key constraints maintain referential integrity between tables
  * by ensuring values in one table match values in a referenced table.
  */
-public final class PgConstraintFk extends PgConstraint implements IConstraintFk {
+public class PgConstraintFk extends PgConstraint implements IConstraintFk {
 
-    private String foreignSchema;
-    private String foreignTable;
     private final List<String> columns = new ArrayList<>();
     private final List<String> delActCols = new ArrayList<>();
     private final List<String> refs = new ArrayList<>();
+
+    private String foreignSchema;
+    private String foreignTable;
     private String match;
     private String delAction;
     private String updAction;
@@ -47,6 +48,68 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
      */
     public PgConstraintFk(String name) {
         super(name);
+    }
+
+    @Override
+    public String getDefinition() {
+        var sbSQL = new StringBuilder();
+        sbSQL.append("FOREIGN KEY ");
+        StatementUtils.appendCols(sbSQL, columns, getQuoter());
+        appendPeriod(sbSQL, periodColumn);
+        sbSQL.append(" REFERENCES ").append(quote(foreignSchema)).append('.')
+                .append(quote(foreignTable));
+        if (!refs.isEmpty()) {
+            StatementUtils.appendCols(sbSQL, refs, getQuoter());
+            appendPeriod(sbSQL, periodRefcolumn);
+        }
+        if (match != null) {
+            sbSQL.append(" MATCH ").append(match);
+        }
+        if (updAction != null) {
+            sbSQL.append(" ON UPDATE ").append(updAction);
+        }
+        if (delAction != null) {
+            sbSQL.append(" ON DELETE ").append(delAction);
+            if (!delActCols.isEmpty()) {
+                StatementUtils.appendCols(sbSQL, delActCols, getQuoter());
+            }
+        }
+        return sbSQL.toString();
+    }
+
+    private void appendPeriod(StringBuilder sbSQL, String periodColumn) {
+        if (periodColumn != null) {
+            sbSQL.setLength(sbSQL.length() - 1);
+            sbSQL
+                    .append(", PERIOD ")
+                    .append(quote(periodColumn))
+                    .append(")");
+        }
+    }
+
+    @Override
+    protected void compareExtraOptions(PgConstraint newConstr, SQLScript script) {
+        if (!super.compareUnalterable(newConstr)) {
+            StringBuilder sb = new StringBuilder();
+            appendAlterTable(sb);
+            sb.append("\n\tALTER CONSTRAINT ").append(getQuotedName());
+
+            if (deferrable != newConstr.deferrable && !newConstr.deferrable) {
+                sb.append(" NOT DEFERRABLE");
+                script.addStatement(sb);
+            } else {
+                sb.append(" DEFERRABLE INITIALLY ").append(newConstr.initially ? "DEFERRED" : "IMMEDIATE");
+            }
+            if (notEnforced != newConstr.notEnforced) {
+                sb.append(newConstr.notEnforced ? " NOT " : " ").append("ENFORCED");
+            }
+            script.addStatement(sb);
+        }
+    }
+
+    @Override
+    public String getErrorCode() {
+        return DUPLICATE_OBJECT;
     }
 
     @Override
@@ -130,69 +193,6 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
     }
 
     @Override
-    public String getErrorCode() {
-        return DUPLICATE_OBJECT;
-    }
-
-    @Override
-    public String getDefinition() {
-        var sbSQL = new StringBuilder();
-        sbSQL.append("FOREIGN KEY ");
-        StatementUtils.appendCols(sbSQL, columns, getQuoter());
-        appendPeriod(sbSQL, periodColumn);
-        sbSQL.append(" REFERENCES ").append(quote(foreignSchema)).append('.')
-                .append(quote(foreignTable));
-        if (!refs.isEmpty()) {
-            StatementUtils.appendCols(sbSQL, refs, getQuoter());
-            appendPeriod(sbSQL, periodRefcolumn);
-        }
-        if (match != null) {
-            sbSQL.append(" MATCH ").append(match);
-        }
-        if (updAction != null) {
-            sbSQL.append(" ON UPDATE ").append(updAction);
-        }
-        if (delAction != null) {
-            sbSQL.append(" ON DELETE ").append(delAction);
-            if (!delActCols.isEmpty()) {
-                StatementUtils.appendCols(sbSQL, delActCols, getQuoter());
-            }
-        }
-        return sbSQL.toString();
-    }
-
-
-    private void appendPeriod(StringBuilder sbSQL, String periodColumn) {
-        if (periodColumn != null) {
-            sbSQL.setLength(sbSQL.length() - 1);
-            sbSQL
-                    .append(", PERIOD ")
-                    .append(quote(periodColumn))
-                    .append(")");
-        }
-    }
-
-    @Override
-    protected void compareExtraOptions(PgConstraint newConstr, SQLScript script) {
-        if (!super.compareUnalterable(newConstr)) {
-            StringBuilder sb = new StringBuilder();
-            appendAlterTable(sb);
-            sb.append("\n\tALTER CONSTRAINT ").append(getQuotedName());
-
-            if (deferrable != newConstr.deferrable && !newConstr.deferrable) {
-                sb.append(" NOT DEFERRABLE");
-                script.addStatement(sb);
-            } else {
-                sb.append(" DEFERRABLE INITIALLY ").append(newConstr.initially ? "DEFERRED" : "IMMEDIATE");
-            }
-            if (notEnforced != newConstr.notEnforced) {
-                sb.append(newConstr.notEnforced ? " NOT " : " ").append("ENFORCED");
-            }
-            script.addStatement(sb);
-        }
-    }
-
-    @Override
     public void computeHash(Hasher hasher) {
         super.computeHash(hasher);
         hasher.put(foreignSchema);
@@ -205,6 +205,11 @@ public final class PgConstraintFk extends PgConstraint implements IConstraintFk 
         hasher.put(updAction);
         hasher.put(periodColumn);
         hasher.put(periodRefcolumn);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
     }
 
     @Override

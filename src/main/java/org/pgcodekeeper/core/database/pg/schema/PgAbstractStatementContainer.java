@@ -219,13 +219,10 @@ public abstract class PgAbstractStatementContainer extends PgAbstractStatement
 
     @Override
     public boolean compareChildren(AbstractStatement obj) {
-        if (obj instanceof PgAbstractStatementContainer cont) {
-            return indexes.equals(cont.indexes)
-                    && triggers.equals(cont.triggers)
-                    && rules.equals(cont.rules)
-                    && policies.equals(cont.policies);
-        }
-
-        return false;
+        return obj instanceof PgAbstractStatementContainer cont
+                && indexes.equals(cont.indexes)
+                && triggers.equals(cont.triggers)
+                && rules.equals(cont.rules)
+                && policies.equals(cont.policies);
     }
 }

@@ -27,7 +27,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * User mappings define how to authenticate as a specific user when accessing foreign servers,
  * typically storing connection credentials and options for foreign data wrappers.
  */
-public final class PgUserMapping extends PgAbstractStatement implements PgForeignOptionContainer {
+public class PgUserMapping extends PgAbstractStatement implements PgForeignOptionContainer {
 
     private final String user;
     private final String server;
@@ -45,65 +45,9 @@ public final class PgUserMapping extends PgAbstractStatement implements PgForeig
         this.server = server;
     }
 
-    /**
-     * Gets the foreign server name for this mapping.
-     *
-     * @return server name
-     */
-    public String getServer() {
-        return server;
-    }
-
-    @Override
-    public String getQualifiedName() {
-        if (qualifiedName == null) {
-            qualifiedName = quote(user) + " SERVER " + quote(server);
-        }
-
-        return qualifiedName;
-    }
-
-    @Override
-    public void addOption(String key, String value) {
-        this.options.put(key, value);
-        resetHash();
-    }
-
-    @Override
-    public Map<String, String> getOptions() {
-        return Collections.unmodifiableMap(options);
-    }
-
     @Override
     public DbObjType getStatementType() {
         return DbObjType.USER_MAPPING;
-    }
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(user);
-        hasher.put(server);
-        hasher.put(options);
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj instanceof PgUserMapping usm && super.compare(obj)) {
-            return Objects.equals(user, usm.user)
-                    && Objects.equals(server, usm.server)
-                    && Objects.equals(options, usm.options);
-        }
-        return false;
-    }
-
-    @Override
-    protected AbstractStatement getCopy() {
-        PgUserMapping copyUsm = new PgUserMapping(user, server);
-        copyUsm.options.putAll(options);
-        return copyUsm;
     }
 
     @Override
@@ -149,8 +93,62 @@ public final class PgUserMapping extends PgAbstractStatement implements PgForeig
         return "ALTER USER MAPPING FOR " + getQualifiedName();
     }
 
+    /**
+     * Gets the foreign server name for this mapping.
+     *
+     * @return server name
+     */
+    public String getServer() {
+        return server;
+    }
+
+    @Override
+    public String getQualifiedName() {
+        if (qualifiedName == null) {
+            qualifiedName = quote(user) + " SERVER " + quote(server);
+        }
+
+        return qualifiedName;
+    }
+
+    @Override
+    public void addOption(String key, String value) {
+        this.options.put(key, value);
+        resetHash();
+    }
+
+    @Override
+    public Map<String, String> getOptions() {
+        return Collections.unmodifiableMap(options);
+    }
+
     @Override
     public String getQuotedName() {
         return name;
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(user);
+        hasher.put(server);
+        hasher.put(options);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+        return obj instanceof PgUserMapping usm && super.compare(obj)
+                && Objects.equals(user, usm.user)
+                && Objects.equals(server, usm.server)
+                && Objects.equals(options, usm.options);
+    }
+
+    @Override
+    protected AbstractStatement getCopy() {
+        PgUserMapping copyUsm = new PgUserMapping(user, server);
+        copyUsm.options.putAll(options);
+        return copyUsm;
     }
 }

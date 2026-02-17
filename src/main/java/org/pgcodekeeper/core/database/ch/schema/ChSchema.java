@@ -29,10 +29,11 @@ import java.util.stream.Stream;
  */
 public class ChSchema extends ChAbstractStatement implements ISchema, IStatementContainer {
 
-    private String engine = "Atomic";
     private final Map<String, ChTable> tables = new LinkedHashMap<>();
     private final Map<String, ChView> views = new LinkedHashMap<>();
     private final Map<String, ChDictionary> dictionaries = new LinkedHashMap<>();
+
+    private String engine = "Atomic";
 
     /**
      * Creates a new ClickHouse schema with the specified name.
@@ -41,6 +42,37 @@ public class ChSchema extends ChAbstractStatement implements ISchema, IStatement
      */
     public ChSchema(String name) {
         super(name);
+    }
+
+    @Override
+    public void getCreationSQL(SQLScript script) {
+        var sb = new StringBuilder();
+        sb.append("CREATE DATABASE ");
+        appendIfNotExists(sb, script.getSettings());
+        sb.append(getQualifiedName()).append("\nENGINE = ").append(engine);
+        if (getComment() != null) {
+            sb.append("\nCOMMENT ").append(getComment());
+        }
+        script.addStatement(sb);
+    }
+
+    @Override
+    public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
+        if (!compareUnalterable((ChSchema) newCondition)) {
+            return ObjectState.RECREATE;
+        }
+        return ObjectState.NOTHING;
+    }
+
+    @Override
+    public void getDropSQL(SQLScript script, boolean generateExists) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("DROP DATABASE ");
+        if (generateExists) {
+            sb.append(IF_EXISTS);
+        }
+        appendFullName(sb);
+        script.addStatement(sb);
     }
 
     public void setEngine(String engine) {
@@ -82,37 +114,6 @@ public class ChSchema extends ChAbstractStatement implements ISchema, IStatement
             result = dictionaries.get(name);
         }
         return result;
-    }
-
-    @Override
-    public void getCreationSQL(SQLScript script) {
-        var sb = new StringBuilder();
-        sb.append("CREATE DATABASE ");
-        appendIfNotExists(sb, script.getSettings());
-        sb.append(getQualifiedName()).append("\nENGINE = ").append(engine);
-        if (getComment() != null) {
-            sb.append("\nCOMMENT ").append(getComment());
-        }
-        script.addStatement(sb);
-    }
-
-    @Override
-    public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
-        if (!compareUnalterable((ChSchema) newCondition)) {
-            return ObjectState.RECREATE;
-        }
-        return ObjectState.NOTHING;
-    }
-
-    @Override
-    public void getDropSQL(SQLScript script, boolean generateExists) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("DROP DATABASE ");
-        if (generateExists) {
-            sb.append(IF_EXISTS);
-        }
-        appendFullName(sb);
-        script.addStatement(sb);
     }
 
     @Override
@@ -200,11 +201,35 @@ public class ChSchema extends ChAbstractStatement implements ISchema, IStatement
                 .findAny().orElse(null);
     }
 
+    public ChTable getTable(String name) {
+        return getChildByName(tables, name);
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(engine);
+    }
+
     @Override
     protected void computeChildrenHash(Hasher hasher) {
         hasher.putUnordered(views);
         hasher.putUnordered(tables);
         hasher.putUnordered(dictionaries);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+        return obj instanceof ChSchema schema
+                && super.compare(schema)
+                && compareUnalterable(schema);
+    }
+
+    private boolean compareUnalterable(ChSchema newSchema) {
+        return Objects.equals(engine, newSchema.engine)
+                && Objects.equals(comment, newSchema.comment);
     }
 
     @Override
@@ -218,32 +243,9 @@ public class ChSchema extends ChAbstractStatement implements ISchema, IStatement
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(engine);
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        if (this == obj) {
-            return true;
-        }
-        return obj instanceof ChSchema schema && super.compare(schema)
-                && compareUnalterable(schema);
-    }
-
-    private boolean compareUnalterable(ChSchema newSchema) {
-        return Objects.equals(engine, newSchema.engine)
-                && Objects.equals(comment, newSchema.comment);
-    }
-
-    @Override
     protected ChSchema getCopy() {
         var schema = new ChSchema(name);
         schema.setEngine(engine);
         return schema;
-    }
-
-    public ChTable getTable(String name) {
-        return getChildByName(tables, name);
     }
 }

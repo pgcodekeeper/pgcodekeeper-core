@@ -27,7 +27,7 @@ import org.pgcodekeeper.core.script.*;
  * Handles column-specific features like SPARSE, ROWGUIDCOL, PERSISTED, identity columns,
  * generated columns, and data masking functions.
  */
-public final class MsColumn extends MsAbstractStatement implements IColumn {
+public class MsColumn extends MsAbstractStatement implements IColumn {
 
     private static final String SPARSE = "SPARSE";
     private static final String ROWGUIDCOL = "ROWGUIDCOL";
@@ -61,6 +61,68 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
      */
     public MsColumn(String name) {
         super(name);
+    }
+
+    @Override
+    public void getCreationSQL(SQLScript script) {
+        StringBuilder sql = new StringBuilder();
+        sql.append(getAlterTable());
+        sql.append("\n\tADD ").append(quote(name)).append(' ');
+        if (expression != null) {
+            sql.append("AS ").append(expression);
+        } else {
+            sql.append(type);
+        }
+
+        if (collation != null) {
+            sql.append(COLLATE).append(collation);
+        }
+
+        if (isIdentity) {
+            sql.append(" IDENTITY (").append(seed).append(',').append(increment).append(")");
+            if (isNotForRep) {
+                sql.append(" NOT FOR REPLICATION");
+            }
+        }
+
+        if (maskingFunction != null) {
+            sql.append(" MASKED WITH (FUNCTION = ").append(maskingFunction).append(")");
+        }
+
+        if (generated != null) {
+            appendGenerated(sql);
+        }
+
+        boolean isJoinNotNull = expression == null && defaultValue == null && notNull;
+        if (isJoinNotNull) {
+            sql.append(NOT_NULL);
+        }
+
+        script.addStatement(sql);
+
+        compareDefaults(null, null, defaultName, defaultValue, script);
+
+        if (!isJoinNotNull && expression == null && notNull) {
+            if (defaultValue != null) {
+                addUpdateStatement(script);
+            }
+
+            StringBuilder sqlAlter = new StringBuilder();
+            sqlAlter.append(getAlterColumn()).append(' ').append(type);
+
+            if (collation != null) {
+                sqlAlter.append(COLLATE).append(collation);
+            }
+
+            sqlAlter.append(NOT_NULL);
+            script.addStatement(sqlAlter);
+        }
+
+        compareOption(false, isSparse, SPARSE, script);
+        compareOption(false, isRowGuidCol, ROWGUIDCOL, script);
+        compareOption(false, isPersisted, PERSISTED, script);
+
+        appendPrivileges(script);
     }
 
     public String getFullDefinition() {
@@ -120,93 +182,6 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
         return sbDefinition.toString();
     }
 
-    @Override
-    public void getCreationSQL(SQLScript script) {
-        StringBuilder sql = new StringBuilder();
-        sql.append(getAlterTable(false));
-        sql.append("\n\tADD ").append(quote(name)).append(' ');
-        if (expression != null) {
-            sql.append("AS ").append(expression);
-        } else {
-            sql.append(type);
-        }
-
-        if (collation != null) {
-            sql.append(COLLATE).append(collation);
-        }
-
-        if (isIdentity) {
-            sql.append(" IDENTITY (").append(seed).append(',').append(increment).append(")");
-            if (isNotForRep) {
-                sql.append(" NOT FOR REPLICATION");
-            }
-        }
-
-        if (maskingFunction != null) {
-            sql.append(" MASKED WITH (FUNCTION = ").append(maskingFunction).append(")");
-        }
-
-        if (generated != null) {
-            appendGenerated(sql);
-        }
-
-        boolean isJoinNotNull = expression == null && defaultValue == null && notNull;
-        if (isJoinNotNull) {
-            sql.append(NOT_NULL);
-        }
-
-        script.addStatement(sql);
-
-        compareDefaults(null, null, defaultName, defaultValue, script);
-
-        if (!isJoinNotNull && expression == null && notNull) {
-            if (defaultValue != null) {
-                addUpdateStatement(script);
-            }
-
-            StringBuilder sqlAlter = new StringBuilder();
-            sqlAlter.append(getAlterColumn()).append(' ').append(type);
-
-            if (collation != null) {
-                sqlAlter.append(COLLATE).append(collation);
-            }
-
-            sqlAlter.append(NOT_NULL);
-            script.addStatement(sqlAlter);
-        }
-
-        compareOption(false, isSparse, SPARSE, script);
-        compareOption(false, isRowGuidCol, ROWGUIDCOL, script);
-        compareOption(false, isPersisted, PERSISTED, script);
-
-        appendPrivileges(script);
-    }
-
-    private void compareOption(boolean oldOption, boolean newOption, String optionName, SQLScript script) {
-        compareOption(oldOption, newOption, optionName, null, script);
-    }
-
-    private void compareOption(boolean oldOption, boolean newOption, String optionName,
-                               AtomicBoolean isNeedDepcies, SQLScript script) {
-        if (oldOption == newOption) {
-            return;
-        }
-
-        /*
-         * we can set PERSISTED without drop dependencies, but can't simple drop this option
-         * for first we have to drop dependencies
-         */
-        if (isNeedDepcies != null && (oldOption || !PERSISTED.equalsIgnoreCase(optionName))) {
-            isNeedDepcies.set(true);
-        }
-
-        String sb = getAlterColumn() + (newOption ? " ADD " : " DROP ") + optionName;
-
-        // before adding the ROWGUIDCOL option to a column, we must first remove it from another
-        var orderType = !newOption && ROWGUIDCOL.equalsIgnoreCase(optionName) ? SQLActionType.BEGIN : SQLActionType.MID;
-        script.addStatement(sb, orderType);
-    }
-
     private void appendGenerated(StringBuilder sb) {
         sb.append(" GENERATED ALWAYS AS ").append(generated.getValue());
         if (isHidden) {
@@ -262,12 +237,12 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
         }
 
         if (oldDefault != null) {
-            script.addStatement(getAlterTable(false) + "\n\tDROP CONSTRAINT " + quote(oldDefaultName));
+            script.addStatement(getAlterTable() + "\n\tDROP CONSTRAINT " + quote(oldDefaultName));
         }
 
         if (newDefault != null) {
             StringBuilder sql = new StringBuilder();
-            sql.append(getAlterTable(false));
+            sql.append(getAlterTable());
             sql.append("\n\tADD");
             if (newDefaultName != null) {
                 sql.append(" CONSTRAINT ").append(quote(newDefaultName));
@@ -328,6 +303,31 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
         }
     }
 
+    private void compareOption(boolean oldOption, boolean newOption, String optionName, SQLScript script) {
+        compareOption(oldOption, newOption, optionName, null, script);
+    }
+
+    private void compareOption(boolean oldOption, boolean newOption, String optionName,
+                               AtomicBoolean isNeedDepcies, SQLScript script) {
+        if (oldOption == newOption) {
+            return;
+        }
+
+        /*
+         * we can set PERSISTED without drop dependencies, but can't simple drop this option
+         * for first we have to drop dependencies
+         */
+        if (isNeedDepcies != null && (oldOption || !PERSISTED.equalsIgnoreCase(optionName))) {
+            isNeedDepcies.set(true);
+        }
+
+        String sb = getAlterColumn() + (newOption ? " ADD " : " DROP ") + optionName;
+
+        // before adding the ROWGUIDCOL option to a column, we must first remove it from another
+        var orderType = !newOption && ROWGUIDCOL.equalsIgnoreCase(optionName) ? SQLActionType.BEGIN : SQLActionType.MID;
+        script.addStatement(sb, orderType);
+    }
+
     private void addUpdateStatement(SQLScript script) {
         StringBuilder sb = new StringBuilder();
         sb.append("UPDATE ").append(parent.getQualifiedName())
@@ -338,7 +338,7 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
     }
 
     private String getAlterColumn() {
-        return ((MsTable) parent).getAlterTable(false) + ALTER_COLUMN + getQuotedName();
+        return ((MsTable) parent).getAlterTable() + ALTER_COLUMN + getQuotedName();
     }
 
     @Override
@@ -346,7 +346,7 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
         final StringBuilder sb = new StringBuilder();
         // we need to drop default
         compareDefaults(defaultName, defaultValue, null, null, script);
-        sb.append(getAlterTable(false)).append("\n\tDROP COLUMN ");
+        sb.append(getAlterTable()).append("\n\tDROP COLUMN ");
         if (optionExists) {
             sb.append(IF_EXISTS);
         }
@@ -428,6 +428,34 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
         resetHash();
     }
 
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
+        resetHash();
+    }
+
+    public void setNotNull(boolean notNull) {
+        this.notNull = notNull;
+        resetHash();
+    }
+
+    public void setCollation(String collation) {
+        this.collation = collation;
+        resetHash();
+    }
+
+    public void setType(String type) {
+        this.type = type;
+        resetHash();
+    }
+
+    private String getAlterTable() {
+        return ((MsTable) parent).getAlterTable();
+    }
+
+    public String getType() {
+        return type;
+    }
+
     @Override
     public void computeHash(Hasher hasher) {
         hasher.put(isSparse);
@@ -450,26 +478,27 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
 
     @Override
     public boolean compare(IStatement obj) {
-        if (obj instanceof MsColumn col && super.compare(obj)) {
-            return isSparse == col.isSparse
-                    && isRowGuidCol == col.isRowGuidCol
-                    && isPersisted == col.isPersisted
-                    && isNotForRep == col.isNotForRep
-                    && isIdentity == col.isIdentity
-                    && isHidden == col.isHidden
-                    && Objects.equals(seed, col.seed)
-                    && Objects.equals(increment, col.increment)
-                    && Objects.equals(defaultName, col.defaultName)
-                    && Objects.equals(expression, col.expression)
-                    && Objects.equals(maskingFunction, col.maskingFunction)
-                    && generated == col.generated
-                    && Objects.equals(type, col.type)
-                    && Objects.equals(collation, col.collation)
-                    && Objects.equals(notNull, col.notNull)
-                    && Objects.equals(defaultValue, col.defaultValue);
+        if (this == obj) {
+            return true;
         }
-
-        return false;
+        return obj instanceof MsColumn col
+                && super.compare(col)
+                && isSparse == col.isSparse
+                && isRowGuidCol == col.isRowGuidCol
+                && isPersisted == col.isPersisted
+                && isNotForRep == col.isNotForRep
+                && isIdentity == col.isIdentity
+                && isHidden == col.isHidden
+                && Objects.equals(seed, col.seed)
+                && Objects.equals(increment, col.increment)
+                && Objects.equals(defaultName, col.defaultName)
+                && Objects.equals(expression, col.expression)
+                && Objects.equals(maskingFunction, col.maskingFunction)
+                && generated == col.generated
+                && Objects.equals(type, col.type)
+                && Objects.equals(collation, col.collation)
+                && Objects.equals(notNull, col.notNull)
+                && Objects.equals(defaultValue, col.defaultValue);
     }
 
     @Override
@@ -492,33 +521,5 @@ public final class MsColumn extends MsAbstractStatement implements IColumn {
         copy.setNotNull(notNull);
         copy.setDefaultValue(defaultValue);
         return copy;
-    }
-
-    public void setDefaultValue(String defaultValue) {
-        this.defaultValue = defaultValue;
-        resetHash();
-    }
-
-    public void setNotNull(boolean notNull) {
-        this.notNull = notNull;
-        resetHash();
-    }
-
-    public void setCollation(String collation) {
-        this.collation = collation;
-        resetHash();
-    }
-
-    public void setType(String type) {
-        this.type = type;
-        resetHash();
-    }
-
-    private String getAlterTable(boolean only) {
-        return ((MsTable) parent).getAlterTable(only);
-    }
-
-    public String getType() {
-        return type;
     }
 }

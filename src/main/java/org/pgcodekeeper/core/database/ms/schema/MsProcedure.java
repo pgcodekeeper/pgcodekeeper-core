@@ -17,12 +17,13 @@ package org.pgcodekeeper.core.database.ms.schema;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IFunction;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 
 /**
  * Represents a Microsoft SQL stored procedure.
  * Supports execution of SQL statements and business logic within the database.
  */
-public final class MsProcedure extends MsAbstractFunction {
+public class MsProcedure extends MsAbstractFunction {
 
     /**
      * Creates a new Microsoft SQL stored procedure.
@@ -51,5 +52,10 @@ public final class MsProcedure extends MsAbstractFunction {
     @Override
     protected MsAbstractFunction getFunctionCopy() {
         return new MsProcedure(name);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
     }
 }

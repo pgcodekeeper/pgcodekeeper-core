@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.script.SQLScript;
 
 /**
@@ -25,7 +26,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * @author galiev_mr
  * @since 4.1.1
  */
-public final class PgSimpleForeignTable extends PgAbstractForeignTable {
+public class PgSimpleForeignTable extends PgAbstractForeignTable {
 
     /**
      * Creates a new PostgreSQL simple foreign table.
@@ -35,11 +36,6 @@ public final class PgSimpleForeignTable extends PgAbstractForeignTable {
      */
     public PgSimpleForeignTable(String name, String serverName) {
         super(name, serverName);
-    }
-
-    @Override
-    protected PgAbstractTable getTableCopy() {
-        return new PgSimpleForeignTable(name, serverName);
     }
 
     @Override
@@ -57,5 +53,15 @@ public final class PgSimpleForeignTable extends PgAbstractForeignTable {
         }
 
         sbSQL.append(')');
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
+    }
+
+    @Override
+    protected PgAbstractTable getTableCopy() {
+        return new PgSimpleForeignTable(name, serverName);
     }
 }

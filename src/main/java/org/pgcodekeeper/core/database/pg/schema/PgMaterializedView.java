@@ -30,7 +30,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Materialized views are database objects that contain the results of a query
  * and can be refreshed periodically to update the cached data.
  */
-public final class PgMaterializedView extends PgAbstractView {
+public class PgMaterializedView extends PgAbstractView {
 
     private String distribution;
     private String method = HEAP;
@@ -44,6 +44,11 @@ public final class PgMaterializedView extends PgAbstractView {
      */
     public PgMaterializedView(String name) {
         super(name);
+    }
+
+    @Override
+    public String getTypeName() {
+        return "MATERIALIZED VIEW";
     }
 
     @Override
@@ -115,11 +120,6 @@ public final class PgMaterializedView extends PgAbstractView {
         resetHash();
     }
 
-    @Override
-    public String getTypeName() {
-        return "MATERIALIZED VIEW";
-    }
-
     public void setIsWithData(final Boolean isWithData) {
         this.isWithData = isWithData;
         resetHash();
@@ -131,24 +131,25 @@ public final class PgMaterializedView extends PgAbstractView {
     }
 
     @Override
-    public boolean compare(IStatement obj) {
-        if (obj instanceof PgMaterializedView view && super.compare(obj)) {
-            return Objects.equals(isWithData, view.isWithData)
-                    && Objects.equals(tablespace, view.tablespace)
-                    && Objects.equals(method, view.method)
-                    && Objects.equals(distribution, view.distribution);
-        }
-
-        return false;
-    }
-
-    @Override
     public void computeHash(Hasher hasher) {
         super.computeHash(hasher);
         hasher.put(isWithData);
         hasher.put(tablespace);
         hasher.put(method);
         hasher.put(distribution);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+        return obj instanceof PgMaterializedView view
+                && super.compare(obj)
+                && Objects.equals(isWithData, view.isWithData)
+                && Objects.equals(tablespace, view.tablespace)
+                && Objects.equals(method, view.method)
+                && Objects.equals(distribution, view.distribution);
     }
 
     @Override

@@ -39,6 +39,11 @@ public abstract class MsAbstractClrFunction extends MsAbstractCommonFunction {
         this.assemblyMethod = assemblyMethod;
     }
 
+    @Override
+    protected boolean isNeedDepcies(MsAbstractCommonFunction newFunction) {
+        return true;
+    }
+
     protected abstract String getDeclaration(Argument arg);
 
     /**
@@ -62,14 +67,12 @@ public abstract class MsAbstractClrFunction extends MsAbstractCommonFunction {
 
     @Override
     protected boolean compareUnalterable(MsAbstractCommonFunction function) {
-        if (function instanceof MsAbstractClrFunction func && super.compareUnalterable(function)) {
-            return Objects.equals(assembly, func.assembly)
-                    && Objects.equals(assemblyClass, func.assemblyClass)
-                    && Objects.equals(assemblyMethod, func.assemblyMethod)
-                    && options.equals(func.options);
-        }
-
-        return false;
+        return function instanceof MsAbstractClrFunction func
+                && super.compareUnalterable(func)
+                && Objects.equals(assembly, func.assembly)
+                && Objects.equals(assemblyClass, func.assemblyClass)
+                && Objects.equals(assemblyMethod, func.assemblyMethod)
+                && options.equals(func.options);
     }
 
     @Override
@@ -77,10 +80,5 @@ public abstract class MsAbstractClrFunction extends MsAbstractCommonFunction {
         MsAbstractClrFunction copy = (MsAbstractClrFunction) super.getCopy();
         copy.options.addAll(options);
         return copy;
-    }
-
-    @Override
-    protected boolean isNeedDepcies(MsAbstractCommonFunction newFunction) {
-        return true;
     }
 }

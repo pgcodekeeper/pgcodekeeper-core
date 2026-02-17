@@ -26,19 +26,20 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a ClickHouse user account with authentication and authorization settings.
  * It supports hosts restrictions, role assignments, default database, and grantee configurations.
  */
-public final class ChUser extends ChAbstractStatement {
+public class ChUser extends ChAbstractStatement {
 
     private static final String DEF_STORAGE = "local_directory";
     private static final String EXCEPT = " EXCEPT ";
     private static final String DEFAULT = "DEFAULT ROLE ";
     private static final String DELIM = "\n\t";
 
-    private String storageType = DEF_STORAGE;
     private final List<String> hosts = new ArrayList<>();
     private final List<String> grantees = new ArrayList<>();
     private final List<String> exGrantees = new ArrayList<>();
     private final List<String> defRoles = new ArrayList<>();
     private final List<String> exceptRoles = new ArrayList<>();
+
+    private String storageType = DEF_STORAGE;
     private String defDb;
 
     /**
@@ -145,49 +146,6 @@ public final class ChUser extends ChAbstractStatement {
         }
     }
 
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(hosts);
-        hasher.put(storageType);
-        hasher.put(defRoles);
-        hasher.put(exceptRoles);
-        hasher.put(grantees);
-        hasher.put(exGrantees);
-        hasher.put(defDb);
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj instanceof ChUser user && super.compare(obj)) {
-            return hosts.equals(user.hosts)
-                    && Objects.equals(storageType, user.storageType)
-                    && defRoles.equals(user.defRoles)
-                    && exceptRoles.equals(user.exceptRoles)
-                    && grantees.equals(user.grantees)
-                    && exGrantees.equals(user.exGrantees)
-                    && Objects.equals(defDb, user.defDb);
-        }
-
-        return false;
-    }
-
-    @Override
-    protected AbstractStatement getCopy() {
-        ChUser userDst = new ChUser(name);
-        userDst.hosts.addAll(hosts);
-        userDst.setStorageType(storageType);
-        userDst.defRoles.addAll(defRoles);
-        userDst.exceptRoles.addAll(exceptRoles);
-        userDst.grantees.addAll(grantees);
-        userDst.exGrantees.addAll(exGrantees);
-        userDst.setDefaultDatabase(defDb);
-        return userDst;
-    }
-
     public void setDefaultDatabase(String defaultDatabase) {
         this.defDb = defaultDatabase;
         resetHash();
@@ -255,5 +213,45 @@ public final class ChUser extends ChAbstractStatement {
     public void setStorageType(String storageType) {
         this.storageType = storageType;
         resetHash();
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(hosts);
+        hasher.put(storageType);
+        hasher.put(defRoles);
+        hasher.put(exceptRoles);
+        hasher.put(grantees);
+        hasher.put(exGrantees);
+        hasher.put(defDb);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+        return obj instanceof ChUser user
+                && super.compare(obj)
+                && hosts.equals(user.hosts)
+                && Objects.equals(storageType, user.storageType)
+                && defRoles.equals(user.defRoles)
+                && exceptRoles.equals(user.exceptRoles)
+                && grantees.equals(user.grantees)
+                && exGrantees.equals(user.exGrantees)
+                && Objects.equals(defDb, user.defDb);
+    }
+
+    @Override
+    protected AbstractStatement getCopy() {
+        ChUser userDst = new ChUser(name);
+        userDst.hosts.addAll(hosts);
+        userDst.setStorageType(storageType);
+        userDst.defRoles.addAll(defRoles);
+        userDst.exceptRoles.addAll(exceptRoles);
+        userDst.grantees.addAll(grantees);
+        userDst.exGrantees.addAll(exGrantees);
+        userDst.setDefaultDatabase(defDb);
+        return userDst;
     }
 }

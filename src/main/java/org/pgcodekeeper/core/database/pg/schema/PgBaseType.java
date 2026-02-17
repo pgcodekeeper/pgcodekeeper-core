@@ -27,7 +27,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents user-defined base types with input/output functions,
  * storage properties, and optional Greenplum compression options.
  */
-public final class PgBaseType extends PgAbstractType implements ICompressOptionContainer {
+public class PgBaseType extends PgAbstractType implements ICompressOptionContainer {
 
     private String inputFunction;
     private String outputFunction;
@@ -265,14 +265,14 @@ public final class PgBaseType extends PgAbstractType implements ICompressOptionC
 
     @Override
     public boolean compare(IStatement obj) {
-        if (obj instanceof PgBaseType type) {
-            return super.compare(type)
-                    && compareUnalterable(type)
-                    && Objects.equals(compressType, type.compressType)
-                    && compressLevel == type.compressLevel
-                    && blockSize == type.blockSize;
+        if (this == obj) {
+            return true;
         }
-        return false;
+        return obj instanceof PgBaseType type && super.compare(type)
+                && compareUnalterable(type)
+                && Objects.equals(compressType, type.compressType)
+                && compressLevel == type.compressLevel
+                && blockSize == type.blockSize;
     }
 
     @Override

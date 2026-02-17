@@ -32,7 +32,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Schemas are namespaces that contain database objects like tables, functions, types, and operators.
  * Each schema can have its own set of permissions and provides object organization.
  */
-public final class PgSchema extends PgAbstractStatement implements ISchema {
+public class PgSchema extends PgAbstractStatement implements ISchema {
 
     private final Map<String, PgAbstractFunction> functions = new LinkedHashMap<>();
     private final Map<String, PgSequence> sequences = new LinkedHashMap<>();
@@ -364,55 +364,6 @@ public final class PgSchema extends PgAbstractStatement implements ISchema {
         addUnique(functions, st);
     }
 
-    @Override
-    protected void computeChildrenHash(Hasher hasher) {
-        super.computeChildrenHash(hasher);
-        hasher.putUnordered(sequences);
-        hasher.putUnordered(functions);
-        hasher.putUnordered(views);
-        hasher.putUnordered(tables);
-        hasher.putUnordered(types);
-        hasher.putUnordered(domains);
-        hasher.putUnordered(collations);
-        hasher.putUnordered(parsers);
-        hasher.putUnordered(templates);
-        hasher.putUnordered(dictionaries);
-        hasher.putUnordered(configurations);
-        hasher.putUnordered(operators);
-        hasher.putUnordered(statistics);
-    }
-
-    @Override
-    public boolean compareChildren(AbstractStatement obj) {
-        if (obj instanceof PgSchema schema) {
-            return super.compareChildren(obj)
-                    && sequences.equals(schema.sequences)
-                    && functions.equals(schema.functions)
-                    && views.equals(schema.views)
-                    && tables.equals(schema.tables)
-                    && types.equals(schema.types)
-                    && domains.equals(schema.domains)
-                    && collations.equals(schema.collations)
-                    && parsers.equals(schema.parsers)
-                    && templates.equals(schema.templates)
-                    && dictionaries.equals(schema.dictionaries)
-                    && configurations.equals(schema.configurations)
-                    && operators.equals(schema.operators)
-                    && statistics.equals(schema.statistics);
-        }
-        return false;
-    }
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        // all hashable fields in AbstractStatement
-    }
-
-    @Override
-    protected PgSchema getCopy() {
-        return new PgSchema(name);
-    }
-
     /**
      * @return found relation or null if no such relation has been found
      */
@@ -494,4 +445,54 @@ public final class PgSchema extends PgAbstractStatement implements ISchema {
                 .findAny().orElse(null);
     }
 
+    @Override
+    public void computeHash(Hasher hasher) {
+        // all hashable fields in AbstractStatement
+    }
+
+    @Override
+    protected void computeChildrenHash(Hasher hasher) {
+        super.computeChildrenHash(hasher);
+        hasher.putUnordered(sequences);
+        hasher.putUnordered(functions);
+        hasher.putUnordered(views);
+        hasher.putUnordered(tables);
+        hasher.putUnordered(types);
+        hasher.putUnordered(domains);
+        hasher.putUnordered(collations);
+        hasher.putUnordered(parsers);
+        hasher.putUnordered(templates);
+        hasher.putUnordered(dictionaries);
+        hasher.putUnordered(configurations);
+        hasher.putUnordered(operators);
+        hasher.putUnordered(statistics);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
+    }
+
+    @Override
+    public boolean compareChildren(AbstractStatement obj) {
+        return obj instanceof PgSchema schema && super.compareChildren(obj)
+                && sequences.equals(schema.sequences)
+                && functions.equals(schema.functions)
+                && views.equals(schema.views)
+                && tables.equals(schema.tables)
+                && types.equals(schema.types)
+                && domains.equals(schema.domains)
+                && collations.equals(schema.collations)
+                && parsers.equals(schema.parsers)
+                && templates.equals(schema.templates)
+                && dictionaries.equals(schema.dictionaries)
+                && configurations.equals(schema.configurations)
+                && operators.equals(schema.operators)
+                && statistics.equals(schema.statistics);
+    }
+
+    @Override
+    protected PgSchema getCopy() {
+        return new PgSchema(name);
+    }
 }

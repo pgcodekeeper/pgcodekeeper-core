@@ -43,13 +43,6 @@ public abstract class PgAbstractType extends PgAbstractStatement implements ITyp
         appendComments(script);
     }
 
-
-    protected abstract void appendDef(StringBuilder sb);
-
-    protected void appendOptions(SQLScript script) {
-        // subclasses will override if needed
-    }
-
     @Override
     public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
         int startSize = script.getSize();
@@ -66,11 +59,13 @@ public abstract class PgAbstractType extends PgAbstractStatement implements ITyp
         return getObjectState(isNeedDepcies.get(), script, startSize);
     }
 
+    protected void appendOptions(SQLScript script) {
+        // subclasses will override if needed
+    }
+
     private boolean isNeedRecreate(PgAbstractType newType) {
         return !getClass().equals(newType.getClass()) || !compareUnalterable(newType);
     }
-
-    protected abstract boolean compareUnalterable(PgAbstractType newType);
 
     protected void compareType(PgAbstractType newType, AtomicBoolean isNeedDepcies, SQLScript script) {
         // subclasses may override if needed
@@ -81,4 +76,8 @@ public abstract class PgAbstractType extends PgAbstractStatement implements ITyp
             sb.append(",\n\t").append(name).append(" = ").append(value);
         }
     }
+
+    protected abstract void appendDef(StringBuilder sb);
+
+    protected abstract boolean compareUnalterable(PgAbstractType newType);
 }

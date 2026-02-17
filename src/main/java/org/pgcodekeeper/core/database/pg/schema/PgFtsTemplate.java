@@ -26,7 +26,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Templates define the interface for FTS dictionaries by specifying
  * the functions that dictionaries must provide for text processing.
  */
-public final class PgFtsTemplate extends PgAbstractStatement implements ISearchPath {
+public class PgFtsTemplate extends PgAbstractStatement implements ISearchPath {
 
     private String initFunction;
     private String lexizeFunction;
@@ -72,6 +72,16 @@ public final class PgFtsTemplate extends PgAbstractStatement implements ISearchP
         return getObjectState(script, startSize);
     }
 
+    public void setInitFunction(final String initFunction) {
+        this.initFunction = initFunction;
+        resetHash();
+    }
+
+    public void setLexizeFunction(final String lexizeFunction) {
+        this.lexizeFunction = lexizeFunction;
+        resetHash();
+    }
+
     @Override
     public void computeHash(Hasher hasher) {
         hasher.put(initFunction);
@@ -83,12 +93,8 @@ public final class PgFtsTemplate extends PgAbstractStatement implements ISearchP
         if (this == obj) {
             return true;
         }
-
-        if (obj instanceof PgFtsTemplate temp && super.compare(obj)) {
-            return compareUnalterable(temp);
-        }
-
-        return false;
+        return obj instanceof PgFtsTemplate temp && super.compare(obj)
+                && compareUnalterable(temp);
     }
 
     private boolean compareUnalterable(PgFtsTemplate template) {
@@ -102,16 +108,5 @@ public final class PgFtsTemplate extends PgAbstractStatement implements ISearchP
         templateDst.setInitFunction(initFunction);
         templateDst.setLexizeFunction(lexizeFunction);
         return templateDst;
-    }
-
-
-    public void setInitFunction(final String initFunction) {
-        this.initFunction = initFunction;
-        resetHash();
-    }
-
-    public void setLexizeFunction(final String lexizeFunction) {
-        this.lexizeFunction = lexizeFunction;
-        resetHash();
     }
 }

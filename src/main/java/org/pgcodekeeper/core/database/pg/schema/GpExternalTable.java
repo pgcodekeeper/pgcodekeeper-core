@@ -27,13 +27,14 @@ import org.pgcodekeeper.core.settings.ISettings;
  * External tables allow access to data stored outside the database,
  * such as flat files, web services, or other external data sources.
  */
-public final class GpExternalTable extends PgAbstractTable implements IForeignTable, PgForeignOptionContainer {
+public class GpExternalTable extends PgAbstractTable implements IForeignTable, PgForeignOptionContainer {
+
+    private final List<String> urlLocation = new ArrayList<>();
 
     private boolean isWritable;
     private boolean isWeb;
     private int rejectLimit;
     private String distribution;
-    private List<String> urLocation = new ArrayList<>();
     private String exLocation = "ON ALL";
     private String command;
     private String formatType;
@@ -52,35 +53,8 @@ public final class GpExternalTable extends PgAbstractTable implements IForeignTa
     }
 
     @Override
-    public void compareOptions(IOptionContainer newContainer, SQLScript script) {
-        // no impl
-    }
-
-    @Override
-    protected void appendName(StringBuilder sbSQL, ISettings settings) {
-        sbSQL.append("CREATE ");
-        if (isWritable) {
-            sbSQL.append("WRITABLE ");
-        }
-        sbSQL.append("EXTERNAL ");
-        if (isWeb) {
-            sbSQL.append("WEB ");
-        }
-        sbSQL.append("TABLE ").append(getQualifiedName());
-    }
-
-    @Override
-    protected void appendColumns(StringBuilder sbSQL, SQLScript script) {
-        sbSQL.append(" (");
-        for (PgColumn column : columns) {
-            sbSQL.append("\n\t").append(column.getName()).append(" ")
-                    .append(column.getType()).append(",");
-        }
-
-        if (!columns.isEmpty()) {
-            sbSQL.setLength(sbSQL.length() - 1);
-        }
-        sbSQL.append("\n)");
+    public String getTypeName() {
+        return "EXTERNAL TABLE";
     }
 
     @Override
@@ -89,9 +63,9 @@ public final class GpExternalTable extends PgAbstractTable implements IForeignTa
 
         if (command != null) {
             sbSQL.append("EXECUTE ").append(command).append(" ").append(exLocation);
-        } else if (!urLocation.isEmpty()) {
+        } else if (!urlLocation.isEmpty()) {
             sbSQL.append("LOCATION (");
-            for (String loc : urLocation) {
+            for (String loc : urlLocation) {
                 sbSQL.append("\n").append(loc).append(",");
             }
             sbSQL.setLength(sbSQL.length() - 1);
@@ -130,10 +104,47 @@ public final class GpExternalTable extends PgAbstractTable implements IForeignTa
         }
     }
 
+    @Override
+    public void appendMoveDataSql(IStatement newCondition, SQLScript script, String tblTmpBareName,
+                                  List<String> identityCols) {
+        // no impl
+    }
 
     @Override
-    protected void appendAlterOptions(SQLScript script) {
+    public void compareOptions(IOptionContainer newContainer, SQLScript script) {
         // no impl
+    }
+
+    @Override
+    public String getAlterHeader() {
+        throw new IllegalStateException("Unsupported operation for EXTERNAL TABLE");
+    }
+
+    @Override
+    protected void appendName(StringBuilder sbSQL, ISettings settings) {
+        sbSQL.append("CREATE ");
+        if (isWritable) {
+            sbSQL.append("WRITABLE ");
+        }
+        sbSQL.append("EXTERNAL ");
+        if (isWeb) {
+            sbSQL.append("WEB ");
+        }
+        sbSQL.append("TABLE ").append(getQualifiedName());
+    }
+
+    @Override
+    protected void appendColumns(StringBuilder sbSQL, SQLScript script) {
+        sbSQL.append(" (");
+        for (PgColumn column : columns) {
+            sbSQL.append("\n\t").append(column.getName()).append(" ")
+                    .append(column.getType()).append(",");
+        }
+
+        if (!columns.isEmpty()) {
+            sbSQL.setLength(sbSQL.length() - 1);
+        }
+        sbSQL.append("\n)");
     }
 
     @Override
@@ -145,23 +156,18 @@ public final class GpExternalTable extends PgAbstractTable implements IForeignTa
     }
 
     @Override
-    protected void compareTableTypes(PgAbstractTable newTable, SQLScript script) {
-        // untransformable
-    }
-
-    @Override
-    public String getAlterHeader() {
-        throw new IllegalStateException("Unsupported operation for EXTERNAL TABLE");
-    }
-
-    @Override
     protected String getAlterTable(boolean only) {
         return "ALTER EXTERNAL TABLE " + getQualifiedName();
     }
 
     @Override
-    public String getTypeName() {
-        return "EXTERNAL TABLE";
+    protected void appendAlterOptions(SQLScript script) {
+        // no impl
+    }
+
+    @Override
+    protected void compareTableTypes(PgAbstractTable newTable, SQLScript script) {
+        // untransformable
     }
 
     public void setWritable(boolean isWritable) {
@@ -184,8 +190,8 @@ public final class GpExternalTable extends PgAbstractTable implements IForeignTa
         resetHash();
     }
 
-    public void setUrLocation(List<String> urLocation) {
-        this.urLocation = urLocation;
+    public void addUrLocations(List<String> urlLocation) {
+        this.urlLocation.addAll(urlLocation);
         resetHash();
     }
 
@@ -195,7 +201,7 @@ public final class GpExternalTable extends PgAbstractTable implements IForeignTa
      * @param location URI location to add
      */
     public void addUrLocation(String location) {
-        urLocation.add(location);
+        urlLocation.add(location);
         resetHash();
     }
 
@@ -241,7 +247,7 @@ public final class GpExternalTable extends PgAbstractTable implements IForeignTa
         hasher.put(isWeb);
         hasher.put(rejectLimit);
         hasher.put(distribution);
-        hasher.put(urLocation);
+        hasher.put(urlLocation);
         hasher.put(exLocation);
         hasher.put(command);
         hasher.put(formatType);
@@ -252,7 +258,15 @@ public final class GpExternalTable extends PgAbstractTable implements IForeignTa
     }
 
     @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
+    }
+
+    @Override
     protected boolean compareTable(PgAbstractTable obj) {
+        if (this == obj) {
+            return true;
+        }
         return  obj instanceof GpExternalTable table
                 && super.compareTable(table)
                 && compareExternalOptions(table);
@@ -263,7 +277,7 @@ public final class GpExternalTable extends PgAbstractTable implements IForeignTa
                 && isWeb == table.isWeb
                 && rejectLimit == table.rejectLimit
                 && Objects.equals(distribution, table.distribution)
-                && Objects.equals(urLocation, table.urLocation)
+                && Objects.equals(urlLocation, table.urlLocation)
                 && Objects.equals(exLocation, table.exLocation)
                 && Objects.equals(command, table.command)
                 && Objects.equals(formatType, table.formatType)
@@ -280,7 +294,7 @@ public final class GpExternalTable extends PgAbstractTable implements IForeignTa
         copy.setWeb(isWeb);
         copy.setRejectLimit(rejectLimit);
         copy.setDistribution(distribution);
-        copy.setUrLocation(urLocation);
+        copy.addUrLocations(urlLocation);
         copy.setExLocation(exLocation);
         copy.setCommand(command);
         copy.setFormatType(formatType);
@@ -289,11 +303,5 @@ public final class GpExternalTable extends PgAbstractTable implements IForeignTa
         copy.setRowReject(isRowReject);
         copy.setIsLogErrors(isLogErrors);
         return copy;
-    }
-
-    @Override
-    public void appendMoveDataSql(IStatement newCondition, SQLScript script, String tblTmpBareName,
-                                  List<String> identityCols) {
-        // no impl
     }
 }

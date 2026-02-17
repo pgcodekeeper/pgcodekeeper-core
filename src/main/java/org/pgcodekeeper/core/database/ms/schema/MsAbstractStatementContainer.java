@@ -29,8 +29,8 @@ import java.util.*;
 public abstract class MsAbstractStatementContainer extends MsAbstractStatement
         implements IRelation, IStatementContainer, ISearchPath {
 
+    private final Map<String, MsTrigger> triggers = new LinkedHashMap<>();
     private final Map<String, MsIndex> indexes = new LinkedHashMap<>();
-    protected final Map<String, MsTrigger> triggers = new LinkedHashMap<>();
     private final Map<String, MsStatistics> statistics = new HashMap<>();
 
     protected MsAbstractStatementContainer(String name) {
@@ -88,6 +88,10 @@ public abstract class MsAbstractStatementContainer extends MsAbstractStatement
         return false;
     }
 
+    public MsTrigger getTrigger(final String name) {
+        return triggers.get(name);
+    }
+
     @Override
     public void computeChildrenHash(Hasher hasher) {
         hasher.putUnordered(indexes);
@@ -97,15 +101,9 @@ public abstract class MsAbstractStatementContainer extends MsAbstractStatement
 
     @Override
     public boolean compareChildren(AbstractStatement obj) {
-        if (obj instanceof MsAbstractStatementContainer table) {
-            return indexes.equals(table.indexes)
-                    && triggers.equals(table.triggers)
-                    && statistics.equals(table.statistics);
-        }
-        return false;
-    }
-
-    public MsTrigger getTrigger(final String name) {
-        return triggers.get(name);
+        return obj instanceof MsAbstractStatementContainer table
+                && indexes.equals(table.indexes)
+                && triggers.equals(table.triggers)
+                && statistics.equals(table.statistics);
     }
 }

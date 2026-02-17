@@ -30,29 +30,74 @@ import java.util.*;
  */
 public class ChDatabase extends ChAbstractStatement implements IDatabase {
 
-    private ChSupportedVersion version = ChSupportedVersion.DEFAULT;
-
     private final List<ObjectOverride> overrides = new ArrayList<>();
-
     // Contains object references
     private final Map<String, Set<ObjectLocation>> objReferences = new HashMap<>();
     // Contains analysis launchers for all statements
     // (used for launch analyze and getting dependencies).
     private final ArrayList<IAnalysisLauncher> analysisLaunchers = new ArrayList<>();
-
-    /**
-     * Current default schema.
-     */
-    private ChSchema defaultSchema;
     private final Map<String, ChSchema> schemas = new LinkedHashMap<>();
-
     private final Map<String, ChFunction> functions = new LinkedHashMap<>();
     private final Map<String, ChPolicy> policies = new LinkedHashMap<>();
     private final Map<String, ChUser> users = new LinkedHashMap<>();
     private final Map<String, ChRole> roles = new LinkedHashMap<>();
 
+    /**
+     * Current default schema.
+     */
+    private ChSchema defaultSchema;
+    private ChSupportedVersion version = ChSupportedVersion.DEFAULT;
+
     public ChDatabase() {
         super("DB_name_placeholder");
+    }
+
+    @Override
+    public void clearAnalysisLaunchers() {
+        analysisLaunchers.clear();
+        analysisLaunchers.trimToSize();
+    }
+
+    @Override
+    public final IStatement getStatement(ObjectReference reference) {
+        DbObjType type = reference.type();
+        if (type == DbObjType.DATABASE) {
+            return this;
+        }
+
+        if (type.in(DbObjType.SCHEMA, DbObjType.POLICY, DbObjType.FUNCTION, DbObjType.USER, DbObjType.ROLE)) {
+            return getChild(reference.schema(), type);
+        }
+
+        ChSchema s = getSchema(reference.schema());
+        if (s == null) {
+            return null;
+        }
+
+        return switch (type) {
+            case VIEW, TABLE, DICTIONARY -> s.getRelation(reference.table());
+            case FUNCTION -> resolveFunctionCall(reference.table());
+            case INDEX -> s.getIndexByName(reference.table());
+            // handled in getStatement, left here for consistency
+            case COLUMN -> {
+                var t = s.getTable(reference.table());
+                yield t == null ? null : t.getColumn(reference.column());
+            }
+            case CONSTRAINT -> {
+                var sc = s.getStatementContainer(reference.table());
+                yield sc == null ? null : sc.getChild(reference.column(), type);
+            }
+            default -> throw new IllegalStateException("Unhandled DbObjType: " + type);
+        };
+    }
+
+    private AbstractStatement resolveFunctionCall(String table) {
+        for (var f : functions.values()) {
+            if (f.getBareName().equals(table)) {
+                return f;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -142,12 +187,6 @@ public class ChDatabase extends ChAbstractStatement implements IDatabase {
     }
 
     @Override
-    public void clearAnalysisLaunchers() {
-        analysisLaunchers.clear();
-        analysisLaunchers.trimToSize();
-    }
-
-    @Override
     public void addAnalysisLauncher(IAnalysisLauncher launcher) {
         analysisLaunchers.add(launcher);
     }
@@ -199,6 +238,11 @@ public class ChDatabase extends ChAbstractStatement implements IDatabase {
     }
 
     @Override
+    public void computeHash(Hasher hasher) {
+        // has only child objects
+    }
+
+    @Override
     public void computeChildrenHash(Hasher hasher) {
         hasher.putUnordered(functions);
         hasher.putUnordered(schemas);
@@ -208,20 +252,19 @@ public class ChDatabase extends ChAbstractStatement implements IDatabase {
     }
 
     @Override
-    public boolean compareChildren(AbstractStatement obj) {
-        if (obj instanceof ChDatabase db && super.compareChildren(obj)) {
-            return functions.equals(db.functions)
-                    && schemas.equals(db.schemas)
-                    && users.equals(db.users)
-                    && roles.equals(db.roles)
-                    && policies.equals(db.policies);
-        }
-        return false;
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        // has only child objects
+    public boolean compareChildren(AbstractStatement obj) {
+        return obj instanceof ChDatabase db
+                && super.compareChildren(db)
+                && functions.equals(db.functions)
+                && schemas.equals(db.schemas)
+                && users.equals(db.users)
+                && roles.equals(db.roles)
+                && policies.equals(db.policies);
     }
 
     @Override
@@ -229,47 +272,5 @@ public class ChDatabase extends ChAbstractStatement implements IDatabase {
         ChDatabase dbDst = new ChDatabase();
         dbDst.setVersion(version);
         return dbDst;
-    }
-
-    @Override
-    public final IStatement getStatement(ObjectReference reference) {
-        DbObjType type = reference.type();
-        if (type == DbObjType.DATABASE) {
-            return this;
-        }
-
-        if (type.in(DbObjType.SCHEMA, DbObjType.POLICY, DbObjType.FUNCTION, DbObjType.USER, DbObjType.ROLE)) {
-            return getChild(reference.schema(), type);
-        }
-
-        ChSchema s = getSchema(reference.schema());
-        if (s == null) {
-            return null;
-        }
-
-        return switch (type) {
-        case VIEW, TABLE, DICTIONARY -> s.getRelation(reference.table());
-        case FUNCTION -> resolveFunctionCall(reference.table());
-        case INDEX -> s.getIndexByName(reference.table());
-        // handled in getStatement, left here for consistency
-        case COLUMN -> {
-            var t = s.getTable(reference.table());
-            yield t == null ? null : t.getColumn(reference.column());
-        }
-        case CONSTRAINT -> {
-            var sc = s.getStatementContainer(reference.table());
-            yield sc == null ? null : sc.getChild(reference.column(), type);
-        }
-        default -> throw new IllegalStateException("Unhandled DbObjType: " + type);
-        };
-    }
-
-    private AbstractStatement resolveFunctionCall(String table) {
-        for (var f : functions.values()) {
-            if (f.getBareName().equals(table)) {
-                return f;
-            }
-        }
-        return null;
     }
 }

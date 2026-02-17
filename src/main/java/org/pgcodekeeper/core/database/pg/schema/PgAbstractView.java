@@ -38,16 +38,20 @@ import org.pgcodekeeper.core.utils.Pair;
  */
 public abstract class PgAbstractView extends PgAbstractStatementContainer implements IView, ISimpleOptionContainer {
 
-    private static final String COLUMN_COMMENT = "COMMENT ON COLUMN %s.%s IS %s";
     public static final String CHECK_OPTION = "check_option";
+
     protected static final String ALTER_COLUMN = " ALTER COLUMN ";
 
-    protected String query;
+    private static final String COLUMN_COMMENT = "COMMENT ON COLUMN %s.%s IS %s";
+
     protected final Map<String, String> options = new LinkedHashMap<>();
 
-    private String normalizedQuery;
+    protected String query;
+
     private final Map<String, String> columnComments = new LinkedHashMap<>();
     private final List<String> columnNames = new ArrayList<>();
+
+    private String normalizedQuery;
 
     protected PgAbstractView(String name) {
         super(name);
@@ -70,10 +74,17 @@ public abstract class PgAbstractView extends PgAbstractStatementContainer implem
         appendComments(script);
     }
 
-    @Override
-    public void appendComments(SQLScript script) {
-        super.appendComments(script);
-        appendChildrenComments(script);
+    private void appendColumnNames(final StringBuilder sbSQL) {
+        if (columnNames.isEmpty()) {
+            return;
+        }
+
+        sbSQL.append(" (");
+        for (String columnName : columnNames) {
+            sbSQL.append(quote(columnName)).append(", ");
+        }
+        sbSQL.setLength(sbSQL.length() - 2);
+        sbSQL.append(')');
     }
 
     protected void appendOptions(StringBuilder sbSQL) {
@@ -98,24 +109,17 @@ public abstract class PgAbstractView extends PgAbstractStatementContainer implem
         // noimpl
     }
 
+    @Override
+    public void appendComments(SQLScript script) {
+        super.appendComments(script);
+        appendChildrenComments(script);
+    }
+
     private void appendChildrenComments(SQLScript script) {
         for (final Entry<String, String> columnComment : columnComments.entrySet()) {
             script.addCommentStatement(COLUMN_COMMENT.formatted(getQualifiedName(),
                     quote(columnComment.getKey()), columnComment.getValue()));
         }
-    }
-
-    protected void appendColumnNames(final StringBuilder sbSQL) {
-        if (columnNames.isEmpty()) {
-            return;
-        }
-
-        sbSQL.append(" (");
-        for (String columnName : columnNames) {
-            sbSQL.append(quote(columnName)).append(", ");
-        }
-        sbSQL.setLength(sbSQL.length() - 2);
-        sbSQL.append(')');
     }
 
     @Override
@@ -136,7 +140,27 @@ public abstract class PgAbstractView extends PgAbstractStatementContainer implem
         return getObjectState(script, startSize);
     }
 
-    protected abstract void alterViewOptions(SQLScript script, PgAbstractView newAbstractView);
+    /**
+     * Returns true if either column names or query of the view has been
+     * modified.
+     *
+     * @param newView new view
+     * @return true if view has been modified, otherwise false
+     */
+    protected boolean needDrop(final PgAbstractView newView) {
+        if (getClass() != newView.getClass()) {
+            return true;
+        }
+
+        List<String> oldColumnNames = columnNames;
+        List<String> newColumnNames = newView.columnNames;
+
+        if (oldColumnNames.isEmpty() && newColumnNames.isEmpty()) {
+            return !normalizedQuery.equals(newView.normalizedQuery);
+        }
+
+        return !oldColumnNames.equals(newColumnNames);
+    }
 
     @Override
     public void appendAlterComments(AbstractStatement newObj, SQLScript script) {
@@ -168,31 +192,11 @@ public abstract class PgAbstractView extends PgAbstractStatementContainer implem
         }
     }
 
+    protected abstract void alterViewOptions(SQLScript script, PgAbstractView newAbstractView);
+
     @Override
     public boolean canDropBeforeCreate() {
         return true;
-    }
-
-    /**
-     * Returns true if either column names or query of the view has been
-     * modified.
-     *
-     * @param newView new view
-     * @return true if view has been modified, otherwise false
-     */
-    protected boolean needDrop(final PgAbstractView newView) {
-        if (getClass() != newView.getClass()) {
-            return true;
-        }
-
-        List<String> oldColumnNames = columnNames;
-        List<String> newColumnNames = newView.columnNames;
-
-        if (oldColumnNames.isEmpty() && newColumnNames.isEmpty()) {
-            return !normalizedQuery.equals(newView.normalizedQuery);
-        }
-
-        return !oldColumnNames.equals(newColumnNames);
     }
 
     /**
@@ -249,15 +253,26 @@ public abstract class PgAbstractView extends PgAbstractStatementContainer implem
     }
 
     @Override
-    public boolean compare(IStatement obj) {
-        if (obj instanceof PgAbstractView view && super.compare(obj)) {
-            return Objects.equals(normalizedQuery, view.normalizedQuery)
-                    && columnNames.equals(view.columnNames)
-                    && columnComments.equals(view.columnComments)
-                    && options.equals(view.options);
-        }
+    public void computeHash(Hasher hasher) {
+        hasher.put(columnNames);
+        hasher.put(normalizedQuery);
+        hasher.put(columnComments);
+        hasher.put(options);
+    }
 
-        return false;
+    @Override
+    public Collection<PgConstraint> getConstraints() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return obj instanceof PgAbstractView view
+                && super.compare(view)
+                && Objects.equals(normalizedQuery, view.normalizedQuery)
+                && columnNames.equals(view.columnNames)
+                && columnComments.equals(view.columnComments)
+                && options.equals(view.options);
     }
 
     @Override
@@ -269,19 +284,6 @@ public abstract class PgAbstractView extends PgAbstractStatementContainer implem
         view.columnComments.putAll(columnComments);
         view.options.putAll(options);
         return view;
-    }
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(columnNames);
-        hasher.put(normalizedQuery);
-        hasher.put(columnComments);
-        hasher.put(options);
-    }
-
-    @Override
-    public Collection<PgConstraint> getConstraints() {
-        return Collections.emptyList();
     }
 
     protected abstract PgAbstractView getViewCopy();

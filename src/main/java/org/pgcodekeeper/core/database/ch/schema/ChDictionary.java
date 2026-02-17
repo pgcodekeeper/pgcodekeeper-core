@@ -29,16 +29,17 @@ import org.pgcodekeeper.core.utils.Pair;
  * Dictionaries in ClickHouse are used for storing key-value data for fast lookups
  * and can have various sources and layouts.
  */
-public final class ChDictionary extends ChAbstractStatement implements IRelation {
+public class ChDictionary extends ChAbstractStatement implements IRelation {
+
+    private final List<ChColumn> columns = new ArrayList<>();
+    private final Map<String, String> sources = new LinkedHashMap<>();
+    private final Map<String, String> options = new LinkedHashMap<>();
 
     private String sourceType;
     private String lifeTime;
     private String layOut;
     private String pk;
     private String range;
-    private final List<ChColumn> columns = new ArrayList<>();
-    private final Map<String, String> sources = new LinkedHashMap<>();
-    private final Map<String, String> options = new LinkedHashMap<>();
 
     /**
      * Creates a new ClickHouse dictionary with the specified name.
@@ -49,66 +50,9 @@ public final class ChDictionary extends ChAbstractStatement implements IRelation
         super(name);
     }
 
-    public void setSourceType(String sourceType) {
-        this.sourceType = sourceType;
-        resetHash();
-    }
-
-    public void setLifeTime(String lifeTime) {
-        this.lifeTime = lifeTime;
-        resetHash();
-    }
-
-    public void setLayOut(String layOut) {
-        this.layOut = layOut;
-        resetHash();
-    }
-
-    public void setPk(String pk) {
-        this.pk = pk;
-        resetHash();
-    }
-
-    public void setRange(String range) {
-        this.range = range;
-        resetHash();
-    }
-
-    /**
-     * Adds a column to this dictionary.
-     *
-     * @param column the column to add
-     */
-    public void addColumn(final ChColumn column) {
-        assertUnique(getColumn(column.getName()), column);
-        columns.add(column);
-        column.setParent(this);
-        resetHash();
-    }
-
-    /**
-     * Finds column according to specified column {@code name}.
-     *
-     * @param name name of the column to be searched
-     * @return found column or null if no such column has been found
-     */
-    private ChColumn getColumn(final String name) {
-        for (ChColumn column : columns) {
-            if (column.getName().equals(name)) {
-                return column;
-            }
-        }
-        return null;
-    }
-
-    public void addSource(String key, String value) {
-        sources.put(key, value);
-        resetHash();
-    }
-
-    public void addOption(String option, String value) {
-        options.put(option, value);
-        resetHash();
+    @Override
+    public DbObjType getStatementType() {
+        return DbObjType.DICTIONARY;
     }
 
     @Override
@@ -171,9 +115,66 @@ public final class ChDictionary extends ChAbstractStatement implements IRelation
         return ObjectState.NOTHING;
     }
 
-    @Override
-    public DbObjType getStatementType() {
-        return DbObjType.DICTIONARY;
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
+        resetHash();
+    }
+
+    public void setLifeTime(String lifeTime) {
+        this.lifeTime = lifeTime;
+        resetHash();
+    }
+
+    public void setLayOut(String layOut) {
+        this.layOut = layOut;
+        resetHash();
+    }
+
+    public void setPk(String pk) {
+        this.pk = pk;
+        resetHash();
+    }
+
+    public void setRange(String range) {
+        this.range = range;
+        resetHash();
+    }
+
+    /**
+     * Adds a column to this dictionary.
+     *
+     * @param column the column to add
+     */
+    public void addColumn(final ChColumn column) {
+        assertUnique(getColumn(column.getName()), column);
+        columns.add(column);
+        column.setParent(this);
+        resetHash();
+    }
+
+    /**
+     * Finds column according to specified column {@code name}.
+     *
+     * @param name name of the column to be searched
+     * @return found column or null if no such column has been found
+     */
+    private ChColumn getColumn(final String name) {
+        for (ChColumn column : columns) {
+            if (column.getName().equals(name)) {
+                return column;
+            }
+        }
+        return null;
+    }
+
+    public void addSource(String key, String value) {
+        sources.put(key, value);
+        resetHash();
+    }
+
+    public void addOption(String option, String value) {
+        options.put(option, value);
+        resetHash();
     }
 
     @Override

@@ -28,14 +28,15 @@ import org.pgcodekeeper.core.settings.ISettings;
  * Primary key constraints uniquely identify each row and cannot contain NULL values.
  * Unique constraints ensure no duplicate values but can contain NULLs.
  */
-public final class PgConstraintPk extends PgConstraint implements IConstraintPk, PgIndexParamContainer {
+public class PgConstraintPk extends PgConstraint implements IConstraintPk, PgIndexParamContainer {
 
     private final boolean isPrimaryKey;
-    private boolean isClustered;
-    private boolean isDistinct;
     private final List<String> columns = new ArrayList<>();
     private final List<String> includes = new ArrayList<>();
     private final Map<String, String> params = new HashMap<>();
+
+    private boolean isClustered;
+    private boolean isDistinct;
     private String tablespace;
     private String withoutOverlapsColumn;
 
@@ -48,69 +49,6 @@ public final class PgConstraintPk extends PgConstraint implements IConstraintPk,
     public PgConstraintPk(String name, boolean isPrimaryKey) {
         super(name);
         this.isPrimaryKey = isPrimaryKey;
-    }
-
-    public void setDistinct(boolean isDistinct) {
-        this.isDistinct = isDistinct;
-        resetHash();
-    }
-
-    @Override
-    public void addInclude(String include) {
-        includes.add(include);
-        resetHash();
-    }
-
-    @Override
-    public void addParam(String key, String value) {
-        params.put(key, value);
-        resetHash();
-    }
-
-    @Override
-    public void setTablespace(String tablespace) {
-        this.tablespace = tablespace;
-        resetHash();
-    }
-
-    @Override
-    public boolean isPrimaryKey() {
-        return isPrimaryKey;
-    }
-
-    @Override
-    public boolean isClustered() {
-        return isClustered;
-    }
-
-    public void setClustered(boolean isClustered) {
-        this.isClustered = isClustered;
-        resetHash();
-    }
-
-    public void setWithoutOverlapsColumn(String withoutOverlapsColumn) {
-        this.withoutOverlapsColumn = withoutOverlapsColumn;
-        resetHash();
-    }
-
-    @Override
-    public List<String> getColumns() {
-        return Collections.unmodifiableList(columns);
-    }
-
-    /**
-     * Adds a column to this constraint.
-     *
-     * @param column column name
-     */
-    public void addColumn(String column) {
-        columns.add(column);
-        resetHash();
-    }
-
-    @Override
-    public String getErrorCode() {
-        return isPrimaryKey ? INVALID_DEFINITION : DUPLICATE_RELATION;
     }
 
     @Override
@@ -177,6 +115,69 @@ public final class PgConstraintPk extends PgConstraint implements IConstraintPk,
         }
     }
 
+    public void setDistinct(boolean isDistinct) {
+        this.isDistinct = isDistinct;
+        resetHash();
+    }
+
+    @Override
+    public void addInclude(String include) {
+        includes.add(include);
+        resetHash();
+    }
+
+    @Override
+    public void addParam(String key, String value) {
+        params.put(key, value);
+        resetHash();
+    }
+
+    @Override
+    public void setTablespace(String tablespace) {
+        this.tablespace = tablespace;
+        resetHash();
+    }
+
+    @Override
+    public boolean isPrimaryKey() {
+        return isPrimaryKey;
+    }
+
+    @Override
+    public boolean isClustered() {
+        return isClustered;
+    }
+
+    public void setClustered(boolean isClustered) {
+        this.isClustered = isClustered;
+        resetHash();
+    }
+
+    public void setWithoutOverlapsColumn(String withoutOverlapsColumn) {
+        this.withoutOverlapsColumn = withoutOverlapsColumn;
+        resetHash();
+    }
+
+    @Override
+    public List<String> getColumns() {
+        return Collections.unmodifiableList(columns);
+    }
+
+    /**
+     * Adds a column to this constraint.
+     *
+     * @param column column name
+     */
+    public void addColumn(String column) {
+        columns.add(column);
+        resetHash();
+    }
+
+    @Override
+    public String getErrorCode() {
+        return isPrimaryKey ? INVALID_DEFINITION : DUPLICATE_RELATION;
+    }
+
     @Override
     protected boolean isGenerateNotValid(ISettings settings) {
         return false;
@@ -197,11 +198,12 @@ public final class PgConstraintPk extends PgConstraint implements IConstraintPk,
 
     @Override
     public boolean compare(IStatement obj) {
-        if (obj instanceof PgConstraintPk con && super.compare(con)) {
-            return compareUnalterable(con)
-                    && isClustered() == con.isClustered();
+        if (this == obj) {
+            return true;
         }
-        return false;
+        return obj instanceof PgConstraintPk con && super.compare(con)
+                && compareUnalterable(con)
+                && isClustered() == con.isClustered();
     }
 
     @Override
