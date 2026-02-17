@@ -12,9 +12,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added comments processing for NOT NULL constraints in PostgreSQL.
 - Added connection test with Greenplum.
 - Added a setting for adding in migration script ON CLUSTER syntax to ClickHouse (experimentally).
+- Added search for .pgcodekeeperignore and .pgcodekeeperignoreschema files during project read.
 
 ### Changed
 
+- Reworked project structure: separated into api, base layers and implementation modules for PostgreSQL, MS SQL and ClickHouse to facilitate future extensions. Adapted API to the new structure.
 - Updated license year.
 - Increased version of testcontainers library.
 - Improved parser rules for ClickHouse.
