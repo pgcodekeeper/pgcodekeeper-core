@@ -26,13 +26,13 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents Microsoft SQL table statistics.
  * Statistics are used by the query optimizer to create efficient query execution plans.
  */
-public final class MsStatistics extends MsAbstractStatement implements IStatistics, ISubElement {
+public class MsStatistics extends MsAbstractStatement implements IStatistics, ISubElement {
 
-    public static final String SAMPLE = "SAMPLE";
-    private String filter;
-    private String samplePercent;
     private final List<String> cols = new ArrayList<>();
     private final Map<String, String> options = new HashMap<>();
+
+    private String filter;
+    private String samplePercent;
     private boolean isParentHasData;
 
     /**
@@ -59,6 +59,24 @@ public final class MsStatistics extends MsAbstractStatement implements IStatisti
         script.addStatement(sb);
     }
 
+    @Override
+    public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
+        int startSize = script.getSize();
+        var newStat = (MsStatistics) newCondition;
+        if (!compareUnalterable(newStat)) {
+            return ObjectState.RECREATE;
+        }
+        if (!Objects.equals(options, newStat.options) || !compareSample(newStat)) {
+            StringBuilder sql = new StringBuilder();
+            sql.append("UPDATE STATISTICS ")
+                    .append(parent.getQualifiedName()).append(" (").append(name).append(")");
+            newStat.appendOptions(sql);
+            script.addStatement(sql);
+        }
+
+        return getObjectState(script, startSize);
+    }
+
     private void appendOptions(StringBuilder sb) {
         if (options.isEmpty() && samplePercent == null) {
             return;
@@ -78,71 +96,6 @@ public final class MsStatistics extends MsAbstractStatement implements IStatisti
             return;
         }
         sb.append(value);
-    }
-
-    @Override
-    public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
-        int startSize = script.getSize();
-        var newStat = (MsStatistics) newCondition;
-        if (!compareUnalterable(newStat)) {
-            return ObjectState.RECREATE;
-        }
-        if (!Objects.equals(options, newStat.options) || !compareSample(newStat)) {
-            StringBuilder sql = new StringBuilder();
-            sql.append("UPDATE STATISTICS ")
-                    .append(parent.getQualifiedName()).append(" (").append(name).append(")");
-            newStat.appendOptions(sql);
-            script.addStatement(sql);
-        }
-
-        return getObjectState(script, startSize);
-    }
-
-    private boolean compareSample(MsStatistics stat) {
-        if (!isParentHasData || !stat.isParentHasData) {
-            // MS SQL doesn't persist samplePercent for empty tables - compare only when both have data
-            return true;
-        }
-
-        return Objects.equals(samplePercent, stat.samplePercent);
-    }
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(filter);
-        hasher.put(cols);
-        // TODO difficult equals
-        // hasher.put(samplePercent);
-        // hasher.put(isParentHasData);
-        hasher.put(options);
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        return obj instanceof MsStatistics stat && super.compare(stat)
-                && compareUnalterable(stat)
-                && compareSample(stat)
-                && Objects.equals(options, stat.options);
-    }
-
-    private boolean compareUnalterable(MsStatistics stat) {
-        return Objects.equals(filter, stat.filter)
-                && Objects.equals(cols, stat.cols);
-    }
-
-    @Override
-    protected MsStatistics getCopy() {
-        var stat = new MsStatistics(name);
-        stat.setFilter(filter);
-        stat.cols.addAll(cols);
-        stat.setSamplePercent(samplePercent);
-        stat.setParentHasData(isParentHasData);
-        stat.options.putAll(options);
-        return stat;
     }
 
     public void setFilter(String filter) {
@@ -179,5 +132,52 @@ public final class MsStatistics extends MsAbstractStatement implements IStatisti
     public void putOption(String key, String value) {
         options.put(key, value);
         resetHash();
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(filter);
+        hasher.put(cols);
+        // TODO difficult equals
+        // hasher.put(samplePercent);
+        // hasher.put(isParentHasData);
+        hasher.put(options);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+        return obj instanceof MsStatistics stat
+                && super.compare(stat)
+                && compareUnalterable(stat)
+                && compareSample(stat)
+                && Objects.equals(options, stat.options);
+    }
+
+    private boolean compareUnalterable(MsStatistics stat) {
+        return Objects.equals(filter, stat.filter)
+                && Objects.equals(cols, stat.cols);
+    }
+
+    private boolean compareSample(MsStatistics stat) {
+        if (!isParentHasData || !stat.isParentHasData) {
+            // MS SQL doesn't persist samplePercent for empty tables - compare only when both have data
+            return true;
+        }
+
+        return Objects.equals(samplePercent, stat.samplePercent);
+    }
+
+    @Override
+    protected MsStatistics getCopy() {
+        var stat = new MsStatistics(name);
+        stat.setFilter(filter);
+        stat.cols.addAll(cols);
+        stat.setSamplePercent(samplePercent);
+        stat.setParentHasData(isParentHasData);
+        stat.options.putAll(options);
+        return stat;
     }
 }

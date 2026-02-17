@@ -25,7 +25,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * PostgreSQL type cast implementation.
  * Represents a cast that specifies how to perform conversions between two data types.
  */
-public final class PgCast extends PgAbstractStatement implements ICast {
+public class PgCast extends PgAbstractStatement implements ICast {
 
     /**
      * Enumeration of cast methods
@@ -37,10 +37,10 @@ public final class PgCast extends PgAbstractStatement implements ICast {
     private CastMethod method = CastMethod.BINARY;
     private CastContext context = CastContext.EXPLICIT;
 
-    private String function;
-
     private final String source;
     private final String target;
+
+    private String function;
 
     @Override
     public DbObjType getStatementType() {
@@ -57,44 +57,6 @@ public final class PgCast extends PgAbstractStatement implements ICast {
         super(ICast.getSimpleName(source, target));
         this.source = source;
         this.target = target;
-    }
-
-    @Override
-    public CastContext getContext() {
-        return context;
-    }
-
-    public void setContext(CastContext context) {
-        this.context = context;
-        resetHash();
-    }
-
-    public void setMethod(CastMethod method) {
-        this.method = method;
-        resetHash();
-    }
-
-    public void setFunction(String function) {
-        this.function = function;
-        resetHash();
-    }
-
-    @Override
-    public String getSource() {
-        return source;
-    }
-
-    @Override
-    public String getTarget() {
-        return target;
-    }
-
-    @Override
-    public String getQualifiedName() {
-        if (qualifiedName == null) {
-            qualifiedName = '(' + source + " AS " + target + ')';
-        }
-        return qualifiedName;
     }
 
     @Override
@@ -143,6 +105,49 @@ public final class PgCast extends PgAbstractStatement implements ICast {
     }
 
     @Override
+    public CastContext getContext() {
+        return context;
+    }
+
+    public void setContext(CastContext context) {
+        this.context = context;
+        resetHash();
+    }
+
+    public void setMethod(CastMethod method) {
+        this.method = method;
+        resetHash();
+    }
+
+    public void setFunction(String function) {
+        this.function = function;
+        resetHash();
+    }
+
+    @Override
+    public String getSource() {
+        return source;
+    }
+
+    @Override
+    public String getTarget() {
+        return target;
+    }
+
+    @Override
+    public String getQualifiedName() {
+        if (qualifiedName == null) {
+            qualifiedName = '(' + source + " AS " + target + ')';
+        }
+        return qualifiedName;
+    }
+
+    @Override
+    public String getQuotedName() {
+        return name;
+    }
+
+    @Override
     public void computeHash(Hasher hasher) {
         hasher.put(context);
         hasher.put(method);
@@ -154,12 +159,9 @@ public final class PgCast extends PgAbstractStatement implements ICast {
         if (this == obj) {
             return true;
         }
-
-        if (obj instanceof PgCast cast && super.compare(obj)) {
-            return compareUnalterable(cast);
-        }
-
-        return false;
+        return obj instanceof PgCast cast
+                && super.compare(obj)
+                && compareUnalterable(cast);
     }
 
     private boolean compareUnalterable(PgCast cast) {
@@ -175,10 +177,5 @@ public final class PgCast extends PgAbstractStatement implements ICast {
         copy.setMethod(method);
         copy.setFunction(function);
         return copy;
-    }
-
-    @Override
-    public String getQuotedName() {
-        return name;
     }
 }

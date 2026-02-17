@@ -32,11 +32,12 @@ import org.pgcodekeeper.core.utils.Utils;
  * Extended statistics collect additional information about column correlations
  * and distributions to improve query planning for multi-column predicates.
  */
-public final class PgStatistics extends PgAbstractStatement implements IStatistics, ISearchPath {
+public class PgStatistics extends PgAbstractStatement implements IStatistics, ISearchPath {
 
-    private int statistics = -1;
     private final List<String> kinds = new ArrayList<>();
     private final List<String> expressions = new ArrayList<>();
+
+    private int statistics = -1;
     private String foreignSchema;
     private String foreignTable;
 
@@ -152,13 +153,9 @@ public final class PgStatistics extends PgAbstractStatement implements IStatisti
         if (this == obj) {
             return true;
         }
-
-        if (obj instanceof PgStatistics stat && super.compare(obj)) {
-            return compareUnalterable(stat)
-                    && stat.statistics == statistics;
-        }
-
-        return false;
+        return obj instanceof PgStatistics stat && super.compare(obj)
+                && compareUnalterable(stat)
+                && stat.statistics == statistics;
     }
 
     private boolean compareUnalterable(PgStatistics stat) {

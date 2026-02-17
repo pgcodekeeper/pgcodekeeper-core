@@ -29,7 +29,7 @@ import org.pgcodekeeper.core.utils.Pair;
  * Represents a composite type consisting of multiple attributes (fields),
  * similar to a table row structure but used as a data type.
  */
-public final class PgCompositeType extends PgAbstractType implements ICompositeType {
+public class PgCompositeType extends PgAbstractType implements ICompositeType {
 
     private static final String COLLATE = " COLLATE ";
 
@@ -177,16 +177,25 @@ public final class PgCompositeType extends PgAbstractType implements ICompositeT
     }
 
     @Override
+    public String getAttrType(String attrName) {
+        return attrs.stream()
+                .filter(column -> attrName.equals(column.getName()))
+                .findFirst()
+                .map(PgColumn::getType).orElse(null);
+    }
+
+    @Override
     public void computeHash(Hasher hasher) {
         hasher.putOrdered(attrs);
     }
 
     @Override
     public boolean compare(IStatement obj) {
-        if (obj instanceof PgCompositeType type && super.compare(type)) {
-            return attrs.equals(type.attrs);
+        if (this == obj) {
+            return true;
         }
-        return false;
+        return obj instanceof PgCompositeType type && super.compare(type)
+                && attrs.equals(type.attrs);
     }
 
     @Override
@@ -196,13 +205,5 @@ public final class PgCompositeType extends PgAbstractType implements ICompositeT
             copy.addAttr((PgColumn) attr.deepCopy());
         }
         return copy;
-    }
-
-    @Override
-    public String getAttrType(String attrName) {
-        return attrs.stream()
-                    .filter(column -> attrName.equals(column.getName()))
-                    .findFirst()
-                    .map(PgColumn::getType).orElse(null);
     }
 }

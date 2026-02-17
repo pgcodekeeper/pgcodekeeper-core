@@ -27,12 +27,13 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Foreign servers define connection information for external data sources
  * that can be accessed through foreign data wrappers (FDWs).
  */
-public final class PgServer extends PgAbstractStatement implements PgForeignOptionContainer {
+public class PgServer extends PgAbstractStatement implements PgForeignOptionContainer {
+
+    private final Map<String, String> options = new LinkedHashMap<>();
 
     private String type;
     private String version;
     private String fdw;
-    private final Map<String, String> options = new LinkedHashMap<>();
 
     /**
      * Creates a new PostgreSQL foreign server.
@@ -44,80 +45,8 @@ public final class PgServer extends PgAbstractStatement implements PgForeignOpti
     }
 
     @Override
-    public String getAlterHeader() {
-        return "ALTER SERVER " + getQualifiedName();
-    }
-
-    public void setType(String type) {
-        this.type = type;
-        resetHash();
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-        resetHash();
-    }
-
-    /**
-     * Gets the foreign data wrapper name for this server.
-     *
-     * @return FDW name
-     */
-    public String getFdw() {
-        return fdw;
-    }
-
-    public void setFdw(String fdw) {
-        this.fdw = fdw;
-        resetHash();
-    }
-
-    @Override
-    public Map<String, String> getOptions() {
-        return Collections.unmodifiableMap(options);
-    }
-
-    @Override
-    public void addOption(String key, String value) {
-        this.options.put(key, value);
-        resetHash();
-    }
-
-    @Override
     public DbObjType getStatementType() {
         return DbObjType.SERVER;
-    }
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(type);
-        hasher.put(version);
-        hasher.put(fdw);
-        hasher.put(options);
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj instanceof PgServer srv && super.compare(obj)) {
-            return Objects.equals(type, srv.type)
-                    && Objects.equals(version, srv.version)
-                    && Objects.equals(fdw, srv.fdw)
-                    && Objects.equals(options, srv.options);
-        }
-        return false;
-    }
-
-    @Override
-    protected AbstractStatement getCopy() {
-        PgServer copyServer = new PgServer(name);
-        copyServer.setType(type);
-        copyServer.setVersion(version);
-        copyServer.setFdw(fdw);
-        copyServer.options.putAll(options);
-        return copyServer;
     }
 
     @Override
@@ -165,5 +94,75 @@ public final class PgServer extends PgAbstractStatement implements PgForeignOpti
         appendAlterComments(newServer, script);
 
         return getObjectState(script, startSize);
+    }
+
+    @Override
+    public String getAlterHeader() {
+        return "ALTER SERVER " + getQualifiedName();
+    }
+
+    public void setType(String type) {
+        this.type = type;
+        resetHash();
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+        resetHash();
+    }
+
+    /**
+     * Gets the foreign data wrapper name for this server.
+     *
+     * @return FDW name
+     */
+    public String getFdw() {
+        return fdw;
+    }
+
+    public void setFdw(String fdw) {
+        this.fdw = fdw;
+        resetHash();
+    }
+
+    @Override
+    public Map<String, String> getOptions() {
+        return Collections.unmodifiableMap(options);
+    }
+
+    @Override
+    public void addOption(String key, String value) {
+        this.options.put(key, value);
+        resetHash();
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(type);
+        hasher.put(version);
+        hasher.put(fdw);
+        hasher.put(options);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+        return obj instanceof PgServer srv && super.compare(obj)
+                && Objects.equals(type, srv.type)
+                && Objects.equals(version, srv.version)
+                && Objects.equals(fdw, srv.fdw)
+                && Objects.equals(options, srv.options);
+    }
+
+    @Override
+    protected AbstractStatement getCopy() {
+        PgServer copyServer = new PgServer(name);
+        copyServer.setType(type);
+        copyServer.setVersion(version);
+        copyServer.setFdw(fdw);
+        copyServer.options.putAll(options);
+        return copyServer;
     }
 }

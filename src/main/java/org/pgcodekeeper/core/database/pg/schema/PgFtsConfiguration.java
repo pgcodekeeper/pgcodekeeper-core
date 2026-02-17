@@ -26,17 +26,17 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Configurations specify which text search parser to use and
  * how to map token types to dictionaries for text processing.
  */
-public final class PgFtsConfiguration extends PgAbstractStatement implements ISearchPath {
+public class PgFtsConfiguration extends PgAbstractStatement implements ISearchPath {
 
     private static final String ALTER_CONFIGURATION = "ALTER TEXT SEARCH CONFIGURATION ";
     private static final String WITH = "\n\tWITH ";
 
-    private String parser;
     /**
      * key - fragment, value - dictionaries
      */
     private final Map<String, String> dictionariesMap = new HashMap<>();
 
+    private String parser;
 
     /**
      * Creates a new PostgreSQL FTS configuration.
@@ -127,34 +127,6 @@ public final class PgFtsConfiguration extends PgAbstractStatement implements ISe
         return sqlAction.toString();
     }
 
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(parser);
-        hasher.put(dictionariesMap);
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj instanceof PgFtsConfiguration config && super.compare(obj)) {
-            return Objects.equals(parser, config.parser)
-                    && dictionariesMap.equals(config.dictionariesMap);
-        }
-
-        return false;
-    }
-
-    @Override
-    protected PgFtsConfiguration getCopy() {
-        PgFtsConfiguration confDst = new PgFtsConfiguration(name);
-        confDst.setParser(parser);
-        confDst.dictionariesMap.putAll(dictionariesMap);
-        return confDst;
-    }
-
     /**
      * Gets the text search parser used by this configuration.
      *
@@ -178,5 +150,29 @@ public final class PgFtsConfiguration extends PgAbstractStatement implements ISe
     public void addDictionary(String fragment, List<String> dictionaries) {
         dictionariesMap.put(fragment, String.join(", ", dictionaries));
         resetHash();
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(parser);
+        hasher.put(dictionariesMap);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+        return obj instanceof PgFtsConfiguration config && super.compare(obj)
+                && Objects.equals(parser, config.parser)
+                && dictionariesMap.equals(config.dictionariesMap);
+    }
+
+    @Override
+    protected PgFtsConfiguration getCopy() {
+        PgFtsConfiguration confDst = new PgFtsConfiguration(name);
+        confDst.setParser(parser);
+        confDst.dictionariesMap.putAll(dictionariesMap);
+        return confDst;
     }
 }

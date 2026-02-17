@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * Stores column information including data type, constraints, storage parameters,
  * statistics, compression settings, and identity properties.
  */
-public final class PgColumn extends PgAbstractStatement
+public class PgColumn extends PgAbstractStatement
         implements ISimpleOptionContainer, ICompressOptionContainer, IColumn {
 
     private static final Logger LOG = LoggerFactory.getLogger(PgColumn.class);
@@ -49,10 +49,11 @@ public final class PgColumn extends PgAbstractStatement
     private static final String NOT_NULL = " NOT NULL";
 
 
-    private Integer statistics;
-    private String storage;
     private final Map<String, String> options = new LinkedHashMap<>(0);
     private final Map<String, String> fOptions = new LinkedHashMap<>(0);
+
+    private Integer statistics;
+    private String storage;
     private PgSequence sequence;
     private String identityType;
     private String compression;
@@ -793,14 +794,14 @@ public final class PgColumn extends PgAbstractStatement
 
     @Override
     public boolean compare(IStatement obj) {
-        if (obj instanceof PgColumn col && super.compare(obj)) {
-            return Objects.equals(type, col.type)
-                    && Objects.equals(collation, col.collation)
-                    && Objects.equals(defaultValue, col.defaultValue)
-                    && compareColOptions(col);
+        if (this == obj) {
+            return true;
         }
-
-        return false;
+        return obj instanceof PgColumn col && super.compare(obj)
+                && Objects.equals(type, col.type)
+                && Objects.equals(collation, col.collation)
+                && Objects.equals(defaultValue, col.defaultValue)
+                && compareColOptions(col);
     }
 
     private boolean compareColOptions(PgColumn col) {

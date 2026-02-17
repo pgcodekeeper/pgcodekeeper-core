@@ -32,7 +32,7 @@ import org.pgcodekeeper.core.settings.ISettings;
  * Views are virtual tables defined by queries that provide a way to present data
  * from one or more tables in a customized format without storing the data physically.
  */
-public final class PgView extends PgAbstractView {
+public class PgView extends PgAbstractView {
 
     private final Map<String, String> defaultValues = new LinkedHashMap<>();
 
@@ -70,21 +70,6 @@ public final class PgView extends PgAbstractView {
         alterDefaultValues(newView, script);
     }
 
-    @Override
-    protected void appendOptions(StringBuilder sbSQL) {
-        super.appendOptions(sbSQL);
-        sbSQL.append(" AS\n\t");
-        sbSQL.append(query);
-        if (options.containsKey(CHECK_OPTION)) {
-            String chekOption = options.get(CHECK_OPTION);
-            sbSQL.append("\nWITH ");
-            if (chekOption != null) {
-                sbSQL.append(chekOption.toUpperCase(Locale.ROOT));
-            }
-            sbSQL.append(" CHECK OPTION");
-        }
-    }
-
     /**
      * Compares default values with values in new view.
      *
@@ -118,6 +103,21 @@ public final class PgView extends PgAbstractView {
                 .append(state).append(" DEFAULT");
     }
 
+    @Override
+    protected void appendOptions(StringBuilder sbSQL) {
+        super.appendOptions(sbSQL);
+        sbSQL.append(" AS\n\t");
+        sbSQL.append(query);
+        if (options.containsKey(CHECK_OPTION)) {
+            String chekOption = options.get(CHECK_OPTION);
+            sbSQL.append("\nWITH ");
+            if (chekOption != null) {
+                sbSQL.append(chekOption.toUpperCase(Locale.ROOT));
+            }
+            sbSQL.append(" CHECK OPTION");
+        }
+    }
+
     /**
      * Adds/replaces column default value specification.
      *
@@ -140,18 +140,19 @@ public final class PgView extends PgAbstractView {
     }
 
     @Override
-    public boolean compare(IStatement obj) {
-        if (obj instanceof PgView view && super.compare(obj)) {
-            return Objects.equals(defaultValues, view.defaultValues);
-        }
-
-        return false;
-    }
-
-    @Override
     public void computeHash(Hasher hasher) {
         super.computeHash(hasher);
         hasher.put(defaultValues);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+        return obj instanceof PgView view
+                && super.compare(view)
+                && Objects.equals(defaultValues, view.defaultValues);
     }
 
     @Override
@@ -160,5 +161,4 @@ public final class PgView extends PgAbstractView {
         view.defaultValues.putAll(defaultValues);
         return view;
     }
-
 }

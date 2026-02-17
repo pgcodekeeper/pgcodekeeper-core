@@ -26,7 +26,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Parsers break down documents into tokens and classify them into types.
  * Each parser consists of several functions that handle different parsing phases.
  */
-public final class PgFtsParser extends PgAbstractStatement implements ISearchPath {
+public class PgFtsParser extends PgAbstractStatement implements ISearchPath {
 
     private static final String NEW_LINE = ",\n\t";
 
@@ -80,47 +80,6 @@ public final class PgFtsParser extends PgAbstractStatement implements ISearchPat
         return getObjectState(script, startSize);
     }
 
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(startFunction);
-        hasher.put(getTokenFunction);
-        hasher.put(endFunction);
-        hasher.put(lexTypesFunction);
-        hasher.put(headLineFunction);
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj instanceof PgFtsParser parser && super.compare(obj)) {
-            return compareUnalterable(parser);
-        }
-
-        return false;
-    }
-
-    private boolean compareUnalterable(PgFtsParser parser) {
-        return Objects.equals(startFunction, parser.startFunction)
-                && Objects.equals(getTokenFunction, parser.getTokenFunction)
-                && Objects.equals(endFunction, parser.endFunction)
-                && Objects.equals(lexTypesFunction, parser.lexTypesFunction)
-                && Objects.equals(headLineFunction, parser.headLineFunction);
-    }
-
-    @Override
-    protected PgFtsParser getCopy() {
-        PgFtsParser parserDst = new PgFtsParser(name);
-        parserDst.setStartFunction(startFunction);
-        parserDst.setGetTokenFunction(getTokenFunction);
-        parserDst.setEndFunction(endFunction);
-        parserDst.setLexTypesFunction(lexTypesFunction);
-        parserDst.setHeadLineFunction(headLineFunction);
-        return parserDst;
-    }
-
     public void setStartFunction(final String startFunction) {
         this.startFunction = startFunction;
         resetHash();
@@ -144,5 +103,42 @@ public final class PgFtsParser extends PgAbstractStatement implements ISearchPat
     public void setHeadLineFunction(final String headLineFunction) {
         this.headLineFunction = headLineFunction;
         resetHash();
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(startFunction);
+        hasher.put(getTokenFunction);
+        hasher.put(endFunction);
+        hasher.put(lexTypesFunction);
+        hasher.put(headLineFunction);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+        return obj instanceof PgFtsParser parser && super.compare(obj)
+                && compareUnalterable(parser);
+    }
+
+    private boolean compareUnalterable(PgFtsParser parser) {
+        return Objects.equals(startFunction, parser.startFunction)
+                && Objects.equals(getTokenFunction, parser.getTokenFunction)
+                && Objects.equals(endFunction, parser.endFunction)
+                && Objects.equals(lexTypesFunction, parser.lexTypesFunction)
+                && Objects.equals(headLineFunction, parser.headLineFunction);
+    }
+
+    @Override
+    protected PgFtsParser getCopy() {
+        PgFtsParser parserDst = new PgFtsParser(name);
+        parserDst.setStartFunction(startFunction);
+        parserDst.setGetTokenFunction(getTokenFunction);
+        parserDst.setEndFunction(endFunction);
+        parserDst.setLexTypesFunction(lexTypesFunction);
+        parserDst.setHeadLineFunction(headLineFunction);
+        return parserDst;
     }
 }

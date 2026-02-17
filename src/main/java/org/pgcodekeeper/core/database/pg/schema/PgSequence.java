@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * Sequences generate unique numeric identifiers, commonly used for auto-incrementing primary keys.
  * Supports various data types, caching, cycling, and ownership by table columns.
  */
-public final class PgSequence extends PgAbstractStatement implements ISequence {
+public class PgSequence extends PgAbstractStatement implements ISequence {
 
     private static final Logger LOG = LoggerFactory.getLogger(PgSequence.class);
 
@@ -316,6 +316,21 @@ public final class PgSequence extends PgAbstractStatement implements ISequence {
         resetHash();
     }
 
+    public void setCycle(boolean cycle) {
+        this.cycle = cycle;
+        resetHash();
+    }
+
+    public void setCache(String cache) {
+        this.cache = cache;
+        resetHash();
+    }
+
+    @Override
+    public Stream<Pair<String, String>> getRelationColumns() {
+        return relationColumns.stream();
+    }
+
     @Override
     public void computeHash(Hasher hasher) {
         hasher.put(ownedBy == null ? 0 : ownedBy.hashCode());
@@ -331,19 +346,19 @@ public final class PgSequence extends PgAbstractStatement implements ISequence {
 
     @Override
     public boolean compare(IStatement obj) {
-        if (obj instanceof PgSequence seq && super.compare(obj)) {
-            return Objects.equals(ownedBy, seq.ownedBy)
-                    && Objects.equals(cache, seq.cache)
-                    && cycle == seq.cycle
-                    && Objects.equals(increment, seq.increment)
-                    && Objects.equals(maxValue, seq.maxValue)
-                    && Objects.equals(minValue, seq.minValue)
-                    && Objects.equals(dataType, seq.dataType)
-                    && Objects.equals(startWith, seq.startWith)
-                    && isLogged == seq.isLogged;
+        if (this == obj) {
+            return true;
         }
-
-        return false;
+        return obj instanceof PgSequence seq && super.compare(obj)
+                && Objects.equals(ownedBy, seq.ownedBy)
+                && Objects.equals(cache, seq.cache)
+                && cycle == seq.cycle
+                && Objects.equals(increment, seq.increment)
+                && Objects.equals(maxValue, seq.maxValue)
+                && Objects.equals(minValue, seq.minValue)
+                && Objects.equals(dataType, seq.dataType)
+                && Objects.equals(startWith, seq.startWith)
+                && isLogged == seq.isLogged;
     }
 
     @Override
@@ -359,20 +374,5 @@ public final class PgSequence extends PgAbstractStatement implements ISequence {
         copy.setStartWith(startWith);
         copy.setLogged(isLogged);
         return copy;
-    }
-
-    public void setCycle(boolean cycle) {
-        this.cycle = cycle;
-        resetHash();
-    }
-
-    public void setCache(String cache) {
-        this.cache = cache;
-        resetHash();
-    }
-
-    @Override
-    public Stream<Pair<String, String>> getRelationColumns() {
-        return relationColumns.stream();
     }
 }

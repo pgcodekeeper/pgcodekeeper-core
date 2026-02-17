@@ -32,8 +32,9 @@ import java.util.Objects;
 public class ChConstraint extends ChAbstractStatement implements IConstraint {
 
     private final boolean isAssume;
+
+    private boolean isNotValid;
     private String expr;
-    protected boolean isNotValid;
 
     /**
      * Creates a new ClickHouse constraint.
@@ -61,16 +62,16 @@ public class ChConstraint extends ChAbstractStatement implements IConstraint {
     }
 
     @Override
-    public String getDefinition() {
-        return (isAssume ? "ASSUME " : "CHECK ") + expr;
-    }
-
-    @Override
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sb = new StringBuilder();
         appendAlterTable(sb);
         sb.append(" ADD CONSTRAINT ").append(getQuotedName()).append(' ').append(getDefinition());
         script.addStatement(sb);
+    }
+
+    @Override
+    public String getDefinition() {
+        return (isAssume ? "ASSUME " : "CHECK ") + expr;
     }
 
     @Override
@@ -94,9 +95,14 @@ public class ChConstraint extends ChAbstractStatement implements IConstraint {
         script.addStatement(sb);
     }
 
-    private boolean compareUnalterable(ChConstraint newConstr) {
-        return Objects.equals(isAssume, newConstr.isAssume)
-                && Objects.equals(expr, newConstr.expr);
+    private void appendAlterTable(StringBuilder sb) {
+        sb.append("ALTER ").append(parent.getStatementType().name()).append(' ');
+        sb.append(getParent().getQualifiedName());
+    }
+
+    @Override
+    public String getTableName() {
+        return parent.getName();
     }
 
     @Override
@@ -108,8 +114,6 @@ public class ChConstraint extends ChAbstractStatement implements IConstraint {
     public boolean containsColumn(String name) {
         return getColumns().contains(name);
     }
-
-
 
     @Override
     public ObjectLocation getLocation() {
@@ -138,21 +142,16 @@ public class ChConstraint extends ChAbstractStatement implements IConstraint {
                 && compareUnalterable(con);
     }
 
+    private boolean compareUnalterable(ChConstraint newConstr) {
+        return Objects.equals(isAssume, newConstr.isAssume)
+                && Objects.equals(expr, newConstr.expr);
+    }
+
     @Override
     protected ChConstraint getCopy() {
         var constraintDst = new ChConstraint(name, isAssume);
         constraintDst.setNotValid(isNotValid);
         constraintDst.setExpr(expr);
         return constraintDst;
-    }
-
-    protected void appendAlterTable(StringBuilder sb) {
-        sb.append("ALTER ").append(parent.getStatementType().name()).append(' ');
-        sb.append(getParent().getQualifiedName());
-    }
-
-    @Override
-    public String getTableName() {
-        return parent.getName();
     }
 }

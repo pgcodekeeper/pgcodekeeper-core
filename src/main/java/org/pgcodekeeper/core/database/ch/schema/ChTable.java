@@ -35,14 +35,14 @@ import java.util.stream.Stream;
  */
 public class ChTable extends ChAbstractStatement implements ITable, IOptionContainer {
 
-    protected static final String ALTER_COLUMN = " ALTER COLUMN ";
+    protected final List<ChColumn> columns = new ArrayList<>();
+
+    private final Map<String, String> projections = new LinkedHashMap<>();
+    private final Map<String, String> options = new LinkedHashMap<>();
     private final Map<String, ChIndex> indexes = new LinkedHashMap<>();
     private final Map<String, ChConstraint> constraints = new LinkedHashMap<>();
 
-    protected ChEngine engine;
-    protected final Map<String, String> projections = new LinkedHashMap<>();
-    protected final Map<String, String> options = new LinkedHashMap<>();
-    protected final List<ChColumn> columns = new ArrayList<>();
+    private ChEngine engine;
 
     /**
      * Creates a new ClickHouse table with the specified name.
@@ -51,27 +51,6 @@ public class ChTable extends ChAbstractStatement implements ITable, IOptionConta
      */
     public ChTable(String name) {
         super(name);
-    }
-
-    /**
-     * Adds a projection to this table.
-     *
-     * @param key        the projection name
-     * @param expression the projection expression
-     */
-    public void addProjection(String key, String expression) {
-        projections.put(key, expression);
-        resetHash();
-    }
-
-    public void setEngine(ChEngine engine) {
-        this.engine = engine;
-        resetHash();
-    }
-
-    public void setPkExpr(String pkExpr) {
-        engine.setPrimaryKey(pkExpr);
-        resetHash();
     }
 
     @Override
@@ -129,6 +108,18 @@ public class ChTable extends ChAbstractStatement implements ITable, IOptionConta
         return getObjectState(script, startSize);
     }
 
+    @Override
+    public boolean isRecreated(ITable newTable, ISettings settings) {
+        return newTable instanceof ChTable newChTable
+                && (isNeedRecreate(newChTable) || isColumnsOrderChanged(newChTable, settings));
+    }
+
+    protected boolean isNeedRecreate(ChTable newTable) {
+        var newEngine = newTable.engine;
+        return !engine.compareUnalterable(newEngine)
+                && !engine.isModifybleSampleBy(newEngine);
+    }
+
     private void compareProjections(Map<String, String> newProjections, SQLScript script) {
         if (Objects.equals(projections, newProjections)) {
             return;
@@ -184,15 +175,38 @@ public class ChTable extends ChAbstractStatement implements ITable, IOptionConta
         return ALTER_TABLE + getQualifiedName();
     }
 
-    protected boolean isNeedRecreate(ChTable newTable) {
-        var newEngine = newTable.engine;
-        return !engine.compareUnalterable(newEngine)
-                && !engine.isModifybleSampleBy(newEngine);
-    }
-
     @Override
     public void compareOptions(IOptionContainer newContainer, SQLScript script) {
         // no impl
+    }
+
+    protected boolean isColumnsOrderChanged(ChTable newTable, ISettings settings) {
+        if (settings.isIgnoreColumnOrder()) {
+            return false;
+        }
+
+        return StatementUtils.isColumnsOrderChanged(newTable.columns, columns);
+    }
+
+    @Override
+    public boolean compareIgnoringColumnOrder(ITable newTable) {
+        return compare(newTable, false);
+    }
+
+    @Override
+    public void appendMoveDataSql(IStatement newCondition, SQLScript script, String tblTmpBareName,
+                                  List<String> identityCols) {
+        ChTable newTable = (ChTable) newCondition;
+        List<String> colsForMovingData = getColsForMovingData(newTable);
+        if (colsForMovingData.isEmpty()) {
+            return;
+        }
+
+        String tblTmpQName = getParent().getQuotedName() + '.' + quote(tblTmpBareName);
+        String cols = colsForMovingData.stream().map(this::quote).collect(Collectors.joining(", "));
+        List<String> identityColsForMovingData = identityCols == null ? Collections.emptyList()
+                : identityCols.stream().filter(colsForMovingData::contains).toList();
+        writeInsert(script, newTable, tblTmpQName, identityColsForMovingData, cols);
     }
 
     protected void writeInsert(SQLScript script, ChTable newTable, String tblTmpQName,
@@ -203,16 +217,32 @@ public class ChTable extends ChAbstractStatement implements ITable, IOptionConta
         script.addStatement(sbInsert);
     }
 
+    /**
+     * Adds a projection to this table.
+     *
+     * @param key        the projection name
+     * @param expression the projection expression
+     */
+    public void addProjection(String key, String expression) {
+        projections.put(key, expression);
+        resetHash();
+    }
+
+    public void setEngine(ChEngine engine) {
+        this.engine = engine;
+        resetHash();
+    }
+
+    public void setPkExpr(String pkExpr) {
+        engine.setPrimaryKey(pkExpr);
+        resetHash();
+    }
+
     protected List<String> getColsForMovingData(ChTable newTable) {
         return newTable.columns.stream()
                 .map(IColumn::getName)
                 .filter(this::containsColumn)
                 .toList();
-    }
-
-    @Override
-    public DbObjType getStatementType() {
-        return DbObjType.TABLE;
     }
 
     @Override
@@ -300,20 +330,6 @@ public class ChTable extends ChAbstractStatement implements ITable, IOptionConta
                 .map(c -> new Pair<>(c.getName(), c.getType()));
     }
 
-    protected boolean isColumnsOrderChanged(ChTable newTable, ISettings settings) {
-        if (settings.isIgnoreColumnOrder()) {
-            return false;
-        }
-
-        return StatementUtils.isColumnsOrderChanged(newTable.columns, columns);
-    }
-
-    protected void appendColumnsPrivileges(SQLScript script) {
-        for (var col : columns) {
-            col.appendPrivileges(script);
-        }
-    }
-
     @Override
     public Map<String, String> getOptions() {
         return Collections.unmodifiableMap(options);
@@ -358,26 +374,17 @@ public class ChTable extends ChAbstractStatement implements ITable, IOptionConta
     }
 
     @Override
-    public void computeChildrenHash(Hasher hasher) {
-        hasher.putUnordered(constraints);
-        hasher.putUnordered(indexes);
-    }
-
-    @Override
-    public boolean compareChildren(AbstractStatement obj) {
-        if (obj instanceof ChTable table && super.compareChildren(obj)) {
-            return constraints.equals(table.constraints)
-                    && indexes.equals(table.indexes);
-        }
-        return false;
-    }
-
-    @Override
     public void computeHash(Hasher hasher) {
         hasher.putOrdered(columns);
         hasher.put(options);
         hasher.put(projections);
         hasher.put(engine);
+    }
+
+    @Override
+    public void computeChildrenHash(Hasher hasher) {
+        hasher.putUnordered(constraints);
+        hasher.putUnordered(indexes);
     }
 
     @Override
@@ -414,6 +421,13 @@ public class ChTable extends ChAbstractStatement implements ITable, IOptionConta
     }
 
     @Override
+    public boolean compareChildren(AbstractStatement obj) {
+        return obj instanceof ChTable table && super.compareChildren(obj)
+                && constraints.equals(table.constraints)
+                && indexes.equals(table.indexes);
+    }
+
+    @Override
     protected ChTable getCopy() {
         ChTable copy = getTableCopy();
         for (var colSrc : columns) {
@@ -427,32 +441,5 @@ public class ChTable extends ChAbstractStatement implements ITable, IOptionConta
 
     protected ChTable getTableCopy() {
         return new ChTable(name);
-    }
-
-    @Override
-    public void appendMoveDataSql(IStatement newCondition, SQLScript script, String tblTmpBareName,
-                                  List<String> identityCols) {
-        ChTable newTable = (ChTable) newCondition;
-        List<String> colsForMovingData = getColsForMovingData(newTable);
-        if (colsForMovingData.isEmpty()) {
-            return;
-        }
-
-        String tblTmpQName = getParent().getQuotedName() + '.' + quote(tblTmpBareName);
-        String cols = colsForMovingData.stream().map(this::quote).collect(Collectors.joining(", "));
-        List<String> identityColsForMovingData = identityCols == null ? Collections.emptyList()
-                : identityCols.stream().filter(colsForMovingData::contains).toList();
-        writeInsert(script, newTable, tblTmpQName, identityColsForMovingData, cols);
-    }
-
-    @Override
-    public boolean isRecreated(ITable newTable, ISettings settings) {
-        return newTable instanceof ChTable newChTable
-                && (isNeedRecreate(newChTable) || isColumnsOrderChanged(newChTable, settings));
-    }
-
-    @Override
-    public boolean compareIgnoringColumnOrder(ITable newTable) {
-        return compare(newTable, false);
     }
 }

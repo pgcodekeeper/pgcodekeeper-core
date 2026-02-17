@@ -30,10 +30,11 @@ import java.util.Objects;
  */
 public class PgRule extends PgAbstractStatement implements IRule {
 
+    private final List<String> commands = new ArrayList<>();
+
     private EventType event;
     private String condition;
     private boolean instead;
-    private final List<String> commands = new ArrayList<>();
     /**
      * null is default (ENABLED), otherwise contains "{ENABLE|DISABLE} [ALWAYS|REPLICA]" string
      */
@@ -46,36 +47,6 @@ public class PgRule extends PgAbstractStatement implements IRule {
      */
     public PgRule(String name) {
         super(name);
-    }
-
-    public void setEvent(EventType event) {
-        this.event = event;
-        resetHash();
-    }
-
-    public void setCondition(String condition) {
-        this.condition = condition;
-        resetHash();
-    }
-
-    public void setInstead(boolean instead) {
-        this.instead = instead;
-        resetHash();
-    }
-
-    /**
-     * Adds an action command to be executed when this rule fires.
-     *
-     * @param command SQL command to execute
-     */
-    public void addCommand(String command) {
-        commands.add(command);
-        resetHash();
-    }
-
-    public void setEnabledState(String enabledState) {
-        this.enabledState = enabledState;
-        resetHash();
     }
 
     @Override
@@ -154,6 +125,36 @@ public class PgRule extends PgAbstractStatement implements IRule {
     @Override
     public boolean canDropBeforeCreate() {
         return true;
+    }
+
+    public void setEvent(EventType event) {
+        this.event = event;
+        resetHash();
+    }
+
+    public void setCondition(String condition) {
+        this.condition = condition;
+        resetHash();
+    }
+
+    public void setInstead(boolean instead) {
+        this.instead = instead;
+        resetHash();
+    }
+
+    /**
+     * Adds an action command to be executed when this rule fires.
+     *
+     * @param command SQL command to execute
+     */
+    public void addCommand(String command) {
+        commands.add(command);
+        resetHash();
+    }
+
+    public void setEnabledState(String enabledState) {
+        this.enabledState = enabledState;
+        resetHash();
     }
 
     @Override

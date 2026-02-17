@@ -26,12 +26,13 @@ import org.pgcodekeeper.core.hasher.Hasher;
  * EXCLUDE constraints ensure that if any two rows are compared on specified columns
  * using specified operators, not all comparisons will return TRUE.
  */
-public final class PgConstraintExclude extends PgConstraint implements PgIndexParamContainer, ISimpleColumnContainer {
+public class PgConstraintExclude extends PgConstraint implements PgIndexParamContainer, ISimpleColumnContainer {
 
     private final Map<String, String> params = new HashMap<>();
     private final Set<String> columnNames = new HashSet<>();
     private final List<SimpleColumn> columns = new ArrayList<>();
     private final List<String> includes = new ArrayList<>();
+
     private String indexMethod;
     private String predicate;
     private String tablespace;
@@ -43,51 +44,6 @@ public final class PgConstraintExclude extends PgConstraint implements PgIndexPa
      */
     public PgConstraintExclude(String name) {
         super(name);
-    }
-
-    @Override
-    public void addInclude(String include) {
-        includes.add(include);
-        resetHash();
-    }
-
-    @Override
-    public Set<String> getColumns() {
-        return Collections.unmodifiableSet(columnNames);
-    }
-
-    @Override
-    public boolean containsColumn(String name) {
-        return columnNames.contains(name);
-    }
-
-    @Override
-    public void addColumn(SimpleColumn column) {
-        columnNames.add(column.getName());
-        columns.add(column);
-        resetHash();
-    }
-
-    @Override
-    public void addParam(String key, String value) {
-        params.put(key, value);
-        resetHash();
-    }
-
-    public void setIndexMethod(String indexMethod) {
-        this.indexMethod = indexMethod;
-        resetHash();
-    }
-
-    public void setPredicate(String predicate) {
-        this.predicate = predicate;
-        resetHash();
-    }
-
-    @Override
-    public void setTablespace(String tablespace) {
-        this.tablespace = tablespace;
-        resetHash();
     }
 
     @Override
@@ -147,6 +103,56 @@ public final class PgConstraintExclude extends PgConstraint implements PgIndexPa
     }
 
     @Override
+    public String getErrorCode() {
+        return DUPLICATE_RELATION;
+    }
+
+    @Override
+    public void addInclude(String include) {
+        includes.add(include);
+        resetHash();
+    }
+
+    @Override
+    public Set<String> getColumns() {
+        return Collections.unmodifiableSet(columnNames);
+    }
+
+    @Override
+    public boolean containsColumn(String name) {
+        return columnNames.contains(name);
+    }
+
+    @Override
+    public void addColumn(SimpleColumn column) {
+        columnNames.add(column.getName());
+        columns.add(column);
+        resetHash();
+    }
+
+    @Override
+    public void addParam(String key, String value) {
+        params.put(key, value);
+        resetHash();
+    }
+
+    public void setIndexMethod(String indexMethod) {
+        this.indexMethod = indexMethod;
+        resetHash();
+    }
+
+    public void setPredicate(String predicate) {
+        this.predicate = predicate;
+        resetHash();
+    }
+
+    @Override
+    public void setTablespace(String tablespace) {
+        this.tablespace = tablespace;
+        resetHash();
+    }
+
+    @Override
     public void computeHash(Hasher hasher) {
         super.computeHash(hasher);
         hasher.put(params);
@@ -155,6 +161,11 @@ public final class PgConstraintExclude extends PgConstraint implements PgIndexPa
         hasher.put(indexMethod);
         hasher.put(predicate);
         hasher.put(tablespace);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
     }
 
     @Override
@@ -180,10 +191,5 @@ public final class PgConstraintExclude extends PgConstraint implements PgIndexPa
         con.setPredicate(predicate);
         con.setTablespace(tablespace);
         return con;
-    }
-
-    @Override
-    public String getErrorCode() {
-        return DUPLICATE_RELATION;
     }
 }

@@ -29,7 +29,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * @author galiev_mr
  * @since 4.1.1
  */
-public final class PgPartitionTable extends PgAbstractRegularTable implements IPartitionTable {
+public class PgPartitionTable extends PgAbstractRegularTable implements IPartitionTable {
 
     private final String partitionBounds;
 
@@ -42,11 +42,6 @@ public final class PgPartitionTable extends PgAbstractRegularTable implements IP
     public PgPartitionTable(String name, String partitionBounds) {
         super(name);
         this.partitionBounds = partitionBounds;
-    }
-
-    @Override
-    public String getPartitionBounds() {
-        return partitionBounds;
     }
 
     @Override
@@ -136,9 +131,25 @@ public final class PgPartitionTable extends PgAbstractRegularTable implements IP
     }
 
     @Override
+    public void appendMoveDataSql(IStatement newCondition, SQLScript script, String tblTmpBareName,
+                                  List<String> identityCols) {
+        // no impl
+    }
+
+    @Override
+    public String getPartitionBounds() {
+        return partitionBounds;
+    }
+
+    @Override
     public void computeHash(Hasher hasher) {
         super.computeHash(hasher);
         hasher.put(partitionBounds);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
     }
 
     @Override
@@ -151,11 +162,5 @@ public final class PgPartitionTable extends PgAbstractRegularTable implements IP
     @Override
     protected PgAbstractTable getTableCopy() {
         return new PgPartitionTable(name, partitionBounds);
-    }
-
-    @Override
-    public void appendMoveDataSql(IStatement newCondition, SQLScript script, String tblTmpBareName,
-                                  List<String> identityCols) {
-        // no impl
     }
 }

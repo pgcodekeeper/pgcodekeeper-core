@@ -35,69 +35,14 @@ import java.util.Objects;
  */
 public class ChColumn extends ChAbstractStatement implements IColumn {
 
-    protected static final String ALTER_COLUMN = "\n\tALTER COLUMN ";
-    protected static final String COLLATE = " COLLATE ";
-    protected static final String NULL = " NULL";
-    protected static final String NOT_NULL = " NOT NULL";
-
-    protected String type;
-    protected String collation;
-    protected boolean notNull;
-    protected String defaultValue;
-
-    public void setDefaultValue(final String defaultValue) {
-        this.defaultValue = defaultValue;
-        resetHash();
-    }
-
-    public String getDefaultValue() {
-        return defaultValue;
-    }
-
-    public void setNotNull(final boolean notNull) {
-        this.notNull = notNull;
-        resetHash();
-    }
-
-    public boolean isNotNull() {
-        return notNull;
-    }
-
-    public void setType(final String type) {
-        this.type = type;
-        resetHash();
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setCollation(final String collation) {
-        this.collation = collation;
-        resetHash();
-    }
-
-    public String getCollation() {
-        return collation;
-    }
-
-    @Override
-    public ObjectLocation getLocation() {
-        ObjectLocation location = meta.getLocation();
-        if (location == null) {
-            location = parent.getLocation();
-        }
-        return location;
-    }
-
-    protected String getAlterTable(boolean only) {
-        return ((ChTable) parent).getAlterTable(only);
-    }
-
-    private String defaultType;
-
-    private String ttl;
     private final List<String> codecs = new ArrayList<>();
+
+    private String type;
+    private String collation;
+    private boolean notNull;
+    private String defaultValue;
+    private String defaultType;
+    private String ttl;
     private String option;
 
     /**
@@ -108,40 +53,6 @@ public class ChColumn extends ChAbstractStatement implements IColumn {
     public ChColumn(String name) {
         super(name);
         setNotNull(true);
-    }
-
-    public void setDefaultType(String defaultType) {
-        this.defaultType = defaultType;
-        resetHash();
-    }
-
-    public void setTtl(String ttl) {
-        this.ttl = ttl;
-        resetHash();
-    }
-
-    public void addCodec(String codec) {
-        codecs.add(codec);
-        resetHash();
-    }
-
-    public void setOption(String option) {
-        this.option = option;
-        resetHash();
-    }
-
-    /**
-     * Returns the complete column definition including type, constraints, and other attributes.
-     *
-     * @return the full column definition as SQL string
-     */
-    public String getFullDefinition() {
-        var sb = new StringBuilder();
-        sb.append(ChDiffUtils.quoteName(name));
-
-        appendType(sb);
-        appendColumnOptions(sb);
-        return sb.toString();
     }
 
     @Override
@@ -156,17 +67,18 @@ public class ChColumn extends ChAbstractStatement implements IColumn {
         script.addStatement(sb);
     }
 
-    private void appendType(StringBuilder sb) {
-        if (type == null) {
-            return;
-        }
+    /**
+     * Returns the complete column definition including type, constraints, and other attributes.
+     *
+     * @return the full column definition as SQL string
+     */
+    public String getFullDefinition() {
+        var sb = new StringBuilder();
+        sb.append(ChDiffUtils.quoteName(name));
 
-        sb.append(' ');
-        if (notNull) {
-            sb.append(type);
-        } else {
-            sb.append("Nullable(").append(type).append(")");
-        }
+        appendType(sb);
+        appendColumnOptions(sb);
+        return sb.toString();
     }
 
     private void appendColumnOptions(StringBuilder sb) {
@@ -211,17 +123,6 @@ public class ChColumn extends ChAbstractStatement implements IColumn {
         compareTtl(newColumn.ttl, newColumn.type, script);
         compareComment(newColumn.comment, script);
         return getObjectState(script, startSize);
-    }
-
-    @Override
-    public void getDropSQL(SQLScript script, boolean optionExists) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getAlterTable(false)).append("\n\tDROP COLUMN ");
-        if (optionExists) {
-            sb.append(IF_EXISTS);
-        }
-        sb.append(ChDiffUtils.quoteName(name));
-        script.addStatement(sb);
     }
 
     private void compareTypes(ChColumn newColumn, SQLScript script) {
@@ -319,6 +220,99 @@ public class ChColumn extends ChAbstractStatement implements IColumn {
         if (settings.isGenerateExists()) {
             sb.append(IF_EXISTS);
         }
+    }
+
+    @Override
+    public void getDropSQL(SQLScript script, boolean optionExists) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getAlterTable(false)).append("\n\tDROP COLUMN ");
+        if (optionExists) {
+            sb.append(IF_EXISTS);
+        }
+        sb.append(ChDiffUtils.quoteName(name));
+        script.addStatement(sb);
+    }
+
+    private void appendType(StringBuilder sb) {
+        if (type == null) {
+            return;
+        }
+
+        sb.append(' ');
+        if (notNull) {
+            sb.append(type);
+        } else {
+            sb.append("Nullable(").append(type).append(")");
+        }
+    }
+
+    private String getAlterTable(boolean only) {
+        return ((ChTable) parent).getAlterTable(only);
+    }
+
+    public void setDefaultValue(final String defaultValue) {
+        this.defaultValue = defaultValue;
+        resetHash();
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setNotNull(final boolean notNull) {
+        this.notNull = notNull;
+        resetHash();
+    }
+
+    public boolean isNotNull() {
+        return notNull;
+    }
+
+    public void setType(final String type) {
+        this.type = type;
+        resetHash();
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setCollation(final String collation) {
+        this.collation = collation;
+        resetHash();
+    }
+
+    public String getCollation() {
+        return collation;
+    }
+
+    @Override
+    public ObjectLocation getLocation() {
+        ObjectLocation location = meta.getLocation();
+        if (location == null) {
+            location = parent.getLocation();
+        }
+        return location;
+    }
+
+    public void setDefaultType(String defaultType) {
+        this.defaultType = defaultType;
+        resetHash();
+    }
+
+    public void setTtl(String ttl) {
+        this.ttl = ttl;
+        resetHash();
+    }
+
+    public void addCodec(String codec) {
+        codecs.add(codec);
+        resetHash();
+    }
+
+    public void setOption(String option) {
+        this.option = option;
+        resetHash();
     }
 
     @Override

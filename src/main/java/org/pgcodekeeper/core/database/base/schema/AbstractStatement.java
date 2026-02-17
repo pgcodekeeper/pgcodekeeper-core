@@ -38,34 +38,170 @@ public abstract class AbstractStatement implements IStatement, IHashable {
 
     protected static final String IF_EXISTS = "IF EXISTS ";
     protected static final String ALTER_TABLE = "ALTER TABLE ";
+
     private static final String SEPARATOR = ";";
 
     protected final String name;
+    protected final Set<IPrivilege> privileges = new LinkedHashSet<>();
+    protected final Set<ObjectReference> deps = new LinkedHashSet<>();
+    protected final StatementMeta meta = new StatementMeta();
+
     protected String owner;
     protected String comment;
-    protected final Set<IPrivilege> privileges = new LinkedHashSet<>();
-
+    protected String qualifiedName;
     protected AbstractStatement parent;
-    protected final Set<ObjectReference> deps = new LinkedHashSet<>();
-
-    protected final StatementMeta meta = new StatementMeta();
 
     // 0 means not calculated yet and/or hash has been reset
     private int hash;
-    protected String qualifiedName;
 
     protected AbstractStatement(String name) {
         this.name = name;
     }
 
-    @Override
-    public String getName() {
-        return name;
+    /**
+     * Appends comment SQL to the script if this statement has comments.
+     *
+     * @param script the SQL script to append comments to
+     */
+    public void appendComments(SQLScript script) {
+        if (checkComments()) {
+            appendCommentSql(script);
+        }
     }
+
+    /**
+     * Appends ALTER comment SQL if the comment has changed.
+     *
+     * @param newObj the new statement to compare comments with
+     * @param script the SQL script to append ALTER comments to
+     */
+    public void appendAlterComments(AbstractStatement newObj, SQLScript script) {
+        if (!Objects.equals(getComment(), newObj.getComment())) {
+            newObj.appendCommentSql(script);
+        }
+    }
+
+    protected void appendCommentSql(SQLScript script) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("COMMENT ON ").append(getTypeName()).append(' ');
+        appendFullName(sb);
+        sb.append(" IS ").append(checkComments() ? comment : "NULL");
+        script.addCommentStatement(sb.toString());
+    }
+
+    protected void appendAlterOwner(AbstractStatement newObj, SQLScript script) {
+        if (!Objects.equals(owner, newObj.owner)) {
+            newObj.alterOwnerSQL(script);
+        }
+    }
+
+    protected void alterOwnerSQL(SQLScript script) {
+        appendOwnerSQL(script);
+    }
+
+    public void appendPrivileges(SQLScript script) {
+        IPrivilege.appendPrivileges(privileges, script);
+    }
+
+    protected void alterPrivileges(AbstractStatement newObj, SQLScript script) {
+        Set<IPrivilege> newPrivileges = newObj.getPrivileges();
+
+        // first drop (revoke) missing grants
+        for (IPrivilege privilege : privileges) {
+            if (!privilege.isRevoke() && !newPrivileges.contains(privilege)) {
+                script.addStatement(privilege.getDropSQL());
+            }
+        }
+
+        // now set all privileges if there are any changes
+        if (!privileges.equals(newPrivileges)) {
+            appendDefaultPrivileges(newObj, script);
+            IPrivilege.appendPrivileges(newPrivileges, script);
+        }
+    }
+
+    protected void appendDefaultPrivileges(IStatement statement, SQLScript script) {
+        // no imp
+    }
+
+    @Override
+    public String getSQL(boolean isFormatted, ISettings settings) {
+        SQLScript script = new SQLScript(settings, getSeparator());
+        getCreationSQL(script);
+        String sql = script.getFullScript();
+        if (!isFormatted || !settings.isAutoFormatObjectCode()) {
+            return sql;
+        }
+        return formatSql(sql, 0, sql.length(), settings.getFormatConfiguration());
+    }
+
+    /**
+     * Generates DROP SQL for this statement using settings from the script.
+     *
+     * @param script the SQL script to append the DROP statement to
+     */
+    public final void getDropSQL(SQLScript script) {
+        getDropSQL(script, script.getSettings().isGenerateExists());
+    }
+
+    @Override
+    public void getDropSQL(SQLScript script, boolean generateExists) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("DROP ").append(getTypeName()).append(' ');
+        if (generateExists) {
+            sb.append(IF_EXISTS);
+        }
+        appendFullName(sb);
+        script.addStatement(sb);
+    }
+
+    protected void appendIfNotExists(StringBuilder sb, ISettings settings) {
+        if (settings.isGenerateExists()) {
+            sb.append("IF NOT EXISTS ");
+        }
+    }
+
+    @Override
+    public boolean canDropBeforeCreate() {
+        return false;
+    }
+
+    /**
+     * Determines the object state based on changes made to the script.
+     *
+     * @param script    the SQL script to check for changes
+     * @param startSize the initial size of the script before changes
+     * @return the object state indicating the type of change
+     */
+    public ObjectState getObjectState(SQLScript script, int startSize) {
+        return getObjectState(false, script, startSize);
+    }
+
+    /**
+     * Determines the object state based on changes made to the script.
+     *
+     * @param isNeedDepcies whether dependencies need to be considered
+     * @param script        the SQL script to check for changes
+     * @param startSize     the initial size of the script before changes
+     * @return the object state: NOTHING if no changes, ALTER_WITH_DEP if dependencies needed, ALTER otherwise
+     */
+    public ObjectState getObjectState(boolean isNeedDepcies, SQLScript script, int startSize) {
+        if (script.getSize() == startSize) {
+            return ObjectState.NOTHING;
+        }
+
+        return isNeedDepcies ? ObjectState.ALTER_WITH_DEP : ObjectState.ALTER;
+    }
+
 
     @Override
     public boolean canDrop() {
         return true;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     /**
@@ -170,22 +306,6 @@ public abstract class AbstractStatement implements IStatement, IHashable {
         return comment;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
-        resetHash();
-    }
-
-    /**
-     * Appends comment SQL to the script if this statement has comments.
-     *
-     * @param script the SQL script to append comments to
-     */
-    public void appendComments(SQLScript script) {
-        if (checkComments()) {
-            appendCommentSql(script);
-        }
-    }
-
     /**
      * Checks if this statement has non-empty comments.
      *
@@ -195,34 +315,9 @@ public abstract class AbstractStatement implements IStatement, IHashable {
         return comment != null && !comment.isEmpty();
     }
 
-    /**
-     * Appends ALTER comment SQL if the comment has changed.
-     *
-     * @param newObj the new statement to compare comments with
-     * @param script the SQL script to append ALTER comments to
-     */
-    public void appendAlterComments(AbstractStatement newObj, SQLScript script) {
-        if (!Objects.equals(getComment(), newObj.getComment())) {
-            newObj.appendCommentSql(script);
-        }
-    }
-
-    protected void appendCommentSql(SQLScript script) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("COMMENT ON ").append(getTypeName()).append(' ');
-        appendFullName(sb);
-        sb.append(" IS ").append(checkComments() ? comment : "NULL");
-        script.addCommentStatement(sb.toString());
-    }
-
-    protected void appendAlterOwner(AbstractStatement newObj, SQLScript script) {
-        if (!Objects.equals(owner, newObj.owner)) {
-            newObj.alterOwnerSQL(script);
-        }
-    }
-
-    protected void alterOwnerSQL(SQLScript script) {
-        appendOwnerSQL(script);
+    public void setComment(String comment) {
+        this.comment = comment;
+        resetHash();
     }
 
     /**
@@ -246,39 +341,6 @@ public abstract class AbstractStatement implements IStatement, IHashable {
         resetHash();
     }
 
-    /**
-     * Clears all privileges from this statement and resets the hash.
-     */
-    public void clearPrivileges() {
-        privileges.clear();
-        resetHash();
-    }
-
-    public void appendPrivileges(SQLScript script) {
-        IPrivilege.appendPrivileges(privileges, script);
-    }
-
-    protected void alterPrivileges(AbstractStatement newObj, SQLScript script) {
-        Set<IPrivilege> newPrivileges = newObj.getPrivileges();
-
-        // first drop (revoke) missing grants
-        for (IPrivilege privilege : privileges) {
-            if (!privilege.isRevoke() && !newPrivileges.contains(privilege)) {
-                script.addStatement(privilege.getDropSQL());
-            }
-        }
-
-        // now set all privileges if there are any changes
-        if (!privileges.equals(newPrivileges)) {
-            appendDefaultPrivileges(newObj, script);
-            IPrivilege.appendPrivileges(newPrivileges, script);
-        }
-    }
-
-    protected void appendDefaultPrivileges(IStatement statement, SQLScript script) {
-        // no imp
-    }
-
     @Override
     public String getOwner() {
         return owner;
@@ -289,111 +351,6 @@ public abstract class AbstractStatement implements IStatement, IHashable {
         this.owner = owner;
         resetHash();
     }
-
-    @Override
-    public String getSQL(boolean isFormatted, ISettings settings) {
-        SQLScript script = new SQLScript(settings, getSeparator());
-        getCreationSQL(script);
-        String sql = script.getFullScript();
-        if (!isFormatted || !settings.isAutoFormatObjectCode()) {
-            return sql;
-        }
-        return formatSql(sql, 0, sql.length(), settings.getFormatConfiguration());
-    }
-
-    /**
-     * Generates DROP SQL for this statement using settings from the script.
-     *
-     * @param script the SQL script to append the DROP statement to
-     */
-    public final void getDropSQL(SQLScript script) {
-        getDropSQL(script, script.getSettings().isGenerateExists());
-    }
-
-    @Override
-    public boolean canDropBeforeCreate() {
-        return false;
-    }
-
-    @Override
-    public void getDropSQL(SQLScript script, boolean generateExists) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("DROP ").append(getTypeName()).append(' ');
-        if (generateExists) {
-            sb.append(IF_EXISTS);
-        }
-        appendFullName(sb);
-        script.addStatement(sb);
-    }
-
-    protected void appendIfNotExists(StringBuilder sb, ISettings settings) {
-        if (settings.isGenerateExists()) {
-            sb.append("IF NOT EXISTS ");
-        }
-    }
-
-    /**
-     * Determines the object state based on changes made to the script.
-     *
-     * @param script    the SQL script to check for changes
-     * @param startSize the initial size of the script before changes
-     * @return the object state indicating the type of change
-     */
-    public ObjectState getObjectState(SQLScript script, int startSize) {
-        return getObjectState(false, script, startSize);
-    }
-
-    /**
-     * Determines the object state based on changes made to the script.
-     *
-     * @param isNeedDepcies whether dependencies need to be considered
-     * @param script        the SQL script to check for changes
-     * @param startSize     the initial size of the script before changes
-     * @return the object state: NOTHING if no changes, ALTER_WITH_DEP if dependencies needed, ALTER otherwise
-     */
-    public ObjectState getObjectState(boolean isNeedDepcies, SQLScript script, int startSize) {
-        if (script.getSize() == startSize) {
-            return ObjectState.NOTHING;
-        }
-
-        return isNeedDepcies ? ObjectState.ALTER_WITH_DEP : ObjectState.ALTER;
-    }
-
-    @Override
-    public final IStatement deepCopy() {
-        IStatement copy = shallowCopy();
-        if (copy instanceof IStatementContainer cont) {
-            getChildren().forEach(st -> cont.addChild(st.deepCopy()));
-        }
-        return copy;
-    }
-
-    /**
-     * This method does not account for nested child PgStatements.
-     * Shallow version of {@link #equals(Object)}
-     */
-    @Override
-    public boolean compare(IStatement obj) {
-        return obj instanceof AbstractStatement statement
-                && getStatementType() == obj.getStatementType()
-                && Objects.equals(name, statement.name)
-                && Objects.equals(owner, statement.owner)
-                && Objects.equals(comment, statement.comment)
-                && privileges.equals(statement.privileges);
-    }
-
-    @Override
-    public final AbstractStatement shallowCopy() {
-        AbstractStatement copy = getCopy();
-        copy.setOwner(owner);
-        copy.setComment(comment);
-        copy.deps.addAll(deps);
-        copy.privileges.addAll(privileges);
-        copy.meta.copy(meta);
-        return copy;
-    }
-
-    protected abstract AbstractStatement getCopy();
 
     @Override
     public IStatement getTwin(IDatabase db) {
@@ -454,50 +411,58 @@ public abstract class AbstractStatement implements IStatement, IHashable {
     }
 
     /**
-     * Deep part of {@link #equals(Object)}.
-     * Compares all object's child PgStatements for equality.
-     */
-    public boolean compareChildren(AbstractStatement obj) {
-        if (obj == null) {
-            throw new IllegalArgumentException("Null Statement!");
-        }
-        return true;
-    }
-
-    /**
-     * Compares this object and all its children with another statement.
-     * <hr><br>
-     * {@inheritDoc}
+     * @return fully qualified (up to schema) dot-delimited object name.
+     * Identifiers are quoted.
      */
     @Override
-    public final boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
+    public String getQualifiedName() {
+        if (qualifiedName == null) {
+            StringBuilder sb = new StringBuilder(getQuotedName());
+
+            AbstractStatement par = this.parent;
+            while (par != null && !(par instanceof IDatabase)) {
+                sb.insert(0, '.').insert(0, par.getQuotedName());
+                par = par.parent;
+            }
+
+            qualifiedName = sb.toString();
         }
 
-        if (obj instanceof AbstractStatement st) {
-            return this.compare(st)
-                    && this.parentNamesEquals(st)
-                    && this.compareChildren(st);
-        }
-        return false;
+        return qualifiedName;
     }
 
-    /**
-     * Recursively compares objects' parents
-     * to ensure their equal position in their object trees.
-     */
-    private boolean parentNamesEquals(AbstractStatement st) {
-        AbstractStatement p = parent;
-        AbstractStatement p2 = st.parent;
-        while (p != null && p2 != null) {
-            if (!Objects.equals(p.getName(), p2.getName())) {
-                return false;
-            }
-            p = p.parent;
-            p2 = p2.parent;
+    protected void assertUnique(AbstractStatement found, AbstractStatement newSt) {
+        if (found != null) {
+            AbstractStatement foundParent = found.parent;
+            throw foundParent instanceof ISearchPath
+                    ? new ObjectCreationException(newSt, foundParent)
+                    : new ObjectCreationException(newSt);
         }
-        return p == null && p2 == null;
+    }
+
+    protected <T extends AbstractStatement> void addUnique(Map<String, T> map, T newSt) {
+        AbstractStatement found = map.putIfAbsent(getNameInCorrectCase(newSt.getName()), newSt);
+        assertUnique(found, newSt);
+        newSt.setParent(this);
+        resetHash();
+    }
+
+    protected <T extends AbstractStatement> T getChildByName(Map<String, T> map, String name) {
+        String lowerCaseName = getNameInCorrectCase(name);
+        return map.get(lowerCaseName);
+    }
+
+    protected String getNameInCorrectCase(String name) {
+        return name;
+    }
+
+    protected void appendFullName(StringBuilder sb) {
+        sb.append(getQualifiedName());
+    }
+
+    @Override
+    public String getSeparator() {
+        return SEPARATOR;
     }
 
     /**
@@ -558,62 +523,86 @@ public abstract class AbstractStatement implements IStatement, IHashable {
     }
 
     /**
-     * @return fully qualified (up to schema) dot-delimited object name.
-     * Identifiers are quoted.
+     * Compares this object and all its children with another statement.
+     * <hr><br>
+     * {@inheritDoc}
      */
     @Override
-    public String getQualifiedName() {
-        if (qualifiedName == null) {
-            StringBuilder sb = new StringBuilder(getQuotedName());
-
-            AbstractStatement par = this.parent;
-            while (par != null && !(par instanceof IDatabase)) {
-                sb.insert(0, '.').insert(0, par.getQuotedName());
-                par = par.parent;
-            }
-
-            qualifiedName = sb.toString();
+    public final boolean equals(Object obj) {
+        if (obj instanceof AbstractStatement st) {
+            return this.compare(st)
+                    && this.parentNamesEquals(st)
+                    && this.compareChildren(st);
         }
-
-        return qualifiedName;
+        return false;
     }
+
+    /**
+     * This method does not account for nested child PgStatements.
+     * Shallow version of {@link #equals(Object)}
+     */
+    @Override
+    public boolean compare(IStatement obj) {
+        return obj instanceof AbstractStatement statement
+                && getStatementType() == obj.getStatementType()
+                && Objects.equals(name, statement.name)
+                && Objects.equals(owner, statement.owner)
+                && Objects.equals(comment, statement.comment)
+                && privileges.equals(statement.privileges);
+    }
+
+    /**
+     * Recursively compares objects' parents
+     * to ensure their equal position in their object trees.
+     */
+    private boolean parentNamesEquals(AbstractStatement st) {
+        AbstractStatement p = parent;
+        AbstractStatement p2 = st.parent;
+        while (p != null && p2 != null) {
+            if (!Objects.equals(p.getName(), p2.getName())) {
+                return false;
+            }
+            p = p.parent;
+            p2 = p2.parent;
+        }
+        return p == null && p2 == null;
+    }
+
+    /**
+     * Deep part of {@link #equals(Object)}.
+     * Compares all object's child PgStatements for equality.
+     */
+    public boolean compareChildren(AbstractStatement obj) {
+        if (obj == null) {
+            throw new IllegalArgumentException("Null Statement!");
+        }
+        return true;
+    }
+
+    @Override
+    public final IStatement deepCopy() {
+        IStatement copy = shallowCopy();
+        if (copy instanceof IStatementContainer cont) {
+            getChildren().forEach(st -> cont.addChild(st.deepCopy()));
+        }
+        return copy;
+    }
+
+    @Override
+    public final AbstractStatement shallowCopy() {
+        AbstractStatement copy = getCopy();
+        copy.setOwner(owner);
+        copy.setComment(comment);
+        copy.deps.addAll(deps);
+        copy.privileges.addAll(privileges);
+        copy.meta.copy(meta);
+        return copy;
+    }
+
+    protected abstract AbstractStatement getCopy();
 
     @Override
     public String toString() {
         return name == null ? "Unnamed object" : name;
-    }
-
-    protected void assertUnique(AbstractStatement found, AbstractStatement newSt) {
-        if (found != null) {
-            AbstractStatement foundParent = found.parent;
-            throw foundParent instanceof ISearchPath
-                    ? new ObjectCreationException(newSt, foundParent)
-                    : new ObjectCreationException(newSt);
-        }
-    }
-
-    protected <T extends AbstractStatement> void addUnique(Map<String, T> map, T newSt) {
-        AbstractStatement found = map.putIfAbsent(getNameInCorrectCase(newSt.getName()), newSt);
-        assertUnique(found, newSt);
-        newSt.setParent(this);
-        resetHash();
-    }
-
-    protected <T extends AbstractStatement> T getChildByName(Map<String, T> map, String name) {
-        String lowerCaseName = getNameInCorrectCase(name);
-        return map.get(lowerCaseName);
-    }
-
-    protected String getNameInCorrectCase(String name) {
-        return name;
-    }
-
-    protected void appendFullName(StringBuilder sb) {
-        sb.append(getQualifiedName());
-    }
-
-    @Override
-    public String getSeparator() {
-        return SEPARATOR;
     }
 }

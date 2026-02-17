@@ -30,11 +30,16 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Triggers are functions that are automatically executed in response to database events
  * like INSERT, UPDATE, DELETE, or TRUNCATE on tables or views.
  */
-public final class PgTrigger extends PgAbstractStatement implements ITrigger {
+public class PgTrigger extends PgAbstractStatement implements ITrigger {
 
     public enum TgTypes {
         BEFORE, AFTER, INSTEAD_OF
     }
+
+    /**
+     * Optional list of columns for UPDATE event.
+     */
+    private final Set<String> updateColumns = new HashSet<>();
 
     private String function;
     private String refTableName;
@@ -55,12 +60,7 @@ public final class PgTrigger extends PgAbstractStatement implements ITrigger {
     private boolean isOnTruncate;
     private boolean isConstraint;
     private Boolean isImmediate;
-    /**
-     * Optional list of columns for UPDATE event.
-     */
-    private final Set<String> updateColumns = new HashSet<>();
     private String when;
-
     /**
      * REFERENCING old table name
      */
@@ -69,7 +69,6 @@ public final class PgTrigger extends PgAbstractStatement implements ITrigger {
      * REFERENCING new table name
      */
     private String newTable;
-
 
     /**
      * Creates a new PostgreSQL trigger.
@@ -326,11 +325,9 @@ public final class PgTrigger extends PgAbstractStatement implements ITrigger {
         if (this == obj) {
             return true;
         }
-        if (obj instanceof PgTrigger trigger && super.compare(obj)) {
-            return compareUnalterable(trigger)
-                    && triggerState == trigger.triggerState;
-        }
-        return false;
+        return obj instanceof PgTrigger trigger && super.compare(obj)
+                && compareUnalterable(trigger)
+                && triggerState == trigger.triggerState;
     }
 
     private boolean compareUnalterable(PgTrigger trigger) {

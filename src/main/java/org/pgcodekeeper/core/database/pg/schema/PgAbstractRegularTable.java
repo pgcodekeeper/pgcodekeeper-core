@@ -131,11 +131,6 @@ public abstract class PgAbstractRegularTable extends PgAbstractTable implements 
         return getAlterTable(only) + securityType + "ROW LEVEL SECURITY";
     }
 
-    public void setMethod(String using) {
-        this.method = using;
-        resetHash();
-    }
-
     @Override
     protected void compareTableOptions(PgAbstractTable newTable, SQLScript script) {
         super.compareTableOptions(newTable, script);
@@ -232,8 +227,6 @@ public abstract class PgAbstractRegularTable extends PgAbstractTable implements 
         }
     }
 
-    protected abstract void convertTable(SQLScript script);
-
     @Override
     protected boolean isNeedRecreate(PgAbstractTable newTable) {
         if (super.isNeedRecreate(newTable)) {
@@ -256,6 +249,13 @@ public abstract class PgAbstractRegularTable extends PgAbstractTable implements 
                     .append(sequence.isLogged() ? "LOGGED;" : "UNLOGGED;");
         }
         return sequence;
+    }
+
+    protected abstract void convertTable(SQLScript script);
+
+    public void setMethod(String using) {
+        this.method = using;
+        resetHash();
     }
 
     /**

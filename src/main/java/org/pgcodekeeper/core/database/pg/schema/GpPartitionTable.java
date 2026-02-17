@@ -26,11 +26,12 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a partitioned table specific to Greenplum database
  * with support for templates and Greenplum-specific partitioning features.
  */
-public final class GpPartitionTable extends PgAbstractRegularTable {
+public class GpPartitionTable extends PgAbstractRegularTable {
+
+    private final Map<String, GpPartitionTemplateContainer> templates = new HashMap<>();
 
     private String partitionGpBounds;
     private String normalizedPartitionGpBounds;
-    private final Map<String, GpPartitionTemplateContainer> templates = new HashMap<>();
 
     /**
      * Creates a new Greenplum partition table.
@@ -39,28 +40,6 @@ public final class GpPartitionTable extends PgAbstractRegularTable {
      */
     public GpPartitionTable(String name) {
         super(name);
-    }
-
-    /**
-     * Sets the partition bounds for this Greenplum table.
-     *
-     * @param partitionGpBounds           raw partition bounds
-     * @param normalizedPartitionGpBounds normalized partition bounds for comparison
-     */
-    public void setPartitionGpBound(String partitionGpBounds, String normalizedPartitionGpBounds) {
-        this.partitionGpBounds = partitionGpBounds;
-        this.normalizedPartitionGpBounds = normalizedPartitionGpBounds;
-        resetHash();
-    }
-
-    /**
-     * Adds a partition template to this table.
-     *
-     * @param template partition template to add
-     */
-    public void addTemplate(GpPartitionTemplateContainer template) {
-        this.templates.put(template.getPartitionName(), template);
-        resetHash();
     }
 
     @Override
@@ -83,11 +62,6 @@ public final class GpPartitionTable extends PgAbstractRegularTable {
     @Override
     protected boolean isNeedRecreate(PgAbstractTable newTable) {
         return super.isNeedRecreate(newTable) || !this.getClass().equals(newTable.getClass());
-    }
-
-    @Override
-    protected void convertTable(SQLScript script) {
-        // available in 7 version
     }
 
     @Override
@@ -150,13 +124,40 @@ public final class GpPartitionTable extends PgAbstractRegularTable {
     }
 
     @Override
-    public String getPartitionBy() {
-        return normalizedPartitionGpBounds;
+    protected void compareTableTypes(PgAbstractTable newTable, SQLScript script) {
+        // no implements
     }
 
     @Override
-    protected void compareTableTypes(PgAbstractTable newTable, SQLScript script) {
-        // no implements
+    protected void convertTable(SQLScript script) {
+        // available in 7 version
+    }
+
+    /**
+     * Sets the partition bounds for this Greenplum table.
+     *
+     * @param partitionGpBounds           raw partition bounds
+     * @param normalizedPartitionGpBounds normalized partition bounds for comparison
+     */
+    public void setPartitionGpBound(String partitionGpBounds, String normalizedPartitionGpBounds) {
+        this.partitionGpBounds = partitionGpBounds;
+        this.normalizedPartitionGpBounds = normalizedPartitionGpBounds;
+        resetHash();
+    }
+
+    /**
+     * Adds a partition template to this table.
+     *
+     * @param template partition template to add
+     */
+    public void addTemplate(GpPartitionTemplateContainer template) {
+        this.templates.put(template.getPartitionName(), template);
+        resetHash();
+    }
+
+    @Override
+    public String getPartitionBy() {
+        return normalizedPartitionGpBounds;
     }
 
 
@@ -169,6 +170,9 @@ public final class GpPartitionTable extends PgAbstractRegularTable {
 
     @Override
     protected boolean compareTable(PgAbstractTable obj) {
+        if (this == obj) {
+            return true;
+        }
         return obj instanceof GpPartitionTable table
                 && super.compareTable(table)
                 && Objects.equals(templates, table.templates)

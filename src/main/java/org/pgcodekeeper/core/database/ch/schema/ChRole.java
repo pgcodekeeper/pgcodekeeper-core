@@ -28,7 +28,7 @@ import java.util.Objects;
  * Represents a ClickHouse role for access control.
  * Roles can be stored in different storage types and have associated privileges.
  */
-public final class ChRole extends ChAbstractStatement {
+public class ChRole extends ChAbstractStatement {
 
     private static final String DEF_STORAGE = "local_directory";
 
@@ -77,6 +77,11 @@ public final class ChRole extends ChAbstractStatement {
         return getObjectState(script, startSize);
     }
 
+    public void setStorageType(String storageType) {
+        this.storageType = storageType;
+        resetHash();
+    }
+
     @Override
     public void computeHash(Hasher hasher) {
         hasher.put(storageType);
@@ -87,12 +92,9 @@ public final class ChRole extends ChAbstractStatement {
         if (this == obj) {
             return true;
         }
-
-        if (obj instanceof ChRole role && super.compare(obj)) {
-            return Objects.equals(storageType, role.storageType);
-        }
-
-        return false;
+        return obj instanceof ChRole role
+                && super.compare(role)
+                && Objects.equals(storageType, role.storageType);
     }
 
     @Override
@@ -100,10 +102,5 @@ public final class ChRole extends ChAbstractStatement {
         ChRole copy = new ChRole(name);
         copy.setStorageType(storageType);
         return copy;
-    }
-
-    public void setStorageType(String storageType) {
-        this.storageType = storageType;
-        resetHash();
     }
 }

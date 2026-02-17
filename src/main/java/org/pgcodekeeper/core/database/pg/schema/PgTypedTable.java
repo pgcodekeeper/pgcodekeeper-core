@@ -17,6 +17,7 @@ package org.pgcodekeeper.core.database.pg.schema;
 
 import java.util.Objects;
 
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -29,7 +30,7 @@ import org.pgcodekeeper.core.settings.ISettings;
  * @author galiev_mr
  * @since 4.1.1
  */
-public final class PgTypedTable extends PgAbstractRegularTable {
+public class PgTypedTable extends PgAbstractRegularTable {
 
     private final String ofType;
 
@@ -63,15 +64,6 @@ public final class PgTypedTable extends PgAbstractRegularTable {
         }
     }
 
-    /**
-     * Gets the composite type this table is based on.
-     *
-     * @return composite type name
-     */
-    public String getOfType() {
-        return ofType;
-    }
-
     @Override
     protected void compareTableTypes(PgAbstractTable newTable, SQLScript script) {
         if (newTable instanceof PgTypedTable typedTable) {
@@ -95,9 +87,28 @@ public final class PgTypedTable extends PgAbstractRegularTable {
     }
 
     @Override
+    protected void convertTable(SQLScript script) {
+        script.addStatement(getAlterTable(false) + " OF " + ofType);
+    }
+
+    /**
+     * Gets the composite type this table is based on.
+     *
+     * @return composite type name
+     */
+    public String getOfType() {
+        return ofType;
+    }
+
+    @Override
     public void computeHash(Hasher hasher) {
         super.computeHash(hasher);
         hasher.put(ofType);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
     }
 
     @Override
@@ -110,10 +121,5 @@ public final class PgTypedTable extends PgAbstractRegularTable {
     @Override
     protected PgAbstractTable getTableCopy() {
         return new PgTypedTable(name, ofType);
-    }
-
-    @Override
-    protected void convertTable(SQLScript script) {
-        script.addStatement(getAlterTable(false) + " OF " + ofType);
     }
 }

@@ -26,7 +26,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
  * Represents a ClickHouse Log family table that supports constraints.
  * Extends ChTable with the ability to add CHECK and ASSUME constraints.
  */
-public final class ChTableLog extends ChTable {
+public class ChTableLog extends ChTable {
 
     private final List<ChConstraint> constrs = new ArrayList<>();
 
@@ -46,6 +46,14 @@ public final class ChTableLog extends ChTable {
             sb.append("\n\tCONSTRAINT ").append(constr.getQuotedName()).append(' ')
                     .append(constr.getDefinition()).append(',');
         }
+    }
+
+    @Override
+    protected boolean isNeedRecreate(ChTable newTable) {
+        var newChLogTable = (ChTableLog) newTable;
+        return super.isNeedRecreate(newChLogTable)
+                || !constrs.equals(newChLogTable.constrs)
+                || !columns.equals(newChLogTable.columns);
     }
 
     @Override
@@ -70,6 +78,11 @@ public final class ChTableLog extends ChTable {
     }
 
     @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
+    }
+
+    @Override
     protected boolean compareTable(AbstractStatement obj) {
         return obj instanceof ChTableLog table
                 && super.compareTable(table)
@@ -81,13 +94,5 @@ public final class ChTableLog extends ChTable {
         var table = new ChTableLog(name);
         table.constrs.addAll(constrs);
         return table;
-    }
-
-    @Override
-    protected boolean isNeedRecreate(ChTable newTable) {
-        var newChLogTable = (ChTableLog) newTable;
-        return super.isNeedRecreate(newChLogTable)
-                || !constrs.equals(newChLogTable.constrs)
-                || !columns.equals(newChLogTable.columns);
     }
 }

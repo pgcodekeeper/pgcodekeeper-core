@@ -39,6 +39,12 @@ public abstract class PgAbstractFunction extends PgAbstractStatement implements 
     private static final float DEFAULT_PROCOST = 100.0f;
     private static final float DEFAULT_PROROWS = 1000.0f;
 
+    protected final List<Argument> arguments = new ArrayList<>();
+
+    private final List<String> transforms = new ArrayList<>();
+    private final Map<String, String> configurations = new LinkedHashMap<>();
+    private final Map<String, String> returnsColumns = new LinkedHashMap<>();
+
     private float rows = DEFAULT_PROROWS;
     private boolean isWindow;
     private boolean isStrict;
@@ -51,15 +57,8 @@ public abstract class PgAbstractFunction extends PgAbstractStatement implements 
     private String body;
     private String supportFunc;
     private String executeOn;
-
-    private final List<String> transforms = new ArrayList<>();
-    private final Map<String, String> configurations = new LinkedHashMap<>();
-    private final Map<String, String> returnsColumns = new LinkedHashMap<>();
-
     private String signatureCache;
     private boolean inStatementBody;
-
-    protected final List<Argument> arguments = new ArrayList<>();
 
     protected PgAbstractFunction(String name) {
         super(name);
@@ -193,22 +192,6 @@ public abstract class PgAbstractFunction extends PgAbstractStatement implements 
     }
 
     /**
-     * Alias for {@link #getSignature()} which provides a unique function ID.
-     * <p>
-     * Use {@link #getBareName()} to get just the function name.
-     */
-    @Override
-    public String getName() {
-        return getSignature();
-    }
-
-    @Override
-    public void appendFullName(StringBuilder sb) {
-        sb.append(quote(parent.getName())).append('.');
-        appendFunctionSignature(sb, false, true);
-    }
-
-    /**
      * Appends signature of statement to sb.
      *
      * @param sb                   StringBuilder to append signature to
@@ -242,6 +225,48 @@ public abstract class PgAbstractFunction extends PgAbstractStatement implements 
             signatureCache = sb.substring(sigStart, sb.length());
         }
         return sb;
+    }
+
+    @Override
+    public boolean needDrop(IFunction newFunction) {
+        var iOld = arguments.iterator();
+        var iNew = newFunction.getArguments().iterator();
+        while (iOld.hasNext() && iNew.hasNext()) {
+            var argOld = iOld.next();
+            var argNew = iNew.next();
+            String oldDef = argOld.getDefaultExpression();
+            String newDef = argNew.getDefaultExpression();
+
+            if (oldDef != null && !oldDef.equals(newDef)) {
+                return true;
+            }
+            if (!Objects.equals(argOld.getName(), argNew.getName())) {
+                return true;
+            }
+            if (!Objects.equals(argOld.getDataType(), argNew.getDataType())) {
+                return true;
+            }
+            if (argOld.getMode() != argNew.getMode()) {
+                return true;
+            }
+        }
+        return iOld.hasNext() || iNew.hasNext();
+    }
+
+    /**
+     * Alias for {@link #getSignature()} which provides a unique function ID.
+     * <p>
+     * Use {@link #getBareName()} to get just the function name.
+     */
+    @Override
+    public String getName() {
+        return getSignature();
+    }
+
+    @Override
+    public void appendFullName(StringBuilder sb) {
+        sb.append(quote(parent.getName())).append('.');
+        appendFunctionSignature(sb, false, true);
     }
 
     public void setWindow(boolean isWindow) {
@@ -387,30 +412,23 @@ public abstract class PgAbstractFunction extends PgAbstractStatement implements 
         return signatureCache;
     }
 
-    @Override
-    public boolean needDrop(IFunction newFunction) {
-        var iOld = arguments.iterator();
-        var iNew = newFunction.getArguments().iterator();
-        while (iOld.hasNext() && iNew.hasNext()) {
-            var argOld = iOld.next();
-            var argNew = iNew.next();
-            String oldDef = argOld.getDefaultExpression();
-            String newDef = argNew.getDefaultExpression();
+    public void addArgument(Argument argDst) {
+        arguments.add(argDst);
+        resetHash();
+    }
 
-            if (oldDef != null && !oldDef.equals(newDef)) {
-                return true;
-            }
-            if (!Objects.equals(argOld.getName(), argNew.getName())) {
-                return true;
-            }
-            if (!Objects.equals(argOld.getDataType(), argNew.getDataType())) {
-                return true;
-            }
-            if (argOld.getMode() != argNew.getMode()) {
-                return true;
-            }
+    @Override
+    public List<IArgument> getArguments() {
+        return Collections.unmodifiableList(arguments);
+    }
+
+    @Override
+    public String getQualifiedName() {
+        if (qualifiedName == null) {
+            qualifiedName = parent.getQualifiedName() + '.' + getName();
         }
-        return iOld.hasNext() || iNew.hasNext();
+
+        return qualifiedName;
     }
 
     @Override
@@ -434,15 +452,8 @@ public abstract class PgAbstractFunction extends PgAbstractStatement implements 
 
     @Override
     public boolean compare(IStatement obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj instanceof PgAbstractFunction func && super.compare(obj)) {
-            return compareUnalterable(func);
-        }
-
-        return false;
+        return obj instanceof PgAbstractFunction func && super.compare(obj)
+                && compareUnalterable(func);
     }
 
     protected boolean compareUnalterable(PgAbstractFunction func) {
@@ -490,25 +501,6 @@ public abstract class PgAbstractFunction extends PgAbstractStatement implements 
         functionDst.setInStatementBody(inStatementBody);
 
         return functionDst;
-    }
-
-    public void addArgument(Argument argDst) {
-        arguments.add(argDst);
-        resetHash();
-    }
-
-    @Override
-    public List<IArgument> getArguments() {
-        return Collections.unmodifiableList(arguments);
-    }
-
-    @Override
-    public String getQualifiedName() {
-        if (qualifiedName == null) {
-            qualifiedName = parent.getQualifiedName() + '.' + getName();
-        }
-
-        return qualifiedName;
     }
 
     protected abstract PgAbstractFunction getFunctionCopy();

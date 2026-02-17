@@ -25,7 +25,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a Microsoft SQL database role.
  * Roles are used to group users and manage permissions at the database level.
  */
-public final class MsRole extends MsAbstractStatement {
+public class MsRole extends MsAbstractStatement {
 
     private final Set<String> members = new LinkedHashSet<>();
 
@@ -61,14 +61,6 @@ public final class MsRole extends MsAbstractStatement {
     }
 
     @Override
-    public void getDropSQL(SQLScript script, boolean optionExists) {
-        for (String member : members) {
-            appendAlterRole(member, script, false);
-        }
-        super.getDropSQL(script, optionExists);
-    }
-
-    @Override
     public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
         int startSize = script.getSize();
         MsRole newRole = (MsRole) newCondition;
@@ -101,6 +93,14 @@ public final class MsRole extends MsAbstractStatement {
         script.addStatement(sql);
     }
 
+    @Override
+    public void getDropSQL(SQLScript script, boolean optionExists) {
+        for (String member : members) {
+            appendAlterRole(member, script, false);
+        }
+        super.getDropSQL(script, optionExists);
+    }
+
     /**
      * Adds a member to this role.
      *
@@ -122,7 +122,8 @@ public final class MsRole extends MsAbstractStatement {
             return true;
         }
 
-        return obj instanceof MsRole role && super.compare(obj)
+        return obj instanceof MsRole role
+                && super.compare(role)
                 && Objects.equals(members, role.members);
     }
 

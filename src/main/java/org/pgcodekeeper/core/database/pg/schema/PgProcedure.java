@@ -23,6 +23,7 @@ import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IFunction;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
@@ -30,7 +31,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
  * Procedures are similar to functions but can manage transactions
  * and don't return values directly (though they can have OUT parameters).
  */
-public final class PgProcedure extends PgAbstractFunction {
+public class PgProcedure extends PgAbstractFunction {
 
     private String returns;
 
@@ -62,6 +63,11 @@ public final class PgProcedure extends PgAbstractFunction {
     public void computeHash(Hasher hasher) {
         super.computeHash(hasher);
         hasher.put(returns);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
     }
 
     @Override

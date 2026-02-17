@@ -19,6 +19,7 @@ import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IFunction;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 
@@ -27,7 +28,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
  * Represents aggregate functions which operate on sets of values
  * and return a single result, such as SUM, COUNT, AVG, etc.
  */
-public final class PgAggregate extends PgAbstractFunction {
+public class PgAggregate extends PgAbstractFunction {
 
     /**
      * Enumeration of aggregate function kinds
@@ -51,9 +52,7 @@ public final class PgAggregate extends PgAbstractFunction {
     }
 
     private int directCount;
-
     private AggKinds kind = AggKinds.NORMAL;
-
     private String sFunc;
     private String sType;
     private int sSpace;
@@ -72,7 +71,6 @@ public final class PgAggregate extends PgAbstractFunction {
     private String mInitCond;
     private String sortOp;
     private String returns;
-
     private ModifyType finalFuncModify;
     private ModifyType mFinalFuncModify;
 
@@ -390,32 +388,34 @@ public final class PgAggregate extends PgAbstractFunction {
     }
 
     @Override
-    protected boolean compareUnalterable(PgAbstractFunction func) {
-        if (func instanceof PgAggregate aggr && super.compareUnalterable(func)) {
-            return directCount == aggr.directCount
-                    && Objects.equals(kind, aggr.kind)
-                    && Objects.equals(sFunc, aggr.sFunc)
-                    && Objects.equals(sType, aggr.sType)
-                    && sSpace == aggr.sSpace
-                    && Objects.equals(finalFunc, aggr.finalFunc)
-                    && isFinalFuncExtra == aggr.isFinalFuncExtra
-                    && Objects.equals(finalFuncModify, aggr.finalFuncModify)
-                    && Objects.equals(combineFunc, aggr.combineFunc)
-                    && Objects.equals(serialFunc, aggr.serialFunc)
-                    && Objects.equals(deserialFunc, aggr.deserialFunc)
-                    && Objects.equals(initCond, aggr.initCond)
-                    && Objects.equals(mSFunc, aggr.mSFunc)
-                    && Objects.equals(mInvFunc, aggr.mInvFunc)
-                    && Objects.equals(mSType, aggr.mSType)
-                    && mSSpace == aggr.mSSpace
-                    && Objects.equals(mFinalFunc, aggr.mFinalFunc)
-                    && isMFinalFuncExtra == aggr.isMFinalFuncExtra
-                    && Objects.equals(mFinalFuncModify, aggr.mFinalFuncModify)
-                    && Objects.equals(mInitCond, aggr.mInitCond)
-                    && Objects.equals(sortOp, aggr.sortOp);
-        }
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
+    }
 
-        return false;
+    @Override
+    protected boolean compareUnalterable(PgAbstractFunction func) {
+        return func instanceof PgAggregate aggr && super.compareUnalterable(func)
+                && directCount == aggr.directCount
+                && Objects.equals(kind, aggr.kind)
+                && Objects.equals(sFunc, aggr.sFunc)
+                && Objects.equals(sType, aggr.sType)
+                && sSpace == aggr.sSpace
+                && Objects.equals(finalFunc, aggr.finalFunc)
+                && isFinalFuncExtra == aggr.isFinalFuncExtra
+                && Objects.equals(finalFuncModify, aggr.finalFuncModify)
+                && Objects.equals(combineFunc, aggr.combineFunc)
+                && Objects.equals(serialFunc, aggr.serialFunc)
+                && Objects.equals(deserialFunc, aggr.deserialFunc)
+                && Objects.equals(initCond, aggr.initCond)
+                && Objects.equals(mSFunc, aggr.mSFunc)
+                && Objects.equals(mInvFunc, aggr.mInvFunc)
+                && Objects.equals(mSType, aggr.mSType)
+                && mSSpace == aggr.mSSpace
+                && Objects.equals(mFinalFunc, aggr.mFinalFunc)
+                && isMFinalFuncExtra == aggr.isMFinalFuncExtra
+                && Objects.equals(mFinalFuncModify, aggr.mFinalFuncModify)
+                && Objects.equals(mInitCond, aggr.mInitCond)
+                && Objects.equals(sortOp, aggr.sortOp);
     }
 
     @Override

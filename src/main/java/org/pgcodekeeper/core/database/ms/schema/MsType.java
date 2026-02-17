@@ -28,7 +28,7 @@ import org.pgcodekeeper.core.utils.Utils;
  * Represents a Microsoft SQL user-defined type that can be an alias type,
  * assembly type, or table type. Each type has specific properties and behaviors.
  */
-public final class MsType extends MsAbstractStatement implements IType, IStatementContainer {
+public class MsType extends MsAbstractStatement implements IType, IStatementContainer {
 
     // base type
     private String baseType;
@@ -62,21 +62,6 @@ public final class MsType extends MsAbstractStatement implements IType, IStateme
         appendOwnerSQL(script);
         appendPrivileges(script);
         appendComments(script);
-    }
-
-    @Override
-    public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
-        int startSize = script.getSize();
-        MsType newType = (MsType) newCondition;
-
-        if (isNeedRecreate(newType)) {
-            return ObjectState.RECREATE;
-        }
-        AtomicBoolean isNeedDepcies = new AtomicBoolean(false);
-        appendAlterOwner(newType, script);
-        alterPrivileges(newType, script);
-        appendAlterComments(newType, script);
-        return getObjectState(isNeedDepcies.get(), script, startSize);
     }
 
     private void appendDef(StringBuilder sb) {
@@ -117,53 +102,22 @@ public final class MsType extends MsAbstractStatement implements IType, IStateme
     }
 
     @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(isNotNull);
-        hasher.put(isMemoryOptimized);
-        hasher.put(baseType);
-        hasher.put(assemblyName);
-        hasher.put(assemblyClass);
-        hasher.put(columns);
-        hasher.put(indices);
-        hasher.put(constraints);
-    }
+    public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
+        int startSize = script.getSize();
+        MsType newType = (MsType) newCondition;
 
-    @Override
-    public boolean compare(IStatement obj) {
-        if (obj instanceof MsType type && super.compare(type)) {
-            return compareUnalterable(type);
+        if (isNeedRecreate(newType)) {
+            return ObjectState.RECREATE;
         }
-
-        return false;
+        AtomicBoolean isNeedDepcies = new AtomicBoolean(false);
+        appendAlterOwner(newType, script);
+        alterPrivileges(newType, script);
+        appendAlterComments(newType, script);
+        return getObjectState(isNeedDepcies.get(), script, startSize);
     }
 
-    private boolean compareUnalterable(MsType newType) {
-        if (this == newType) {
-            return true;
-        }
-
-        return isNotNull == newType.isNotNull
-                && isMemoryOptimized == newType.isMemoryOptimized
-                && Objects.equals(baseType, newType.baseType)
-                && Objects.equals(assemblyName, newType.assemblyName)
-                && Objects.equals(assemblyClass, newType.assemblyClass)
-                && columns.equals(newType.columns)
-                && Utils.setLikeEquals(indices, newType.indices)
-                && Utils.setLikeEquals(constraints, newType.constraints);
-    }
-
-    @Override
-    protected MsType getCopy() {
-        MsType copy = new MsType(name);
-        copy.setNotNull(isNotNull);
-        copy.setMemoryOptimized(isMemoryOptimized);
-        copy.setBaseType(baseType);
-        copy.setAssemblyName(assemblyName);
-        copy.setAssemblyClass(assemblyClass);
-        copy.columns.addAll(columns);
-        copy.indices.addAll(indices);
-        copy.constraints.addAll(constraints);
-        return copy;
+    private boolean isNeedRecreate(MsType newType) {
+        return !getClass().equals(newType.getClass()) || !compareUnalterable(newType);
     }
 
     public void setBaseType(String baseType) {
@@ -221,7 +175,55 @@ public final class MsType extends MsAbstractStatement implements IType, IStateme
         return List.of();
     }
 
-    private boolean isNeedRecreate(MsType newType) {
-        return !getClass().equals(newType.getClass()) || !compareUnalterable(newType);
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(isNotNull);
+        hasher.put(isMemoryOptimized);
+        hasher.put(baseType);
+        hasher.put(assemblyName);
+        hasher.put(assemblyClass);
+        hasher.put(columns);
+        hasher.put(indices);
+        hasher.put(constraints);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        return obj instanceof MsType type
+                && super.compare(type)
+                && compareUnalterable(type);
+    }
+
+    private boolean compareUnalterable(MsType newType) {
+        if (this == newType) {
+            return true;
+        }
+
+        return isNotNull == newType.isNotNull
+                && isMemoryOptimized == newType.isMemoryOptimized
+                && Objects.equals(baseType, newType.baseType)
+                && Objects.equals(assemblyName, newType.assemblyName)
+                && Objects.equals(assemblyClass, newType.assemblyClass)
+                && columns.equals(newType.columns)
+                && Utils.setLikeEquals(indices, newType.indices)
+                && Utils.setLikeEquals(constraints, newType.constraints);
+    }
+
+    @Override
+    protected MsType getCopy() {
+        MsType copy = new MsType(name);
+        copy.setNotNull(isNotNull);
+        copy.setMemoryOptimized(isMemoryOptimized);
+        copy.setBaseType(baseType);
+        copy.setAssemblyName(assemblyName);
+        copy.setAssemblyClass(assemblyClass);
+        copy.columns.addAll(columns);
+        copy.indices.addAll(indices);
+        copy.constraints.addAll(constraints);
+        return copy;
     }
 }

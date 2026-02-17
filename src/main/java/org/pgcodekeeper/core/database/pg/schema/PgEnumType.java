@@ -27,7 +27,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents an enumerated type with a fixed set of string values
  * that can be extended but not reordered.
  */
-public final class PgEnumType extends PgAbstractType {
+public class PgEnumType extends PgAbstractType {
 
     private final List<String> enums = new ArrayList<>();
 
@@ -117,10 +117,11 @@ public final class PgEnumType extends PgAbstractType {
 
     @Override
     public boolean compare(IStatement obj) {
-        if (obj instanceof PgEnumType type && super.compare(type)) {
-            return enums.equals(type.enums);
+        if (this == obj) {
+            return true;
         }
-        return false;
+        return obj instanceof PgEnumType type && super.compare(type)
+                && enums.equals(type.enums);
     }
 
     @Override

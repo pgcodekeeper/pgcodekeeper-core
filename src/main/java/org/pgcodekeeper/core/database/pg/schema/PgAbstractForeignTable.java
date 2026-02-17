@@ -40,6 +40,31 @@ public abstract class PgAbstractForeignTable extends PgAbstractTable implements 
     }
 
     @Override
+    public String getTypeName() {
+        return "FOREIGN TABLE";
+    }
+
+    @Override
+    public void appendOptions(StringBuilder sqlOption) {
+        sqlOption.append("\nSERVER ").append(quote(serverName));
+        if (!options.isEmpty()) {
+            sqlOption.append('\n');
+        }
+        PgForeignOptionContainer.super.appendOptions(sqlOption);
+    }
+
+    @Override
+    public String getAlterHeader() {
+        return getAlterTable(false);
+    }
+
+    @Override
+    public void appendMoveDataSql(IStatement newCondition, SQLScript script, String tblTmpBareName,
+                                  List<String> identityCols) {
+        // no impl
+    }
+
+    @Override
     protected String getAlterTable(boolean only) {
         StringBuilder sb = new StringBuilder();
         sb.append("ALTER FOREIGN TABLE ");
@@ -55,25 +80,6 @@ public abstract class PgAbstractForeignTable extends PgAbstractTable implements 
         return super.isNeedRecreate(newTable)
                 || !this.getClass().equals(newTable.getClass())
                 || !Objects.equals(serverName, ((PgAbstractForeignTable) newTable).serverName);
-    }
-
-    @Override
-    public void appendOptions(StringBuilder sqlOption) {
-        sqlOption.append("\nSERVER ").append(quote(serverName));
-        if (!options.isEmpty()) {
-            sqlOption.append('\n');
-        }
-        PgForeignOptionContainer.super.appendOptions(sqlOption);
-    }
-
-    @Override
-    public String getTypeName() {
-        return "FOREIGN TABLE";
-    }
-
-    @Override
-    public String getAlterHeader() {
-        return getAlterTable(false);
     }
 
     @Override
@@ -105,21 +111,15 @@ public abstract class PgAbstractForeignTable extends PgAbstractTable implements 
     }
 
     @Override
-    protected boolean compareTable(PgAbstractTable obj) {
-        return obj instanceof PgAbstractForeignTable table
-                && super.compareTable(table)
-                && Objects.equals(serverName, table.serverName);
-    }
-
-    @Override
     public void computeHash(Hasher hasher) {
         super.computeHash(hasher);
         hasher.put(serverName);
     }
 
     @Override
-    public void appendMoveDataSql(IStatement newCondition, SQLScript script, String tblTmpBareName,
-                                  List<String> identityCols) {
-        // no impl
+    protected boolean compareTable(PgAbstractTable obj) {
+        return obj instanceof PgAbstractForeignTable table
+                && super.compareTable(table)
+                && Objects.equals(serverName, table.serverName);
     }
 }

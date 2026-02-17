@@ -27,7 +27,7 @@ import org.pgcodekeeper.core.utils.Pair;
  * Represents a Microsoft SQL view with support for schema binding,
  * ANSI_NULLS and QUOTED_IDENTIFIER settings, and statistics.
  */
-public final class MsView extends MsAbstractStatementContainer implements MsSourceStatement, IView {
+public class MsView extends MsAbstractStatementContainer implements MsSourceStatement, IView {
 
     private boolean ansiNulls;
     private boolean quotedIdentified;
@@ -37,7 +37,6 @@ public final class MsView extends MsAbstractStatementContainer implements MsSour
      * Does not participate in comparison, since it is part of {@link #secondPart}
      */
     private boolean schemaBinding;
-
     private String firstPart;
     private String secondPart;
 
@@ -87,35 +86,6 @@ public final class MsView extends MsAbstractStatementContainer implements MsSour
         return true;
     }
 
-    @Override
-    public boolean compare(IStatement obj) {
-        return obj instanceof MsView view
-                && super.compare(obj)
-                && Objects.equals(firstPart, view.firstPart)
-                && Objects.equals(secondPart, view.secondPart)
-                && quotedIdentified == view.quotedIdentified
-                && ansiNulls == view.ansiNulls;
-    }
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(firstPart);
-        hasher.put(secondPart);
-        hasher.put(quotedIdentified);
-        hasher.put(ansiNulls);
-    }
-
-    @Override
-    protected MsView getCopy() {
-        MsView view = new MsView(name);
-        view.setFirstPart(firstPart);
-        view.setSecondPart(secondPart);
-        view.setAnsiNulls(ansiNulls);
-        view.setQuotedIdentified(quotedIdentified);
-        view.setSchemaBinding(schemaBinding);
-        return view;
-    }
-
     public void setAnsiNulls(boolean ansiNulls) {
         this.ansiNulls = ansiNulls;
         resetHash();
@@ -162,4 +132,35 @@ public final class MsView extends MsAbstractStatementContainer implements MsSour
         return Stream.empty();
     }
 
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(firstPart);
+        hasher.put(secondPart);
+        hasher.put(quotedIdentified);
+        hasher.put(ansiNulls);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+        return obj instanceof MsView view
+                && super.compare(view)
+                && Objects.equals(firstPart, view.firstPart)
+                && Objects.equals(secondPart, view.secondPart)
+                && quotedIdentified == view.quotedIdentified
+                && ansiNulls == view.ansiNulls;
+    }
+
+    @Override
+    protected MsView getCopy() {
+        MsView view = new MsView(name);
+        view.setFirstPart(firstPart);
+        view.setSecondPart(secondPart);
+        view.setAnsiNulls(ansiNulls);
+        view.setQuotedIdentified(quotedIdentified);
+        view.setSchemaBinding(schemaBinding);
+        return view;
+    }
 }

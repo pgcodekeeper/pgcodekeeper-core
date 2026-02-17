@@ -25,12 +25,13 @@ import org.pgcodekeeper.core.hasher.Hasher;
  * Represents a Microsoft SQL FOREIGN KEY constraint that enforces referential integrity
  * between tables.
  */
-public final class MsConstraintFk extends MsConstraint implements IConstraintFk {
+public class MsConstraintFk extends MsConstraint implements IConstraintFk {
 
     private final List<String> columns = new ArrayList<>();
+    private final List<String> refs = new ArrayList<>();
+
     private String foreignSchema;
     private String foreignTable;
-    private final List<String> refs = new ArrayList<>();
     private String delAction;
     private String updAction;
     private boolean isNotForRepl;
@@ -42,6 +43,29 @@ public final class MsConstraintFk extends MsConstraint implements IConstraintFk 
      */
     public MsConstraintFk(String name) {
         super(name);
+    }
+
+    @Override
+    public String getDefinition() {
+        var sbSQL = new StringBuilder();
+        sbSQL.append("FOREIGN KEY ");
+        StatementUtils.appendCols(sbSQL, columns, getQuoter());
+        sbSQL.append(" REFERENCES ").append(quote(foreignSchema)).append('.').append(quote(foreignTable));
+        if (!refs.isEmpty()) {
+            sbSQL.append(' ');
+            StatementUtils.appendCols(sbSQL, refs, getQuoter());
+        }
+        if (delAction != null) {
+            sbSQL.append(" ON DELETE ").append(delAction);
+        }
+        if (updAction != null) {
+            sbSQL.append(" ON UPDATE ").append(updAction);
+        }
+        if (isNotForRepl) {
+            sbSQL.append(" NOT FOR REPLICATION");
+        }
+
+        return sbSQL.toString();
     }
 
     @Override
@@ -110,29 +134,6 @@ public final class MsConstraintFk extends MsConstraint implements IConstraintFk 
     }
 
     @Override
-    public String getDefinition() {
-        var sbSQL = new StringBuilder();
-        sbSQL.append("FOREIGN KEY ");
-        StatementUtils.appendCols(sbSQL, columns, getQuoter());
-        sbSQL.append(" REFERENCES ").append(quote(foreignSchema)).append('.').append(quote(foreignTable));
-        if (!refs.isEmpty()) {
-            sbSQL.append(' ');
-            StatementUtils.appendCols(sbSQL, refs, getQuoter());
-        }
-        if (delAction != null) {
-            sbSQL.append(" ON DELETE ").append(delAction);
-        }
-        if (updAction != null) {
-            sbSQL.append(" ON UPDATE ").append(updAction);
-        }
-        if (isNotForRepl) {
-            sbSQL.append(" NOT FOR REPLICATION");
-        }
-
-        return sbSQL.toString();
-    }
-
-    @Override
     public void computeHash(Hasher hasher) {
         super.computeHash(hasher);
         hasher.put(columns);
@@ -146,25 +147,24 @@ public final class MsConstraintFk extends MsConstraint implements IConstraintFk 
 
     @Override
     public boolean compare(IStatement obj) {
-        if (obj instanceof MsConstraintFk con && super.compare(con)) {
-            return compareUnalterable(con);
+        if (this == obj) {
+            return true;
         }
-        return false;
+        return obj instanceof MsConstraintFk con
+                && super.compare(con)
+                && compareUnalterable(con);
     }
 
     @Override
     protected boolean compareUnalterable(MsConstraint obj) {
-        if (obj instanceof MsConstraintFk con) {
-            return Objects.equals(columns, con.columns)
-                    && Objects.equals(foreignSchema, con.foreignSchema)
-                    && Objects.equals(foreignTable, con.foreignTable)
-                    && Objects.equals(refs, con.refs)
-                    && Objects.equals(delAction, con.delAction)
-                    && Objects.equals(updAction, con.updAction)
-                    && isNotForRepl == con.isNotForRepl;
-        }
-
-        return false;
+        return obj instanceof MsConstraintFk con
+                && Objects.equals(columns, con.columns)
+                && Objects.equals(foreignSchema, con.foreignSchema)
+                && Objects.equals(foreignTable, con.foreignTable)
+                && Objects.equals(refs, con.refs)
+                && Objects.equals(delAction, con.delAction)
+                && Objects.equals(updAction, con.updAction)
+                && isNotForRepl == con.isNotForRepl;
     }
 
     @Override

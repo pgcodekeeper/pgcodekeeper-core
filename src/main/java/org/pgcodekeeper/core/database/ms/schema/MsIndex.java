@@ -26,16 +26,16 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a Microsoft SQL index with support for clustered, non-clustered,
  * and columnstore indexes.
  */
-public final class MsIndex extends MsAbstractStatement implements IIndex {
+public class MsIndex extends MsAbstractStatement implements IIndex {
 
-    private boolean isColumnstore;
     private final List<String> orderCols = new ArrayList<>();
-
-    private boolean unique;
-    private String tablespace;
     private final List<SimpleColumn> columns = new ArrayList<>();
     private final Map<String, String> options = new LinkedHashMap<>();
     private final List<String> includes = new ArrayList<>();
+
+    private boolean isColumnstore;
+    private boolean unique;
+    private String tablespace;
     private String where;
     private boolean isClustered;
 
@@ -46,21 +46,6 @@ public final class MsIndex extends MsAbstractStatement implements IIndex {
      */
     public MsIndex(String name) {
         super(name);
-    }
-
-    public void setColumnstore(boolean isColumnstore) {
-        this.isColumnstore = isColumnstore;
-        resetHash();
-    }
-
-    /**
-     * Adds a column to the ORDER clause for columnstore indexes.
-     *
-     * @param orderCol the column specification for ordering
-     */
-    public void addOrderCol(String orderCol) {
-        this.orderCols.add(orderCol);
-        resetHash();
     }
 
     @Override
@@ -139,6 +124,13 @@ public final class MsIndex extends MsAbstractStatement implements IIndex {
         return sb.toString();
     }
 
+    private void appendClustered(StringBuilder sb) {
+        if (!isClustered) {
+            sb.append("NON");
+        }
+        sb.append("CLUSTERED ");
+    }
+
     private void appendSimpleColumns(StringBuilder sbSQL, List<SimpleColumn> columns) {
         for (var col : columns) {
             sbSQL.append(quote(col.getName()));
@@ -148,13 +140,6 @@ public final class MsIndex extends MsAbstractStatement implements IIndex {
             sbSQL.append(", ");
         }
         sbSQL.setLength(sbSQL.length() - 2);
-    }
-
-    private void appendClustered(StringBuilder sb) {
-        if (!isClustered) {
-            sb.append("NON");
-        }
-        sb.append("CLUSTERED ");
     }
 
     @Override
@@ -178,57 +163,37 @@ public final class MsIndex extends MsAbstractStatement implements IIndex {
     }
 
     @Override
+    public boolean compareColumns(Collection<String> refs) {
+        if (refs.size() != columns.size()) {
+            return false;
+        }
+        int i = 0;
+        for (String ref : refs) {
+            if (!ref.equals(columns.get(i++).getName())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
     public void appendFullName(StringBuilder sb) {
         sb.append(getQuotedName()).append(" ON ").append(parent.getQualifiedName());
     }
 
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.putOrdered(columns);
-        hasher.put(where);
-        hasher.put(includes);
-        hasher.put(unique);
-        hasher.put(isClustered);
-        hasher.put(tablespace);
-        hasher.put(options);
-        hasher.put(isColumnstore);
-        hasher.put(orderCols);
+    public void setColumnstore(boolean isColumnstore) {
+        this.isColumnstore = isColumnstore;
+        resetHash();
     }
 
-    @Override
-    public boolean compare(IStatement obj) {
-        if (obj instanceof MsIndex index && super.compare(obj)) {
-            return compareUnalterable(index)
-                    && isClustered == index.isClustered
-                    && Objects.equals(tablespace, index.tablespace)
-                    && Objects.equals(options, index.options)
-                    && isColumnstore == index.isColumnstore
-                    && Objects.equals(orderCols, index.orderCols);
-        }
-
-        return false;
-    }
-
-    private boolean compareUnalterable(MsIndex index) {
-        return Objects.equals(columns, index.columns)
-                && Objects.equals(where, index.where)
-                && Objects.equals(includes, index.includes)
-                && unique == index.unique;
-    }
-
-    @Override
-    protected MsIndex getCopy() {
-        MsIndex indexDst = new MsIndex(name);
-        indexDst.columns.addAll(columns);
-        indexDst.setWhere(where);
-        indexDst.includes.addAll(includes);
-        indexDst.setUnique(unique);
-        indexDst.setClustered(isClustered);
-        indexDst.setTablespace(tablespace);
-        indexDst.options.putAll(options);
-        indexDst.setColumnstore(isColumnstore);
-        indexDst.orderCols.addAll(orderCols);
-        return indexDst;
+    /**
+     * Adds a column to the ORDER clause for columnstore indexes.
+     *
+     * @param orderCol the column specification for ordering
+     */
+    public void addOrderCol(String orderCol) {
+        this.orderCols.add(orderCol);
+        resetHash();
     }
 
     public void setTablespace(String tablespace) {
@@ -288,16 +253,52 @@ public final class MsIndex extends MsAbstractStatement implements IIndex {
     }
 
     @Override
-    public boolean compareColumns(Collection<String> refs) {
-        if (refs.size() != columns.size()) {
-            return false;
+    public void computeHash(Hasher hasher) {
+        hasher.putOrdered(columns);
+        hasher.put(where);
+        hasher.put(includes);
+        hasher.put(unique);
+        hasher.put(isClustered);
+        hasher.put(tablespace);
+        hasher.put(options);
+        hasher.put(isColumnstore);
+        hasher.put(orderCols);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
         }
-        int i = 0;
-        for (String ref : refs) {
-            if (!ref.equals(columns.get(i++).getName())) {
-                return false;
-            }
-        }
-        return true;
+        return obj instanceof MsIndex index
+                && super.compare(obj)
+                && compareUnalterable(index)
+                && isClustered == index.isClustered
+                && Objects.equals(tablespace, index.tablespace)
+                && Objects.equals(options, index.options)
+                && isColumnstore == index.isColumnstore
+                && Objects.equals(orderCols, index.orderCols);
+    }
+
+    private boolean compareUnalterable(MsIndex index) {
+        return Objects.equals(columns, index.columns)
+                && Objects.equals(where, index.where)
+                && Objects.equals(includes, index.includes)
+                && unique == index.unique;
+    }
+
+    @Override
+    protected MsIndex getCopy() {
+        MsIndex indexDst = new MsIndex(name);
+        indexDst.columns.addAll(columns);
+        indexDst.setWhere(where);
+        indexDst.includes.addAll(includes);
+        indexDst.setUnique(unique);
+        indexDst.setClustered(isClustered);
+        indexDst.setTablespace(tablespace);
+        indexDst.options.putAll(options);
+        indexDst.setColumnstore(isColumnstore);
+        indexDst.orderCols.addAll(orderCols);
+        return indexDst;
     }
 }

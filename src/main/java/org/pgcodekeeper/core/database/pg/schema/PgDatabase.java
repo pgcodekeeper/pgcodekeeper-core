@@ -36,19 +36,14 @@ import org.pgcodekeeper.core.hasher.Hasher;
  *
  * @author fordfrog
  */
-public final class PgDatabase extends PgAbstractStatement implements IDatabase {
-
-    private PgSchema defaultSchema;
-    private PgSupportedVersion version = PgSupportedVersion.VERSION_14;
+public class PgDatabase extends PgAbstractStatement implements IDatabase {
 
     private final List<ObjectOverride> overrides = new ArrayList<>();
-
     // Contains object references
     private final Map<String, Set<ObjectLocation>> objReferences = new HashMap<>();
     // Contains analysis launchers for all statements
     // (used for launch analyze and getting dependencies).
     private final ArrayList<IAnalysisLauncher> analysisLaunchers = new ArrayList<>();
-
     private final Map<String, PgExtension> extensions = new LinkedHashMap<>();
     private final Map<String, PgEventTrigger> eventTriggers = new LinkedHashMap<>();
     private final Map<String, PgForeignDataWrapper> fdws = new LinkedHashMap<>();
@@ -57,11 +52,107 @@ public final class PgDatabase extends PgAbstractStatement implements IDatabase {
     private final Map<String, PgCast> casts = new LinkedHashMap<>();
     private final Map<String, PgSchema> schemas = new LinkedHashMap<>();
 
+    private PgSchema defaultSchema;
+    private PgSupportedVersion version = PgSupportedVersion.VERSION_14;
+
     /**
      * Creates a new PostgreSQL database.
      */
     public PgDatabase() {
         super("DB_name_placeholder");
+    }
+
+    @Override
+    public void concat(IStatement st) {
+        DbObjType type = st.getStatementType();
+        String name = st.getName();
+        if (type != DbObjType.SCHEMA || !PgConsts.DEFAULT_SCHEMA.equals(name) || st.hasChildren()) {
+            // skip empty public schema
+            IDatabase.super.concat(st);
+        }
+    }
+
+    /**
+     * Sorts columns in all tables within all schemas of this database.
+     * This is used to ensure consistent column ordering in inherited tables.
+     */
+    public void sortColumns() {
+        for (PgSchema schema : getSchemas()) {
+            schema.getTables().forEach(t -> t.sortColumns());
+        }
+    }
+
+    @Override
+    public final AbstractStatement getStatement(ObjectReference reference) {
+        DbObjType type = reference.type();
+        if (type == DbObjType.DATABASE) {
+            return this;
+        }
+
+        if (type.in(DbObjType.SCHEMA, DbObjType.EXTENSION, DbObjType.FOREIGN_DATA_WRAPPER, DbObjType.EVENT_TRIGGER,
+                DbObjType.SERVER, DbObjType.USER_MAPPING, DbObjType.CAST)) {
+            return getChild(reference.schema(), type);
+        }
+
+        PgSchema s = getSchema(reference.schema());
+        if (s == null) {
+            return null;
+        }
+
+        return switch (type) {
+            case DOMAIN, SEQUENCE, VIEW, COLLATION, FTS_PARSER, FTS_TEMPLATE, FTS_DICTIONARY, FTS_CONFIGURATION,
+                 STATISTICS ->
+                    s.getChild(reference.table(), type);
+            case TYPE -> (AbstractStatement) resolveTypeCall(s, reference.table());
+            case FUNCTION, PROCEDURE, AGGREGATE -> s.getFunction(reference.table());
+            case OPERATOR -> (AbstractStatement) resolveOperatorCall(s, reference.table());
+            case TABLE -> (AbstractStatement) s.getRelation(reference.table());
+            case INDEX -> s.getIndexByName(reference.table());
+            // handled in getStatement, left here for consistency
+            case COLUMN -> {
+                PgAbstractTable t = s.getTable(reference.table());
+                yield t == null ? null : t.getColumn(reference.column());
+            }
+            case CONSTRAINT, TRIGGER, RULE, POLICY -> {
+                var sc = s.getStatementContainer(reference.table());
+                yield sc == null ? null : sc.getChild(reference.column(), type);
+            }
+            default -> throw new IllegalStateException("Unhandled DbObjType: " + type);
+        };
+    }
+
+    private IStatement resolveTypeCall(PgSchema s, String table) {
+        AbstractStatement st = s.getChild(table, DbObjType.TYPE);
+        if (st != null) {
+            return st;
+        }
+        st = s.getChild(table, DbObjType.DOMAIN);
+        if (st != null) {
+            return st;
+        }
+        // every "selectable" relation can be used as a type
+        // getRelation should only look for "selectable" relations
+        return s.getRelation(table);
+    }
+
+    private IOperator resolveOperatorCall(PgSchema abstractSchema, String table) {
+        PgSchema schema = abstractSchema;
+        IOperator oper = null;
+        if (table.indexOf('(') != -1) {
+            oper = schema.getOperator(table);
+        }
+        if (oper != null) {
+            return oper;
+        }
+
+        int found = 0;
+        for (IOperator o : schema.getOperators()) {
+            if (o.getBareName().equals(table)) {
+                ++found;
+                oper = o;
+            }
+        }
+        return found == 1 ? oper : null;
     }
 
     @Override
@@ -238,26 +329,6 @@ public final class PgDatabase extends PgAbstractStatement implements IDatabase {
         addUnique(casts, cast);
     }
 
-    @Override
-    public void concat(IStatement st) {
-        DbObjType type = st.getStatementType();
-        String name = st.getName();
-        if (type != DbObjType.SCHEMA || !PgConsts.DEFAULT_SCHEMA.equals(name) || st.hasChildren()) {
-            // skip empty public schema
-            IDatabase.super.concat(st);
-        }
-    }
-
-    /**
-     * Sorts columns in all tables within all schemas of this database.
-     * This is used to ensure consistent column ordering in inherited tables.
-     */
-    public void sortColumns() {
-        for (PgSchema schema : getSchemas()) {
-            schema.getTables().forEach(t -> t.sortColumns());
-        }
-    }
-
     /**
      * Getter for {@link #schemas}. The list cannot be modified.
      *
@@ -266,113 +337,6 @@ public final class PgDatabase extends PgAbstractStatement implements IDatabase {
     @Override
     public Collection<PgSchema> getSchemas() {
         return Collections.unmodifiableCollection(schemas.values());
-    }
-
-    private IOperator resolveOperatorCall(PgSchema abstractSchema, String table) {
-        PgSchema schema = abstractSchema;
-        IOperator oper = null;
-        if (table.indexOf('(') != -1) {
-            oper = schema.getOperator(table);
-        }
-        if (oper != null) {
-            return oper;
-        }
-
-        int found = 0;
-        for (IOperator o : schema.getOperators()) {
-            if (o.getBareName().equals(table)) {
-                ++found;
-                oper = o;
-            }
-        }
-        return found == 1 ? oper : null;
-    }
-
-    @Override
-    public final AbstractStatement getStatement(ObjectReference reference) {
-        DbObjType type = reference.type();
-        if (type == DbObjType.DATABASE) {
-            return this;
-        }
-
-        if (type.in(DbObjType.SCHEMA, DbObjType.EXTENSION, DbObjType.FOREIGN_DATA_WRAPPER, DbObjType.EVENT_TRIGGER,
-                DbObjType.SERVER, DbObjType.USER_MAPPING, DbObjType.CAST)) {
-            return getChild(reference.schema(), type);
-        }
-
-        PgSchema s = getSchema(reference.schema());
-        if (s == null) {
-            return null;
-        }
-
-        return switch (type) {
-            case DOMAIN, SEQUENCE, VIEW, COLLATION, FTS_PARSER, FTS_TEMPLATE, FTS_DICTIONARY, FTS_CONFIGURATION,
-                 STATISTICS ->
-                    s.getChild(reference.table(), type);
-            case TYPE -> (AbstractStatement) resolveTypeCall(s, reference.table());
-            case FUNCTION, PROCEDURE, AGGREGATE -> s.getFunction(reference.table());
-            case OPERATOR -> (AbstractStatement) resolveOperatorCall(s, reference.table());
-            case TABLE -> (AbstractStatement) s.getRelation(reference.table());
-            case INDEX -> s.getIndexByName(reference.table());
-            // handled in getStatement, left here for consistency
-            case COLUMN -> {
-                PgAbstractTable t = s.getTable(reference.table());
-                yield t == null ? null : t.getColumn(reference.column());
-            }
-            case CONSTRAINT, TRIGGER, RULE, POLICY -> {
-                var sc = s.getStatementContainer(reference.table());
-                yield sc == null ? null : sc.getChild(reference.column(), type);
-            }
-            default -> throw new IllegalStateException("Unhandled DbObjType: " + type);
-        };
-    }
-
-    private IStatement resolveTypeCall(PgSchema s, String table) {
-        AbstractStatement st = s.getChild(table, DbObjType.TYPE);
-        if (st != null) {
-            return st;
-        }
-        st = s.getChild(table, DbObjType.DOMAIN);
-        if (st != null) {
-            return st;
-        }
-        // every "selectable" relation can be used as a type
-        // getRelation should only look for "selectable" relations
-        return s.getRelation(table);
-    }
-
-    @Override
-    public void computeChildrenHash(Hasher hasher) {
-        hasher.putUnordered(extensions);
-        hasher.putUnordered(eventTriggers);
-        hasher.putUnordered(fdws);
-        hasher.putUnordered(servers);
-        hasher.putUnordered(casts);
-    }
-
-    @Override
-    public boolean compareChildren(AbstractStatement obj) {
-        if (obj instanceof PgDatabase db && super.compareChildren(obj)) {
-            return extensions.equals(db.extensions)
-                    && eventTriggers.equals(db.eventTriggers)
-                    && fdws.equals(db.fdws)
-                    && servers.equals(db.servers)
-                    && casts.equals(db.casts);
-        }
-
-        return false;
-    }
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        // has only child objects
-    }
-
-    @Override
-    protected PgDatabase getCopy() {
-        PgDatabase dbDst = new PgDatabase();
-        dbDst.setVersion(version);
-        return dbDst;
     }
 
     public void setVersion(PgSupportedVersion version) {
@@ -421,5 +385,41 @@ public final class PgDatabase extends PgAbstractStatement implements IDatabase {
     public void clearAnalysisLaunchers() {
         analysisLaunchers.clear();
         analysisLaunchers.trimToSize();
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        // has only child objects
+    }
+
+    @Override
+    public void computeChildrenHash(Hasher hasher) {
+        hasher.putUnordered(extensions);
+        hasher.putUnordered(eventTriggers);
+        hasher.putUnordered(fdws);
+        hasher.putUnordered(servers);
+        hasher.putUnordered(casts);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
+    }
+
+    @Override
+    public boolean compareChildren(AbstractStatement obj) {
+        return obj instanceof PgDatabase db && super.compareChildren(obj)
+                && extensions.equals(db.extensions)
+                && eventTriggers.equals(db.eventTriggers)
+                && fdws.equals(db.fdws)
+                && servers.equals(db.servers)
+                && casts.equals(db.casts);
+    }
+
+    @Override
+    protected PgDatabase getCopy() {
+        PgDatabase dbDst = new PgDatabase();
+        dbDst.setVersion(version);
+        return dbDst;
     }
 }

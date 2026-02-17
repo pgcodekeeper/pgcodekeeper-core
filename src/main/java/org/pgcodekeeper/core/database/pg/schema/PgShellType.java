@@ -23,7 +23,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
  * Shell types are placeholder types created before their actual definition,
  * used to resolve forward references in type definitions.
  */
-public final class PgShellType extends PgAbstractType {
+public class PgShellType extends PgAbstractType {
 
     /**
      * Creates a new PostgreSQL shell type.
@@ -51,6 +51,9 @@ public final class PgShellType extends PgAbstractType {
 
     @Override
     public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
         return obj instanceof PgShellType && super.compare(obj);
     }
 

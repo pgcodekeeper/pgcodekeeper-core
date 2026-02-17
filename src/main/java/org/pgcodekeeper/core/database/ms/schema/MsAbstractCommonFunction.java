@@ -41,23 +41,6 @@ public abstract class MsAbstractCommonFunction extends MsAbstractStatement imple
     }
 
     @Override
-    public String getReturns() {
-        // subclasses may override if needed
-        return null;
-    }
-
-    @Override
-    public void setReturns(String returns) {
-        throw new IllegalStateException();
-    }
-
-    @Override
-    public Map<String, String> getReturnsColumns() {
-        // subclasses may override if needed
-        return Collections.emptyMap();
-    }
-
-    @Override
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
         appendFunctionFullSQL(sbSQL, true);
@@ -65,11 +48,6 @@ public abstract class MsAbstractCommonFunction extends MsAbstractStatement imple
         appendOwnerSQL(script);
         appendPrivileges(script);
         appendComments(script);
-    }
-
-    @Override
-    public boolean canDropBeforeCreate() {
-        return true;
     }
 
     @Override
@@ -97,11 +75,33 @@ public abstract class MsAbstractCommonFunction extends MsAbstractStatement imple
         return getObjectState(isNeedDepcies, script, startSize);
     }
 
+    @Override
+    public String getReturns() {
+        // subclasses may override if needed
+        return null;
+    }
+
+    @Override
+    public boolean canDropBeforeCreate() {
+        return true;
+    }
+
     protected boolean isNeedDepcies(MsAbstractCommonFunction newFunction) {
         return !deps.equals(newFunction.deps);
     }
 
     protected abstract void appendFunctionFullSQL(StringBuilder sb, boolean isCreate);
+
+    @Override
+    public void setReturns(String returns) {
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public Map<String, String> getReturnsColumns() {
+        // subclasses may override if needed
+        return Collections.emptyMap();
+    }
 
     /**
      * Getter for {@link #arguments}. List cannot be modified.
@@ -128,15 +128,9 @@ public abstract class MsAbstractCommonFunction extends MsAbstractStatement imple
 
     @Override
     public boolean compare(IStatement obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj instanceof MsAbstractCommonFunction func && super.compare(obj)) {
-            return compareUnalterable(func);
-        }
-
-        return false;
+        return obj instanceof MsAbstractCommonFunction func
+                && super.compare(func)
+                && compareUnalterable(func);
     }
 
     /**

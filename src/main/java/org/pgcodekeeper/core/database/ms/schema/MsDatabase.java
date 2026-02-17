@@ -28,30 +28,90 @@ import org.pgcodekeeper.core.hasher.Hasher;
  * Represents a Microsoft SQL database with its schemas, assemblies, roles, and users.
  * Provides functionality for managing database-level objects and their relationships.
  */
-public final class MsDatabase extends MsAbstractStatement implements IDatabase {
+public class MsDatabase extends MsAbstractStatement implements IDatabase {
 
-    private MsSupportedVersion version = MsSupportedVersion.VERSION_17;
-
-    /**
-     * Current default schema.
-     */
-    private MsSchema defaultSchema;
     private final Map<String, MsSchema> schemas = new LinkedHashMap<>();
-
     private final List<ObjectOverride> overrides = new ArrayList<>();
-
     // Contains object references
     private final Map<String, Set<ObjectLocation>> objReferences = new HashMap<>();
     // Contains analysis launchers for all statements
     // (used for launch analyze and getting dependencies).
     private final ArrayList<IAnalysisLauncher> analysisLaunchers = new ArrayList<>();
-
     private final Map<String, MsAssembly> assemblies = new LinkedHashMap<>();
     private final Map<String, MsRole> roles = new LinkedHashMap<>();
     private final Map<String, MsUser> users = new LinkedHashMap<>();
 
+    private MsSupportedVersion version = MsSupportedVersion.VERSION_17;
+    /**
+     * Current default schema.
+     */
+    private MsSchema defaultSchema;
+
     public MsDatabase() {
         super("DB_name_placeholder");
+    }
+
+    @Override
+    public IStatement getStatement(ObjectReference reference) {
+        DbObjType type = reference.type();
+        if (type == DbObjType.DATABASE) {
+            return this;
+        }
+
+        if (type.in(DbObjType.SCHEMA, DbObjType.USER, DbObjType.ROLE, DbObjType.ASSEMBLY)) {
+            return getChild(reference.schema(), type);
+        }
+
+        MsSchema s = getSchema(reference.schema());
+        if (s == null) {
+            return null;
+        }
+
+        return switch (type) {
+            case SEQUENCE, VIEW -> s.getChild(reference.table(), type);
+            case TYPE -> resolveTypeCall(s, reference.table());
+            case FUNCTION, PROCEDURE -> resolveFunctionCall(s, reference.table());
+            case TABLE -> s.getRelation(reference.table());
+            case INDEX -> s.getIndexByName(reference.table());
+            // handled in getStatement, left here for consistency
+            case COLUMN -> {
+                MsTable t = s.getTable(reference.table());
+                yield t == null ? null : t.getColumn(reference.column());
+            }
+            case STATISTICS, CONSTRAINT, TRIGGER -> {
+                var sc = s.getStatementContainer(reference.table());
+                yield sc == null ? null : sc.getChild(reference.column(), type);
+            }
+            default -> throw new IllegalStateException("Unhandled DbObjType: " + type);
+        };
+    }
+
+    private IStatement resolveTypeCall(MsSchema s, String table) {
+        IStatement st = s.getChild(table, DbObjType.TYPE);
+        if (st != null) {
+            return st;
+        }
+        // every "selectable" relation can be used as a type
+        // getRelation should only look for "selectable" relations
+        return s.getRelation(table);
+    }
+
+    private IFunction resolveFunctionCall(MsSchema schema, String table) {
+        for (IFunction f : schema.getFunctions()) {
+            if (f.getBareName().equals(table)) {
+                return f;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Clears all analysis launchers and trims the internal list to size.
+     */
+    @Override
+    public void clearAnalysisLaunchers() {
+        analysisLaunchers.clear();
+        analysisLaunchers.trimToSize();
     }
 
     @Override
@@ -207,60 +267,6 @@ public final class MsDatabase extends MsAbstractStatement implements IDatabase {
         return Collections.unmodifiableCollection(schemas.values());
     }
 
-    @Override
-    public IStatement getStatement(ObjectReference reference) {
-        DbObjType type = reference.type();
-        if (type == DbObjType.DATABASE) {
-            return this;
-        }
-
-        if (type.in(DbObjType.SCHEMA, DbObjType.USER, DbObjType.ROLE, DbObjType.ASSEMBLY)) {
-            return getChild(reference.schema(), type);
-        }
-
-        MsSchema s = getSchema(reference.schema());
-        if (s == null) {
-            return null;
-        }
-
-        return switch (type) {
-            case SEQUENCE, VIEW -> s.getChild(reference.table(), type);
-            case TYPE -> resolveTypeCall(s, reference.table());
-            case FUNCTION, PROCEDURE -> resolveFunctionCall(s, reference.table());
-            case TABLE -> s.getRelation(reference.table());
-            case INDEX -> s.getIndexByName(reference.table());
-            // handled in getStatement, left here for consistency
-            case COLUMN -> {
-                MsTable t = s.getTable(reference.table());
-                yield t == null ? null : t.getColumn(reference.column());
-            }
-            case STATISTICS, CONSTRAINT, TRIGGER -> {
-                var sc = s.getStatementContainer(reference.table());
-                yield sc == null ? null : sc.getChild(reference.column(), type);
-            }
-            default -> throw new IllegalStateException("Unhandled DbObjType: " + type);
-        };
-    }
-
-    private IStatement resolveTypeCall(MsSchema s, String table) {
-        IStatement st = s.getChild(table, DbObjType.TYPE);
-        if (st != null) {
-            return st;
-        }
-        // every "selectable" relation can be used as a type
-        // getRelation should only look for "selectable" relations
-        return s.getRelation(table);
-    }
-
-    private IFunction resolveFunctionCall(MsSchema schema, String table) {
-        for (IFunction f : schema.getFunctions()) {
-            if (f.getBareName().equals(table)) {
-                return f;
-            }
-        }
-        return null;
-    }
-
     public void setVersion(MsSupportedVersion version) {
         this.version = version;
     }
@@ -301,15 +307,6 @@ public final class MsDatabase extends MsAbstractStatement implements IDatabase {
     }
 
     /**
-     * Clears all analysis launchers and trims the internal list to size.
-     */
-    @Override
-    public void clearAnalysisLaunchers() {
-        analysisLaunchers.clear();
-        analysisLaunchers.trimToSize();
-    }
-
-    /**
      * Add 'analysis launcher' for deferred analyze.
      *
      * @param launcher launcher that contains almost everything needed to analyze a statement contained in it
@@ -322,35 +319,6 @@ public final class MsDatabase extends MsAbstractStatement implements IDatabase {
     @Override
     public void addReference(String fileName, ObjectLocation loc) {
         objReferences.computeIfAbsent(fileName, k -> new LinkedHashSet<>()).add(loc);
-    }
-
-    @Override
-    public boolean compareChildren(AbstractStatement obj) {
-        if (obj instanceof MsDatabase db && super.compareChildren(obj)) {
-            return assemblies.equals(db.assemblies)
-                    && roles.equals(db.roles)
-                    && users.equals(db.users);
-        }
-        return false;
-    }
-
-    @Override
-    public void computeChildrenHash(Hasher hasher) {
-        hasher.putUnordered(assemblies);
-        hasher.putUnordered(roles);
-        hasher.putUnordered(users);
-    }
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        // has only child objects
-    }
-
-    @Override
-    protected MsDatabase getCopy() {
-        MsDatabase dbDst = new MsDatabase();
-        dbDst.setVersion(version);
-        return dbDst;
     }
 
     /**
@@ -376,5 +344,37 @@ public final class MsDatabase extends MsAbstractStatement implements IDatabase {
      */
     public void addSchema(final MsSchema schema) {
         addUnique(schemas, schema);
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        // has only child objects
+    }
+
+    @Override
+    public void computeChildrenHash(Hasher hasher) {
+        hasher.putUnordered(assemblies);
+        hasher.putUnordered(roles);
+        hasher.putUnordered(users);
+    }
+
+    @Override
+    public boolean compareChildren(AbstractStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+        return obj instanceof MsDatabase db
+                && super.compareChildren(db)
+                && assemblies.equals(db.assemblies)
+                && roles.equals(db.roles)
+                && users.equals(db.users);
+    }
+
+
+    @Override
+    protected MsDatabase getCopy() {
+        MsDatabase dbDst = new MsDatabase();
+        dbDst.setVersion(version);
+        return dbDst;
     }
 }

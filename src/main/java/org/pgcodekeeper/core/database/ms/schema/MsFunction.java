@@ -19,13 +19,14 @@ import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IFunction;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 
 /**
  * Represents a Microsoft SQL user-defined function.
  * Supports scalar, table-valued, and other function types.
  */
-public final class MsFunction extends MsAbstractFunction {
+public class MsFunction extends MsAbstractFunction {
 
     private MsFunctionTypes funcType = MsFunctionTypes.SCALAR;
 
@@ -49,12 +50,6 @@ public final class MsFunction extends MsAbstractFunction {
     }
 
     @Override
-    protected boolean compareUnalterable(MsAbstractCommonFunction func) {
-        return func instanceof MsAbstractFunction && super.compareUnalterable(func)
-                && Objects.equals(funcType, ((MsFunction) func).funcType);
-    }
-
-    @Override
     public boolean needDrop(IFunction newFunction) {
         if (newFunction instanceof MsFunction msFunction) {
             return funcType != msFunction.funcType;
@@ -70,9 +65,21 @@ public final class MsFunction extends MsAbstractFunction {
     }
 
     @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
+    }
+
+    @Override
+    protected boolean compareUnalterable(MsAbstractCommonFunction func) {
+        return func instanceof MsAbstractFunction && super.compareUnalterable(func)
+                && Objects.equals(funcType, ((MsFunction) func).funcType);
+    }
+
+    @Override
     protected MsAbstractFunction getFunctionCopy() {
         MsFunction func = new MsFunction(name);
         func.setFuncType(funcType);
+
         return func;
     }
 

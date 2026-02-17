@@ -26,12 +26,13 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Policies control which rows are visible or modifiable for specific users or roles,
  * providing fine-grained access control at the row level.
  */
-public final class PgPolicy extends PgAbstractStatement implements ISubElement, IPolicy {
+public class PgPolicy extends PgAbstractStatement implements ISubElement, IPolicy {
+
+    private final Set<String> roles = new LinkedHashSet<>();
 
     private String check;
     private boolean isPermissive = true;
     private EventType event;
-    private final Set<String> roles = new LinkedHashSet<>();
     private String using;
 
     /**
@@ -41,11 +42,6 @@ public final class PgPolicy extends PgAbstractStatement implements ISubElement, 
      */
     public PgPolicy(String name) {
         super(name);
-    }
-
-    public void setCheck(String check) {
-        this.check = check;
-        resetHash();
     }
 
     @Override
@@ -124,43 +120,6 @@ public final class PgPolicy extends PgAbstractStatement implements ISubElement, 
         sb.append(getQuotedName()).append(" ON ").append(parent.getQualifiedName());
     }
 
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(isPermissive);
-        hasher.put(event);
-        hasher.put(roles);
-        hasher.put(using);
-        hasher.put(check);
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj instanceof PgPolicy police && super.compare(obj)) {
-            return isPermissive == police.isPermissive
-                    && event == police.event
-                    && roles.equals(police.roles)
-                    && Objects.equals(using, police.using)
-                    && Objects.equals(check, police.check);
-        }
-
-        return false;
-    }
-
-    @Override
-    protected PgPolicy getCopy() {
-        PgPolicy copy = new PgPolicy(name);
-        copy.isPermissive = isPermissive;
-        copy.event = event;
-        copy.roles.addAll(roles);
-        copy.using = using;
-        copy.setCheck(check);
-        return copy;
-    }
-
     private boolean compareUnalterable(PgPolicy police) {
         // we can alter but cannot remove
         if (using != null && police.using == null) {
@@ -172,6 +131,11 @@ public final class PgPolicy extends PgAbstractStatement implements ISubElement, 
         }
 
         return event == police.event && isPermissive == police.isPermissive;
+    }
+
+    public void setCheck(String check) {
+        this.check = check;
+        resetHash();
     }
 
     public void setEvent(EventType event) {
@@ -192,5 +156,38 @@ public final class PgPolicy extends PgAbstractStatement implements ISubElement, 
     public void setUsing(String using) {
         this.using = using;
         resetHash();
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(isPermissive);
+        hasher.put(event);
+        hasher.put(roles);
+        hasher.put(using);
+        hasher.put(check);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+        return obj instanceof PgPolicy police && super.compare(obj)
+                && isPermissive == police.isPermissive
+                && event == police.event
+                && roles.equals(police.roles)
+                && Objects.equals(using, police.using)
+                && Objects.equals(check, police.check);
+    }
+
+    @Override
+    protected PgPolicy getCopy() {
+        PgPolicy copy = new PgPolicy(name);
+        copy.isPermissive = isPermissive;
+        copy.event = event;
+        copy.roles.addAll(roles);
+        copy.using = using;
+        copy.setCheck(check);
+        return copy;
     }
 }

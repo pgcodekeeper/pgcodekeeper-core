@@ -32,29 +32,26 @@ import org.pgcodekeeper.core.utils.Utils;
  * Represents a Microsoft SQL table with support for memory-optimized tables,
  * temporal tables, filestream data, and other Microsoft SQL specific features.
  */
-public final class MsTable extends MsAbstractStatementContainer implements ITable, ISimpleOptionContainer {
+public class MsTable extends MsAbstractStatementContainer implements ITable, ISimpleOptionContainer {
 
     private static final String MEMORY_OPTIMIZED = "MEMORY_OPTIMIZED";
+
+    private final List<MsColumn> columns = new ArrayList<>();
+    private final Map<String, String> options = new LinkedHashMap<>();
+    private final Map<String, MsConstraint> constraints = new LinkedHashMap<>();
 
     /**
      * list of internal primary keys for memory optimized table
      */
     private List<MsConstraint> pkeys;
-
     private boolean ansiNulls;
     private Boolean isTracked;
-
     private String textImage;
     private String fileStream;
     private String tablespace;
     private String sysVersioning;
-
     private MsColumn periodStartCol;
     private MsColumn periodEndCol;
-
-    private final List<MsColumn> columns = new ArrayList<>();
-    private final Map<String, String> options = new LinkedHashMap<>();
-    private final Map<String, MsConstraint> constraints = new LinkedHashMap<>();
 
     /**
      * Creates a new Microsoft SQL table with the specified name.
@@ -76,31 +73,6 @@ public final class MsTable extends MsAbstractStatementContainer implements ITabl
         appendOwnerSQL(script);
         appendPrivileges(script);
         appendColumnsPriliges(script);
-    }
-
-    @Override
-    public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
-        int startSize = script.getSize();
-        MsTable newTable = (MsTable) newCondition;
-
-        if (isRecreated(newTable, script.getSettings())) {
-            return ObjectState.RECREATE;
-        }
-
-        appendAlterOwner(newTable, script);
-        compareTableOptions(newTable, script);
-        alterPrivileges(newTable, script);
-
-        return getObjectState(script, startSize);
-    }
-
-    private void appendAlterOptions(SQLScript script) {
-        if (isTracked != null) {
-            script.addStatement(enableTracking(), SQLActionType.END);
-        }
-        if (sysVersioning != null) {
-            script.addStatement(enableSysVersioning(), SQLActionType.END);
-        }
     }
 
     private void appendName(StringBuilder sbSQL) {
@@ -144,41 +116,6 @@ public final class MsTable extends MsAbstractStatementContainer implements ITabl
         }
     }
 
-    @Override
-    public boolean isClustered() {
-        if (super.isClustered()) {
-            return true;
-        }
-
-        for (MsConstraint constr : constraints.values()) {
-            if (constr instanceof IConstraintPk pk && pk.isClustered()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Gets the list of primary key constraints for memory-optimized tables.
-     *
-     * @return unmodifiable list of primary key constraints
-     */
-    public List<MsConstraint> getPkeys() {
-        return pkeys == null ? Collections.emptyList() : Collections.unmodifiableList(pkeys);
-    }
-
-    private void addConstraint(MsConstraint constraint) {
-        if (constraint.isPrimaryKey() && isMemoryOptimized()) {
-            if (pkeys == null) {
-                pkeys = new ArrayList<>();
-            }
-            pkeys.add(constraint);
-        } else {
-            addUnique(constraints, constraint);
-        }
-    }
-
     private void appendOptions(StringBuilder sbSQL) {
         int startLength = sbSQL.length();
         if (tablespace != null) {
@@ -216,16 +153,61 @@ public final class MsTable extends MsAbstractStatementContainer implements ITabl
         }
     }
 
+    private void appendAlterOptions(SQLScript script) {
+        if (isTracked != null) {
+            script.addStatement(enableTracking(), SQLActionType.END);
+        }
+        if (sysVersioning != null) {
+            script.addStatement(enableSysVersioning(), SQLActionType.END);
+        }
+    }
+
+    private void appendColumnsPriliges(SQLScript script) {
+        for (MsColumn col : columns) {
+            col.appendPrivileges(script);
+        }
+    }
+
+    @Override
+    public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
+        int startSize = script.getSize();
+        MsTable newTable = (MsTable) newCondition;
+
+        if (isRecreated(newTable, script.getSettings())) {
+            return ObjectState.RECREATE;
+        }
+
+        appendAlterOwner(newTable, script);
+        compareTableOptions(newTable, script);
+        alterPrivileges(newTable, script);
+
+        return getObjectState(script, startSize);
+    }
+
+    @Override
+    public boolean isRecreated(ITable newTable, ISettings settings) {
+        return newTable instanceof MsTable newMsTable &&
+                (isNeedRecreate(newMsTable) || isColumnsOrderChanged(newMsTable, settings));
+    }
+
     private boolean isNeedRecreate(MsTable newTable) {
-            return !Objects.equals(newTable.tablespace, tablespace)
-                    || ansiNulls != newTable.ansiNulls
-                    || !Utils.setLikeEquals(newTable.getPkeys(), getPkeys())
-                    || !Objects.equals(newTable.options, options)
-                    || !Objects.equals(newTable.fileStream, fileStream)
-                    || !Objects.equals(newTable.periodStartCol, periodStartCol)
-                    || !Objects.equals(newTable.periodEndCol, periodEndCol)
-                    || (newTable.textImage != null && textImage != null
-                    && !Objects.equals(newTable.textImage, textImage));
+        return !Objects.equals(newTable.tablespace, tablespace)
+                || ansiNulls != newTable.ansiNulls
+                || !Utils.setLikeEquals(newTable.getPkeys(), getPkeys())
+                || !Objects.equals(newTable.options, options)
+                || !Objects.equals(newTable.fileStream, fileStream)
+                || !Objects.equals(newTable.periodStartCol, periodStartCol)
+                || !Objects.equals(newTable.periodEndCol, periodEndCol)
+                || (newTable.textImage != null && textImage != null
+                && !Objects.equals(newTable.textImage, textImage));
+    }
+
+    private boolean isColumnsOrderChanged(MsTable newTable, ISettings settings) {
+        if (settings.isIgnoreColumnOrder()) {
+            return false;
+        }
+
+        return StatementUtils.isColumnsOrderChanged(newTable.columns, columns);
     }
 
     /**
@@ -238,24 +220,6 @@ public final class MsTable extends MsAbstractStatementContainer implements ITabl
     public void compareTableOptions(MsTable newTable, SQLScript script) {
         compareTracked(newTable, script);
         compareSysVersioning(newTable, script);
-    }
-
-    private void compareSysVersioning(MsTable newTable, SQLScript script) {
-        if (Objects.equals(sysVersioning, newTable.sysVersioning)) {
-            if (sysVersioning != null && pkChanged(newTable)) {
-                script.addStatement(disableSysVersioning(), SQLActionType.BEGIN);
-                script.addStatement(newTable.enableSysVersioning(), SQLActionType.END);
-            }
-            return;
-        }
-
-        if (sysVersioning != null) {
-            script.addStatement(disableSysVersioning(), SQLActionType.MID);
-        }
-
-        if (newTable.sysVersioning != null) {
-            script.addStatement(newTable.enableSysVersioning(), SQLActionType.MID);
-        }
     }
 
     private void compareTracked(MsTable newTable, SQLScript script) {
@@ -276,32 +240,34 @@ public final class MsTable extends MsAbstractStatementContainer implements ITabl
         }
     }
 
-    private boolean pkChanged(MsTable table) {
-        var oldPk = constraints.values().stream().filter(MsConstraintPk.class::isInstance).findAny().orElse(null);
-        var newPk = table.constraints.values().stream().filter(MsConstraintPk.class::isInstance).findAny().orElse(null);
-        return oldPk != null && newPk != null && !Objects.equals(oldPk, newPk);
-    }
-
-    private String disableTracking() {
-        return getAlterTable(false) + " DISABLE CHANGE_TRACKING";
-    }
-
     private String enableTracking() {
-        return getAlterTable(false) +
+        return getAlterTable() +
                 " ENABLE CHANGE_TRACKING WITH (TRACK_COLUMNS_UPDATED = " +
                 (isTracked() ? "ON" : "OFF") + ')';
     }
 
-    private String disableSysVersioning() {
-        return getAlterTable(false) + " SET (SYSTEM_VERSIONING = OFF)";
+    private void compareSysVersioning(MsTable newTable, SQLScript script) {
+        if (Objects.equals(sysVersioning, newTable.sysVersioning)) {
+            if (sysVersioning != null && pkChanged(newTable)) {
+                script.addStatement(disableSysVersioning(), SQLActionType.BEGIN);
+                script.addStatement(newTable.enableSysVersioning(), SQLActionType.END);
+            }
+            return;
+        }
+
+        if (sysVersioning != null) {
+            script.addStatement(disableSysVersioning(), SQLActionType.MID);
+        }
+
+        if (newTable.sysVersioning != null) {
+            script.addStatement(newTable.enableSysVersioning(), SQLActionType.MID);
+        }
     }
 
-    private String enableSysVersioning() {
-        return getAlterTable(false) + " SET (SYSTEM_VERSIONING = " + sysVersioning + ')';
-    }
-
-    public String getAlterTable(boolean only) {
-        return ALTER_TABLE + getQualifiedName();
+    private boolean pkChanged(MsTable table) {
+        var oldPk = constraints.values().stream().filter(MsConstraintPk.class::isInstance).findAny().orElse(null);
+        var newPk = table.constraints.values().stream().filter(MsConstraintPk.class::isInstance).findAny().orElse(null);
+        return oldPk != null && newPk != null && !Objects.equals(oldPk, newPk);
     }
 
     @Override
@@ -314,6 +280,113 @@ public final class MsTable extends MsAbstractStatementContainer implements ITabl
         }
 
         super.getDropSQL(script, generateExists);
+    }
+
+    private String disableTracking() {
+        return getAlterTable() + " DISABLE CHANGE_TRACKING";
+    }
+
+    private String disableSysVersioning() {
+        return getAlterTable() + " SET (SYSTEM_VERSIONING = OFF)";
+    }
+
+    private String enableSysVersioning() {
+        return getAlterTable() + " SET (SYSTEM_VERSIONING = " + sysVersioning + ')';
+    }
+
+    String getAlterTable() {
+        return ALTER_TABLE + getQualifiedName();
+    }
+
+    @Override
+    public void appendMoveDataSql(IStatement newCondition, SQLScript script, String tblTmpBareName,
+                                  List<String> identityCols) {
+        MsTable newTable = (MsTable) newCondition;
+        List<String> colsForMovingData = getColsForMovingData(newTable);
+        if (colsForMovingData.isEmpty()) {
+            return;
+        }
+
+        String tblTmpQName = getParent().getQuotedName() + '.' + quote(tblTmpBareName);
+        String cols = colsForMovingData.stream().map(this::quote).collect(Collectors.joining(", "));
+        List<String> identityColsForMovingData = identityCols == null ? Collections.emptyList()
+                : identityCols.stream().filter(colsForMovingData::contains).toList();
+        writeInsert(script, newTable, tblTmpQName, identityColsForMovingData, cols);
+    }
+
+    private List<String> getColsForMovingData(MsTable newTbl) {
+        return newTbl.getColumns().stream()
+                .filter(c -> containsColumn(c.getName()))
+                .map(MsColumn.class::cast)
+                .filter(msCol -> msCol.getExpression() == null && msCol.getGenerated() == null)
+                .map(MsColumn::getName).toList();
+    }
+
+    private void writeInsert(SQLScript script, MsTable newTable, String tblTmpQName,
+                             List<String> identityColsForMovingData, String cols) {
+        String tblQName = newTable.getQualifiedName();
+        boolean newHasIdentity = newTable.getColumns().stream().anyMatch(c ->  ((MsColumn) c).isIdentity());
+        if (newHasIdentity) {
+            // There can only be one IDENTITY column per table in MSSQL.
+            script.addStatement(getIdentInsertText(tblQName, true));
+        }
+
+        StringBuilder sbInsert = new StringBuilder();
+
+        sbInsert.append("INSERT INTO ").append(tblQName).append('(').append(cols).append(")");
+        sbInsert.append("\nSELECT ").append(cols).append(" FROM ").append(tblTmpQName);
+        script.addStatement(sbInsert);
+
+        if (newHasIdentity) {
+            // There can only be one IDENTITY column per table in MSSQL.
+            script.addStatement(getIdentInsertText(tblQName, false));
+        }
+
+        if (!identityColsForMovingData.isEmpty() && newHasIdentity) {
+            // DECLARE'd var is only visible within its batch
+            // so we shouldn't need unique names for them here
+            // use the largest numeric type to fit any possible identity value
+            StringBuilder sbSql = new StringBuilder();
+            sbSql.append("DECLARE @restart_var numeric(38,0) = (SELECT IDENT_CURRENT (")
+                    .append(Utils.quoteString(tblTmpQName))
+                    .append("));\nDBCC CHECKIDENT (")
+                    .append(Utils.quoteString(tblQName))
+                    .append(", RESEED, @restart_var);");
+            script.addStatement(sbSql);
+        }
+    }
+
+    private String getIdentInsertText(String name, boolean isOn) {
+        return "SET IDENTITY_INSERT " + name + (isOn ? " ON" : " OFF");
+    }
+
+    @Override
+    public boolean compareIgnoringColumnOrder(ITable newTable) {
+        return compare(newTable, false);
+    }
+
+    @Override
+    public boolean isClustered() {
+        if (super.isClustered()) {
+            return true;
+        }
+
+        for (MsConstraint constr : constraints.values()) {
+            if (constr instanceof IConstraintPk pk && pk.isClustered()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Gets the list of primary key constraints for memory-optimized tables.
+     *
+     * @return unmodifiable list of primary key constraints
+     */
+    public List<MsConstraint> getPkeys() {
+        return pkeys == null ? Collections.emptyList() : Collections.unmodifiableList(pkeys);
     }
 
     public void setFileStream(String fileStream) {
@@ -339,7 +412,6 @@ public final class MsTable extends MsAbstractStatementContainer implements ITabl
     public boolean isTracked() {
         return isTracked != null && isTracked;
     }
-
 
     public void setTracked(final Boolean isTracked) {
         this.isTracked = isTracked;
@@ -379,57 +451,22 @@ public final class MsTable extends MsAbstractStatementContainer implements ITabl
         resetHash();
     }
 
-    private void writeInsert(SQLScript script, MsTable newTable, String tblTmpQName,
-                               List<String> identityColsForMovingData, String cols) {
-        String tblQName = newTable.getQualifiedName();
-        boolean newHasIdentity = newTable.getColumns().stream().anyMatch(c ->  ((MsColumn) c).isIdentity());
-        if (newHasIdentity) {
-            // There can only be one IDENTITY column per table in MSSQL.
-            script.addStatement(getIdentInsertText(tblQName, true));
-        }
-
-        StringBuilder sbInsert = new StringBuilder();
-
-        sbInsert.append("INSERT INTO ").append(tblQName).append('(').append(cols).append(")");
-        sbInsert.append("\nSELECT ").append(cols).append(" FROM ").append(tblTmpQName);
-        script.addStatement(sbInsert);
-
-        if (newHasIdentity) {
-            // There can only be one IDENTITY column per table in MSSQL.
-            script.addStatement(getIdentInsertText(tblQName, false));
-        }
-
-        if (!identityColsForMovingData.isEmpty() && newHasIdentity) {
-            // DECLARE'd var is only visible within its batch
-            // so we shouldn't need unique names for them here
-            // use the largest numeric type to fit any possible identity value
-            StringBuilder sbSql = new StringBuilder();
-            sbSql.append("DECLARE @restart_var numeric(38,0) = (SELECT IDENT_CURRENT (")
-                    .append(Utils.quoteString(tblTmpQName))
-                    .append("));\nDBCC CHECKIDENT (")
-                    .append(Utils.quoteString(tblQName))
-                    .append(", RESEED, @restart_var);");
-            script.addStatement(sbSql);
-        }
-    }
-
-    private String getIdentInsertText(String name, boolean isOn) {
-        return "SET IDENTITY_INSERT " + name + (isOn ? " ON" : " OFF");
-    }
-
-    private List<String> getColsForMovingData(MsTable newTbl) {
-        return newTbl.getColumns().stream()
-                .filter(c -> containsColumn(c.getName()))
-                .map(MsColumn.class::cast)
-                .filter(msCol -> msCol.getExpression() == null && msCol.getGenerated() == null)
-                .map(MsColumn::getName).toList();
-    }
-
     @Override
     public void addChild(IStatement st) {
         switch (st.getStatementType()) {
             case CONSTRAINT -> addConstraint((MsConstraint) st);
             default -> super.addChild(st);
+        }
+    }
+
+    private void addConstraint(MsConstraint constraint) {
+        if (constraint.isPrimaryKey() && isMemoryOptimized()) {
+            if (pkeys == null) {
+                pkeys = new ArrayList<>();
+            }
+            pkeys.add(constraint);
+        } else {
+            addUnique(constraints, constraint);
         }
     }
 
@@ -453,67 +490,6 @@ public final class MsTable extends MsAbstractStatementContainer implements ITabl
     public void fillChildrenList(List<Collection<? extends AbstractStatement>> l) {
         super.fillChildrenList(l);
         l.add(constraints.values());
-    }
-
-    @Override
-    public boolean compareChildren(AbstractStatement obj) {
-        if (obj instanceof MsTable table && super.compareChildren(obj)) {
-            return constraints.equals(table.constraints);
-        }
-        return false;
-    }
-
-    @Override
-    public void computeChildrenHash(Hasher hasher) {
-        super.computeChildrenHash(hasher);
-        hasher.putUnordered(constraints);
-    }
-
-    private void appendColumnsPriliges(SQLScript script) {
-        for (MsColumn col : columns) {
-            col.appendPrivileges(script);
-        }
-    }
-
-    /**
-     * Compares this table with the {@code newTable} to determine if a full table recreation is required.
-     * A full recreation (DROP and CREATE) is needed when the tables differ in ways that cannot
-     * be altered using ALTER TABLE statements.
-     *
-     * @param newTable the new table definition to compare against
-     * @param settings application settings that may affect the comparison logic
-     * @return {@code true} if the table requires recreation (DROP and CREATE) rather than
-     * being alterable, {@code false} if the changes can be applied via ALTER TABLE
-     */
-    public final boolean isRecreated(MsTable newTable, ISettings settings) {
-        return isNeedRecreate(newTable) || isColumnsOrderChanged(newTable, settings);
-    }
-
-    @Override
-    public void appendMoveDataSql(IStatement newCondition, SQLScript script, String tblTmpBareName,
-                                  List<String> identityCols) {
-        MsTable newTable = (MsTable) newCondition;
-        List<String> colsForMovingData = getColsForMovingData(newTable);
-        if (colsForMovingData.isEmpty()) {
-            return;
-        }
-
-        String tblTmpQName = getParent().getQuotedName() + '.' + quote(tblTmpBareName);
-        String cols = colsForMovingData.stream().map(this::quote).collect(Collectors.joining(", "));
-        List<String> identityColsForMovingData = identityCols == null ? Collections.emptyList()
-                : identityCols.stream().filter(colsForMovingData::contains).toList();
-        writeInsert(script, newTable, tblTmpQName, identityColsForMovingData, cols);
-    }
-
-    @Override
-    public boolean isRecreated(ITable newTable, ISettings settings) {
-        return newTable instanceof MsTable newMsTable &&
-                (isNeedRecreate(newMsTable) || isColumnsOrderChanged(newMsTable, settings));
-    }
-
-    @Override
-    public boolean compareIgnoringColumnOrder(ITable newTable) {
-        return compare(newTable, false);
     }
 
     @Override
@@ -547,6 +523,35 @@ public final class MsTable extends MsAbstractStatementContainer implements ITabl
     }
 
     @Override
+    public void addOption(String key, String value) {
+        options.put(key, value);
+        resetHash();
+    }
+
+    @Override
+    public Map<String, String> getOptions() {
+        return Collections.unmodifiableMap(options);
+    }
+
+    @Override
+    public Stream<Pair<String, String>> getRelationColumns() {
+        return columns.stream()
+                .filter(c -> c.getType() != null)
+                .map(c -> new Pair<>(c.getName(), c.getType()));
+    }
+
+    public void addColumn(final MsColumn column) {
+        assertUnique(getColumn(column.getName()), column);
+        columns.add(column);
+        column.setParent(this);
+        resetHash();
+    }
+
+    public MsConstraint getConstraint(String name) {
+        return constraints.get(name);
+    }
+
+    @Override
     public void computeHash(Hasher hasher) {
         hasher.putOrdered(columns);
         hasher.put(options);
@@ -562,6 +567,12 @@ public final class MsTable extends MsAbstractStatementContainer implements ITabl
     }
 
     @Override
+    public void computeChildrenHash(Hasher hasher) {
+        super.computeChildrenHash(hasher);
+        hasher.putUnordered(constraints);
+    }
+
+    @Override
     public boolean compare(IStatement obj) {
         return compare(obj, true);
     }
@@ -571,7 +582,7 @@ public final class MsTable extends MsAbstractStatementContainer implements ITabl
             return true;
         }
 
-        if (obj instanceof MsTable table && super.compare(obj)) {
+        if (obj instanceof MsTable table && super.compare(table)) {
             boolean isColumnsEqual;
             if (checkColumnOrder) {
                 isColumnsEqual = columns.equals(table.columns);
@@ -602,6 +613,12 @@ public final class MsTable extends MsAbstractStatementContainer implements ITabl
     }
 
     @Override
+    public boolean compareChildren(AbstractStatement obj) {
+        return obj instanceof MsTable table && super.compareChildren(obj)
+                && constraints.equals(table.constraints);
+    }
+
+    @Override
     protected MsTable getCopy() {
         MsTable table = new MsTable(name);
         for (var colSrc : columns) {
@@ -622,42 +639,5 @@ public final class MsTable extends MsAbstractStatementContainer implements ITabl
             table.pkeys.addAll(pkeys);
         }
         return table;
-    }
-
-    private boolean isColumnsOrderChanged(MsTable newTable, ISettings settings) {
-        if (settings.isIgnoreColumnOrder()) {
-            return false;
-        }
-
-        return StatementUtils.isColumnsOrderChanged(newTable.columns, columns);
-    }
-
-    @Override
-    public void addOption(String key, String value) {
-        options.put(key, value);
-        resetHash();
-    }
-
-    @Override
-    public Map<String, String> getOptions() {
-        return Collections.unmodifiableMap(options);
-    }
-
-    @Override
-    public Stream<Pair<String, String>> getRelationColumns() {
-        return columns.stream()
-                .filter(c -> c.getType() != null)
-                .map(c -> new Pair<>(c.getName(), c.getType()));
-    }
-
-    public void addColumn(final MsColumn column) {
-        assertUnique(getColumn(column.getName()), column);
-        columns.add(column);
-        column.setParent(this);
-        resetHash();
-    }
-
-    public MsConstraint getConstraint(String name) {
-        return constraints.get(name);
     }
 }

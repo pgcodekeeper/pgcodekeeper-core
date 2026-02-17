@@ -26,7 +26,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Operators are symbols that represent specific operations (like +, -, *, etc.)
  * and can be customized for user-defined types with associated functions.
  */
-public final class PgOperator extends PgAbstractStatement implements IOperator, ISearchPath {
+public class PgOperator extends PgAbstractStatement implements IOperator, ISearchPath {
 
     private String procedure;
     private String leftArg;
@@ -37,7 +37,6 @@ public final class PgOperator extends PgAbstractStatement implements IOperator, 
     private boolean isHashes;
     private String restrict;
     private String join;
-
     private String returns;
 
     /**
@@ -52,16 +51,6 @@ public final class PgOperator extends PgAbstractStatement implements IOperator, 
     @Override
     public DbObjType getStatementType() {
         return DbObjType.OPERATOR;
-    }
-
-    @Override
-    public void setReturns(String returns) {
-        this.returns = returns;
-    }
-
-    @Override
-    public String getReturns() {
-        return returns;
     }
 
     @Override
@@ -119,6 +108,53 @@ public final class PgOperator extends PgAbstractStatement implements IOperator, 
         appendComments(script);
     }
 
+    @Override
+    public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
+        int startSize = script.getSize();
+        PgOperator newOperator = (PgOperator) newCondition;
+
+        if (!compareUnalterable(newOperator)) {
+            return ObjectState.RECREATE;
+        }
+
+        String newOperRestr = newOperator.restrict;
+        String newOperJoin = newOperator.join;
+        boolean restrChanged = !Objects.equals(restrict, newOperRestr);
+        boolean joinChanged = !Objects.equals(join, newOperJoin);
+        if (restrChanged || joinChanged) {
+            StringBuilder sql = new StringBuilder();
+            sql.append("ALTER OPERATOR ")
+                    .append(getQualifiedName())
+                    .append("\n\tSET (");
+            if (restrChanged) {
+                sql.append("RESTRICT = ").append(newOperRestr != null ? newOperRestr : "NONE");
+                if (joinChanged) {
+                    sql.append(", ");
+                }
+            }
+            if (joinChanged) {
+                sql.append("JOIN = ").append(newOperJoin != null ? newOperJoin : "NONE");
+            }
+            sql.append(")");
+            script.addStatement(sql);
+        }
+
+        appendAlterOwner(newOperator, script);
+        appendAlterComments(newOperator, script);
+
+        return getObjectState(script, startSize);
+    }
+
+    @Override
+    public void setReturns(String returns) {
+        this.returns = returns;
+    }
+
+    @Override
+    public String getReturns() {
+        return returns;
+    }
+
     /**
      * Returns the operator signature including its arguments.
      *
@@ -157,43 +193,6 @@ public final class PgOperator extends PgAbstractStatement implements IOperator, 
         return signature.toString();
     }
 
-    @Override
-    public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
-        int startSize = script.getSize();
-        PgOperator newOperator = (PgOperator) newCondition;
-
-        if (!compareUnalterable(newOperator)) {
-            return ObjectState.RECREATE;
-        }
-
-        String newOperRestr = newOperator.restrict;
-        String newOperJoin = newOperator.join;
-        boolean restrChanged = !Objects.equals(restrict, newOperRestr);
-        boolean joinChanged = !Objects.equals(join, newOperJoin);
-        if (restrChanged || joinChanged) {
-            StringBuilder sql = new StringBuilder();
-            sql.append("ALTER OPERATOR ")
-                    .append(getQualifiedName())
-                    .append("\n\tSET (");
-            if (restrChanged) {
-                sql.append("RESTRICT = ").append(newOperRestr != null ? newOperRestr : "NONE");
-                if (joinChanged) {
-                    sql.append(", ");
-                }
-            }
-            if (joinChanged) {
-                sql.append("JOIN = ").append(newOperJoin != null ? newOperJoin : "NONE");
-            }
-            sql.append(")");
-            script.addStatement(sql);
-        }
-
-        appendAlterOwner(newOperator, script);
-        appendAlterComments(newOperator, script);
-
-        return getObjectState(script, startSize);
-    }
-
     /**
      * Alias for {@link #getSignature()} which provides a unique operator ID.
      * <p>
@@ -211,59 +210,6 @@ public final class PgOperator extends PgAbstractStatement implements IOperator, 
         }
 
         return qualifiedName;
-    }
-
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(procedure);
-        hasher.put(leftArg);
-        hasher.put(rightArg);
-        hasher.put(commutator);
-        hasher.put(negator);
-        hasher.put(isMerges);
-        hasher.put(isHashes);
-        hasher.put(restrict);
-        hasher.put(join);
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj instanceof PgOperator oper && super.compare(obj)) {
-            return compareUnalterable(oper)
-                    && Objects.equals(restrict, oper.restrict)
-                    && Objects.equals(join, oper.join);
-        }
-
-        return false;
-    }
-
-    private boolean compareUnalterable(PgOperator oper) {
-        return Objects.equals(procedure, oper.procedure)
-                && Objects.equals(leftArg, oper.leftArg)
-                && Objects.equals(rightArg, oper.rightArg)
-                && Objects.equals(commutator, oper.commutator)
-                && Objects.equals(negator, oper.negator)
-                && isMerges == oper.isMerges
-                && isHashes == oper.isHashes;
-    }
-
-    @Override
-    protected PgOperator getCopy() {
-        PgOperator operatorDst = new PgOperator(name);
-        operatorDst.setProcedure(procedure);
-        operatorDst.setLeftArg(leftArg);
-        operatorDst.setRightArg(rightArg);
-        operatorDst.setCommutator(commutator);
-        operatorDst.setNegator(negator);
-        operatorDst.setMerges(isMerges);
-        operatorDst.setHashes(isHashes);
-        operatorDst.setRestrict(restrict);
-        operatorDst.setJoin(join);
-        return operatorDst;
     }
 
     public void setProcedure(String procedure) {
@@ -319,5 +265,54 @@ public final class PgOperator extends PgAbstractStatement implements IOperator, 
     public void setJoin(String join) {
         this.join = join;
         resetHash();
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(procedure);
+        hasher.put(leftArg);
+        hasher.put(rightArg);
+        hasher.put(commutator);
+        hasher.put(negator);
+        hasher.put(isMerges);
+        hasher.put(isHashes);
+        hasher.put(restrict);
+        hasher.put(join);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+        return obj instanceof PgOperator oper && super.compare(obj)
+                && compareUnalterable(oper)
+                && Objects.equals(restrict, oper.restrict)
+                && Objects.equals(join, oper.join);
+    }
+
+    private boolean compareUnalterable(PgOperator oper) {
+        return Objects.equals(procedure, oper.procedure)
+                && Objects.equals(leftArg, oper.leftArg)
+                && Objects.equals(rightArg, oper.rightArg)
+                && Objects.equals(commutator, oper.commutator)
+                && Objects.equals(negator, oper.negator)
+                && isMerges == oper.isMerges
+                && isHashes == oper.isHashes;
+    }
+
+    @Override
+    protected PgOperator getCopy() {
+        PgOperator operatorDst = new PgOperator(name);
+        operatorDst.setProcedure(procedure);
+        operatorDst.setLeftArg(leftArg);
+        operatorDst.setRightArg(rightArg);
+        operatorDst.setCommutator(commutator);
+        operatorDst.setNegator(negator);
+        operatorDst.setMerges(isMerges);
+        operatorDst.setHashes(isHashes);
+        operatorDst.setRestrict(restrict);
+        operatorDst.setJoin(join);
+        return operatorDst;
     }
 }

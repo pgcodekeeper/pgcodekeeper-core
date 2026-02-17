@@ -26,11 +26,12 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Dictionaries are used to process tokens during full-text search,
  * performing operations like stemming, synonym replacement, or filtering.
  */
-public final class PgFtsDictionary extends PgAbstractStatement
+public class PgFtsDictionary extends PgAbstractStatement
         implements ISimpleOptionContainer, ISearchPath {
 
-    private String template;
     private final Map<String, String> options = new LinkedHashMap<>();
+
+    private String template;
 
     /**
      * Creates a new PostgreSQL FTS dictionary.
@@ -122,13 +123,10 @@ public final class PgFtsDictionary extends PgAbstractStatement
         if (this == obj) {
             return true;
         }
-
-        if (obj instanceof PgFtsDictionary dictionary && super.compare(obj)) {
-            return Objects.equals(template, dictionary.template)
-                    && options.equals(dictionary.options);
-        }
-
-        return false;
+        return obj instanceof PgFtsDictionary dictionary
+                && super.compare(dictionary)
+                && Objects.equals(template, dictionary.template)
+                && options.equals(dictionary.options);
     }
 
     @Override

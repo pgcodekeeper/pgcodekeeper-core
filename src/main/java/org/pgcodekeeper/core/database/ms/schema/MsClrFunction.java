@@ -26,7 +26,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
  * Represents a Microsoft SQL CLR function.
  * CLR functions are implemented in .NET assemblies and can be called from SQL.
  */
-public final class MsClrFunction extends MsAbstractClrFunction {
+public class MsClrFunction extends MsAbstractClrFunction {
 
     private String returns;
     private MsFunctionTypes funcType = MsFunctionTypes.SCALAR;
@@ -47,26 +47,6 @@ public final class MsClrFunction extends MsAbstractClrFunction {
     @Override
     public DbObjType getStatementType() {
         return DbObjType.FUNCTION;
-    }
-
-    @Override
-    public String getDeclaration(Argument arg) {
-        final StringBuilder sbString = new StringBuilder();
-        sbString.append(arg.getName()).append(' ').append(arg.getDataType());
-
-        String def = arg.getDefaultExpression();
-
-        if (def != null && !def.isEmpty()) {
-            sbString.append(" = ");
-            sbString.append(def);
-        }
-
-        ArgMode mode = arg.getMode();
-        if (ArgMode.IN != mode) {
-            sbString.append(' ').append(mode);
-        }
-
-        return sbString.toString();
     }
 
     @Override
@@ -92,6 +72,35 @@ public final class MsClrFunction extends MsAbstractClrFunction {
         sbSQL.append(quote(assemblyMethod));
     }
 
+    @Override
+    public String getDeclaration(Argument arg) {
+        final StringBuilder sbString = new StringBuilder();
+        sbString.append(arg.getName()).append(' ').append(arg.getDataType());
+
+        String def = arg.getDefaultExpression();
+
+        if (def != null && !def.isEmpty()) {
+            sbString.append(" = ");
+            sbString.append(def);
+        }
+
+        ArgMode mode = arg.getMode();
+        if (ArgMode.IN != mode) {
+            sbString.append(' ').append(mode);
+        }
+
+        return sbString.toString();
+    }
+
+    @Override
+    public boolean needDrop(IFunction newFunction) {
+        if (newFunction instanceof MsClrFunction newClrFunc) {
+            return funcType != newClrFunc.funcType;
+        }
+
+        return true;
+    }
+
     public void setFuncType(MsFunctionTypes funcType) {
         this.funcType = funcType;
         resetHash();
@@ -110,26 +119,22 @@ public final class MsClrFunction extends MsAbstractClrFunction {
     }
 
     @Override
-    protected boolean compareUnalterable(MsAbstractCommonFunction func) {
-        return func instanceof MsClrFunction newClrFunc && super.compareUnalterable(func)
-                && Objects.equals(returns, func.getReturns())
-                && Objects.equals(funcType, newClrFunc.funcType);
-    }
-
-    @Override
-    public boolean needDrop(IFunction newFunction) {
-        if (newFunction instanceof MsClrFunction newClrFunc) {
-            return funcType != newClrFunc.funcType;
-        }
-
-        return true;
-    }
-
-    @Override
     public void computeHash(Hasher hasher) {
         super.computeHash(hasher);
         hasher.put(getReturns());
         hasher.put(funcType);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        return this == obj || super.compare(obj);
+    }
+
+    @Override
+    protected boolean compareUnalterable(MsAbstractCommonFunction func) {
+        return func instanceof MsClrFunction newClrFunc && super.compareUnalterable(func)
+                && Objects.equals(returns, func.getReturns())
+                && Objects.equals(funcType, newClrFunc.funcType);
     }
 
     @Override

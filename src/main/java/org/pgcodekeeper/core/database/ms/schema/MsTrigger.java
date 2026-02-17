@@ -25,12 +25,11 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a Microsoft SQL trigger that executes in response to specific database events.
  * Triggers can be enabled or disabled and support ANSI_NULLS and QUOTED_IDENTIFIER settings.
  */
-public final class MsTrigger extends MsAbstractStatement implements MsSourceStatement, ITrigger {
+public class MsTrigger extends MsAbstractStatement implements MsSourceStatement, ITrigger {
 
     private boolean ansiNulls;
     private boolean quotedIdentified;
     private boolean isDisable;
-
     private String firstPart;
     private String secondPart;
 
@@ -105,39 +104,6 @@ public final class MsTrigger extends MsAbstractStatement implements MsSourceStat
         return true;
     }
 
-    @Override
-    public void computeHash(Hasher hasher) {
-        hasher.put(firstPart);
-        hasher.put(secondPart);
-        hasher.put(quotedIdentified);
-        hasher.put(ansiNulls);
-        hasher.put(isDisable);
-    }
-
-    @Override
-    public boolean compare(IStatement obj) {
-        if (obj instanceof MsTrigger trigger && super.compare(obj)) {
-            return Objects.equals(firstPart, trigger.firstPart)
-                    && Objects.equals(secondPart, trigger.secondPart)
-                    && quotedIdentified == trigger.quotedIdentified
-                    && ansiNulls == trigger.ansiNulls
-                    && isDisable == trigger.isDisable;
-        }
-
-        return false;
-    }
-
-    @Override
-    protected MsTrigger getCopy() {
-        MsTrigger trigger = new MsTrigger(name);
-        trigger.setFirstPart(firstPart);
-        trigger.setSecondPart(secondPart);
-        trigger.setQuotedIdentified(quotedIdentified);
-        trigger.setAnsiNulls(ansiNulls);
-        trigger.setDisable(isDisable);
-        return trigger;
-    }
-
     public void setAnsiNulls(boolean ansiNulls) {
         this.ansiNulls = ansiNulls;
         resetHash();
@@ -173,5 +139,39 @@ public final class MsTrigger extends MsAbstractStatement implements MsSourceStat
     public void setSecondPart(String secondPart) {
         this.secondPart = secondPart;
         resetHash();
+    }
+
+    @Override
+    public void computeHash(Hasher hasher) {
+        hasher.put(firstPart);
+        hasher.put(secondPart);
+        hasher.put(quotedIdentified);
+        hasher.put(ansiNulls);
+        hasher.put(isDisable);
+    }
+
+    @Override
+    public boolean compare(IStatement obj) {
+        if (this == obj) {
+            return true;
+        }
+        return obj instanceof MsTrigger trigger
+                && super.compare(trigger)
+                && Objects.equals(firstPart, trigger.firstPart)
+                && Objects.equals(secondPart, trigger.secondPart)
+                && quotedIdentified == trigger.quotedIdentified
+                && ansiNulls == trigger.ansiNulls
+                && isDisable == trigger.isDisable;
+    }
+
+    @Override
+    protected MsTrigger getCopy() {
+        MsTrigger trigger = new MsTrigger(name);
+        trigger.setFirstPart(firstPart);
+        trigger.setSecondPart(secondPart);
+        trigger.setQuotedIdentified(quotedIdentified);
+        trigger.setAnsiNulls(ansiNulls);
+        trigger.setDisable(isDisable);
+        return trigger;
     }
 }

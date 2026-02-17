@@ -28,15 +28,14 @@ import java.util.*;
  */
 public class ChIndex extends ChAbstractStatement implements IIndex {
 
-    protected String where;
-    protected String tablespace;
-    protected boolean unique;
-    protected boolean isClustered;
+    private final List<SimpleColumn> columns = new ArrayList<>();
+    private final List<String> includes = new ArrayList<>();
+    private final Map<String, String> options = new LinkedHashMap<>();
 
-    protected final List<SimpleColumn> columns = new ArrayList<>();
-    protected final List<String> includes = new ArrayList<>();
-    protected final Map<String, String> options = new LinkedHashMap<>();
-
+    private String where;
+    private String tablespace;
+    private boolean unique;
+    private boolean isClustered;
     private String expr;
     private String type;
     private int granVal = 1;
@@ -48,6 +47,64 @@ public class ChIndex extends ChAbstractStatement implements IIndex {
      */
     public ChIndex(String name) {
         super(name);
+    }
+
+    @Override
+    public void getCreationSQL(SQLScript script) {
+        script.addStatement(getAlterTable() + " ADD " + getDefinition());
+    }
+
+    /**
+     * Returns the full definition string for this index.
+     *
+     * @return the complete index definition
+     */
+    private String getDefinition() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("INDEX ").append(name).append(' ').append(expr)
+                .append(" TYPE ").append(type);
+        if (granVal != 1) {
+            sb.append(" GRANULARITY ").append(granVal);
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
+        var newIndex = (ChIndex) newCondition;
+        if (!compareUnalterable(newIndex)) {
+            return ObjectState.RECREATE;
+        }
+        return ObjectState.NOTHING;
+    }
+
+    @Override
+    public void getDropSQL(SQLScript script, boolean optionExists) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(getAlterTable()).append("\n\tDROP INDEX ");
+        if (optionExists) {
+            sb.append(IF_EXISTS);
+        }
+        sb.append(getQuotedName());
+        script.addStatement(sb);
+    }
+
+    private String getAlterTable() {
+        return ((ChTable) parent).getAlterTable(false);
+    }
+
+    @Override
+    public boolean compareColumns(Collection<String> refs) {
+        if (refs.size() != columns.size()) {
+            return false;
+        }
+        int i = 0;
+        for (String ref : refs) {
+            if (!ref.equals(columns.get(i++).getName())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void setClustered(boolean isClustered) {
@@ -63,20 +120,6 @@ public class ChIndex extends ChAbstractStatement implements IIndex {
     public void addColumn(SimpleColumn column) {
         columns.add(column);
         resetHash();
-    }
-
-    @Override
-    public boolean compareColumns(Collection<String> refs) {
-        if (refs.size() != columns.size()) {
-            return false;
-        }
-        int i = 0;
-        for (String ref : refs) {
-            if (!ref.equals(columns.get(i++).getName())) {
-                return false;
-            }
-        }
-        return true;
     }
 
     @Override
@@ -120,12 +163,6 @@ public class ChIndex extends ChAbstractStatement implements IIndex {
         resetHash();
     }
 
-    protected void appendWhere(StringBuilder sbSQL) {
-        if (where != null) {
-            sbSQL.append("\nWHERE ").append(where);
-        }
-    }
-
     public void setExpr(String expr) {
         this.expr = expr;
         resetHash();
@@ -139,50 +176,6 @@ public class ChIndex extends ChAbstractStatement implements IIndex {
     public void setGranVal(int granVal) {
         this.granVal = granVal;
         resetHash();
-    }
-
-    /**
-     * Returns the full definition string for this index.
-     *
-     * @return the complete index definition
-     */
-    public String getDefinition() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("INDEX ").append(name).append(' ').append(expr)
-                .append(" TYPE ").append(type);
-        if (granVal != 1) {
-            sb.append(" GRANULARITY ").append(granVal);
-        }
-        return sb.toString();
-    }
-
-    @Override
-    public void getCreationSQL(SQLScript script) {
-        script.addStatement(getAlterTable() + " ADD " + getDefinition());
-    }
-
-    @Override
-    public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
-        var newIndex = (ChIndex) newCondition;
-        if (!compareUnalterable(newIndex)) {
-            return ObjectState.RECREATE;
-        }
-        return ObjectState.NOTHING;
-    }
-
-    @Override
-    public void getDropSQL(SQLScript script, boolean optionExists) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(getAlterTable()).append("\n\tDROP INDEX ");
-        if (optionExists) {
-            sb.append(IF_EXISTS);
-        }
-        sb.append(getQuotedName());
-        script.addStatement(sb);
-    }
-
-    private String getAlterTable() {
-        return ((ChTable) parent).getAlterTable(false);
     }
 
     @Override
@@ -204,15 +197,12 @@ public class ChIndex extends ChAbstractStatement implements IIndex {
         if (this == obj) {
             return true;
         }
-
-        if (obj instanceof ChIndex index && super.compare(obj)) {
-            return compareUnalterable(index)
-                    && isClustered == index.isClustered
-                    && Objects.equals(tablespace, index.tablespace)
-                    && Objects.equals(options, index.options);
-        }
-
-        return false;
+        return obj instanceof ChIndex index
+                && super.compare(obj)
+                && compareUnalterable(index)
+                && isClustered == index.isClustered
+                && Objects.equals(tablespace, index.tablespace)
+                && Objects.equals(options, index.options);
     }
 
     protected boolean compareUnalterable(ChIndex index) {

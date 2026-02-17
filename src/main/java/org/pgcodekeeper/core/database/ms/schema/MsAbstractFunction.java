@@ -86,14 +86,12 @@ public abstract class MsAbstractFunction extends MsAbstractCommonFunction
 
     @Override
     protected boolean compareUnalterable(MsAbstractCommonFunction func) {
-        if (func instanceof MsAbstractFunction newFunction && super.compareUnalterable(func)) {
-            return ansiNulls == newFunction.ansiNulls
+            return func instanceof MsAbstractFunction newFunction
+                    && super.compareUnalterable(func)
+                    && ansiNulls == newFunction.ansiNulls
                     && quotedIdentified == newFunction.quotedIdentified
                     && Objects.equals(firstPart, newFunction.firstPart)
                     && Objects.equals(secondPart, newFunction.secondPart);
-        }
-
-        return false;
     }
 
     @Override
