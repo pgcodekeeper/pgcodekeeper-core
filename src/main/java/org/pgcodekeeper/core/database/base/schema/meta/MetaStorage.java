@@ -38,21 +38,21 @@ public final class MetaStorage implements Serializable {
 
     private static final String FILTER_PATTERN = """
             maxdepth=7;\
-            org.pgcodekeeper.core.schema.meta.MetaStorage;\
-            org.pgcodekeeper.core.schema.meta.MetaCast;\
-            org.pgcodekeeper.core.schema.meta.MetaContainer;\
-            org.pgcodekeeper.core.schema.meta.MetaFunction;\
-            org.pgcodekeeper.core.schema.meta.MetaOperator;\
-            org.pgcodekeeper.core.schema.meta.MetaRelation;\
-            org.pgcodekeeper.core.schema.meta.MetaStatement;\
-            org.pgcodekeeper.core.schema.PgObjLocation;\
-            org.pgcodekeeper.core.schema.PgObjLocation$LocationType;\
-            org.pgcodekeeper.core.schema.Argument;\
-            org.pgcodekeeper.core.schema.ArgMode;\
-            org.pgcodekeeper.core.schema.GenericColumn;\
-            org.pgcodekeeper.core.schema.ICast$CastContext;\
+            org.pgcodekeeper.core.database.base.schema.meta.MetaStorage;\
+            org.pgcodekeeper.core.database.base.schema.meta.MetaCast;\
+            org.pgcodekeeper.core.database.base.schema.meta.MetaContainer;\
+            org.pgcodekeeper.core.database.base.schema.meta.MetaFunction;\
+            org.pgcodekeeper.core.database.base.schema.meta.MetaOperator;\
+            org.pgcodekeeper.core.database.base.schema.meta.MetaRelation;\
+            org.pgcodekeeper.core.database.base.schema.meta.MetaStatement;\
+            org.pgcodekeeper.core.database.api.schema.ObjectLocation;\
+            org.pgcodekeeper.core.database.api.schema.ObjectLocation$LocationType;\
+            org.pgcodekeeper.core.database.api.schema.ObjectReference;\
+            org.pgcodekeeper.core.database.api.schema.DbObjType;\
+            org.pgcodekeeper.core.database.api.schema.ArgMode;\
+            org.pgcodekeeper.core.database.api.schema.ICast$CastContext;\
+            org.pgcodekeeper.core.database.base.schema.Argument;\
             org.pgcodekeeper.core.DangerStatement;\
-            org.pgcodekeeper.core.model.difftree.DbObjType;\
             org.pgcodekeeper.core.ContextLocation;\
             org.pgcodekeeper.core.utils.Pair;\
             java.util.ArrayList;\
