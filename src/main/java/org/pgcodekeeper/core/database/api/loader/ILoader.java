@@ -19,6 +19,7 @@ import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Interface for database loader
@@ -36,4 +37,9 @@ public interface ILoader {
      * @return configuration settings
      */
     ISettings getSettings();
+
+    /**
+     * @return unmodifiable list of errors during loading
+     */
+    List<Object> getErrors();
 }

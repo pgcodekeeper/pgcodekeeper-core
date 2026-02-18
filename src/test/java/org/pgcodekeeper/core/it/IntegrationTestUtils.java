@@ -92,7 +92,7 @@ public final class IntegrationTestUtils {
             FullAnalyze.fullAnalyze(db, diffSettings.getErrors());
         }
 
-        assertErrors(loader.getErrors());
+        assertErrors(diffSettings.getErrors());
         return db;
     }
 

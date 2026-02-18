@@ -17,11 +17,11 @@ package org.pgcodekeeper.core.database.ch.parser;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.base.parser.CustomParserListener;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
 import org.pgcodekeeper.core.database.ch.parser.statement.*;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
-import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
 import org.pgcodekeeper.core.settings.DiffSettings;
 
 /**

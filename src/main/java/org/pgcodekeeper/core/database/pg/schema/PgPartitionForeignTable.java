@@ -19,7 +19,6 @@ import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.IPartitionTable;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 

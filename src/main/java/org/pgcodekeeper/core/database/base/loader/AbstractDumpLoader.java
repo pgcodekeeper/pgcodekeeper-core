@@ -16,9 +16,9 @@
 package org.pgcodekeeper.core.database.base.loader;
 
 import org.pgcodekeeper.core.database.api.loader.IDumpLoader;
+import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.AntlrTask;
-import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.base.schema.StatementOverride;
 import org.pgcodekeeper.core.monitor.IMonitor;
@@ -80,6 +80,7 @@ public abstract class AbstractDumpLoader<T extends IDatabase> extends AbstractLo
         return db;
     }
 
+    @Override
     public void setMode(ParserListenerMode mode) {
         this.mode = mode;
     }
@@ -90,6 +91,7 @@ public abstract class AbstractDumpLoader<T extends IDatabase> extends AbstractLo
 
     public abstract void loadWithoutAnalyze(T db, Queue<AntlrTask<?>> antlrTasks);
 
+    @Override
     protected abstract T createDatabase();
 
     protected abstract ISchema createDefaultSchema();

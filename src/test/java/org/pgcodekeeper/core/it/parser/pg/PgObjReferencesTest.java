@@ -20,9 +20,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
+import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
-import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.DiffSettings;
 
@@ -143,7 +143,7 @@ class PgObjReferencesTest {
 
         String actual = IntegrationTestUtils.getRefsAsString(db.getObjReferences()).strip();
 
-        IntegrationTestUtils.assertErrors(loader.getErrors());
+        IntegrationTestUtils.assertErrors(diffSettings.getErrors());
         Assertions.assertEquals(expected, actual);
     }
 }

@@ -20,6 +20,7 @@ import java.util.function.BiFunction;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.*;
 import org.pgcodekeeper.core.database.base.schema.*;
@@ -29,7 +30,6 @@ import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.schema.PgSchema;
 import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
-import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
 import org.pgcodekeeper.core.settings.DiffSettings;
 
 /**

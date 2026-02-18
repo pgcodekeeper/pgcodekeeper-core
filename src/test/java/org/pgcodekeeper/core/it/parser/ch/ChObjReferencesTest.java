@@ -20,9 +20,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
+import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.ch.loader.ChDumpLoader;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
-import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.DiffSettings;
 

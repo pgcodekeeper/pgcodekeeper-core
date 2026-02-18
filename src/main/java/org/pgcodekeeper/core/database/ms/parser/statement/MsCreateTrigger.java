@@ -20,7 +20,6 @@ import java.util.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
 import org.pgcodekeeper.core.database.ms.parser.launcher.MsFuncProcTrigAnalysisLauncher;
 import org.pgcodekeeper.core.database.ms.schema.*;
