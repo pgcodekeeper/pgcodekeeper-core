@@ -20,7 +20,6 @@ import java.util.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
 import org.pgcodekeeper.core.database.ms.parser.launcher.MsExpressionAnalysisLauncher;
 import org.pgcodekeeper.core.database.ms.schema.*;
@@ -62,7 +61,7 @@ public final class MsAlterTable extends MsTableAbstract {
             addConstraints(elements, table, schemaCtx, nameCtx);
         } else if (tableActionCtx.CONSTRAINT() != null && tableActionCtx.ALL() == null) {
             for (IdContext id : tableActionCtx.name_list().id()) {
-                MsConstraint constr = (MsConstraint) getSafe(MsTable::getConstraint, table, id);
+                MsConstraint constr = getSafe(MsTable::getConstraint, table, id);
                 if (tableActionCtx.WITH() != null) {
                     doSafe(MsConstraint::setNotValid, constr, tableActionCtx.nocheck_check != null);
                 }

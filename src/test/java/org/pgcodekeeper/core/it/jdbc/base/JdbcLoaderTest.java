@@ -18,9 +18,9 @@ package org.pgcodekeeper.core.it.jdbc.base;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
+import org.pgcodekeeper.core.database.api.loader.IDumpLoader;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
-import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.parser.ScriptParser;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.settings.CoreSettings;
@@ -56,6 +56,6 @@ public abstract class JdbcLoaderTest {
         }
     }
 
-    protected abstract AbstractDumpLoader<?> createDumpLoader(InputStreamProvider input, String inputObjectName,
+    protected abstract IDumpLoader createDumpLoader(InputStreamProvider input, String inputObjectName,
             ISettings settings, IDatabaseProvider databaseProvider);
 }

@@ -21,6 +21,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
@@ -29,7 +30,6 @@ import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.exception.MisplacedObjectException;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
-import org.pgcodekeeper.core.database.base.parser.ParserListenerMode;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Utils;
 

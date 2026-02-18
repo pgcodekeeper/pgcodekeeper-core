@@ -17,10 +17,8 @@ package org.pgcodekeeper.core.database.ms.parser.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
-import org.pgcodekeeper.core.database.ms.schema.MsAbstractStatement;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.ms.schema.MsSchema;
 import org.pgcodekeeper.core.settings.ISettings;

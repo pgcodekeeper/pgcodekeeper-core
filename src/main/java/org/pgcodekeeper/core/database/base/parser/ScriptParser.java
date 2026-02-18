@@ -20,8 +20,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.pgcodekeeper.core.DangerStatement;
+import org.pgcodekeeper.core.database.api.loader.IDumpLoader;
+import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
-import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,7 @@ public final class ScriptParser {
      * @throws IOException          if there's an error reading the script
      * @throws InterruptedException if parsing is interrupted
      */
-    public ScriptParser(AbstractDumpLoader<?> loader, String name, String script)
+    public ScriptParser(IDumpLoader loader, String name, String script)
             throws IOException, InterruptedException {
         this.script = script;
         LOG.info(Messages.ScriptParser_log_load_dump);

@@ -22,7 +22,6 @@ package org.pgcodekeeper.core.database.pg.schema;
 import java.util.Objects;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.IFunction;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 

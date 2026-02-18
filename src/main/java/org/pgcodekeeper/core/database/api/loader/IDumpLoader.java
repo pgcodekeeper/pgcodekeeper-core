@@ -15,9 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.loader;
 
+import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
+
 /**
  * Interface for database dump loader
  */
 public interface IDumpLoader extends ILoader {
 
+    /**
+     * Sets loader mode
+     *
+     * @param mode loader mode
+     */
+    void setMode(ParserListenerMode mode);
 }
