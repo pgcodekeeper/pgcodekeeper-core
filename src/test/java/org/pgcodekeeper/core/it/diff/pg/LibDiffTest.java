@@ -78,7 +78,7 @@ class LibDiffTest {
         PgLibraryLoader loader = new PgLibraryLoader(dbNew, null, new HashSet<>(), diffSettings);
         loader.loadLibraries(isIgnorePrivileges, libs);
 
-        String script = PgCodeKeeperApi.diff(dbOld, dbNew, diffSettings);
+        String script = PgCodeKeeperApi.diff(databaseProvider, dbOld, dbNew, diffSettings);
 
         IntegrationTestUtils.assertResult(script, fileNameTemplate, getClass());
     }

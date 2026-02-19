@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.project;
 
+import org.pgcodekeeper.core.database.api.project.IProjectUpdater;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.localizations.Messages;
@@ -40,7 +41,7 @@ import java.util.List;
  * <p>
  * Subclasses must implement database-specific methods for directory structure and model exporters.
  */
-public abstract class AbstractProjectUpdater {
+public abstract class AbstractProjectUpdater implements IProjectUpdater {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractProjectUpdater.class);
     private static final String OVERRIDES = "OVERRIDES";
@@ -121,12 +122,7 @@ public abstract class AbstractProjectUpdater {
                                                                           Collection<TreeElement> changedObjects,
                                                                           String sqlEncoding);
 
-    /**
-     * Performs partial update of database project.
-     * Updates only changed objects with safe backup and restore on failure.
-     *
-     * @throws IOException if update operation fails
-     */
+    @Override
     public void updatePartial() throws IOException {
         LOG.info(Messages.ProjectUpdater_log_start_partial_update);
         if (dbOld == null) {
@@ -205,13 +201,7 @@ public abstract class AbstractProjectUpdater {
         }
     }
 
-    /**
-     * Performs full update of database project.
-     * Completely regenerates project structure with optional overrides preservation.
-     *
-     * @param projectOnly whether to preserve overrides directory during update
-     * @throws IOException if update operation fails
-     */
+    @Override
     public void updateFull(boolean projectOnly) throws IOException {
         LOG.info(Messages.ProjectUpdater_log_start_full_update);
         boolean caughtProcessingEx = false;

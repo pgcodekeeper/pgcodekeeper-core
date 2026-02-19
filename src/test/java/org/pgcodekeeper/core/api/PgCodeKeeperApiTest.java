@@ -21,20 +21,16 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.TestUtils;
-import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
-import org.pgcodekeeper.core.database.pg.loader.PgProjectLoader;
-import org.pgcodekeeper.core.monitor.NullMonitor;
-import org.pgcodekeeper.core.settings.CoreSettings;
+import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.settings.DiffSettings;
-import org.pgcodekeeper.core.settings.ISettings;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PgCodeKeeperApiTest {
 
@@ -45,11 +41,12 @@ class PgCodeKeeperApiTest {
     private static final String PUBLIC_DIRECTORY = "SCHEMA/public/";
     private static final String TABLES_DIRECTORY = PUBLIC_DIRECTORY + "TABLE/";
 
-    private CoreSettings settings;
+    private DiffSettings diffSettings;
+    private final PgDatabaseProvider provider = new PgDatabaseProvider();
 
     @BeforeEach
     void initSettings() {
-        settings = new CoreSettings();
+        diffSettings = new DiffSettings();
     }
 
     @ParameterizedTest
@@ -57,11 +54,11 @@ class PgCodeKeeperApiTest {
             "test_diff"
     })
     void diffTest(String testName) throws IOException, InterruptedException {
-        var oldDb = loadDatabaseFromDump(getFilePath(testName + ORIGINAL), settings);
-        var newDb = loadDatabaseFromDump(getFilePath(testName + NEW), settings);
+        var oldDbLoader = provider.getDumpLoader(getFilePath(testName + ORIGINAL), diffSettings);
+        var newDbLoader = provider.getDumpLoader(getFilePath(testName + NEW), diffSettings);
         var expectedDiff = getExpectedDiff(testName);
 
-        String actual = PgCodeKeeperApi.diff(oldDb, newDb, new DiffSettings(settings));
+        String actual = PgCodeKeeperApi.diff(provider, oldDbLoader, newDbLoader, diffSettings);
 
         TestUtils.assertIgnoreNewLines(expectedDiff, actual);
     }
@@ -71,14 +68,13 @@ class PgCodeKeeperApiTest {
             "test_ignore"
     })
     void diffWithIgnoreListTest(String testName) throws IOException, InterruptedException {
-        var oldDb = loadDatabaseFromDump(getFilePath(testName + ORIGINAL), settings);
-        var newDb = loadDatabaseFromDump(getFilePath(testName + NEW), settings);
+        var oldDbLoader = provider.getDumpLoader(getFilePath(testName + ORIGINAL), diffSettings);
+        var newDbLoader = provider.getDumpLoader(getFilePath(testName + NEW), diffSettings);
         var ignoreListPath = getFilePath("ignore.pgcodekeeperignore");
         var expectedDiff = getExpectedDiff(testName);
 
-        var diffSettings = new DiffSettings(settings);
         diffSettings.addIgnoreList(ignoreListPath);
-        String actual = PgCodeKeeperApi.diff(oldDb, newDb, diffSettings);
+        String actual = PgCodeKeeperApi.diff(provider, oldDbLoader, newDbLoader, diffSettings);
 
         TestUtils.assertIgnoreNewLines(expectedDiff, actual);
     }
@@ -86,26 +82,25 @@ class PgCodeKeeperApiTest {
     @Test
     void exportTest(@TempDir Path tempDir) throws IOException, InterruptedException {
         var dumpFileName = "test_export.sql";
-        var db = loadDatabaseFromDump(getFilePath(dumpFileName), settings);
+        var loader = provider.getDumpLoader(getFilePath(dumpFileName), diffSettings);
         var exportedTableFile = tempDir.resolve(TABLES_DIRECTORY + "test_table.sql");
         var expectedContent = getFileContent(dumpFileName);
 
-        PgCodeKeeperApi.export(db, tempDir, new DiffSettings(settings));
+        PgCodeKeeperApi.exportToProject(provider, null, loader, tempDir, diffSettings);
 
         assertFileContent(exportedTableFile, expectedContent);
     }
 
     @Test
     void exportWithIgnoreListTest(@TempDir Path tempDir) throws IOException, InterruptedException {
-        var db = loadDatabaseFromDump(getFilePath("test_export_with_ignore_list.sql"), settings);
+        var loader = provider.getDumpLoader(getFilePath("test_export_with_ignore_list.sql"), diffSettings);
         var exportedTableFile = tempDir.resolve(TABLES_DIRECTORY + "test_table.sql");
         var ignoredTableFile = tempDir.resolve(TABLES_DIRECTORY + "ignored_table.sql");
         var expectedContent = getFileContent("test_export_with_ignore_list_exported.sql");
         var ignoreListPath = getFilePath("test_export_with_ignore_list.pgcodekeeperignore");
 
-        var diffSettings = new DiffSettings(settings, new NullMonitor());
         diffSettings.addIgnoreList(ignoreListPath);
-        PgCodeKeeperApi.export(db, tempDir, diffSettings);
+        PgCodeKeeperApi.exportToProject(provider, null, loader, tempDir, diffSettings);
 
         assertFileContent(exportedTableFile, expectedContent);
         assertFalse(Files.exists(ignoredTableFile));
@@ -115,15 +110,15 @@ class PgCodeKeeperApiTest {
     void updateProjectTest(@TempDir Path tempDir) throws IOException, InterruptedException {
         // Setup project structure with initial tables
         setupUpdateProjectStructure(tempDir);
-        var oldDb = loadDatabaseFromProject(tempDir, settings);
-        var newDb = loadDatabaseFromDump(getFilePath("test_update_project_new_dump.sql"), settings);
+        var oldDbLoader = provider.getProjectLoader(tempDir, diffSettings);
+        var newDbLoader = provider.getDumpLoader(getFilePath("test_update_project_new_dump.sql"), diffSettings);
         var expectedContent = getFileContent("test_update_project_new_dump.sql");
 
         Path tablesDir = tempDir.resolve(TABLES_DIRECTORY);
         Path firstTableFile = tablesDir.resolve("first_table.sql");
         Path secondTableFile = tablesDir.resolve("second_table.sql");
 
-        PgCodeKeeperApi.update(oldDb, newDb, tempDir, new DiffSettings(settings));
+        PgCodeKeeperApi.exportToProject(provider, oldDbLoader, newDbLoader, tempDir, diffSettings);
 
         // Verify first table was removed and second table was updated
         assertFalse(Files.exists(firstTableFile));
@@ -134,8 +129,8 @@ class PgCodeKeeperApiTest {
     void updateProjectWithIgnoreListTest(@TempDir Path tempDir) throws IOException, InterruptedException {
         // Setup project structure with initial tables
         setupUpdateProjectStructure(tempDir);
-        var oldDb = loadDatabaseFromProject(tempDir, settings);
-        var newDb = loadDatabaseFromDump(getFilePath("test_update_project_new_dump.sql"), settings);
+        var oldDbLoader = provider.getProjectLoader(tempDir, diffSettings);
+        var newDbLoader = provider.getDumpLoader(getFilePath("test_update_project_new_dump.sql"), diffSettings);
         var ignoreListPath = getFilePath("test_update_project_ignore_list.pgcodekeeperignore");
 
         var expectedFirstTableContent = getFileContent("test_update_project_old_first_table.sql");
@@ -145,9 +140,8 @@ class PgCodeKeeperApiTest {
         Path firstTableFile = tablesDir.resolve("first_table.sql");
         Path secondTableFile = tablesDir.resolve("second_table.sql");
 
-        var diffSettings = new DiffSettings(settings, new NullMonitor());
         diffSettings.addIgnoreList(ignoreListPath);
-        PgCodeKeeperApi.update(oldDb, newDb, tempDir, diffSettings);
+        PgCodeKeeperApi.exportToProject(provider, oldDbLoader, newDbLoader, tempDir, diffSettings);
 
         // Verify both tables exist and have correct content
         assertFileContent(firstTableFile, expectedFirstTableContent);
@@ -185,16 +179,5 @@ class PgCodeKeeperApiTest {
         assertTrue(Files.exists(filePath));
         var actualContent = Files.readString(filePath);
         TestUtils.assertIgnoreNewLines(expectedContent, actualContent);
-    }
-
-    private static IDatabase loadDatabaseFromDump(Path pathToFile, ISettings settings)
-            throws IOException, InterruptedException {
-        return (new PgDumpLoader(pathToFile, new DiffSettings(settings))).load();
-    }
-
-    private static IDatabase loadDatabaseFromProject(Path projectPath, ISettings settings)
-            throws IOException, InterruptedException {
-        DiffSettings diffSettings = new DiffSettings(settings);
-        return new PgProjectLoader(projectPath, diffSettings).loadAndAnalyze();
     }
 }

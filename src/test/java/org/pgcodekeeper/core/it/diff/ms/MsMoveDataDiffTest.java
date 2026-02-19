@@ -57,10 +57,10 @@ class MsMoveDataDiffTest {
         var dbNew = loadTestDump(
                 databaseProvider, fileNameTemplate + FILES_POSTFIX.NEW_SQL, MsMoveDataDiffTest.class, diffSettings);
 
-        assertDiffSame(dbOld, fileNameTemplate, diffSettings);
-        assertDiffSame(dbNew, fileNameTemplate, diffSettings);
+        assertDiffSame(databaseProvider, dbOld, fileNameTemplate, diffSettings);
+        assertDiffSame(databaseProvider, dbNew, fileNameTemplate, diffSettings);
 
-        String script = PgCodeKeeperApi.diff(dbOld, dbNew, new DiffSettings(settings));
+        String script = PgCodeKeeperApi.diff(databaseProvider, dbOld, dbNew, new DiffSettings(settings));
         String content = script.replaceAll("([0-9a-fA-F]{32})", "randomly_generated_part");
 
         assertResult(content, fileNameTemplate, MsMoveDataDiffTest.class);

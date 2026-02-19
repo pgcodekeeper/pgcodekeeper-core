@@ -84,14 +84,14 @@ class MsJdbcLoaderTest extends JdbcLoaderTest {
         var diffSettings = new DiffSettings(settings);
 
         var path = TestUtils.getFilePath(dumpFileName, getClass());
-        MsDatabase dumpDb = databaseProvider.getDatabaseFromDump(path, diffSettings);
+        MsDatabase dumpDb = databaseProvider.getDumpLoader(path, diffSettings).loadAndAnalyze();
 
         var script = Files.readString(TestUtils.getFilePath(dumpFileName, getClass()));
         var loader = createDumpLoader(() -> new ByteArrayInputStream(script.getBytes(StandardCharsets.UTF_8)),
                 dumpFileName, settings, databaseProvider);
         ScriptParser parser = new ScriptParser(loader, dumpFileName, script);
 
-        var startConfDb = databaseProvider.getDatabaseFromJdbc(url, diffSettings);
+        var startConfDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
         IJdbcConnector connector = new MsJdbcConnector(url);
         try {
             var runner = new JdbcRunner(new NullMonitor());
@@ -101,12 +101,12 @@ class MsJdbcLoaderTest extends JdbcLoaderTest {
                 runner.runBatches(connector, parser.batch(), null);
             }
 
-            var remoteDb = databaseProvider.getDatabaseFromJdbc(url, diffSettings);
+            var remoteDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
             List<Path> ignoreLists = List.of(TestUtils.getFilePath("ms.pgcodekeeperignore", getClass()));
             for (Path ignorePath : ignoreLists) {
                 diffSettings.addIgnoreList(ignorePath);
             }
-            var actual = PgCodeKeeperApi.diff(dumpDb, remoteDb, diffSettings);
+            var actual = PgCodeKeeperApi.diff(databaseProvider, dumpDb, remoteDb, diffSettings);
             Assertions.assertEquals("", actual, "Incorrect run dump %s on Database".formatted(dumpFileName));
         } finally {
             clearDb(settings, startConfDb, connector, url, databaseProvider);

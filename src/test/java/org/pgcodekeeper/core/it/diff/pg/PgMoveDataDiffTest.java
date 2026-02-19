@@ -67,10 +67,10 @@ class PgMoveDataDiffTest {
         IDatabase dbNew = loadTestDump(
                 databaseProvider, fileNameTemplate + FILES_POSTFIX.NEW_SQL, PgMoveDataDiffTest.class, diffSettings);
 
-        IntegrationTestUtils.assertDiffSame(dbOld, fileNameTemplate, diffSettings);
-        IntegrationTestUtils.assertDiffSame(dbNew, fileNameTemplate, diffSettings);
+        IntegrationTestUtils.assertDiffSame(databaseProvider, dbOld, fileNameTemplate, diffSettings);
+        IntegrationTestUtils.assertDiffSame(databaseProvider, dbNew, fileNameTemplate, diffSettings);
 
-        String script = PgCodeKeeperApi.diff(dbOld, dbNew, diffSettings);
+        String script = PgCodeKeeperApi.diff(databaseProvider, dbOld, dbNew, diffSettings);
         String content = script.replaceAll("([0-9a-fA-F]{32})", "randomly_generated_part");
 
         IntegrationTestUtils.assertResult(content, fileNameTemplate, PgMoveDataDiffTest.class);

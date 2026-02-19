@@ -28,7 +28,6 @@ import org.pgcodekeeper.core.database.ms.loader.MsDumpLoader;
 import org.pgcodekeeper.core.database.ms.project.MsModelExporter;
 import org.pgcodekeeper.core.database.ms.schema.*;
 import org.pgcodekeeper.core.database.ms.utils.MsConsts;
-import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.DiffSettings;
 
@@ -57,6 +56,7 @@ class MsAntlrLoaderTest {
     private static final String MS_USER = "ms_user";
     private static final String PRIMARY = "[PRIMARY]";
     private static final String ENCODING = Consts.UTF_8;
+    private final MsDatabaseProvider databaseProvider = new MsDatabaseProvider();
 
     void testDatabase(String fileName, IDatabase d, Path exportDir) throws Exception {
         loadSchema(fileName, d);
@@ -69,14 +69,14 @@ class MsAntlrLoaderTest {
         settings.setInCharsetName(ENCODING);
         settings.setKeepNewlines(true);
         var diffSettings = new DiffSettings(settings);
-        IDatabase d = new MsDatabaseProvider().getDatabaseFromDump(
-                TestUtils.getFilePath(fileName, MsAntlrLoaderTest.class), diffSettings);
+        IDatabase d = databaseProvider.getDumpLoader(
+                TestUtils.getFilePath(fileName, MsAntlrLoaderTest.class), diffSettings).loadAndAnalyze();
 
-        assertDiff(dbPredefined, d, diffSettings, "PgDumpLoader: predefined object is not equal to file " + fileName);
+        assertDiff(databaseProvider, dbPredefined, d, diffSettings, "PgDumpLoader: predefined object is not equal to file " + fileName);
 
         // test deepCopy mechanism
-        assertDiff(d, (IDatabase) d.deepCopy(), diffSettings, "PgStatement deep copy altered");
-        assertDiff(dbPredefined, d, diffSettings, "PgStatement deep copy altered original");
+        assertDiff(databaseProvider, d, (IDatabase) d.deepCopy(), diffSettings, "PgStatement deep copy altered");
+        assertDiff(databaseProvider, dbPredefined, d, diffSettings, "PgStatement deep copy altered original");
     }
 
     void exportFullDb(String fileName, IDatabase dbPredefined, Path exportDir) throws Exception {
@@ -86,19 +86,18 @@ class MsAntlrLoaderTest {
         settings.setKeepNewlines(true);
         var diffSettings = new DiffSettings(settings);
 
-        IDatabase dbFromFile = new MsDatabaseProvider().getDatabaseFromDump(
-                TestUtils.getFilePath(fileName, MsAntlrLoaderTest.class), diffSettings);
+        IDatabase dbFromFile = new MsDatabaseProvider().getDumpLoader(
+                TestUtils.getFilePath(fileName, MsAntlrLoaderTest.class), diffSettings).loadAndAnalyze();
 
         new MsModelExporter(exportDir, dbPredefined, ENCODING, settings).exportFull();
 
-        IDatabase dbAfterExport = IntegrationTestUtils.createProjectLoader(exportDir, settings, dbFromFile)
-                .loadAndAnalyze();
+        IDatabase dbAfterExport = databaseProvider.getProjectLoader(exportDir, diffSettings).loadAndAnalyze();
 
         // check the same db similarity before and after export
-        assertDiff(dbPredefined, dbAfterExport, diffSettings, "Predefined object PgDB" + fileName +
+        assertDiff(databaseProvider, dbPredefined, dbAfterExport, diffSettings, "Predefined object PgDB" + fileName +
                 " is not equal to exported'n'loaded.");
 
-        assertDiff(dbAfterExport, dbFromFile, diffSettings,
+        assertDiff(databaseProvider, dbAfterExport, dbFromFile, diffSettings,
                 "Exported predefined object is not equal to file " + fileName);
     }
 
@@ -442,12 +441,12 @@ class MsAntlrLoaderTest {
                 AS
                 BEGIN
                     DECLARE @Res integer = 0
-                
+
                     SET @Res = @First * @Second
-                
+
                     IF @Res < 0
                         SET @Res = 0
-                
+
                     RETURN @Res
                 END""");
         schema.addChild(func);
@@ -565,10 +564,10 @@ class MsAntlrLoaderTest {
                 AS
                 BEGIN
                     DECLARE @Res bit = 0
-                
+
                     IF @arg1 > 1
                         SET @Res = 1
-                
+
                     RETURN @Res
                 END""");
 
@@ -642,7 +641,7 @@ class MsAntlrLoaderTest {
         trigger.setQuotedIdentified(true);
         trigger.setFirstPart("");
         trigger.setSecondPart("""
-                
+
                     INSTEAD OF DELETE
                     AS
                     BEGIN
@@ -657,7 +656,7 @@ class MsAntlrLoaderTest {
         trigger.setQuotedIdentified(true);
         trigger.setFirstPart("");
         trigger.setSecondPart("""
-                
+
                     INSTEAD OF INSERT
                     AS
                     BEGIN
@@ -672,7 +671,7 @@ class MsAntlrLoaderTest {
         trigger.setQuotedIdentified(true);
         trigger.setFirstPart("");
         trigger.setSecondPart("""
-                
+
                     INSTEAD OF UPDATE
                     AS
                     BEGIN
@@ -865,23 +864,23 @@ class MsAntlrLoaderTest {
         func.addArgument(new Argument("@delimiter", "char(1)"));
         func.setFirstPart("");
         func.setSecondPart("""
-                
+
                 (@string nvarchar(MAX), @delimiter char(1))
                 RETURNS @output TABLE(tbldata nvarchar(256))
                 BEGIN
                     DECLARE @start INT, @end INT
                     SELECT @start = 1, @end = CHARINDEX(@delimiter, @string)
-                
+
                     WHILE @start < LEN(@string) + 1 BEGIN
                         IF @end = 0\s
                             SET @end = LEN(@string) + 1
-                
+
                         INSERT INTO @output (tbldata)\s
                         VALUES(SUBSTRING(@string, @start, @end - @start))
                         SET @start = @end + 1
                         SET @end = CHARINDEX(@delimiter, @string, @start)
                     END
-                
+
                     RETURN
                 END""");
         schema.addChild(func);
@@ -894,7 +893,7 @@ class MsAntlrLoaderTest {
         func.addArgument(new Argument("@delimiter", "char(1)"));
         func.setFirstPart("");
         func.setSecondPart("""
-                
+
                 (@string nvarchar(MAX), @delimiter char(1))
                 RETURNS @output TABLE(tbldata nvarchar(256))
                 BEGIN
@@ -968,7 +967,7 @@ class MsAntlrLoaderTest {
         proc.setQuotedIdentified(true);
         proc.setFirstPart("");
         proc.setSecondPart("""
-                
+
                 AS
                 BEGIN
                     -- empty procedure
@@ -1028,7 +1027,7 @@ class MsAntlrLoaderTest {
         trigger.setAnsiNulls(true);
         trigger.setFirstPart("");
         trigger.setSecondPart("""
-                
+
                 FOR UPDATE
                 AS\s
                     BEGIN

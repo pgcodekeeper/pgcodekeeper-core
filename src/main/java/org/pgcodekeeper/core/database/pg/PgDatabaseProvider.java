@@ -15,23 +15,29 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg;
 
-import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.script.IScriptBuilder;
 import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
 import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.loader.PgProjectLoader;
-import org.pgcodekeeper.core.database.pg.parser.PgCustomAntlrErrorStrategy;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLLexer;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser;
-import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
+import org.pgcodekeeper.core.database.pg.project.PgProjectUpdater;
+import org.pgcodekeeper.core.database.pg.script.PgScriptBuilder;
+import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.InputStreamProvider;
 
-import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
+/**
+ * {@link IDatabaseProvider} implementation for PostgreSQL databases.
+ */
 public class PgDatabaseProvider implements IDatabaseProvider {
 
     @Override
@@ -45,42 +51,46 @@ public class PgDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public Lexer getLexer(CharStream stream) {
-        return new SQLLexer(stream);
-    }
-
-    @Override
-    public Parser getParser(CommonTokenStream stream) {
-        return new SQLParser(stream);
-    }
-
-    @Override
-    public ANTLRErrorStrategy getErrorHandler() {
-        return new PgCustomAntlrErrorStrategy();
-    }
-
-    @Override
     public IJdbcConnector getJdbcConnector(String url) {
         return new PgJdbcConnector(url);
     }
 
     @Override
-    public PgDatabase getDatabaseFromJdbc(String url, DiffSettings diffSettings)
-            throws IOException, InterruptedException {
+    public PgModelExporter getModelExporter(Path outDir, IDatabase newDb, List<TreeElement> changedObjects,
+                                            ISettings settings) {
+        return new PgModelExporter(outDir, newDb, null, changedObjects, Consts.UTF_8, settings);
+    }
+
+    @Override
+    public PgProjectUpdater getProjectUpdater(IDatabase newDb, IDatabase oldDb, List<TreeElement> changedObjects,
+                                              Path projectPath, ISettings settings) {
+        return new PgProjectUpdater(newDb, oldDb, changedObjects, Consts.UTF_8, projectPath, false, settings);
+    }
+
+    @Override
+    public PgJdbcLoader getJdbcLoader(String url, DiffSettings diffSettings) {
         String timezone = diffSettings.getSettings().getTimeZone() == null
                 ? Consts.UTC : diffSettings.getSettings().getTimeZone();
-        return new PgJdbcLoader(getJdbcConnector(url), timezone, diffSettings).loadAndAnalyze();
+        return new PgJdbcLoader(getJdbcConnector(url), timezone, diffSettings);
     }
 
     @Override
-    public PgDatabase getDatabaseFromDump(Path path, DiffSettings diffSettings)
-            throws IOException, InterruptedException {
-        return new PgDumpLoader(path, diffSettings).loadAndAnalyze();
+    public PgDumpLoader getDumpLoader(Path path, DiffSettings diffSettings) {
+        return new PgDumpLoader(path, diffSettings);
     }
 
     @Override
-    public PgDatabase getDatabaseFromProject(Path path, DiffSettings diffSettings)
-            throws IOException, InterruptedException {
-        return new PgProjectLoader(path, diffSettings).loadAndAnalyze();
+    public PgDumpLoader getDumpLoader(InputStreamProvider input, String name, DiffSettings diffSettings) {
+        return new PgDumpLoader(input, name, diffSettings);
+    }
+
+    @Override
+    public PgProjectLoader getProjectLoader(Path path, DiffSettings diffSettings) {
+        return new PgProjectLoader(path, diffSettings);
+    }
+
+    @Override
+    public IScriptBuilder getScriptBuilder(DiffSettings diffSettings) {
+        return new PgScriptBuilder(diffSettings);
     }
 }

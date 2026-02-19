@@ -68,6 +68,7 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
      * @throws IOException          if database loading fails
      * @throws InterruptedException if the loading process is interrupted
      */
+    @Override
     public T loadAndAnalyze() throws IOException, InterruptedException {
         T db = load();
         FullAnalyze.fullAnalyze(db, diffSettings.getErrors());

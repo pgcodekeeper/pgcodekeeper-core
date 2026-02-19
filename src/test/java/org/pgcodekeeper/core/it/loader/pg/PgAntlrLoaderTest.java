@@ -22,11 +22,7 @@ package org.pgcodekeeper.core.it.loader.pg;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.EventType;
-import org.pgcodekeeper.core.database.api.schema.ObjectReference;
-import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.database.api.schema.ISchema;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.Argument;
 import org.pgcodekeeper.core.database.base.schema.SimpleColumn;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
@@ -35,7 +31,6 @@ import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.database.pg.schema.PgTrigger.TgTypes;
 import org.pgcodekeeper.core.database.pg.utils.PgConsts;
-import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.DiffSettings;
 
@@ -71,11 +66,11 @@ class PgAntlrLoaderTest {
         var diffSettings = new DiffSettings(settings);
         IDatabase d = loadTestDump(databaseProvider, fileName, PgAntlrLoaderTest.class, diffSettings);
 
-        assertDiff(d, dbPredefined, diffSettings, "PgDumpLoader: predefined object is not equal to file " + fileName);
+        assertDiff(databaseProvider, d, dbPredefined, diffSettings, "PgDumpLoader: predefined object is not equal to file " + fileName);
 
         // test deepCopy mechanism
-        assertDiff(d, (IDatabase) d.deepCopy(), diffSettings, "PgStatement deep copy altered");
-        assertDiff(dbPredefined, d, diffSettings, "PgStatement deep copy altered original");
+        assertDiff(databaseProvider, d, (IDatabase) d.deepCopy(), diffSettings, "PgStatement deep copy altered");
+        assertDiff(databaseProvider, dbPredefined, d, diffSettings, "PgStatement deep copy altered original");
     }
 
     void exportFullDb(String fileName, IDatabase dbPredefined, Path exportDir) throws IOException, InterruptedException {
@@ -87,15 +82,14 @@ class PgAntlrLoaderTest {
 
         new PgModelExporter(exportDir, dbPredefined, Consts.UTF_8, settings).exportFull();
 
-        IDatabase dbAfterExport = IntegrationTestUtils.createProjectLoader(exportDir, settings,
-                dbFromFile).loadAndAnalyze();
+        IDatabase dbAfterExport = databaseProvider.getProjectLoader(exportDir, diffSettings).loadAndAnalyze();
 
         // check the same db similarity before and after export
 
-        assertDiff(dbPredefined, dbAfterExport, diffSettings, "Predefined object PgDB" + fileName +
+        assertDiff(databaseProvider, dbPredefined, dbAfterExport, diffSettings, "Predefined object PgDB" + fileName +
                 " is not equal to exported'n'loaded.");
 
-        assertDiff(dbAfterExport, dbFromFile, diffSettings,
+        assertDiff(databaseProvider, dbAfterExport, dbFromFile, diffSettings,
                 "Exported predefined object is not equal to file " + fileName);
     }
 
