@@ -25,26 +25,11 @@ import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.api.schema.ObjectReference;
-import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
-import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
 import org.pgcodekeeper.core.database.base.parser.FullAnalyze;
-import org.pgcodekeeper.core.database.ch.ChDatabaseProvider;
-import org.pgcodekeeper.core.database.ch.loader.ChDumpLoader;
-import org.pgcodekeeper.core.database.ch.loader.ChProjectLoader;
-import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
-import org.pgcodekeeper.core.database.ms.MsDatabaseProvider;
-import org.pgcodekeeper.core.database.ms.loader.MsDumpLoader;
-import org.pgcodekeeper.core.database.ms.loader.MsProjectLoader;
-import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
-import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
-import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
-import org.pgcodekeeper.core.database.pg.loader.PgProjectLoader;
-import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.DiffSettings;
-import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.io.IOException;
@@ -76,16 +61,7 @@ public final class IntegrationTestUtils {
         InputStreamProvider input = () -> c.getResourceAsStream(resource);
         String inputObjectName = "test/" + c.getName() + '/' + resource;
 
-        AbstractDumpLoader<?> loader;
-        if (databaseProvider instanceof MsDatabaseProvider) {
-            loader = new MsDumpLoader(input, inputObjectName, diffSettings);
-        } else if (databaseProvider instanceof PgDatabaseProvider) {
-            loader = new PgDumpLoader(input, inputObjectName, diffSettings);
-        } else if (databaseProvider instanceof ChDatabaseProvider) {
-            loader = new ChDumpLoader(input, inputObjectName, diffSettings);
-        } else {
-            throw new UnsupportedOperationException();
-        }
+        var loader = databaseProvider.getDumpLoader(input, inputObjectName, diffSettings);
 
         IDatabase db = loader.load();
         if (analysis) {
@@ -98,20 +74,22 @@ public final class IntegrationTestUtils {
 
     public static void assertErrors(List<Object> errors) {
         var errorsString = errors.stream()
-        .map(Object::toString)
-        .collect(Collectors.joining(System.lineSeparator()));
+                .map(Object::toString)
+                .collect(Collectors.joining(System.lineSeparator()));
 
         Assertions.assertEquals("", errorsString);
     }
 
-    public static void assertDiffSame(IDatabase db, String template, DiffSettings diffSettings)
+    public static void assertDiffSame(IDatabaseProvider provider, IDatabase db, String template,
+                                      DiffSettings diffSettings)
             throws IOException, InterruptedException {
-        assertDiff(db, db, diffSettings, "File name template: " + template);
+        assertDiff(provider, db, db, diffSettings, "File name template: " + template);
     }
 
-    public static void assertDiff(IDatabase oldDb, IDatabase newDb, DiffSettings diffSettings, String errorMessage)
+    public static void assertDiff(IDatabaseProvider provider, IDatabase oldDb, IDatabase newDb,
+                                  DiffSettings diffSettings, String errorMessage)
             throws IOException, InterruptedException {
-        String script = PgCodeKeeperApi.diff(oldDb, newDb, diffSettings);
+        String script = PgCodeKeeperApi.diff(provider, oldDb, newDb, diffSettings);
         Assertions.assertEquals("", script.trim(), errorMessage);
     }
 
@@ -148,28 +126,29 @@ public final class IntegrationTestUtils {
     public static String getScript(IDatabaseProvider databaseProvider, String fileNameTemplate,
                                    DiffSettings diffSettings, Class<?> clazz)
             throws IOException, InterruptedException {
-        IDatabase dbOld = loadTestDump(databaseProvider, fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, diffSettings);
-        assertDiffSame(dbOld, fileNameTemplate, diffSettings);
+        var dbOld = loadTestDump(databaseProvider, fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, diffSettings);
+        assertDiffSame(databaseProvider, dbOld, fileNameTemplate, diffSettings);
 
-        IDatabase dbNew = loadTestDump(databaseProvider, fileNameTemplate + FILES_POSTFIX.NEW_SQL, clazz, diffSettings);
-        assertDiffSame(dbNew, fileNameTemplate, diffSettings);
+        var dbNew = loadTestDump(databaseProvider, fileNameTemplate + FILES_POSTFIX.NEW_SQL, clazz, diffSettings);
+        assertDiffSame(databaseProvider, dbNew, fileNameTemplate, diffSettings);
 
-        return PgCodeKeeperApi.diff(dbOld, dbNew, diffSettings);
+        return PgCodeKeeperApi.diff(databaseProvider, dbOld, dbNew, diffSettings);
     }
 
-    public static void assertEqualsDependencies(IDatabaseProvider databaseProvider, String dbTemplate, String userTemplateName,
-                                                Map<String, DbObjType> selected, Class<?> clazz, DiffSettings diffSettings)
+    public static void assertEqualsDependencies(IDatabaseProvider databaseProvider, String dbTemplate,
+                                                String userTemplateName, Map<String, DbObjType> selected,
+                                                Class<?> clazz, DiffSettings diffSettings)
             throws IOException, InterruptedException {
-        IDatabase oldDbFull = loadTestDump(databaseProvider, dbTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, diffSettings);
-        IDatabase newDbFull = loadTestDump(databaseProvider, dbTemplate + FILES_POSTFIX.NEW_SQL, clazz, diffSettings);
+        var oldDbFull = loadTestDump(databaseProvider, dbTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, diffSettings);
+        var newDbFull = loadTestDump(databaseProvider, dbTemplate + FILES_POSTFIX.NEW_SQL, clazz, diffSettings);
 
-        assertDiffSame(oldDbFull, dbTemplate, diffSettings);
-        assertDiffSame(newDbFull, dbTemplate, diffSettings);
+        assertDiffSame(databaseProvider, oldDbFull, dbTemplate, diffSettings);
+        assertDiffSame(databaseProvider, newDbFull, dbTemplate, diffSettings);
 
         TreeElement tree = DiffTree.create(diffSettings.getSettings(), oldDbFull, newDbFull, null);
 
         setSelected(selected, tree, oldDbFull, newDbFull);
-        String script = PgCodeKeeperApi.diff(tree, oldDbFull, newDbFull, diffSettings);
+        String script = PgCodeKeeperApi.diff(databaseProvider, oldDbFull, newDbFull, diffSettings, tree);
         var userSelTemplate = null == userTemplateName ? dbTemplate : dbTemplate + "_" + userTemplateName;
         assertResult(script, userSelTemplate, clazz);
     }
@@ -221,26 +200,6 @@ public final class IntegrationTestUtils {
         }
 
         return sb.toString();
-    }
-
-    public static AbstractProjectLoader<?> createProjectLoader(Path dirPath, ISettings settings, IDatabase database) {
-        return createProjectLoader(dirPath, new DiffSettings(settings), database);
-    }
-
-    public static AbstractProjectLoader<?> createProjectLoader(Path dirPath, DiffSettings diffSettings,
-                                                               IDatabase database) {
-        AbstractProjectLoader<?> loader;
-        if (database instanceof PgDatabase) {
-            loader = new PgProjectLoader(dirPath, diffSettings);
-        } else if (database instanceof MsDatabase) {
-            loader = new MsProjectLoader(dirPath, diffSettings);
-        } else if (database instanceof ChDatabase) {
-            loader = new ChProjectLoader(dirPath, diffSettings);
-        } else {
-            throw new IllegalStateException("Unknown database type");
-        }
-
-        return loader;
     }
 
     private IntegrationTestUtils() {

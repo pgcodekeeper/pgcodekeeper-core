@@ -77,7 +77,7 @@ class PgGpJdbcLoaderTest extends JdbcLoaderTest {
         settings.setEnableFunctionBodiesDependencies(true);
         var diffSettings = new DiffSettings(settings);
         var path = TestUtils.getFilePath(dumpFileName, getClass());
-        var dumpDb = databaseProvider.getDatabaseFromDump(path, diffSettings);
+        var dumpDb = databaseProvider.getDumpLoader(path, diffSettings).loadAndAnalyze();
         dumpDb.setVersion(version);
         var script = Files.readString(TestUtils.getFilePath(dumpFileName, getClass()));
 
@@ -85,17 +85,17 @@ class PgGpJdbcLoaderTest extends JdbcLoaderTest {
                 dumpFileName, settings, databaseProvider);
         ScriptParser parser = new ScriptParser(loader, dumpFileName, script);
 
-        var startConfDb = databaseProvider.getDatabaseFromJdbc(url, diffSettings);
+        var startConfDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
         IJdbcConnector connector = new PgJdbcConnector(url);
         try {
             new JdbcRunner(new NullMonitor()).runBatches(connector, parser.batch(), null);
 
-            var remoteDb = databaseProvider.getDatabaseFromJdbc(url, diffSettings);
+            var remoteDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
             List<Path> ignoreLists = List.of(TestUtils.getFilePath(ignoreListName, getClass()));
             for (var ignoreList : ignoreLists) {
                 diffSettings.addIgnoreList(ignoreList);
             }
-            var actual = PgCodeKeeperApi.diff(dumpDb, remoteDb, diffSettings);
+            var actual = PgCodeKeeperApi.diff(databaseProvider, dumpDb, remoteDb, diffSettings);
             Assertions.assertEquals("", actual, "Incorrect run dump %s on Database".formatted(dumpFileName));
         } finally {
             clearDb(settings, startConfDb, connector, url, databaseProvider);

@@ -38,7 +38,7 @@ class BrokenScriptTest {
         String resource = fileNameTemplate + FILES_POSTFIX.SQL;
         var diffSettings = new DiffSettings(new CoreSettings());
 
-        provider.getDatabaseFromDump(TestUtils.getFilePath(resource, getClass()), diffSettings);
+        provider.getDumpLoader(TestUtils.getFilePath(resource, getClass()), diffSettings).loadAndAnalyze();
         var errors = diffSettings.getErrors();
 
         Assertions.assertEquals(1, errors.size());

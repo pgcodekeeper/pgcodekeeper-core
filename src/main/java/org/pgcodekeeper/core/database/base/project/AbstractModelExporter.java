@@ -16,14 +16,15 @@
 package org.pgcodekeeper.core.database.base.project;
 
 import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.database.api.project.IModelExporter;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ISubElement;
+import org.pgcodekeeper.core.exception.DirectoryException;
 import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
-import org.pgcodekeeper.core.exception.DirectoryException;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.FileUtils;
@@ -48,7 +49,7 @@ import java.util.stream.Collectors;
  * <p>
  * Subclasses must implement database-specific methods for directory structure and file paths.
  */
-public abstract class AbstractModelExporter {
+public abstract class AbstractModelExporter implements IModelExporter {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractModelExporter.class);
 
@@ -147,12 +148,7 @@ public abstract class AbstractModelExporter {
         return path.resolve(fileName);
     }
 
-    /**
-     * Exports the complete database schema to directory structure.
-     * Creates output directory and exports all database objects as SQL files.
-     *
-     * @throws IOException if export operation fails
-     */
+    @Override
     public void exportFull() throws IOException {
         createOutDir();
 
@@ -183,13 +179,7 @@ public abstract class AbstractModelExporter {
         }
     }
 
-    /**
-     * Exports only changed objects based on comparison between old and new schemas.
-     * Handles object additions, deletions, and modifications.
-     *
-     * @throws IOException           if export operation fails
-     * @throws PgCodeKeeperException if old database is null or directory issues occur
-     */
+    @Override
     public void exportPartial() throws IOException, PgCodeKeeperException {
         if (oldDb == null) {
             String msg = Messages.ModelExporter_log_old_database_not_null;
@@ -243,12 +233,7 @@ public abstract class AbstractModelExporter {
         writeDumps(dumps);
     }
 
-    /**
-     * Exports selected objects as a new project structure.
-     * Creates clean directory structure with only specified objects.
-     *
-     * @throws IOException if export operation fails
-     */
+    @Override
     public void exportProject() throws IOException {
         createOutDir();
 

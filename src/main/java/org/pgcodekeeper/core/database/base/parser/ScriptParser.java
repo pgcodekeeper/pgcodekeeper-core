@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.parser;
 
-import java.io.*;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.database.api.loader.IDumpLoader;
 import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
@@ -26,6 +22,10 @@ import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Parses and analyzes SQL scripts, detecting dangerous statements and syntax errors.
@@ -43,9 +43,9 @@ public final class ScriptParser {
     /**
      * Creates a new script parser and immediately processes the script.
      *
-     * @param loader   the dump loader to use for parsing
-     * @param name     name of the script (for error reporting)
-     * @param script   the SQL script content to parse
+     * @param loader the dump loader to use for parsing
+     * @param name   name of the script (for error reporting)
+     * @param script the SQL script content to parse
      * @throws IOException          if there's an error reading the script
      * @throws InterruptedException if parsing is interrupted
      */

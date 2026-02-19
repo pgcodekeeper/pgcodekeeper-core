@@ -15,22 +15,29 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch;
 
-import org.antlr.v4.runtime.*;
+import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.script.IScriptBuilder;
 import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;
 import org.pgcodekeeper.core.database.ch.loader.ChDumpLoader;
 import org.pgcodekeeper.core.database.ch.loader.ChJdbcLoader;
 import org.pgcodekeeper.core.database.ch.loader.ChProjectLoader;
-import org.pgcodekeeper.core.database.ch.parser.ChCustomAntlrErrorStrategy;
-import org.pgcodekeeper.core.database.ch.parser.generated.CHLexer;
-import org.pgcodekeeper.core.database.ch.parser.generated.CHParser;
-import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.database.ch.project.ChModelExporter;
+import org.pgcodekeeper.core.database.ch.project.ChProjectUpdater;
+import org.pgcodekeeper.core.database.ch.script.ChScriptBuilder;
+import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.InputStreamProvider;
 
-import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
+/**
+ * {@link IDatabaseProvider} implementation for ClickHouse databases.
+ */
 public class ChDatabaseProvider implements IDatabaseProvider {
 
     @Override
@@ -44,40 +51,44 @@ public class ChDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public Lexer getLexer(CharStream stream) {
-        return new CHLexer(stream);
-    }
-
-    @Override
-    public Parser getParser(CommonTokenStream stream) {
-        return new CHParser(stream);
-    }
-
-    @Override
-    public ANTLRErrorStrategy getErrorHandler() {
-        return new ChCustomAntlrErrorStrategy();
-    }
-
-    @Override
     public IJdbcConnector getJdbcConnector(String url) {
         return new ChJdbcConnector(url);
     }
 
     @Override
-    public ChDatabase getDatabaseFromJdbc(String url, DiffSettings diffSettings)
-            throws IOException, InterruptedException {
-        return new ChJdbcLoader(getJdbcConnector(url), diffSettings).loadAndAnalyze();
+    public ChModelExporter getModelExporter(Path outDir, IDatabase newDb, List<TreeElement> changedObjects,
+                                            ISettings settings) {
+        return new ChModelExporter(outDir, newDb, null, changedObjects, Consts.UTF_8, settings);
     }
 
     @Override
-    public ChDatabase getDatabaseFromDump(Path path, DiffSettings diffSettings)
-            throws IOException, InterruptedException {
-        return new ChDumpLoader(path, diffSettings).loadAndAnalyze();
+    public ChProjectUpdater getProjectUpdater(IDatabase newDb, IDatabase oldDb, List<TreeElement> changedObjects,
+                                              Path projectPath, ISettings settings) {
+        return new ChProjectUpdater(newDb, oldDb, changedObjects, Consts.UTF_8, projectPath, false, settings);
     }
 
     @Override
-    public ChDatabase getDatabaseFromProject(Path path, DiffSettings diffSettings)
-            throws IOException, InterruptedException {
-        return new ChProjectLoader(path, diffSettings).loadAndAnalyze();
+    public ChJdbcLoader getJdbcLoader(String url, DiffSettings diffSettings) {
+        return new ChJdbcLoader(getJdbcConnector(url), diffSettings);
+    }
+
+    @Override
+    public ChDumpLoader getDumpLoader(Path path, DiffSettings diffSettings) {
+        return new ChDumpLoader(path, diffSettings);
+    }
+
+    @Override
+    public ChDumpLoader getDumpLoader(InputStreamProvider input, String name, DiffSettings diffSettings) {
+        return new ChDumpLoader(input, name, diffSettings);
+    }
+
+    @Override
+    public ChProjectLoader getProjectLoader(Path path, DiffSettings diffSettings) {
+        return new ChProjectLoader(path, diffSettings);
+    }
+
+    @Override
+    public IScriptBuilder getScriptBuilder(DiffSettings diffSettings) {
+        return new ChScriptBuilder(diffSettings);
     }
 }

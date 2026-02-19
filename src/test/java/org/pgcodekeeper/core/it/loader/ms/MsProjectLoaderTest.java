@@ -46,7 +46,7 @@ class MsProjectLoaderTest {
 
         createIgnoredSchemaFile(dir);
 
-        var db = IntegrationTestUtils.createProjectLoader(dir, diffSettings, msDbDump).load();
+        var db = databaseProvider.getProjectLoader(dir, diffSettings).load();
 
         for (var dbSchema : db.getSchemas()) {
             if (IGNORED_SCHEMAS_LIST.contains(dbSchema.getName())) {

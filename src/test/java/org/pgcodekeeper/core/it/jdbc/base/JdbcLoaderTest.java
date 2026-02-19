@@ -41,16 +41,16 @@ public abstract class JdbcLoaderTest {
                            IJdbcConnector connector, String url, IDatabaseProvider databaseProvider)
             throws IOException, InterruptedException, SQLException {
         var diffSettings = new DiffSettings(settings);
-        var oldDb = databaseProvider.getDatabaseFromJdbc(url, diffSettings);
-        var dropScript = PgCodeKeeperApi.diff(oldDb, startConfDb, diffSettings);
+        var oldDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
+        var dropScript = PgCodeKeeperApi.diff(databaseProvider, oldDb, startConfDb, diffSettings);
 
         var loader = createDumpLoader(() -> new ByteArrayInputStream(dropScript.getBytes(StandardCharsets.UTF_8)),
                 CLEAN_DB_SCRIPT, settings, databaseProvider);
         new JdbcRunner(new NullMonitor()).runBatches(connector,
                 new ScriptParser(loader, CLEAN_DB_SCRIPT, dropScript).batch(), null);
 
-        var newDb = databaseProvider.getDatabaseFromJdbc(url, diffSettings);
-        var diff = PgCodeKeeperApi.diff(startConfDb, newDb, diffSettings);
+        var newDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
+        var diff = PgCodeKeeperApi.diff(databaseProvider, startConfDb, newDb, diffSettings);
         if (!diff.isEmpty()) {
             throw new IllegalStateException("Database cleared incorrect. in database:\n\n" + diff);
         }

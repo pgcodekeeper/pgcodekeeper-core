@@ -13,40 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.database.api.loader;
-
-import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.settings.ISettings;
+package org.pgcodekeeper.core.database.api.script;
 
 import java.io.IOException;
-import java.util.List;
+
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.model.difftree.TreeElement;
 
 /**
- * Interface for database loader
+ * Interface for script builder
  */
-public interface ILoader {
+public interface IScriptBuilder {
 
     /**
-     * Loads the database schema.
+     * Gets selected elements from root, compares them between source and target
+     * and generates a migration script.
      *
-     * @return loaded database
+     * @param root  the root of the diff tree
+     * @param oldDb the source database schema
+     * @param newDb the target database schema
+     * @return SQL migration script
+     * @throws IOException if an I/O error occurs
      */
-    IDatabase load() throws IOException, InterruptedException;
-
-    /**
-     * Loads the database schema and runs full expression analysis.
-     *
-     * @return loaded and fully analyzed database
-     */
-    IDatabase loadAndAnalyze() throws IOException, InterruptedException;
-
-    /**
-     * @return configuration settings
-     */
-    ISettings getSettings();
-
-    /**
-     * @return unmodifiable list of errors during loading
-     */
-    List<Object> getErrors();
+    public String createScript(TreeElement root, IDatabase oldDb, IDatabase newDb) throws IOException;
 }

@@ -17,13 +17,14 @@ package org.pgcodekeeper.core.model.graph;
 
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
-import org.pgcodekeeper.core.utils.Utils;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ITable;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.base.schema.StatementUtils;
+import org.pgcodekeeper.core.utils.Utils;
+
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -78,10 +79,10 @@ public class DepcyFinder {
     /**
      * Finds dependencies for a specific database statement.
      *
-     * @param depth maximum depth to search
-     * @param isReverse whether to search reverse dependencies
+     * @param depth          maximum depth to search
+     * @param isReverse      whether to search reverse dependencies
      * @param filterObjTypes object types to filter by
-     * @param st the statement to find dependencies for
+     * @param st             the statement to find dependencies for
      * @return list of formatted dependency strings
      */
     public static List<String> byStatement(int depth, boolean isReverse, Collection<DbObjType> filterObjTypes,

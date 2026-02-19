@@ -13,40 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.database.api.loader;
-
-import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.settings.ISettings;
+package org.pgcodekeeper.core.database.api.project;
 
 import java.io.IOException;
-import java.util.List;
 
-/**
- * Interface for database loader
- */
-public interface ILoader {
+public interface IProjectUpdater {
 
     /**
-     * Loads the database schema.
+     * Performs partial update of database project.
+     * Updates only changed objects with safe backup and restore on failure.
      *
-     * @return loaded database
+     * @throws IOException if update operation fails
      */
-    IDatabase load() throws IOException, InterruptedException;
+    void updatePartial() throws IOException;
 
     /**
-     * Loads the database schema and runs full expression analysis.
+     * Performs full update of database project.
+     * Completely regenerates project structure with optional overrides preservation.
      *
-     * @return loaded and fully analyzed database
+     * @param projectOnly whether to preserve overrides directory during update
+     * @throws IOException if update operation fails
      */
-    IDatabase loadAndAnalyze() throws IOException, InterruptedException;
-
-    /**
-     * @return configuration settings
-     */
-    ISettings getSettings();
-
-    /**
-     * @return unmodifiable list of errors during loading
-     */
-    List<Object> getErrors();
+    void updateFull(boolean projectOnly) throws IOException;
 }

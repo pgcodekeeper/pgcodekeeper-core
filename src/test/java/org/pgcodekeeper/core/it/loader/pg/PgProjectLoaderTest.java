@@ -54,7 +54,7 @@ class PgProjectLoaderTest {
 
         createIgnoredSchemaFile(dir);
 
-        IDatabase db = IntegrationTestUtils.createProjectLoader(dir, diffSettings, dbDump).load();
+        IDatabase db = databaseProvider.getProjectLoader(dir, diffSettings).load();
 
         for (var dbSchema : db.getSchemas()) {
             if (IGNORED_SCHEMAS_LIST.contains(dbSchema.getName())) {
@@ -87,7 +87,7 @@ class PgProjectLoaderTest {
 
         new PgModelExporter(dir, dbDump, null, selected, Consts.UTF_8, settings).exportProject();
 
-        IDatabase loader = IntegrationTestUtils.createProjectLoader(dir, settings, dbDump).load();
+        IDatabase loader = databaseProvider.getProjectLoader(dir, diffSettings).load();
         var objects = loader.getDescendants().toList();
         var ignoredObj = "people";
         for (var st : objects) {
