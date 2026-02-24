@@ -19,6 +19,7 @@ import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
+import org.pgcodekeeper.core.database.base.loader.AbstractLibraryLoader;
 import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
 import org.pgcodekeeper.core.database.base.parser.AntlrTaskManager;
 import org.pgcodekeeper.core.database.ms.project.MsWorkDirs;
@@ -29,6 +30,8 @@ import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * MS SQL Server project loader for loading database schemas from project directory structures.
@@ -39,6 +42,11 @@ public class MsProjectLoader extends AbstractProjectLoader<MsDatabase> {
         super(dirPath, diffSettings);
     }
 
+    public MsProjectLoader(Path dirPath, DiffSettings diffSettings, Collection<String> libXmls,
+                           Collection<String> libs, Collection<String> libsWithoutPriv, Path metaPath) {
+        super(dirPath, diffSettings, libXmls, libs, libsWithoutPriv, metaPath);
+    }
+
     @Override
     protected MsDatabase createDatabase() {
         return new MsDatabase();
@@ -47,6 +55,11 @@ public class MsProjectLoader extends AbstractProjectLoader<MsDatabase> {
     @Override
     protected AbstractDumpLoader<MsDatabase> createDumpLoader(Path file) {
         return new MsDumpLoader(file, diffSettings);
+    }
+
+    @Override
+    protected AbstractLibraryLoader<MsDatabase> createLibraryLoader(MsDatabase db) {
+        return new MsLibraryLoader(db, metaPath, new HashSet<>(), diffSettings);
     }
 
     @Override

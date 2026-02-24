@@ -33,6 +33,7 @@ import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -85,6 +86,12 @@ public class ChDatabaseProvider implements IDatabaseProvider {
     @Override
     public ChProjectLoader getProjectLoader(Path path, DiffSettings diffSettings) {
         return new ChProjectLoader(path, diffSettings);
+    }
+
+    @Override
+    public ChProjectLoader getProjectLoader(Path path, DiffSettings diffSettings, Collection<String> libXmls,
+                                            Collection<String> libs, Collection<String> libsWithoutPriv, Path metaPath) {
+        return new ChProjectLoader(path, diffSettings, libXmls, libs, libsWithoutPriv, metaPath);
     }
 
     @Override

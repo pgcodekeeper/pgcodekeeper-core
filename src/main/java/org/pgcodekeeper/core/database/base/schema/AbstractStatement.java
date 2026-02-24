@@ -342,6 +342,12 @@ public abstract class AbstractStatement implements IStatement, IHashable {
     }
 
     @Override
+    public void clearPrivileges() {
+        privileges.clear();
+        resetHash();
+    }
+
+    @Override
     public String getOwner() {
         return owner;
     }

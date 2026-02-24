@@ -139,6 +139,11 @@ public interface IStatement {
     Set<IPrivilege> getPrivileges();
 
     /**
+     * Removes all privileges from this statement.
+     */
+    void clearPrivileges();
+
+    /**
      * Gets the SQL representation of this statement with optional formatting.
      *
      * @param isFormatted whether to apply formatting to the SQL

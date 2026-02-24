@@ -19,12 +19,17 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.TestUtils;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
 import org.pgcodekeeper.core.ignorelist.IgnoreList;
 import org.pgcodekeeper.core.ignorelist.IgnoreParser;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
+import org.pgcodekeeper.core.library.Library;
+import org.pgcodekeeper.core.library.LibraryXmlStore;
 import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeFlattener;
@@ -32,7 +37,9 @@ import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 
 import static org.pgcodekeeper.core.it.IntegrationTestUtils.*;
@@ -41,6 +48,10 @@ import static org.pgcodekeeper.core.it.IntegrationTestUtils.*;
  * Tests for PostgreSQL ProjectLoader functionality
  */
 class PgProjectLoaderTest {
+
+    private static final String RESOURCE_FIRST_LIB = "lib_first_table.sql";
+    private static final String RESOURCE_SECOND_LIB = "lib_second_table.sql";
+    private static final String RESOURCE_OVERRIDE_EMP = "override_emp.sql";
 
     private final PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
 
@@ -95,6 +106,105 @@ class PgProjectLoaderTest {
             if (stName.startsWith(ignoredObj)) {
                 Assertions.fail("Ignored object loaded " + stName);
             }
+        }
+    }
+
+    @Test
+    void testProjectLoaderWithLibrary(@TempDir Path dir) throws IOException, InterruptedException {
+        var settings = new CoreSettings();
+        var diffSettings = new DiffSettings(settings);
+        IDatabase dbDump = loadTestDump(databaseProvider, RESOURCE_DUMP, IntegrationTestUtils.class, diffSettings);
+
+        Path projectDir = dir.resolve("project");
+        new PgModelExporter(projectDir, dbDump, Consts.UTF_8, settings).exportFull();
+
+        String libPath = TestUtils.getFilePath(RESOURCE_FIRST_LIB, getClass()).toString();
+
+        IDatabase db = databaseProvider.getProjectLoader(projectDir, diffSettings, Collections.emptyList(),
+                List.of(libPath), Collections.emptyList(), dir.resolve("meta")).load();
+
+        assertLibLoaded(db, "lib_first_table", true);
+    }
+
+    @Test
+    void testProjectLoaderWithLibraryWithoutPrivileges(@TempDir Path dir) throws IOException, InterruptedException {
+        var settings = new CoreSettings();
+        var diffSettings = new DiffSettings(settings);
+        IDatabase dbDump = loadTestDump(databaseProvider, RESOURCE_DUMP, IntegrationTestUtils.class, diffSettings);
+
+        Path projectDir = dir.resolve("project");
+        new PgModelExporter(projectDir, dbDump, Consts.UTF_8, settings).exportFull();
+
+        String libPath = TestUtils.getFilePath(RESOURCE_FIRST_LIB, getClass()).toString();
+
+        IDatabase db = databaseProvider.getProjectLoader(projectDir, diffSettings, Collections.emptyList(),
+                Collections.emptyList(), List.of(libPath), dir.resolve("meta")).load();
+
+        assertLibLoaded(db, "lib_first_table", false);
+    }
+
+    @Test
+    void testProjectLoaderWithLibraryFromXml(@TempDir Path dir) throws IOException, InterruptedException {
+        var settings = new CoreSettings();
+        var diffSettings = new DiffSettings(settings);
+        IDatabase dbDump = loadTestDump(databaseProvider, RESOURCE_DUMP, IntegrationTestUtils.class, diffSettings);
+
+        Path projectDir = dir.resolve("project");
+        new PgModelExporter(projectDir, dbDump, Consts.UTF_8, settings).exportFull();
+
+        String libWithPrivPath = TestUtils.getFilePath(RESOURCE_FIRST_LIB, getClass()).toString();
+        String libWithoutPrivPath = TestUtils.getFilePath(RESOURCE_SECOND_LIB, getClass()).toString();
+        Path depsFile = dir.resolve(".dependencies");
+        new LibraryXmlStore(depsFile).writeDependencies(List.of(
+                new Library("", libWithPrivPath, false, ""),
+                new Library("", libWithoutPrivPath, true, "")), false);
+
+        IDatabase db = databaseProvider.getProjectLoader(projectDir, diffSettings, List.of(depsFile.toString()),
+                Collections.emptyList(), Collections.emptyList(), dir.resolve("meta")).load();
+
+        assertLibLoaded(db, "lib_first_table", true);
+        assertLibLoaded(db, "lib_second_table", false);
+    }
+
+    @Test
+    void testProjectLoaderWithOverrides(@TempDir Path dir) throws IOException, InterruptedException {
+        var settings = new CoreSettings();
+        var diffSettings = new DiffSettings(settings);
+        IDatabase dbDump = loadTestDump(databaseProvider, RESOURCE_DUMP, IntegrationTestUtils.class, diffSettings);
+
+        Path projectDir = dir.resolve("project");
+        new PgModelExporter(projectDir, dbDump, Consts.UTF_8, settings).exportFull();
+
+        Path overrideDir = projectDir.resolve("OVERRIDES/SCHEMA/public/TABLE");
+        Files.createDirectories(overrideDir);
+        var empPath = TestUtils.getFilePath(RESOURCE_OVERRIDE_EMP, getClass());
+        Files.copy(empPath, overrideDir.resolve("emp.sql"));
+
+        IDatabase db = databaseProvider.getProjectLoader(projectDir, diffSettings).load();
+
+        var emp = db.getStatement(new ObjectReference("public", "emp", DbObjType.TABLE));
+        Assertions.assertNotNull(emp);
+        var hasSelectGrant = emp.getPrivileges().stream().anyMatch(
+                p -> !p.isRevoke() && "SELECT".equals(p.getPermission())
+                        && "override_user".equals(p.getRole()));
+
+        Assertions.assertEquals("override_user", emp.getOwner());
+        Assertions.assertTrue(hasSelectGrant);
+    }
+
+    private static void assertLibLoaded(IDatabase db, String tableName, boolean isWithPrivileges) {
+        var libTableRef = new ObjectReference("public", tableName, DbObjType.TABLE);
+        var libTable = db.getStatement(libTableRef);
+
+        Assertions.assertNotNull(libTable);
+        Assertions.assertTrue(libTable.isLib());
+
+        if (isWithPrivileges) {
+            Assertions.assertEquals("lib_user", libTable.getOwner());
+            Assertions.assertFalse(libTable.getPrivileges().isEmpty());
+        } else {
+            Assertions.assertNull(libTable.getOwner());
+            Assertions.assertTrue(libTable.getPrivileges().isEmpty());
         }
     }
 }
