@@ -17,6 +17,7 @@ package org.pgcodekeeper.core.database.pg.loader;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
+import org.pgcodekeeper.core.database.base.loader.AbstractLibraryLoader;
 import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
 import org.pgcodekeeper.core.database.pg.project.PgWorkDirs;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
@@ -26,6 +27,8 @@ import org.pgcodekeeper.core.utils.Utils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.stream.Stream;
 
 /**
@@ -37,6 +40,11 @@ public class PgProjectLoader extends AbstractProjectLoader<PgDatabase> {
         super(dirPath, diffSettings);
     }
 
+    public PgProjectLoader(Path dirPath, DiffSettings diffSettings, Collection<String> libXmls,
+                           Collection<String> libs, Collection<String> libsWithoutPriv, Path metaPath) {
+        super(dirPath, diffSettings, libXmls, libs, libsWithoutPriv, metaPath);
+    }
+
     @Override
     protected PgDatabase createDatabase() {
         return new PgDatabase();
@@ -45,6 +53,11 @@ public class PgProjectLoader extends AbstractProjectLoader<PgDatabase> {
     @Override
     protected AbstractDumpLoader<PgDatabase> createDumpLoader(Path file) {
         return new PgDumpLoader(file, diffSettings);
+    }
+
+    @Override
+    protected AbstractLibraryLoader<PgDatabase> createLibraryLoader(PgDatabase db) {
+        return new PgLibraryLoader(db, metaPath, new HashSet<>(), diffSettings);
     }
 
     @Override

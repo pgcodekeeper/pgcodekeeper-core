@@ -29,6 +29,7 @@ import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -108,6 +109,21 @@ public interface IDatabaseProvider {
      * @see DiffSettings
      */
     IProjectLoader getProjectLoader(Path path, DiffSettings diffSettings);
+
+    /**
+     * @param path              path to project directory
+     * @param diffSettings      unified context object containing settings, monitor, ignore schema list, and error accumulator
+     * @param libXmls           paths to XML files with library dependency definitions
+     * @param libs              paths to library dependencies
+     * @param libsWithoutPriv   paths to library dependencies with ignored privileges
+     * @param metaPath          path to metadata directory for storing downloaded and unzipped library files, may be null
+     *                          if no ZIP or URI libraries are expected
+     * @return project loader for the DBMS
+     * @see IProjectLoader
+     * @see DiffSettings
+     */
+    IProjectLoader getProjectLoader(Path path, DiffSettings diffSettings, Collection<String> libXmls,
+                                    Collection<String> libs, Collection<String> libsWithoutPriv, Path metaPath);
 
     /**
      * @param diffSettings configuration settings
