@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [14.0.0] - 2026-02-25
+
+### Added
+
 - Added comments processing for NOT NULL constraints in PostgreSQL.
 - Added connection test with Greenplum.
 - Added a setting for adding in migration script ON CLUSTER syntax to ClickHouse (experimentally).
@@ -2419,7 +2427,8 @@ We increment major version in this release due to decision to shift our developm
 
 - ORDER BY parsing has been added to the aggregate functions.
 
-[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v13.1.0...HEAD
+[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.0.0...HEAD
+[14.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v13.1.0...v14.0.0
 [13.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v13.0.0...v13.1.0
 [13.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v12.0.0...v13.0.0
 [12.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.2.0...v12.0.0
