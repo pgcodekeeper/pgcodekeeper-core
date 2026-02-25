@@ -22,7 +22,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
 import org.pgcodekeeper.core.database.base.formatter.*;
-import org.pgcodekeeper.core.database.base.formatter.FormatItem;
+import org.pgcodekeeper.core.database.api.formatter.FormatItem;
 import org.pgcodekeeper.core.database.base.parser.CodeUnitToken;
 import org.pgcodekeeper.core.database.ch.parser.generated.*;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
@@ -45,13 +45,6 @@ public class ChFormatter extends AbstractFormatter {
         super(source, offset, length, config);
     }
 
-
-    /**
-     * Gets the list of formatting changes to apply to the ClickHouse SQL text.
-     * Parses the SQL and applies formatting rules to create view statements and their subqueries.
-     *
-     * @return List of FormatItem objects representing the formatting changes
-     */
     @Override
     public List<FormatItem> getFormatItems() {
         List<FormatItem> changes = new ArrayList<>();

@@ -13,17 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.database.api.schema;
+package org.pgcodekeeper.core.database.api.formatter;
+
+import java.util.List;
 
 /**
- * Interface for database column
+ * Interface for SQL formatter implementations.
+ * Provides common functionality and structure for database-specific formatters.
  */
-public interface IColumn extends ISubElement {
+public interface IFormatter {
 
-    @Override
-    default DbObjType getStatementType() {
-        return DbObjType.COLUMN;
-    }
-    String getType();
-    boolean isNotNull();
+    /**
+     * Gets the list of formatting changes to apply to the SQL text.
+     * Parses the SQL and applies formatting rules based on the configuration.
+     *
+     * @return List of FormatItem objects representing formatting changes
+     */
+    List<FormatItem> getFormatItems();
+
+    /**
+     * Formats the source text according to configuration and database type.
+     *
+     * @return Formatted SQL string
+     */
+    String formatText();
 }

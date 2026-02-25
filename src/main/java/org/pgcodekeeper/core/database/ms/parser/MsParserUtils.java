@@ -136,7 +136,7 @@ public final class MsParserUtils {
      * Clears the MS SQL parser cache.
      */
     // new method for cleanCacheOfAllParsers()
-    public void cleanCacheMsParser() {
+    public static void cleanCacheMsParser() {
         if (msParserLastStart != 0) {
             cleanParserCache();
         }

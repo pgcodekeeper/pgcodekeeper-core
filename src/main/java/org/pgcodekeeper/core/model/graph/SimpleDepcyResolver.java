@@ -101,7 +101,7 @@ public class SimpleDepcyResolver {
      * @param entity the statement to find connections for
      * @return set of statements that the entity depends on
      */
-    public Set<IStatement> getConnectedTo(AbstractStatement entity) {
+    public Set<IStatement> getConnectedTo(IStatement entity) {
         Set<IStatement> connected = new HashSet<>();
         Graph<IStatement, DefaultEdge> currentGraph = oldDepcyGraph.getGraph();
         for (DefaultEdge e : currentGraph.outgoingEdgesOf(entity)) {

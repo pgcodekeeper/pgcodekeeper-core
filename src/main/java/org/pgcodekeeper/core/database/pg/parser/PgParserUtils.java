@@ -169,7 +169,7 @@ public final class PgParserUtils {
      * Clears the PostgreSQL parser cache.
      */
     // new method for cleanCacheOfAllParsers()
-    protected void cleanCachePgParser() {
+    public static void cleanCachePgParser() {
         if (pgParserLastStart != 0) {
             cleanParserCache();
         }

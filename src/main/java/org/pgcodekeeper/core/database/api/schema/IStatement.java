@@ -285,4 +285,8 @@ public interface IStatement {
     void setLocation(ObjectLocation loc);
 
     boolean hasChildren();
+
+    void setComment(String comment);
+
+    String getAuthor();
 }

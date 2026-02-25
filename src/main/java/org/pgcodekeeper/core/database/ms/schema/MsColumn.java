@@ -457,6 +457,11 @@ public class MsColumn extends MsAbstractStatement implements IColumn {
     }
 
     @Override
+    public boolean isNotNull() {
+        return notNull;
+    }
+
+    @Override
     public void computeHash(Hasher hasher) {
         hasher.put(isSparse);
         hasher.put(isRowGuidCol);
