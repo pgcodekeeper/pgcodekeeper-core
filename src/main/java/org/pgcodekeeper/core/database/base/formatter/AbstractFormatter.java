@@ -17,13 +17,15 @@ package org.pgcodekeeper.core.database.base.formatter;
 
 import java.util.*;
 
+import org.pgcodekeeper.core.database.api.formatter.FormatItem;
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
+import org.pgcodekeeper.core.database.api.formatter.IFormatter;
 
 /**
  * Abstract base class for SQL formatter implementations.
  * Provides common functionality and structure for database-specific formatters.
  */
-public abstract class AbstractFormatter {
+public abstract class AbstractFormatter implements IFormatter {
 
     protected final String source;
     protected final int start;
@@ -37,13 +39,7 @@ public abstract class AbstractFormatter {
         this.config = config;
     }
 
-    protected abstract List<FormatItem> getFormatItems();
-
-    /**
-     * Formats the source text according to configuration and database type.
-     *
-     * @return Formatted SQL string
-     */
+    @Override
     public String formatText() {
         List<FormatItem> list = getFormatItems();
         if (list.isEmpty()) {

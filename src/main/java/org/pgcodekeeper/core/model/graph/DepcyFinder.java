@@ -86,7 +86,7 @@ public class DepcyFinder {
      * @return list of formatted dependency strings
      */
     public static List<String> byStatement(int depth, boolean isReverse, Collection<DbObjType> filterObjTypes,
-                                           AbstractStatement st) {
+                                           IStatement st) {
         DepcyFinder depcyFinder = new DepcyFinder(st.getDatabase(), depth, isReverse, filterObjTypes, false);
         depcyFinder.fillTree(st, START_LEVEL, new HashSet<>(), null, 0);
         return depcyFinder.getResult();

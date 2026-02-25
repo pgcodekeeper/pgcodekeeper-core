@@ -97,8 +97,14 @@ public class MetaStatement implements IStatement, Serializable {
         return comment;
     }
 
+    @Override
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    @Override
+    public String getAuthor() {
+        throw new UnsupportedOperationException();
     }
 
     /**

@@ -23,7 +23,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.Lexer;
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
 import org.pgcodekeeper.core.database.base.formatter.*;
-import org.pgcodekeeper.core.database.base.formatter.FormatItem;
+import org.pgcodekeeper.core.database.api.formatter.FormatItem;
 import org.pgcodekeeper.core.database.base.parser.CodeUnitToken;
 import org.pgcodekeeper.core.database.pg.parser.generated.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
@@ -49,12 +49,6 @@ public class PgFormatter extends AbstractFormatter {
         super(source, offset, length, config);
     }
 
-    /**
-     * Gets the list of formatting changes to apply to the SQL text.
-     * Parses the SQL and applies formatting rules based on the configuration.
-     *
-     * @return List of FormatItem objects representing formatting changes
-     */
     @Override
     public List<FormatItem> getFormatItems() {
         List<FormatItem> changes = new ArrayList<>();

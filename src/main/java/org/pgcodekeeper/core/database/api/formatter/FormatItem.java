@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.pgcodekeeper.core.database.base.formatter;
+package org.pgcodekeeper.core.database.api.formatter;
 
 /**
  * Represents a single formatting operation to be applied to SQL text.
