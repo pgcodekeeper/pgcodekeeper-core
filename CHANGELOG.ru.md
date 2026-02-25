@@ -9,6 +9,14 @@
 
 ### Добавлено
 
+### Изменено
+
+### Исправлено
+
+## [14.0.0] - 2026-02-25
+
+### Добавлено
+
 - Добавлена обработка комментариев для ограничений NOT NULL в PostgreSQL.
 - Добавлены тесты соединения Greenplum.
 - Добавлена настройка для добавления в скрипт миграции синтаксиса ON CLUSTER для таблиц в ClickHouse (экспериментально).
@@ -2420,7 +2428,8 @@
 
 - Добавлен парсинг ORDER BY для агрегатных функции.
 
-[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v13.1.0...HEAD
+[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.0.0...HEAD
+[14.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v13.1.0...14.0.0
 [13.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v13.0.0...v13.1.0
 [13.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v12.0.0...v13.0.0
 [12.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.2.0...v12.0.0
