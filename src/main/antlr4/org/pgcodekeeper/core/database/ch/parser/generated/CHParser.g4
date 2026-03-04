@@ -1300,6 +1300,7 @@ data_type
     | BINARY VARYING
     | BIT
     | BLOB
+    | BOOL
     | BOOLEAN
     | BYTE
     | BYTEA
@@ -1311,9 +1312,10 @@ data_type
     | CHARACTER VARYING
     | CLOB
     | DATE
-    | DATETIME (LPAREN STRING_LITERAL RPAREN)?
+    | DATE32
+    | (DATETIME | DATETIME32) (LPAREN STRING_LITERAL RPAREN)?
     | DATETIME64 LPAREN number_literal (COMMA STRING_LITERAL)? RPAREN
-    | DECIMAL LPAREN signed_number_literal COMMA signed_number_literal RPAREN
+    | (DEC | DECIMAL) LPAREN signed_number_literal COMMA signed_number_literal RPAREN
     | DECIMAL_BIT LPAREN signed_number_literal RPAREN
     | DOUBLE PRECISION? precision?
     | DYNAMIC (LPAREN MAX_TYPES EQ_SINGLE NUMBER RPAREN)?
@@ -1360,9 +1362,22 @@ data_type
     | UUID
     | VARBINARY
     | VARCHAR
+    | VARCHAR2
     | VARIANT (LPAREN data_type (COMMA data_type)* RPAREN)
     | YEAR
-    | (INT | INTEGER | BIGINT | MEDIUMINT | SMALLINT | TINYINT) (UNSIGNED | SIGNED)? precision?
+    | YEARS
+    | YYYY
+    | integer_types (UNSIGNED | SIGNED)? precision?
+    ;
+
+integer_types
+    : INT
+    | INT1
+    | INTEGER
+    | BIGINT
+    | MEDIUMINT
+    | SMALLINT
+    | TINYINT
     ;
 
 geo_types
@@ -1418,7 +1433,7 @@ expr_primary
     : literal
     | (qualified_name DOT)? ASTERISK
     | qualified_name
-    | DATE STRING_LITERAL
+    | (DATE | DATE32) STRING_LITERAL
     | function_call
     | lambda_expr
     | blank_paren
@@ -1539,16 +1554,28 @@ literal
 
 interval
     : NANOSECOND
+    | NANOSECONDS
     | MICROSECOND
+    | MICROSECONDS
     | MILLISECOND
+    | MILLISECONDS
     | SECOND
+    | SECONDS
     | MINUTE
+    | MINUTES
     | HOUR
+    | HOURS
     | DAY
+    | DAYS
     | WEEK
+    | WEEKS
     | MONTH
+    | MONTHS
     | QUARTER
+    | QUARTERS
     | YEAR
+    | YEARS
+    | YYYY
     ;
 
 tokens_nonreserved
@@ -1561,8 +1588,6 @@ tokens_nonreserved
     | AFTER
     | AGGREGATE_FUNCTION
     | ALIAS
-    | ALTER
-    | AND
     | APPEND
     | APPLY
     | ARBITRARY
@@ -1583,6 +1608,7 @@ tokens_nonreserved
     | BINARY
     | BIT
     | BLOB
+    | BOOL
     | BOOLEAN
     | BOTH
     | BY
@@ -1592,7 +1618,6 @@ tokens_nonreserved
     | CACHE
     | CACHES
     | CANCEL
-    | CASE
     | CAST
     | CHANGED
     | CHANGEABLE_IN_READONLY
@@ -1618,7 +1643,6 @@ tokens_nonreserved
     | CONFIG
     | CONST
     | CONSTRAINT
-    | CREATE
     | CUBE
     | CURRENT
     | CURRENT_USER
@@ -1626,8 +1650,11 @@ tokens_nonreserved
     | DATABASE
     | DATABASES
     | DATE
+    | DATE32
     | DATETIME
+    | DATETIME32
     | DATETIME64
+    | DEC
     | DECIMAL
     | DECIMAL_BIT
     | DEDUPLICATE
@@ -1645,18 +1672,15 @@ tokens_nonreserved
     | DETACHED
     | DICTGET
     | DICTIONARIES
-    | DICTIONARY
     | DISK
     | DISTINCT
     | DISTRIBUTED
     | DIV
     | DNS
     | DOUBLE
-    | DROP
     | DYNAMIC
     | EMPTY
     | ENABLED
-    | END
     | ENGINE
     | ENGINES
     | ENUM
@@ -1689,7 +1713,6 @@ tokens_nonreserved
     | FLOAT
     | FLUSH
     | FOLLOWING
-    | FOR
     | FORGET
     | FREEZE
     | FUNCTION
@@ -1711,20 +1734,18 @@ tokens_nonreserved
     | ICEBERG
     | ID
     | IDENTIFIED
-    | IF
     | IMPLICIT
     | IMPERSONATE
-    | IN
     | INDEX
     | INDEXES
     | INDICES
     | INFILE
     | INHERIT
     | INJECTIVE
-    | INSERT
     | INSERTS
     | INSTRUMENT
     | INT
+    | INT1
     | INT_TYPE
     | INTEGER
     | INTERPOLATE
@@ -1735,7 +1756,6 @@ tokens_nonreserved
     | IP
     | IPV4
     | IPV6
-    | IS
     | IS_OBJECT_ID
     | JSON
     | KAFKA
@@ -1781,7 +1801,9 @@ tokens_nonreserved
     | METHODS
     | METRICS
     | MICROSECOND
+    | MICROSECONDS
     | MILLISECOND
+    | MILLISECONDS
     | MIN
     | MOD
     | MODEL
@@ -1796,6 +1818,7 @@ tokens_nonreserved
     | NAME
     | NAMED
     | NANOSECOND
+    | NANOSECONDS
     | NATS
     | NATIONAL
     | NCHAR
@@ -1815,7 +1838,6 @@ tokens_nonreserved
     | ONLY
     | OPTIMIZE
     | OPTION
-    | OR
     | OUTER
     | OUTFILE
     | OVER
@@ -1899,7 +1921,6 @@ tokens_nonreserved
     | SECRETS
     | SECURE
     | SECURITY
-    | SELECT
     | SELECTS
     | SENDS
     | SEQUENTIAL
@@ -1940,7 +1961,6 @@ tokens_nonreserved
     | TEMPORARY
     | TEST
     | TEXT
-    | THEN
     | TIES
     | TIME
     | TIMEOUT
@@ -1955,10 +1975,9 @@ tokens_nonreserved
     | TRANSACTION
     | TREE
     | TRIM
-    | TRUNCATE
     | TTL
-    | TUPLE
     | TYPE
+    | TUPLE
     | UNBOUNDED
     | UNFREEZE
     | UNCOMPRESSED
@@ -1966,7 +1985,6 @@ tokens_nonreserved
     | UNDROP
     | UNSIGNED
     | UNTIL
-    | UPDATE
     | URL
     | USAGE
     | USE
@@ -1976,6 +1994,7 @@ tokens_nonreserved
     | VALUES
     | VARBINARY
     | VARCHAR
+    | VARCHAR2
     | VARIANT
     | VARYING
     | VIEW
@@ -1983,7 +2002,6 @@ tokens_nonreserved
     | VOLUME
     | WAIT
     | WATCH
-    | WHEN
     | WRITABLE
     | WRITTEN
     | ZKPATH
@@ -1996,26 +2014,38 @@ alias_clause
 
 tokens_reserved
     : ALL
+    | ALTER
+    | AND
     | ANTI
     | ANY
     | ARRAY
     | AS
     | ASOF
     | BETWEEN
+    | CASE
     | CROSS
+    | CREATE
+    | DICTIONARY
+    | DROP
     | ELSE
+    | END
     | EXCEPT
     | FINAL
+    | FOR
     | FORMAT
     | FROM
     | FULL
     | GLOBAL
     | GROUP
     | HAVING
+    | IF
     | ILIKE
+    | IN
     | INNER
+    | INSERT
     | INTERSECT
     | INTO
+    | IS
     | JOIN
     | LEFT
     | LIKE
@@ -2023,17 +2053,23 @@ tokens_reserved
     | NOT
     | OFFSET
     | ON
+    | OR
     | ORDER
     | PASTE
     | PREWHERE
     | RIGHT
     | SAMPLE
+    | SELECT
     | SEMI
     | SETTINGS
+    | THEN
+    | TRUNCATE
     | UNION
+    | UPDATE
     | USING
     | UUID
     | WHERE
+    | WHEN
     | WINDOW
     | WITH
     ;

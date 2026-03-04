@@ -216,7 +216,7 @@ public abstract class PgAbstractFunction extends PgAbstractStatement implements 
             if (addComma) {
                 sb.append(", ");
             }
-            argument.appendDeclaration(sb, includeDefaultValues, includeArgNames);
+            argument.appendDeclaration(sb, includeDefaultValues, includeArgNames, getQuoter());
             addComma = true;
         }
         sb.append(')');

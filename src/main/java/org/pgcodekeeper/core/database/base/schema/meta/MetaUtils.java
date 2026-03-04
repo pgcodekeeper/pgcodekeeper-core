@@ -64,6 +64,7 @@ public final class MetaUtils {
         if (st instanceof ICast cast) {
             return new MetaCast(cast.getSource(), cast.getTarget(), cast.getContext(), loc);
         }
+
         if (st instanceof IOperator op) {
             MetaOperator oper = new MetaOperator(loc);
             oper.setLeftArg(op.getLeftArg());
@@ -71,6 +72,7 @@ public final class MetaUtils {
             oper.setReturns(op.getReturns());
             return oper;
         }
+
         if (st instanceof IFunction function) {
             MetaFunction func = new MetaFunction(loc, st.getBareName());
             function.getReturnsColumns().forEach(func::addReturnsColumn);

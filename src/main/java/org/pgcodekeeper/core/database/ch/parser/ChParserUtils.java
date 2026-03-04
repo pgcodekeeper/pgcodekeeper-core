@@ -77,7 +77,7 @@ public final class ChParserUtils {
     private static CHParser createParser(CharStream stream, String parsedObjectName, List<Object> errors) {
         Lexer lexer = new CHLexer(stream);
         CHParser parser = new CHParser(new CommonTokenStream(lexer));
-        AntlrParser.addErrorListener(lexer, parser, parsedObjectName, errors, 0, 0, 0);
+        ParserUtils.addErrorListener(lexer, parser, parsedObjectName, errors, 0, 0, 0);
         parser.setErrorHandler(new ChCustomAntlrErrorStrategy());
         chParserLastStart = System.currentTimeMillis();
         return parser;
@@ -145,7 +145,7 @@ public final class ChParserUtils {
     }
 
     private static void cleanParserCache() {
-        Parser parser = createParser(AntlrParser.SQL, AntlrParser.PARSED_OBJ_NAME, null);
+        Parser parser = createParser(ParserUtils.SQL, ParserUtils.PARSED_OBJ_NAME, null);
         chParserLastStart = 0;
         parser.getInterpreter().clearDFA();
     }

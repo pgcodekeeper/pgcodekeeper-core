@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Added support for MS SQL and ClickHouse keywords.
+
 ### Changed
 
 ### Fixed

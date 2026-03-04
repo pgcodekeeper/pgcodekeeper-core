@@ -22,8 +22,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
-import org.pgcodekeeper.core.sql.Keyword;
-import org.pgcodekeeper.core.sql.Keyword.LabelCategory;
+import org.pgcodekeeper.core.it.parser.pg.Keyword.LabelCategory;
 
 class KeywordAliasParseTest {
 

@@ -2212,7 +2212,7 @@ restore_symmetric_key
 
 // https://msdn.microsoft.com/en-us/library/ms188332.aspx
 execute_statement
-    : EXECUTE (execute_string | execute_module)
+    : execute_token (execute_string | execute_module)
     ;
 
 execute_string
@@ -2313,7 +2313,7 @@ permission
              | REMOTE SERVICE BINDING | ROLE | ROUTE | RULE | SCHEMA | SEQUENCE | SERVER ROLE | SERVICE | SYMMETRIC KEY
              | SYNONYM | TABLE | TRACE EVENT NOTIFICATION | TYPE | VIEW | XML SCHEMA COLLECTION)
     | DELETE
-    | EXECUTE (ANY EXTERNAL SCRIPT)?
+    | execute_token (ANY EXTERNAL SCRIPT)?
     | EXTERNAL ACCESS ASSEMBLY
     | IMPERSONATE (ANY LOGIN)?
     | INSERT
@@ -2489,7 +2489,11 @@ dbcc_clause
     ;
 
 execute_clause
-    : EXECUTE AS execute_clause_user
+    : execute_token AS execute_clause_user
+    ;
+
+execute_token
+    : EXECUTE | EXEC
     ;
 
 execute_clause_user
@@ -3086,11 +3090,11 @@ function_call
     | CURRENT_DATE LR_BRACKET RR_BRACKET
     | CURRENT_TIME (LR_BRACKET primitive_expression RR_BRACKET)?
     // https://msdn.microsoft.com/en-us/library/hh231076.aspx
-    | CAST LR_BRACKET expression AS data_type RR_BRACKET
+    | (CAST | TRY_CAST) LR_BRACKET expression AS data_type RR_BRACKET
     // https://msdn.microsoft.com/en-us/library/ms187928.aspx
-    | CONVERT LR_BRACKET convert_data_type=data_type COMMA convert_expression=expression (COMMA style=expression)? RR_BRACKET
+    | (CONVERT | TRY_CONVERT) LR_BRACKET convert_data_type=data_type COMMA convert_expression=expression (COMMA style=expression)? RR_BRACKET
     // https://docs.microsoft.com/en-us/sql/t-sql/functions/parse-transact-sql
-    | PARSE LR_BRACKET expression AS data_type (USING expression)? RR_BRACKET
+    | (PARSE | TRY_PARSE) LR_BRACKET expression AS data_type (USING expression)? RR_BRACKET
     // https://msdn.microsoft.com/en-us/library/ms190349.aspx
     | COALESCE LR_BRACKET expression_list RR_BRACKET
     // https://msdn.microsoft.com/en-us/library/ms188751.aspx
@@ -4125,6 +4129,8 @@ simple_id
     | TRUE
     | TRUSTWORTHY
     | TRY
+    | TRY_CAST
+    | TRY_PARSE
     | TSQL
     | TWO_DIGIT_YEAR_CUTOFF
     | TYPE

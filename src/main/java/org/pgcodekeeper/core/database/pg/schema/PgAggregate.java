@@ -211,8 +211,7 @@ public class PgAggregate extends PgAbstractFunction {
                 } else if (!first) {
                     sb.append(", ");
                 }
-
-                arg.appendDeclaration(sb, false, true);
+                arg.appendDeclaration(sb, false, true, getQuoter());
                 first = false;
                 i--;
             }

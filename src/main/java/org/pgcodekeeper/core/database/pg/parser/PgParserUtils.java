@@ -54,7 +54,7 @@ public final class PgParserUtils {
         var stream = CharStreams.fromString(aclArrayAsString);
         Lexer lexer = new PrivilegesLexer(stream);
         PrivilegesParser parser = new PrivilegesParser(new CommonTokenStream(lexer));
-        AntlrParser.addErrorListener(lexer, parser, "jdbc privileges", null, 0, 0, 0);
+        ParserUtils.addErrorListener(lexer, parser, "jdbc privileges", null, 0, 0, 0);
         return parser;
     }
 
@@ -109,7 +109,7 @@ public final class PgParserUtils {
                                              int offset, int lineOffset, int inLineOffset) {
         SQLLexer lexer = new SQLLexer(stream);
         SQLParser parser = new SQLParser(new CommonTokenStream(lexer));
-        AntlrParser.addErrorListener(lexer, parser, parsedObjectName, errors, offset, lineOffset, inLineOffset);
+        ParserUtils.addErrorListener(lexer, parser, parsedObjectName, errors, offset, lineOffset, inLineOffset);
         parser.setErrorHandler(new PgCustomAntlrErrorStrategy());
         pgParserLastStart = System.currentTimeMillis();
         return parser;
@@ -176,7 +176,7 @@ public final class PgParserUtils {
     }
 
     protected static void cleanParserCache() {
-        Parser parser = createSqlParser(AntlrParser.SQL, AntlrParser.PARSED_OBJ_NAME, null);
+        Parser parser = createSqlParser(ParserUtils.SQL, ParserUtils.PARSED_OBJ_NAME, null);
         pgParserLastStart = 0;
         parser.getInterpreter().clearDFA();
     }

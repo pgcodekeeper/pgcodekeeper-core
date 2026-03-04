@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api.schema;
 
+import java.util.function.UnaryOperator;
+
 /**
  * Interface for database function argument
  */
@@ -40,6 +42,8 @@ public interface IArgument {
      * @param sbString            the StringBuilder to append to
      * @param includeDefaultValue whether to include the default value
      * @param includeArgName      whether to include the argument name
+     * @param quoter              quoter for arguments
      */
-    void appendDeclaration(StringBuilder sbString, boolean includeDefaultValue, boolean includeArgName);
+    void appendDeclaration(StringBuilder sbString, boolean includeDefaultValue, boolean includeArgName,
+                           UnaryOperator<String> quoter);
 }

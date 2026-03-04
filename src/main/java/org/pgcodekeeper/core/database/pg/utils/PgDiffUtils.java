@@ -23,9 +23,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
-import org.pgcodekeeper.core.sql.Keyword;
-import org.pgcodekeeper.core.sql.Keyword.KeywordCategory;
-
 /**
  * Utility class for handling quoting and unquoting of identifiers and literals in PostgreSQL.
  *
@@ -61,12 +58,7 @@ public final class PgDiffUtils {
             }
         }
 
-        if (!allowKeywords) {
-            Keyword keyword = Keyword.KEYWORDS.get(allowCaps ? lowerId : id);
-            return keyword == null || keyword.getCategory() == KeywordCategory.UNRESERVED_KEYWORD;
-        }
-
-        return true;
+        return allowKeywords || !PgKeyword.isKeyword(id);
     }
 
     /**

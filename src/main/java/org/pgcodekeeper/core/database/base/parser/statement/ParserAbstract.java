@@ -27,7 +27,6 @@ import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.project.AbstractModelExporter;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.exception.MisplacedObjectException;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -349,11 +348,7 @@ public abstract class ParserAbstract<S extends IDatabase> {
                     nameCtx.getStart());
         }
 
-        String name = nameCtx.getText();
-        if (signature != null) {
-            // PG functions have a name with optional quoting, which is used when searching in the database
-            name = PgDiffUtils.getQuotedName(name) + signature;
-        }
+        String name = getNameWithSignature(nameCtx.getText(), signature);
         return switch (type) {
             case DOMAIN, FTS_CONFIGURATION, FTS_DICTIONARY, FTS_PARSER, FTS_TEMPLATE, OPERATOR, SEQUENCE, TABLE,
                  DICTIONARY, TYPE, VIEW, INDEX, STATISTICS, COLLATION, FUNCTION, PROCEDURE, AGGREGATE ->
@@ -481,6 +476,17 @@ public abstract class ParserAbstract<S extends IDatabase> {
      * in 'Outline' and in 'outline of Project explorer files'.
      */
     protected abstract String getStmtAction();
+
+    /**
+     * Constructs a fully qualified function name including its signature.
+     * <p>
+     * @param name      the base name of the function
+     * @param signature the function signature including parentheses and parameter types
+     * @return the complete function identifier
+     */
+    protected String getNameWithSignature(String name, String signature) {
+        return name;
+    }
 
     protected ISchema createAndAddSchemaWithCheck(ParserRuleContext nameCtx) {
         String name = nameCtx.getText();
