@@ -17,15 +17,15 @@ package org.pgcodekeeper.core.database.base.schema;
 
 import java.io.*;
 import java.util.Objects;
+import java.util.function.UnaryOperator;
 
 import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.hasher.*;
 
 /**
- * Represents a function argument with its mode, name, data type, and default value.
- * Used for storing parameter information for functions, procedures, and aggregates
- * across different database types.
+ * Represents a function argument with its mode, name, data type, and default
+ * value. Used for storing parameter information for functions, procedures, and
+ * aggregates across different database types.
  */
 public class Argument implements IArgument, Serializable, IHashable {
 
@@ -83,16 +83,9 @@ public class Argument implements IArgument, Serializable, IHashable {
         return name;
     }
 
-    /**
-     * Appends the argument declaration to a StringBuilder.
-     *
-     * @param sbString            the StringBuilder to append to
-     * @param includeDefaultValue whether to include the default value
-     * @param includeArgName      whether to include the argument name
-     */
     @Override
-    public void appendDeclaration(StringBuilder sbString,
-                                  boolean includeDefaultValue, boolean includeArgName) {
+    public void appendDeclaration(StringBuilder sbString, boolean includeDefaultValue, boolean includeArgName,
+                                  UnaryOperator<String> quoter) {
         if (includeArgName) {
             if (mode != ArgMode.IN) {
                 sbString.append(mode);
@@ -100,7 +93,7 @@ public class Argument implements IArgument, Serializable, IHashable {
             }
 
             if (name != null && !name.isEmpty()) {
-                sbString.append(PgDiffUtils.getQuotedName(name));
+                sbString.append(quoter.apply(name));
                 sbString.append(' ');
             }
         }

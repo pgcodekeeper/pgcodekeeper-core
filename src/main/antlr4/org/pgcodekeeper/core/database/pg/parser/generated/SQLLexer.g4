@@ -52,7 +52,7 @@ private final Deque<String> _tags = new ArrayDeque<String>();
     ==================================================
     */
 
-    ABORT: 'ABORT';    // first identifier rule, sync with CustomSQLAntlrErrorStrategy & AntlrUtils
+    ABORT: 'ABORT';    // first identifier rule, sync with PgCustomAntlrErrorStrategy, PgKeyword
     ABSENT: 'ABSENT';
     ABSOLUTE: 'ABSOLUTE';
     ACCESS: 'ACCESS';
@@ -408,7 +408,7 @@ private final Deque<String> _tags = new ArrayDeque<String>();
     YEAR: 'YEAR';
     YES: 'YES';
 
-    ZONE: 'ZONE';
+    ZONE: 'ZONE';    // last UNRESERVED keyword, sync with PgKeyword
 
     /*
     ==================================================
@@ -416,7 +416,7 @@ private final Deque<String> _tags = new ArrayDeque<String>();
     ==================================================
     */
 
-    BETWEEN: 'BETWEEN';
+    BETWEEN: 'BETWEEN';    // first col name keyword, sync with PgKeyword
     BIGINT: 'BIGINT';
     BIT: 'BIT';
     BOOLEAN: 'BOOLEAN';
@@ -494,7 +494,7 @@ private final Deque<String> _tags = new ArrayDeque<String>();
     XMLPI: 'XMLPI';
     XMLROOT: 'XMLROOT';
     XMLSERIALIZE: 'XMLSERIALIZE';
-    XMLTABLE: 'XMLTABLE';
+    XMLTABLE: 'XMLTABLE';    // last col name keyword, sync with PgKeyword
 
     /*
     ==================================================
@@ -502,7 +502,7 @@ private final Deque<String> _tags = new ArrayDeque<String>();
     ==================================================
     */
 
-    AUTHORIZATION: 'AUTHORIZATION';
+    AUTHORIZATION: 'AUTHORIZATION';    // first TYPE FUNC name, sync with PgKeyword
 
     BINARY: 'BINARY';
 
@@ -536,7 +536,7 @@ private final Deque<String> _tags = new ArrayDeque<String>();
 
     TABLESAMPLE: 'TABLESAMPLE';
 
-    VERBOSE: 'VERBOSE';
+    VERBOSE: 'VERBOSE';   // last TYPE FUNC name, sync with PgKeyword
 
     /*
     ==================================================
@@ -544,7 +544,7 @@ private final Deque<String> _tags = new ArrayDeque<String>();
     ==================================================
     */
 
-    ALL: 'ALL';   // first RESERVED_KEYWORD, sync with AntlrUtils.normalizeWhitespaceUnquoted
+    ALL: 'ALL';   // first RESERVED_KEYWORD, sync with PgParserUtils.normalizeWhitespaceUnquoted, PgKeyword
     ANALYSE: 'ANALYSE';
     ANALYZE: 'ANALYZE';
     AND: 'AND';
@@ -639,7 +639,7 @@ private final Deque<String> _tags = new ArrayDeque<String>();
     WHEN: 'WHEN';
     WHERE: 'WHERE';
     WINDOW: 'WINDOW';
-    WITH: 'WITH';   // last RESERVED_KEYWORD, sync with AntlrUtils.normalizeWhitespaceUnquoted
+    WITH: 'WITH';   // last RESERVED_KEYWORD, sync with PgParserUtils.normalizeWhitespaceUnquoted, PgKeyword
 
     /*
      * Other tokens.
@@ -880,12 +880,12 @@ private final Deque<String> _tags = new ArrayDeque<String>();
     STACKED: 'STACKED';
 
     WARNING: 'WARNING';
-    WHILE: 'WHILE';     // last identifier rule, sync with CustomSQLAntlrErrorStrategy & AntlrUtils
+    WHILE: 'WHILE';     // last identifier rule, sync with PgCustomAntlrErrorStrategy
 
 // Operators
 
 // Cast Operator
-CAST_EXPRESSION : ':' ':';   // first operator rule, sync with CustomSQLAntlrErrorStrategy
+CAST_EXPRESSION : ':' ':';   // first operator rule, sync with PgCustomAntlrErrorStrategy
 
 EQUAL : '=';
 COLON :  ':';
@@ -918,7 +918,7 @@ COLON_EQUAL : ':=';
 LESS_LESS : '<<';
 GREATER_GREATER : '>>';
 DOUBLE_DOT: '..';
-HASH_SIGN: '#';              // last operator rule, sync with CustomSQLAntlrErrorStrategy
+HASH_SIGN: '#';              // last operator rule, sync with PgCustomAntlrErrorStrategy
 
 BlockComment: '/*' (BlockComment |.)*? '*/' -> channel(HIDDEN);
 LineComment: '--' ~[\r\n]* -> channel(HIDDEN);

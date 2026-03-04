@@ -10,7 +10,7 @@ import org.pgcodekeeper.core.database.base.parser.CodeUnitLexer;
 }
 
 // Basic keywords (from https://msdn.microsoft.com/en-us/library/ms189822.aspx)
-ADD: 'ADD';
+ADD: 'ADD';    // first reserved keyword, sync with MsKeyword
 ALL: 'ALL';
 ALTER: 'ALTER';
 AND: 'AND';
@@ -40,7 +40,7 @@ CONSTRAINT: 'CONSTRAINT';
 CONTAINS: 'CONTAINS';
 CONTAINSTABLE: 'CONTAINSTABLE';
 CONTINUE: 'CONTINUE';
-CONVERT: 'TRY_'? 'CONVERT';
+CONVERT: 'CONVERT';
 CREATE: 'CREATE';
 CROSS: 'CROSS';
 CURRENT: 'CURRENT';
@@ -68,7 +68,8 @@ END: 'END';
 ERRLVL: 'ERRLVL';
 ESCAPE: 'ESCAPE';
 EXCEPT: 'EXCEPT';
-EXECUTE: 'EXEC' 'UTE'?;
+EXEC: 'EXEC';
+EXECUTE: 'EXECUTE';
 EXISTS: 'EXISTS';
 EXIT: 'EXIT';
 EXTERNAL: 'EXTERNAL';
@@ -196,10 +197,10 @@ WHILE: 'WHILE';
 WINDOW : 'WINDOW';
 WITH: 'WITH';
 WITHIN_GROUP: 'WITHIN GROUP';
-WRITETEXT: 'WRITETEXT';
+WRITETEXT: 'WRITETEXT';   // last reserved keyword, sync with MsKeyword
 
 // Additional keywords. They can be id, please keep them in sync with the parser.
-ABORT: 'ABORT';  // first identifier rule, sync with CustomTSQLAntlrErrorStrategy
+ABORT: 'ABORT';  // first identifier rule, sync with MsCustomAntlrErrorStrategy, MsKeyword
 ABORT_AFTER_WAIT: 'ABORT_AFTER_WAIT';
 ABSENT: 'ABSENT';
 ABSOLUTE: 'ABSOLUTE';
@@ -280,7 +281,7 @@ CACHE: 'CACHE';
 CALLED: 'CALLED';
 CALLER: 'CALLER';
 CAP_CPU_PERCENT: 'CAP_CPU_PERCENT';
-CAST: 'TRY_'? 'CAST';
+CAST: 'CAST';
 CATALOG: 'CATALOG';
 CATCH: 'CATCH';
 CERTIFICATE: 'CERTIFICATE';
@@ -642,7 +643,7 @@ PAGE_VERIFY: 'PAGE_VERIFY';
 PAGLOCK: 'PAGLOCK';
 PARAMETERS: 'PARAMETERS';
 PARAMETERIZATION: 'PARAMETERIZATION';
-PARSE: 'TRY_'? 'PARSE';
+PARSE: 'PARSE';
 PARSER_VERSION: 'PARSER_VERSION';
 PARTIAL: 'PARTIAL';
 PARTITION: 'PARTITION';
@@ -885,6 +886,8 @@ TRIPLE_DES_3KEY: 'TRIPLE_DES_3KEY';
 TRUE: 'TRUE';
 TRUSTWORTHY: 'TRUSTWORTHY';
 TRY: 'TRY';
+TRY_CAST: 'TRY_CAST';
+TRY_PARSE: 'TRY_PARSE';
 TSQL: 'TSQL';
 TWO_DIGIT_YEAR_CUTOFF: 'TWO_DIGIT_YEAR_CUTOFF';
 TYPE: 'TYPE';
@@ -932,7 +935,7 @@ XMLSCHEMA: 'XMLSCHEMA';
 XQUERY: 'XQUERY';
 XSINIL: 'XSINIL';
 YEAR: 'YEAR';
-YEARS: 'YEARS'; // last identifier rule, sync with CustomTSQLAntlrErrorStrategy
+YEARS: 'YEARS'; // last identifier rule, sync with MsCustomAntlrErrorStrategy, MsKeyword
 
 // Combinations that cannot be used as IDs
 DOLLAR_ACTION:      DOLLAR ACTION;

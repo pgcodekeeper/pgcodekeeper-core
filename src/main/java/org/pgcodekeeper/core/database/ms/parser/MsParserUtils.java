@@ -76,7 +76,7 @@ public final class MsParserUtils {
     private static TSQLParser createSqlParser(CharStream stream, String parsedObjectName, List<Object> errors) {
         TSQLLexer lexer = new TSQLLexer(stream);
         TSQLParser parser = new TSQLParser(new CommonTokenStream(lexer));
-        AntlrParser.addErrorListener(lexer, parser, parsedObjectName, errors, 0, 0, 0);
+        ParserUtils.addErrorListener(lexer, parser, parsedObjectName, errors, 0, 0, 0);
         parser.setErrorHandler(new MsCustomAntlrErrorStrategy());
         msParserLastStart = System.currentTimeMillis();
         return parser;
@@ -143,7 +143,7 @@ public final class MsParserUtils {
     }
 
     protected static void cleanParserCache() {
-        Parser parser = createSqlParser(AntlrParser.SQL, AntlrParser.PARSED_OBJ_NAME, null);
+        Parser parser = createSqlParser(ParserUtils.SQL, ParserUtils.PARSED_OBJ_NAME, null);
         msParserLastStart = 0;
         parser.getInterpreter().clearDFA();
     }

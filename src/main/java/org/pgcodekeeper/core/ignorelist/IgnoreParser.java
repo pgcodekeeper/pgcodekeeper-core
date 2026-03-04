@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.RuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.base.parser.AntlrParser;
+import org.pgcodekeeper.core.database.base.parser.ParserUtils;
 import org.pgcodekeeper.core.database.base.parser.generated.IgnoreListParser;
 import org.pgcodekeeper.core.database.base.parser.generated.IgnoreListParser.*;
 import org.pgcodekeeper.core.localizations.Messages;
@@ -62,7 +62,7 @@ public final class IgnoreParser {
         String parsedObjectName = listFile.toString();
         var msg = Messages.IgnoreParser_log_load_ignored_list.formatted(parsedObjectName);
         LOG.info(msg);
-        var parser = AntlrParser.createIgnoreListParser(listFile);
+        var parser = ParserUtils.createIgnoreListParser(listFile);
 
         try {
             parse(parser);

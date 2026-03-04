@@ -17,16 +17,17 @@ package org.pgcodekeeper.core.database.base.parser;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.*;
 
 import org.antlr.v4.runtime.*;
 import org.pgcodekeeper.core.database.base.parser.generated.IgnoreListLexer;
 import org.pgcodekeeper.core.database.base.parser.generated.IgnoreListParser;
+import org.pgcodekeeper.core.sql.KeywordCategory;
 
 /**
  * Utility class for creating and managing ANTLR parser
  */
-public final class AntlrParser {
+public class ParserUtils {
 
     public static final String SQL = ";";
     public static final String PARSED_OBJ_NAME = "fake string to clean parser cache";
@@ -56,6 +57,28 @@ public final class AntlrParser {
         parser.addErrorListener(listener);
     }
 
-    private AntlrParser() {
+    /**
+     * Reads a range of token IDs from a vocabulary and populates a keyword map with
+     * the specified category. This is a utility method for initializing keyword
+     * maps based on lexer token definitions.
+     *
+     * @param vocab    the vocabulary containing token literal names
+     * @param startId  the starting token (inclusive)
+     * @param endId    the ending token(inclusive)
+     * @param keywords the map to populate with keywords and their categories
+     * @param type     the category to assign to all keywords in the specified range
+     */
+    public static void readKeywords(Vocabulary vocab, int startId, int endId, Map<String, KeywordCategory> keywords,
+            KeywordCategory type) {
+        for (int i = startId; i <= endId; i++) {
+            String literal = vocab.getLiteralName(i);
+            if (literal != null) {
+                String clean = literal.substring(1, literal.length() - 1);
+                keywords.put(clean.toLowerCase(Locale.ROOT), type);
+            }
+        }
+    }
+
+    private ParserUtils() {
     }
 }

@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.utils;
 
-import org.pgcodekeeper.core.sql.Keyword;
-import org.pgcodekeeper.core.sql.Keyword.KeywordCategory;
-
 /**
  * Utility class for handling quoting and unquoting of identifiers and literals in Microsoft SQL.
  */
@@ -55,11 +52,7 @@ public class MsDiffUtils {
             }
         }
 
-        if (!allowKeywords) {
-            Keyword keyword = Keyword.KEYWORDS.get(id);
-            return keyword == null || keyword.getCategory() == KeywordCategory.UNRESERVED_KEYWORD;        }
-
-        return true;
+        return allowKeywords || !MsKeyword.isKeyword(id);
     }
 
     /**

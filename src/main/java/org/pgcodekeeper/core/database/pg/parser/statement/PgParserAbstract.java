@@ -23,9 +23,7 @@ import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 import org.pgcodekeeper.core.database.base.parser.CodeUnitToken;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.base.schema.Argument;
-import org.pgcodekeeper.core.database.base.schema.SimpleColumn;
+import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.project.PgWorkDirs;
 import org.pgcodekeeper.core.database.pg.schema.*;
@@ -450,19 +448,26 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
     @Override
     protected ObjectLocation getLocation(List<? extends ParserRuleContext> ids, DbObjType type, String action,
                                          boolean isDep, String signature, LocationType locationType) {
+        ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
         if (type == DbObjType.CAST) {
-            ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
             return buildLocation(nameCtx, action, locationType,
                     new ObjectReference(getCastName((Cast_nameContext) nameCtx), DbObjType.CAST));
         }
 
         if (type == DbObjType.USER_MAPPING) {
-            ParserRuleContext nameCtx = QNameParser.getFirstNameCtx(ids);
             return buildLocation(nameCtx, action, locationType,
                     new ObjectReference(getUserMappingName((User_mapping_nameContext) nameCtx), DbObjType.USER_MAPPING));
         }
-
         return super.getLocation(ids, type, action, isDep, signature, locationType);
+    }
+
+    @Override
+    protected String getNameWithSignature(String name, String signature) {
+        if (signature != null) {
+            // PG functions have a name with optional quoting, which is used when searching in the database
+            name = PgDiffUtils.getQuotedName(name) + signature;
+        }
+        return name;
     }
 
     protected String getCastName(Cast_nameContext nameCtx) {

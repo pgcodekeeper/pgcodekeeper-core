@@ -16,6 +16,7 @@
 package org.pgcodekeeper.core.database.pg.parser.statement;
 
 import java.util.*;
+import java.util.function.UnaryOperator;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.*;
@@ -99,8 +100,8 @@ public final class PgCreateAggregate extends PgParserAbstract {
     private void fillArguments(List<Function_argumentsContext> argumentsCtx, PgAggregate aggr) {
         for (Function_argumentsContext argument : argumentsCtx) {
             Identifier_nontypeContext name = argument.identifier_nontype();
-            Argument arg = new Argument(parseArgMode(argument.argmode()),
-                    (name != null ? name.getText() : null),
+
+            Argument arg = new Argument(parseArgMode(argument.argmode()), (name != null ? name.getText() : null),
                     getTypeName(argument.data_type()));
             addTypeDepcy(argument.data_type(), aggr);
             aggr.addArgument(arg);
@@ -266,18 +267,19 @@ public final class PgCreateAggregate extends PgParserAbstract {
         String mSType = aggregate.getMSType();
         var args = aggregate.getArguments();
         int directCount = aggregate.getDirectCount();
+        var quoter = aggregate.getQuoter();
         var orderByArgs = args.subList(directCount, args.size());
 
         switch (paramName) {
             case SFUNC, MSFUNC, MINVFUNC:
                 sb.append(paramName == AggFuncs.SFUNC ? sType : mSType).append(", ");
-                fillStringByArgs(sb, orderByArgs.isEmpty() ? args : orderByArgs);
+                fillStringByArgs(sb, orderByArgs.isEmpty() ? args : orderByArgs, quoter);
                 break;
             case FINALFUNC, MFINALFUNC:
                 sb.append(paramName == AggFuncs.FINALFUNC ? sType : mSType).append(", ");
                 if (directCount > 0 && !orderByArgs.isEmpty()) {
                     // for signature: aggregateName(mode name type, ... ORDER BY modeN nameN typeN, ....)
-                    fillStringByArgs(sb, args.subList(0, directCount));
+                    fillStringByArgs(sb, args.subList(0, directCount), quoter);
                 }
                 break;
 
@@ -287,12 +289,12 @@ public final class PgCreateAggregate extends PgParserAbstract {
 
             case DESERIALFUNC:
                 sb.append("bytea").append(", ");
-                fillStringByArgs(sb, args);
+                fillStringByArgs(sb, args, quoter);
                 break;
 
             case SERIALFUNC:
                 // Signature 'aggregateName(*)' with 'SERIALFUNC'-parameter could not be created.
-                fillStringByArgs(sb, args);
+                fillStringByArgs(sb, args, quoter);
                 break;
 
             default:
@@ -306,9 +308,9 @@ public final class PgCreateAggregate extends PgParserAbstract {
         return sb.toString();
     }
 
-    private static void fillStringByArgs(StringBuilder sb, List<IArgument> args) {
+    private static void fillStringByArgs(StringBuilder sb, List<IArgument> args, UnaryOperator<String> quoter) {
         for (var arg : args) {
-            arg.appendDeclaration(sb, false, true);
+            arg.appendDeclaration(sb, false, true, quoter);
             sb.append(", ");
         }
     }
