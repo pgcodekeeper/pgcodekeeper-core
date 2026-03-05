@@ -21,6 +21,7 @@ import org.pgcodekeeper.core.database.base.loader.AbstractLibraryLoader;
 import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
 import org.pgcodekeeper.core.database.pg.project.PgWorkDirs;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.Utils;
 
@@ -61,7 +62,7 @@ public class PgProjectLoader extends AbstractProjectLoader<PgDatabase> {
     }
 
     @Override
-    protected void loadStructure(Path dir, PgDatabase db) throws IOException {
+    protected void loadStructure(Path dir, PgDatabase db) throws IOException, InterruptedException {
         for (String dirName : PgWorkDirs.getDirectoryNames()) {
             if (PgWorkDirs.SCHEMA.equals(dirName)) {
                 loadPgSchemaStructure(dir, db, dirName);
@@ -71,7 +72,8 @@ public class PgProjectLoader extends AbstractProjectLoader<PgDatabase> {
         }
     }
 
-    private void loadPgSchemaStructure(Path baseDir, PgDatabase db, String commonDir) throws IOException {
+    private void loadPgSchemaStructure(Path baseDir, PgDatabase db, String commonDir)
+            throws IOException, InterruptedException {
 
         Path schemasCommonDir = baseDir.resolve(commonDir);
         // skip walking SCHEMA folder if it does not exist
@@ -82,9 +84,11 @@ public class PgProjectLoader extends AbstractProjectLoader<PgDatabase> {
         // read out schemas names, and work in loop on each
         try (Stream<Path> schemas = Files.list(schemasCommonDir)) {
             for (Path schemaDir : Utils.streamIterator(schemas)) {
+                IMonitor.checkCancelled(getMonitor());
                 if (Files.isDirectory(schemaDir) && isAllowedSchema(schemaDir.getFileName().toString())) {
                     loadSubdir(schemasCommonDir, schemaDir.getFileName().toString(), db);
                     for (DbObjType dirSub : PgWorkDirs.getDirLoadOrder()) {
+                        IMonitor.checkCancelled(getMonitor());
                         loadSubdir(schemaDir, dirSub.name(), db);
                     }
                 }

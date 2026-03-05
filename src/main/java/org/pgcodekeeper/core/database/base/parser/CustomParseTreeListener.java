@@ -74,9 +74,7 @@ public final class CustomParseTreeListener implements ParseTreeListener {
     public void exitEveryRule(ParserRuleContext ctx) {
         if (ctx.depth() <= monitoringLevel) {
             monitor.worked(1);
-            try {
-                IMonitor.checkCancelled(monitor);
-            } catch (InterruptedException e) {
+            if (monitor.isCancelled()) {
                 throw new MonitorCancelledRuntimeException();
             }
         }

@@ -71,6 +71,7 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
     @Override
     public T loadAndAnalyze() throws IOException, InterruptedException {
         T db = load();
+        IMonitor.checkCancelled(getMonitor());
         FullAnalyze.fullAnalyze(db, diffSettings.getErrors());
         return db;
     }

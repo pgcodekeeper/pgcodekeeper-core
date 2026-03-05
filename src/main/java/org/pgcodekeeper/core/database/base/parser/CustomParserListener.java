@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.parser;
 
-import java.util.*;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -25,13 +23,19 @@ import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
-import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.exception.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.exception.MisplacedObjectException;
+import org.pgcodekeeper.core.exception.MonitorCancelledRuntimeException;
+import org.pgcodekeeper.core.exception.ObjectCreationException;
+import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Locale;
 
 /**
  * Base class for custom ANTLR parse tree listeners that build database schema models.
@@ -81,12 +85,12 @@ public class CustomParserListener<T extends IDatabase> {
 
     protected void safeParseStatement(Runnable r, ParserRuleContext ctx) {
         try {
-            IMonitor.checkCancelled(getMonitor());
+            if (getMonitor().isCancelled()) {
+                throw new MonitorCancelledRuntimeException();
+            }
             r.run();
         } catch (UnresolvedReferenceException ex) {
             diffSettings.addError(handleUnresolvedReference(ex, filename));
-        } catch (InterruptedException ex) {
-            throw new MonitorCancelledRuntimeException();
         } catch (Exception e) {
             if (ctx != null) {
                 diffSettings.addError(handleParserContextException(e, filename, ctx));

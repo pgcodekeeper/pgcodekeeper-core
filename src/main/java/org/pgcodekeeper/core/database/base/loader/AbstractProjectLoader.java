@@ -22,6 +22,7 @@ import org.pgcodekeeper.core.database.api.schema.ITable;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.base.schema.StatementOverride;
 import org.pgcodekeeper.core.library.LibraryXmlStore;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.Utils;
 
@@ -76,8 +77,11 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
     public T load() throws InterruptedException, IOException {
         T db = createDatabase();
         loadStructure(dirPath, db);
+        IMonitor.checkCancelled(getMonitor());
         finishLoaders();
+        IMonitor.checkCancelled(getMonitor());
         loadLibraries(db);
+        IMonitor.checkCancelled(getMonitor());
         loadOverrides(db);
         return db;
     }
@@ -90,12 +94,12 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
 
     protected abstract void loadStructure(Path dir, T db) throws InterruptedException, IOException;
 
-    protected void loadSubdir(Path dir, String sub, T db) throws IOException {
+    protected void loadSubdir(Path dir, String sub, T db) throws IOException, InterruptedException {
         loadSubdir(dir, sub, db, null);
     }
 
     protected void loadSubdir(Path dir, String sub, T db, Predicate<String> checkFilename)
-            throws IOException {
+            throws IOException, InterruptedException {
         Path subDir = dir.resolve(sub);
         if (!Files.isDirectory(subDir)) {
             return;
@@ -104,6 +108,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
                 .filter(f -> filterFile(f, checkFilename))
                 .sorted()) {
             for (Path f : Utils.streamIterator(files)) {
+                IMonitor.checkCancelled(getMonitor());
                 var loader = createDumpLoader(f);
                 if (isOverrideMode) {
                     loader.setOverridesMap(overrides);
@@ -138,6 +143,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
         try {
             loadStructure(overridesDir, db);
             finishLoaders();
+            IMonitor.checkCancelled(getMonitor());
             replaceOverrides();
         } finally {
             isOverrideMode = false;
@@ -178,6 +184,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
         var libraryLoader = createLibraryLoader(db);
 
         for (String xml : libXmls) {
+            IMonitor.checkCancelled(getMonitor());
             libraryLoader.loadXml(new LibraryXmlStore(Paths.get(xml)));
         }
         libraryLoader.loadLibraries(false, libs);

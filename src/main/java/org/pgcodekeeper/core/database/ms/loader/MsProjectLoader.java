@@ -26,6 +26,7 @@ import org.pgcodekeeper.core.database.ms.project.MsWorkDirs;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.ms.schema.MsSchema;
 import org.pgcodekeeper.core.database.ms.utils.MsConsts;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
@@ -76,6 +77,7 @@ public class MsProjectLoader extends AbstractProjectLoader<MsDatabase> {
         loadSubdir(securityFolder, MsWorkDirs.USERS, db);
 
         for (String dirSub : MsWorkDirs.getDirectoryNames()) {
+            IMonitor.checkCancelled(getMonitor());
             if (MsWorkDirs.isInSchema(dirSub)) {
                 // get schema name from file names (format: schema.objectname.sql) and filter
                 loadSubdir(dir, dirSub, db, fileName -> isAllowedSchema(fileName.split("\\.")[0]));

@@ -18,9 +18,9 @@ package org.pgcodekeeper.core.database.base.loader;
 import org.antlr.v4.runtime.Parser;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.loader.IJdbcLoader;
-import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.ISchema;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
 import org.pgcodekeeper.core.database.base.parser.AntlrTaskManager;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
@@ -75,7 +75,7 @@ public abstract class AbstractJdbcLoader<T extends IDatabase> extends AbstractLo
             return parserCtxReader.apply(p);
         }, r -> {
             diffSettings.addErrors(list);
-            if (getMonitor().isCanceled()) {
+            if (getMonitor().isCancelled()) {
                 throw new MonitorCancelledRuntimeException();
             }
             setCurrentObject(object);

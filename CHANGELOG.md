@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Fixed monitor progress tracking.
+
 ## [14.0.0] - 2026-02-25
 
 ### Added
