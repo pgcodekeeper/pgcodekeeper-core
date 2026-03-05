@@ -34,7 +34,8 @@ import java.util.List;
 class MsDepcyFinderTest {
 
     @ParameterizedTest
-    @CsvSource({
+    @CsvSource(value = {
+            "fileName, objectName",
             // test analysis work on window statement
             "ms_view_window, dbo.v1",
             // "ms_insert_name, public.sales5",
@@ -43,15 +44,16 @@ class MsDepcyFinderTest {
             "ms_procedure, dbo.test_poc",
             // test searching deps of object by name without quotes and case insensitive mode for MS
             "ms_UPPER_CASE, dbo.TEST_POC",
-    })
+            }, useHeadersInDisplayName = true)
     void compareReverseGraph(String fileName, String objectName) throws IOException, InterruptedException {
         compareGraph(fileName, FILES_POSTFIX.DEPS_REVERSE_TXT, objectName, true);
     }
 
     @ParameterizedTest
-    @CsvSource({
+    @CsvSource(value = {
+            "fileName, objectName",
             "ms_sys_ver_table, '\\[dbo\\]\\.\\[t1\\]'",
-    })
+            }, useHeadersInDisplayName = true)
     void compareBothGraph(String fileName, String objectName) throws IOException, InterruptedException {
         compareGraph(fileName, FILES_POSTFIX.DEPS_TXT, objectName, false);
         compareGraph(fileName, FILES_POSTFIX.DEPS_REVERSE_TXT, objectName, true);

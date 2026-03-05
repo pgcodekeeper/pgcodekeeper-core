@@ -22,12 +22,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 final class FileUtilsTest {
 
     @ParameterizedTest
-    @CsvSource({
+    @CsvSource(value = {
+            "URL, expected",
             "jdbc:sqlserver://127.0.0.1;databaseName={master};integratedSecurity=true, master",
             "jdbc:sqlserver://127.0.0.1;databaseName=master;integratedSecurity=true, master",
             "jdbc:postgresql://127.0.0.1:5432/test_1?user=test&arg=test, test_1",
             "jdbc:jkslauef/sdaf:135/test12&user=userName&arg2=pas{s,"
-    })
+            }, useHeadersInDisplayName = true)
     void testGetDbNameFromMsUrl(String url, String expected) {
         if (expected == null) {
             expected = "";

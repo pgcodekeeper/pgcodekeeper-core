@@ -33,36 +33,37 @@ import java.util.List;
 class PgDepcyFinderTest {
 
     @ParameterizedTest
-    @CsvSource({
+    @CsvSource(value = {
+            "fileName, objectName",
             // test analysis work on merge statement
             "function_merge, public.f1",
             "view, public.v1",
-    })
+            }, useHeadersInDisplayName = true)
     void compareReverseGraph(String fileName, String objectName) throws IOException, InterruptedException {
         compareGraph(fileName, FILES_POSTFIX.DEPS_REVERSE_TXT, objectName, true);
     }
 
     @ParameterizedTest
-    @CsvSource({
-            "table, public.t1",
-            "regex, public\\.t.",
+    @CsvSource(value = {
+            "fileName, objectName",
+            "table, public.t1", "regex, public\\.t.",
             //test searching deps of object "MyTable" by name without quotes and case insensitive mode for PG
             "quotes, public.mytable",
-            //test searching deps of object "MyTable" by name with quotes for PG
+            // test searching deps of object "MyTable" by name with quotes for PG
             "quotes, public.\"mytable\"",
             // test searching deps of function by full name
             "function_circle, public.f1\\(\\)",
-            //test searching deps of function by name with regex for PG
+            // test searching deps of function by name with regex for PG
             "function_circle, 'public\\.f1\\(.*'",
-            //test searching deps of function by name without parens for PG
+            // test searching deps of function by name without parens for PG
             "function_circle, 'public\\.f1'",
-            //test searching deps of function by name with quotes and without parens for PG
+            // test searching deps of function by name with quotes and without parens for PG
             "function_circle_quotes, 'public\\.\"Func1\"\\(.*'",
             //test searching deps of quoted function by name without quotes and parens for PG
             "function_circle_quotes, 'public\\.func1'",
-            //test searching deps of table constraint
+            // test searching deps of table constraint
             "table_constraint, public.test_fk_1.fk",
-    })
+            }, useHeadersInDisplayName = true)
     void compareBothGraph(String fileName, String objectName) throws IOException, InterruptedException {
         compareGraph(fileName, FILES_POSTFIX.DEPS_TXT, objectName, false);
         compareGraph(fileName, FILES_POSTFIX.DEPS_REVERSE_TXT, objectName, true);
