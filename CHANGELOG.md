@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Updated the JUnit library version from 5.x to version 6.
+
 ### Fixed
 
 ## [14.0.0] - 2026-02-25
