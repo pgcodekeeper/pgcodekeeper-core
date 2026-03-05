@@ -26,14 +26,14 @@ public interface IMonitor {
      *
      * @param cancelled {@code true} to cancel the operation, {@code false} otherwise
      */
-    void setCanceled(boolean cancelled);
+    void setCancelled(boolean cancelled);
 
     /**
-     * Returns whether this monitor has been canceled.
+     * Returns whether this monitor has been cancelled.
      *
-     * @return {@code true} if the operation has been canceled, {@code false} otherwise
+     * @return {@code true} if the operation has been cancelled, {@code false} otherwise
      */
-    boolean isCanceled();
+    boolean isCancelled();
 
     /**
      * Notifies that a given number of work units have been completed.
@@ -57,6 +57,13 @@ public interface IMonitor {
     void setWorkRemaining(int size);
 
     /**
+     * Sets the name of the current task being monitored.
+     *
+     * @param name the task name
+     */
+    void setTaskName(String name);
+
+    /**
      * Checks if progress monitor has been cancelled.
      *
      * @param monitor the progress monitor to check
@@ -64,7 +71,7 @@ public interface IMonitor {
      */
     static void checkCancelled(IMonitor monitor)
             throws InterruptedException {
-        if (monitor != null && monitor.isCanceled()) {
+        if (monitor != null && monitor.isCancelled()) {
             throw new InterruptedException();
         }
     }

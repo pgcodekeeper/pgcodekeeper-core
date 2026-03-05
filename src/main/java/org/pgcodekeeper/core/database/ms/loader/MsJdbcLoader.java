@@ -31,6 +31,7 @@ import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser;
 import org.pgcodekeeper.core.database.ms.schema.*;
 import org.pgcodekeeper.core.database.ms.utils.MsDiffUtils;
 import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,6 +95,7 @@ public final class MsJdbcLoader extends AbstractJdbcLoader<MsDatabase> {
             new MsUsersReader(this, d).read();
             new MsStatisticsReader(this).read();
 
+            IMonitor.checkCancelled(getMonitor());
             finishLoaders();
 
             connection.commit();

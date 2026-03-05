@@ -79,6 +79,7 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
     public void loadLibraries(boolean isIgnorePrivileges, Collection<String> paths)
             throws InterruptedException, IOException {
         for (String path : paths) {
+            IMonitor.checkCancelled(getMonitor());
             database.addLib(getLibraryDependency(path, isIgnorePrivileges), path, null);
         }
     }
@@ -98,6 +99,7 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
         try {
             loadNested = xmlStore.readLoadNestedFlag();
             for (Library lib : libs) {
+                IMonitor.checkCancelled(getMonitor());
                 String path = lib.path();
                 T db = getLibraryDependency(path, lib.isIgnorePrivileges(), xmlPath);
                 database.addLib(db, path, lib.owner());
@@ -118,6 +120,7 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
             return createDatabase();
         }
 
+        IMonitor.checkCancelled(getMonitor());
         switch (LibrarySource.getSource(path)) {
             case JDBC:
                 return loadJdbc(path, isIgnorePrivileges);
@@ -254,6 +257,7 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
         try (Stream<Path> stream = Files.list(f)) {
             List<Path> dirs = new ArrayList<>();
             for (Path sub : (Iterable<Path>) stream::iterator) {
+                IMonitor.checkCancelled(getMonitor());
                 if (Files.isDirectory(sub)) {
                     dirs.add(sub);
                 } else {
@@ -262,6 +266,7 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
             }
 
             for (Path sub : dirs) {
+                IMonitor.checkCancelled(getMonitor());
                 readStatementsFromDirectory(sub, db, diffSettings);
             }
         }
@@ -337,12 +342,12 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
         }
 
         @Override
-        public void addIgnoreList(Path ignoreListPath) throws IOException {
+        public void addIgnoreList(Path ignoreListPath) {
             // no impl
         }
 
         @Override
-        public void addIgnoreSchemaList(Path ignoreSchemaListPath) throws IOException {
+        public void addIgnoreSchemaList(Path ignoreSchemaListPath) {
             // no impl
         }
 

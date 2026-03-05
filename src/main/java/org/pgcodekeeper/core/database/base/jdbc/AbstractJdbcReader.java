@@ -51,7 +51,6 @@ public abstract class AbstractJdbcReader<T extends AbstractJdbcLoader<? extends 
             IMonitor monitor = loader.getMonitor();
             while (result.next()) {
                 IMonitor.checkCancelled(monitor);
-                monitor.worked(1);
                 processResult(result);
             }
         }

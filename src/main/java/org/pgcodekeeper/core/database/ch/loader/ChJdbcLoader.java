@@ -28,6 +28,7 @@ import org.pgcodekeeper.core.database.ch.parser.ChParserUtils;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.Utils;
 import org.slf4j.Logger;
@@ -74,6 +75,7 @@ public final class ChJdbcLoader extends AbstractJdbcLoader<ChDatabase> {
                 new ChPrivilegesReader(this, d).read();
             }
 
+            IMonitor.checkCancelled(getMonitor());
             finishLoaders();
 
             LOG.info(Messages.JdbcLoader_log_succes_queried);

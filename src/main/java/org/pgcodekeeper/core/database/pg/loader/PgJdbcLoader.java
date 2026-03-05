@@ -15,16 +15,11 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.loader;
 
-import java.io.IOException;
-import java.sql.*;
-import java.util.*;
-import java.util.function.*;
-
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.loader.AbstractJdbcLoader;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.pg.jdbc.*;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser;
@@ -32,8 +27,21 @@ import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.Utils;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * JDBC-based database schema loader for PostgreSQL databases.
@@ -141,7 +149,6 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
             queryTypesForCache();
             queryRoles();
             queryCheckExtension();
-            setupMonitorWork();
 
             info(Messages.JdbcLoader_log_read_db_objects);
             new PgSchemasReader(this, d).read();
@@ -187,6 +194,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
             if (!PgSupportedVersion.GP_VERSION_7.isLE(getVersion())) {
                 sequencesReader.querySequencesData(d);
             }
+            IMonitor.checkCancelled(getMonitor());
             connection.commit();
             finishLoaders();
 
@@ -247,6 +255,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
         setCurrentOperation(Messages.JdbcLoaderBase_log_get_list_system_types);
         try (ResultSet res = runner.runScript(statement, QUERY_TYPES_FOR_CACHE_ALL)) {
             while (res.next()) {
+                IMonitor.checkCancelled(getMonitor());
                 long oid = res.getLong("oid");
                 PgJdbcType type = new PgJdbcType(oid, res.getString("typname"),
                         res.getLong("typelem"), res.getLong("typarray"),
@@ -264,6 +273,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
         setCurrentOperation(Messages.JdbcLoaderBase_log_get_roles);
         try (ResultSet res = runner.runScript(statement, "SELECT oid::bigint, rolname FROM pg_catalog.pg_roles")) {
             while (res.next()) {
+                IMonitor.checkCancelled(getMonitor());
                 cachedRolesNamesByOid.put(res.getLong("oid"), res.getString("rolname"));
             }
         }
@@ -273,6 +283,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
         setCurrentOperation(Messages.JdbcLoaderBase_log_check_extension);
         try (ResultSet res = runner.runScript(statement, QUERY_CHECK_TIMESTAMPS)) {
             while (res.next()) {
+                IMonitor.checkCancelled(getMonitor());
                 String extVersion = res.getString("extversion");
                 if (!extVersion.startsWith(EXTENSION_VERSION)) {
                     var msg = Messages.JdbcLoaderBase_log_old_version_used.formatted(extVersion,
@@ -284,15 +295,6 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
                     extensionSchema = res.getString("nspname");
                 }
             }
-        }
-    }
-
-    protected void setupMonitorWork() throws SQLException, InterruptedException {
-        setCurrentOperation(Messages.JdbcLoaderBase_log_get_obj_count);
-        try (ResultSet resCount = runner.runScript(statement, QUERY_TOTAL_OBJECTS_COUNT)) {
-            int count = resCount.next() ? resCount.getInt(1) : DEFAULT_OBJECTS_COUNT;
-            getMonitor().setWorkRemaining(count);
-            debug(Messages.JdbcLoaderBase_log_get_total_obj_count, count);
         }
     }
 

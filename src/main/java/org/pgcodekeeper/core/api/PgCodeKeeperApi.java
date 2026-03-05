@@ -60,10 +60,23 @@ public final class PgCodeKeeperApi {
                               ILoader newDbLoader,
                               DiffSettings diffSettings)
             throws IOException, InterruptedException {
+        var subMonitor = diffSettings.getMonitor().createSubMonitor();
+        subMonitor.setWorkRemaining(70);
+
         // TODO parallel load
+        subMonitor.setTaskName("Loading old database");
         var oldDb = oldDbLoader.loadAndAnalyze();
+        subMonitor.worked(30);
+
+        subMonitor.setTaskName("Loading new database");
         var newDb = newDbLoader.loadAndAnalyze();
-        return diff(provider, oldDb, newDb, diffSettings);
+        subMonitor.worked(30);
+
+        subMonitor.setTaskName("Building script");
+        var script = diff(provider, oldDb, newDb, diffSettings);
+        subMonitor.worked(10);
+
+        return script;
     }
 
     /**
@@ -82,7 +95,7 @@ public final class PgCodeKeeperApi {
                               IDatabase newDb,
                               DiffSettings diffSettings)
             throws IOException, InterruptedException {
-        TreeElement root = DiffTree.create(diffSettings.getSettings(), oldDb, newDb);
+        TreeElement root = DiffTree.create(diffSettings.getSettings(), oldDb, newDb, diffSettings.getMonitor());
         root.setAllChecked();
         return diff(provider, oldDb, newDb, diffSettings, root);
     }
@@ -129,12 +142,24 @@ public final class PgCodeKeeperApi {
                                        Path projectPath,
                                        DiffSettings diffSettings)
             throws IOException, InterruptedException {
+        var subMonitor = diffSettings.getMonitor().createSubMonitor();
+        subMonitor.setWorkRemaining(100);
+
+        subMonitor.setTaskName("Loading old database");
         var oldDb = oldDbLoader == null ? null : oldDbLoader.loadAndAnalyze();
+        subMonitor.worked(30);
+
+        subMonitor.setTaskName("Loading new database");
         var newDb = newDbLoader.loadAndAnalyze();
+        subMonitor.worked(30);
+
         IgnoreList ignoreList = diffSettings.getIgnoreList();
         ISettings settings = diffSettings.getSettings();
+
+        subMonitor.setTaskName("Building diff tree");
         TreeElement root = DiffTree.create(settings, oldDb, newDb, diffSettings.getMonitor());
         root.setAllChecked();
+        subMonitor.worked(20);
 
         List<TreeElement> selected = new TreeFlattener()
                 .onlySelected()
@@ -142,11 +167,13 @@ public final class PgCodeKeeperApi {
                 .onlyTypes(settings.getAllowedTypes())
                 .flatten(root);
 
+        subMonitor.setTaskName("Exporting project");
         if (oldDb != null) {
             provider.getProjectUpdater(newDb, oldDb, selected, projectPath, settings).updatePartial();
         } else {
             provider.getModelExporter(projectPath, newDb, selected, settings).exportProject();
         }
+        subMonitor.worked(20);
     }
 
     /**
@@ -190,9 +217,19 @@ public final class PgCodeKeeperApi {
                                                                 DiffSettings diffSettings,
                                                                 Collection<DangerStatement> allowedDangers)
             throws IOException, InterruptedException {
+        var subMonitor = diffSettings.getMonitor().createSubMonitor();
+        subMonitor.setWorkRemaining(100);
+
+        subMonitor.setTaskName("Parsing script");
         ScriptParser parser = new ScriptParser(provider.getDumpLoader(() -> new ByteArrayInputStream(
                 sql.getBytes(StandardCharsets.UTF_8)), name, diffSettings), name, sql);
-        return parser.getDangerDdl(allowedDangers);
+        subMonitor.worked(50);
+
+        subMonitor.setTaskName("Checking dangerous statements");
+        var result = parser.getDangerDdl(allowedDangers);
+        subMonitor.worked(50);
+
+        return result;
     }
 
     /**
@@ -210,9 +247,17 @@ public final class PgCodeKeeperApi {
     public static void runSQL(IDatabaseProvider provider, String name, String sql, String url,
                               DiffSettings diffSettings)
             throws IOException, InterruptedException, SQLException {
+        var subMonitor = diffSettings.getMonitor().createSubMonitor();
+        subMonitor.setWorkRemaining(100);
+
+        subMonitor.setTaskName("Parsing script");
         ScriptParser parser = new ScriptParser(provider.getDumpLoader(() -> new ByteArrayInputStream(
                 sql.getBytes(StandardCharsets.UTF_8)), name, diffSettings), name, sql);
+        subMonitor.worked(30);
+
+        subMonitor.setTaskName("Executing script");
         new JdbcRunner().runBatches(provider.getJdbcConnector(url), parser.batch(), null);
+        subMonitor.worked(70);
     }
 
     private PgCodeKeeperApi() {

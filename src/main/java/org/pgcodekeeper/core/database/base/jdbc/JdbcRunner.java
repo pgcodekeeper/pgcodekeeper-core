@@ -15,22 +15,23 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.jdbc;
 
-import java.io.IOException;
-import java.sql.*;
-import java.util.List;
-import java.util.concurrent.*;
-
 import org.pgcodekeeper.core.callable.QueriesBatchCallable;
 import org.pgcodekeeper.core.callable.QueryCallable;
 import org.pgcodekeeper.core.callable.ResultSetCallable;
 import org.pgcodekeeper.core.callable.StatementCallable;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
-import org.pgcodekeeper.core.monitor.*;
+import org.pgcodekeeper.core.monitor.IMonitor;
+import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.reporter.IProgressReporter;
 import org.pgcodekeeper.core.utils.DaemonThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.sql.*;
+import java.util.List;
+import java.util.concurrent.*;
 
 /**
  * JDBC statement execution runner with progress monitoring and cancellation support.
@@ -155,7 +156,7 @@ public class JdbcRunner {
         Future<T> queryFuture = THREAD_POOL.submit(callable);
 
         while (true) {
-            if (monitor.isCanceled()) {
+            if (monitor.isCancelled()) {
                 LOG.info(MESSAGE);
                 callable.cancel();
                 throw new InterruptedException(MESSAGE);

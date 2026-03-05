@@ -21,6 +21,7 @@ import org.pgcodekeeper.core.database.base.loader.AbstractLibraryLoader;
 import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
 import org.pgcodekeeper.core.database.ch.project.ChWorkDirs;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.Utils;
 
@@ -61,7 +62,7 @@ public class ChProjectLoader extends AbstractProjectLoader<ChDatabase> {
     }
 
     @Override
-    protected void loadStructure(Path dir, ChDatabase db) throws IOException {
+    protected void loadStructure(Path dir, ChDatabase db) throws IOException, InterruptedException {
         for (String dirName : ChWorkDirs.getDirectoryNames()) {
             if (ChWorkDirs.DATABASE.equals(dirName)) {
                 loadDatabaseStructure(dir, db, dirName);
@@ -71,7 +72,8 @@ public class ChProjectLoader extends AbstractProjectLoader<ChDatabase> {
         }
     }
 
-    private void loadDatabaseStructure(Path baseDir, ChDatabase db, String commonDir) throws IOException {
+    private void loadDatabaseStructure(Path baseDir, ChDatabase db, String commonDir)
+            throws IOException, InterruptedException {
         Path databasesCommonDir = baseDir.resolve(commonDir);
         if (!Files.isDirectory(databasesCommonDir)) {
             return;
@@ -79,9 +81,11 @@ public class ChProjectLoader extends AbstractProjectLoader<ChDatabase> {
 
         try (Stream<Path> databases = Files.list(databasesCommonDir)) {
             for (Path databaseDir : Utils.streamIterator(databases)) {
+                IMonitor.checkCancelled(getMonitor());
                 if (Files.isDirectory(databaseDir) && isAllowedSchema(databaseDir.getFileName().toString())) {
                     loadSubdir(databasesCommonDir, databaseDir.getFileName().toString(), db);
                     for (DbObjType dirSub : ChWorkDirs.getDirLoadOrder()) {
+                        IMonitor.checkCancelled(getMonitor());
                         loadSubdir(databaseDir, dirSub.name(), db);
                     }
                 }

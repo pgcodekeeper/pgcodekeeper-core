@@ -26,12 +26,12 @@ public class NullMonitor implements IMonitor {
     private volatile boolean cancelled = false;
 
     @Override
-    public void setCanceled(boolean cancelled) {
+    public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
     }
 
     @Override
-    public boolean isCanceled() {
+    public boolean isCancelled() {
         return cancelled;
     }
 
@@ -47,6 +47,11 @@ public class NullMonitor implements IMonitor {
 
     @Override
     public void setWorkRemaining(int size) {
+        // no impl
+    }
+
+    @Override
+    public void setTaskName(String name) {
         // no impl
     }
 }
