@@ -23,6 +23,7 @@ import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.ObjectReference;
+import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
 import org.pgcodekeeper.core.ignorelist.IgnoreList;
@@ -87,7 +88,7 @@ class PgProjectLoaderTest {
         root.setAllChecked();
 
         createIgnoreListFile(dir);
-        Path listFile = dir.resolve(".pgcodekeeperignore");
+        Path listFile = dir.resolve(AbstractProjectLoader.IGNORE_FILE);
 
         IgnoreList ignoreList = new IgnoreList();
         IgnoreParser ignoreParser = new IgnoreParser(ignoreList);

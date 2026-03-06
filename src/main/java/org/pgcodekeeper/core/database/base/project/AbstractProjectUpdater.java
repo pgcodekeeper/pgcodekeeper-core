@@ -32,6 +32,8 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.List;
 
+import static org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader.OVERRIDES_DIR;
+
 /**
  * Abstract base class for database project updaters that provides common update functionality
  * for different database types (PostgreSQL, MS SQL, ClickHouse).
@@ -44,7 +46,6 @@ import java.util.List;
 public abstract class AbstractProjectUpdater implements IProjectUpdater {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractProjectUpdater.class);
-    private static final String OVERRIDES = "OVERRIDES";
 
     private final IDatabase dbNew;
     private final IDatabase dbOld;
@@ -165,8 +166,8 @@ public abstract class AbstractProjectUpdater implements IProjectUpdater {
     private void updatePartialInternal(Path dirTmp) throws IOException, PgCodeKeeperException {
         LOG.info(Messages.ProjectUpdater_log_start_partial_update);
         if (overridesOnly) {
-            updateFolder(dirTmp, OVERRIDES);
-            createOverridesModelExporter(dirExport.resolve(OVERRIDES),
+            updateFolder(dirTmp, OVERRIDES_DIR);
+            createOverridesModelExporter(dirExport.resolve(OVERRIDES_DIR),
                     dbNew, dbOld, changedObjects, encoding).exportPartial();
             return;
         }
@@ -212,7 +213,7 @@ public abstract class AbstractProjectUpdater implements IProjectUpdater {
                 safeCleanProjectDir(dirTmp);
                 createModelExporter(dirExport, dbNew, encoding).exportFull();
                 if (projectOnly) {
-                    restoreFolder(dirTmp, OVERRIDES);
+                    restoreFolder(dirTmp, OVERRIDES_DIR);
                 }
             } catch (Exception ex) {
                 caughtProcessingEx = true;
@@ -235,7 +236,7 @@ public abstract class AbstractProjectUpdater implements IProjectUpdater {
             moveFolder(dirTmp, subdirName);
         }
 
-        moveFolder(dirTmp, OVERRIDES);
+        moveFolder(dirTmp, OVERRIDES_DIR);
     }
 
     private void moveFolder(Path dirTmp, String folder) throws IOException {
@@ -250,7 +251,7 @@ public abstract class AbstractProjectUpdater implements IProjectUpdater {
             restoreFolder(dirTmp, subdirName);
         }
 
-        restoreFolder(dirTmp, OVERRIDES);
+        restoreFolder(dirTmp, OVERRIDES_DIR);
     }
 
     private void restoreFolder(Path dirTmp, String folder) throws IOException {

@@ -42,9 +42,9 @@ import java.util.stream.Stream;
 public abstract class AbstractProjectLoader<T extends IDatabase> extends AbstractLoader<T>
         implements IProjectLoader {
 
-    private static final String IGNORE_FILE = ".pgcodekeeperignore";
-    private static final String IGNORE_SCHEMA_FILE = ".pgcodekeeperignoreschema";
-    private static final String OVERRIDES_DIR = "OVERRIDES";
+    public static final String IGNORE_FILE = ".pgcodekeeperignore";
+    public static final String IGNORE_SCHEMA_FILE = ".pgcodekeeperignoreschema";
+    public static final String OVERRIDES_DIR = "OVERRIDES";
 
     protected final Path metaPath;
     protected final Map<AbstractStatement, StatementOverride> overrides = new LinkedHashMap<>();

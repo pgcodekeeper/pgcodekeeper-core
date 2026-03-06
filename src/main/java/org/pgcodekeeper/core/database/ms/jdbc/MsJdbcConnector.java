@@ -28,7 +28,7 @@ import com.microsoft.sqlserver.jdbc.SQLServerDriver;
  */
 public class MsJdbcConnector extends AbstractJdbcConnector {
 
-    protected static final String TRUST_CERT = "trustServerCertificate";
+    protected static final String TRUST_CERT = MsConsts.TRUST_CERT;
 
     private static final String URL_START_MS = "jdbc:sqlserver:";
     private static final int DEFAULT_PORT = 1433;

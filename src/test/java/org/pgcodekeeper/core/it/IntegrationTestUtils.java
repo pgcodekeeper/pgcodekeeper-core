@@ -25,6 +25,7 @@ import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.api.schema.ObjectReference;
+import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
 import org.pgcodekeeper.core.database.base.parser.FullAnalyze;
 import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
@@ -106,14 +107,14 @@ public final class IntegrationTestUtils {
                 HIDE NONE country
                 HIDE NONE worker
                 HIDE REGEX 'ignore.*'""";
-        Files.writeString(dir.resolve(".pgcodekeeperignoreschema"), rule);
+        Files.writeString(dir.resolve(AbstractProjectLoader.IGNORE_SCHEMA_FILE), rule);
     }
 
     public static void createIgnoreListFile(Path dir) throws IOException {
         String rule = """
                 SHOW ALL
                 HIDE REGEX 'people.*'""";
-        Files.writeString(dir.resolve(".pgcodekeeperignore"), rule);
+        Files.writeString(dir.resolve(AbstractProjectLoader.IGNORE_FILE), rule);
     }
 
     public static void assertDiff(IDatabaseProvider databaseProvider, String fileNameTemplate, Class<?> clazz)
