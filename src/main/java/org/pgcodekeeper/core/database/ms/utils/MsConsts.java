@@ -27,6 +27,7 @@ public final class MsConsts {
 
     public static final String DEFAULT_SCHEMA = "dbo";
     public static final String GO = "GO";
+    public static final String TRUST_CERT = "trustServerCertificate";
 
     private MsConsts() {
     }
