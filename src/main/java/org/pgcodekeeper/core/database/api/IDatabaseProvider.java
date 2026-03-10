@@ -72,8 +72,21 @@ public interface IDatabaseProvider {
      * @param settings       configuration settings
      * @return project updater for the DBMS
      */
+    default IProjectUpdater getProjectUpdater(IDatabase newDb, IDatabase oldDb, List<TreeElement> changedObjects,
+                                              Path projectPath, ISettings settings) {
+        return getProjectUpdater(newDb, oldDb, changedObjects, projectPath, false, settings);
+    }
+    /**
+     * @param newDb          the new database version with changes
+     * @param oldDb          the old database version
+     * @param changedObjects list of changed tree elements to apply
+     * @param projectPath    path to the project directory to update
+     * @param overridesOnly  update overrides only
+     * @param settings       configuration settings
+     * @return project updater for the DBMS
+     */
     IProjectUpdater getProjectUpdater(IDatabase newDb, IDatabase oldDb, List<TreeElement> changedObjects,
-                                      Path projectPath, ISettings settings);
+                                      Path projectPath, boolean overridesOnly, ISettings settings);
 
     /**
      * @param url          full jdbc url

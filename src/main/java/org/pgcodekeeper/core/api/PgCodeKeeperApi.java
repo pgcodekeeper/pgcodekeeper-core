@@ -27,8 +27,10 @@ import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeFlattener;
 import org.pgcodekeeper.core.model.graph.DepcyFinder;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.Pair;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -45,15 +47,73 @@ import java.util.Set;
 public final class PgCodeKeeperApi {
 
     /**
-     * Compares two databases and generates a migration script.
+     * Compares two databases and generates a tree.
      *
      * @param provider     the database provider determining SQL dialect
      * @param oldDbLoader  loader for the old database version to compare from
      * @param newDbLoader  loader for the new database version to compare to
      * @param diffSettings unified context object containing settings, ignore list, and error accumulator
-     * @return the generated migration script as a string
+     * @return the root element of generated tree
      * @throws IOException          if I/O operations fail
      * @throws InterruptedException if the thread is interrupted during the operation
+     */
+    public static TreeElement createTree(IDatabaseProvider provider,
+                                         ILoader oldDbLoader,
+                                         ILoader newDbLoader,
+                                         DiffSettings diffSettings)
+            throws IOException, InterruptedException {
+        var subMonitor = diffSettings.getMonitor().createSubMonitor();
+        subMonitor.setWorkRemaining(65);
+
+        var databases = loadDatabases(oldDbLoader, newDbLoader, subMonitor, diffSettings);
+
+        subMonitor.setTaskName("Creating tree");
+        TreeElement root = DiffTree.create(diffSettings.getSettings(), databases.getFirst(), databases.getSecond(),
+                diffSettings.getMonitor());
+        subMonitor.worked(5);
+
+        return root;
+    }
+
+    /**
+     * Loads databases from loaders
+     * 
+     * @param oldDbLoader   loader for the old database version to compare from
+     * @param newDbLoader   loader for the old database version to compare from
+     * @param subMonitor    the progress monitor for tracking operation progress
+     * @param diffSettings  unified context object containing settings, ignore list, and error accumulator
+     * @return pair of databases (old and new)
+     * @throws IOException          if I/O operations fail
+     * @throws InterruptedException if the thread is interrupted during the operation
+     */
+    private static Pair<IDatabase, IDatabase> loadDatabases(ILoader oldDbLoader,
+                                                            ILoader newDbLoader,
+                                                            IMonitor subMonitor,
+                                                            DiffSettings diffSettings)
+            throws IOException, InterruptedException {
+        // TODO parallel load by option
+        subMonitor.setTaskName("Loading old database");
+        var oldDb = oldDbLoader.loadAndAnalyze();
+        subMonitor.worked(30);
+
+        subMonitor.setTaskName("Loading new database");
+        var newDb = newDbLoader.loadAndAnalyze();
+        subMonitor.worked(30);
+        return new Pair<>(oldDb, newDb);
+    }
+
+    /**
+     * Compares two databases and generates a migration script.
+     *
+     * @param provider     the database provider determining SQL dialect
+     * @param oldDbLoader  loader for the old database version to compare from
+     * @param newDbLoader  loader for the new database version to compare to
+     * @param diffSettings unified context object containing settings, ignore list,
+     *                     and error accumulator
+     * @return the generated migration script as a string
+     * @throws IOException          if I/O operations fail
+     * @throws InterruptedException if the thread is interrupted during the
+     *                              operation
      */
     public static String diff(IDatabaseProvider provider,
                               ILoader oldDbLoader,
@@ -63,17 +123,10 @@ public final class PgCodeKeeperApi {
         var subMonitor = diffSettings.getMonitor().createSubMonitor();
         subMonitor.setWorkRemaining(70);
 
-        // TODO parallel load
-        subMonitor.setTaskName("Loading old database");
-        var oldDb = oldDbLoader.loadAndAnalyze();
-        subMonitor.worked(30);
-
-        subMonitor.setTaskName("Loading new database");
-        var newDb = newDbLoader.loadAndAnalyze();
-        subMonitor.worked(30);
+        var databases = loadDatabases(oldDbLoader, newDbLoader, subMonitor, diffSettings);
 
         subMonitor.setTaskName("Building script");
-        var script = diff(provider, oldDb, newDb, diffSettings);
+        var script = diff(provider, databases.getFirst(), databases.getSecond(), diffSettings);
         subMonitor.worked(10);
 
         return script;
@@ -142,6 +195,32 @@ public final class PgCodeKeeperApi {
                                        Path projectPath,
                                        DiffSettings diffSettings)
             throws IOException, InterruptedException {
+        exportToProject(provider, oldDbLoader, newDbLoader, projectPath, false, diffSettings);
+    }
+
+    /**
+     * Exports or updates project or overrides files based on database schema.
+     * <p>
+     * If {@code oldDb} is {@code null}, exports {@code newDb} schema to an empty project directory.
+     * If {@code oldDb} is provided, updates the existing project with changes between {@code oldDb} and {@code newDb}.
+     *
+     * @param provider      the database provider determining SQL dialect and exporter/updater implementation
+     * @param oldDbLoader   loader for the old database version (existing project state), or {@code null} for a full export
+     * @param newDbLoader   loader for the new new database version (target state)
+     * @param projectPath   path to the target project directory
+     * @param overridesOnly option to update only overrides
+     * @param diffSettings unified context object containing settings, monitor, ignore list, and error accumulator
+     * @throws IOException          if I/O operations fail, if the directory does not exist,
+     *                              if the directory is not empty (export) or if path is a file
+     * @throws InterruptedException if the thread is interrupted during the operation
+     */
+    public static void exportToProject(IDatabaseProvider provider,
+                                       ILoader oldDbLoader,
+                                       ILoader newDbLoader,
+                                       Path projectPath,
+                                       boolean overridesOnly,
+                                       DiffSettings diffSettings)
+            throws IOException, InterruptedException {
         var subMonitor = diffSettings.getMonitor().createSubMonitor();
         subMonitor.setWorkRemaining(100);
 
@@ -168,12 +247,36 @@ public final class PgCodeKeeperApi {
                 .flatten(root);
 
         subMonitor.setTaskName("Exporting project");
+        exportToProject(provider, oldDb, newDb, selected, projectPath, overridesOnly, settings);
+        subMonitor.worked(20);
+    }
+
+    /**
+     * Exports or updates project or overrides files based on selected elements.
+     *
+     * @param provider      the database provider determining SQL dialect and exporter/updater implementation
+     * @param oldDb         the old database version (existing project state), or {@code null} for a full export
+     * @param newDb         the new new database version (target state)
+     * @param selected      the selected elements
+     * @param projectPath   path to the target project directory
+     * @param overridesOnly option to update only overrides
+     * @param settings      configuration settings
+     * @throws IOException          if I/O operations fail, if the directory does not exist,
+     *                              if the directory is not empty (export) or if path is a file
+     */
+    public static void exportToProject(IDatabaseProvider provider,
+                                       IDatabase oldDb,
+                                       IDatabase newDb,
+                                       List<TreeElement> selected,
+                                       Path projectPath,
+                                       boolean overridesOnly,
+                                       ISettings settings)
+            throws IOException {
         if (oldDb != null) {
-            provider.getProjectUpdater(newDb, oldDb, selected, projectPath, settings).updatePartial();
+            provider.getProjectUpdater(newDb, oldDb, selected, projectPath, overridesOnly, settings).updatePartial();
         } else {
             provider.getModelExporter(projectPath, newDb, selected, settings).exportProject();
         }
-        subMonitor.worked(20);
     }
 
     /**
