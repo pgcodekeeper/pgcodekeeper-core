@@ -64,8 +64,8 @@ public class ChDatabaseProvider implements IDatabaseProvider {
 
     @Override
     public ChProjectUpdater getProjectUpdater(IDatabase newDb, IDatabase oldDb, List<TreeElement> changedObjects,
-                                              Path projectPath, ISettings settings) {
-        return new ChProjectUpdater(newDb, oldDb, changedObjects, Consts.UTF_8, projectPath, false, settings);
+                                              Path projectPath, boolean overridesOnly, ISettings settings) {
+        return new ChProjectUpdater(newDb, oldDb, changedObjects, Consts.UTF_8, projectPath, overridesOnly, settings);
     }
 
     @Override
