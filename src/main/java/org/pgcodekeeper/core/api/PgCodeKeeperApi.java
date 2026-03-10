@@ -49,7 +49,6 @@ public final class PgCodeKeeperApi {
     /**
      * Compares two databases and generates a tree.
      *
-     * @param provider     the database provider determining SQL dialect
      * @param oldDbLoader  loader for the old database version to compare from
      * @param newDbLoader  loader for the new database version to compare to
      * @param diffSettings unified context object containing settings, ignore list, and error accumulator
@@ -57,8 +56,7 @@ public final class PgCodeKeeperApi {
      * @throws IOException          if I/O operations fail
      * @throws InterruptedException if the thread is interrupted during the operation
      */
-    public static TreeElement createTree(IDatabaseProvider provider,
-                                         ILoader oldDbLoader,
+    public static TreeElement createTree(ILoader oldDbLoader,
                                          ILoader newDbLoader,
                                          DiffSettings diffSettings)
             throws IOException, InterruptedException {
@@ -77,7 +75,7 @@ public final class PgCodeKeeperApi {
 
     /**
      * Loads databases from loaders
-     * 
+     *
      * @param oldDbLoader   loader for the old database version to compare from
      * @param newDbLoader   loader for the old database version to compare from
      * @param subMonitor    the progress monitor for tracking operation progress
