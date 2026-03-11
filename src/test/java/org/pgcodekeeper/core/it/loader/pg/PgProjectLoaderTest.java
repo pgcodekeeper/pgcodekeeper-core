@@ -155,8 +155,9 @@ class PgProjectLoaderTest {
 
         String libWithPrivPath = TestUtils.getFilePath(RESOURCE_FIRST_LIB, getClass()).toString();
         String libWithoutPrivPath = TestUtils.getFilePath(RESOURCE_SECOND_LIB, getClass()).toString();
-        Path depsFile = dir.resolve(".dependencies");
-        new LibraryXmlStore(depsFile).writeDependencies(List.of(
+
+        Path depsFile = projectDir.resolve(LibraryXmlStore.FILE_NAME);
+        new LibraryXmlStore(projectDir.resolve(LibraryXmlStore.FILE_NAME)).writeDependencies(List.of(
                 new Library("", libWithPrivPath, false, ""),
                 new Library("", libWithoutPrivPath, true, "")), false);
 
@@ -165,6 +166,34 @@ class PgProjectLoaderTest {
 
         assertLibLoaded(db, "lib_first_table", true);
         assertLibLoaded(db, "lib_second_table", false);
+    }
+
+    @Test
+    void testProjectLoaderWithIsLibTrue(@TempDir Path dir) throws IOException, InterruptedException {
+        var settings = new CoreSettings();
+        var diffSettings = new DiffSettings(settings);
+        IDatabase dbDump = loadTestDump(databaseProvider, RESOURCE_DUMP, IntegrationTestUtils.class, diffSettings);
+
+        Path projectDir = dir.resolve("project");
+        new PgModelExporter(projectDir, dbDump, Consts.UTF_8, settings).exportFull();
+
+        String libPath = TestUtils.getFilePath(RESOURCE_FIRST_LIB, getClass()).toString();
+        new LibraryXmlStore(projectDir.resolve(LibraryXmlStore.FILE_NAME)).writeDependencies(List.of(
+                new Library("", libPath, false, "")), false);
+
+        String externalLibPath = TestUtils.getFilePath(RESOURCE_SECOND_LIB, getClass()).toString();
+        Path externalXml = dir.resolve(".external");
+        new LibraryXmlStore(externalXml).writeDependencies(List.of(
+                new Library("", externalLibPath, false, "")), false);
+
+        var loader = databaseProvider.getProjectLoader(projectDir, diffSettings, List.of(externalXml.toString()),
+                Collections.emptyList(), Collections.emptyList(), dir.resolve("meta"));
+        loader.setLib(true);
+        IDatabase db = loader.load();
+
+        var libTableRef = new ObjectReference("public", "lib_first_table", DbObjType.TABLE);
+        Assertions.assertNull(db.getStatement(libTableRef));
+        assertLibLoaded(db, "lib_second_table", true);
     }
 
     @Test
