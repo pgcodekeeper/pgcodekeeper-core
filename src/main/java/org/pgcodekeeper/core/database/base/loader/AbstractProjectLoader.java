@@ -52,6 +52,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
 
     protected boolean isOverrideMode;
 
+    private boolean isLib;
     private final Path dirPath;
     private final Collection<String> libXmls;
     private final Collection<String> libs;
@@ -86,6 +87,11 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
         return db;
     }
 
+    public void setLib(boolean isLib) {
+        this.isLib = isLib;
+    }
+
+    @Override
     protected abstract T createDatabase();
 
     protected abstract AbstractDumpLoader<T> createDumpLoader(Path file);
@@ -183,6 +189,13 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
     private void loadLibraries(T db) throws IOException, InterruptedException {
         var libraryLoader = createLibraryLoader(db);
 
+        if (!isLib) {
+            // check project libraries
+            Path depsFile = dirPath.resolve(LibraryXmlStore.FILE_NAME);
+            if (Files.isRegularFile(depsFile)) {
+                libraryLoader.loadXml(new LibraryXmlStore(depsFile));
+            }
+        }
         for (String xml : libXmls) {
             IMonitor.checkCancelled(getMonitor());
             libraryLoader.loadXml(new LibraryXmlStore(Paths.get(xml)));

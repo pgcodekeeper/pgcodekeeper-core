@@ -93,6 +93,10 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
      */
     public void loadXml(LibraryXmlStore xmlStore)
             throws InterruptedException, IOException {
+        if (!loadedPaths.add(xmlStore.getXmlFile().toString())) {
+            return;
+        }
+
         List<Library> libs = xmlStore.readObjects();
         Path xmlPath = xmlStore.getXmlFile();
         boolean oldLoadNested = loadNested;
@@ -167,7 +171,9 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
 
         // project
         if (Files.exists(path.resolve(Consts.FILENAME_WORKING_DIR_MARKER))) {
-            T db = getProjectLoader(path, copyDiffSettings).load();
+            var projectLoader = getProjectLoader(path, copyDiffSettings);
+            projectLoader.setLib(true);
+            T db = projectLoader.load();
 
             if (loadNested) {
                 getCopy(db).loadXml(new LibraryXmlStore(path.resolve(LibraryXmlStore.FILE_NAME)));

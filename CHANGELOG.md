@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Updated the JUnit library version from 5.x to version 6.
 
+- The .dependencies file is now automatically read when loading a project.
+
 ### Fixed
 
 - Fixed monitor progress tracking.
