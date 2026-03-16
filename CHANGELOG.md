@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Fixed monitor progress tracking.
+- Fixed a bug in the generation of the migration script when data migration when recreating tables with serial-type fields for PostgreSQL.
 
 ## [14.0.0] - 2026-02-25
 

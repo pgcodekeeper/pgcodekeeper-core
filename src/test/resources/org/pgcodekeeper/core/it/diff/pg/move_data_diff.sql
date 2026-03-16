@@ -52,17 +52,6 @@ DROP INDEX public.tbl_idx;
 
 ALTER TABLE public.tbl RENAME TO tbl_randomly_generated_part;
 
-DROP SEQUENCE public.cities2_city_id_seq;
-
-CREATE SEQUENCE public.cities2_city_id_seq
-	START WITH 1
-	INCREMENT BY 1
-	NO MAXVALUE
-	NO MINVALUE
-	CACHE 1;
-
-ALTER SEQUENCE public.cities2_city_id_seq OWNER TO khazieva_gr;
-
 CREATE TABLE public.cities2 (
 	id1 text NOT NULL,
 	id3 text NOT NULL,
@@ -76,6 +65,9 @@ ALTER TABLE public.cities2 OWNER TO khazieva_gr;
 
 INSERT INTO public.cities2(id1, id, city_id, c_name, population)
 SELECT id1, id, city_id, c_name, population FROM public.cities2_randomly_generated_part;
+
+ALTER SEQUENCE public.cities2_city_id_seq
+	OWNED BY public.cities2.city_id;
 
 DROP TABLE public.cities2_randomly_generated_part;
 
@@ -131,6 +123,3 @@ CREATE INDEX tbl_idx ON public.tbl USING btree (event_time);
 
 ALTER SEQUENCE public.person_age_seq
 	OWNED BY public.person.age;
-
-ALTER SEQUENCE public.cities2_city_id_seq
-	OWNED BY public.cities2.city_id;
