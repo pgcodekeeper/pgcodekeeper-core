@@ -84,7 +84,6 @@ public class PgSequence extends PgAbstractStatement implements ISequence {
 
         fillSequenceBody(sbSQL);
         script.addStatement(sbSQL);
-
         getOwnedBySQL(script);
         appendOwnerSQL(script);
         appendPrivileges(script);
@@ -133,7 +132,11 @@ public class PgSequence extends PgAbstractStatement implements ISequence {
     /**
      * Creates SQL statement for modification "OWNED BY" parameter.
      */
-    private void getOwnedBySQL(SQLScript script) {
+    public void getOwnedBySQL(SQLScript script) {
+        getOwnedBySQL(script, SQLActionType.END);
+    }
+
+    public void getOwnedBySQL(SQLScript script, SQLActionType type) {
         if (ownedBy == null) {
             return;
         }
@@ -143,7 +146,7 @@ public class PgSequence extends PgAbstractStatement implements ISequence {
                 quote(ownedBy.table()) + '.' +
                 quote(ownedBy.column());
 
-        script.addStatement(sb, SQLActionType.END);
+        script.addStatement(sb, type);
     }
 
     @Override

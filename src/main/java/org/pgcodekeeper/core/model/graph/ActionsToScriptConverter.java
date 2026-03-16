@@ -22,10 +22,9 @@ import org.pgcodekeeper.core.database.ms.schema.MsConstraintPk;
 import org.pgcodekeeper.core.database.ms.schema.MsTable;
 import org.pgcodekeeper.core.database.ms.schema.MsView;
 import org.pgcodekeeper.core.database.ms.utils.MsDiffUtils;
-import org.pgcodekeeper.core.database.pg.schema.PgColumn;
-import org.pgcodekeeper.core.database.pg.schema.PgPartitionTable;
-import org.pgcodekeeper.core.database.pg.schema.PgSequence;
+import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
+import org.pgcodekeeper.core.script.SQLActionType;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Utils;
@@ -86,6 +85,7 @@ public final class ActionsToScriptConverter {
     private Map<String, List<PgPartitionTable>> partitionTables;
 
     private List<String> partitionChildren;
+    private List<PgSequence> sequences;
 
     /**
      * Fills the SQL script with statements based on resolved database actions.
@@ -127,6 +127,7 @@ public final class ActionsToScriptConverter {
             tblIdentityCols = new HashMap<>();
             partitionTables = new HashMap<>();
             partitionChildren = new ArrayList<>();
+            sequences = new ArrayList<>();
         }
     }
 
@@ -232,9 +233,9 @@ public final class ActionsToScriptConverter {
 
                 var oldObj = obj.getTwin(oldDbFull);
 
-                // explicitly deleting a sequence due to a name conflict
-                if (settings.isDataMovementMode() && obj instanceof PgSequence && oldObj != null) {
-                    addToDropScript(obj, false);
+                if (settings.isDataMovementMode() && obj instanceof PgSequence seq && oldObj != null) {
+                    sequences.add(seq);
+                    break;
                 }
 
                 if (settings.isDropBeforeCreate() && obj.canDropBeforeCreate()) {
@@ -252,10 +253,10 @@ public final class ActionsToScriptConverter {
                     script.addStatementWithoutSeparator(depcy);
                 }
                 if (settings.isDataMovementMode()
-                        && obj instanceof ITable
+                        && obj instanceof ITable table
                         && !(obj instanceof IForeignTable)
                         && obj.getTwin(newDbFull) != null) {
-                    addCommandsForRenameTbl((ITable) obj);
+                    addCommandsForRenameTbl(table);
                 } else {
                     checkMsTableOptions(obj);
                     addToDropScript(obj, false);
@@ -365,6 +366,14 @@ public final class ActionsToScriptConverter {
         }
 
         oldTable.appendMoveDataSql(newObj, script, tempName, tblIdentityCols.get(qname));
+
+        //add OWNED BY if table have sequence
+        for (var seq : sequences) {
+            if (oldTable.getSchemaName().equals(seq.getOwnedBy().schema())
+                    && oldTable.getBareName().equals(seq.getOwnedBy().table())) {
+                seq.getOwnedBySQL(script, SQLActionType.MID);
+            }
+        }
 
         if (tables != null) {
             List<PgPartitionTable> list = new ArrayList<>(tables);

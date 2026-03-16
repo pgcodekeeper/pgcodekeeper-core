@@ -55,7 +55,9 @@ class PgMoveDataDiffTest {
             //implementation for partition table data movement test in PG (with identity columns)
             "move_data_partition_table_identity",
             //implementation for partition table data movement test in PG with identity columns(dropped, changed identity col)
-            "move_data_change_col_identity"
+            "move_data_change_col_identity",
+            //test for data movement in PG for case with changing table having a serial column
+            "sequence_data"
     })
     void moveDataTest(String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
