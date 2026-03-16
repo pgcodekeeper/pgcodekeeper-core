@@ -15,7 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.utils;
 
+import org.pgcodekeeper.core.database.api.loader.ILoader;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -44,6 +47,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -219,7 +224,6 @@ public final class Utils {
                 .digest(s.getBytes(StandardCharsets.UTF_8));
     }
 
-
     /**
      * Returns hexadecimal string representation of hash.
      *
@@ -348,6 +352,82 @@ public final class Utils {
         return map.isEmpty();
     }
 
+    /**
+     * Loads databases from loaders
+     *
+     * @param oldDbLoader     loader for the old database
+     * @param newDbLoader     loader for the new database
+     * @param subMonitor      the progress monitor for tracking operation progress
+     * @param isParallelLoad  flag indicating whether to load databases in parallel mode
+     * @return pair of databases (old and new)
+     * @throws IOException          if I/O operations fail
+     * @throws InterruptedException if the thread is interrupted during the operation
+     */
+    public static Pair<IDatabase, IDatabase> loadDatabases(ILoader oldDbLoader, ILoader newDbLoader,
+            IMonitor subMonitor, boolean isParallelLoad) throws IOException, InterruptedException {
+        if (isParallelLoad) {
+            return loadDatabasesInParallelMode(oldDbLoader, newDbLoader, subMonitor);
+        }
+        subMonitor.setTaskName("Loading old database");
+        var oldDb = oldDbLoader.loadAndAnalyze();
+        subMonitor.worked(30);
+
+        subMonitor.setTaskName("Loading new database");
+        var newDb = newDbLoader.loadAndAnalyze();
+        subMonitor.worked(30);
+
+        return new Pair<>(oldDb, newDb);
+    }
+
+    /**
+     * Loads two databases in parallel using the provided loaders.
+     *
+     * @param oldDbLoader loader for the old database
+     * @param newDbLoader loader for the new database
+     * @param monitor     progress monitor for tracking loading progress
+     * @return pair containing the loaded old (left) and new (right) databases
+     * @throws InterruptedException if loading is interrupted
+     * @throws IOException          if an I/O error occurs during loading
+     */
+    private static Pair<IDatabase, IDatabase> loadDatabasesInParallelMode(ILoader oldDbLoader, ILoader newDbLoader,
+            IMonitor monitor) throws InterruptedException, IOException {
+        // Parallel load
+        monitor.setTaskName("Loading databases");
+
+        var oldDbFuture = CompletableFuture.supplyAsync(supplyLoader(oldDbLoader, monitor));
+        var newDbFuture = CompletableFuture.supplyAsync(supplyLoader(newDbLoader, monitor));
+
+        try {
+            CompletableFuture.allOf(oldDbFuture, newDbFuture).join();
+            monitor.worked(60);
+            return new Pair<>(oldDbFuture.join(), newDbFuture.join());
+        } catch (CompletionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                throw ie;
+            }
+            if (cause instanceof IOException io) {
+                throw io;
+            }
+            throw new IOException("Failed to load databases", cause);
+        }
+    }
+
+    private static Supplier<IDatabase> supplyLoader(ILoader oldDbLoader, IMonitor monitor) {
+        return () -> {
+            try {
+                return oldDbLoader.loadAndAnalyze();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                monitor.setCancelled(true);
+                throw new CompletionException(e);
+            } catch (IOException e) {
+                monitor.setCancelled(true);
+                throw new CompletionException(e);
+            }
+        };
+    }
 
     public static Random getRandom() {
         return RANDOM;
