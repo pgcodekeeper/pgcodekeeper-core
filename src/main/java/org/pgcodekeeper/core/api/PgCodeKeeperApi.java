@@ -27,10 +27,9 @@ import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeFlattener;
 import org.pgcodekeeper.core.model.graph.DepcyFinder;
-import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.Pair;
+import org.pgcodekeeper.core.utils.Utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -63,7 +62,8 @@ public final class PgCodeKeeperApi {
         var subMonitor = diffSettings.getMonitor().createSubMonitor();
         subMonitor.setWorkRemaining(65);
 
-        var databases = loadDatabases(oldDbLoader, newDbLoader, subMonitor, diffSettings);
+        boolean isParallelLoad = diffSettings.getSettings().isParallelLoad();
+        var databases = Utils.loadDatabases(oldDbLoader, newDbLoader, subMonitor, isParallelLoad);
 
         subMonitor.setTaskName("Creating tree");
         TreeElement root = DiffTree.create(diffSettings.getSettings(), databases.getFirst(), databases.getSecond(),
@@ -73,32 +73,6 @@ public final class PgCodeKeeperApi {
         return root;
     }
 
-    /**
-     * Loads databases from loaders
-     *
-     * @param oldDbLoader   loader for the old database version to compare from
-     * @param newDbLoader   loader for the old database version to compare from
-     * @param subMonitor    the progress monitor for tracking operation progress
-     * @param diffSettings  unified context object containing settings, ignore list, and error accumulator
-     * @return pair of databases (old and new)
-     * @throws IOException          if I/O operations fail
-     * @throws InterruptedException if the thread is interrupted during the operation
-     */
-    private static Pair<IDatabase, IDatabase> loadDatabases(ILoader oldDbLoader,
-                                                            ILoader newDbLoader,
-                                                            IMonitor subMonitor,
-                                                            DiffSettings diffSettings)
-            throws IOException, InterruptedException {
-        // TODO parallel load by option
-        subMonitor.setTaskName("Loading old database");
-        var oldDb = oldDbLoader.loadAndAnalyze();
-        subMonitor.worked(30);
-
-        subMonitor.setTaskName("Loading new database");
-        var newDb = newDbLoader.loadAndAnalyze();
-        subMonitor.worked(30);
-        return new Pair<>(oldDb, newDb);
-    }
 
     /**
      * Compares two databases and generates a migration script.
@@ -120,8 +94,8 @@ public final class PgCodeKeeperApi {
             throws IOException, InterruptedException {
         var subMonitor = diffSettings.getMonitor().createSubMonitor();
         subMonitor.setWorkRemaining(70);
-
-        var databases = loadDatabases(oldDbLoader, newDbLoader, subMonitor, diffSettings);
+        boolean isParallelLoad = diffSettings.getSettings().isParallelLoad();
+        var databases = Utils.loadDatabases(oldDbLoader, newDbLoader, subMonitor, isParallelLoad);
 
         subMonitor.setTaskName("Building script");
         var script = diff(provider, databases.getFirst(), databases.getSecond(), diffSettings);

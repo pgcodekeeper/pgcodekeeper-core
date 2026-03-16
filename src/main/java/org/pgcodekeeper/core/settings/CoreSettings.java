@@ -54,6 +54,7 @@ public class CoreSettings implements ISettings {
     private boolean selectedOnly;
     private boolean ignoreConcurrentModification;
     private String clusterName;
+    private boolean parallelLoad;
 
     @Override
     public boolean isConcurrentlyMode() {
@@ -282,6 +283,15 @@ public class CoreSettings implements ISettings {
         return clusterName;
     }
 
+    public void setParallelLoad(boolean parallelLoad) {
+        this.parallelLoad = parallelLoad;
+    }
+
+    @Override
+    public boolean isParallelLoad() {
+        return parallelLoad;
+    }
+
     @Override
     public CoreSettings copy() {
         var settings = new CoreSettings();
@@ -309,6 +319,7 @@ public class CoreSettings implements ISettings {
         settings.timeZone = timeZone;
         settings.printUsing = printUsing;
         settings.clusterName = clusterName;
+        settings.parallelLoad = parallelLoad;
         return settings;
     }
 }

@@ -161,6 +161,14 @@ public interface ISettings {
     boolean isDisableCheckFunctionBodies();
 
     /**
+     * Returns the parallel load flag that controls how databases are loaded during comparison.
+     *
+     * @return {@code true} for parallel loading (faster, more resource-intensive),
+     *         {@code false} for sequential loading (slower, fewer resources)
+     */
+    boolean isParallelLoad();
+
+    /**
      * Gets the input character encoding name.
      *
      * @return the character encoding name

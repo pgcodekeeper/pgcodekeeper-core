@@ -15,22 +15,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.api;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.io.IOException;
+import java.nio.file.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
+import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.DiffSettings;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PgCodeKeeperApiTest {
 
@@ -59,6 +57,25 @@ class PgCodeKeeperApiTest {
         var expectedDiff = getExpectedDiff(testName);
 
         String actual = PgCodeKeeperApi.diff(provider, oldDbLoader, newDbLoader, diffSettings);
+
+        TestUtils.assertIgnoreNewLines(expectedDiff, actual);
+    }
+
+
+    @ParameterizedTest
+    @CsvSource({
+            "test_diff, false",
+            "test_diff, true"})
+    void loaderTest(String testName, boolean parallelLoad) throws IOException, InterruptedException {
+        CoreSettings settings = new CoreSettings();
+        settings.setParallelLoad(parallelLoad);
+
+        var diffSetts = new DiffSettings(settings);
+        var oldDbLoader = provider.getDumpLoader(getFilePath(testName + ORIGINAL), diffSetts);
+        var newDbLoader = provider.getDumpLoader(getFilePath(testName + NEW), diffSetts);
+        var expectedDiff = getExpectedDiff(testName);
+
+        String actual = PgCodeKeeperApi.diff(provider, oldDbLoader, newDbLoader, diffSetts);
 
         TestUtils.assertIgnoreNewLines(expectedDiff, actual);
     }
