@@ -65,7 +65,7 @@ public class MsDatabaseProvider implements IDatabaseProvider {
     @Override
     public MsProjectUpdater getProjectUpdater(IDatabase newDb, IDatabase oldDb, List<TreeElement> changedObjects,
                                               Path projectPath, boolean overridesOnly, ISettings settings) {
-        return new MsProjectUpdater(newDb, oldDb, changedObjects, Consts.UTF_8, projectPath, false, settings);
+        return new MsProjectUpdater(newDb, oldDb, changedObjects, Consts.UTF_8, projectPath, overridesOnly, settings);
     }
 
     @Override
