@@ -15,11 +15,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - Updated the JUnit library version from 5.x to version 6.
-
 - The .dependencies file is now automatically read when loading a project.
 
 ### Fixed
 
+- Fixed a migration script generation error with the `Print DROP before CREATE` option.
 - Fixed monitor progress tracking.
 - Fixed a bug in the generation of the migration script when data migration when recreating tables with serial-type fields for PostgreSQL.
 - Fixed a bug with searching for dependencies for the LATERAL function in PostgreSQL.

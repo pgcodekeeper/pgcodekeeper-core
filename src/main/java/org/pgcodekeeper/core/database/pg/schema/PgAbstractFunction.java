@@ -228,6 +228,11 @@ public abstract class PgAbstractFunction extends PgAbstractStatement implements 
     }
 
     @Override
+    public boolean canDropBeforeCreate() {
+        return true;
+    }
+
+    @Override
     public boolean needDrop(IFunction newFunction) {
         var iOld = arguments.iterator();
         var iNew = newFunction.getArguments().iterator();
