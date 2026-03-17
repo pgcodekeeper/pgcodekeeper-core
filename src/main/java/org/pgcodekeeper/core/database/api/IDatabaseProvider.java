@@ -30,7 +30,6 @@ import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Interface for DBMS
@@ -66,7 +65,7 @@ public interface IDatabaseProvider {
      * @param settings       configuration settings
      * @return model exporter for the DBMS
      */
-    IModelExporter getModelExporter(Path outDir, IDatabase newDb, List<TreeElement> changedObjects,
+    IModelExporter getModelExporter(Path outDir, IDatabase newDb, Collection<TreeElement> changedObjects,
                                     ISettings settings);
 
     /**
@@ -77,7 +76,7 @@ public interface IDatabaseProvider {
      * @param settings       configuration settings
      * @return project updater for the DBMS
      */
-    default IProjectUpdater getProjectUpdater(IDatabase newDb, IDatabase oldDb, List<TreeElement> changedObjects,
+    default IProjectUpdater getProjectUpdater(IDatabase newDb, IDatabase oldDb, Collection<TreeElement> changedObjects,
                                               Path projectPath, ISettings settings) {
         return getProjectUpdater(newDb, oldDb, changedObjects, projectPath, false, settings);
     }
@@ -91,7 +90,7 @@ public interface IDatabaseProvider {
      * @param settings       configuration settings
      * @return project updater for the DBMS
      */
-    IProjectUpdater getProjectUpdater(IDatabase newDb, IDatabase oldDb, List<TreeElement> changedObjects,
+    IProjectUpdater getProjectUpdater(IDatabase newDb, IDatabase oldDb, Collection<TreeElement> changedObjects,
                                       Path projectPath, boolean overridesOnly, ISettings settings);
 
     /**

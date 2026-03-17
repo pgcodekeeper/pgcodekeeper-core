@@ -25,7 +25,6 @@ import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -58,8 +57,8 @@ public class PgOverridesModelExporter extends AbstractOverridesModelExporter {
     }
 
     @Override
-    protected Path getRelativeFolderPath(IStatement st) {
-        return PgWorkDirs.getRelativeFolderPath(st, Paths.get(""));
+    protected Path getRelativeFilePath(IStatement st) {
+        return PgWorkDirs.getRelativeFilePath(st);
     }
 
     @Override

@@ -261,7 +261,7 @@ public abstract class PgAbstractView extends PgAbstractStatementContainer implem
     }
 
     @Override
-    public Collection<PgConstraint> getConstraints() {
+    public Collection<IConstraint> getConstraints() {
         return Collections.emptyList();
     }
 

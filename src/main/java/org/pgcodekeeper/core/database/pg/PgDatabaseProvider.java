@@ -35,7 +35,6 @@ import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * {@link IDatabaseProvider} implementation for PostgreSQL databases.
@@ -63,13 +62,13 @@ public class PgDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public PgModelExporter getModelExporter(Path outDir, IDatabase newDb, List<TreeElement> changedObjects,
+    public PgModelExporter getModelExporter(Path outDir, IDatabase newDb, Collection<TreeElement> changedObjects,
                                             ISettings settings) {
         return new PgModelExporter(outDir, newDb, null, changedObjects, Consts.UTF_8, settings);
     }
 
     @Override
-    public PgProjectUpdater getProjectUpdater(IDatabase newDb, IDatabase oldDb, List<TreeElement> changedObjects,
+    public PgProjectUpdater getProjectUpdater(IDatabase newDb, IDatabase oldDb, Collection<TreeElement> changedObjects,
                                               Path projectPath, boolean overridesOnly, ISettings settings) {
         return new PgProjectUpdater(newDb, oldDb, changedObjects, Consts.UTF_8, projectPath, overridesOnly, settings);
     }

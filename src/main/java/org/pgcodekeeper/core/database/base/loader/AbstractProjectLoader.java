@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.loader;
 
+import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.loader.IProjectLoader;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IPrivilege;
@@ -133,7 +134,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
 
     protected boolean filterFile(Path f, Predicate<String> checkFilename) {
         String fileName = f.getFileName().toString();
-        if (!fileName.toLowerCase(Locale.ROOT).endsWith(".sql") || !Files.isRegularFile(f)) {
+        if (!fileName.toLowerCase(Locale.ROOT).endsWith(Consts.SQL_POSTFIX) || !Files.isRegularFile(f)) {
             return false;
         }
         return checkFilename == null || checkFilename.test(fileName);

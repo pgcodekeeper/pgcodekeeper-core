@@ -35,6 +35,7 @@ public final class Consts {
     public static final String EXPORT_CURRENT_VERSION = "0.6.0";
 
     public static final String JDBC_SUCCESS = "success";
+    public static final String SQL_POSTFIX = ".sql";
 
     private Consts() {
     }

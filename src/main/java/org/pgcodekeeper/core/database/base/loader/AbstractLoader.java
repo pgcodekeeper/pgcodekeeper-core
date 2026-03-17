@@ -53,6 +53,10 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
 
     @Override
     public T load() throws IOException, InterruptedException {
+        if (loadedDb != null) {
+            return loadedDb;
+        }
+
         loadedDb = loadInternal();
         return loadedDb;
     }
@@ -61,12 +65,10 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
 
     @Override
     public T getDatabase() {
-        if (loadedDb == null) {
-            throw new IllegalStateException("DB is not loaded yet, object is null");
-        }
         return loadedDb;
     }
 
+    @Override
     public List<Object> getErrors() {
         return Collections.unmodifiableList(diffSettings.getErrors());
     }

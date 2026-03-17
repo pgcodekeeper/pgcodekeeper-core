@@ -22,7 +22,6 @@ import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 
@@ -54,7 +53,7 @@ public class ChOverridesModelExporter extends AbstractOverridesModelExporter {
     }
 
     @Override
-    protected Path getRelativeFolderPath(IStatement st) {
-        return ChWorkDirs.getRelativeFolderPath(st, Paths.get(""));
+    protected Path getRelativeFilePath(IStatement st) {
+        return ChWorkDirs.getRelativeFilePath(st);
     }
 }

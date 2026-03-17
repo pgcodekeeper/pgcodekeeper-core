@@ -15,8 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.project;
 
+import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.ISubElement;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.utils.FileUtils;
 
@@ -69,6 +71,20 @@ public final class ChWorkDirs {
             }
             default -> throw new IllegalStateException(Messages.DbObjType_unsupported_type + type);
         };
+    }
+
+    /**
+     * Gets the relative file path for a ClickHouse database statement.
+     *
+     * @param st the database statement
+     * @return relative path for the statement's file
+     */
+    public static Path getRelativeFilePath(IStatement st) {
+        if (st instanceof ISubElement) {
+            st = st.getParent();
+        }
+        Path path = getRelativeFolderPath(st, Path.of(""));
+        return path.resolve(FileUtils.getValidFilename(st.getBareName()) + Consts.SQL_POSTFIX);
     }
 
     /**

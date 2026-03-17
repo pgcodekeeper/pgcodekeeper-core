@@ -324,6 +324,11 @@ public class ChTable extends ChAbstractStatement implements ITable, IOptionConta
     }
 
     @Override
+    public Collection<IConstraint> getConstraints() {
+        return Collections.unmodifiableCollection(constraints.values());
+    }
+
+    @Override
     public Stream<Pair<String, String>> getRelationColumns() {
         return columns.stream()
                 .filter(c -> c.getType() != null)

@@ -26,7 +26,6 @@ import org.pgcodekeeper.core.database.ms.project.MsWorkDirs;
 import org.pgcodekeeper.core.database.ms.schema.*;
 import org.pgcodekeeper.core.database.ms.utils.MsDiffUtils;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.FileUtils;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -363,22 +362,13 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
     }
 
     @Override
-    protected Path getRelativeFolderPath(IStatement st, Path baseDir) {
-        return MsWorkDirs.getRelativeFolderPath(st, baseDir);
+    protected Path getRelativeFilePath(IStatement st) {
+        return MsWorkDirs.getRelativeFilePath(st);
     }
 
     @Override
     protected List<String> getDirectoryNames() {
         return MsWorkDirs.getDirectoryNames();
-    }
-
-    @Override
-    protected String getExportedFileName(IStatement st) {
-        String fileName = super.getExportedFileName(st);
-        if (st instanceof ISearchPath sp) {
-            return FileUtils.getValidFilename(sp.getSchemaName()) + '.' + fileName;
-        }
-        return fileName;
     }
 
     @Override

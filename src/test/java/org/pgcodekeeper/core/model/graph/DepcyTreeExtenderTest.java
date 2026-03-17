@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
@@ -71,8 +72,8 @@ class DepcyTreeExtenderTest {
          */
         PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
 
-        String fileName = "depcy_schema_" + fileIndex + ".sql";
-        String targetFileName = "depcy_schema_new_" + fileIndex + ".sql";
+        String fileName = "depcy_schema_" + fileIndex + FILES_POSTFIX.SQL;
+        String targetFileName = "depcy_schema_new_" + fileIndex + FILES_POSTFIX.SQL;
 
         var diffSettings = new DiffSettings();
         IDatabase dbSource = loadTestDump(databaseProvider, fileName, DepcyTreeExtenderTest.class, diffSettings);

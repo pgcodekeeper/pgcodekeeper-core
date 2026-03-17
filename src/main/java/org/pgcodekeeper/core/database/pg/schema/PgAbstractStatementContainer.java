@@ -144,7 +144,7 @@ public abstract class PgAbstractStatementContainer extends PgAbstractStatement
         return getChildByName(policies, name);
     }
 
-    public abstract Collection<PgConstraint> getConstraints();
+    public abstract Collection<IConstraint> getConstraints();
 
     /**
      * Getter for {@link #indexes}. The list cannot be modified.

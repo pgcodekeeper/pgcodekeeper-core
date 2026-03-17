@@ -20,7 +20,6 @@ import org.pgcodekeeper.core.database.api.project.IModelExporter;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.api.schema.ISubElement;
 import org.pgcodekeeper.core.exception.DirectoryException;
 import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.localizations.Messages;
@@ -126,27 +125,12 @@ public abstract class AbstractModelExporter implements IModelExporter {
     protected abstract List<String> getDirectoryNames();
 
     /**
-     * Gets the relative folder path for a database statement.
-     *
-     * @param st the database statement
-     * @return relative folder path where the statement should be stored
-     */
-    protected abstract Path getRelativeFolderPath(IStatement st);
-
-    /**
      * Gets the relative file path for a database statement within project structure.
      *
      * @param st the database statement
      * @return relative path for the statement's file
      */
-    public Path getRelativeFilePath(IStatement st) {
-        if (st instanceof ISubElement) {
-            st = st.getParent();
-        }
-        Path path = getRelativeFolderPath(st);
-        String fileName = getExportedFilenameSql(getExportedFilename(st));
-        return path.resolve(fileName);
-    }
+    protected abstract Path getRelativeFilePath(IStatement st);
 
     @Override
     public void exportFull() throws IOException {
@@ -301,23 +285,13 @@ public abstract class AbstractModelExporter implements IModelExporter {
     }
 
     /**
-     * Gets the exported filename for a database statement.
-     *
-     * @param statement the database statement
-     * @return sanitized filename suitable for file system
-     */
-    public static String getExportedFilename(IStatement statement) {
-        return FileUtils.getValidFilename(statement.getBareName());
-    }
-
-    /**
      * Gets the SQL filename with .sql extension.
      *
      * @param name the base name
      * @return filename with .sql extension
      */
     public static String getExportedFilenameSql(String name) {
-        return FileUtils.getValidFilename(name) + ".sql"; //$NON-NLS-1$
+        return FileUtils.getValidFilename(name) + Consts.SQL_POSTFIX;
     }
 
     /**

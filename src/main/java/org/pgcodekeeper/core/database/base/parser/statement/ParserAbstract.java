@@ -25,7 +25,6 @@ import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.project.AbstractModelExporter;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.exception.MisplacedObjectException;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
@@ -286,19 +285,7 @@ public abstract class ParserAbstract<S extends IDatabase> {
         }
     }
 
-    private Path getRelativeFilePath(IStatement st) {
-        if (st instanceof ISubElement) {
-            st = st.getParent();
-        }
-        Path path = getRelativeFolderPath(st, Paths.get("")); //$NON-NLS-1$
-        return path.resolve(getExportedFileName(st));
-    }
-
-    protected String getExportedFileName(IStatement st) {
-        return AbstractModelExporter.getExportedFilenameSql(AbstractModelExporter.getExportedFilename(st));
-    }
-
-    protected abstract Path getRelativeFolderPath(IStatement st, Path baseDir);
+    protected abstract Path getRelativeFilePath(IStatement st);
 
     private boolean isInProject() {
         List<String> dirs = getDirectoryNames();
