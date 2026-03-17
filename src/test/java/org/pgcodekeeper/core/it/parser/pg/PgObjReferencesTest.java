@@ -131,7 +131,7 @@ class PgObjReferencesTest {
             "with",
             "pg_unicode_escaping"
     })
-    void comparePgReferences(final String fileNameTemplate) throws IOException, InterruptedException {
+    void compareReferences(final String fileNameTemplate) throws IOException, InterruptedException {
         String resource = fileNameTemplate + FILES_POSTFIX.SQL;
         var diffSettings = new DiffSettings(new CoreSettings());
         var loader = new PgDumpLoader(() -> getClass().getResourceAsStream(resource), resource, diffSettings);
@@ -142,6 +142,26 @@ class PgObjReferencesTest {
                 .readResource(fileNameTemplate + FILES_POSTFIX.REFS_TXT, getClass()).strip();
 
         String actual = IntegrationTestUtils.getRefsAsString(db.getObjReferences()).strip();
+
+        IntegrationTestUtils.assertErrors(diffSettings.getErrors());
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "lateral"
+    })
+    void compareAnalysisReferences(final String fileNameTemplate) throws IOException, InterruptedException {
+        String resource = fileNameTemplate + FILES_POSTFIX.SQL;
+        var diffSettings = new DiffSettings(new CoreSettings());
+        var loader = new PgDumpLoader(() -> getClass().getResourceAsStream(resource), resource, diffSettings);
+        loader.setMode(ParserListenerMode.NORMAL);
+        var db = loader.loadAndAnalyze();
+
+        String expected = TestUtils
+                .readResource(fileNameTemplate + FILES_POSTFIX.REFS_TXT, getClass()).strip();
+
+        String actual = IntegrationTestUtils.getRefsWithoutOffSetAsString(db.getObjReferences()).strip();
 
         IntegrationTestUtils.assertErrors(diffSettings.getErrors());
         Assertions.assertEquals(expected, actual);

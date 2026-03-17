@@ -43,7 +43,7 @@ class PlpgParserTest {
 
     @ParameterizedTest
     @CsvSource({
-        "plpgsql, 21",
+        "plpgsql, 21"
     })
     void parse(final String fileNameTemplate, int allowedAmbiguity) throws IOException {
         List<Object> errors = new ArrayList<>();
