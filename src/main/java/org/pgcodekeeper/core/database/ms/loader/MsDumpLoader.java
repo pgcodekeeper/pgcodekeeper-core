@@ -57,10 +57,10 @@ public class MsDumpLoader extends AbstractDumpLoader<MsDatabase> {
     public void loadWithoutAnalyze(MsDatabase db, Queue<AntlrTask<?>> antlrTasks) {
         IMsContextProcessor listener;
         if (overrides != null) {
-            listener = new MsOverridesListener(db, inputObjectName, mode, diffSettings, overrides);
+            listener = new MsOverridesListener(db, databaseName, mode, diffSettings, overrides);
         } else {
-            listener = new MsCustomParserListener(db, inputObjectName, mode, diffSettings);
+            listener = new MsCustomParserListener(db, databaseName, mode, diffSettings);
         }
-        MsParserUtils.parseSqlStream(input, inputObjectName, diffSettings, monitoringLevel, listener, antlrTasks);
+        MsParserUtils.parseSqlStream(input, databaseName, diffSettings, monitoringLevel, listener, antlrTasks);
     }
 }

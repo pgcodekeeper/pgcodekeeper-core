@@ -40,18 +40,32 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractLoader.class);
 
     protected final Queue<AntlrTask<?>> antlrTasks = new ArrayDeque<>();
-
     protected final DiffSettings diffSettings;
-
     protected String currentOperation;
     protected int version;
+    protected String databaseName;
+    private T loadedDb;
 
-    protected AbstractLoader(DiffSettings diffSettings) {
+    protected AbstractLoader(DiffSettings diffSettings, String databaseName) {
         this.diffSettings = diffSettings;
+        this.databaseName = databaseName;
     }
 
     @Override
-    public abstract T load() throws IOException, InterruptedException;
+    public T load() throws IOException, InterruptedException {
+        loadedDb = loadInternal();
+        return loadedDb;
+    }
+
+    protected abstract T loadInternal() throws IOException, InterruptedException;
+
+    @Override
+    public T getDatabase() {
+        if (loadedDb == null) {
+            throw new IllegalStateException("DB is not loaded yet, object is null");
+        }
+        return loadedDb;
+    }
 
     public List<Object> getErrors() {
         return Collections.unmodifiableList(diffSettings.getErrors());
@@ -74,6 +88,11 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
         IMonitor.checkCancelled(getMonitor());
         FullAnalyze.fullAnalyze(db, diffSettings.getErrors());
         return db;
+    }
+
+    @Override
+    public String getDatabaseName() {
+        return databaseName;
     }
 
     protected void finishLoaders() throws InterruptedException, IOException {

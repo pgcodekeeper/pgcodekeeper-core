@@ -37,22 +37,19 @@ import java.util.Queue;
 public abstract class AbstractDumpLoader<T extends IDatabase> extends AbstractLoader<T> implements IDumpLoader {
 
     protected final InputStreamProvider input;
-    protected final String inputObjectName;
     protected final int monitoringLevel;
-
     protected ParserListenerMode mode = ParserListenerMode.NORMAL;
     protected Map<AbstractStatement, StatementOverride> overrides;
 
-    protected AbstractDumpLoader(InputStreamProvider input, String inputObjectName,
+    protected AbstractDumpLoader(InputStreamProvider input, String databaseName,
                                  DiffSettings diffSettings, int monitoringLevel) {
-        super(diffSettings);
+        super(diffSettings, databaseName);
         this.input = input;
-        this.inputObjectName = inputObjectName;
         this.monitoringLevel = monitoringLevel;
     }
 
-    protected AbstractDumpLoader(InputStreamProvider input, String inputObjectName, DiffSettings diffSettings) {
-        this(input, inputObjectName, diffSettings, 0);
+    protected AbstractDumpLoader(InputStreamProvider input, String dbOriginName, DiffSettings diffSettings) {
+        this(input, dbOriginName, diffSettings, 0);
     }
 
     protected AbstractDumpLoader(Path inputFile, DiffSettings diffSettings) {
@@ -60,7 +57,7 @@ public abstract class AbstractDumpLoader<T extends IDatabase> extends AbstractLo
     }
 
     @Override
-    public T load() throws IOException, InterruptedException {
+    public T loadInternal() throws IOException, InterruptedException {
         var db = createDatabaseWithSchema();
         IMonitor.checkCancelled(getMonitor());
         loadWithoutAnalyze(db, antlrTasks);

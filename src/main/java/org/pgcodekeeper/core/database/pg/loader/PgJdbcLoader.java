@@ -129,7 +129,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
     }
 
     @Override
-    public PgDatabase load() throws IOException, InterruptedException {
+    public PgDatabase loadInternal() throws IOException, InterruptedException {
         PgDatabase d = createDatabase();
 
         info(Messages.JdbcLoader_log_reading_db_jdbc);

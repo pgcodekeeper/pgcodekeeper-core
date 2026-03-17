@@ -21,6 +21,7 @@ import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.script.IScriptBuilder;
 import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.loader.PgProjectLoader;
@@ -52,6 +53,11 @@ public class PgDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
+    public PgDatabase createDatabase() {
+        return new PgDatabase();
+    }
+
+    @Override
     public IJdbcConnector getJdbcConnector(String url) {
         return new PgJdbcConnector(url);
     }
@@ -70,9 +76,14 @@ public class PgDatabaseProvider implements IDatabaseProvider {
 
     @Override
     public PgJdbcLoader getJdbcLoader(String url, DiffSettings diffSettings) {
+        return getJdbcLoader(getJdbcConnector(url), diffSettings);
+    }
+
+    @Override
+    public PgJdbcLoader getJdbcLoader(IJdbcConnector connector, DiffSettings diffSettings) {
         String timezone = diffSettings.getSettings().getTimeZone() == null
                 ? Consts.UTC : diffSettings.getSettings().getTimeZone();
-        return new PgJdbcLoader(getJdbcConnector(url), timezone, diffSettings);
+        return new PgJdbcLoader(connector, timezone, diffSettings);
     }
 
     @Override

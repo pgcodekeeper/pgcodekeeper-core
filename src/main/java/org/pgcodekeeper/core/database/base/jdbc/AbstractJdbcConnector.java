@@ -15,13 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.jdbc;
 
-import java.io.IOException;
-import java.sql.*;
-import java.util.Properties;
-
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.utils.Utils;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Properties;
+import java.util.regex.Pattern;
 
 /**
  * Abstract base class for JDBC database connectors.
@@ -29,13 +32,23 @@ import org.pgcodekeeper.core.utils.Utils;
  */
 public abstract class AbstractJdbcConnector implements IJdbcConnector {
 
+    private static final Pattern DB_NAME_PATTERN = Pattern.compile("://[^/]+/([^?#;]+)");
+
     private final String url;
+    private final String dbName;
 
     /**
-     * @param url jdbc connection string
+     * @param url    jdbc connection string
+     * @param dbName database name
      */
-    protected AbstractJdbcConnector(String url) {
+    protected AbstractJdbcConnector(String url, String dbName) {
         this.url = url;
+        this.dbName = dbName;
+    }
+
+    protected static String extractDbName(String url) {
+        var matcher = DB_NAME_PATTERN.matcher(url);
+        return matcher.find() ? matcher.group(1) : "";
     }
 
     @Override
@@ -60,6 +73,11 @@ public abstract class AbstractJdbcConnector implements IJdbcConnector {
         return url;
     }
 
+    @Override
+    public String getDbName() {
+        return dbName;
+    }
+
     /**
      * @return connection properties
      */
@@ -72,7 +90,7 @@ public abstract class AbstractJdbcConnector implements IJdbcConnector {
     /**
      * Validates connection string
      *
-     * @param url connection string
+     * @param url             connection string
      * @param allowedPrefixes allowed prefixes
      * @throws IllegalArgumentException if the string does not start with the allowed prefixes
      */

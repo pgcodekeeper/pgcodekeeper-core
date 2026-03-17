@@ -15,11 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.loader;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import java.util.stream.IntStream;
-
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
@@ -28,16 +23,31 @@ import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.base.schema.Argument;
 import org.pgcodekeeper.core.database.base.schema.meta.*;
-import org.pgcodekeeper.core.database.pg.jdbc.*;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
+import org.pgcodekeeper.core.database.pg.jdbc.IPgJdbcReader;
+import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
+import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcType;
+import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcUtils;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Function_argsContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Function_argumentsContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Identifier_nontypeContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.VexContext;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.monitor.*;
+import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
-import org.pgcodekeeper.core.utils.*;
+import org.pgcodekeeper.core.utils.Pair;
+import org.pgcodekeeper.core.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * JDBC-based system metadata loader for PostgreSQL databases.
@@ -87,7 +97,7 @@ final class PgJdbcSystemLoader extends PgJdbcLoader {
             .where(SYSTEM_SCHEMAS)
             .build();
 
-    private static final String QUERY_SYSTEM_OPERATORS =  new QueryBuilder()
+    private static final String QUERY_SYSTEM_OPERATORS = new QueryBuilder()
             .column("o.oprname as name")
             .column(NSPNAME)
             .column("o.oprleft::bigint AS left")
@@ -124,7 +134,7 @@ final class PgJdbcSystemLoader extends PgJdbcLoader {
      * @throws IllegalStateException always, as this operation is not supported
      */
     @Override
-    public PgDatabase load() {
+    public PgDatabase loadInternal() {
         throw new IllegalStateException("Unsupported operation for JdbcSystemLoader");
     }
 

@@ -41,6 +41,16 @@ public interface ILoader {
     IDatabase loadAndAnalyze() throws IOException, InterruptedException;
 
     /**
+     * @return previously loaded database, or null if {@link #load()} has not been called
+     */
+    IDatabase getDatabase();
+
+    /**
+     * @return name identifying the database source (database name, file name, or project directory name)
+     */
+    String getDatabaseName();
+
+    /**
      * @return configuration settings
      */
     ISettings getSettings();

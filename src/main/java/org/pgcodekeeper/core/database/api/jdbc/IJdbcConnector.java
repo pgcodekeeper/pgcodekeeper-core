@@ -40,4 +40,9 @@ public interface IJdbcConnector {
      * @return connection string
      */
     String getUrl();
+
+    /**
+     * @return database name extracted from the connection URL
+     */
+    String getDbName();
 }

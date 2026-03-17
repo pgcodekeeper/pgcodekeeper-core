@@ -15,12 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.loader;
 
-import java.io.IOException;
-import java.sql.*;
-import java.util.List;
-import java.util.function.*;
-import java.util.stream.Collectors;
-
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.base.loader.AbstractJdbcLoader;
 import org.pgcodekeeper.core.database.ch.jdbc.*;
@@ -33,6 +27,15 @@ import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * JDBC-based database schema loader for ClickHouse databases.
@@ -54,7 +57,7 @@ public final class ChJdbcLoader extends AbstractJdbcLoader<ChDatabase> {
     }
 
     @Override
-    public ChDatabase load() throws IOException, InterruptedException {
+    public ChDatabase loadInternal() throws IOException, InterruptedException {
         ChDatabase d = createDatabase();
 
         LOG.info(Messages.JdbcLoader_log_reading_db_jdbc);
