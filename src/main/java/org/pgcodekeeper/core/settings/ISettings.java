@@ -169,6 +169,13 @@ public interface ISettings {
     boolean isParallelLoad();
 
     /**
+     * Checks whether automatic loading of project auxiliary files should be disabled
+     *
+     * @return true if whether automatic loading of project auxiliary files should be disabled
+     */
+    boolean isDisableAutoLoad();
+
+    /**
      * Gets the input character encoding name.
      *
      * @return the character encoding name

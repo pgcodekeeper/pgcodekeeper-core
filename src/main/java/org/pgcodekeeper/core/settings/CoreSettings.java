@@ -30,12 +30,8 @@ import java.util.List;
  * character encoding, file paths, and various migration behavior flags.
  */
 public class CoreSettings implements ISettings {
-    private String inCharsetName = Consts.UTF_8;
-    private List<String> preFilePath = new ArrayList<>();
-    private List<String> postFilePath = new ArrayList<>();
-    private List<DbObjType> allowedTypes = new ArrayList<>();
+
     private boolean printUsing = true;
-    private String timeZone;
     private boolean ignorePrivileges;
     private boolean keepNewlines;
     private boolean simplifyView;
@@ -53,8 +49,16 @@ public class CoreSettings implements ISettings {
     private boolean stopNotAllowed;
     private boolean selectedOnly;
     private boolean ignoreConcurrentModification;
-    private String clusterName;
     private boolean parallelLoad;
+    private boolean disableAutoLoad;
+
+    private String timeZone;
+    private String clusterName;
+    private String inCharsetName = Consts.UTF_8;
+
+    private List<String> preFilePath = new ArrayList<>();
+    private List<String> postFilePath = new ArrayList<>();
+    private List<DbObjType> allowedTypes = new ArrayList<>();
 
     @Override
     public boolean isConcurrentlyMode() {
@@ -293,6 +297,15 @@ public class CoreSettings implements ISettings {
     }
 
     @Override
+    public boolean isDisableAutoLoad() {
+        return disableAutoLoad;
+    }
+
+    public void setDisableAutoLoad(boolean disableAutoLoad) {
+        this.disableAutoLoad = disableAutoLoad;
+    }
+
+    @Override
     public CoreSettings copy() {
         var settings = new CoreSettings();
         settings.addTransaction = addTransaction;
@@ -320,6 +333,7 @@ public class CoreSettings implements ISettings {
         settings.printUsing = printUsing;
         settings.clusterName = clusterName;
         settings.parallelLoad = parallelLoad;
+        settings.disableAutoLoad = disableAutoLoad;
         return settings;
     }
 }

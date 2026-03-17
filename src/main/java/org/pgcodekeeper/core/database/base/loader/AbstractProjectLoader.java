@@ -189,7 +189,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
     private void loadLibraries(T db) throws IOException, InterruptedException {
         var libraryLoader = createLibraryLoader(db);
 
-        if (!isLib) {
+        if (!isLib && !diffSettings.getSettings().isDisableAutoLoad()) {
             // check project libraries
             Path depsFile = dirPath.resolve(LibraryXmlStore.FILE_NAME);
             if (Files.isRegularFile(depsFile)) {
@@ -205,6 +205,10 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
     }
 
     private void readIgnoreLists() {
+        if (diffSettings.getSettings().isDisableAutoLoad()) {
+            return;
+        }
+
         try {
             Path ignoreFile = dirPath.resolve(IGNORE_FILE);
             if (Files.isRegularFile(ignoreFile)) {

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Added support for parallel database loading.
 - Added support for MS SQL and ClickHouse keywords.
+- Added the ability to disable automatic loading of additional project files (.pgcodekeeperignore, .pgcodekeeperignoreschema, .dependencies).
 
 ### Changed
 
