@@ -354,4 +354,19 @@ class MsDiffTest {
         String script = getScript(databaseProvider, fileNameTemplate, diffSettings, MsDiffTest.class);
         assertResult(script, fileNameTemplate, MsDiffTest.class);
     }
+
+    // test "print DROP before CREATE" option
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "add_drop_ms_function",
+            "add_drop_ms_view",
+            "add_drop_ms_trigger"
+    })
+    void testAddDropStatementForObj(String fileNameTemplate) throws IOException, InterruptedException {
+        var settings = new CoreSettings();
+        settings.setDropBeforeCreate(true);
+
+        String script = getScript(databaseProvider, fileNameTemplate, new DiffSettings(settings), MsDiffTest.class);
+        assertResult(script, fileNameTemplate, MsDiffTest.class);
+    }
 }

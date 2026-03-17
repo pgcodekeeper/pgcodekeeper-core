@@ -692,4 +692,20 @@ class PgDiffTest {
         String script = getScript(databaseProvider, fileNameTemplate, new DiffSettings(settings), PgDiffTest.class);
         assertResult(script, fileNameTemplate, PgDiffTest.class);
     }
+
+    // test "print DROP before CREATE" option
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "add_drop_function",
+            "add_drop_view",
+            "add_drop_trigger",
+            "add_drop_rule"
+    })
+    void testAddDropStatementForObj(String fileNameTemplate) throws IOException, InterruptedException {
+        var settings = new CoreSettings();
+        settings.setDropBeforeCreate(true);
+
+        String script = getScript(databaseProvider, fileNameTemplate, new DiffSettings(settings), PgDiffTest.class);
+        assertResult(script, fileNameTemplate, PgDiffTest.class);
+    }
 }

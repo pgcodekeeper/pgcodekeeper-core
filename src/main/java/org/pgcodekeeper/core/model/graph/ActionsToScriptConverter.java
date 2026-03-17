@@ -298,7 +298,8 @@ public final class ActionsToScriptConverter {
 
     private void addToDropScript(IStatement obj, boolean isExist) {
         // check "drop before create"
-        if (!droppedObjects.add(obj.getTwin(oldDbFull))) {
+        var oldObj = obj.getTwin(oldDbFull);
+        if (oldObj != null && !droppedObjects.add(oldObj)) {
             return;
         }
         obj.getDropSQL(script, isExist);
