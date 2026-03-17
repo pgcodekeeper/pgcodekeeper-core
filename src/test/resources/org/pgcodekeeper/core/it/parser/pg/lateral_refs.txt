@@ -1,0 +1,15 @@
+Reference: Object = test (SCHEMA), action = CREATE, line number = 1, charPositionInLine = 14
+Reference: Object = test (SCHEMA), action = null, line number = 3, charPositionInLine = 27
+Reference: Object = test.get_id(integer) (FUNCTION), action = CREATE, line number = 3, charPositionInLine = 32
+Reference: Object = test (SCHEMA), action = null, line number = 10, charPositionInLine = 13
+Reference: Object = test.t1 (TABLE), action = CREATE, line number = 10, charPositionInLine = 18
+Reference: Object = test (SCHEMA), action = null, line number = 15, charPositionInLine = 12
+Reference: Object = test.v1 (VIEW), action = CREATE, line number = 15, charPositionInLine = 17
+Reference: Object = test.t1 (TABLE), action = null, line number = 17, charPositionInLine = 4
+Reference: Object = test.t1 (TABLE), action = null, line number = 18, charPositionInLine = 4
+Reference: Object = test (SCHEMA), action = null, line number = 20, charPositionInLine = 7
+Reference: Object = test.t1 (TABLE), action = null, line number = 20, charPositionInLine = 12
+Reference: Object = test.t1 (TABLE), action = null, line number = 20, charPositionInLine = 15
+Reference: Object = test (SCHEMA), action = null, line number = 21, charPositionInLine = 10
+Reference: Object = test.get_id(integer) (FUNCTION), action = null, line number = 21, charPositionInLine = 15
+Reference: Object = test.t1 (TABLE), action = null, line number = 21, charPositionInLine = 22

@@ -564,6 +564,7 @@ public final class PgSelect extends PgAbstractExprWithNmspc<Select_stmtContext> 
     private void fromFunctionCommon(From_primaryContext from) {
         boolean oldLateral = lateralAllowed;
         try {
+            lateralAllowed = true;
             if (from.function_call() != null) {
                 var colPairs = function(from.function_call(), from.alias, from.from_function_column_def());
                 if (colPairs != null) {
