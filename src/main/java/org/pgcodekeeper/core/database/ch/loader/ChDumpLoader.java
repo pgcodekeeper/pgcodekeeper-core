@@ -57,10 +57,10 @@ public class ChDumpLoader extends AbstractDumpLoader<ChDatabase> {
     public void loadWithoutAnalyze(ChDatabase db, Queue<AntlrTask<?>> antlrTasks) {
         IChContextProcessor listener;
         if (overrides != null) {
-            listener = new ChOverridesListener(db, inputObjectName, mode, diffSettings, overrides);
+            listener = new ChOverridesListener(db, databaseName, mode, diffSettings, overrides);
         } else {
-            listener = new ChCustomParserListener(db, inputObjectName, mode, diffSettings);
+            listener = new ChCustomParserListener(db, databaseName, mode, diffSettings);
         }
-        ChParserUtils.parseSqlStream(input, inputObjectName, diffSettings, monitoringLevel, listener, antlrTasks);
+        ChParserUtils.parseSqlStream(input, databaseName, diffSettings, monitoringLevel, listener, antlrTasks);
     }
 }

@@ -57,10 +57,10 @@ public class PgDumpLoader extends AbstractDumpLoader<PgDatabase> {
     public void loadWithoutAnalyze(PgDatabase db, Queue<AntlrTask<?>> antlrTasks) {
         IPgContextProcessor listener;
         if (overrides != null) {
-            listener = new PgOverridesListener(db, inputObjectName, mode, diffSettings, overrides);
+            listener = new PgOverridesListener(db, databaseName, mode, diffSettings, overrides);
         } else {
-            listener = new PgCustomParserListener(db, inputObjectName, mode, diffSettings, antlrTasks);
+            listener = new PgCustomParserListener(db, databaseName, mode, diffSettings, antlrTasks);
         }
-        PgParserUtils.parseSqlStream(input, inputObjectName, diffSettings, monitoringLevel, listener, antlrTasks);
+        PgParserUtils.parseSqlStream(input, databaseName, diffSettings, monitoringLevel, listener, antlrTasks);
     }
 }

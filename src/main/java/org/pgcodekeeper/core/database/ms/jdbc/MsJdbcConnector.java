@@ -15,13 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.jdbc;
 
-import java.sql.SQLException;
-import java.util.Properties;
-
+import com.microsoft.sqlserver.jdbc.SQLServerDriver;
 import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
 import org.pgcodekeeper.core.database.ms.utils.MsConsts;
 
-import com.microsoft.sqlserver.jdbc.SQLServerDriver;
+import java.sql.SQLException;
+import java.util.Properties;
+import java.util.regex.Pattern;
 
 /**
  * JDBC database connector implementation for MS SQL.
@@ -33,17 +33,28 @@ public class MsJdbcConnector extends AbstractJdbcConnector {
     private static final String URL_START_MS = "jdbc:sqlserver:";
     private static final int DEFAULT_PORT = 1433;
 
+    private static final Pattern DB_NAME_PATTERN = Pattern.compile("databaseName=\\{?([^};]+)");
+
     /**
      * @param url full jdbc connection string
      */
     public MsJdbcConnector(String url) {
-        super(url);
+        super(url, extractMsDbName(url));
         validateUrl(url, URL_START_MS);
+    }
+
+    private static String extractMsDbName(String url) {
+        if (!url.startsWith("jdbc:")) {
+            return "";
+        }
+        var matcher = DB_NAME_PATTERN.matcher(url);
+        return matcher.find() ? matcher.group(1) : "";
     }
 
     public MsJdbcConnector(String host, int port, String dbName) {
         super(URL_START_MS + "//" + host + ':' + (port > 0 ? port : DEFAULT_PORT)
-                + (dbName == null ? "" : ";databaseName={" + dbName + '}'));
+                        + (dbName == null ? "" : ";databaseName={" + dbName + '}'),
+                dbName == null ? "" : dbName);
     }
 
     @Override

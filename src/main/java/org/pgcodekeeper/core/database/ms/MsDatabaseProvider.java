@@ -21,6 +21,7 @@ import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.script.IScriptBuilder;
 import org.pgcodekeeper.core.database.ms.jdbc.MsJdbcConnector;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.ms.loader.MsDumpLoader;
 import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
 import org.pgcodekeeper.core.database.ms.loader.MsProjectLoader;
@@ -52,6 +53,11 @@ public class MsDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
+    public MsDatabase createDatabase() {
+        return new MsDatabase();
+    }
+
+    @Override
     public IJdbcConnector getJdbcConnector(String url) {
         return new MsJdbcConnector(url);
     }
@@ -70,7 +76,12 @@ public class MsDatabaseProvider implements IDatabaseProvider {
 
     @Override
     public MsJdbcLoader getJdbcLoader(String url, DiffSettings diffSettings) {
-        return new MsJdbcLoader(getJdbcConnector(url), diffSettings);
+        return getJdbcLoader(getJdbcConnector(url), diffSettings);
+    }
+
+    @Override
+    public MsJdbcLoader getJdbcLoader(IJdbcConnector connector, DiffSettings diffSettings) {
+        return new MsJdbcLoader(connector, diffSettings);
     }
 
     @Override

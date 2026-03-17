@@ -36,12 +36,13 @@ public class ChJdbcConnector extends AbstractJdbcConnector {
      * @param url full jdbc connection string
      */
     public ChJdbcConnector(String url) {
-        super(url);
+        super(url, extractDbName(url));
         validateUrl(url, URL_START_CH, URL_START_CH_SHORT);
     }
 
     public ChJdbcConnector(String host, int port, String dbName) {
-        super(URL_START_CH + "//" + host + ':' + (port > 0 ? port : DEFAULT_PORT) + (dbName == null ? "" : "/" + dbName));
+        super(URL_START_CH + "//" + host + ':' + (port > 0 ? port : DEFAULT_PORT) + (dbName == null ? "" : "/" + dbName),
+                dbName == null ? "" : dbName);
     }
 
     @Override

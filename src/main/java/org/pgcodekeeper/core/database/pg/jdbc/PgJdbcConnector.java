@@ -33,12 +33,12 @@ public class PgJdbcConnector extends AbstractJdbcConnector {
      * @param url full jdbc connection string
      */
     public PgJdbcConnector(String url) {
-        super(url);
+        super(url, extractDbName(url));
         validateUrl(url, URL_START_PG);
     }
 
     public PgJdbcConnector(String host, int port, String dbName) {
-        super(URL_START_PG + "//" + host + ':' + (port > 0 ? port : DEFAULT_PORT) + '/' + dbName);
+        super(URL_START_PG + "//" + host + ':' + (port > 0 ? port : DEFAULT_PORT) + '/' + dbName, dbName);
     }
 
     @Override

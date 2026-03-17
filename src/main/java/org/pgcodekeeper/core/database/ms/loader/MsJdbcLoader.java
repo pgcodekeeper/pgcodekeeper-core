@@ -15,26 +15,36 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.loader;
 
-import java.io.IOException;
-import java.sql.*;
-import java.util.List;
-import java.util.function.*;
-
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IPrivilege;
+import org.pgcodekeeper.core.database.api.schema.ISearchPath;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.loader.AbstractJdbcLoader;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.ms.jdbc.*;
 import org.pgcodekeeper.core.database.ms.parser.MsParserUtils;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser;
-import org.pgcodekeeper.core.database.ms.schema.*;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
+import org.pgcodekeeper.core.database.ms.schema.MsPrivilege;
+import org.pgcodekeeper.core.database.ms.schema.MsTable;
 import org.pgcodekeeper.core.database.ms.utils.MsDiffUtils;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * JDBC-based database schema loader for Microsoft SQL Server databases.
@@ -60,7 +70,7 @@ public final class MsJdbcLoader extends AbstractJdbcLoader<MsDatabase> {
     }
 
     @Override
-    public MsDatabase load() throws IOException, InterruptedException {
+    public MsDatabase loadInternal() throws IOException, InterruptedException {
         MsDatabase d = createDatabase();
 
         LOG.info(Messages.JdbcLoader_log_reading_db_jdbc);

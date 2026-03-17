@@ -48,6 +48,11 @@ public interface IDatabaseProvider {
     String getFullName();
 
     /**
+     * @return new empty database instance for this DBMS
+     */
+    IDatabase createDatabase();
+
+    /**
      * @param url full jdbc url
      * @return jdbc connector for DBMS
      * @see IJdbcConnector
@@ -97,6 +102,15 @@ public interface IDatabaseProvider {
      * @see DiffSettings
      */
     IJdbcLoader getJdbcLoader(String url, DiffSettings diffSettings);
+
+    /**
+     * @param connector    jdbc connector for the DBMS
+     * @param diffSettings unified context object containing settings, monitor, ignore schema list, and error accumulator
+     * @return jdbc loader for the DBMS
+     * @see IJdbcLoader
+     * @see DiffSettings
+     */
+    IJdbcLoader getJdbcLoader(IJdbcConnector connector, DiffSettings diffSettings);
 
     /**
      * @param path         path to dump file

@@ -59,7 +59,7 @@ public abstract class AbstractJdbcLoader<T extends IDatabase> extends AbstractLo
     protected Statement statement;
 
     protected AbstractJdbcLoader(IJdbcConnector connector, DiffSettings diffSettings) {
-        super(diffSettings);
+        super(diffSettings, connector.getDbName());
         this.connector = connector;
         this.runner = new JdbcRunner(getMonitor());
     }

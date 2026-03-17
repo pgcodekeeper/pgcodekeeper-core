@@ -65,7 +65,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
 
     protected AbstractProjectLoader(Path dirPath, DiffSettings diffSettings, Collection<String> libXmls,
                                     Collection<String> libs, Collection<String> libsWithoutPriv, Path metaPath) {
-        super(diffSettings);
+        super(diffSettings, dirPath.getFileName().toString());
         this.dirPath = dirPath;
         this.libXmls = libXmls;
         this.libs = libs;
@@ -75,7 +75,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
     }
 
     @Override
-    public T load() throws InterruptedException, IOException {
+    public T loadInternal() throws InterruptedException, IOException {
         T db = createDatabase();
         loadStructure(dirPath, db);
         IMonitor.checkCancelled(getMonitor());

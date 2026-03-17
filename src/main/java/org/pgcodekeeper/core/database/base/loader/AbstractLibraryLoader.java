@@ -52,7 +52,7 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
 
     protected AbstractLibraryLoader(T database, Path metaPath, Set<String> loadedPaths,
                                     DiffSettings diffSettings) {
-        super(diffSettings);
+        super(diffSettings, "");
         this.database = database;
         this.metaPath = metaPath;
         this.loadedPaths = loadedPaths;
@@ -64,7 +64,7 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
      * @throws UnsupportedOperationException always, as this operation is not supported
      */
     @Override
-    public T load() {
+    public T loadInternal() {
         throw new UnsupportedOperationException();
     }
 

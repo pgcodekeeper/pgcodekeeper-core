@@ -21,6 +21,7 @@ import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.script.IScriptBuilder;
 import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.database.ch.loader.ChDumpLoader;
 import org.pgcodekeeper.core.database.ch.loader.ChJdbcLoader;
 import org.pgcodekeeper.core.database.ch.loader.ChProjectLoader;
@@ -52,6 +53,11 @@ public class ChDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
+    public ChDatabase createDatabase() {
+        return new ChDatabase();
+    }
+
+    @Override
     public IJdbcConnector getJdbcConnector(String url) {
         return new ChJdbcConnector(url);
     }
@@ -70,7 +76,12 @@ public class ChDatabaseProvider implements IDatabaseProvider {
 
     @Override
     public ChJdbcLoader getJdbcLoader(String url, DiffSettings diffSettings) {
-        return new ChJdbcLoader(getJdbcConnector(url), diffSettings);
+        return getJdbcLoader(getJdbcConnector(url), diffSettings);
+    }
+
+    @Override
+    public ChJdbcLoader getJdbcLoader(IJdbcConnector connector, DiffSettings diffSettings) {
+        return new ChJdbcLoader(connector, diffSettings);
     }
 
     @Override
