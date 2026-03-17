@@ -35,7 +35,6 @@ import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * {@link IDatabaseProvider} implementation for MS SQL Server databases.
@@ -63,13 +62,13 @@ public class MsDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public MsModelExporter getModelExporter(Path outDir, IDatabase newDb, List<TreeElement> changedObjects,
+    public MsModelExporter getModelExporter(Path outDir, IDatabase newDb, Collection<TreeElement> changedObjects,
                                             ISettings settings) {
         return new MsModelExporter(outDir, newDb, null, changedObjects, Consts.UTF_8, settings);
     }
 
     @Override
-    public MsProjectUpdater getProjectUpdater(IDatabase newDb, IDatabase oldDb, List<TreeElement> changedObjects,
+    public MsProjectUpdater getProjectUpdater(IDatabase newDb, IDatabase oldDb, Collection<TreeElement> changedObjects,
                                               Path projectPath, boolean overridesOnly, ISettings settings) {
         return new MsProjectUpdater(newDb, oldDb, changedObjects, Consts.UTF_8, projectPath, overridesOnly, settings);
     }

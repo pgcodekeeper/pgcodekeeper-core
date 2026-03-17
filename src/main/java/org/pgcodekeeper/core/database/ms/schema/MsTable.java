@@ -512,6 +512,11 @@ public class MsTable extends MsAbstractStatementContainer implements ITable, ISi
         return Collections.unmodifiableList(columns);
     }
 
+    @Override
+    public Collection<IConstraint> getConstraints() {
+        return Collections.unmodifiableCollection(constraints.values());
+    }
+
     /**
      * Checks if a column with the specified name exists.
      *

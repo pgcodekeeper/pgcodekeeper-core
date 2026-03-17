@@ -32,12 +32,11 @@ import java.util.Map;
 public class DiffSettings {
 
     private final ISettings settings;
-    private final IMonitor monitor;
     private final List<Object> errors = new ArrayList<>();
-
     private final IgnoreList ignoreList = new IgnoreList();
     private final IgnoreSchemaList ignoreSchemaList = new IgnoreSchemaList();
     private final List<Map.Entry<IStatement, IStatement>> additionalDependencies = new ArrayList<>();
+    private IMonitor monitor;
 
     public DiffSettings(ISettings settings, IMonitor monitor) {
         this.settings = settings;
@@ -76,6 +75,10 @@ public class DiffSettings {
         return additionalDependencies;
     }
 
+    public void addAdditionalDependencies(Collection<Map.Entry<IStatement, IStatement>> deps) {
+        additionalDependencies.addAll(deps);
+    }
+
     public List<Object> getErrors() {
         return errors;
     }
@@ -86,6 +89,10 @@ public class DiffSettings {
 
     public void addErrors(Collection<Object> errors) {
         this.errors.addAll(errors);
+    }
+
+    public void setMonitor(IMonitor monitor) {
+        this.monitor = monitor;
     }
 
     public boolean isAllowedSchema(String schemaName) {

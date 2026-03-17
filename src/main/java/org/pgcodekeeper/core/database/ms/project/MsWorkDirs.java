@@ -15,9 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.project;
 
+import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.ISearchPath;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.ISubElement;
 import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.utils.FileUtils;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -62,6 +66,24 @@ public final class MsWorkDirs {
                     .resolve(getDirectoryNameForType(type));
             default -> throw new IllegalStateException(Messages.DbObjType_unsupported_type + type);
         };
+    }
+
+    /**
+     * Gets the relative file path for a MS SQL Server database statement.
+     *
+     * @param st the database statement
+     * @return relative path for the statement's file
+     */
+    public static Path getRelativeFilePath(IStatement st) {
+        if (st instanceof ISubElement) {
+            st = st.getParent();
+        }
+        Path path = getRelativeFolderPath(st, Path.of(""));
+        String fileName = FileUtils.getValidFilename(st.getBareName()) + Consts.SQL_POSTFIX;
+        if (st instanceof ISearchPath sp) {
+            fileName = FileUtils.getValidFilename(sp.getSchemaName()) + '.' + fileName;
+        }
+        return path.resolve(fileName);
     }
 
     /**

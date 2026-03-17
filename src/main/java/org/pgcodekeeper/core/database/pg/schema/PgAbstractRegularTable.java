@@ -203,7 +203,7 @@ public abstract class PgAbstractRegularTable extends PgAbstractTable implements 
         String columnName = null;
         // search DISTRIBUTED column(s)
         // 1 step - search in primary key
-        for (PgConstraint constraint : newTable.getConstraints()) {
+        for (var constraint : newTable.getConstraints()) {
             if (constraint.isPrimaryKey()) {
                 columnName = String.join(", ", constraint.getColumns());
                 break;

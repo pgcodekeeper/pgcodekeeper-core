@@ -283,7 +283,7 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
         String filePath = sub.toString();
         if (filePath.endsWith(".zip")) {
             db.addLib(getLibraryDependency(filePath, diffSettings.getSettings().isIgnorePrivileges()), null, null);
-        } else if (filePath.endsWith(".sql")) {
+        } else if (filePath.endsWith(Consts.SQL_POSTFIX)) {
             var loader = getDumpLoader(sub, diffSettings);
             loader.loadWithoutAnalyze(db, antlrTasks);
         }

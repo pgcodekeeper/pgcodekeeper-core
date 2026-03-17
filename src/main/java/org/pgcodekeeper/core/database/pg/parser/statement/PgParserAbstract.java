@@ -495,8 +495,8 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
     }
 
     @Override
-    protected Path getRelativeFolderPath(IStatement st, Path baseDir) {
-        return PgWorkDirs.getRelativeFolderPath(st, baseDir);
+    protected Path getRelativeFilePath(IStatement st) {
+        return PgWorkDirs.getRelativeFilePath(st);
     }
 
     @Override

@@ -36,6 +36,8 @@ public interface ITable extends IRelation, IStatementContainer {
 
     Collection<IColumn> getColumns();
 
+    Collection<IConstraint> getConstraints();
+
     /**
      * Creates a stream that includes the statement itself and its columns if it's a table.
      *

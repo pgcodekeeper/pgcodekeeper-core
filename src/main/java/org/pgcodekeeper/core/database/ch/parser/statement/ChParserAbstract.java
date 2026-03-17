@@ -250,8 +250,8 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
     }
 
     @Override
-    protected Path getRelativeFolderPath(IStatement st, Path baseDir) {
-        return ChWorkDirs.getRelativeFolderPath(st, baseDir);
+    protected Path getRelativeFilePath(IStatement st) {
+        return ChWorkDirs.getRelativeFilePath(st);
     }
 
     @Override

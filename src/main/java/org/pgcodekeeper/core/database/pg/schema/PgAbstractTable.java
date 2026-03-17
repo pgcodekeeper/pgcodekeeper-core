@@ -586,7 +586,7 @@ public abstract class PgAbstractTable extends PgAbstractStatementContainer imple
      * @return {@link #constraints}
      */
     @Override
-    public Collection<PgConstraint> getConstraints() {
+    public Collection<IConstraint> getConstraints() {
         return Collections.unmodifiableCollection(constraints.values());
     }
 

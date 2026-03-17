@@ -16,16 +16,12 @@
 package org.pgcodekeeper.core.database.ms.project;
 
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.database.api.schema.ISearchPath;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.api.schema.ISubElement;
 import org.pgcodekeeper.core.database.base.project.AbstractModelExporter;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.FileUtils;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 
@@ -70,20 +66,7 @@ public class MsModelExporter extends AbstractModelExporter {
     }
 
     @Override
-    protected Path getRelativeFolderPath(IStatement st) {
-        return MsWorkDirs.getRelativeFolderPath(st, Paths.get(""));
-    }
-
-    @Override
-    public Path getRelativeFilePath(IStatement st) {
-        if (st instanceof ISubElement) {
-            st = st.getParent();
-        }
-        Path path = getRelativeFolderPath(st);
-        String fileName = getExportedFilenameSql(getExportedFilename(st));
-        if (st instanceof ISearchPath sp) {
-            fileName = FileUtils.getValidFilename(sp.getSchemaName()) + '.' + fileName;
-        }
-        return path.resolve(fileName);
+    protected Path getRelativeFilePath(IStatement st) {
+        return MsWorkDirs.getRelativeFilePath(st);
     }
 }

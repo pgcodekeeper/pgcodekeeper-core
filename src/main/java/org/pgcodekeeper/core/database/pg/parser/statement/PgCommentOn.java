@@ -15,18 +15,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.parser.statement;
 
-import java.util.*;
-import java.util.stream.Stream;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.schema.*;
 import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.settings.ISettings;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Parser for PostgreSQL COMMENT ON statements.
@@ -178,7 +180,7 @@ public final class PgCommentOn extends PgParserAbstract {
             type = DbObjType.CAST;
         } else if (obj.INDEX() != null) {
             type = DbObjType.INDEX;
-            st = getSafe((sc, n) -> sc.getStatementContainers()
+            st = getSafe((sc, n) -> (AbstractStatement) sc.getStatementContainers()
                             .flatMap(c -> Stream.concat(c.getIndexes().stream(), c.getConstraints().stream()))
                             .filter(s -> s.getName().equals(n))
                             .reduce((a, b) -> b.getStatementType() == DbObjType.INDEX ? b : a)
