@@ -107,14 +107,17 @@ public abstract class AbstractModelExporter implements IModelExporter {
     protected AbstractModelExporter(Path outDir, IDatabase newDb, IDatabase oldDb,
                                     Collection<TreeElement> changedObjects,
                                     String sqlEncoding, ISettings settings) {
+        // we should create new settings to get correct script in project files
+        var set = new CoreSettings();
+        set.setFormatConfiguration(settings.getFormatConfiguration());
+        set.setAutoFormatObjectCode(settings.isAutoFormatObjectCode());
+
         this.outDir = outDir;
         this.newDb = newDb;
         this.oldDb = oldDb;
         this.sqlEncoding = sqlEncoding;
         this.changeList = changedObjects;
-
-        // we should create new settings to get correct script in project files
-        this.settings = new CoreSettings();
+        this.settings = set;
     }
 
     /**

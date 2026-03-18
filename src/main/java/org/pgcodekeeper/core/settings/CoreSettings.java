@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.settings;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.base.formatter.FormatConfiguration;
+import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 
 import java.util.ArrayList;
@@ -51,6 +51,8 @@ public class CoreSettings implements ISettings {
     private boolean ignoreConcurrentModification;
     private boolean parallelLoad;
     private boolean disableAutoLoad;
+    private IFormatConfiguration formatConfiguration;
+    private boolean isAutoFormatObjectCode;
 
     private String timeZone;
     private String clusterName;
@@ -134,7 +136,11 @@ public class CoreSettings implements ISettings {
 
     @Override
     public boolean isAutoFormatObjectCode() {
-        return false;
+        return isAutoFormatObjectCode;
+    }
+
+    public void setAutoFormatObjectCode(boolean isAutoFormatObjectCode) {
+        this.isAutoFormatObjectCode = isAutoFormatObjectCode;
     }
 
     @Override
@@ -247,8 +253,12 @@ public class CoreSettings implements ISettings {
     }
 
     @Override
-    public FormatConfiguration getFormatConfiguration() {
-        return null;
+    public IFormatConfiguration getFormatConfiguration() {
+        return formatConfiguration;
+    }
+
+    public void setFormatConfiguration(IFormatConfiguration formatConfiguration) {
+        this.formatConfiguration = formatConfiguration;
     }
 
     @Override
@@ -334,6 +344,8 @@ public class CoreSettings implements ISettings {
         settings.clusterName = clusterName;
         settings.parallelLoad = parallelLoad;
         settings.disableAutoLoad = disableAutoLoad;
+        settings.formatConfiguration = formatConfiguration;
+        settings.isAutoFormatObjectCode = isAutoFormatObjectCode;
         return settings;
     }
 }
