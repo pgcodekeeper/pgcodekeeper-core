@@ -9,6 +9,14 @@
 
 ### Добавлено
 
+### Изменено
+
+### Исправлено
+
+## [14.1.0] - 2026-03-18
+
+### Добавлено
+
 - Добавлена поддержка параллельной загрузки баз данных.
 - Добавлена поддержка ключевых слов MS SQL и ClickHouse.
 - Добавлена возможность отключать автоматическую загрузку дополнительных файлов проекта (.pgcodekeeperignore, .pgcodekeeperignoreschema, .dependencies).
@@ -2441,8 +2449,9 @@
 
 - Добавлен парсинг ORDER BY для агрегатных функции.
 
-[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.0.0...HEAD
-[14.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v13.1.0...14.0.0
+[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.1.0...HEAD
+[14.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.0.0...v14.1.0
+[14.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v13.1.0...v14.0.0
 [13.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v13.0.0...v13.1.0
 [13.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v12.0.0...v13.0.0
 [12.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v11.2.0...v12.0.0
