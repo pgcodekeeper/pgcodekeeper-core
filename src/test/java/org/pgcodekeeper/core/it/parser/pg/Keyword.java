@@ -39,7 +39,6 @@ import org.pgcodekeeper.core.sql.KeywordCategory;
  *
  * @author levsha_aa
  */
-@Deprecated
 public class Keyword {
 
     public static final Map<String, Keyword> KEYWORDS;
