@@ -82,13 +82,6 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
             .where("e.extname = 'pg_dbo_timestamp'")
             .build();
 
-    private static final String QUERY_TOTAL_OBJECTS_COUNT = new QueryBuilder()
-            .column("pg_catalog.count(c.oid)::integer")
-            .from("pg_catalog.pg_class c")
-            .where("c.relnamespace IN (SELECT nsp.oid FROM pg_catalog.pg_namespace nsp WHERE nsp.nspname NOT LIKE ('pg_%') AND nsp.nspname != 'information_schema')")
-            .where("c.relkind != 't'")
-            .build();
-
     private static final String QUERY_TYPES_FOR_CACHE_ALL = new QueryBuilder()
             .column("t.oid")
             .column("t.typname")
@@ -107,7 +100,6 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
      * @see <a href="https://github.com/postgres/postgres/blob/master/src/include/access/transam.h">transam.h</a>
      */
     private static final int FIRST_NORMAL_OBJECT_ID = 16384;
-    private static final int DEFAULT_OBJECTS_COUNT = 100;
 
     protected final String timezone;
 
