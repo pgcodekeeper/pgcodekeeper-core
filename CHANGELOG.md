@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Fixed incorrect error on parallel database load failure.
+
 ## [14.1.0] - 2026-03-18
 
 ### Added

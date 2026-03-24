@@ -47,7 +47,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -127,9 +128,9 @@ public final class Utils {
     /**
      * Writes an XML document to the output stream
      *
-     * @param xml - {@link Document} witch store xml document
+     * @param xml     - {@link Document} witch store xml document
      * @param encrypt - if true, enables secure XML processing
-     * @param stream - The output stream to write the XML document to
+     * @param stream  - The output stream to write the XML document to
      * @throws TransformerException if an error occurred during the XML transformation
      */
     public static void writeXml(Document xml, boolean encrypt, StreamResult stream) throws TransformerException {
@@ -355,16 +356,17 @@ public final class Utils {
     /**
      * Loads databases from loaders
      *
-     * @param oldDbLoader     loader for the old database
-     * @param newDbLoader     loader for the new database
-     * @param subMonitor      the progress monitor for tracking operation progress
-     * @param isParallelLoad  flag indicating whether to load databases in parallel mode
+     * @param oldDbLoader    loader for the old database
+     * @param newDbLoader    loader for the new database
+     * @param subMonitor     the progress monitor for tracking operation progress
+     * @param isParallelLoad flag indicating whether to load databases in parallel mode
      * @return pair of databases (old and new)
      * @throws IOException          if I/O operations fail
      * @throws InterruptedException if the thread is interrupted during the operation
      */
     public static Pair<IDatabase, IDatabase> loadDatabases(ILoader oldDbLoader, ILoader newDbLoader,
-            IMonitor subMonitor, boolean isParallelLoad) throws IOException, InterruptedException {
+                                                           IMonitor subMonitor, boolean isParallelLoad)
+            throws IOException, InterruptedException {
         if (isParallelLoad) {
             return loadDatabasesInParallelMode(oldDbLoader, newDbLoader, subMonitor);
         }
@@ -390,23 +392,26 @@ public final class Utils {
      * @throws IOException          if an I/O error occurs during loading
      */
     private static Pair<IDatabase, IDatabase> loadDatabasesInParallelMode(ILoader oldDbLoader, ILoader newDbLoader,
-            IMonitor monitor) throws InterruptedException, IOException {
+                                                                          IMonitor monitor)
+            throws InterruptedException, IOException {
         // Parallel load
         monitor.setTaskName("Loading databases");
 
-        var oldDbFuture = CompletableFuture.supplyAsync(supplyLoader(oldDbLoader, monitor));
-        var newDbFuture = CompletableFuture.supplyAsync(supplyLoader(newDbLoader, monitor));
+        var oldDbFuture = CompletableFuture.supplyAsync(supplyLoader(oldDbLoader));
+        var newDbFuture = CompletableFuture.supplyAsync(supplyLoader(newDbLoader));
 
         try {
             CompletableFuture.allOf(oldDbFuture, newDbFuture).join();
             monitor.worked(60);
             return new Pair<>(oldDbFuture.join(), newDbFuture.join());
         } catch (CompletionException e) {
+            monitor.setCancelled(true);
             Throwable cause = e.getCause();
             if (cause instanceof InterruptedException ie) {
                 Thread.currentThread().interrupt();
                 throw ie;
             }
+
             if (cause instanceof IOException io) {
                 throw io;
             }
@@ -414,16 +419,14 @@ public final class Utils {
         }
     }
 
-    private static Supplier<IDatabase> supplyLoader(ILoader oldDbLoader, IMonitor monitor) {
+    private static Supplier<IDatabase> supplyLoader(ILoader oldDbLoader) {
         return () -> {
             try {
                 return oldDbLoader.loadAndAnalyze();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                monitor.setCancelled(true);
                 throw new CompletionException(e);
             } catch (IOException e) {
-                monitor.setCancelled(true);
                 throw new CompletionException(e);
             }
         };
