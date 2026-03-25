@@ -89,7 +89,7 @@ class MsObjReferencesTest {
 
         String actual = IntegrationTestUtils.getRefsAsString(db.getObjReferences()).strip();
 
-        IntegrationTestUtils.assertErrors(diffSettings.getErrors());
+        TestUtils.assertErrors(diffSettings.getErrors());
         Assertions.assertEquals(expected, actual);
     }
 }

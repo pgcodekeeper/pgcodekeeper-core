@@ -143,7 +143,7 @@ class PgObjReferencesTest {
 
         String actual = IntegrationTestUtils.getRefsAsString(db.getObjReferences()).strip();
 
-        IntegrationTestUtils.assertErrors(diffSettings.getErrors());
+        TestUtils.assertErrors(diffSettings.getErrors());
         Assertions.assertEquals(expected, actual);
     }
 
@@ -163,7 +163,7 @@ class PgObjReferencesTest {
 
         String actual = IntegrationTestUtils.getRefsWithoutOffSetAsString(db.getObjReferences()).strip();
 
-        IntegrationTestUtils.assertErrors(diffSettings.getErrors());
+        TestUtils.assertErrors(diffSettings.getErrors());
         Assertions.assertEquals(expected, actual);
     }
 }

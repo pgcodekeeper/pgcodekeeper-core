@@ -21,7 +21,10 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.Assertions;
 
 public final class TestUtils {
@@ -54,6 +57,14 @@ public final class TestUtils {
         Assertions.assertLinesMatch(
                 expected.lines(),
                 actual.lines());
+    }
+
+    public static void assertErrors(List<Object> errors) {
+        var errorsString = errors.stream()
+                .map(Object::toString)
+                .collect(Collectors.joining(System.lineSeparator()));
+
+        Assertions.assertEquals("", errorsString);
     }
 
     private TestUtils() {

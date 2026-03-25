@@ -59,6 +59,7 @@ class PgCodeKeeperApiTest {
         String actual = PgCodeKeeperApi.diff(provider, oldDbLoader, newDbLoader, diffSettings);
 
         TestUtils.assertIgnoreNewLines(expectedDiff, actual);
+        TestUtils.assertErrors(diffSettings.getErrors());
     }
 
 
@@ -78,6 +79,7 @@ class PgCodeKeeperApiTest {
         String actual = PgCodeKeeperApi.diff(provider, oldDbLoader, newDbLoader, diffSetts);
 
         TestUtils.assertIgnoreNewLines(expectedDiff, actual);
+        TestUtils.assertErrors(diffSettings.getErrors());
     }
 
     @ParameterizedTest
@@ -94,6 +96,7 @@ class PgCodeKeeperApiTest {
         String actual = PgCodeKeeperApi.diff(provider, oldDbLoader, newDbLoader, diffSettings);
 
         TestUtils.assertIgnoreNewLines(expectedDiff, actual);
+        TestUtils.assertErrors(diffSettings.getErrors());
     }
 
     @Test
@@ -106,6 +109,7 @@ class PgCodeKeeperApiTest {
         PgCodeKeeperApi.exportToProject(provider, null, loader, tempDir, diffSettings);
 
         assertFileContent(exportedTableFile, expectedContent);
+        TestUtils.assertErrors(diffSettings.getErrors());
     }
 
     @Test
@@ -121,6 +125,7 @@ class PgCodeKeeperApiTest {
 
         assertFileContent(exportedTableFile, expectedContent);
         assertFalse(Files.exists(ignoredTableFile));
+        TestUtils.assertErrors(diffSettings.getErrors());
     }
 
     @Test
@@ -140,6 +145,7 @@ class PgCodeKeeperApiTest {
         // Verify first table was removed and second table was updated
         assertFalse(Files.exists(firstTableFile));
         assertFileContent(secondTableFile, expectedContent);
+        TestUtils.assertErrors(diffSettings.getErrors());
     }
 
     @Test
@@ -163,6 +169,7 @@ class PgCodeKeeperApiTest {
         // Verify both tables exist and have correct content
         assertFileContent(firstTableFile, expectedFirstTableContent);
         assertFileContent(secondTableFile, expectedSecondTableContent);
+        TestUtils.assertErrors(diffSettings.getErrors());
     }
 
     private void setupUpdateProjectStructure(Path tempDir) throws IOException {

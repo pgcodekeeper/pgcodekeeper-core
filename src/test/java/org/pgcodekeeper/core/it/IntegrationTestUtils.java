@@ -37,7 +37,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public final class IntegrationTestUtils {
 
@@ -69,16 +68,8 @@ public final class IntegrationTestUtils {
             FullAnalyze.fullAnalyze(db, diffSettings.getErrors());
         }
 
-        assertErrors(diffSettings.getErrors());
+        TestUtils.assertErrors(diffSettings.getErrors());
         return db;
-    }
-
-    public static void assertErrors(List<Object> errors) {
-        var errorsString = errors.stream()
-                .map(Object::toString)
-                .collect(Collectors.joining(System.lineSeparator()));
-
-        Assertions.assertEquals("", errorsString);
     }
 
     public static void assertDiffSame(IDatabaseProvider provider, IDatabase db, String template,

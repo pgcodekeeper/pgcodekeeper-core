@@ -11,9 +11,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Disabled loading of the OVERRIDES directory for libraries to restore the behavior typical before version 14.0.0.
+
 ### Fixed
 
 - Fixed incorrect error on parallel database load failure.
+- Fixed an error when calling the project load API method without specifying the library load directory.
 
 ## [14.1.0] - 2026-03-18
 
