@@ -11,6 +11,12 @@
 
 ### Изменено
 
+### Исправлено
+
+## [14.1.1] - 2026-03-25
+
+### Изменено
+
 - Отключена загрузка директории OVERRIDES у библиотек для восстановления поведения, характерного до версии 14.0.0.
 
 ### Исправлено
@@ -2454,7 +2460,8 @@
 
 - Добавлен парсинг ORDER BY для агрегатных функции.
 
-[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.1.0...HEAD
+[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.1.1...HEAD
+[14.1.1]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.1.0...v14.1.1
 [14.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.0.0...v14.1.0
 [14.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v13.1.0...v14.0.0
 [13.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v13.0.0...v13.1.0

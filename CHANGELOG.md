@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+### Fixed
+
+## [14.1.1] - 2026-03-25
+
+### Changed
+
 - Disabled loading of the OVERRIDES directory for libraries to restore the behavior typical before version 14.0.0.
 
 ### Fixed
@@ -2453,7 +2459,8 @@ We increment major version in this release due to decision to shift our developm
 
 - ORDER BY parsing has been added to the aggregate functions.
 
-[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.1.0...HEAD
+[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.1.1...HEAD
+[14.1.1]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.1.0...v14.1.1
 [14.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.0.0...v14.1.0
 [14.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v13.1.0...v14.0.0
 [13.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v13.0.0...v13.1.0
