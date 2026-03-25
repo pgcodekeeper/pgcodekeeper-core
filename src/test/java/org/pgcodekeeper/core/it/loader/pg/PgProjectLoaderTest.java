@@ -129,10 +129,7 @@ class PgProjectLoaderTest {
         assertTrue(result, "Ignored schemas not loaded");
         assertTrue(diffSettings.getIgnoreList().getList().isEmpty());
 
-        var libTableRef = new ObjectReference("public", "lib_first_table", DbObjType.TABLE);
-        var libTable = db.getStatement(libTableRef);
-
-        Assertions.assertNull(libTable);
+        assertNotLoaded(db, "lib_first_table");
     }
 
     @Test
@@ -208,9 +205,8 @@ class PgProjectLoaderTest {
         loader.setLib(true);
         IDatabase db = loader.load();
 
-        var libTableRef = new ObjectReference("public", "lib_first_table", DbObjType.TABLE);
-        Assertions.assertNull(db.getStatement(libTableRef));
-        assertLibLoaded(db, "lib_second_table", true);
+        assertNotLoaded(db, "lib_first_table");
+        assertNotLoaded(db, "lib_second_table");
     }
 
     @Test
@@ -251,6 +247,13 @@ class PgProjectLoaderTest {
             Assertions.assertNull(libTable.getOwner());
             Assertions.assertTrue(libTable.getPrivileges().isEmpty());
         }
+    }
+
+    private void assertNotLoaded(IDatabase db, String tableName) {
+        var libTableRef = new ObjectReference("public", tableName, DbObjType.TABLE);
+        var libTable = db.getStatement(libTableRef);
+
+        Assertions.assertNull(libTable);
     }
 
     private void createProject(Path dir, DiffSettings diffSettings)

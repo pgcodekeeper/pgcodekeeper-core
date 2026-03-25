@@ -82,9 +82,12 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
         IMonitor.checkCancelled(getMonitor());
         finishLoaders();
         IMonitor.checkCancelled(getMonitor());
-        loadLibraries(db);
-        IMonitor.checkCancelled(getMonitor());
-        loadOverrides(db);
+        if (!isLib) {
+            loadLibraries(db);
+            IMonitor.checkCancelled(getMonitor());
+            loadOverrides(db);
+            IMonitor.checkCancelled(getMonitor());
+        }
         return db;
     }
 
@@ -190,7 +193,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
     private void loadLibraries(T db) throws IOException, InterruptedException {
         var libraryLoader = createLibraryLoader(db);
 
-        if (!isLib && !diffSettings.getSettings().isDisableAutoLoad()) {
+        if (!diffSettings.getSettings().isDisableAutoLoad()) {
             // check project libraries
             Path depsFile = dirPath.resolve(LibraryXmlStore.FILE_NAME);
             if (Files.isRegularFile(depsFile)) {

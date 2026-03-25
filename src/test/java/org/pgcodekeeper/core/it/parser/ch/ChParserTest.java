@@ -32,7 +32,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.database.ch.parser.ChParserUtils;
-import org.pgcodekeeper.core.it.IntegrationTestUtils;
 
 /**
  * Tests for ClickHouse parser rules.
@@ -82,7 +81,7 @@ class ChParserTest {
         parser.ch_file();
 
         int count = ambiguity.intValue();
-        IntegrationTestUtils.assertErrors(errors);
+        TestUtils.assertErrors(errors);
         Assertions.assertEquals(allowedAmbiguity, count,
                 "File: " + fileNameTemplate + " - ANTLR Ambiguity " + count + " expected " + allowedAmbiguity);
     }

@@ -44,6 +44,10 @@ import java.util.stream.Stream;
  */
 public abstract class AbstractLibraryLoader<T extends IDatabase> extends AbstractLoader<T> {
 
+    private static final String LOG_DIR = ".pgcodekeeper-core";
+    private static final String DEPS_DIR = "dependencies";
+    private static final Path META_PATH = Paths.get(System.getProperty("user.home"), LOG_DIR, DEPS_DIR);
+
     protected final T database;
     protected final Path metaPath;
     protected final Set<String> loadedPaths;
@@ -54,7 +58,7 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
                                     DiffSettings diffSettings) {
         super(diffSettings, "");
         this.database = database;
-        this.metaPath = metaPath;
+        this.metaPath = metaPath != null ? metaPath : META_PATH;
         this.loadedPaths = loadedPaths;
     }
 
