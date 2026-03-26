@@ -37,4 +37,4 @@ jobs:
           content: ${{ secrets.MAVEN_SETTINGS_XML }}
 
       - name: Build and deploy
-        run: mvn -B clean deploy -DskipTests -Prelease
+        run: mvn -B -ntp clean deploy -DskipTests -Prelease
