@@ -20,8 +20,13 @@ import java.util.List;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
-import org.pgcodekeeper.core.database.ch.schema.*;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.Create_table_stmtContext;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.IdentifierContext;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.Table_element_exprContext;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
+import org.pgcodekeeper.core.database.ch.schema.ChTable;
+import org.pgcodekeeper.core.database.ch.schema.ChTableLog;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.settings.ISettings;
 
 /**
@@ -108,7 +113,8 @@ public final class ChCreateTable extends ChParserAbstract {
             return;
         }
 
-        throw new IllegalArgumentException("unsupported Table_element_exprContext\n" + getFullCtxText(elementCtx));
+        throw new IllegalArgumentException(
+                Messages.ChCreateTable_unsupported_Table_element_exprContext + getFullCtxText(elementCtx));
     }
 
     @Override

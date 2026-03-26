@@ -15,17 +15,77 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.parser;
 
-import java.util.*;
+import java.util.List;
+import java.util.Locale;
+import java.util.Queue;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
-import org.pgcodekeeper.core.database.base.parser.*;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
-import org.pgcodekeeper.core.database.pg.parser.statement.*;
+import org.pgcodekeeper.core.database.base.parser.AntlrTask;
+import org.pgcodekeeper.core.database.base.parser.CustomParserListener;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Data_statementContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Schema_alterContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Schema_createContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Schema_dropContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Schema_statementContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Script_statementContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Script_transactionContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Session_local_optionContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Set_statementContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Set_statement_valueContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.SqlContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.StatementContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.VexContext;
+import org.pgcodekeeper.core.database.pg.parser.statement.GpCreateExternalTable;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgAlterDomain;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgAlterFtsStatement;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgAlterIndex;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgAlterMatView;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgAlterOther;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgAlterOwner;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgAlterSequence;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgAlterTable;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgAlterView;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCommentOn;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateAggregate;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateCast;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateCollation;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateDatabase;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateDomain;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateEventTrigger;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateExtension;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateFdw;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateForeignTable;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateFtsConfiguration;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateFtsDictionary;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateFtsParser;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateFtsTemplate;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateFunction;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateIndex;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateOperator;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreatePolicy;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateRule;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateSchema;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateSequence;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateServer;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateStatistics;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateTable;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateTrigger;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateType;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateUserMapping;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateView;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgDeleteStatement;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgDropStatement;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgGrantPrivilege;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgInsertStatement;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgMergeStatement;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgUpdateStatement;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.settings.DiffSettings;
 
 /**
@@ -271,7 +331,8 @@ public final class PgCustomParserListener extends CustomParserListener<PgDatabas
             case "search_path":
                 if (ParserListenerMode.NORMAL == mode
                         && (vex.size() != 1 || !PgConsts.PG_CATALOG.equals(confValue))) {
-                    throw new UnresolvedReferenceException("Unsupported search_path", ctx.start);
+                    throw new UnresolvedReferenceException(Messages.PgCustomParserListener_unsupported_search_path,
+                            ctx.start);
                 }
                 break;
             case "default_with_oids":

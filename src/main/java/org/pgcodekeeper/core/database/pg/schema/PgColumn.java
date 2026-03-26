@@ -19,11 +19,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IColumn;
+import org.pgcodekeeper.core.database.api.schema.IForeignTable;
+import org.pgcodekeeper.core.database.api.schema.ISimpleOptionContainer;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
+import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.script.SQLScript;
@@ -610,7 +619,7 @@ public class PgColumn extends PgAbstractStatement
         for (Inherits in : tbl.getInherits()) {
             IStatement parent = getDatabase().getStatement(new ObjectReference(in.key(), in.value(), DbObjType.TABLE));
             if (parent == null) {
-                var msg = "There is no such object of inheritance as table: %s".formatted(in.getQualifiedName());
+                var msg = Messages.PgColumn_no_such_object_of_inheritance.formatted(in.getQualifiedName());
                 LOG.error(msg);
                 continue;
             }

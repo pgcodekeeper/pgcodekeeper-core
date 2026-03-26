@@ -15,12 +15,15 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.ICast.CastContext;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
@@ -28,9 +31,11 @@ import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
-import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.database.pg.schema.PgCast;
 import org.pgcodekeeper.core.database.pg.schema.PgCast.CastMethod;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
+import org.pgcodekeeper.core.localizations.Messages;
 
 /**
  * Reader for PostgreSQL casts.
@@ -104,7 +109,7 @@ public final class PgCastsReader extends PgAbstractJdbcReader {
                 cast.setMethod(CastMethod.BINARY);
                 break;
             default:
-                throw new IllegalStateException("Unknown cast method: " + type);
+                throw new IllegalStateException(Messages.PgCastsReader_unknown_cast_method.formatted(type));
         }
 
         loader.setComment(cast, res);

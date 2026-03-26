@@ -16,9 +16,19 @@
 package org.pgcodekeeper.core.database.base.schema.meta;
 
 import java.io.Serial;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.ArgMode;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IArgument;
+import org.pgcodekeeper.core.database.api.schema.IFunction;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.schema.Argument;
 import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 
@@ -209,7 +219,7 @@ public final class MetaFunction extends MetaStatement implements IFunction {
      */
     @Override
     public ISchema getContainingSchema() {
-        throw new IllegalStateException("Unsupported operation");
+        throw new UnsupportedOperationException();
     }
 
     /**

@@ -15,11 +15,14 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.difftree;
 
-import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
+import static org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide.BOTH;
+import static org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide.LEFT;
+import static org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide.RIGHT;
 
 import java.util.Comparator;
 
-import static org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide.*;
+import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
 
 /**
  * Comparator for TreeElement objects that provides custom sorting logic
@@ -57,7 +60,7 @@ public class CompareTree implements Comparator<TreeElement> {
             return res;
         }
 
-        throw new IllegalStateException("Missing compare case");
+        throw new IllegalStateException(Messages.CompareTree_missing_compare);
     }
 
     /**

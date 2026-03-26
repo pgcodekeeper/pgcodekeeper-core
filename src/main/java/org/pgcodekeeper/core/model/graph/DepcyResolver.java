@@ -15,24 +15,41 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.OptionalInt;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.IntStream;
+
 import org.jgrapht.graph.DefaultEdge;
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.ms.schema.MsSourceStatement;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IArgument;
+import org.pgcodekeeper.core.database.api.schema.IColumn;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.IFunction;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.ITable;
+import org.pgcodekeeper.core.database.api.schema.ObjectState;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.ms.schema.MsAbstractFunction;
+import org.pgcodekeeper.core.database.ms.schema.MsSourceStatement;
 import org.pgcodekeeper.core.database.ms.schema.MsTable;
 import org.pgcodekeeper.core.database.ms.schema.MsType;
 import org.pgcodekeeper.core.database.ms.schema.MsView;
 import org.pgcodekeeper.core.database.pg.schema.PgIndex;
 import org.pgcodekeeper.core.database.pg.schema.PgSequence;
 import org.pgcodekeeper.core.database.pg.schema.PgTypedTable;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
-
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.stream.IntStream;
 
 /**
  * Core dependency resolution engine that determines database object changes required for schema migration.
@@ -481,7 +498,7 @@ public final class DepcyResolver {
             case CREATE, DROP -> actions.add(new ActionContainer(oldObj, oldObj, action, starter));
             case ALTER, ALTER_WITH_DEP -> actions
                     .add(new ActionContainer(oldObj, oldObj.getTwin(newDb), ObjectState.ALTER, starter));
-            default -> throw new IllegalStateException("Not implemented action");
+            default -> throw new IllegalStateException(Messages.ActionsToScriptConverter_not_implemented_action);
         }
     }
 

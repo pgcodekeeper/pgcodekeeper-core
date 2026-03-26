@@ -15,13 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.parser.statement;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Batch_statement_bodyContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Create_or_alter_triggerContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.IdContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Qualified_nameContext;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.settings.ISettings;
 
 /**
@@ -118,6 +124,6 @@ public final class MsAlterBatch extends MsBatchContextProcessor {
 
     @Override
     protected ParserRuleContext getDelimiterCtx() {
-        throw new IllegalStateException("Unsupported operation for AlterMsBatch");
+        throw new UnsupportedOperationException(Messages.MsAlterBatch_UnsupportedOperationException);
     }
 }

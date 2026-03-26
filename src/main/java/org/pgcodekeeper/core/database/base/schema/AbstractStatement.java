@@ -15,16 +15,33 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.schema;
 
-import org.pgcodekeeper.core.database.api.schema.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.IPrivilege;
+import org.pgcodekeeper.core.database.api.schema.ISearchPath;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
+import org.pgcodekeeper.core.database.api.schema.ITable;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
+import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.exception.ObjectCreationException;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.hasher.IHashable;
 import org.pgcodekeeper.core.hasher.JavaHasher;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
-
-import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * Abstract base class for all database statements and objects.
@@ -283,8 +300,8 @@ public abstract class AbstractStatement implements IStatement, IHashable {
      */
     public void setParent(AbstractStatement parent) {
         if (parent != null && this.parent != null) {
-            throw new IllegalStateException("Statement already has a parent: "
-                    + this.getClass() + " Name: " + this.getName());
+            throw new IllegalStateException(
+                    Messages.AbstractStatement_already_has_a_parent.formatted(this.getClass(), this.getName()));
         }
 
         qualifiedName = null;
@@ -580,7 +597,7 @@ public abstract class AbstractStatement implements IStatement, IHashable {
      */
     public boolean compareChildren(AbstractStatement obj) {
         if (obj == null) {
-            throw new IllegalArgumentException("Null Statement!");
+            throw new IllegalArgumentException(Messages.AbstractStatement_null_statement);
         }
         return true;
     }

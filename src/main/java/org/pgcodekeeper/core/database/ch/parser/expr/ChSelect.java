@@ -15,11 +15,18 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.parser.expr;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
 import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
-import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
-import org.pgcodekeeper.core.database.ch.parser.rulectx.*;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.From_itemContext;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.From_primaryContext;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.Grouping_element_listContext;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.Select_primaryContext;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.Select_stmtContext;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.Select_stmt_no_parensContext;
+import org.pgcodekeeper.core.database.ch.parser.rulectx.ChSelectOps;
+import org.pgcodekeeper.core.database.ch.parser.rulectx.ChSelectStmt;
 import org.pgcodekeeper.core.localizations.Messages;
 
 /**
@@ -99,7 +106,7 @@ public final class ChSelect extends ChAbstractExprWithNmspc<Select_stmtContext> 
             return select(query);
         }
 
-        log(Messages.ChSelect_log_not_alter_selectops);
+        log(Messages.Select_log_not_alter_selectops);
         return Collections.emptyList();
     }
 

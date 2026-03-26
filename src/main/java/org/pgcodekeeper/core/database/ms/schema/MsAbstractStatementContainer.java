@@ -15,11 +15,21 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.hasher.Hasher;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-import java.util.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IRelation;
+import org.pgcodekeeper.core.database.api.schema.ISearchPath;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.localizations.Messages;
 
 /**
  * Abstract base class for database objects that can contain other statements.
@@ -71,7 +81,8 @@ public abstract class MsAbstractStatementContainer extends MsAbstractStatement
             case INDEX -> addUnique(indexes, (MsIndex) st);
             case TRIGGER -> addUnique(triggers, (MsTrigger) st);
             case STATISTICS -> addUnique(statistics, (MsStatistics) st);
-            default -> throw new IllegalArgumentException("Unsupported child type: " + type);
+            default ->
+                throw new IllegalArgumentException(Messages.Statement_unsupported_child_type.formatted(type));
         }
     }
 

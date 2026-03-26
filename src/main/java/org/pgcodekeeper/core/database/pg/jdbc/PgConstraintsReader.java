@@ -15,15 +15,29 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgAlterTable;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
-import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractTable;
+import org.pgcodekeeper.core.database.pg.schema.PgColumn;
+import org.pgcodekeeper.core.database.pg.schema.PgConstraint;
+import org.pgcodekeeper.core.database.pg.schema.PgConstraintCheck;
+import org.pgcodekeeper.core.database.pg.schema.PgConstraintExclude;
+import org.pgcodekeeper.core.database.pg.schema.PgConstraintFk;
+import org.pgcodekeeper.core.database.pg.schema.PgConstraintNotNull;
+import org.pgcodekeeper.core.database.pg.schema.PgConstraintPk;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgIndexParamContainer;
+import org.pgcodekeeper.core.database.pg.schema.PgPartitionTable;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.utils.Pair;
 
 /**
@@ -80,7 +94,8 @@ public final class PgConstraintsReader extends PgAbstractSearchPathJdbcReader {
                 readNotNullConstraint(res, (PgAbstractTable) cont, constraintName);
                 return;
             default:
-                throw new IllegalArgumentException("Unsupported constraint's type " + type);
+                throw new IllegalArgumentException(
+                        Messages.PgConstraintsReader_unsupported_constraint_type.formatted(type));
         }
 
         if (params != null) {

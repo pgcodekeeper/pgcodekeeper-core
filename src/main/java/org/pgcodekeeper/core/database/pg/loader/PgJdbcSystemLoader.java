@@ -15,6 +15,18 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.loader;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.IntStream;
+
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
@@ -22,7 +34,11 @@ import org.pgcodekeeper.core.database.api.schema.ICast.CastContext;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.base.schema.Argument;
-import org.pgcodekeeper.core.database.base.schema.meta.*;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaCast;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaFunction;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaOperator;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaRelation;
+import org.pgcodekeeper.core.database.base.schema.meta.MetaStorage;
 import org.pgcodekeeper.core.database.pg.jdbc.IPgJdbcReader;
 import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
 import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcType;
@@ -40,14 +56,6 @@ import org.pgcodekeeper.core.utils.Pair;
 import org.pgcodekeeper.core.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.IntStream;
 
 /**
  * JDBC-based system metadata loader for PostgreSQL databases.
@@ -135,7 +143,7 @@ final class PgJdbcSystemLoader extends PgJdbcLoader {
      */
     @Override
     public PgDatabase loadInternal() {
-        throw new IllegalStateException("Unsupported operation for JdbcSystemLoader");
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -334,7 +342,8 @@ final class PgJdbcSystemLoader extends PgJdbcLoader {
                     case "e" -> CastContext.EXPLICIT;
                     case "a" -> CastContext.ASSIGNMENT;
                     case "i" -> CastContext.IMPLICIT;
-                    default -> throw new IllegalStateException("Unknown cast context: " + type);
+                default ->
+                    throw new IllegalStateException(Messages.PgJdbcSystemLoader_unknown_cast_context.formatted(type));
                 };
                 storage.addMetaChild(new MetaCast(source, target, ctx));
             }

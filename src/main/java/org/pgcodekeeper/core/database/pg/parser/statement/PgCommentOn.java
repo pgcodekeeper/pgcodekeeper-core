@@ -15,20 +15,32 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.parser.statement;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
-import org.pgcodekeeper.core.database.pg.schema.*;
-import org.pgcodekeeper.core.database.pg.utils.PgConsts;
-import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
-import org.pgcodekeeper.core.settings.ISettings;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
+
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.base.parser.QNameParser;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Cast_nameContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Comment_member_objectContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Comment_on_statementContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.SconstContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Target_operatorContext;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractStatementContainer;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractTable;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractView;
+import org.pgcodekeeper.core.database.pg.schema.PgColumn;
+import org.pgcodekeeper.core.database.pg.schema.PgCompositeType;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgDomain;
+import org.pgcodekeeper.core.database.pg.schema.PgSchema;
+import org.pgcodekeeper.core.database.pg.utils.PgConsts;
+import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
+import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.settings.ISettings;
 
 /**
  * Parser for PostgreSQL COMMENT ON statements.
@@ -87,8 +99,7 @@ public final class PgCommentOn extends PgParserAbstract {
 
             ParserRuleContext tableCtx = QNameParser.getSecondNameCtx(ids);
             if (tableCtx == null) {
-                throw new UnresolvedReferenceException(
-                        "Table name is missing for commented column!", nameCtx.getStart());
+                throw new UnresolvedReferenceException(Messages.PgCommentOn_table_name_is_missing, nameCtx.getStart());
             }
             String tableName = tableCtx.getText();
             PgAbstractTable table = schema.getTable(tableName);

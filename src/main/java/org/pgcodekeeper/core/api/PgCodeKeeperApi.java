@@ -15,22 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.api;
 
-import org.pgcodekeeper.core.DangerStatement;
-import org.pgcodekeeper.core.database.api.IDatabaseProvider;
-import org.pgcodekeeper.core.database.api.loader.ILoader;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
-import org.pgcodekeeper.core.database.base.parser.ScriptParser;
-import org.pgcodekeeper.core.ignorelist.IgnoreList;
-import org.pgcodekeeper.core.model.difftree.DiffTree;
-import org.pgcodekeeper.core.model.difftree.TreeElement;
-import org.pgcodekeeper.core.model.difftree.TreeFlattener;
-import org.pgcodekeeper.core.model.graph.DepcyFinder;
-import org.pgcodekeeper.core.settings.DiffSettings;
-import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.Utils;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -39,6 +23,23 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+
+import org.pgcodekeeper.core.DangerStatement;
+import org.pgcodekeeper.core.database.api.IDatabaseProvider;
+import org.pgcodekeeper.core.database.api.loader.ILoader;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
+import org.pgcodekeeper.core.database.base.parser.ScriptParser;
+import org.pgcodekeeper.core.ignorelist.IgnoreList;
+import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.model.difftree.DiffTree;
+import org.pgcodekeeper.core.model.difftree.TreeElement;
+import org.pgcodekeeper.core.model.difftree.TreeFlattener;
+import org.pgcodekeeper.core.model.graph.DepcyFinder;
+import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.Utils;
 
 /**
  * Main API class for pgCodeKeeper database operations.
@@ -65,7 +66,7 @@ public final class PgCodeKeeperApi {
         boolean isParallelLoad = diffSettings.getSettings().isParallelLoad();
         var databases = Utils.loadDatabases(oldDbLoader, newDbLoader, subMonitor, isParallelLoad);
 
-        subMonitor.setTaskName("Creating tree");
+        subMonitor.setTaskName(Messages.PgCodeKeeperApi_creating_tree);
         TreeElement root = DiffTree.create(diffSettings.getSettings(), databases.getFirst(), databases.getSecond(),
                 diffSettings.getMonitor());
         subMonitor.worked(5);
@@ -97,7 +98,7 @@ public final class PgCodeKeeperApi {
         boolean isParallelLoad = diffSettings.getSettings().isParallelLoad();
         var databases = Utils.loadDatabases(oldDbLoader, newDbLoader, subMonitor, isParallelLoad);
 
-        subMonitor.setTaskName("Building script");
+        subMonitor.setTaskName(Messages.PgCodeKeeperApi_building_script);
         var script = diff(provider, databases.getFirst(), databases.getSecond(), diffSettings);
         subMonitor.worked(10);
 
@@ -196,18 +197,18 @@ public final class PgCodeKeeperApi {
         var subMonitor = diffSettings.getMonitor().createSubMonitor();
         subMonitor.setWorkRemaining(100);
 
-        subMonitor.setTaskName("Loading old database");
+        subMonitor.setTaskName(Messages.Utils_loading_old_database);
         var oldDb = oldDbLoader == null ? null : oldDbLoader.loadAndAnalyze();
         subMonitor.worked(30);
 
-        subMonitor.setTaskName("Loading new database");
+        subMonitor.setTaskName(Messages.Utils_loading_new_database);
         var newDb = newDbLoader.loadAndAnalyze();
         subMonitor.worked(30);
 
         IgnoreList ignoreList = diffSettings.getIgnoreList();
         ISettings settings = diffSettings.getSettings();
 
-        subMonitor.setTaskName("Building diff tree");
+        subMonitor.setTaskName(Messages.PgCodeKeeperApi_creating_tree);
         TreeElement root = DiffTree.create(settings, oldDb, newDb, diffSettings.getMonitor());
         root.setAllChecked();
         subMonitor.worked(20);
@@ -218,7 +219,7 @@ public final class PgCodeKeeperApi {
                 .onlyTypes(settings.getAllowedTypes())
                 .flatten(root);
 
-        subMonitor.setTaskName("Exporting project");
+        subMonitor.setTaskName(Messages.PgCodeKeeperApi_exporting_project);
         exportToProject(provider, oldDb, newDb, selected, projectPath, overridesOnly, settings);
         subMonitor.worked(20);
     }
@@ -295,12 +296,12 @@ public final class PgCodeKeeperApi {
         var subMonitor = diffSettings.getMonitor().createSubMonitor();
         subMonitor.setWorkRemaining(100);
 
-        subMonitor.setTaskName("Parsing script");
+        subMonitor.setTaskName(Messages.PgCodeKeeperApi_parsing_script);
         ScriptParser parser = new ScriptParser(provider.getDumpLoader(() -> new ByteArrayInputStream(
                 sql.getBytes(StandardCharsets.UTF_8)), name, diffSettings), name, sql);
         subMonitor.worked(50);
 
-        subMonitor.setTaskName("Checking dangerous statements");
+        subMonitor.setTaskName(Messages.PgCodeKeeperApi_checking_dangerous_statements);
         var result = parser.getDangerDdl(allowedDangers);
         subMonitor.worked(50);
 
@@ -325,12 +326,12 @@ public final class PgCodeKeeperApi {
         var subMonitor = diffSettings.getMonitor().createSubMonitor();
         subMonitor.setWorkRemaining(100);
 
-        subMonitor.setTaskName("Parsing script");
+        subMonitor.setTaskName(Messages.PgCodeKeeperApi_parsing_script);
         ScriptParser parser = new ScriptParser(provider.getDumpLoader(() -> new ByteArrayInputStream(
                 sql.getBytes(StandardCharsets.UTF_8)), name, diffSettings), name, sql);
         subMonitor.worked(30);
 
-        subMonitor.setTaskName("Executing script");
+        subMonitor.setTaskName(Messages.PgCodeKeeperApi_executing_script);
         new JdbcRunner().runBatches(provider.getJdbcConnector(url), parser.batch(), null);
         subMonitor.worked(70);
     }

@@ -19,9 +19,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.utils;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+
+import org.pgcodekeeper.core.localizations.Messages;
 
 /**
  * Utility class for handling quoting and unquoting of identifiers and literals in PostgreSQL.
@@ -258,7 +261,7 @@ public final class PgDiffUtils {
 
             return byteStream.toString(StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new IllegalStateException("Error constructing object name", e);
+            throw new IllegalStateException(Messages.PgDiffUtils_error_constructing_object_name, e);
         }
     }
 

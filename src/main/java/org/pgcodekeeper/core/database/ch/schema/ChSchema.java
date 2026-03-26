@@ -15,13 +15,24 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.database.api.schema.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
+
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IRelation;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
+import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.script.SQLScript;
-
-import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * Represents a ClickHouse database schema (database in ClickHouse terms).
@@ -150,7 +161,7 @@ public class ChSchema extends ChAbstractStatement implements ISchema, IStatement
                 addUnique(views, (ChView) st);
                 break;
             default:
-                throw new IllegalArgumentException("Unsupported child type: " + type);
+                throw new IllegalArgumentException(Messages.Statement_unsupported_child_type.formatted(type));
         }
     }
 

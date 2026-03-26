@@ -19,12 +19,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import java.util.*;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Stream;
 
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.ISequence;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
+import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.script.*;
+import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.script.SQLActionType;
+import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -275,7 +282,7 @@ public class PgSequence extends PgAbstractStatement implements ISequence {
                 yield needMaxVal ? boundaryTypeVal : -boundaryTypeVal;
             }
             default -> {
-                var msg = "Unsupported sequence type: %s".formatted(type);
+                var msg = Messages.Utils_unsupported_sequence_type.formatted(type);
                 LOG.warn(msg);
                 yield needMaxVal ? Long.MAX_VALUE : Long.MIN_VALUE;
             }

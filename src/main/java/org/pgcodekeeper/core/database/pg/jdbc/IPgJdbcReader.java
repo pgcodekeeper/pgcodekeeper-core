@@ -18,13 +18,15 @@ package org.pgcodekeeper.core.database.pg.jdbc;
 import java.util.function.BiConsumer;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.exception.ConcurrentModificationException;
+import org.pgcodekeeper.core.localizations.Messages;
 
 public interface IPgJdbcReader {
 
@@ -78,7 +80,7 @@ public interface IPgJdbcReader {
     static void checkTypeValidity(String type) {
         checkObjectValidity(type, DbObjType.TYPE, "");
         if ("???".equals(type) || "???[]".equals(type)) {
-            throw new ConcurrentModificationException("Concurrent type modification");
+            throw new ConcurrentModificationException(Messages.IPgJdbcReader_ConcurrentModificationException);
         }
     }
 

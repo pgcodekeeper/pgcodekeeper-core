@@ -15,13 +15,16 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.jdbc;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcReader;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.ISchema;
 import org.pgcodekeeper.core.database.base.loader.AbstractJdbcLoader;
-import org.pgcodekeeper.core.exception.*;
+import org.pgcodekeeper.core.exception.ConcurrentModificationException;
+import org.pgcodekeeper.core.exception.XmlReaderException;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.slf4j.Logger;
@@ -63,7 +66,7 @@ public abstract class AbstractSearchPathJdbcReader<T extends AbstractJdbcLoader<
         var schemaId = result.getObject(schemaColumn.substring(schemaColumn.indexOf('.') + 1));
         ISchema schema = loader.getSchema(schemaId);
         if (schema == null) {
-            var msg = "No schema found for id %s".formatted(schemaId);
+            var msg = Messages.AbstractSearchPathJdbcReader_no_schema_found.formatted(schemaId);
             LOG.warn(msg);
             return;
         }

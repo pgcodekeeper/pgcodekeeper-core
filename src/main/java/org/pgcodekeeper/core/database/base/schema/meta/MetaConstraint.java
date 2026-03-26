@@ -16,9 +16,13 @@
 package org.pgcodekeeper.core.database.base.schema.meta;
 
 import java.io.Serial;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.IConstraintPk;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 
 /**
  * Represents a database constraint metadata object.
@@ -78,7 +82,7 @@ public final class MetaConstraint extends MetaStatement implements IConstraintPk
      */
     @Override
     public ISchema getContainingSchema() {
-        throw new IllegalStateException("Unsupported operation");
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -110,7 +114,7 @@ public final class MetaConstraint extends MetaStatement implements IConstraintPk
      */
     @Override
     public String getDefinition() {
-        throw new IllegalStateException("Unsupported operation");
+        throw new UnsupportedOperationException();
     }
 
     @Override

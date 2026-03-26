@@ -15,13 +15,42 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.parser.expr;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map.Entry;
 
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
-import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
-import org.pgcodekeeper.core.database.ms.parser.rulectx.*;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.As_table_aliasContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Change_tableContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Column_declarationContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Derived_tableContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.ExpressionContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Expression_listContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.From_itemContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.From_primaryContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Full_column_nameContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Function_callContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Open_jsonContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Open_xmlContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Order_by_clauseContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Order_by_expressionContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Primary_key_valuesContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Qualified_nameContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Query_specificationContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Schema_declarationContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Search_conditionContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Select_list_elemContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Select_statementContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Select_stmt_no_parensContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Table_value_constructorContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Top_clauseContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Window_specificationContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.With_expressionContext;
+import org.pgcodekeeper.core.database.ms.parser.rulectx.MsSelectOps;
+import org.pgcodekeeper.core.database.ms.parser.rulectx.MsSelectStmt;
 import org.pgcodekeeper.core.localizations.Messages;
 
 /**
@@ -116,7 +145,7 @@ public class MsSelect extends MsAbstractExprWithNmspc<Select_statementContext> {
                 ret = select(query);
             }
         } else {
-            log(Messages.MsSelect_log_not_alter_selectops);
+            log(Messages.Select_log_not_alter_selectops);
         }
         return ret;
     }

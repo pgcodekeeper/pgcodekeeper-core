@@ -15,6 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.parser;
 
+import java.util.List;
+import java.util.Locale;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -28,14 +31,12 @@ import org.pgcodekeeper.core.exception.MisplacedObjectException;
 import org.pgcodekeeper.core.exception.MonitorCancelledRuntimeException;
 import org.pgcodekeeper.core.exception.ObjectCreationException;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Locale;
 
 /**
  * Base class for custom ANTLR parse tree listeners that build database schema models.
@@ -95,7 +96,7 @@ public class CustomParserListener<T extends IDatabase> {
             if (ctx != null) {
                 diffSettings.addError(handleParserContextException(e, filename, ctx));
             } else {
-                LOG.error("Statement context is missing", e);
+                LOG.error(Messages.CustomParserListener_statement_context_is_missing, e);
             }
         }
     }

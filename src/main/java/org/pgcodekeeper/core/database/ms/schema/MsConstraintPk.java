@@ -15,10 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.api.schema.IConstraintPk;
+import org.pgcodekeeper.core.database.api.schema.IOptionContainer;
+import org.pgcodekeeper.core.database.api.schema.ISimpleColumnContainer;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.base.schema.SimpleColumn;
+import org.pgcodekeeper.core.database.base.schema.StatementUtils;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 
@@ -132,7 +141,7 @@ public class MsConstraintPk extends MsConstraint implements IConstraintPk, IOpti
      */
     @Override
     public void addInclude(String column) {
-        throw new IllegalStateException("Unsupported operation");
+        throw new UnsupportedOperationException();
     }
 
     @Override

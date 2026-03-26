@@ -15,23 +15,55 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.parser.statement;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
-import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
-import org.pgcodekeeper.core.database.ms.parser.launcher.MsExpressionAnalysisLauncher;
-import org.pgcodekeeper.core.database.ms.project.MsWorkDirs;
-import org.pgcodekeeper.core.database.ms.schema.*;
-import org.pgcodekeeper.core.database.ms.utils.MsDiffUtils;
-import org.pgcodekeeper.core.settings.ISettings;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IOptionContainer;
+import org.pgcodekeeper.core.database.api.schema.ISimpleColumnContainer;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
+import org.pgcodekeeper.core.database.base.parser.QNameParser;
+import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.SimpleColumn;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Column_optionContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Column_with_orderContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Data_typeContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.DataspaceContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.ExpressionContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.IdContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Identity_valueContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Index_includeContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Index_optionContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Index_optionsContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Index_restContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Index_whereContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.On_optionContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Qualified_nameContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Table_constraint_bodyContext;
+import org.pgcodekeeper.core.database.ms.parser.launcher.MsExpressionAnalysisLauncher;
+import org.pgcodekeeper.core.database.ms.project.MsWorkDirs;
+import org.pgcodekeeper.core.database.ms.schema.MsColumn;
+import org.pgcodekeeper.core.database.ms.schema.MsConstraint;
+import org.pgcodekeeper.core.database.ms.schema.MsConstraintCheck;
+import org.pgcodekeeper.core.database.ms.schema.MsConstraintFk;
+import org.pgcodekeeper.core.database.ms.schema.MsConstraintPk;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
+import org.pgcodekeeper.core.database.ms.schema.MsGeneratedType;
+import org.pgcodekeeper.core.database.ms.schema.MsIndex;
+import org.pgcodekeeper.core.database.ms.schema.MsSchema;
+import org.pgcodekeeper.core.database.ms.schema.MsTable;
+import org.pgcodekeeper.core.database.ms.schema.MsType;
+import org.pgcodekeeper.core.database.ms.utils.MsDiffUtils;
+import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.settings.ISettings;
 
 /**
  * Abstract base class for Microsoft SQL statement parsers.
@@ -289,7 +321,8 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
             return isStart ? MsGeneratedType.SEQ_START : MsGeneratedType.SEQ_END;
         }
 
-        throw new IllegalStateException("Unsupported GENERATED ALWAYS column type: " + getFullCtxText(option));
+        throw new IllegalStateException(
+                Messages.MsParserAbstract_unsupported_generated_always.formatted(getFullCtxText(option)));
     }
 
     protected void fillColumns(ISimpleColumnContainer stmt, List<Column_with_orderContext> cols, String schema,

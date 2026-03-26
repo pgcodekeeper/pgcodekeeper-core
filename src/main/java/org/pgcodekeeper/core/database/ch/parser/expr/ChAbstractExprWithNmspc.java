@@ -15,15 +15,25 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.parser.expr;
 
-import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.IRelation;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.Alias_clauseContext;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.Dml_stmtContext;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.Qualified_nameContext;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.With_clauseContext;
+import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.With_queryContext;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.utils.Pair;
 
@@ -147,7 +157,8 @@ public abstract class ChAbstractExprWithNmspc<T> extends ChAbstractExpr {
     public void addRawTableReference(ObjectReference qualifiedTable) {
         boolean exists = !unaliasedNamespace.add(qualifiedTable);
         if (exists) {
-            log(Messages.ChAbstractExprWithNmspc_log_dupl_unaliased_table, qualifiedTable.schema(), qualifiedTable.table());
+            log(Messages.AbstractExprWithNmspc_log_dupl_unaliased_table, qualifiedTable.schema(),
+                    qualifiedTable.table());
         }
     }
 

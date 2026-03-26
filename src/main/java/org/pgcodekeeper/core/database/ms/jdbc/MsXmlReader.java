@@ -15,15 +15,26 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.jdbc;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.pgcodekeeper.core.exception.XmlReaderException;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.utils.Utils;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
@@ -134,7 +145,7 @@ public class MsXmlReader {
             Document doc = Utils.readXml(reader);
 
             if (!ROOT.equals(doc.getDocumentElement().getNodeName())) {
-                throw new IOException("XML root element name is not as requested.");
+                throw new IOException(Messages.MsXmlReader_not_root_element);
             }
 
             Element root = (Element) doc.getElementsByTagName(ROOT).item(0);

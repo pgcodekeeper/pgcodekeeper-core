@@ -15,25 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.utils;
 
-import org.pgcodekeeper.core.database.api.loader.ILoader;
-import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.monitor.IMonitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
@@ -46,11 +27,36 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.pgcodekeeper.core.database.api.loader.ILoader;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.monitor.IMonitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * Utility class providing common helper methods for various operations including
@@ -370,11 +376,11 @@ public final class Utils {
         if (isParallelLoad) {
             return loadDatabasesInParallelMode(oldDbLoader, newDbLoader, subMonitor);
         }
-        subMonitor.setTaskName("Loading old database");
+        subMonitor.setTaskName(Messages.Utils_loading_old_database);
         var oldDb = oldDbLoader.loadAndAnalyze();
         subMonitor.worked(30);
 
-        subMonitor.setTaskName("Loading new database");
+        subMonitor.setTaskName(Messages.Utils_loading_new_database);
         var newDb = newDbLoader.loadAndAnalyze();
         subMonitor.worked(30);
 
@@ -395,7 +401,7 @@ public final class Utils {
                                                                           IMonitor monitor)
             throws InterruptedException, IOException {
         // Parallel load
-        monitor.setTaskName("Loading databases");
+        monitor.setTaskName(Messages.Utils_loading_databases);
 
         var oldDbFuture = CompletableFuture.supplyAsync(supplyLoader(oldDbLoader));
         var newDbFuture = CompletableFuture.supplyAsync(supplyLoader(newDbLoader));
@@ -415,7 +421,7 @@ public final class Utils {
             if (cause instanceof IOException io) {
                 throw io;
             }
-            throw new IOException("Failed to load databases", cause);
+            throw new IOException(Messages.Utils_failed_to_load_databases, cause);
         }
     }
 
