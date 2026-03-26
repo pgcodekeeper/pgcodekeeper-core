@@ -15,23 +15,42 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
-import org.pgcodekeeper.core.database.api.schema.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Predicate;
+
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IColumn;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.IForeignTable;
+import org.pgcodekeeper.core.database.api.schema.ISequence;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.ITable;
+import org.pgcodekeeper.core.database.api.schema.ObjectState;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.ms.schema.MsColumn;
 import org.pgcodekeeper.core.database.ms.schema.MsConstraintPk;
 import org.pgcodekeeper.core.database.ms.schema.MsTable;
 import org.pgcodekeeper.core.database.ms.schema.MsView;
 import org.pgcodekeeper.core.database.ms.utils.MsDiffUtils;
-import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.database.pg.schema.PgColumn;
+import org.pgcodekeeper.core.database.pg.schema.PgPartitionTable;
+import org.pgcodekeeper.core.database.pg.schema.PgSequence;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.script.SQLActionType;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Utils;
-
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.function.Predicate;
 
 /**
  * Converts database action containers into executable SQL script statements.
@@ -279,7 +298,7 @@ public final class ActionsToScriptConverter {
                 }
                 break;
             default:
-                throw new IllegalStateException("Not implemented action");
+                throw new IllegalStateException(Messages.ActionsToScriptConverter_not_implemented_action);
         }
     }
 
@@ -446,8 +465,8 @@ public final class ActionsToScriptConverter {
         Collection<DbObjType> allowedTypes = settings.getAllowedTypes();
         if (!allowedTypes.isEmpty() && !allowedTypes.contains(type)) {
             if (settings.isStopNotAllowed()) {
-                throw new NotAllowedObjectException(action.getOldObj().getQualifiedName()
-                        + " (" + type + ") is not an allowed script object. Stopping.");
+                throw new NotAllowedObjectException(Messages.ActionsToScriptConverter_not_allowed_object
+                        .formatted(action.getOldObj().getQualifiedName(), type));
             }
             addHiddenObj(action, "object type is not in allowed types list");
             return true;
@@ -482,7 +501,7 @@ public final class ActionsToScriptConverter {
             case CREATE -> isSelectedObj.test(action.getNewObj());
             case ALTER -> isSelectedObj.test(action.getNewObj()) && isSelectedObj.test(action.getOldObj());
             case DROP -> isSelectedObj.test(action.getOldObj());
-            default -> throw new IllegalStateException("Not implemented action");
+        default -> throw new IllegalStateException(Messages.ActionsToScriptConverter_not_implemented_action);
         };
     }
 

@@ -15,12 +15,15 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
+import org.pgcodekeeper.core.localizations.Messages;
 
 /**
  * Parser for aclItem arrays
@@ -58,8 +61,8 @@ public final class PgJdbcPrivilege {
                 }
             }
 
-            throw new IllegalArgumentException(
-                    "No enum constant " + PrivilegeTypes.class.getCanonicalName() + "." + letter);
+            throw new IllegalArgumentException(Messages.PgJdbcPrivilege_no_enum_constant
+                    .formatted(PrivilegeTypes.class.getCanonicalName(), letter));
         }
     }
 

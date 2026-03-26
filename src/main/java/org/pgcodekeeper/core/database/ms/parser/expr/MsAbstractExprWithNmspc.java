@@ -15,16 +15,28 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.parser.expr;
 
-import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Stream;
 
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IRelation;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
-import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.As_table_aliasContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Common_table_expressionContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Qualified_nameContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.With_expressionContext;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.utils.*;
+import org.pgcodekeeper.core.utils.Pair;
+import org.pgcodekeeper.core.utils.Utils;
 
 /**
  * Abstract base class for analyzing Microsoft SQL expressions with namespace support.
@@ -163,7 +175,8 @@ public abstract class MsAbstractExprWithNmspc<T> extends MsAbstractExpr {
     public void addRawTableReference(ObjectReference qualifiedTable) {
         boolean exists = !unaliasedNamespace.add(qualifiedTable);
         if (exists) {
-            log(Messages.MsAbstractExprWithNmspc_log_dupl_unaliased_table, qualifiedTable.schema(), qualifiedTable.table());
+            log(Messages.AbstractExprWithNmspc_log_dupl_unaliased_table, qualifiedTable.schema(),
+                    qualifiedTable.table());
         }
     }
 

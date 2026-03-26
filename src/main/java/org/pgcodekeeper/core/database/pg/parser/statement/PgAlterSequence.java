@@ -15,21 +15,26 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.parser.statement;
 
+import java.util.List;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Alter_sequence_statementContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Schema_alterContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Sequence_bodyContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Set_loggedContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Tokens_nonreserved_except_function_typeContext;
 import org.pgcodekeeper.core.database.pg.schema.PgColumn;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.schema.PgSchema;
 import org.pgcodekeeper.core.database.pg.schema.PgSequence;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.settings.ISettings;
-
-import java.util.List;
 
 /**
  * Parser for PostgreSQL ALTER SEQUENCE statements.
@@ -119,7 +124,8 @@ public final class PgAlterSequence extends PgParserAbstract {
             }
         }
 
-        throw new UnresolvedReferenceException("Cannot find object in database: " + seqName, nameToken);
+        throw new UnresolvedReferenceException(
+                Messages.Utils_not_object_in_database.formatted(seqName), nameToken);
     }
 
     @Override

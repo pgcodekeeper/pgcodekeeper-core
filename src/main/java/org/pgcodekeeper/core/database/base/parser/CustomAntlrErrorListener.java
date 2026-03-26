@@ -21,6 +21,7 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +75,7 @@ final class CustomAntlrErrorListener extends BaseErrorListener {
         AntlrError error = new AntlrError(token, parsedObjectName, line, charPositionInLine, msg)
                 .copyWithOffset(offset, lineOffset, inLineOffset);
 
-        var warningMsg = "ANTLR Error:\n%s".formatted(error);
+        var warningMsg = Messages.CustomAntlrErrorListener_error.formatted(error);
         LOG.warn(warningMsg);
         if (errors != null) {
             errors.add(error);

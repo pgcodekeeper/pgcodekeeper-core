@@ -15,21 +15,42 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.parser;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.parser.*;
-import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
-import org.pgcodekeeper.core.database.pg.parser.statement.*;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.IRelation;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.base.parser.CustomParserListener;
+import org.pgcodekeeper.core.database.base.parser.QNameParser;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.StatementOverride;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Alter_owner_statementContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Alter_table_statementContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Create_schema_statementContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.IdentifierContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Owner_toContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Rule_commonContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Schema_alterContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Schema_createContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Schema_statementContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.SqlContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.StatementContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Table_actionContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.User_nameContext;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgAlterOwner;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgGrantPrivilege;
+import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.schema.PgSchema;
 import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.settings.DiffSettings;
 
 /**
@@ -138,8 +159,8 @@ public final class PgOverridesListener extends CustomParserListener<PgDatabase>
         String name = ctx.getText();
         R statement = getter.apply(container, name);
         if (statement == null) {
-            throw new UnresolvedReferenceException("Cannot find object in database: "
-                    + name, ctx.getStart());
+            throw new UnresolvedReferenceException(
+                    Messages.Utils_not_object_in_database.formatted(name), ctx.getStart());
         }
 
         return statement;

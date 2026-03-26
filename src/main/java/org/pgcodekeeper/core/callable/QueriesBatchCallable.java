@@ -15,19 +15,26 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.callable;
 
-import com.microsoft.sqlserver.jdbc.SQLServerError;
-import com.microsoft.sqlserver.jdbc.SQLServerException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.reporter.IProgressReporter;
-import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcType;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcType;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
+import org.pgcodekeeper.core.reporter.IProgressReporter;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import com.microsoft.sqlserver.jdbc.SQLServerError;
+import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 /**
  * Executable callable for processing batches of SQL queries with progress monitoring and error reporting.
@@ -95,7 +102,7 @@ public class QueriesBatchCallable extends StatementCallable<String> {
             }
 
             if (reporter != null) {
-                reporter.writeMessage("Script finished"); //$NON-NLS-1$
+                reporter.writeMessage(Messages.QueriesBatchCallable_script_finished); // $NON-NLS-1$
             }
         } catch (PSQLException ex) {
             ServerErrorMessage sem = ex.getServerErrorMessage();
@@ -189,7 +196,7 @@ public class QueriesBatchCallable extends StatementCallable<String> {
         }
 
         if (reporter != null) {
-            reporter.writeMessage("Starting batch"); //$NON-NLS-1$
+            reporter.writeMessage(Messages.QueriesBatchCallable_starting_batch);
         }
 
         for (ObjectLocation query : queriesList) {
@@ -198,7 +205,7 @@ public class QueriesBatchCallable extends StatementCallable<String> {
         }
 
         if (reporter != null) {
-            reporter.writeMessage("Executing batch"); //$NON-NLS-1$
+            reporter.writeMessage(Messages.QueriesBatchCallable_executing_batch);
         }
 
         st.executeBatch();

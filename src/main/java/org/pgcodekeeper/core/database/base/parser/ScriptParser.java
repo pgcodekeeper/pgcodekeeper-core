@@ -15,6 +15,15 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.parser;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.database.api.loader.IDumpLoader;
 import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
@@ -22,10 +31,6 @@ import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Parses and analyzes SQL scripts, detecting dangerous statements and syntax errors.
@@ -103,7 +108,7 @@ public final class ScriptParser {
     public String getErrorMessage() {
         if (!errors.isEmpty()) {
             StringBuilder sb = new StringBuilder();
-            sb.append("Errors while parse script:\n"); //$NON-NLS-1$
+            sb.append(Messages.ScriptParser_errors_while_parse_script);
             for (Object er : errors) {
                 sb.append(er).append('\n');
             }

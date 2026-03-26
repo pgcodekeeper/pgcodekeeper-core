@@ -16,10 +16,15 @@
 package org.pgcodekeeper.core.database.base.schema.meta;
 
 import java.io.Serial;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IRelation;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.utils.Pair;
 
 /**
@@ -80,7 +85,7 @@ public final class MetaRelation extends MetaStatement implements IRelation {
      */
     @Override
     public ISchema getContainingSchema() {
-        throw new IllegalStateException("Unsupported operation");
+        throw new UnsupportedOperationException();
     }
 
     /**

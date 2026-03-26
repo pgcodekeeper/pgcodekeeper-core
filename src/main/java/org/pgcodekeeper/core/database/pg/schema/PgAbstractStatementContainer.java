@@ -15,11 +15,21 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.hasher.Hasher;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-import java.util.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IConstraint;
+import org.pgcodekeeper.core.database.api.schema.IRelation;
+import org.pgcodekeeper.core.database.api.schema.ISearchPath;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.localizations.Messages;
 
 /**
  * Abstract base class for database objects that can contain other statements.
@@ -87,7 +97,7 @@ public abstract class PgAbstractStatementContainer extends PgAbstractStatement
                 addPolicy((PgPolicy) st);
                 break;
             default:
-                throw new IllegalArgumentException("Unsupported child type: " + type);
+                throw new IllegalArgumentException(Messages.Statement_unsupported_child_type.formatted(type));
         }
     }
 

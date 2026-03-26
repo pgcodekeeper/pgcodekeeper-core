@@ -15,6 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.difftree;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IColumn;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
@@ -22,11 +29,10 @@ import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
 import org.pgcodekeeper.core.database.api.schema.ITable;
 import org.pgcodekeeper.core.diff.Comparison;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.ISettings;
-
-import java.util.*;
 
 /**
  * Utility class for creating and managing diff trees that represent
@@ -238,7 +244,7 @@ record CompareResult(IStatement left, IStatement right) {
         if (right != null) {
             return DiffSide.RIGHT;
         }
-        throw new IllegalStateException("Both diff sides are null!");
+        throw new IllegalStateException(Messages.DiffTree_both_diff_sides_are_null);
     }
 
     /**
@@ -255,7 +261,7 @@ record CompareResult(IStatement left, IStatement right) {
         if (right != null) {
             return right;
         }
-        throw new IllegalStateException("Both diff sides are null!");
+        throw new IllegalStateException(Messages.DiffTree_both_diff_sides_are_null);
     }
 
     /**

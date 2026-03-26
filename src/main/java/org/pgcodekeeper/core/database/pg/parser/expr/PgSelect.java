@@ -15,20 +15,62 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.parser.expr;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.ICompositeType;
+import org.pgcodekeeper.core.database.api.schema.IConstraintPk;
+import org.pgcodekeeper.core.database.api.schema.IRelation;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
-import org.pgcodekeeper.core.database.pg.parser.rulectx.*;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.After_opsContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Alias_clauseContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.From_function_column_defContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.From_itemContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.From_primaryContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.From_rows_with_aliasContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Function_callContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Groupby_clauseContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Grouping_elementContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Grouping_element_listContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.IdentifierContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.IndirectionContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Indirection_listContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Indirection_varContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Orderby_clauseContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Perform_stmtContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Schema_qualified_nameContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Select_listContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Select_opsContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Select_primaryContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Select_stmtContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Select_stmt_no_parensContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Select_sublistContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Table_subqueryContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Value_expression_primaryContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Values_stmtContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Values_valuesContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.VexContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Window_definitionContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.With_clauseContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.With_queryContext;
+import org.pgcodekeeper.core.database.pg.parser.rulectx.PgSelectOps;
+import org.pgcodekeeper.core.database.pg.parser.rulectx.PgSelectStmt;
+import org.pgcodekeeper.core.database.pg.parser.rulectx.PgVex;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgParserAbstract;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.utils.*;
+import org.pgcodekeeper.core.utils.ModPair;
+import org.pgcodekeeper.core.utils.Pair;
 
 /**
  * Parser for SELECT statements with namespace support.
@@ -331,7 +373,7 @@ public final class PgSelect extends PgAbstractExprWithNmspc<Select_stmtContext> 
         Indirection_listContext indList = ctx.indirection_list();
         if (indList == null || indList.MULTIPLY() == null) {
             // this shouldn't happen, crash hard
-            throw new IllegalStateException("Qualified asterisk without the asterisk!");
+            throw new IllegalStateException(Messages.PgSelect_without_the_asterisk);
         }
 
         ParserRuleContext id = ctx.identifier();

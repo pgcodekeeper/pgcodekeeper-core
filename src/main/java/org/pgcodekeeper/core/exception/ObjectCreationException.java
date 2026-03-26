@@ -15,9 +15,10 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.exception;
 
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-
 import java.io.Serial;
+
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.localizations.Messages;
 
 /**
  * Exception thrown when attempting to create a database object that already exists.
@@ -25,8 +26,8 @@ import java.io.Serial;
  */
 public class ObjectCreationException extends RuntimeException {
 
-    private static final String WITHOUT_PARENT = "%s %s already exists"; //$NON-NLS-1$
-    private static final String WITH_PARENT = "%s %s already exists for %s %s"; //$NON-NLS-1$
+    private static final String WITHOUT_PARENT = Messages.ObjectCreationException_without_parent;
+    private static final String WITH_PARENT = Messages.ObjectCreationException_with_parent;
 
     @Serial
     private static final long serialVersionUID = -8514537124804597343L;

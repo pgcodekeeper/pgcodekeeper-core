@@ -33,6 +33,8 @@ public final class Messages {
 
     public static String AbstractJdbcConnector_url_validation_failed;
 
+    public static String AbstractLibraryLoader_error_while_read_library;
+
     public static String AbstractAnalysisLauncher_error_prefix;
 
     public static String AbstractExprWithNmspc_log_ambiguos_ref;
@@ -51,17 +53,43 @@ public final class Messages {
 
     public static String AbstractPgTable_log_schemas_not_found;
 
+    public static String AbstractProjectLoader_failed_to_read_ignore_lists;
+
+    public static String AbstractSearchPathJdbcReader_no_schema_found;
+
     public static String AbstractStatementReader_start;
 
+    public static String AbstractStatement_already_has_a_parent;
+
+    public static String AbstractStatement_null_statement;
+
     // common
+    public static String Utils_unsupported_sequence_type;
+
+    public static String Utils_not_object_in_database;
+
+    public static String Utils_failed_to_load_databases;
+
+    public static String Utils_loading_databases;
+
+    public static String Utils_loading_new_database;
+
+    public static String Utils_loading_old_database;
+
     public static String Utils_log_err_deserialize;
 
     public static String Utils_log_err_serialize;
 
     // pgdiff.loader
+    public static String CompareTree_missing_compare;
+
     public static String Connection_DatabaseJdbcAccessError;
 
     public static String Constraint_WarningMismatchedConstraintTypeForClusterOn;
+
+    public static String CustomAntlrErrorListener_error;
+
+    public static String CustomParserListener_statement_context_is_missing;
 
     public static String ProjectUpdater_error_backup_restore;
 
@@ -69,23 +97,69 @@ public final class Messages {
 
     public static String ProjectUpdater_error_update;
 
-    public static String ProjectUpdater_log_err_restore_project;
-
     public static String ProjectUpdater_log_restoring_err;
 
     public static String ProjectUpdater_log_start_full_update;
 
     public static String ProjectUpdater_log_start_partial_update;
 
-    public static String ProjectUpdater_log_upd_project_err;
-
     public static String ProjectUpdater_log_update_err_restore_proj;
 
     public static String ProjectUpdater_old_db_null;
 
+    public static String MsXmlReader_not_root_element;
+
+    public static String ObjectCreationException_with_parent;
+
+    public static String ObjectCreationException_without_parent;
+
+    public static String ParserAbstract_location_error;
+
+    public static String ParserAbstract_schema_error;
+
+    public static String PgCastsReader_unknown_cast_method;
+
+    public static String PgCodeKeeperApi_building_script;
+
+    public static String PgCodeKeeperApi_checking_dangerous_statements;
+
+    public static String PgCodeKeeperApi_creating_tree;
+
+    public static String PgCodeKeeperApi_executing_script;
+
+    public static String PgCodeKeeperApi_exporting_project;
+
+    public static String PgCodeKeeperApi_parsing_script;
+
+    public static String PgColumn_no_such_object_of_inheritance;
+
+    public static String PgCommentOn_table_name_is_missing;
+
+    public static String PgConstraintsReader_unsupported_constraint_type;
+
+    public static String PgCustomParserListener_unsupported_search_path;
+
+    public static String PgDiffUtils_error_constructing_object_name;
+
     public static String PgDiff_read_error;
 
-    public static String DatabaseType_unsupported_type;
+    public static String PgFunctionsReader_doesnt_support_by_aggregate;
+
+    public static String PgJdbcPrivilege_no_enum_constant;
+
+    public static String PgJdbcSystemLoader_unknown_cast_context;
+
+    public static String PgSelect_without_the_asterisk;
+
+    public static String PgSequencesReader_no_select_privileges_for_sequence;
+
+    public static String PgSequencesReader_no_usage_privileges_for_schema;
+
+    public static String PgSequencesReader_sequences_data_query;
+
+    public static String PgTableAbstract_number_columns_not_match;
+
+    public static String PgTableAbstract_unsupported_constraint_type;
 
     public static String DbObjType_unsupported_type;
 
@@ -97,6 +171,8 @@ public final class Messages {
 
     public static String DepcyGraph_log_remove_deps;
 
+    public static String DiffTree_both_diff_sides_are_null;
+
     public static String FileUtils_creating_temp_directory;
 
     public static String FileUtils_creating_temp_file;
@@ -104,6 +180,8 @@ public final class Messages {
     public static String FileUtils_error_while_read_uri_lib;
 
     public static String Function_log_variable_not_found;
+
+    public static String IPgJdbcReader_ConcurrentModificationException;
 
     public static String IgnoreParser_log_ignor_list_analyzing_err;
 
@@ -123,6 +201,8 @@ public final class Messages {
 
     public static String JdbcReader_column_null_value_error_message;
 
+    public static String JdbcRunner_script_execution;
+
     public static String JdbcLoaderBase_log_check_extension;
 
     public static String JdbcLoaderBase_log_check_gp_db;
@@ -137,13 +217,9 @@ public final class Messages {
 
     public static String JdbcLoaderBase_log_get_list_system_types;
 
-    public static String JdbcLoaderBase_log_get_obj_count;
-
     public static String JdbcLoaderBase_log_get_result_gp;
 
     public static String JdbcLoaderBase_log_get_roles;
-
-    public static String JdbcLoaderBase_log_get_total_obj_count;
 
     public static String JdbcLoaderBase_log_load_version;
 
@@ -159,8 +235,6 @@ public final class Messages {
 
     public static String JdbcLoaderBase_unsupported_gp_version;
 
-    public static String JdbcLoaderBase_log_waiting_antlr_tasks;
-
     public static String ModelExporter_log_create_dirs;
 
     public static String ModelExporter_log_create_dir_err_contains_dir;
@@ -175,11 +249,23 @@ public final class Messages {
 
     public static String Table_TypeParameterChange;
 
+    public static String TreeElement_already_has_a_parent;
+
+    public static String TreeElement_no_statement_found;
+
     public static String TreeFlattener_log_filter_obj;
 
     public static String TreeFlattener_log_ignore_children;
 
     public static String TreeFlattener_log_ignore_obj;
+
+    public static String QueriesBatchCallable_executing_batch;
+
+    public static String QueriesBatchCallable_script_finished;
+
+    public static String QueriesBatchCallable_starting_batch;
+
+    public static String ScriptParser_errors_while_parse_script;
 
     public static String ScriptParser_log_load_dump;
 
@@ -197,7 +283,17 @@ public final class Messages {
 
     public static String SequencesReader_log_not_found_table;
 
+    public static String SimpleDepcyResolver_new_database_not_defined;
+
+    public static String Statement_Unhandled_DbObjType;
+
+    public static String Statement_unsupported_child_type;
+
     public static String Storage_WarningUnableToDetermineStorageType;
+
+    public static String ActionsToScriptConverter_not_allowed_object;
+
+    public static String ActionsToScriptConverter_not_implemented_action;
 
     public static String AlterTriggerError;
 
@@ -207,7 +303,9 @@ public final class Messages {
 
     public static String XmlStore_write_error;
 
-    public static String DatabaseFactory_errors_found_while_parsing;
+    public static String AbstractExpr_duplicate_aliases;
+
+    public static String AbstractExpr_line;
 
     public static String AbstractExpr_log_column_not_found_in_complex;
 
@@ -237,15 +335,13 @@ public final class Messages {
 
     public static String ValueExpr_log_no_literal_alternative;
 
-    public static String MsAbstractExprWithNmspc_log_dupl_unaliased_table;
+    public static String MsAlterBatch_UnsupportedOperationException;
 
-    public static String MsSelect_log_not_alter_selectops;
+    public static String MsParserAbstract_unsupported_generated_always;
 
     public static String MsSelect_log_not_alter_item;
 
-    public static String ChAbstractExprWithNmspc_log_dupl_unaliased_table;
-
-    public static String ChSelect_log_not_alter_selectops;
+    public static String ChCreateTable_unsupported_Table_element_exprContext;
 
     static {
         ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_NAME);

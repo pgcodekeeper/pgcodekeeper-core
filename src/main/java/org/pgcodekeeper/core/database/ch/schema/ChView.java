@@ -15,16 +15,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.hasher.Hasher;
-import org.pgcodekeeper.core.script.SQLScript;
-import org.pgcodekeeper.core.utils.Pair;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
+
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.IView;
+import org.pgcodekeeper.core.database.api.schema.ObjectState;
+import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.utils.Pair;
 
 /**
  * Represents a ClickHouse view (VIEW, MATERIALIZED VIEW, or LIVE VIEW).
@@ -222,7 +226,7 @@ public class ChView extends ChAbstractStatement implements IView {
     }
     @Override
     public void addChild(IStatement stmt) {
-        throw new IllegalArgumentException("Unsupported child type: " + type);
+        throw new IllegalArgumentException(Messages.Statement_unsupported_child_type.formatted(type));
     }
 
     @Override

@@ -15,9 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.IForeignTable;
+import org.pgcodekeeper.core.database.api.schema.IOptionContainer;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.ISettings;
@@ -117,7 +121,7 @@ public class GpExternalTable extends PgAbstractTable implements IForeignTable, P
 
     @Override
     public String getAlterHeader() {
-        throw new IllegalStateException("Unsupported operation for EXTERNAL TABLE");
+        throw new UnsupportedOperationException();
     }
 
     @Override

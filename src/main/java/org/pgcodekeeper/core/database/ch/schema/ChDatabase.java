@@ -15,13 +15,28 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.schema;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.pgcodekeeper.core.database.api.launcher.IAnalysisLauncher;
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.ObjectOverride;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.ch.jdbc.ChSupportedVersion;
 import org.pgcodekeeper.core.hasher.Hasher;
-
-import java.util.*;
+import org.pgcodekeeper.core.localizations.Messages;
 
 /**
  * Represents a ClickHouse database with its schema objects. Contains
@@ -87,7 +102,7 @@ public class ChDatabase extends ChAbstractStatement implements IDatabase {
                 var sc = s.getStatementContainer(reference.table());
                 yield sc == null ? null : sc.getChild(reference.column(), type);
             }
-            default -> throw new IllegalStateException("Unhandled DbObjType: " + type);
+        default -> throw new IllegalStateException(Messages.Statement_Unhandled_DbObjType.formatted(type));
         };
     }
 
@@ -153,7 +168,7 @@ public class ChDatabase extends ChAbstractStatement implements IDatabase {
             addUnique(roles, (ChRole) st);
             break;
         default:
-            throw new IllegalArgumentException("Unsupported child type: " + type);
+            throw new IllegalArgumentException(Messages.Statement_unsupported_child_type.formatted(type));
         }
     }
 

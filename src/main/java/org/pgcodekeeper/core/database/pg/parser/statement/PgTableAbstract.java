@@ -15,18 +15,64 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.parser.statement;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
-import org.pgcodekeeper.core.database.pg.parser.launcher.*;
-import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.ActionContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Collate_identifierContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Compression_identifierContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Constr_bodyContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Constraint_commonContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Data_typeContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Define_columnsContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Define_foreign_optionsContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Encoding_identifierContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Foreign_optionContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.IdentifierContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Identity_bodyContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Index_columnContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Index_parametersContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.List_of_type_column_defContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Names_in_parensContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Nulls_distinctionContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Schema_qualified_nameContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Sequence_bodyContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Storage_directiveContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Storage_optionContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Storage_parameter_optionContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Storage_parametersContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Table_column_defContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Table_column_definitionContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Table_deferrableContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Table_enforcedContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Table_initialy_immedContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Table_of_type_column_defContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.VexContext;
+import org.pgcodekeeper.core.database.pg.parser.launcher.PgConstraintAnalysisLauncher;
+import org.pgcodekeeper.core.database.pg.parser.launcher.PgVexAnalysisLauncher;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractForeignTable;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractTable;
+import org.pgcodekeeper.core.database.pg.schema.PgColumn;
+import org.pgcodekeeper.core.database.pg.schema.PgConstraint;
+import org.pgcodekeeper.core.database.pg.schema.PgConstraintCheck;
+import org.pgcodekeeper.core.database.pg.schema.PgConstraintExclude;
+import org.pgcodekeeper.core.database.pg.schema.PgConstraintFk;
+import org.pgcodekeeper.core.database.pg.schema.PgConstraintNotNull;
+import org.pgcodekeeper.core.database.pg.schema.PgConstraintPk;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
+import org.pgcodekeeper.core.database.pg.schema.PgIndexParamContainer;
+import org.pgcodekeeper.core.database.pg.schema.PgPartitionTable;
+import org.pgcodekeeper.core.database.pg.schema.PgSequence;
 import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.settings.ISettings;
 
 /**
@@ -84,7 +130,7 @@ public abstract class PgTableAbstract extends PgParserAbstract {
             var colNameCtx = body.col_name;
             fillColNotNull(table, tblConstrCtx, colNameCtx);
         } else {
-            throw new IllegalArgumentException("Unsupported constraint's type");
+            throw new IllegalArgumentException(Messages.PgTableAbstract_unsupported_constraint_type);
         }
     }
 
@@ -298,7 +344,7 @@ public abstract class PgTableAbstract extends PgParserAbstract {
             return new PgConstraintCheck(constrName);
         }
 
-        throw new IllegalArgumentException("Unsupported constraint's type");
+        throw new IllegalArgumentException(Messages.PgTableAbstract_unsupported_constraint_type);
     }
 
     protected void processTableConstraintBlank(Constraint_commonContext ctx,
@@ -381,8 +427,7 @@ public abstract class PgTableAbstract extends PgParserAbstract {
         if (refs != null) {
             List<Schema_qualified_nameContext> columns = refs.schema_qualified_name();
             if (columnName != null && columns.size() != 1) {
-                throw new UnresolvedReferenceException(
-                        "The number of columns in the source and the key assignment does not match", tblRef.start);
+                throw new UnresolvedReferenceException(Messages.PgTableAbstract_number_columns_not_match, tblRef.start);
             }
 
             for (Schema_qualified_nameContext column : columns) {

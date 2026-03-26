@@ -15,6 +15,19 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.loader;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
+
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
@@ -22,20 +35,12 @@ import org.pgcodekeeper.core.ignorelist.IgnoreList;
 import org.pgcodekeeper.core.library.Library;
 import org.pgcodekeeper.core.library.LibrarySource;
 import org.pgcodekeeper.core.library.LibraryXmlStore;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.FileUtils;
 import org.pgcodekeeper.core.utils.Utils;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * Database loader for external library dependencies.
@@ -149,7 +154,7 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
         }
 
         if (!Files.exists(p)) {
-            throw new IOException("Error while read library dependency : %s - File not found".formatted(path));
+            throw new IOException(Messages.AbstractLibraryLoader_error_while_read_library.formatted(path));
         }
 
         if (Files.isDirectory(p)) {

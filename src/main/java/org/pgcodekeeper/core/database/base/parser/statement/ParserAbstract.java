@@ -15,22 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.parser.statement;
 
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.misc.Interval;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
-import org.pgcodekeeper.core.database.base.parser.QNameParser;
-import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
-import org.pgcodekeeper.core.exception.MisplacedObjectException;
-import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
-import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.Utils;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -40,14 +24,38 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.misc.Interval;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
+import org.pgcodekeeper.core.database.api.schema.ArgMode;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
+import org.pgcodekeeper.core.database.base.parser.QNameParser;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.exception.MisplacedObjectException;
+import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
+import org.pgcodekeeper.core.localizations.Messages;
+import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.utils.Utils;
+
 /**
  * Abstract base class for database object parsers that provides common parsing functionality
  * and utilities for working with ANTLR-generated parse trees.
  */
 public abstract class ParserAbstract<S extends IDatabase> {
 
-    private static final String SCHEMA_ERROR = "Object must be schema qualified: ";
-    private static final String LOCATION_ERROR = "The object %s must be defined in the file: %s";
+    private static final String SCHEMA_ERROR = Messages.ParserAbstract_schema_error;
+    private static final String LOCATION_ERROR = Messages.ParserAbstract_location_error;
 
     protected static final String ACTION_CREATE = "CREATE";
     protected static final String ACTION_ALTER = "ALTER";
@@ -245,8 +253,7 @@ public abstract class ParserAbstract<S extends IDatabase> {
         }
         R statement = getter.apply(container, name);
         if (statement == null) {
-            throw new UnresolvedReferenceException("Cannot find object in database: "
-                    + name, errToken);
+            throw new UnresolvedReferenceException(Messages.Utils_not_object_in_database.formatted(name), errToken);
         }
 
         checkLocation(statement, errToken);

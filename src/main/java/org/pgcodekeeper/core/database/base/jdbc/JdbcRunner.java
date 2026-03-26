@@ -15,23 +15,34 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.jdbc;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.pgcodekeeper.core.callable.QueriesBatchCallable;
 import org.pgcodekeeper.core.callable.QueryCallable;
 import org.pgcodekeeper.core.callable.ResultSetCallable;
 import org.pgcodekeeper.core.callable.StatementCallable;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.reporter.IProgressReporter;
 import org.pgcodekeeper.core.utils.DaemonThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.sql.*;
-import java.util.List;
-import java.util.concurrent.*;
 
 /**
  * JDBC statement execution runner with progress monitoring and cancellation support.
@@ -47,8 +58,6 @@ public class JdbcRunner {
             new DaemonThreadFactory());
 
     private static final int SLEEP_TIME = 20;
-
-    private static final String MESSAGE = "Script execution interrupted by user";
 
     private final IMonitor monitor;
 
@@ -157,9 +166,9 @@ public class JdbcRunner {
 
         while (true) {
             if (monitor.isCancelled()) {
-                LOG.info(MESSAGE);
+                LOG.info(Messages.JdbcRunner_script_execution);
                 callable.cancel();
-                throw new InterruptedException(MESSAGE);
+                throw new InterruptedException(Messages.JdbcRunner_script_execution);
             }
             try {
                 return queryFuture.get(SLEEP_TIME, TimeUnit.MILLISECONDS);

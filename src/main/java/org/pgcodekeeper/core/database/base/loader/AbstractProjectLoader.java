@@ -15,6 +15,21 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.loader;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Queue;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.loader.IProjectLoader;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
@@ -23,17 +38,10 @@ import org.pgcodekeeper.core.database.api.schema.ITable;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.base.schema.StatementOverride;
 import org.pgcodekeeper.core.library.LibraryXmlStore;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.Utils;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 /**
  * Base project loader for loading database schemas from project directory structures.
@@ -224,7 +232,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
                 diffSettings.addIgnoreSchemaList(ignoreSchemaFile);
             }
         } catch (IOException e) {
-            throw new IllegalArgumentException("Failed to read ignore lists", e);
+            throw new IllegalArgumentException(Messages.AbstractProjectLoader_failed_to_read_ignore_lists, e);
         }
     }
 }

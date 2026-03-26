@@ -15,13 +15,21 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.parser.antlr;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.api.schema.ObjectLocation.*;
+import org.pgcodekeeper.core.database.api.schema.IRelation;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation.Builder;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.CodeUnitToken;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +43,7 @@ public abstract class AbstractExpr {
     /**
      * Log message when in the SELECT part aliases is duplicate
      */
-    protected static final String DUPLICATE_ALIASES = "Duplicate aliases entry: %s";
+    protected static final String DUPLICATE_ALIASES = Messages.AbstractExpr_duplicate_aliases;
 
     private final Set<ObjectLocation> dependencies;
 
@@ -247,7 +255,7 @@ public abstract class AbstractExpr {
             String positionInfo = "";
             if (ctx != null) {
                 CodeUnitToken token = (CodeUnitToken) ctx.getStart();
-                positionInfo = "line %d:%d ".formatted(token.getLine(), token.getCodeUnitPositionInLine());
+                positionInfo = Messages.AbstractExpr_line.formatted(token.getLine(), token.getCodeUnitPositionInLine());
             }
 
             var logMsg = positionInfo + msg.formatted(args);

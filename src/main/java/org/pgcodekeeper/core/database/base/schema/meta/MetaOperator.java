@@ -17,7 +17,11 @@ package org.pgcodekeeper.core.database.base.schema.meta;
 
 import java.io.Serial;
 
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IOperator;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
+import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 
 /**
  * Represents a database operator metadata object.
@@ -108,7 +112,7 @@ public final class MetaOperator extends MetaStatement implements IOperator {
      */
     @Override
     public ISchema getContainingSchema() {
-        throw new IllegalStateException("Unsupported operation");
+        throw new UnsupportedOperationException();
     }
 
     /**

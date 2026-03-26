@@ -15,25 +15,40 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
 
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.ArgMode;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.base.schema.Argument;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.VexContext;
-import org.pgcodekeeper.core.database.pg.parser.launcher.*;
+import org.pgcodekeeper.core.database.pg.parser.launcher.PgFuncProcAnalysisLauncher;
+import org.pgcodekeeper.core.database.pg.parser.launcher.PgVexAnalysisLauncher;
 import org.pgcodekeeper.core.database.pg.parser.statement.PgCreateAggregate;
-import org.pgcodekeeper.core.database.pg.schema.*;
-import org.pgcodekeeper.core.database.pg.schema.PgAggregate.*;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractFunction;
+import org.pgcodekeeper.core.database.pg.schema.PgAggregate;
+import org.pgcodekeeper.core.database.pg.schema.PgAggregate.AggFuncs;
+import org.pgcodekeeper.core.database.pg.schema.PgAggregate.AggKinds;
+import org.pgcodekeeper.core.database.pg.schema.PgAggregate.ModifyType;
+import org.pgcodekeeper.core.database.pg.schema.PgFunction;
+import org.pgcodekeeper.core.database.pg.schema.PgProcedure;
 import org.pgcodekeeper.core.database.pg.utils.PgConsts;
-import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.database.pg.utils.PgConsts.FUNC_SIGN;
+import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.settings.ISettings;
-import org.pgcodekeeper.core.utils.*;
+import org.pgcodekeeper.core.utils.Pair;
+import org.pgcodekeeper.core.utils.Utils;
 
 /**
  * Reader for PostgreSQL functions, procedures and aggregates.
@@ -433,7 +448,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
             case "s" -> ModifyType.SHAREABLE;
             case "w" -> AggKinds.NORMAL != kind ? null : ModifyType.READ_WRITE;
             default ->
-                    throw new IllegalStateException("FinalFuncModifier '" + modifier + "' doesn't support by AGGREGATE!");
+            throw new IllegalStateException(Messages.PgFunctionsReader_doesnt_support_by_aggregate.formatted(modifier));
         };
     }
 

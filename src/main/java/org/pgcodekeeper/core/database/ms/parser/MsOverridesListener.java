@@ -15,17 +15,32 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.parser;
 
-import java.util.*;
+import java.util.Map;
 import java.util.function.BiFunction;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.base.parser.CustomParserListener;
-import org.pgcodekeeper.core.database.base.schema.*;
-import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.*;
-import org.pgcodekeeper.core.database.ms.parser.statement.*;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
+import org.pgcodekeeper.core.database.base.schema.StatementOverride;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Another_statementContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.BatchContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Batch_statementContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Create_assemblyContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Create_schemaContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Ddl_clauseContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.IdContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Schema_alterContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Schema_createContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Security_statementContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Sql_clausesContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.St_clauseContext;
+import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Tsql_fileContext;
+import org.pgcodekeeper.core.database.ms.parser.statement.MsAlterAuthorization;
+import org.pgcodekeeper.core.database.ms.parser.statement.MsGrantPrivilege;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.settings.DiffSettings;
 
 /**
@@ -119,8 +134,8 @@ public final class MsOverridesListener extends CustomParserListener<MsDatabase>
         String name = nameCtx.getText();
         R statement = getter.apply(db, name);
         if (statement == null) {
-            throw new UnresolvedReferenceException("Cannot find object in database: "
-                    + name, nameCtx.getStart());
+            throw new UnresolvedReferenceException(Messages.Utils_not_object_in_database.formatted(name),
+                    nameCtx.getStart());
         }
 
         String owner = ownerCtx.getText();

@@ -15,12 +15,21 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.database.base.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IConstraint;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
+import org.pgcodekeeper.core.database.api.schema.IType;
+import org.pgcodekeeper.core.database.api.schema.ObjectState;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
+import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.utils.Utils;
 
@@ -159,7 +168,7 @@ public class MsType extends MsAbstractStatement implements IType, IStatementCont
                 columns.add(((MsColumn) stmt).getFullDefinition());
                 break;
             default:
-                throw new IllegalArgumentException("Unsupported child type: " + type);
+                throw new IllegalArgumentException(Messages.Statement_unsupported_child_type.formatted(type));
         }
         resetHash();
     }

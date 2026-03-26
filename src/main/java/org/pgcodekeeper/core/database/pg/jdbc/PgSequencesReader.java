@@ -15,14 +15,26 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Array;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.ISchema;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.pg.loader.PgJdbcLoader;
-import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractTable;
+import org.pgcodekeeper.core.database.pg.schema.PgColumn;
+import org.pgcodekeeper.core.database.pg.schema.PgSchema;
+import org.pgcodekeeper.core.database.pg.schema.PgSequence;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.utils.Utils;
@@ -134,7 +146,7 @@ public final class PgSequencesReader extends PgAbstractSearchPathJdbcReader {
 
     public void querySequencesData(IDatabase db)
             throws SQLException, InterruptedException {
-        loader.setCurrentOperation("sequences data query");
+        loader.setCurrentOperation(Messages.PgSequencesReader_sequences_data_query);
 
         List<String> schemasAccess = new ArrayList<>();
         try (PreparedStatement schemasAccessQuery = loader.getConnection().prepareStatement(QUERY_SCHEMAS_ACCESS)) {
@@ -150,8 +162,7 @@ public final class PgSequencesReader extends PgAbstractSearchPathJdbcReader {
                     if ((boolean) hasPriv) {
                         schemasAccess.add(schema);
                     } else {
-                        loader.addError("No USAGE privileges for schema " + schema +
-                                ". SEQUENCE data will be missing.");
+                        loader.addError(Messages.PgSequencesReader_no_usage_privileges_for_schema.formatted(schema));
                     }
                 }
             } finally {
@@ -186,8 +197,7 @@ public final class PgSequencesReader extends PgAbstractSearchPathJdbcReader {
                                 .append(" qname FROM ")
                                 .append(qname);
                     } else {
-                        loader.addError("No SELECT privileges for sequence " + qname +
-                                ". Its data will be missing.");
+                        loader.addError(Messages.PgSequencesReader_no_select_privileges_for_sequence.formatted(qname));
                     }
                 }
             } finally {

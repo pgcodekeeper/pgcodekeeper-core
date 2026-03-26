@@ -15,14 +15,15 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.graph;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import org.pgcodekeeper.core.localizations.Messages;
 
 /**
  * Simple dependency resolver for database objects.
@@ -70,7 +71,7 @@ public class SimpleDepcyResolver {
      */
     public Collection<IStatement> getCreateDepcies(IStatement toCreate) {
         if (newDb == null) {
-            throw new IllegalStateException("New database not defined");
+            throw new IllegalStateException(Messages.SimpleDepcyResolver_new_database_not_defined);
         }
 
         IStatement statement = toCreate.getTwin(newDb);

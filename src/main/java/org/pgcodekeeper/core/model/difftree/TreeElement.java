@@ -15,11 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.model.difftree;
 
-import org.pgcodekeeper.core.database.api.schema.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
+import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
+import org.pgcodekeeper.core.database.api.schema.ITable;
+import org.pgcodekeeper.core.localizations.Messages;
 
 /**
  * Wrapper for database objects representing the state between old and new database schemas.
@@ -148,7 +154,8 @@ public final class TreeElement {
      */
     public void addChild(TreeElement child) {
         if (child.parent != null) {
-            throw new IllegalStateException("Cannot add a child that already has a parent!");
+
+            throw new IllegalStateException(Messages.TreeElement_already_has_a_parent);
         }
 
         child.parent = this;
@@ -230,7 +237,7 @@ public final class TreeElement {
         }
         IStatement stParent = parent.getStatement(db);
         if (stParent == null) {
-            throw new IllegalArgumentException("No statement found for " + parent);
+            throw new IllegalArgumentException(Messages.TreeElement_no_statement_found.formatted(parent));
         }
         if (type == DbObjType.COLUMN) {
             return ((ITable) stParent).getColumn(name);

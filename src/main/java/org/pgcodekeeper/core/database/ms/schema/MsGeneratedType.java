@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.schema;
 
+import org.pgcodekeeper.core.localizations.Messages;
+
 /**
  * Enumeration of Microsoft SQL generated column types.
  * Represents the different types of GENERATED ALWAYS columns.
@@ -54,7 +56,8 @@ public enum MsGeneratedType {
             case 8 -> TRAN_END;
             case 9 -> SEQ_START;
             case 10 -> SEQ_END;
-            default -> throw new IllegalStateException("Unsupported GENERATED ALWAYS column type: " + type);
+        default ->
+            throw new IllegalStateException(Messages.MsParserAbstract_unsupported_generated_always.formatted(type));
         };
     }
 }
