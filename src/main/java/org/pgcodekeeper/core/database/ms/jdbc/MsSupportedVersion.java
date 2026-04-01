@@ -52,10 +52,10 @@ public enum MsSupportedVersion implements ISupportedVersion {
 
     /**
      * Returns the highest supported version that is less than or equal to the specified version.
-     * If no matching version is found, returns VERSION_12 as the default.
+     * If no matching version is found, returns VERSION_17 as the default.
      *
      * @param checkVersion the version to check
-     * @return the matching supported version or VERSION_12 as default
+     * @return the matching supported version or VERSION_17 as default
      */
     public static MsSupportedVersion valueOf(int checkVersion) {
         return ISupportedVersion.valueOf(checkVersion, MsSupportedVersion.values(), MsSupportedVersion.VERSION_17);

@@ -53,6 +53,7 @@ public class CoreSettings implements ISettings {
     private boolean disableAutoLoad;
     private IFormatConfiguration formatConfiguration;
     private boolean isAutoFormatObjectCode;
+    private boolean isUseActualVersionSyntax;
 
     private String timeZone;
     private String clusterName;
@@ -295,6 +296,15 @@ public class CoreSettings implements ISettings {
     @Override
     public String getClusterName() {
         return clusterName;
+    }
+
+    public void setActualVersionSyntax(boolean isUseActualVersionSyntax) {
+        this.isUseActualVersionSyntax = isUseActualVersionSyntax;
+    }
+
+    @Override
+    public boolean isUseActualVersionSyntax() {
+        return isUseActualVersionSyntax;
     }
 
     public void setParallelLoad(boolean parallelLoad) {

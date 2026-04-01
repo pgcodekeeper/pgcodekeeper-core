@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Added localization of missing lines.
+- Added the setting for generating a migration script based on the current version of the database (the setting is currently not implemented).
 
 ### Changed
 

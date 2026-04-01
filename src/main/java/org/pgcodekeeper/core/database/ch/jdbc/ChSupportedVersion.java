@@ -51,10 +51,10 @@ public enum ChSupportedVersion implements ISupportedVersion {
 
     /**
      * Returns the highest supported version that is less than or equal to the specified version.
-     * If no matching version is found, returns VERSION_9_4 as the default.
+     * If no matching version is found, returns DEFAULT as the default.
      *
      * @param checkVersion the version to check
-     * @return the matching supported version or VERSION_9_4 as default
+     * @return the matching supported version or DEFAULT as default
      */
     public static ChSupportedVersion valueOf(int checkVersion) {
         return ISupportedVersion.valueOf(checkVersion, ChSupportedVersion.values(), ChSupportedVersion.DEFAULT);

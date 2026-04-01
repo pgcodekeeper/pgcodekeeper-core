@@ -237,4 +237,11 @@ public interface ISettings {
      * @return cluster name
      */
     String getClusterName();
+
+    /**
+     * Return flag to use correct migration script syntax
+     *
+     * @return true to generate migration script with actual syntax
+     */
+    boolean isUseActualVersionSyntax();
 }
