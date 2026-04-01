@@ -30,8 +30,8 @@ import org.pgcodekeeper.core.utils.Pair;
  */
 public abstract class FormatParseTreeListener implements ParseTreeListener {
 
-    private final CommonTokenStream tokens;
-    private final Map<Token, Pair<IndentDirection, Integer>> indents;
+    protected final CommonTokenStream tokens;
+    protected final Map<Token, Pair<IndentDirection, Integer>> indents;
     protected final Set<Token> unaryOps;
 
     /**

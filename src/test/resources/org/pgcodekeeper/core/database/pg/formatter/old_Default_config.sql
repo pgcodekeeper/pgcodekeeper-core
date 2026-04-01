@@ -1,6 +1,11 @@
 CREATE FUNCTION public.fun2() RETURNS void LANGUAGE plpgsql AS $$ BEGIN 
 /*GROUP BY, HAVING*/
-select id, fio, _date, age, city FROM public.people WHERE age>20 GROUP BY city HAVING _date='12.12.1998'; 
+select id,
+fio,
+             _date,
+         age,
+   city
+            FROM public.people WHERE age>20 GROUP BY city HAVING _date='12.12.1998';
 
 /*SELECT, SUBSELECT*/
 select to_jsonb(t) into param from (select pay as "🙈 🙉 🙊 😎 🤙 😎 🤙",  act_id as "id", token as "token", _sign as "signature") t;  
@@ -32,6 +37,12 @@ case _user when 'one' then f ='1'; when 'two' then f ='2'; when 'three' then f='
 /*SELECT, SUBSELECT, UNION*/
 select array_agg(public.id) into id_total from (select id from public.events where _update> 30 and last_update > c_update and id_name = any(_name) UNION select id from public.events where _update > 5 and last_update > c__update  and c_name = any (name_5m)) alias_;
 
+/*SELECT, SUBSELECT, EXCEPT*/
+select array_agg(id) into except_ids from (select id from public.events where _update > 30 and status = 'active' EXCEPT select event_id from public.completed_events where completion_date > current_date - interval '30 days') except_events;
+
+/*SELECT, SUBSELECT, INTERSECT*/
+select array_agg(user_id) into common_users from (select user_id from public.user_roles where role_name = 'admin' INTERSECT select user_id from public.user_permissions where permission_level >= 5 and is_active = true) intersecting_users;
+
 /*INSERT*/
 insert into public.days(id, _name, _date, country) values(_id, _name, _date, _country) returning id;      
 
@@ -55,6 +66,12 @@ for v_next_sync in (select sys_change_version from bankrupt_bulk.address order b
 
 /*SELECT ...UNION...SELECT*/
 ((select 1 limit 1) union (select 2 limit 1)) order by 1;
+
+/*SELECT ...INTERSECT...SELECT*/
+((select id from public.active_users where status = 1) intersect (select user_id from public.subscribed_users where subscription_active = true)) order by 1;
+
+/*SELECT ...EXCEPT...SELECT*/
+((select product_id from public.products where category = 'electronics') except (select product_id from public.discontinued_products where discontinued_date is not null)) order by 1;
 
 /*SELECT ...EXCEPTION*/
 select 1; BEGIN select 1; EXCEPTION WHEN condition THEN select 12; WHEN condition THEN begin select 12; end; WHEN condition THEN select 13; END;

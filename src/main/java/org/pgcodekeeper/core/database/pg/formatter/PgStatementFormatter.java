@@ -112,7 +112,7 @@ public class PgStatementFormatter extends StatementFormatter {
     @Override
     protected FormatParseTreeListener getListener(CommonTokenStream tokenStream,
                                                   Map<Token, Pair<IndentDirection, Integer>> indents, Set<Token> unaryOps) {
-        return new PgFormatParseTreeListener(tokenStream, indents, unaryOps);
+        return new PgSpaceListener(tokenStream, indents, unaryOps);
     }
 
     @Override

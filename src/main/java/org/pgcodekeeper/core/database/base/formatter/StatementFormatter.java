@@ -62,7 +62,7 @@ public abstract class StatementFormatter {
     /**
      * whether current token is first non-whitespace token on the line
      */
-    private boolean firstTokenInLine = true;
+    protected boolean firstTokenInLine = true;
     /**
      * intermediate indent instructions found by parser
      */
@@ -188,7 +188,7 @@ public abstract class StatementFormatter {
                 break;
             }
         } else if (firstTokenInLine) {
-            writeIndent(false, currentIndent, tokenStart);
+//            writeIndent(false, currentIndent, tokenStart);
         }
     }
 
