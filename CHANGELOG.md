@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Reduced the number of line breaks and indents added when formatting code.
+
 ### Fixed
 
 ## [14.1.1] - 2026-03-25
