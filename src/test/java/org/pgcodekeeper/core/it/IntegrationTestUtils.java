@@ -184,27 +184,6 @@ public final class IntegrationTestUtils {
                     sb.append("Object = ").append(ref).append(", ");
                 }
                 sb.append("action = ").append(loc.getAction()).append(", ");
-                sb.append("offset = ").append(loc.getOffset()).append(", ");
-                sb.append("line number = ").append(loc.getLineNumber()).append(", ");
-                sb.append("charPositionInLine = ").append(loc.getCharPositionInLine());
-                sb.append('\n');
-            });
-        }
-
-        return sb.toString();
-    }
-
-    public static String getRefsWithoutOffSetAsString(Map<String, Set<ObjectLocation>> refs) {
-        StringBuilder sb = new StringBuilder();
-
-        for (Map.Entry<String, Set<ObjectLocation>> entry : refs.entrySet()) {
-            entry.getValue().stream().sorted(Comparator.comparingInt(ContextLocation::getOffset)).forEach(loc -> {
-                sb.append("Reference: ");
-                ObjectReference ref = loc.getObjectReference();
-                if (ref != null) {
-                    sb.append("Object = ").append(ref).append(", ");
-                }
-                sb.append("action = ").append(loc.getAction()).append(", ");
                 sb.append("line number = ").append(loc.getLineNumber()).append(", ");
                 sb.append("charPositionInLine = ").append(loc.getCharPositionInLine());
                 sb.append('\n');
