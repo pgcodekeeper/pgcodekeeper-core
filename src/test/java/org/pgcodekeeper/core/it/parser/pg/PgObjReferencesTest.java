@@ -144,7 +144,7 @@ class PgObjReferencesTest {
         String actual = IntegrationTestUtils.getRefsAsString(db.getObjReferences()).strip();
 
         TestUtils.assertErrors(diffSettings.getErrors());
-        Assertions.assertEquals(expected, actual);
+        TestUtils.assertIgnoreNewLines(expected, actual);
     }
 
     @ParameterizedTest
@@ -161,9 +161,9 @@ class PgObjReferencesTest {
         String expected = TestUtils
                 .readResource(fileNameTemplate + FILES_POSTFIX.REFS_TXT, getClass()).strip();
 
-        String actual = IntegrationTestUtils.getRefsWithoutOffSetAsString(db.getObjReferences()).strip();
+        String actual = IntegrationTestUtils.getRefsAsString(db.getObjReferences()).strip();
 
         TestUtils.assertErrors(diffSettings.getErrors());
-        Assertions.assertEquals(expected, actual);
+        TestUtils.assertIgnoreNewLines(expected, actual);
     }
 }

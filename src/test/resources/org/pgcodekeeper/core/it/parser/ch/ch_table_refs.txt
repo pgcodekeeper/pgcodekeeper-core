@@ -1,542 +1,542 @@
-Reference: Object = t (TABLE), action = CREATE, offset = 45, line number = 2, charPositionInLine = 13
-Reference: Object = t (TABLE), action = CREATE, offset = 97, line number = 3, charPositionInLine = 13
-Reference: Object = x (TABLE), action = CREATE, offset = 154, line number = 4, charPositionInLine = 13
-Reference: Object = t (TABLE), action = CREATE, offset = 375, line number = 7, charPositionInLine = 13
-Reference: Object = t (TABLE), action = CREATE, offset = 455, line number = 8, charPositionInLine = 13
-Reference: Object = db (SCHEMA), action = null, offset = 517, line number = 9, charPositionInLine = 13
-Reference: Object = db.t (TABLE), action = CREATE, offset = 520, line number = 9, charPositionInLine = 16
-Reference: Object = $4@^7 (TABLE), action = CREATE, offset = 573, line number = 10, charPositionInLine = 13
-Reference: Object = ' (SCHEMA), action = null, offset = 636, line number = 11, charPositionInLine = 13
-Reference: Object = '.' (TABLE), action = CREATE, offset = 640, line number = 11, charPositionInLine = 17
-Reference: Object = t1 (TABLE), action = CREATE, offset = 699, line number = 12, charPositionInLine = 13
-Reference: Object = t (TABLE), action = CREATE, offset = 762, line number = 13, charPositionInLine = 13
-Reference: Object = t (TABLE), action = CREATE, offset = 826, line number = 14, charPositionInLine = 13
-Reference: Object = t (TABLE), action = CREATE, offset = 891, line number = 15, charPositionInLine = 13
-Reference: Object = count (TABLE), action = CREATE, offset = 957, line number = 16, charPositionInLine = 13
-Reference: Object = rptable (TABLE), action = CREATE, offset = 1024, line number = 17, charPositionInLine = 13
-Reference: Object = t (TABLE), action = CREATE, offset = 1086, line number = 18, charPositionInLine = 13
-Reference: Object = x (TABLE), action = CREATE, offset = 1154, line number = 19, charPositionInLine = 13
-Reference: Object = test1__fuzz_37 (TABLE), action = CREATE, offset = 1223, line number = 20, charPositionInLine = 13
-Reference: Object = test (SCHEMA), action = null, offset = 1412, line number = 22, charPositionInLine = 13
-Reference: Object = test.xxx (TABLE), action = CREATE, offset = 1417, line number = 22, charPositionInLine = 18
-Reference: Object = t (TABLE), action = CREATE, offset = 1484, line number = 23, charPositionInLine = 13
-Reference: Object = tab (TABLE), action = CREATE, offset = 1557, line number = 24, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 1630, line number = 25, charPositionInLine = 13
-Reference: Object = pk_order (TABLE), action = CREATE, offset = 1703, line number = 26, charPositionInLine = 13
-Reference: Object = pk_order (TABLE), action = CREATE, offset = 1777, line number = 27, charPositionInLine = 13
-Reference: Object = shard1 (TABLE), action = CREATE, offset = 1849, line number = 28, charPositionInLine = 13
-Reference: Object = table_d (TABLE), action = CREATE, offset = 1924, line number = 29, charPositionInLine = 13
-Reference: Object = mt (TABLE), action = CREATE, offset = 1999, line number = 30, charPositionInLine = 13
-Reference: Object = t1 (TABLE), action = CREATE, offset = 2075, line number = 31, charPositionInLine = 13
-Reference: Object = tab (TABLE), action = CREATE, offset = 2151, line number = 32, charPositionInLine = 13
-Reference: Object = tbl (TABLE), action = CREATE, offset = 2228, line number = 33, charPositionInLine = 13
-Reference: Object = tnul (TABLE), action = CREATE, offset = 2305, line number = 34, charPositionInLine = 13
-Reference: Object = Dates (TABLE), action = CREATE, offset = 2382, line number = 35, charPositionInLine = 13
-Reference: Object = auto_assign_enum (TABLE), action = CREATE, offset = 2460, line number = 36, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 2540, line number = 37, charPositionInLine = 13
-Reference: Object = codecs6 (TABLE), action = CREATE, offset = 2616, line number = 38, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 2697, line number = 39, charPositionInLine = 13
-Reference: Object = a (TABLE), action = CREATE, offset = 2894, line number = 41, charPositionInLine = 13
-Reference: Object = t1 (TABLE), action = CREATE, offset = 2977, line number = 42, charPositionInLine = 13
-Reference: Object = alter_test (TABLE), action = CREATE, offset = 3070, line number = 43, charPositionInLine = 23
-Reference: Object = codecs4 (TABLE), action = CREATE, offset = 3143, line number = 44, charPositionInLine = 13
-Reference: Object = t_02708 (TABLE), action = CREATE, offset = 3241, line number = 45, charPositionInLine = 27
-Reference: Object = /t1 (TABLE), action = CREATE, offset = 3311, line number = 46, charPositionInLine = 13
-Reference: Object = db (SCHEMA), action = null, offset = 3397, line number = 47, charPositionInLine = 13
-Reference: Object = db.rptable (TABLE), action = CREATE, offset = 3400, line number = 47, charPositionInLine = 16
-Reference: Object = alter_ttl (TABLE), action = CREATE, offset = 3471, line number = 48, charPositionInLine = 13
-Reference: Object = null_before (TABLE), action = CREATE, offset = 3557, line number = 49, charPositionInLine = 13
-Reference: Object = null_before (TABLE), action = CREATE, offset = 3643, line number = 50, charPositionInLine = 13
-Reference: Object = null_before (TABLE), action = CREATE, offset = 3729, line number = 51, charPositionInLine = 13
-Reference: Object = null_before (TABLE), action = CREATE, offset = 3815, line number = 52, charPositionInLine = 13
-Reference: Object = t1 (TABLE), action = CREATE, offset = 3901, line number = 53, charPositionInLine = 13
-Reference: Object = auto_assign_enum3 (TABLE), action = CREATE, offset = 3987, line number = 54, charPositionInLine = 13
-Reference: Object = data_02222 (TABLE), action = CREATE, offset = 4074, line number = 55, charPositionInLine = 13
-Reference: Object = trailing_comma_2 (TABLE), action = CREATE, offset = 4161, line number = 56, charPositionInLine = 13
-Reference: Object = primary_key (TABLE), action = CREATE, offset = 4248, line number = 57, charPositionInLine = 13
-Reference: Object = aggr (TABLE), action = CREATE, offset = 4337, line number = 58, charPositionInLine = 13
-Reference: Object = auto_assign_enum1 (TABLE), action = CREATE, offset = 4426, line number = 59, charPositionInLine = 13
-Reference: Object = store (TABLE), action = CREATE, offset = 4515, line number = 60, charPositionInLine = 13
-Reference: Object = default (TABLE), action = CREATE, offset = 4604, line number = 61, charPositionInLine = 13
-Reference: Object = tab (TABLE), action = CREATE, offset = 4697, line number = 62, charPositionInLine = 13
-Reference: Object = t (TABLE), action = CREATE, offset = 4789, line number = 63, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 4882, line number = 64, charPositionInLine = 13
-Reference: Object = ttl (TABLE), action = CREATE, offset = 4975, line number = 65, charPositionInLine = 13
-Reference: Object = numbers5 (TABLE), action = CREATE, offset = 5068, line number = 66, charPositionInLine = 13
-Reference: Object = test_table (TABLE), action = CREATE, offset = 5325, line number = 69, charPositionInLine = 13
-Reference: Object = data_02230_ttl (TABLE), action = CREATE, offset = 5419, line number = 70, charPositionInLine = 13
-Reference: Object = test_table (TABLE), action = CREATE, offset = 5713, line number = 73, charPositionInLine = 13
-Reference: Object = x (TABLE), action = CREATE, offset = 5809, line number = 74, charPositionInLine = 13
-Reference: Object = alter_ttl (TABLE), action = CREATE, offset = 5905, line number = 75, charPositionInLine = 13
-Reference: Object = lc_00800_1 (TABLE), action = CREATE, offset = 6002, line number = 76, charPositionInLine = 13
-Reference: Object = table (TABLE), action = CREATE, offset = 6099, line number = 77, charPositionInLine = 13
-Reference: Object = tp (TABLE), action = CREATE, offset = 6196, line number = 78, charPositionInLine = 13
-Reference: Object = bad_conversions_2 (TABLE), action = CREATE, offset = 6294, line number = 79, charPositionInLine = 13
-Reference: Object = samples (TABLE), action = CREATE, offset = 6393, line number = 80, charPositionInLine = 13
-Reference: Object = sessions (TABLE), action = CREATE, offset = 6492, line number = 81, charPositionInLine = 13
-Reference: Object = t_array_index (TABLE), action = CREATE, offset = 6722, line number = 83, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 6896, line number = 85, charPositionInLine = 13
-Reference: Object = delta_table (TABLE), action = CREATE, offset = 6995, line number = 86, charPositionInLine = 13
-Reference: Object = foo (TABLE), action = CREATE, offset = 7095, line number = 87, charPositionInLine = 13
-Reference: Object = tab (TABLE), action = CREATE, offset = 7195, line number = 88, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 7295, line number = 89, charPositionInLine = 13
-Reference: Object = encryption_test (TABLE), action = CREATE, offset = 7395, line number = 90, charPositionInLine = 13
-Reference: Object = interval (TABLE), action = CREATE, offset = 7496, line number = 91, charPositionInLine = 13
-Reference: Object = t (TABLE), action = CREATE, offset = 7595, line number = 92, charPositionInLine = 13
-Reference: Object = t (TABLE), action = CREATE, offset = 7696, line number = 93, charPositionInLine = 13
-Reference: Object = tdm__fuzz_23 (TABLE), action = CREATE, offset = 7797, line number = 94, charPositionInLine = 13
-Reference: Object = test_ins_null (TABLE), action = CREATE, offset = 7898, line number = 95, charPositionInLine = 13
-Reference: Object = binary_op_mono1 (TABLE), action = CREATE, offset = 7999, line number = 96, charPositionInLine = 13
-Reference: Object = db_asterisk (SCHEMA), action = null, offset = 8101, line number = 97, charPositionInLine = 13
-Reference: Object = db_asterisk.* (TABLE), action = CREATE, offset = 8113, line number = 97, charPositionInLine = 25
-Reference: Object = tbl (TABLE), action = CREATE, offset = 8260, line number = 99, charPositionInLine = 13
-Reference: Object = t36 (TABLE), action = CREATE, offset = 8363, line number = 100, charPositionInLine = 13
-Reference: Object = t37 (TABLE), action = CREATE, offset = 8475, line number = 101, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE_1:Identifier} (SCHEMA), action = null, offset = 8596, line number = 102, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE_1:Identifier}.data_02716_3 (TABLE), action = CREATE, offset = 8631, line number = 102, charPositionInLine = 48
-Reference: Object = cc (TABLE), action = CREATE, offset = 8699, line number = 103, charPositionInLine = 13
-Reference: Object = t02006 (TABLE), action = CREATE, offset = 8803, line number = 104, charPositionInLine = 13
-Reference: Object = tab (TABLE), action = CREATE, offset = 8907, line number = 105, charPositionInLine = 13
-Reference: Object = src (TABLE), action = CREATE, offset = 9021, line number = 106, charPositionInLine = 23
-Reference: Object = sample_incorrect (TABLE), action = CREATE, offset = 9129, line number = 107, charPositionInLine = 27
-Reference: Object = mmm (TABLE), action = CREATE, offset = 9220, line number = 108, charPositionInLine = 13
-Reference: Object = tab (TABLE), action = CREATE, offset = 9325, line number = 109, charPositionInLine = 13
-Reference: Object = test_parallel_index (TABLE), action = CREATE, offset = 9430, line number = 110, charPositionInLine = 13
-Reference: Object = test_table (TABLE), action = CREATE, offset = 9529, line number = 111, charPositionInLine = 13
-Reference: Object = tp (TABLE), action = CREATE, offset = 9628, line number = 112, charPositionInLine = 13
-Reference: Object = ignore_auto_increment (TABLE), action = CREATE, offset = 9733, line number = 113, charPositionInLine = 13
-Reference: Object = ignore_auto_increment (TABLE), action = CREATE, offset = 9839, line number = 114, charPositionInLine = 13
-Reference: Object = sales (TABLE), action = CREATE, offset = 9945, line number = 115, charPositionInLine = 13
-Reference: Object = src (TABLE), action = CREATE, offset = 10051, line number = 116, charPositionInLine = 13
-Reference: Object = enum (TABLE), action = CREATE, offset = 10158, line number = 117, charPositionInLine = 13
-Reference: Object = t_ttl_non_deterministic (TABLE), action = CREATE, offset = 10266, line number = 118, charPositionInLine = 13
-Reference: Object = tdm (TABLE), action = CREATE, offset = 10374, line number = 119, charPositionInLine = 13
-Reference: Object = test2 (TABLE), action = CREATE, offset = 10482, line number = 120, charPositionInLine = 13
-Reference: Object = producer_02366 (TABLE), action = CREATE, offset = 10586, line number = 121, charPositionInLine = 13
-Reference: Object = ttl (TABLE), action = CREATE, offset = 10689, line number = 122, charPositionInLine = 13
-Reference: Object = t_json (TABLE), action = CREATE, offset = 10798, line number = 123, charPositionInLine = 13
-Reference: Object = foo (TABLE), action = CREATE, offset = 10908, line number = 124, charPositionInLine = 13
-Reference: Object = projection_without_key (TABLE), action = CREATE, offset = 11019, line number = 125, charPositionInLine = 13
-Reference: Object = {new_db_name:Identifier} (SCHEMA), action = null, offset = 11170, line number = 127, charPositionInLine = 13
-Reference: Object = {new_db_name:Identifier}.{old_tbl_name:Identifier} (TABLE), action = CREATE, offset = 11195, line number = 127, charPositionInLine = 38
-Reference: Object = tab (TABLE), action = CREATE, offset = 11282, line number = 128, charPositionInLine = 13
-Reference: Object = lol (TABLE), action = CREATE, offset = 11412, line number = 130, charPositionInLine = 13
-Reference: Object = tab (TABLE), action = CREATE, offset = 11526, line number = 131, charPositionInLine = 13
-Reference: Object = t1 (TABLE), action = CREATE, offset = 11641, line number = 132, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 11757, line number = 133, charPositionInLine = 13
-Reference: Object = p (TABLE), action = CREATE, offset = 11873, line number = 134, charPositionInLine = 13
-Reference: Object = t_map (TABLE), action = CREATE, offset = 11990, line number = 135, charPositionInLine = 13
-Reference: Object = substitute_udf (TABLE), action = CREATE, offset = 12107, line number = 136, charPositionInLine = 13
-Reference: Object = delta_codec_synthetic (TABLE), action = CREATE, offset = 12214, line number = 137, charPositionInLine = 13
-Reference: Object = table2 (TABLE), action = CREATE, offset = 12334, line number = 138, charPositionInLine = 13
-Reference: Object = t0 (TABLE), action = CREATE, offset = 12454, line number = 139, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 12575, line number = 140, charPositionInLine = 13
-Reference: Object = data_01643 (TABLE), action = CREATE, offset = 12696, line number = 141, charPositionInLine = 13
-Reference: Object = t_bad_constraint (TABLE), action = CREATE, offset = 12825, line number = 145, charPositionInLine = 13
-Reference: Object = pl (TABLE), action = CREATE, offset = 12965, line number = 151, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 13105, line number = 157, charPositionInLine = 13
-Reference: Object = ttl (TABLE), action = CREATE, offset = 13241, line number = 161, charPositionInLine = 13
-Reference: Object = undrop_no_uuid_on_cluster (TABLE), action = CREATE, offset = 13382, line number = 166, charPositionInLine = 13
-Reference: Object = a (TABLE), action = CREATE, offset = 13514, line number = 170, charPositionInLine = 13
-Reference: Object = dummy (TABLE), action = CREATE, offset = 13652, line number = 174, charPositionInLine = 13
-Reference: Object = .inner_id.e15f3ab5-6cae-4df3-b879-f40deafd82c2 (TABLE), action = CREATE, offset = 13792, line number = 179, charPositionInLine = 13
-Reference: Object = d (TABLE), action = CREATE, offset = 13998, line number = 185, charPositionInLine = 13
-Reference: Object = fat_granularity (TABLE), action = CREATE, offset = 14141, line number = 190, charPositionInLine = 13
-Reference: Object = test_01676 (SCHEMA), action = null, offset = 14370, line number = 196, charPositionInLine = 13
-Reference: Object = test_01676.table (TABLE), action = CREATE, offset = 14381, line number = 196, charPositionInLine = 24
-Reference: Object = ignore_auto_increment (TABLE), action = CREATE, offset = 14597, line number = 202, charPositionInLine = 13
-Reference: Object = tab (TABLE), action = CREATE, offset = 14704, line number = 203, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 14845, line number = 207, charPositionInLine = 13
-Reference: Object = column_swap_test_test (TABLE), action = CREATE, offset = 14996, line number = 213, charPositionInLine = 13
-Reference: Object = event_types (TABLE), action = CREATE, offset = 15152, line number = 220, charPositionInLine = 13
-Reference: Object = t_ttl_move_if_exists (TABLE), action = CREATE, offset = 15294, line number = 225, charPositionInLine = 13
-Reference: Object = too_many_parts (TABLE), action = CREATE, offset = 15442, line number = 230, charPositionInLine = 13
-Reference: Object = ip_part_test (TABLE), action = CREATE, offset = 15586, line number = 234, charPositionInLine = 13
-Reference: Object = table (TABLE), action = CREATE, offset = 15779, line number = 240, charPositionInLine = 13
-Reference: Object = table_key (TABLE), action = CREATE, offset = 15967, line number = 245, charPositionInLine = 13
-Reference: Object = ttl_00933_2 (TABLE), action = CREATE, offset = 16113, line number = 249, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 16276, line number = 255, charPositionInLine = 13
-Reference: Object = source_data (TABLE), action = CREATE, offset = 16430, line number = 260, charPositionInLine = 13
-Reference: Object = null_01016 (TABLE), action = CREATE, offset = 16610, line number = 268, charPositionInLine = 27
-Reference: Object = parsed_eph (TABLE), action = CREATE, offset = 16753, line number = 272, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 16913, line number = 278, charPositionInLine = 13
-Reference: Object = click_storage (TABLE), action = CREATE, offset = 17069, line number = 283, charPositionInLine = 13
-Reference: Object = column_swap_test_test (TABLE), action = CREATE, offset = 17229, line number = 288, charPositionInLine = 13
-Reference: Object = legacy_column_name_of_tuple_literal (TABLE), action = CREATE, offset = 17399, line number = 295, charPositionInLine = 13
-Reference: Object = t_nested_with_dots (TABLE), action = CREATE, offset = 17567, line number = 301, charPositionInLine = 13
-Reference: Object = t_skip_index_in (TABLE), action = CREATE, offset = 17726, line number = 305, charPositionInLine = 13
-Reference: Object = ttl (TABLE), action = CREATE, offset = 17887, line number = 312, charPositionInLine = 13
-Reference: Object = t0 (TABLE), action = CREATE, offset = 18050, line number = 317, charPositionInLine = 13
-Reference: Object = merge_tree (TABLE), action = CREATE, offset = 18205, line number = 318, charPositionInLine = 13
-Reference: Object = default_table (TABLE), action = CREATE, offset = 18367, line number = 322, charPositionInLine = 13
-Reference: Object = mytable (TABLE), action = CREATE, offset = 18536, line number = 328, charPositionInLine = 13
-Reference: Object = t2 (TABLE), action = CREATE, offset = 18701, line number = 336, charPositionInLine = 13
-Reference: Object = github_events (TABLE), action = CREATE, offset = 18861, line number = 337, charPositionInLine = 13
-Reference: Object = t_s3_compressed_blocks (TABLE), action = CREATE, offset = 19026, line number = 338, charPositionInLine = 13
-Reference: Object = test_a (TABLE), action = CREATE, offset = 19204, line number = 343, charPositionInLine = 13
-Reference: Object = uuid (TABLE), action = CREATE, offset = 19392, line number = 349, charPositionInLine = 27
-Reference: Object = primary (TABLE), action = CREATE, offset = 19553, line number = 355, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 19728, line number = 359, charPositionInLine = 13
-Reference: Object = .inner_id.e15f3ab5-6cae-4df3-b879-f40deafd82c2 (TABLE), action = CREATE, offset = 19959, line number = 365, charPositionInLine = 13
-Reference: Object = test_byte_size_more_complex (TABLE), action = CREATE, offset = 20209, line number = 371, charPositionInLine = 13
-Reference: Object = nested (TABLE), action = CREATE, offset = 20592, line number = 387, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 20759, line number = 391, charPositionInLine = 13
-Reference: Object = ttl_where (TABLE), action = CREATE, offset = 20921, line number = 395, charPositionInLine = 13
-Reference: Object = t_02809 (TABLE), action = CREATE, offset = 21111, line number = 400, charPositionInLine = 13
-Reference: Object = test_02381 (TABLE), action = CREATE, offset = 21315, line number = 406, charPositionInLine = 13
-Reference: Object = data_01809 (TABLE), action = CREATE, offset = 21516, line number = 411, charPositionInLine = 13
-Reference: Object = tab (TABLE), action = CREATE, offset = 21726, line number = 415, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 21938, line number = 422, charPositionInLine = 13
-Reference: Object = cast (TABLE), action = CREATE, offset = 22265, line number = 431, charPositionInLine = 13
-Reference: Object = test02910_second (TABLE), action = CREATE, offset = 22423, line number = 436, charPositionInLine = 13
-Reference: Object = merge_tree_table (TABLE), action = CREATE, offset = 22687, line number = 443, charPositionInLine = 13
-Reference: Object = recompression_table_compact (TABLE), action = CREATE, offset = 22969, line number = 452, charPositionInLine = 13
-Reference: Object = tbl (TABLE), action = CREATE, offset = 23261, line number = 462, charPositionInLine = 13
-Reference: Object = table_for_rename (TABLE), action = CREATE, offset = 23558, line number = 474, charPositionInLine = 13
-Reference: Object = multidimensional (TABLE), action = CREATE, offset = 23886, line number = 485, charPositionInLine = 13
-Reference: Object = large_alter_table_00804 (TABLE), action = CREATE, offset = 24174, line number = 491, charPositionInLine = 13
-Reference: Object = Test (TABLE), action = CREATE, offset = 24522, line number = 497, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 24886, line number = 503, charPositionInLine = 13
-Reference: Object = t (TABLE), action = CREATE, offset = 25273, line number = 517, charPositionInLine = 13
-Reference: Object = t1_r1 (TABLE), action = CREATE, offset = 25501, line number = 525, charPositionInLine = 13
-Reference: Object = test_01148_atomic (SCHEMA), action = null, offset = 25603, line number = 526, charPositionInLine = 13
-Reference: Object = test_01148_atomic.rmt2 (TABLE), action = CREATE, offset = 25621, line number = 526, charPositionInLine = 31
-Reference: Object = trunc (TABLE), action = CREATE, offset = 25766, line number = 531, charPositionInLine = 13
-Reference: Object = cast2 (TABLE), action = CREATE, offset = 25886, line number = 532, charPositionInLine = 13
-Reference: Object = replicated_mutations_empty_partitions (TABLE), action = CREATE, offset = 26010, line number = 533, charPositionInLine = 13
-Reference: Object = replicated_merge_tree_with_sampling (TABLE), action = CREATE, offset = 26267, line number = 538, charPositionInLine = 13
-Reference: Object = summing_r1 (TABLE), action = CREATE, offset = 26597, line number = 549, charPositionInLine = 13
-Reference: Object = rename1 (TABLE), action = CREATE, offset = 26809, line number = 557, charPositionInLine = 13
-Reference: Object = replicated_aggregating_merge_tree (TABLE), action = CREATE, offset = 27020, line number = 565, charPositionInLine = 13
-Reference: Object = data_rep_02228 (TABLE), action = CREATE, offset = 27327, line number = 576, charPositionInLine = 13
-Reference: Object = table_with_version_replicated_1 (TABLE), action = CREATE, offset = 27565, line number = 584, charPositionInLine = 13
-Reference: Object = t4_r_ok (TABLE), action = CREATE, offset = 27866, line number = 593, charPositionInLine = 13
-Reference: Object = rhs (TABLE), action = CREATE, offset = 28154, line number = 604, charPositionInLine = 27
-Reference: Object = primary_key_test (TABLE), action = CREATE, offset = 28222, line number = 605, charPositionInLine = 13
-Reference: Object = t (TABLE), action = CREATE, offset = 28371, line number = 612, charPositionInLine = 13
-Reference: Object = pk_func (TABLE), action = CREATE, offset = 28556, line number = 620, charPositionInLine = 13
-Reference: Object = summing_merge_tree (TABLE), action = CREATE, offset = 28646, line number = 621, charPositionInLine = 13
-Reference: Object = default (SCHEMA), action = null, offset = 28793, line number = 627, charPositionInLine = 13
-Reference: Object = default.derived_metrics_local (TABLE), action = CREATE, offset = 28801, line number = 627, charPositionInLine = 21
-Reference: Object = t1 (TABLE), action = CREATE, offset = 29257, line number = 641, charPositionInLine = 13
-Reference: Object = signed_table (TABLE), action = CREATE, offset = 29355, line number = 644, charPositionInLine = 13
-Reference: Object = table_with_version (TABLE), action = CREATE, offset = 29485, line number = 648, charPositionInLine = 13
-Reference: Object = test_graphite (TABLE), action = CREATE, offset = 29674, line number = 657, charPositionInLine = 13
-Reference: Object = application_logs (TABLE), action = CREATE, offset = 29876, line number = 666, charPositionInLine = 13
-Reference: Object = m (TABLE), action = CREATE, offset = 31371, line number = 686, charPositionInLine = 13
-Reference: Object = log (TABLE), action = CREATE, offset = 31406, line number = 687, charPositionInLine = 13
-Reference: Object = float (TABLE), action = CREATE, offset = 31442, line number = 688, charPositionInLine = 13
-Reference: Object = local_t (TABLE), action = CREATE, offset = 31487, line number = 689, charPositionInLine = 13
-Reference: Object = tmp2 (TABLE), action = CREATE, offset = 31544, line number = 690, charPositionInLine = 23
-Reference: Object = undrop_log (TABLE), action = CREATE, offset = 31582, line number = 691, charPositionInLine = 13
-Reference: Object = t3 (TABLE), action = CREATE, offset = 31631, line number = 692, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, offset = 31702, line number = 693, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.test_log (TABLE), action = CREATE, offset = 31735, line number = 693, charPositionInLine = 46
-Reference: Object = test_2554_log (TABLE), action = CREATE, offset = 31782, line number = 694, charPositionInLine = 13
-Reference: Object = constrained (TABLE), action = CREATE, offset = 32068, line number = 697, charPositionInLine = 13
-Reference: Object = t (TABLE), action = CREATE, offset = 32255, line number = 705, charPositionInLine = 13
-Reference: Object = numbers_squashed (TABLE), action = CREATE, offset = 32300, line number = 706, charPositionInLine = 13
-Reference: Object = t (TABLE), action = CREATE, offset = 32379, line number = 709, charPositionInLine = 13
-Reference: Object = tmp (TABLE), action = CREATE, offset = 32422, line number = 710, charPositionInLine = 13
-Reference: Object = order (TABLE), action = CREATE, offset = 32477, line number = 711, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, offset = 32549, line number = 712, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.A (TABLE), action = CREATE, offset = 32582, line number = 712, charPositionInLine = 46
-Reference: Object = constraint_on_nullable_type (TABLE), action = CREATE, offset = 32625, line number = 713, charPositionInLine = 13
-Reference: Object = constraint_test_transitivity3 (TABLE), action = CREATE, offset = 32742, line number = 714, charPositionInLine = 13
-Reference: Object = constraint_constant_number_expression (TABLE), action = CREATE, offset = 32888, line number = 721, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 33124, line number = 730, charPositionInLine = 13
-Reference: Object = test_table_hdfs_syntax (TABLE), action = CREATE, offset = 33218, line number = 733, charPositionInLine = 13
-Reference: Object = test_02245 (TABLE), action = CREATE, offset = 33292, line number = 736, charPositionInLine = 13
-Reference: Object = test_02481_mismatch_files (TABLE), action = CREATE, offset = 33388, line number = 737, charPositionInLine = 13
-Reference: Object = test_02245_s3_nested_orc1 (TABLE), action = CREATE, offset = 33565, line number = 742, charPositionInLine = 13
-Reference: Object = dist (TABLE), action = CREATE, offset = 34011, line number = 754, charPositionInLine = 13
-Reference: Object = dist (TABLE), action = CREATE, offset = 34093, line number = 755, charPositionInLine = 13
-Reference: Object = td (TABLE), action = CREATE, offset = 34182, line number = 756, charPositionInLine = 13
-Reference: Object = tt7 (TABLE), action = CREATE, offset = 34271, line number = 757, charPositionInLine = 13
-Reference: Object = inner_distributed (TABLE), action = CREATE, offset = 34360, line number = 758, charPositionInLine = 13
-Reference: Object = outer_distributed (TABLE), action = CREATE, offset = 34505, line number = 759, charPositionInLine = 13
-Reference: Object = dist_01850 (TABLE), action = CREATE, offset = 34650, line number = 760, charPositionInLine = 13
-Reference: Object = test_dictionary_view (TABLE), action = CREATE, offset = 34818, line number = 766, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, offset = 34960, line number = 771, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.table_from_ip_trie_dict (TABLE), action = CREATE, offset = 34993, line number = 771, charPositionInLine = 46
-Reference: Object = merge_tf (TABLE), action = CREATE, offset = 35194, line number = 779, charPositionInLine = 13
-Reference: Object = A_M (TABLE), action = CREATE, offset = 35251, line number = 780, charPositionInLine = 13
-Reference: Object = test_merge (TABLE), action = CREATE, offset = 35317, line number = 781, charPositionInLine = 13
-Reference: Object = merge (TABLE), action = CREATE, offset = 35386, line number = 782, charPositionInLine = 13
-Reference: Object = db (SCHEMA), action = null, offset = 35456, line number = 783, charPositionInLine = 13
-Reference: Object = db.t_merge1 (TABLE), action = CREATE, offset = 35459, line number = 783, charPositionInLine = 16
-Reference: Object = merged (TABLE), action = CREATE, offset = 35522, line number = 784, charPositionInLine = 13
-Reference: Object = merge (TABLE), action = CREATE, offset = 35600, line number = 785, charPositionInLine = 13
-Reference: Object = db (SCHEMA), action = null, offset = 35680, line number = 786, charPositionInLine = 13
-Reference: Object = db.t_merge (TABLE), action = CREATE, offset = 35683, line number = 786, charPositionInLine = 16
-Reference: Object = m (TABLE), action = CREATE, offset = 35753, line number = 787, charPositionInLine = 13
-Reference: Object = m (TABLE), action = CREATE, offset = 35850, line number = 788, charPositionInLine = 13
-Reference: Object = merge_table (TABLE), action = CREATE, offset = 35949, line number = 789, charPositionInLine = 13
-Reference: Object = t_merge (TABLE), action = CREATE, offset = 36055, line number = 790, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 36172, line number = 793, charPositionInLine = 13
-Reference: Object = file (TABLE), action = CREATE, offset = 36220, line number = 794, charPositionInLine = 13
-Reference: Object = f (TABLE), action = CREATE, offset = 36274, line number = 795, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 36330, line number = 796, charPositionInLine = 13
-Reference: Object = table_MySQLWire (TABLE), action = CREATE, offset = 36388, line number = 797, charPositionInLine = 13
-Reference: Object = file (TABLE), action = CREATE, offset = 36454, line number = 798, charPositionInLine = 13
-Reference: Object = table_tsv_01375 (TABLE), action = CREATE, offset = 36522, line number = 799, charPositionInLine = 13
-Reference: Object = test_02312 (TABLE), action = CREATE, offset = 36593, line number = 800, charPositionInLine = 13
-Reference: Object = file (TABLE), action = CREATE, offset = 36646, line number = 801, charPositionInLine = 13
-Reference: Object = file_02184 (TABLE), action = CREATE, offset = 36731, line number = 802, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 36818, line number = 803, charPositionInLine = 13
-Reference: Object = json (TABLE), action = CREATE, offset = 36909, line number = 804, charPositionInLine = 13
-Reference: Object = file_delim (TABLE), action = CREATE, offset = 37011, line number = 805, charPositionInLine = 13
-Reference: Object = test_02152 (TABLE), action = CREATE, offset = 37152, line number = 810, charPositionInLine = 13
-Reference: Object = test_02152 (TABLE), action = CREATE, offset = 37334, line number = 819, charPositionInLine = 13
-Reference: Object = t (TABLE), action = CREATE, offset = 37703, line number = 834, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, offset = 37744, line number = 835, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.A (TABLE), action = CREATE, offset = 37777, line number = 835, charPositionInLine = 46
-Reference: Object = test (TABLE), action = CREATE, offset = 37817, line number = 836, charPositionInLine = 13
-Reference: Object = set (TABLE), action = CREATE, offset = 38120, line number = 840, charPositionInLine = 13
-Reference: Object = set (TABLE), action = CREATE, offset = 38162, line number = 841, charPositionInLine = 13
-Reference: Object = set (TABLE), action = CREATE, offset = 38230, line number = 842, charPositionInLine = 13
-Reference: Object = kv (TABLE), action = CREATE, offset = 38330, line number = 845, charPositionInLine = 13
-Reference: Object = j (TABLE), action = CREATE, offset = 38394, line number = 846, charPositionInLine = 13
-Reference: Object = t2 (TABLE), action = CREATE, offset = 38462, line number = 847, charPositionInLine = 13
-Reference: Object = left_join (TABLE), action = CREATE, offset = 38533, line number = 848, charPositionInLine = 13
-Reference: Object = semi_left_join (TABLE), action = CREATE, offset = 38606, line number = 849, charPositionInLine = 13
-Reference: Object = anti_right_join (TABLE), action = CREATE, offset = 38685, line number = 850, charPositionInLine = 13
-Reference: Object = t2 (TABLE), action = CREATE, offset = 38766, line number = 851, charPositionInLine = 13
-Reference: Object = join (TABLE), action = CREATE, offset = 38848, line number = 852, charPositionInLine = 13
-Reference: Object = full_join (TABLE), action = CREATE, offset = 38938, line number = 853, charPositionInLine = 13
-Reference: Object = test_table_url_syntax (TABLE), action = CREATE, offset = 39046, line number = 856, charPositionInLine = 13
-Reference: Object = test_table_url (TABLE), action = CREATE, offset = 39112, line number = 857, charPositionInLine = 13
-Reference: Object = test_table_url (TABLE), action = CREATE, offset = 39195, line number = 858, charPositionInLine = 13
-Reference: Object = test_table_url (TABLE), action = CREATE, offset = 39292, line number = 859, charPositionInLine = 13
-Reference: Object = url (TABLE), action = CREATE, offset = 39395, line number = 860, charPositionInLine = 13
-Reference: Object = url (TABLE), action = CREATE, offset = 39539, line number = 864, charPositionInLine = 13
-Reference: Object = t2 (TABLE), action = CREATE, offset = 39856, line number = 873, charPositionInLine = 13
-Reference: Object = t2 (TABLE), action = CREATE, offset = 39893, line number = 874, charPositionInLine = 13
-Reference: Object = m (TABLE), action = CREATE, offset = 39930, line number = 875, charPositionInLine = 13
-Reference: Object = join (TABLE), action = CREATE, offset = 39968, line number = 876, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 40023, line number = 877, charPositionInLine = 13
-Reference: Object = h3_indexes (TABLE), action = CREATE, offset = 40203, line number = 880, charPositionInLine = 13
-Reference: Object = mann_whitney_test (TABLE), action = CREATE, offset = 40279, line number = 881, charPositionInLine = 13
-Reference: Object = geo (TABLE), action = CREATE, offset = 40355, line number = 882, charPositionInLine = 13
-Reference: Object = base (SCHEMA), action = null, offset = 40445, line number = 884, charPositionInLine = 14
-Reference: Object = base.t1 (TABLE), action = CREATE, offset = 40450, line number = 884, charPositionInLine = 19
-Reference: Object = analytics_events (TABLE), action = CREATE, offset = 40543, line number = 887, charPositionInLine = 48
-Reference: Object = t02155_t64_tz (TABLE), action = CREATE, offset = 40846, line number = 898, charPositionInLine = 13
-Reference: Object = t1 (TABLE), action = CREATE, offset = 40927, line number = 899, charPositionInLine = 13
-Reference: Object = table_with_cyclic_defaults (TABLE), action = CREATE, offset = 41007, line number = 900, charPositionInLine = 13
-Reference: Object = t_00477 (TABLE), action = CREATE, offset = 41101, line number = 901, charPositionInLine = 23
-Reference: Object = t (TABLE), action = CREATE, offset = 41181, line number = 902, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, offset = 41288, line number = 903, charPositionInLine = 27
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.r2 (TABLE), action = CREATE, offset = 41321, line number = 903, charPositionInLine = 60
-Reference: Object = tuple (TABLE), action = CREATE, offset = 41368, line number = 904, charPositionInLine = 13
-Reference: Object = defaulted (TABLE), action = CREATE, offset = 41464, line number = 905, charPositionInLine = 13
-Reference: Object = polygons_01862 (TABLE), action = CREATE, offset = 41569, line number = 906, charPositionInLine = 13
-Reference: Object = default_constraints (TABLE), action = CREATE, offset = 41678, line number = 907, charPositionInLine = 13
-Reference: Object = test_query_log_factories_info1 (SCHEMA), action = null, offset = 41798, line number = 908, charPositionInLine = 24
-Reference: Object = test_query_log_factories_info1.memory_table (TABLE), action = CREATE, offset = 41829, line number = 908, charPositionInLine = 55
-Reference: Object = t_constraints_where (TABLE), action = CREATE, offset = 41899, line number = 909, charPositionInLine = 13
-Reference: Object = floats (TABLE), action = CREATE, offset = 42047, line number = 916, charPositionInLine = 13
-Reference: Object = ints (TABLE), action = CREATE, offset = 42163, line number = 917, charPositionInLine = 13
-Reference: Object = model (TABLE), action = CREATE, offset = 42326, line number = 928, charPositionInLine = 13
-Reference: Object = test_table_nullable (TABLE), action = CREATE, offset = 42475, line number = 929, charPositionInLine = 13
-Reference: Object = decimal (TABLE), action = CREATE, offset = 42654, line number = 934, charPositionInLine = 27
-Reference: Object = database_for_dict (SCHEMA), action = null, offset = 42831, line number = 943, charPositionInLine = 13
-Reference: Object = database_for_dict.table_for_dict (TABLE), action = CREATE, offset = 42849, line number = 943, charPositionInLine = 31
-Reference: Object = dict_data (TABLE), action = CREATE, offset = 43025, line number = 949, charPositionInLine = 13
-Reference: Object = decimal (TABLE), action = CREATE, offset = 43278, line number = 958, charPositionInLine = 27
-Reference: Object = data (TABLE), action = CREATE, offset = 43516, line number = 967, charPositionInLine = 23
-Reference: Object = unsigned_types (TABLE), action = CREATE, offset = 43762, line number = 971, charPositionInLine = 13
-Reference: Object = arrays_02735 (TABLE), action = CREATE, offset = 44070, line number = 986, charPositionInLine = 13
-Reference: Object = geo_linestring (TABLE), action = CREATE, offset = 44515, line number = 988, charPositionInLine = 13
-Reference: Object = geo_multilinestring (TABLE), action = CREATE, offset = 44577, line number = 989, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 44649, line number = 990, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 44696, line number = 991, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 44756, line number = 992, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 44834, line number = 993, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 44881, line number = 994, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 44940, line number = 995, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 45009, line number = 996, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 45098, line number = 997, charPositionInLine = 13
-Reference: Object = buf (TABLE), action = CREATE, offset = 45177, line number = 1000, charPositionInLine = 13
-Reference: Object = mytable (TABLE), action = CREATE, offset = 45275, line number = 1001, charPositionInLine = 13
-Reference: Object = test_buffer_table (TABLE), action = CREATE, offset = 45408, line number = 1005, charPositionInLine = 13
-Reference: Object = buffer_01277 (TABLE), action = CREATE, offset = 45539, line number = 1009, charPositionInLine = 13
-Reference: Object = buffer_01256 (TABLE), action = CREATE, offset = 45663, line number = 1010, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, offset = 45814, line number = 1011, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.mt_buffer_00158 (TABLE), action = CREATE, offset = 45847, line number = 1011, charPositionInLine = 46
-Reference: Object = t_random_1 (TABLE), action = CREATE, offset = 46056, line number = 1018, charPositionInLine = 13
-Reference: Object = test_table_2 (TABLE), action = CREATE, offset = 46137, line number = 1020, charPositionInLine = 13
-Reference: Object = rng (TABLE), action = CREATE, offset = 46281, line number = 1026, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 46475, line number = 1036, charPositionInLine = 13
-Reference: Object = test (TABLE), action = CREATE, offset = 46606, line number = 1041, charPositionInLine = 13
-Reference: Object = log (TABLE), action = CREATE, offset = 46752, line number = 1048, charPositionInLine = 13
-Reference: Object = t3 (TABLE), action = CREATE, offset = 46834, line number = 1051, charPositionInLine = 13
-Reference: Object = t3_00519 (TABLE), action = CREATE, offset = 46866, line number = 1052, charPositionInLine = 23
-Reference: Object = test_table_noarg (TABLE), action = CREATE, offset = 46915, line number = 1053, charPositionInLine = 13
-Reference: Object = test_table_valid_args (TABLE), action = CREATE, offset = 46982, line number = 1054, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, offset = 47071, line number = 1055, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.tablefunc03 (TABLE), action = CREATE, offset = 47104, line number = 1055, charPositionInLine = 46
-Reference: Object = test_table (TABLE), action = CREATE, offset = 47173, line number = 1056, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, offset = 47266, line number = 1057, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.tablefunc02 (TABLE), action = CREATE, offset = 47299, line number = 1057, charPositionInLine = 46
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, offset = 47412, line number = 1058, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.tablefunc04 (TABLE), action = CREATE, offset = 47445, line number = 1058, charPositionInLine = 46
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, offset = 47567, line number = 1059, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.tablefunc01 (TABLE), action = CREATE, offset = 47600, line number = 1059, charPositionInLine = 46
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, offset = 47728, line number = 1060, charPositionInLine = 13
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.tablefunc06 (TABLE), action = CREATE, offset = 47761, line number = 1060, charPositionInLine = 46
-Reference: Object = t (TABLE), action = ALTER, offset = 47921, line number = 1063, charPositionInLine = 12
-Reference: Object = ttl (TABLE), action = ALTER, offset = 47943, line number = 1064, charPositionInLine = 12
-Reference: Object = tbl (TABLE), action = ALTER, offset = 47973, line number = 1065, charPositionInLine = 12
-Reference: Object = x (TABLE), action = ALTER, offset = 48004, line number = 1066, charPositionInLine = 12
-Reference: Object = test (TABLE), action = ALTER, offset = 48036, line number = 1067, charPositionInLine = 12
-Reference: Object = ttl (TABLE), action = ALTER, offset = 48069, line number = 1068, charPositionInLine = 12
-Reference: Object = src (TABLE), action = ALTER, offset = 48102, line number = 1069, charPositionInLine = 12
-Reference: Object = t (TABLE), action = ALTER, offset = 48136, line number = 1070, charPositionInLine = 12
-Reference: Object = t (TABLE), action = ALTER, offset = 48170, line number = 1071, charPositionInLine = 12
-Reference: Object = prop_table (TABLE), action = ALTER, offset = 48204, line number = 1072, charPositionInLine = 12
-Reference: Object = tp (TABLE), action = ALTER, offset = 48239, line number = 1073, charPositionInLine = 12
-Reference: Object = rmt (TABLE), action = ALTER, offset = 48274, line number = 1074, charPositionInLine = 12
-Reference: Object = t (TABLE), action = ALTER, offset = 48310, line number = 1075, charPositionInLine = 12
-Reference: Object = mut (TABLE), action = ALTER, offset = 48346, line number = 1076, charPositionInLine = 12
-Reference: Object = t (TABLE), action = ALTER, offset = 48383, line number = 1077, charPositionInLine = 12
-Reference: Object = t1 (TABLE), action = ALTER, offset = 48421, line number = 1078, charPositionInLine = 12
-Reference: Object = tmp (TABLE), action = ALTER, offset = 48459, line number = 1079, charPositionInLine = 12
-Reference: Object = tp_1 (TABLE), action = ALTER, offset = 48497, line number = 1080, charPositionInLine = 12
-Reference: Object = union2 (TABLE), action = ALTER, offset = 48535, line number = 1081, charPositionInLine = 12
-Reference: Object = rmt1 (TABLE), action = ALTER, offset = 48573, line number = 1082, charPositionInLine = 12
-Reference: Object = t (TABLE), action = ALTER, offset = 48612, line number = 1083, charPositionInLine = 12
-Reference: Object = t (TABLE), action = ALTER, offset = 48651, line number = 1084, charPositionInLine = 12
-Reference: Object = test (TABLE), action = ALTER, offset = 48690, line number = 1085, charPositionInLine = 12
-Reference: Object = minmax_idx (TABLE), action = ALTER, offset = 48729, line number = 1086, charPositionInLine = 12
-Reference: Object = t (TABLE), action = ALTER, offset = 48769, line number = 1087, charPositionInLine = 12
-Reference: Object = trunc (TABLE), action = ALTER, offset = 48809, line number = 1088, charPositionInLine = 12
-Reference: Object = t1 (TABLE), action = ALTER, offset = 48849, line number = 1089, charPositionInLine = 12
-Reference: Object = rmt (TABLE), action = ALTER, offset = 48890, line number = 1090, charPositionInLine = 12
-Reference: Object = test (TABLE), action = ALTER, offset = 48932, line number = 1091, charPositionInLine = 12
-Reference: Object = tp (TABLE), action = ALTER, offset = 48976, line number = 1092, charPositionInLine = 12
-Reference: Object = dst (TABLE), action = ALTER, offset = 49020, line number = 1093, charPositionInLine = 12
-Reference: Object = dst (TABLE), action = ALTER, offset = 49065, line number = 1094, charPositionInLine = 12
-Reference: Object = sqllt (SCHEMA), action = null, offset = 49111, line number = 1095, charPositionInLine = 12
-Reference: Object = sqllt.table (TABLE), action = ALTER, offset = 49117, line number = 1095, charPositionInLine = 18
-Reference: Object = t1 (TABLE), action = ALTER, offset = 49157, line number = 1096, charPositionInLine = 12
-Reference: Object = partslost_0 (TABLE), action = ALTER, offset = 49203, line number = 1097, charPositionInLine = 12
-Reference: Object = t (TABLE), action = ALTER, offset = 49250, line number = 1098, charPositionInLine = 12
-Reference: Object = tab (TABLE), action = ALTER, offset = 49297, line number = 1099, charPositionInLine = 12
-Reference: Object = idx (INDEX), action = CREATE, offset = 49311, line number = 1099, charPositionInLine = 26
-Reference: Object = test_table (TABLE), action = ALTER, offset = 49344, line number = 1100, charPositionInLine = 12
-Reference: Object = ttl (TABLE), action = ALTER, offset = 49391, line number = 1101, charPositionInLine = 12
-Reference: Object = join_table_mutation (TABLE), action = ALTER, offset = 49438, line number = 1102, charPositionInLine = 12
-Reference: Object = most_ordinary_mt (TABLE), action = ALTER, offset = 49486, line number = 1103, charPositionInLine = 12
-Reference: Object = t (TABLE), action = ALTER, offset = 49534, line number = 1104, charPositionInLine = 12
-Reference: Object = t (TABLE), action = ALTER, offset = 49582, line number = 1105, charPositionInLine = 12
-Reference: Object = t1 (TABLE), action = ALTER, offset = 49630, line number = 1106, charPositionInLine = 12
-Reference: Object = t_lwd_mutations (TABLE), action = ALTER, offset = 49678, line number = 1107, charPositionInLine = 12
-Reference: Object = test (TABLE), action = ALTER, offset = 49726, line number = 1108, charPositionInLine = 12
-Reference: Object = test (TABLE), action = ALTER, offset = 49774, line number = 1109, charPositionInLine = 12
-Reference: Object = t1 (TABLE), action = ALTER, offset = 49822, line number = 1110, charPositionInLine = 12
-Reference: Object = t_remove_sample_by (TABLE), action = ALTER, offset = 49871, line number = 1111, charPositionInLine = 12
-Reference: Object = tab (TABLE), action = ALTER, offset = 49920, line number = 1112, charPositionInLine = 12
-Reference: Object = idx (INDEX), action = CREATE, offset = 49934, line number = 1112, charPositionInLine = 26
-Reference: Object = test (TABLE), action = ALTER, offset = 49969, line number = 1113, charPositionInLine = 12
-Reference: Object = t (TABLE), action = ALTER, offset = 50018, line number = 1114, charPositionInLine = 12
-Reference: Object = test (TABLE), action = ALTER, offset = 50066, line number = 1115, charPositionInLine = 12
-Reference: Object = test5 (TABLE), action = ALTER, offset = 50116, line number = 1116, charPositionInLine = 12
-Reference: Object = alter_test (TABLE), action = ALTER, offset = 50166, line number = 1117, charPositionInLine = 12
-Reference: Object = prewhere (TABLE), action = ALTER, offset = 50217, line number = 1118, charPositionInLine = 12
-Reference: Object = test (TABLE), action = ALTER, offset = 50268, line number = 1119, charPositionInLine = 12
-Reference: Object = rmt (TABLE), action = ALTER, offset = 50319, line number = 1120, charPositionInLine = 12
-Reference: Object = t_merge (TABLE), action = ALTER, offset = 50371, line number = 1121, charPositionInLine = 12
-Reference: Object = tmp (TABLE), action = ALTER, offset = 50421, line number = 1122, charPositionInLine = 12
-Reference: Object = x (TABLE), action = ALTER, offset = 50473, line number = 1123, charPositionInLine = 12
-Reference: Object = alter_test (TABLE), action = ALTER, offset = 50525, line number = 1124, charPositionInLine = 12
-Reference: Object = mut (TABLE), action = ALTER, offset = 50578, line number = 1125, charPositionInLine = 12
-Reference: Object = rmt (TABLE), action = ALTER, offset = 50631, line number = 1126, charPositionInLine = 12
-Reference: Object = t (TABLE), action = ALTER, offset = 50684, line number = 1127, charPositionInLine = 12
-Reference: Object = t (TABLE), action = ALTER, offset = 50738, line number = 1128, charPositionInLine = 12
-Reference: Object = null_before (TABLE), action = ALTER, offset = 50792, line number = 1129, charPositionInLine = 12
-Reference: Object = test (TABLE), action = ALTER, offset = 50847, line number = 1130, charPositionInLine = 12
-Reference: Object = table_two (TABLE), action = ALTER, offset = 50903, line number = 1131, charPositionInLine = 12
-Reference: Object = minmax_compact (TABLE), action = ALTER, offset = 50961, line number = 1132, charPositionInLine = 12
-Reference: Object = ttl (TABLE), action = ALTER, offset = 51020, line number = 1133, charPositionInLine = 12
-Reference: Object = data (TABLE), action = ALTER, offset = 51079, line number = 1134, charPositionInLine = 12
-Reference: Object = t (TABLE), action = ALTER, offset = 51139, line number = 1135, charPositionInLine = 12
-Reference: Object = test (TABLE), action = ALTER, offset = 51199, line number = 1136, charPositionInLine = 12
-Reference: Object = ttl (TABLE), action = ALTER, offset = 51259, line number = 1137, charPositionInLine = 12
-Reference: Object = ttl_old_syntax (TABLE), action = ALTER, offset = 51319, line number = 1138, charPositionInLine = 12
-Reference: Object = test (TABLE), action = ALTER, offset = 51379, line number = 1139, charPositionInLine = 12
-Reference: Object = test_alter (TABLE), action = ALTER, offset = 51440, line number = 1140, charPositionInLine = 12
-Reference: Object = add_table (TABLE), action = ALTER, offset = 51501, line number = 1141, charPositionInLine = 12
-Reference: Object = aliases_test (TABLE), action = ALTER, offset = 51563, line number = 1142, charPositionInLine = 12
-Reference: Object = sqllt (SCHEMA), action = null, offset = 51625, line number = 1143, charPositionInLine = 12
-Reference: Object = sqllt.table (TABLE), action = ALTER, offset = 51631, line number = 1143, charPositionInLine = 18
-Reference: Object = t (TABLE), action = ALTER, offset = 51731, line number = 1145, charPositionInLine = 12
-Reference: Object = alter_test (TABLE), action = ALTER, offset = 51857, line number = 1147, charPositionInLine = 12
-Reference: Object = alter_02834 (TABLE), action = ALTER, offset = 52040, line number = 1150, charPositionInLine = 12
-Reference: Object = mv (TABLE), action = ALTER, offset = 52104, line number = 1151, charPositionInLine = 12
-Reference: Object = clear_column1 (TABLE), action = ALTER, offset = 52272, line number = 1157, charPositionInLine = 12
-Reference: Object = compress_table (TABLE), action = ALTER, offset = 52336, line number = 1158, charPositionInLine = 12
-Reference: Object = prop_table (TABLE), action = ALTER, offset = 52400, line number = 1159, charPositionInLine = 12
-Reference: Object = z (TABLE), action = ALTER, offset = 52464, line number = 1160, charPositionInLine = 12
-Reference: Object = prop_table (TABLE), action = ALTER, offset = 52529, line number = 1161, charPositionInLine = 12
-Reference: Object = prop_table (TABLE), action = ALTER, offset = 52597, line number = 1162, charPositionInLine = 12
-Reference: Object = t_materialize_delete (TABLE), action = ALTER, offset = 52665, line number = 1163, charPositionInLine = 12
-Reference: Object = mt_compact (TABLE), action = ALTER, offset = 52733, line number = 1164, charPositionInLine = 12
-Reference: Object = t_light (TABLE), action = ALTER, offset = 52873, line number = 1166, charPositionInLine = 12
-Reference: Object = table_for_reset_setting (TABLE), action = ALTER, offset = 52942, line number = 1167, charPositionInLine = 12
-Reference: Object = rmt2 (TABLE), action = ALTER, offset = 53011, line number = 1168, charPositionInLine = 12
-Reference: Object = mt_with_pk (TABLE), action = ALTER, offset = 53153, line number = 1170, charPositionInLine = 12
-Reference: Object = idx1 (INDEX), action = CREATE, offset = 53174, line number = 1170, charPositionInLine = 33
-Reference: Object = alter_test (TABLE), action = ALTER, offset = 53224, line number = 1171, charPositionInLine = 12
-Reference: Object = replicated_constraints1 (TABLE), action = ALTER, offset = 53302, line number = 1172, charPositionInLine = 12
-Reference: Object = replicated_constraints1.b_constraint (CONSTRAINT), action = CREATE, offset = 53341, line number = 1172, charPositionInLine = 51
-Reference: Object = tmp_table_01818 (TABLE), action = ALTER, offset = 53380, line number = 1173, charPositionInLine = 12
-Reference: Object = test_move_partition_src (TABLE), action = ALTER, offset = 53463, line number = 1174, charPositionInLine = 12
-Reference: Object = ttl (TABLE), action = ALTER, offset = 53554, line number = 1175, charPositionInLine = 12
-Reference: Object = sales (TABLE), action = ALTER, offset = 53646, line number = 1176, charPositionInLine = 12
-Reference: Object = table_for_alter (TABLE), action = ALTER, offset = 53743, line number = 1177, charPositionInLine = 12
-Reference: Object = test_02381_compress (TABLE), action = ALTER, offset = 53840, line number = 1178, charPositionInLine = 12
-Reference: Object = x (TABLE), action = ALTER, offset = 53937, line number = 1179, charPositionInLine = 12
-Reference: Object = nn (INDEX), action = CREATE, offset = 53949, line number = 1179, charPositionInLine = 24
-Reference: Object = test4 (TABLE), action = ALTER, offset = 54034, line number = 1180, charPositionInLine = 12
-Reference: Object = alter_compression_codec1 (TABLE), action = ALTER, offset = 54133, line number = 1181, charPositionInLine = 12
-Reference: Object = t_mutations_nondeterministic (TABLE), action = ALTER, offset = 54233, line number = 1182, charPositionInLine = 12
-Reference: Object = table_with_cyclic_defaults (TABLE), action = ALTER, offset = 54435, line number = 1184, charPositionInLine = 12
-Reference: Object = add_table (TABLE), action = ALTER, offset = 54536, line number = 1185, charPositionInLine = 12
-Reference: Object = replicated_table_detach_all1 (TABLE), action = ALTER, offset = 54638, line number = 1186, charPositionInLine = 12
-Reference: Object = agg_table (TABLE), action = ALTER, offset = 54777, line number = 1187, charPositionInLine = 12
-Reference: Object = check_query_comment_column (TABLE), action = ALTER, offset = 54941, line number = 1188, charPositionInLine = 12
-Reference: Object = nr (TABLE), action = DROP, offset = 55117, line number = 1191, charPositionInLine = 11
-Reference: Object = /t0 (TABLE), action = DROP, offset = 55142, line number = 1192, charPositionInLine = 21
-Reference: Object = constrained (TABLE), action = DROP, offset = 55170, line number = 1193, charPositionInLine = 21
-Reference: Object = t1 (TABLE), action = DROP, offset = 55214, line number = 1194, charPositionInLine = 31
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, offset = 55229, line number = 1195, charPositionInLine = 11
-Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.wv (TABLE), action = DROP, offset = 55262, line number = 1195, charPositionInLine = 44
-Reference: Object = db (SCHEMA), action = null, offset = 55287, line number = 1196, charPositionInLine = 21
-Reference: Object = db.example_complex_key_source (TABLE), action = DROP, offset = 55290, line number = 1196, charPositionInLine = 24
-Reference: action = OPTIMIZE, offset = 55330, line number = 1199, charPositionInLine = 0
-Reference: action = OPTIMIZE, offset = 55379, line number = 1200, charPositionInLine = 0
-Reference: action = OPTIMIZE, offset = 55461, line number = 1201, charPositionInLine = 0
-Reference: action = OPTIMIZE, offset = 55513, line number = 1202, charPositionInLine = 0
-Reference: action = OPTIMIZE, offset = 55564, line number = 1203, charPositionInLine = 0
-Reference: action = OPTIMIZE, offset = 55623, line number = 1204, charPositionInLine = 0
-Reference: action = OPTIMIZE, offset = 55695, line number = 1205, charPositionInLine = 0
-Reference: action = OPTIMIZE, offset = 55779, line number = 1206, charPositionInLine = 0
-Reference: Object = t_empty_tuple (TABLE), action = CREATE, offset = 55884, line number = 1207, charPositionInLine = 13
-Reference: Object = t_empty_tuple2 (TABLE), action = CREATE, offset = 55960, line number = 1208, charPositionInLine = 13
-Reference: Object = test_table (TABLE), action = ALTER, offset = 56052, line number = 1209, charPositionInLine = 12
-Reference: Object = test_table (TABLE), action = ALTER, offset = 56115, line number = 1210, charPositionInLine = 12
-Reference: Object = test_table (TABLE), action = ALTER, offset = 56194, line number = 1211, charPositionInLine = 12
-Reference: Object = test_table (TABLE), action = ALTER, offset = 56292, line number = 1212, charPositionInLine = 12
-Reference: Object = test_table (TABLE), action = ALTER, offset = 56387, line number = 1213, charPositionInLine = 12
-Reference: Object = test_table.c1 (CONSTRAINT), action = CREATE, offset = 56427, line number = 1213, charPositionInLine = 52
-Reference: Object = test_table (TABLE), action = ALTER, offset = 56455, line number = 1214, charPositionInLine = 12
-Reference: Object = test_table.c1 (CONSTRAINT), action = CREATE, offset = 56495, line number = 1214, charPositionInLine = 52
-Reference: Object = t_constraint_new (TABLE), action = CREATE, offset = 56526, line number = 1215, charPositionInLine = 13
-Reference: Object = test_table (TABLE), action = ALTER, offset = 56661, line number = 1216, charPositionInLine = 12
-Reference: Object = test_table (TABLE), action = ALTER, offset = 56712, line number = 1217, charPositionInLine = 12
-Reference: Object = test_table (TABLE), action = ALTER, offset = 56765, line number = 1218, charPositionInLine = 12
-Reference: Object = test_table (TABLE), action = ALTER, offset = 56803, line number = 1219, charPositionInLine = 12
-Reference: Object = test_table (TABLE), action = ALTER, offset = 56864, line number = 1220, charPositionInLine = 12
-Reference: Object = test_table (TABLE), action = ALTER, offset = 56927, line number = 1221, charPositionInLine = 12
-Reference: Object = test_table (TABLE), action = ALTER, offset = 57017, line number = 1222, charPositionInLine = 12
+Reference: Object = t (TABLE), action = CREATE, line number = 2, charPositionInLine = 13
+Reference: Object = t (TABLE), action = CREATE, line number = 3, charPositionInLine = 13
+Reference: Object = x (TABLE), action = CREATE, line number = 4, charPositionInLine = 13
+Reference: Object = t (TABLE), action = CREATE, line number = 7, charPositionInLine = 13
+Reference: Object = t (TABLE), action = CREATE, line number = 8, charPositionInLine = 13
+Reference: Object = db (SCHEMA), action = null, line number = 9, charPositionInLine = 13
+Reference: Object = db.t (TABLE), action = CREATE, line number = 9, charPositionInLine = 16
+Reference: Object = $4@^7 (TABLE), action = CREATE, line number = 10, charPositionInLine = 13
+Reference: Object = ' (SCHEMA), action = null, line number = 11, charPositionInLine = 13
+Reference: Object = '.' (TABLE), action = CREATE, line number = 11, charPositionInLine = 17
+Reference: Object = t1 (TABLE), action = CREATE, line number = 12, charPositionInLine = 13
+Reference: Object = t (TABLE), action = CREATE, line number = 13, charPositionInLine = 13
+Reference: Object = t (TABLE), action = CREATE, line number = 14, charPositionInLine = 13
+Reference: Object = t (TABLE), action = CREATE, line number = 15, charPositionInLine = 13
+Reference: Object = count (TABLE), action = CREATE, line number = 16, charPositionInLine = 13
+Reference: Object = rptable (TABLE), action = CREATE, line number = 17, charPositionInLine = 13
+Reference: Object = t (TABLE), action = CREATE, line number = 18, charPositionInLine = 13
+Reference: Object = x (TABLE), action = CREATE, line number = 19, charPositionInLine = 13
+Reference: Object = test1__fuzz_37 (TABLE), action = CREATE, line number = 20, charPositionInLine = 13
+Reference: Object = test (SCHEMA), action = null, line number = 22, charPositionInLine = 13
+Reference: Object = test.xxx (TABLE), action = CREATE, line number = 22, charPositionInLine = 18
+Reference: Object = t (TABLE), action = CREATE, line number = 23, charPositionInLine = 13
+Reference: Object = tab (TABLE), action = CREATE, line number = 24, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 25, charPositionInLine = 13
+Reference: Object = pk_order (TABLE), action = CREATE, line number = 26, charPositionInLine = 13
+Reference: Object = pk_order (TABLE), action = CREATE, line number = 27, charPositionInLine = 13
+Reference: Object = shard1 (TABLE), action = CREATE, line number = 28, charPositionInLine = 13
+Reference: Object = table_d (TABLE), action = CREATE, line number = 29, charPositionInLine = 13
+Reference: Object = mt (TABLE), action = CREATE, line number = 30, charPositionInLine = 13
+Reference: Object = t1 (TABLE), action = CREATE, line number = 31, charPositionInLine = 13
+Reference: Object = tab (TABLE), action = CREATE, line number = 32, charPositionInLine = 13
+Reference: Object = tbl (TABLE), action = CREATE, line number = 33, charPositionInLine = 13
+Reference: Object = tnul (TABLE), action = CREATE, line number = 34, charPositionInLine = 13
+Reference: Object = Dates (TABLE), action = CREATE, line number = 35, charPositionInLine = 13
+Reference: Object = auto_assign_enum (TABLE), action = CREATE, line number = 36, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 37, charPositionInLine = 13
+Reference: Object = codecs6 (TABLE), action = CREATE, line number = 38, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 39, charPositionInLine = 13
+Reference: Object = a (TABLE), action = CREATE, line number = 41, charPositionInLine = 13
+Reference: Object = t1 (TABLE), action = CREATE, line number = 42, charPositionInLine = 13
+Reference: Object = alter_test (TABLE), action = CREATE, line number = 43, charPositionInLine = 23
+Reference: Object = codecs4 (TABLE), action = CREATE, line number = 44, charPositionInLine = 13
+Reference: Object = t_02708 (TABLE), action = CREATE, line number = 45, charPositionInLine = 27
+Reference: Object = /t1 (TABLE), action = CREATE, line number = 46, charPositionInLine = 13
+Reference: Object = db (SCHEMA), action = null, line number = 47, charPositionInLine = 13
+Reference: Object = db.rptable (TABLE), action = CREATE, line number = 47, charPositionInLine = 16
+Reference: Object = alter_ttl (TABLE), action = CREATE, line number = 48, charPositionInLine = 13
+Reference: Object = null_before (TABLE), action = CREATE, line number = 49, charPositionInLine = 13
+Reference: Object = null_before (TABLE), action = CREATE, line number = 50, charPositionInLine = 13
+Reference: Object = null_before (TABLE), action = CREATE, line number = 51, charPositionInLine = 13
+Reference: Object = null_before (TABLE), action = CREATE, line number = 52, charPositionInLine = 13
+Reference: Object = t1 (TABLE), action = CREATE, line number = 53, charPositionInLine = 13
+Reference: Object = auto_assign_enum3 (TABLE), action = CREATE, line number = 54, charPositionInLine = 13
+Reference: Object = data_02222 (TABLE), action = CREATE, line number = 55, charPositionInLine = 13
+Reference: Object = trailing_comma_2 (TABLE), action = CREATE, line number = 56, charPositionInLine = 13
+Reference: Object = primary_key (TABLE), action = CREATE, line number = 57, charPositionInLine = 13
+Reference: Object = aggr (TABLE), action = CREATE, line number = 58, charPositionInLine = 13
+Reference: Object = auto_assign_enum1 (TABLE), action = CREATE, line number = 59, charPositionInLine = 13
+Reference: Object = store (TABLE), action = CREATE, line number = 60, charPositionInLine = 13
+Reference: Object = default (TABLE), action = CREATE, line number = 61, charPositionInLine = 13
+Reference: Object = tab (TABLE), action = CREATE, line number = 62, charPositionInLine = 13
+Reference: Object = t (TABLE), action = CREATE, line number = 63, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 64, charPositionInLine = 13
+Reference: Object = ttl (TABLE), action = CREATE, line number = 65, charPositionInLine = 13
+Reference: Object = numbers5 (TABLE), action = CREATE, line number = 66, charPositionInLine = 13
+Reference: Object = test_table (TABLE), action = CREATE, line number = 69, charPositionInLine = 13
+Reference: Object = data_02230_ttl (TABLE), action = CREATE, line number = 70, charPositionInLine = 13
+Reference: Object = test_table (TABLE), action = CREATE, line number = 73, charPositionInLine = 13
+Reference: Object = x (TABLE), action = CREATE, line number = 74, charPositionInLine = 13
+Reference: Object = alter_ttl (TABLE), action = CREATE, line number = 75, charPositionInLine = 13
+Reference: Object = lc_00800_1 (TABLE), action = CREATE, line number = 76, charPositionInLine = 13
+Reference: Object = table (TABLE), action = CREATE, line number = 77, charPositionInLine = 13
+Reference: Object = tp (TABLE), action = CREATE, line number = 78, charPositionInLine = 13
+Reference: Object = bad_conversions_2 (TABLE), action = CREATE, line number = 79, charPositionInLine = 13
+Reference: Object = samples (TABLE), action = CREATE, line number = 80, charPositionInLine = 13
+Reference: Object = sessions (TABLE), action = CREATE, line number = 81, charPositionInLine = 13
+Reference: Object = t_array_index (TABLE), action = CREATE, line number = 83, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 85, charPositionInLine = 13
+Reference: Object = delta_table (TABLE), action = CREATE, line number = 86, charPositionInLine = 13
+Reference: Object = foo (TABLE), action = CREATE, line number = 87, charPositionInLine = 13
+Reference: Object = tab (TABLE), action = CREATE, line number = 88, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 89, charPositionInLine = 13
+Reference: Object = encryption_test (TABLE), action = CREATE, line number = 90, charPositionInLine = 13
+Reference: Object = interval (TABLE), action = CREATE, line number = 91, charPositionInLine = 13
+Reference: Object = t (TABLE), action = CREATE, line number = 92, charPositionInLine = 13
+Reference: Object = t (TABLE), action = CREATE, line number = 93, charPositionInLine = 13
+Reference: Object = tdm__fuzz_23 (TABLE), action = CREATE, line number = 94, charPositionInLine = 13
+Reference: Object = test_ins_null (TABLE), action = CREATE, line number = 95, charPositionInLine = 13
+Reference: Object = binary_op_mono1 (TABLE), action = CREATE, line number = 96, charPositionInLine = 13
+Reference: Object = db_asterisk (SCHEMA), action = null, line number = 97, charPositionInLine = 13
+Reference: Object = db_asterisk.* (TABLE), action = CREATE, line number = 97, charPositionInLine = 25
+Reference: Object = tbl (TABLE), action = CREATE, line number = 99, charPositionInLine = 13
+Reference: Object = t36 (TABLE), action = CREATE, line number = 100, charPositionInLine = 13
+Reference: Object = t37 (TABLE), action = CREATE, line number = 101, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE_1:Identifier} (SCHEMA), action = null, line number = 102, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE_1:Identifier}.data_02716_3 (TABLE), action = CREATE, line number = 102, charPositionInLine = 48
+Reference: Object = cc (TABLE), action = CREATE, line number = 103, charPositionInLine = 13
+Reference: Object = t02006 (TABLE), action = CREATE, line number = 104, charPositionInLine = 13
+Reference: Object = tab (TABLE), action = CREATE, line number = 105, charPositionInLine = 13
+Reference: Object = src (TABLE), action = CREATE, line number = 106, charPositionInLine = 23
+Reference: Object = sample_incorrect (TABLE), action = CREATE, line number = 107, charPositionInLine = 27
+Reference: Object = mmm (TABLE), action = CREATE, line number = 108, charPositionInLine = 13
+Reference: Object = tab (TABLE), action = CREATE, line number = 109, charPositionInLine = 13
+Reference: Object = test_parallel_index (TABLE), action = CREATE, line number = 110, charPositionInLine = 13
+Reference: Object = test_table (TABLE), action = CREATE, line number = 111, charPositionInLine = 13
+Reference: Object = tp (TABLE), action = CREATE, line number = 112, charPositionInLine = 13
+Reference: Object = ignore_auto_increment (TABLE), action = CREATE, line number = 113, charPositionInLine = 13
+Reference: Object = ignore_auto_increment (TABLE), action = CREATE, line number = 114, charPositionInLine = 13
+Reference: Object = sales (TABLE), action = CREATE, line number = 115, charPositionInLine = 13
+Reference: Object = src (TABLE), action = CREATE, line number = 116, charPositionInLine = 13
+Reference: Object = enum (TABLE), action = CREATE, line number = 117, charPositionInLine = 13
+Reference: Object = t_ttl_non_deterministic (TABLE), action = CREATE, line number = 118, charPositionInLine = 13
+Reference: Object = tdm (TABLE), action = CREATE, line number = 119, charPositionInLine = 13
+Reference: Object = test2 (TABLE), action = CREATE, line number = 120, charPositionInLine = 13
+Reference: Object = producer_02366 (TABLE), action = CREATE, line number = 121, charPositionInLine = 13
+Reference: Object = ttl (TABLE), action = CREATE, line number = 122, charPositionInLine = 13
+Reference: Object = t_json (TABLE), action = CREATE, line number = 123, charPositionInLine = 13
+Reference: Object = foo (TABLE), action = CREATE, line number = 124, charPositionInLine = 13
+Reference: Object = projection_without_key (TABLE), action = CREATE, line number = 125, charPositionInLine = 13
+Reference: Object = {new_db_name:Identifier} (SCHEMA), action = null, line number = 127, charPositionInLine = 13
+Reference: Object = {new_db_name:Identifier}.{old_tbl_name:Identifier} (TABLE), action = CREATE, line number = 127, charPositionInLine = 38
+Reference: Object = tab (TABLE), action = CREATE, line number = 128, charPositionInLine = 13
+Reference: Object = lol (TABLE), action = CREATE, line number = 130, charPositionInLine = 13
+Reference: Object = tab (TABLE), action = CREATE, line number = 131, charPositionInLine = 13
+Reference: Object = t1 (TABLE), action = CREATE, line number = 132, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 133, charPositionInLine = 13
+Reference: Object = p (TABLE), action = CREATE, line number = 134, charPositionInLine = 13
+Reference: Object = t_map (TABLE), action = CREATE, line number = 135, charPositionInLine = 13
+Reference: Object = substitute_udf (TABLE), action = CREATE, line number = 136, charPositionInLine = 13
+Reference: Object = delta_codec_synthetic (TABLE), action = CREATE, line number = 137, charPositionInLine = 13
+Reference: Object = table2 (TABLE), action = CREATE, line number = 138, charPositionInLine = 13
+Reference: Object = t0 (TABLE), action = CREATE, line number = 139, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 140, charPositionInLine = 13
+Reference: Object = data_01643 (TABLE), action = CREATE, line number = 141, charPositionInLine = 13
+Reference: Object = t_bad_constraint (TABLE), action = CREATE, line number = 145, charPositionInLine = 13
+Reference: Object = pl (TABLE), action = CREATE, line number = 151, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 157, charPositionInLine = 13
+Reference: Object = ttl (TABLE), action = CREATE, line number = 161, charPositionInLine = 13
+Reference: Object = undrop_no_uuid_on_cluster (TABLE), action = CREATE, line number = 166, charPositionInLine = 13
+Reference: Object = a (TABLE), action = CREATE, line number = 170, charPositionInLine = 13
+Reference: Object = dummy (TABLE), action = CREATE, line number = 174, charPositionInLine = 13
+Reference: Object = .inner_id.e15f3ab5-6cae-4df3-b879-f40deafd82c2 (TABLE), action = CREATE, line number = 179, charPositionInLine = 13
+Reference: Object = d (TABLE), action = CREATE, line number = 185, charPositionInLine = 13
+Reference: Object = fat_granularity (TABLE), action = CREATE, line number = 190, charPositionInLine = 13
+Reference: Object = test_01676 (SCHEMA), action = null, line number = 196, charPositionInLine = 13
+Reference: Object = test_01676.table (TABLE), action = CREATE, line number = 196, charPositionInLine = 24
+Reference: Object = ignore_auto_increment (TABLE), action = CREATE, line number = 202, charPositionInLine = 13
+Reference: Object = tab (TABLE), action = CREATE, line number = 203, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 207, charPositionInLine = 13
+Reference: Object = column_swap_test_test (TABLE), action = CREATE, line number = 213, charPositionInLine = 13
+Reference: Object = event_types (TABLE), action = CREATE, line number = 220, charPositionInLine = 13
+Reference: Object = t_ttl_move_if_exists (TABLE), action = CREATE, line number = 225, charPositionInLine = 13
+Reference: Object = too_many_parts (TABLE), action = CREATE, line number = 230, charPositionInLine = 13
+Reference: Object = ip_part_test (TABLE), action = CREATE, line number = 234, charPositionInLine = 13
+Reference: Object = table (TABLE), action = CREATE, line number = 240, charPositionInLine = 13
+Reference: Object = table_key (TABLE), action = CREATE, line number = 245, charPositionInLine = 13
+Reference: Object = ttl_00933_2 (TABLE), action = CREATE, line number = 249, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 255, charPositionInLine = 13
+Reference: Object = source_data (TABLE), action = CREATE, line number = 260, charPositionInLine = 13
+Reference: Object = null_01016 (TABLE), action = CREATE, line number = 268, charPositionInLine = 27
+Reference: Object = parsed_eph (TABLE), action = CREATE, line number = 272, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 278, charPositionInLine = 13
+Reference: Object = click_storage (TABLE), action = CREATE, line number = 283, charPositionInLine = 13
+Reference: Object = column_swap_test_test (TABLE), action = CREATE, line number = 288, charPositionInLine = 13
+Reference: Object = legacy_column_name_of_tuple_literal (TABLE), action = CREATE, line number = 295, charPositionInLine = 13
+Reference: Object = t_nested_with_dots (TABLE), action = CREATE, line number = 301, charPositionInLine = 13
+Reference: Object = t_skip_index_in (TABLE), action = CREATE, line number = 305, charPositionInLine = 13
+Reference: Object = ttl (TABLE), action = CREATE, line number = 312, charPositionInLine = 13
+Reference: Object = t0 (TABLE), action = CREATE, line number = 317, charPositionInLine = 13
+Reference: Object = merge_tree (TABLE), action = CREATE, line number = 318, charPositionInLine = 13
+Reference: Object = default_table (TABLE), action = CREATE, line number = 322, charPositionInLine = 13
+Reference: Object = mytable (TABLE), action = CREATE, line number = 328, charPositionInLine = 13
+Reference: Object = t2 (TABLE), action = CREATE, line number = 336, charPositionInLine = 13
+Reference: Object = github_events (TABLE), action = CREATE, line number = 337, charPositionInLine = 13
+Reference: Object = t_s3_compressed_blocks (TABLE), action = CREATE, line number = 338, charPositionInLine = 13
+Reference: Object = test_a (TABLE), action = CREATE, line number = 343, charPositionInLine = 13
+Reference: Object = uuid (TABLE), action = CREATE, line number = 349, charPositionInLine = 27
+Reference: Object = primary (TABLE), action = CREATE, line number = 355, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 359, charPositionInLine = 13
+Reference: Object = .inner_id.e15f3ab5-6cae-4df3-b879-f40deafd82c2 (TABLE), action = CREATE, line number = 365, charPositionInLine = 13
+Reference: Object = test_byte_size_more_complex (TABLE), action = CREATE, line number = 371, charPositionInLine = 13
+Reference: Object = nested (TABLE), action = CREATE, line number = 387, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 391, charPositionInLine = 13
+Reference: Object = ttl_where (TABLE), action = CREATE, line number = 395, charPositionInLine = 13
+Reference: Object = t_02809 (TABLE), action = CREATE, line number = 400, charPositionInLine = 13
+Reference: Object = test_02381 (TABLE), action = CREATE, line number = 406, charPositionInLine = 13
+Reference: Object = data_01809 (TABLE), action = CREATE, line number = 411, charPositionInLine = 13
+Reference: Object = tab (TABLE), action = CREATE, line number = 415, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 422, charPositionInLine = 13
+Reference: Object = cast (TABLE), action = CREATE, line number = 431, charPositionInLine = 13
+Reference: Object = test02910_second (TABLE), action = CREATE, line number = 436, charPositionInLine = 13
+Reference: Object = merge_tree_table (TABLE), action = CREATE, line number = 443, charPositionInLine = 13
+Reference: Object = recompression_table_compact (TABLE), action = CREATE, line number = 452, charPositionInLine = 13
+Reference: Object = tbl (TABLE), action = CREATE, line number = 462, charPositionInLine = 13
+Reference: Object = table_for_rename (TABLE), action = CREATE, line number = 474, charPositionInLine = 13
+Reference: Object = multidimensional (TABLE), action = CREATE, line number = 485, charPositionInLine = 13
+Reference: Object = large_alter_table_00804 (TABLE), action = CREATE, line number = 491, charPositionInLine = 13
+Reference: Object = Test (TABLE), action = CREATE, line number = 497, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 503, charPositionInLine = 13
+Reference: Object = t (TABLE), action = CREATE, line number = 517, charPositionInLine = 13
+Reference: Object = t1_r1 (TABLE), action = CREATE, line number = 525, charPositionInLine = 13
+Reference: Object = test_01148_atomic (SCHEMA), action = null, line number = 526, charPositionInLine = 13
+Reference: Object = test_01148_atomic.rmt2 (TABLE), action = CREATE, line number = 526, charPositionInLine = 31
+Reference: Object = trunc (TABLE), action = CREATE, line number = 531, charPositionInLine = 13
+Reference: Object = cast2 (TABLE), action = CREATE, line number = 532, charPositionInLine = 13
+Reference: Object = replicated_mutations_empty_partitions (TABLE), action = CREATE, line number = 533, charPositionInLine = 13
+Reference: Object = replicated_merge_tree_with_sampling (TABLE), action = CREATE, line number = 538, charPositionInLine = 13
+Reference: Object = summing_r1 (TABLE), action = CREATE, line number = 549, charPositionInLine = 13
+Reference: Object = rename1 (TABLE), action = CREATE, line number = 557, charPositionInLine = 13
+Reference: Object = replicated_aggregating_merge_tree (TABLE), action = CREATE, line number = 565, charPositionInLine = 13
+Reference: Object = data_rep_02228 (TABLE), action = CREATE, line number = 576, charPositionInLine = 13
+Reference: Object = table_with_version_replicated_1 (TABLE), action = CREATE, line number = 584, charPositionInLine = 13
+Reference: Object = t4_r_ok (TABLE), action = CREATE, line number = 593, charPositionInLine = 13
+Reference: Object = rhs (TABLE), action = CREATE, line number = 604, charPositionInLine = 27
+Reference: Object = primary_key_test (TABLE), action = CREATE, line number = 605, charPositionInLine = 13
+Reference: Object = t (TABLE), action = CREATE, line number = 612, charPositionInLine = 13
+Reference: Object = pk_func (TABLE), action = CREATE, line number = 620, charPositionInLine = 13
+Reference: Object = summing_merge_tree (TABLE), action = CREATE, line number = 621, charPositionInLine = 13
+Reference: Object = default (SCHEMA), action = null, line number = 627, charPositionInLine = 13
+Reference: Object = default.derived_metrics_local (TABLE), action = CREATE, line number = 627, charPositionInLine = 21
+Reference: Object = t1 (TABLE), action = CREATE, line number = 641, charPositionInLine = 13
+Reference: Object = signed_table (TABLE), action = CREATE, line number = 644, charPositionInLine = 13
+Reference: Object = table_with_version (TABLE), action = CREATE, line number = 648, charPositionInLine = 13
+Reference: Object = test_graphite (TABLE), action = CREATE, line number = 657, charPositionInLine = 13
+Reference: Object = application_logs (TABLE), action = CREATE, line number = 666, charPositionInLine = 13
+Reference: Object = m (TABLE), action = CREATE, line number = 686, charPositionInLine = 13
+Reference: Object = log (TABLE), action = CREATE, line number = 687, charPositionInLine = 13
+Reference: Object = float (TABLE), action = CREATE, line number = 688, charPositionInLine = 13
+Reference: Object = local_t (TABLE), action = CREATE, line number = 689, charPositionInLine = 13
+Reference: Object = tmp2 (TABLE), action = CREATE, line number = 690, charPositionInLine = 23
+Reference: Object = undrop_log (TABLE), action = CREATE, line number = 691, charPositionInLine = 13
+Reference: Object = t3 (TABLE), action = CREATE, line number = 692, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, line number = 693, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.test_log (TABLE), action = CREATE, line number = 693, charPositionInLine = 46
+Reference: Object = test_2554_log (TABLE), action = CREATE, line number = 694, charPositionInLine = 13
+Reference: Object = constrained (TABLE), action = CREATE, line number = 697, charPositionInLine = 13
+Reference: Object = t (TABLE), action = CREATE, line number = 705, charPositionInLine = 13
+Reference: Object = numbers_squashed (TABLE), action = CREATE, line number = 706, charPositionInLine = 13
+Reference: Object = t (TABLE), action = CREATE, line number = 709, charPositionInLine = 13
+Reference: Object = tmp (TABLE), action = CREATE, line number = 710, charPositionInLine = 13
+Reference: Object = order (TABLE), action = CREATE, line number = 711, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, line number = 712, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.A (TABLE), action = CREATE, line number = 712, charPositionInLine = 46
+Reference: Object = constraint_on_nullable_type (TABLE), action = CREATE, line number = 713, charPositionInLine = 13
+Reference: Object = constraint_test_transitivity3 (TABLE), action = CREATE, line number = 714, charPositionInLine = 13
+Reference: Object = constraint_constant_number_expression (TABLE), action = CREATE, line number = 721, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 730, charPositionInLine = 13
+Reference: Object = test_table_hdfs_syntax (TABLE), action = CREATE, line number = 733, charPositionInLine = 13
+Reference: Object = test_02245 (TABLE), action = CREATE, line number = 736, charPositionInLine = 13
+Reference: Object = test_02481_mismatch_files (TABLE), action = CREATE, line number = 737, charPositionInLine = 13
+Reference: Object = test_02245_s3_nested_orc1 (TABLE), action = CREATE, line number = 742, charPositionInLine = 13
+Reference: Object = dist (TABLE), action = CREATE, line number = 754, charPositionInLine = 13
+Reference: Object = dist (TABLE), action = CREATE, line number = 755, charPositionInLine = 13
+Reference: Object = td (TABLE), action = CREATE, line number = 756, charPositionInLine = 13
+Reference: Object = tt7 (TABLE), action = CREATE, line number = 757, charPositionInLine = 13
+Reference: Object = inner_distributed (TABLE), action = CREATE, line number = 758, charPositionInLine = 13
+Reference: Object = outer_distributed (TABLE), action = CREATE, line number = 759, charPositionInLine = 13
+Reference: Object = dist_01850 (TABLE), action = CREATE, line number = 760, charPositionInLine = 13
+Reference: Object = test_dictionary_view (TABLE), action = CREATE, line number = 766, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, line number = 771, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.table_from_ip_trie_dict (TABLE), action = CREATE, line number = 771, charPositionInLine = 46
+Reference: Object = merge_tf (TABLE), action = CREATE, line number = 779, charPositionInLine = 13
+Reference: Object = A_M (TABLE), action = CREATE, line number = 780, charPositionInLine = 13
+Reference: Object = test_merge (TABLE), action = CREATE, line number = 781, charPositionInLine = 13
+Reference: Object = merge (TABLE), action = CREATE, line number = 782, charPositionInLine = 13
+Reference: Object = db (SCHEMA), action = null, line number = 783, charPositionInLine = 13
+Reference: Object = db.t_merge1 (TABLE), action = CREATE, line number = 783, charPositionInLine = 16
+Reference: Object = merged (TABLE), action = CREATE, line number = 784, charPositionInLine = 13
+Reference: Object = merge (TABLE), action = CREATE, line number = 785, charPositionInLine = 13
+Reference: Object = db (SCHEMA), action = null, line number = 786, charPositionInLine = 13
+Reference: Object = db.t_merge (TABLE), action = CREATE, line number = 786, charPositionInLine = 16
+Reference: Object = m (TABLE), action = CREATE, line number = 787, charPositionInLine = 13
+Reference: Object = m (TABLE), action = CREATE, line number = 788, charPositionInLine = 13
+Reference: Object = merge_table (TABLE), action = CREATE, line number = 789, charPositionInLine = 13
+Reference: Object = t_merge (TABLE), action = CREATE, line number = 790, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 793, charPositionInLine = 13
+Reference: Object = file (TABLE), action = CREATE, line number = 794, charPositionInLine = 13
+Reference: Object = f (TABLE), action = CREATE, line number = 795, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 796, charPositionInLine = 13
+Reference: Object = table_MySQLWire (TABLE), action = CREATE, line number = 797, charPositionInLine = 13
+Reference: Object = file (TABLE), action = CREATE, line number = 798, charPositionInLine = 13
+Reference: Object = table_tsv_01375 (TABLE), action = CREATE, line number = 799, charPositionInLine = 13
+Reference: Object = test_02312 (TABLE), action = CREATE, line number = 800, charPositionInLine = 13
+Reference: Object = file (TABLE), action = CREATE, line number = 801, charPositionInLine = 13
+Reference: Object = file_02184 (TABLE), action = CREATE, line number = 802, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 803, charPositionInLine = 13
+Reference: Object = json (TABLE), action = CREATE, line number = 804, charPositionInLine = 13
+Reference: Object = file_delim (TABLE), action = CREATE, line number = 805, charPositionInLine = 13
+Reference: Object = test_02152 (TABLE), action = CREATE, line number = 810, charPositionInLine = 13
+Reference: Object = test_02152 (TABLE), action = CREATE, line number = 819, charPositionInLine = 13
+Reference: Object = t (TABLE), action = CREATE, line number = 834, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, line number = 835, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.A (TABLE), action = CREATE, line number = 835, charPositionInLine = 46
+Reference: Object = test (TABLE), action = CREATE, line number = 836, charPositionInLine = 13
+Reference: Object = set (TABLE), action = CREATE, line number = 840, charPositionInLine = 13
+Reference: Object = set (TABLE), action = CREATE, line number = 841, charPositionInLine = 13
+Reference: Object = set (TABLE), action = CREATE, line number = 842, charPositionInLine = 13
+Reference: Object = kv (TABLE), action = CREATE, line number = 845, charPositionInLine = 13
+Reference: Object = j (TABLE), action = CREATE, line number = 846, charPositionInLine = 13
+Reference: Object = t2 (TABLE), action = CREATE, line number = 847, charPositionInLine = 13
+Reference: Object = left_join (TABLE), action = CREATE, line number = 848, charPositionInLine = 13
+Reference: Object = semi_left_join (TABLE), action = CREATE, line number = 849, charPositionInLine = 13
+Reference: Object = anti_right_join (TABLE), action = CREATE, line number = 850, charPositionInLine = 13
+Reference: Object = t2 (TABLE), action = CREATE, line number = 851, charPositionInLine = 13
+Reference: Object = join (TABLE), action = CREATE, line number = 852, charPositionInLine = 13
+Reference: Object = full_join (TABLE), action = CREATE, line number = 853, charPositionInLine = 13
+Reference: Object = test_table_url_syntax (TABLE), action = CREATE, line number = 856, charPositionInLine = 13
+Reference: Object = test_table_url (TABLE), action = CREATE, line number = 857, charPositionInLine = 13
+Reference: Object = test_table_url (TABLE), action = CREATE, line number = 858, charPositionInLine = 13
+Reference: Object = test_table_url (TABLE), action = CREATE, line number = 859, charPositionInLine = 13
+Reference: Object = url (TABLE), action = CREATE, line number = 860, charPositionInLine = 13
+Reference: Object = url (TABLE), action = CREATE, line number = 864, charPositionInLine = 13
+Reference: Object = t2 (TABLE), action = CREATE, line number = 873, charPositionInLine = 13
+Reference: Object = t2 (TABLE), action = CREATE, line number = 874, charPositionInLine = 13
+Reference: Object = m (TABLE), action = CREATE, line number = 875, charPositionInLine = 13
+Reference: Object = join (TABLE), action = CREATE, line number = 876, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 877, charPositionInLine = 13
+Reference: Object = h3_indexes (TABLE), action = CREATE, line number = 880, charPositionInLine = 13
+Reference: Object = mann_whitney_test (TABLE), action = CREATE, line number = 881, charPositionInLine = 13
+Reference: Object = geo (TABLE), action = CREATE, line number = 882, charPositionInLine = 13
+Reference: Object = base (SCHEMA), action = null, line number = 884, charPositionInLine = 14
+Reference: Object = base.t1 (TABLE), action = CREATE, line number = 884, charPositionInLine = 19
+Reference: Object = analytics_events (TABLE), action = CREATE, line number = 887, charPositionInLine = 48
+Reference: Object = t02155_t64_tz (TABLE), action = CREATE, line number = 898, charPositionInLine = 13
+Reference: Object = t1 (TABLE), action = CREATE, line number = 899, charPositionInLine = 13
+Reference: Object = table_with_cyclic_defaults (TABLE), action = CREATE, line number = 900, charPositionInLine = 13
+Reference: Object = t_00477 (TABLE), action = CREATE, line number = 901, charPositionInLine = 23
+Reference: Object = t (TABLE), action = CREATE, line number = 902, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, line number = 903, charPositionInLine = 27
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.r2 (TABLE), action = CREATE, line number = 903, charPositionInLine = 60
+Reference: Object = tuple (TABLE), action = CREATE, line number = 904, charPositionInLine = 13
+Reference: Object = defaulted (TABLE), action = CREATE, line number = 905, charPositionInLine = 13
+Reference: Object = polygons_01862 (TABLE), action = CREATE, line number = 906, charPositionInLine = 13
+Reference: Object = default_constraints (TABLE), action = CREATE, line number = 907, charPositionInLine = 13
+Reference: Object = test_query_log_factories_info1 (SCHEMA), action = null, line number = 908, charPositionInLine = 24
+Reference: Object = test_query_log_factories_info1.memory_table (TABLE), action = CREATE, line number = 908, charPositionInLine = 55
+Reference: Object = t_constraints_where (TABLE), action = CREATE, line number = 909, charPositionInLine = 13
+Reference: Object = floats (TABLE), action = CREATE, line number = 916, charPositionInLine = 13
+Reference: Object = ints (TABLE), action = CREATE, line number = 917, charPositionInLine = 13
+Reference: Object = model (TABLE), action = CREATE, line number = 928, charPositionInLine = 13
+Reference: Object = test_table_nullable (TABLE), action = CREATE, line number = 929, charPositionInLine = 13
+Reference: Object = decimal (TABLE), action = CREATE, line number = 934, charPositionInLine = 27
+Reference: Object = database_for_dict (SCHEMA), action = null, line number = 943, charPositionInLine = 13
+Reference: Object = database_for_dict.table_for_dict (TABLE), action = CREATE, line number = 943, charPositionInLine = 31
+Reference: Object = dict_data (TABLE), action = CREATE, line number = 949, charPositionInLine = 13
+Reference: Object = decimal (TABLE), action = CREATE, line number = 958, charPositionInLine = 27
+Reference: Object = data (TABLE), action = CREATE, line number = 967, charPositionInLine = 23
+Reference: Object = unsigned_types (TABLE), action = CREATE, line number = 971, charPositionInLine = 13
+Reference: Object = arrays_02735 (TABLE), action = CREATE, line number = 986, charPositionInLine = 13
+Reference: Object = geo_linestring (TABLE), action = CREATE, line number = 988, charPositionInLine = 13
+Reference: Object = geo_multilinestring (TABLE), action = CREATE, line number = 989, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 990, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 991, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 992, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 993, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 994, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 995, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 996, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 997, charPositionInLine = 13
+Reference: Object = buf (TABLE), action = CREATE, line number = 1000, charPositionInLine = 13
+Reference: Object = mytable (TABLE), action = CREATE, line number = 1001, charPositionInLine = 13
+Reference: Object = test_buffer_table (TABLE), action = CREATE, line number = 1005, charPositionInLine = 13
+Reference: Object = buffer_01277 (TABLE), action = CREATE, line number = 1009, charPositionInLine = 13
+Reference: Object = buffer_01256 (TABLE), action = CREATE, line number = 1010, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, line number = 1011, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.mt_buffer_00158 (TABLE), action = CREATE, line number = 1011, charPositionInLine = 46
+Reference: Object = t_random_1 (TABLE), action = CREATE, line number = 1018, charPositionInLine = 13
+Reference: Object = test_table_2 (TABLE), action = CREATE, line number = 1020, charPositionInLine = 13
+Reference: Object = rng (TABLE), action = CREATE, line number = 1026, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 1036, charPositionInLine = 13
+Reference: Object = test (TABLE), action = CREATE, line number = 1041, charPositionInLine = 13
+Reference: Object = log (TABLE), action = CREATE, line number = 1048, charPositionInLine = 13
+Reference: Object = t3 (TABLE), action = CREATE, line number = 1051, charPositionInLine = 13
+Reference: Object = t3_00519 (TABLE), action = CREATE, line number = 1052, charPositionInLine = 23
+Reference: Object = test_table_noarg (TABLE), action = CREATE, line number = 1053, charPositionInLine = 13
+Reference: Object = test_table_valid_args (TABLE), action = CREATE, line number = 1054, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, line number = 1055, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.tablefunc03 (TABLE), action = CREATE, line number = 1055, charPositionInLine = 46
+Reference: Object = test_table (TABLE), action = CREATE, line number = 1056, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, line number = 1057, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.tablefunc02 (TABLE), action = CREATE, line number = 1057, charPositionInLine = 46
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, line number = 1058, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.tablefunc04 (TABLE), action = CREATE, line number = 1058, charPositionInLine = 46
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, line number = 1059, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.tablefunc01 (TABLE), action = CREATE, line number = 1059, charPositionInLine = 46
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, line number = 1060, charPositionInLine = 13
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.tablefunc06 (TABLE), action = CREATE, line number = 1060, charPositionInLine = 46
+Reference: Object = t (TABLE), action = ALTER, line number = 1063, charPositionInLine = 12
+Reference: Object = ttl (TABLE), action = ALTER, line number = 1064, charPositionInLine = 12
+Reference: Object = tbl (TABLE), action = ALTER, line number = 1065, charPositionInLine = 12
+Reference: Object = x (TABLE), action = ALTER, line number = 1066, charPositionInLine = 12
+Reference: Object = test (TABLE), action = ALTER, line number = 1067, charPositionInLine = 12
+Reference: Object = ttl (TABLE), action = ALTER, line number = 1068, charPositionInLine = 12
+Reference: Object = src (TABLE), action = ALTER, line number = 1069, charPositionInLine = 12
+Reference: Object = t (TABLE), action = ALTER, line number = 1070, charPositionInLine = 12
+Reference: Object = t (TABLE), action = ALTER, line number = 1071, charPositionInLine = 12
+Reference: Object = prop_table (TABLE), action = ALTER, line number = 1072, charPositionInLine = 12
+Reference: Object = tp (TABLE), action = ALTER, line number = 1073, charPositionInLine = 12
+Reference: Object = rmt (TABLE), action = ALTER, line number = 1074, charPositionInLine = 12
+Reference: Object = t (TABLE), action = ALTER, line number = 1075, charPositionInLine = 12
+Reference: Object = mut (TABLE), action = ALTER, line number = 1076, charPositionInLine = 12
+Reference: Object = t (TABLE), action = ALTER, line number = 1077, charPositionInLine = 12
+Reference: Object = t1 (TABLE), action = ALTER, line number = 1078, charPositionInLine = 12
+Reference: Object = tmp (TABLE), action = ALTER, line number = 1079, charPositionInLine = 12
+Reference: Object = tp_1 (TABLE), action = ALTER, line number = 1080, charPositionInLine = 12
+Reference: Object = union2 (TABLE), action = ALTER, line number = 1081, charPositionInLine = 12
+Reference: Object = rmt1 (TABLE), action = ALTER, line number = 1082, charPositionInLine = 12
+Reference: Object = t (TABLE), action = ALTER, line number = 1083, charPositionInLine = 12
+Reference: Object = t (TABLE), action = ALTER, line number = 1084, charPositionInLine = 12
+Reference: Object = test (TABLE), action = ALTER, line number = 1085, charPositionInLine = 12
+Reference: Object = minmax_idx (TABLE), action = ALTER, line number = 1086, charPositionInLine = 12
+Reference: Object = t (TABLE), action = ALTER, line number = 1087, charPositionInLine = 12
+Reference: Object = trunc (TABLE), action = ALTER, line number = 1088, charPositionInLine = 12
+Reference: Object = t1 (TABLE), action = ALTER, line number = 1089, charPositionInLine = 12
+Reference: Object = rmt (TABLE), action = ALTER, line number = 1090, charPositionInLine = 12
+Reference: Object = test (TABLE), action = ALTER, line number = 1091, charPositionInLine = 12
+Reference: Object = tp (TABLE), action = ALTER, line number = 1092, charPositionInLine = 12
+Reference: Object = dst (TABLE), action = ALTER, line number = 1093, charPositionInLine = 12
+Reference: Object = dst (TABLE), action = ALTER, line number = 1094, charPositionInLine = 12
+Reference: Object = sqllt (SCHEMA), action = null, line number = 1095, charPositionInLine = 12
+Reference: Object = sqllt.table (TABLE), action = ALTER, line number = 1095, charPositionInLine = 18
+Reference: Object = t1 (TABLE), action = ALTER, line number = 1096, charPositionInLine = 12
+Reference: Object = partslost_0 (TABLE), action = ALTER, line number = 1097, charPositionInLine = 12
+Reference: Object = t (TABLE), action = ALTER, line number = 1098, charPositionInLine = 12
+Reference: Object = tab (TABLE), action = ALTER, line number = 1099, charPositionInLine = 12
+Reference: Object = idx (INDEX), action = CREATE, line number = 1099, charPositionInLine = 26
+Reference: Object = test_table (TABLE), action = ALTER, line number = 1100, charPositionInLine = 12
+Reference: Object = ttl (TABLE), action = ALTER, line number = 1101, charPositionInLine = 12
+Reference: Object = join_table_mutation (TABLE), action = ALTER, line number = 1102, charPositionInLine = 12
+Reference: Object = most_ordinary_mt (TABLE), action = ALTER, line number = 1103, charPositionInLine = 12
+Reference: Object = t (TABLE), action = ALTER, line number = 1104, charPositionInLine = 12
+Reference: Object = t (TABLE), action = ALTER, line number = 1105, charPositionInLine = 12
+Reference: Object = t1 (TABLE), action = ALTER, line number = 1106, charPositionInLine = 12
+Reference: Object = t_lwd_mutations (TABLE), action = ALTER, line number = 1107, charPositionInLine = 12
+Reference: Object = test (TABLE), action = ALTER, line number = 1108, charPositionInLine = 12
+Reference: Object = test (TABLE), action = ALTER, line number = 1109, charPositionInLine = 12
+Reference: Object = t1 (TABLE), action = ALTER, line number = 1110, charPositionInLine = 12
+Reference: Object = t_remove_sample_by (TABLE), action = ALTER, line number = 1111, charPositionInLine = 12
+Reference: Object = tab (TABLE), action = ALTER, line number = 1112, charPositionInLine = 12
+Reference: Object = idx (INDEX), action = CREATE, line number = 1112, charPositionInLine = 26
+Reference: Object = test (TABLE), action = ALTER, line number = 1113, charPositionInLine = 12
+Reference: Object = t (TABLE), action = ALTER, line number = 1114, charPositionInLine = 12
+Reference: Object = test (TABLE), action = ALTER, line number = 1115, charPositionInLine = 12
+Reference: Object = test5 (TABLE), action = ALTER, line number = 1116, charPositionInLine = 12
+Reference: Object = alter_test (TABLE), action = ALTER, line number = 1117, charPositionInLine = 12
+Reference: Object = prewhere (TABLE), action = ALTER, line number = 1118, charPositionInLine = 12
+Reference: Object = test (TABLE), action = ALTER, line number = 1119, charPositionInLine = 12
+Reference: Object = rmt (TABLE), action = ALTER, line number = 1120, charPositionInLine = 12
+Reference: Object = t_merge (TABLE), action = ALTER, line number = 1121, charPositionInLine = 12
+Reference: Object = tmp (TABLE), action = ALTER, line number = 1122, charPositionInLine = 12
+Reference: Object = x (TABLE), action = ALTER, line number = 1123, charPositionInLine = 12
+Reference: Object = alter_test (TABLE), action = ALTER, line number = 1124, charPositionInLine = 12
+Reference: Object = mut (TABLE), action = ALTER, line number = 1125, charPositionInLine = 12
+Reference: Object = rmt (TABLE), action = ALTER, line number = 1126, charPositionInLine = 12
+Reference: Object = t (TABLE), action = ALTER, line number = 1127, charPositionInLine = 12
+Reference: Object = t (TABLE), action = ALTER, line number = 1128, charPositionInLine = 12
+Reference: Object = null_before (TABLE), action = ALTER, line number = 1129, charPositionInLine = 12
+Reference: Object = test (TABLE), action = ALTER, line number = 1130, charPositionInLine = 12
+Reference: Object = table_two (TABLE), action = ALTER, line number = 1131, charPositionInLine = 12
+Reference: Object = minmax_compact (TABLE), action = ALTER, line number = 1132, charPositionInLine = 12
+Reference: Object = ttl (TABLE), action = ALTER, line number = 1133, charPositionInLine = 12
+Reference: Object = data (TABLE), action = ALTER, line number = 1134, charPositionInLine = 12
+Reference: Object = t (TABLE), action = ALTER, line number = 1135, charPositionInLine = 12
+Reference: Object = test (TABLE), action = ALTER, line number = 1136, charPositionInLine = 12
+Reference: Object = ttl (TABLE), action = ALTER, line number = 1137, charPositionInLine = 12
+Reference: Object = ttl_old_syntax (TABLE), action = ALTER, line number = 1138, charPositionInLine = 12
+Reference: Object = test (TABLE), action = ALTER, line number = 1139, charPositionInLine = 12
+Reference: Object = test_alter (TABLE), action = ALTER, line number = 1140, charPositionInLine = 12
+Reference: Object = add_table (TABLE), action = ALTER, line number = 1141, charPositionInLine = 12
+Reference: Object = aliases_test (TABLE), action = ALTER, line number = 1142, charPositionInLine = 12
+Reference: Object = sqllt (SCHEMA), action = null, line number = 1143, charPositionInLine = 12
+Reference: Object = sqllt.table (TABLE), action = ALTER, line number = 1143, charPositionInLine = 18
+Reference: Object = t (TABLE), action = ALTER, line number = 1145, charPositionInLine = 12
+Reference: Object = alter_test (TABLE), action = ALTER, line number = 1147, charPositionInLine = 12
+Reference: Object = alter_02834 (TABLE), action = ALTER, line number = 1150, charPositionInLine = 12
+Reference: Object = mv (TABLE), action = ALTER, line number = 1151, charPositionInLine = 12
+Reference: Object = clear_column1 (TABLE), action = ALTER, line number = 1157, charPositionInLine = 12
+Reference: Object = compress_table (TABLE), action = ALTER, line number = 1158, charPositionInLine = 12
+Reference: Object = prop_table (TABLE), action = ALTER, line number = 1159, charPositionInLine = 12
+Reference: Object = z (TABLE), action = ALTER, line number = 1160, charPositionInLine = 12
+Reference: Object = prop_table (TABLE), action = ALTER, line number = 1161, charPositionInLine = 12
+Reference: Object = prop_table (TABLE), action = ALTER, line number = 1162, charPositionInLine = 12
+Reference: Object = t_materialize_delete (TABLE), action = ALTER, line number = 1163, charPositionInLine = 12
+Reference: Object = mt_compact (TABLE), action = ALTER, line number = 1164, charPositionInLine = 12
+Reference: Object = t_light (TABLE), action = ALTER, line number = 1166, charPositionInLine = 12
+Reference: Object = table_for_reset_setting (TABLE), action = ALTER, line number = 1167, charPositionInLine = 12
+Reference: Object = rmt2 (TABLE), action = ALTER, line number = 1168, charPositionInLine = 12
+Reference: Object = mt_with_pk (TABLE), action = ALTER, line number = 1170, charPositionInLine = 12
+Reference: Object = idx1 (INDEX), action = CREATE, line number = 1170, charPositionInLine = 33
+Reference: Object = alter_test (TABLE), action = ALTER, line number = 1171, charPositionInLine = 12
+Reference: Object = replicated_constraints1 (TABLE), action = ALTER, line number = 1172, charPositionInLine = 12
+Reference: Object = replicated_constraints1.b_constraint (CONSTRAINT), action = CREATE, line number = 1172, charPositionInLine = 51
+Reference: Object = tmp_table_01818 (TABLE), action = ALTER, line number = 1173, charPositionInLine = 12
+Reference: Object = test_move_partition_src (TABLE), action = ALTER, line number = 1174, charPositionInLine = 12
+Reference: Object = ttl (TABLE), action = ALTER, line number = 1175, charPositionInLine = 12
+Reference: Object = sales (TABLE), action = ALTER, line number = 1176, charPositionInLine = 12
+Reference: Object = table_for_alter (TABLE), action = ALTER, line number = 1177, charPositionInLine = 12
+Reference: Object = test_02381_compress (TABLE), action = ALTER, line number = 1178, charPositionInLine = 12
+Reference: Object = x (TABLE), action = ALTER, line number = 1179, charPositionInLine = 12
+Reference: Object = nn (INDEX), action = CREATE, line number = 1179, charPositionInLine = 24
+Reference: Object = test4 (TABLE), action = ALTER, line number = 1180, charPositionInLine = 12
+Reference: Object = alter_compression_codec1 (TABLE), action = ALTER, line number = 1181, charPositionInLine = 12
+Reference: Object = t_mutations_nondeterministic (TABLE), action = ALTER, line number = 1182, charPositionInLine = 12
+Reference: Object = table_with_cyclic_defaults (TABLE), action = ALTER, line number = 1184, charPositionInLine = 12
+Reference: Object = add_table (TABLE), action = ALTER, line number = 1185, charPositionInLine = 12
+Reference: Object = replicated_table_detach_all1 (TABLE), action = ALTER, line number = 1186, charPositionInLine = 12
+Reference: Object = agg_table (TABLE), action = ALTER, line number = 1187, charPositionInLine = 12
+Reference: Object = check_query_comment_column (TABLE), action = ALTER, line number = 1188, charPositionInLine = 12
+Reference: Object = nr (TABLE), action = DROP, line number = 1191, charPositionInLine = 11
+Reference: Object = /t0 (TABLE), action = DROP, line number = 1192, charPositionInLine = 21
+Reference: Object = constrained (TABLE), action = DROP, line number = 1193, charPositionInLine = 21
+Reference: Object = t1 (TABLE), action = DROP, line number = 1194, charPositionInLine = 31
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier} (SCHEMA), action = null, line number = 1195, charPositionInLine = 11
+Reference: Object = {CLICKHOUSE_DATABASE:Identifier}.wv (TABLE), action = DROP, line number = 1195, charPositionInLine = 44
+Reference: Object = db (SCHEMA), action = null, line number = 1196, charPositionInLine = 21
+Reference: Object = db.example_complex_key_source (TABLE), action = DROP, line number = 1196, charPositionInLine = 24
+Reference: action = OPTIMIZE, line number = 1199, charPositionInLine = 0
+Reference: action = OPTIMIZE, line number = 1200, charPositionInLine = 0
+Reference: action = OPTIMIZE, line number = 1201, charPositionInLine = 0
+Reference: action = OPTIMIZE, line number = 1202, charPositionInLine = 0
+Reference: action = OPTIMIZE, line number = 1203, charPositionInLine = 0
+Reference: action = OPTIMIZE, line number = 1204, charPositionInLine = 0
+Reference: action = OPTIMIZE, line number = 1205, charPositionInLine = 0
+Reference: action = OPTIMIZE, line number = 1206, charPositionInLine = 0
+Reference: Object = t_empty_tuple (TABLE), action = CREATE, line number = 1207, charPositionInLine = 13
+Reference: Object = t_empty_tuple2 (TABLE), action = CREATE, line number = 1208, charPositionInLine = 13
+Reference: Object = test_table (TABLE), action = ALTER, line number = 1209, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, line number = 1210, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, line number = 1211, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, line number = 1212, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, line number = 1213, charPositionInLine = 12
+Reference: Object = test_table.c1 (CONSTRAINT), action = CREATE, line number = 1213, charPositionInLine = 52
+Reference: Object = test_table (TABLE), action = ALTER, line number = 1214, charPositionInLine = 12
+Reference: Object = test_table.c1 (CONSTRAINT), action = CREATE, line number = 1214, charPositionInLine = 52
+Reference: Object = t_constraint_new (TABLE), action = CREATE, line number = 1215, charPositionInLine = 13
+Reference: Object = test_table (TABLE), action = ALTER, line number = 1216, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, line number = 1217, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, line number = 1218, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, line number = 1219, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, line number = 1220, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, line number = 1221, charPositionInLine = 12
+Reference: Object = test_table (TABLE), action = ALTER, line number = 1222, charPositionInLine = 12

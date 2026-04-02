@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Fixed errors that caused tests to fail on Windows.
+
 ## [14.1.1] - 2026-03-25
 
 ### Changed

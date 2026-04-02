@@ -92,8 +92,8 @@ class PgExprTypeTest {
     private void runDiff(String fileNameTemplate, CoreSettings settings, String typesForCompare)
             throws InterruptedException, IOException {
         MetaContainer dbNew = loadAndAnalyze(fileNameTemplate, settings, FILES_POSTFIX.NEW_SQL);
-        Assertions.assertEquals(typesForCompare,
-                getRelationColumnsTypes(dbNew), "File: " + fileNameTemplate);
+        TestUtils.assertIgnoreNewLines(typesForCompare,
+                getRelationColumnsTypes(dbNew));
     }
 
     private MetaContainer loadAndAnalyze(String fileNameTemplate, CoreSettings settings, FILES_POSTFIX postfix)
