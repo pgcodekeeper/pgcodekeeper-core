@@ -49,7 +49,7 @@ import org.pgcodekeeper.core.database.pg.schema.PgSequence;
 import org.pgcodekeeper.core.database.pg.schema.PgTypedTable;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.script.SQLScript;
-import org.pgcodekeeper.core.settings.ISettings;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 /**
  * Core dependency resolution engine that determines database object changes required for schema migration.
@@ -101,15 +101,15 @@ public final class DepcyResolver {
 
     private final Map<String, Boolean> recreatedObjs = new HashMap<>();
 
-    private final ISettings settings;
+    private final DiffSettings diffSettings;
 
-    public DepcyResolver(IDatabase oldDatabase, IDatabase newDatabase, ISettings settings, Set<IStatement> toRefresh) {
+    public DepcyResolver(IDatabase oldDatabase, IDatabase newDatabase, DiffSettings diffSettings, Set<IStatement> toRefresh) {
         this.oldDb = oldDatabase;
         this.newDb = newDatabase;
         this.oldDepcyGraph = new DepcyGraph(oldDatabase);
         this.newDepcyGraph = new DepcyGraph(newDatabase);
         this.toRefresh = toRefresh;
-        this.settings = settings;
+        this.diffSettings = diffSettings;
     }
 
     private void fillObjects(List<DbObject> objects) {
@@ -574,11 +574,11 @@ public final class DepcyResolver {
     }
 
     private ObjectState getObjectState(IStatement oldSt, IStatement newSt) {
-        return states.computeIfAbsent(oldSt, x -> oldSt.appendAlterSQL(newSt, new SQLScript(settings, newSt.getSeparator())));
+        return states.computeIfAbsent(oldSt, x -> oldSt.appendAlterSQL(newSt, new SQLScript(diffSettings, newSt.getSeparator())));
     }
 
     private Boolean getRecreatedObj(ITable oldTable, ITable newTable) {
-        return recreatedObjs.computeIfAbsent(oldTable.getQualifiedName(), x -> oldTable.isRecreated(newTable, settings));
+        return recreatedObjs.computeIfAbsent(oldTable.getQualifiedName(), x -> oldTable.isRecreated(newTable, diffSettings.getSettings()));
     }
 
     public static Set<ActionContainer> resolve(IDatabase oldDb,
@@ -587,8 +587,8 @@ public final class DepcyResolver {
                                                List<Entry<IStatement, IStatement>> additionalDependenciesNewDb,
                                                Set<IStatement> toRefresh,
                                                List<DbObject> dbObjects,
-                                               ISettings settings) {
-        DepcyResolver depRes = new DepcyResolver(oldDb, newDb, settings, toRefresh);
+                                               DiffSettings diffSettings) {
+        DepcyResolver depRes = new DepcyResolver(oldDb, newDb, diffSettings, toRefresh);
         depRes.oldDepcyGraph.addCustomDepcies(additionalDependenciesOldDb);
         depRes.newDepcyGraph.addCustomDepcies(additionalDependenciesNewDb);
         depRes.fillObjects(dbObjects);

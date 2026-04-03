@@ -21,6 +21,7 @@ import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
 import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.io.IOException;
@@ -110,7 +111,7 @@ public abstract class AbstractOverridesModelExporter extends AbstractModelExport
 
     @Override
     public String getDumpSql(IStatement st) {
-        SQLScript script = new SQLScript(settings, st.getSeparator());
+        SQLScript script = new SQLScript(new DiffSettings(settings), st.getSeparator());
         Set<IPrivilege> privs = st.getPrivileges();
         st.appendOwnerSQL(script);
         IPrivilege.appendPrivileges(privs, script);

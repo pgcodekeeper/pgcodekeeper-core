@@ -36,7 +36,7 @@ public class MsScriptBuilder extends AbstractScriptBuilder {
     @Override
     protected String getScript(Set<ActionContainer> actions, Set<IStatement> toRefresh, List<TreeElement> selected,
             IDatabase oldDb, IDatabase newDb) {
-        SQLScript script = new SQLScript(getSettings(), newDb.getSeparator());
+        SQLScript script = new SQLScript(diffSettings, newDb.getSeparator());
         if (getSettings().isAddTransaction()) {
             script.addStatement("BEGIN TRANSACTION", SQLActionType.BEGIN); //$NON-NLS-1$
         }

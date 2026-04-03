@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.script;
 
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.EnumMap;
@@ -30,7 +31,7 @@ import java.util.stream.Collectors;
  */
 public final class SQLScript {
 
-    private final ISettings settings;
+    private final DiffSettings diffSettings;
     private final String separator;
 
     private static final String DELIMITER = "\n\n";
@@ -42,11 +43,11 @@ public final class SQLScript {
     /**
      * Creates a new SQL script builder with specified settings.
      *
-     * @param settings the settings containing database type and formatting options
+     * @param diffSettings the settings containing database type and formatting options
      * @param separator - statement separator
      */
-    public SQLScript(ISettings settings, String separator) {
-        this.settings = settings;
+    public SQLScript(DiffSettings diffSettings, String separator) {
+        this.diffSettings = diffSettings;
         this.separator = separator;
     }
     /**
@@ -56,7 +57,7 @@ public final class SQLScript {
      * @param comment the comment text to add
      */
     public void addCommentStatement(String comment) {
-        addStatement(comment, settings.isCommentsToEnd() ? SQLActionType.POST : SQLActionType.MID);
+        addStatement(comment, diffSettings.getSettings().isCommentsToEnd() ? SQLActionType.POST : SQLActionType.MID);
     }
 
     /**
@@ -186,6 +187,15 @@ public final class SQLScript {
      * @return the settings instance
      */
     public ISettings getSettings() {
-        return settings;
+        return diffSettings.getSettings();
+    }
+
+    /**
+     * Returns the diffSettings used by this script.
+     *
+     * @return the diffSettings instance
+     */
+    public DiffSettings getDiffSettings() {
+        return diffSettings;
     }
 }

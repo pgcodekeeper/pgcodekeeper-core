@@ -47,7 +47,7 @@ public abstract class AbstractScriptBuilder implements IScriptBuilder {
 
     private static final String EMPTY_SCRIPT = ""; // $NON-NLS-1$
 
-    private final DiffSettings diffSettings;
+    protected final DiffSettings diffSettings;
 
     /**
      * Creates a new AbstractScriptBuilder instance with the specified settings.
@@ -110,7 +110,7 @@ public abstract class AbstractScriptBuilder implements IScriptBuilder {
             objects.add(new DbObject(oldStatement, newStatement));
         }
         return DepcyResolver.resolve(oldDb, newDb, additionalDependenciesOldDb, additionalDependenciesNewDb, toRefresh,
-                objects, getSettings());
+                objects, diffSettings);
     }
 
     @Deprecated

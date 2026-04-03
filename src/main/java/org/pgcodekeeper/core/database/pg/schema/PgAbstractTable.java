@@ -90,7 +90,7 @@ public abstract class PgAbstractTable extends PgAbstractStatementContainer imple
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
 
-        SQLScript temp = new SQLScript(script.getSettings(), getSeparator());
+        SQLScript temp = new SQLScript(script.getDiffSettings(), getSeparator());
 
         appendName(sbSQL, script.getSettings());
         appendColumns(sbSQL, temp);

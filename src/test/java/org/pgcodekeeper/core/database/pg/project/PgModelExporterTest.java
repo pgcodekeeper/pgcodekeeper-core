@@ -61,7 +61,7 @@ class PgModelExporterTest {
         // check that exporter generate script is equals generated script with default settings
         Assertions.assertEquals(getCreationSQL(stmt), actual, "this should be equals");
 
-        var script = new SQLScript(settings, db.getSeparator());
+        var script = new SQLScript(new DiffSettings(settings), db.getSeparator());
         stmt.getCreationSQL(script);
 
         // check that exporter generates script is not equals generated script with user settings
@@ -88,7 +88,7 @@ class PgModelExporterTest {
      * @return - generated script
      */
     private String getCreationSQL(IStatement statement) {
-        var script = new SQLScript(new CoreSettings(), statement.getSeparator());
+        var script = new SQLScript(new DiffSettings(new CoreSettings()), statement.getSeparator());
         statement.getCreationSQL(script);
         return script.getFullScript();
     }
