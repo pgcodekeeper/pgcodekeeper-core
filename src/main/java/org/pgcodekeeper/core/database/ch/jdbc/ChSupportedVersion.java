@@ -49,6 +49,10 @@ public enum ChSupportedVersion implements ISupportedVersion {
         return text;
     }
 
+    public static ISupportedVersion getDefaultVersion() {
+        return DEFAULT;
+    }
+
     /**
      * Returns the highest supported version that is less than or equal to the specified version.
      * If no matching version is found, returns DEFAULT as the default.

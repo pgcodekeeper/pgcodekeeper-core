@@ -25,7 +25,6 @@ import org.pgcodekeeper.core.database.base.parser.ScriptParser;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.DiffSettings;
-import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.io.ByteArrayInputStream;
@@ -38,14 +37,14 @@ public abstract class JdbcLoaderTest {
     public static final String CLEAN_DB_SCRIPT = "clean db script";
 
     protected void clearDb(CoreSettings settings, IDatabase startConfDb,
-                           IJdbcConnector connector, String url, IDatabaseProvider databaseProvider)
+                           IJdbcConnector connector, String url, IDatabaseProvider databaseProvider,
+                           DiffSettings diffSettings)
             throws IOException, InterruptedException, SQLException {
-        var diffSettings = new DiffSettings(settings);
         var oldDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
         var dropScript = PgCodeKeeperApi.diff(databaseProvider, oldDb, startConfDb, diffSettings);
 
         var loader = createDumpLoader(() -> new ByteArrayInputStream(dropScript.getBytes(StandardCharsets.UTF_8)),
-                CLEAN_DB_SCRIPT, settings, databaseProvider);
+                CLEAN_DB_SCRIPT, diffSettings);
         new JdbcRunner(new NullMonitor()).runBatches(connector,
                 new ScriptParser(loader, CLEAN_DB_SCRIPT, dropScript).batch(), null);
 
@@ -57,5 +56,5 @@ public abstract class JdbcLoaderTest {
     }
 
     protected abstract IDumpLoader createDumpLoader(InputStreamProvider input, String inputObjectName,
-            ISettings settings, IDatabaseProvider databaseProvider);
+            DiffSettings diffSettings);
 }

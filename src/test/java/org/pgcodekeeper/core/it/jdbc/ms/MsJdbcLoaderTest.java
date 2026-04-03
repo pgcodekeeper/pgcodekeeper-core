@@ -21,7 +21,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
-import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
@@ -34,7 +33,6 @@ import org.pgcodekeeper.core.it.jdbc.base.JdbcLoaderTest;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.DiffSettings;
-import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 import org.pgcodekeeper.core.utils.testcontainer.TestContainerType;
 
@@ -88,7 +86,7 @@ class MsJdbcLoaderTest extends JdbcLoaderTest {
 
         var script = Files.readString(TestUtils.getFilePath(dumpFileName, getClass()));
         var loader = createDumpLoader(() -> new ByteArrayInputStream(script.getBytes(StandardCharsets.UTF_8)),
-                dumpFileName, settings, databaseProvider);
+                dumpFileName, diffSettings);
         ScriptParser parser = new ScriptParser(loader, dumpFileName, script);
 
         var startConfDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
@@ -109,13 +107,13 @@ class MsJdbcLoaderTest extends JdbcLoaderTest {
             var actual = PgCodeKeeperApi.diff(databaseProvider, dumpDb, remoteDb, diffSettings);
             Assertions.assertEquals("", actual, "Incorrect run dump %s on Database".formatted(dumpFileName));
         } finally {
-            clearDb(settings, startConfDb, connector, url, databaseProvider);
+            clearDb(settings, startConfDb, connector, url, databaseProvider, diffSettings);
         }
     }
 
     @Override
     protected AbstractDumpLoader<?> createDumpLoader(InputStreamProvider input, String inputObjectName,
-                                                     ISettings settings, IDatabaseProvider databaseProvider) {
-        return new MsDumpLoader(input, inputObjectName, new DiffSettings(settings));
+                                                     DiffSettings diffSettings) {
+        return new MsDumpLoader(input, inputObjectName, diffSettings);
     }
 }

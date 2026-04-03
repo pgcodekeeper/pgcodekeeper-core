@@ -68,21 +68,18 @@ class PgGpJdbcLoaderTest extends JdbcLoaderTest {
         var lowerCaseTypeName = contTypeName.toLowerCase(Locale.ROOT);
         var url = contType.getUrl();
         jdbcLoaderTest(lowerCaseTypeName + "_" + fileName + FILES_POSTFIX.SQL,
-                lowerCaseTypeName + ".pgcodekeeperignore", url, new CoreSettings(),
-                (PgSupportedVersion) contType.getVersion());
+                lowerCaseTypeName + ".pgcodekeeperignore", url, new CoreSettings());
     }
 
-    protected void jdbcLoaderTest(String dumpFileName, String ignoreListName, String url, CoreSettings settings,
-                                  PgSupportedVersion version) throws Exception {
+    protected void jdbcLoaderTest(String dumpFileName, String ignoreListName, String url, CoreSettings settings) throws Exception {
         settings.setEnableFunctionBodiesDependencies(true);
         var diffSettings = new DiffSettings(settings);
         var path = TestUtils.getFilePath(dumpFileName, getClass());
         var dumpDb = databaseProvider.getDumpLoader(path, diffSettings).loadAndAnalyze();
-        dumpDb.setVersion(version);
         var script = Files.readString(TestUtils.getFilePath(dumpFileName, getClass()));
 
         var loader = createDumpLoader(() -> new ByteArrayInputStream(script.getBytes(StandardCharsets.UTF_8)),
-                dumpFileName, settings, databaseProvider);
+                dumpFileName, diffSettings);
         ScriptParser parser = new ScriptParser(loader, dumpFileName, script);
 
         var startConfDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
@@ -98,13 +95,13 @@ class PgGpJdbcLoaderTest extends JdbcLoaderTest {
             var actual = PgCodeKeeperApi.diff(databaseProvider, dumpDb, remoteDb, diffSettings);
             Assertions.assertEquals("", actual, "Incorrect run dump %s on Database".formatted(dumpFileName));
         } finally {
-            clearDb(settings, startConfDb, connector, url, databaseProvider);
+            clearDb(settings, startConfDb, connector, url, databaseProvider, diffSettings);
         }
     }
 
     @Override
     protected AbstractDumpLoader<?> createDumpLoader(InputStreamProvider input, String inputObjectName,
-                                                     ISettings settings, IDatabaseProvider databaseProvider) {
-        return new PgDumpLoader(input, inputObjectName, new DiffSettings(settings));
+                                                     DiffSettings diffSettings) {
+        return new PgDumpLoader(input, inputObjectName, diffSettings);
     }
 }

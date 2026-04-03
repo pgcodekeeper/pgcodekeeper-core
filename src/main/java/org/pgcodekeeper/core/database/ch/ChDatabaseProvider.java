@@ -15,26 +15,26 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch;
 
+import java.nio.file.Path;
+import java.util.Collection;
+
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.script.IScriptBuilder;
 import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;
-import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.database.ch.loader.ChDumpLoader;
 import org.pgcodekeeper.core.database.ch.loader.ChJdbcLoader;
 import org.pgcodekeeper.core.database.ch.loader.ChProjectLoader;
 import org.pgcodekeeper.core.database.ch.project.ChModelExporter;
 import org.pgcodekeeper.core.database.ch.project.ChProjectUpdater;
+import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.database.ch.script.ChScriptBuilder;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
-
-import java.nio.file.Path;
-import java.util.Collection;
 
 /**
  * {@link IDatabaseProvider} implementation for ClickHouse databases.

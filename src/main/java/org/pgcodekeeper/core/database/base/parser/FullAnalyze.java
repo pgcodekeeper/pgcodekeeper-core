@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.parser;
 
+import org.pgcodekeeper.core.database.api.jdbc.ISupportedVersion;
 import org.pgcodekeeper.core.database.api.launcher.IAnalysisLauncher;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IRelation;
@@ -57,9 +58,9 @@ public final class FullAnalyze {
      * @throws InterruptedException if analysis is interrupted
      * @throws IOException          if analysis fails
      */
-    public static void fullAnalyze(IDatabase db, List<Object> errors)
+    public static void fullAnalyze(IDatabase db, List<Object> errors, ISupportedVersion version)
             throws InterruptedException, IOException {
-        fullAnalyze(db, MetaUtils.createTreeFromDb(db), errors);
+        fullAnalyze(db, MetaUtils.createTreeFromDb(db, version), errors);
     }
 
     /**

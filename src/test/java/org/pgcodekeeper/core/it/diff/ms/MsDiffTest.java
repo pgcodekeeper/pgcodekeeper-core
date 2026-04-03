@@ -365,8 +365,8 @@ class MsDiffTest {
     void testAddDropStatementForObj(String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         settings.setDropBeforeCreate(true);
-
-        String script = getScript(databaseProvider, fileNameTemplate, new DiffSettings(settings), MsDiffTest.class);
+        DiffSettings diffSettings = new DiffSettings(settings);
+        String script = getScript(databaseProvider, fileNameTemplate, diffSettings, MsDiffTest.class);
         assertResult(script, fileNameTemplate, MsDiffTest.class);
     }
 }

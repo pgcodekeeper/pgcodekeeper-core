@@ -65,7 +65,7 @@ public final class IntegrationTestUtils {
 
         IDatabase db = loader.load();
         if (analysis) {
-            FullAnalyze.fullAnalyze(db, diffSettings.getErrors());
+            FullAnalyze.fullAnalyze(db, diffSettings.getErrors(), diffSettings.getVersion());
         }
 
         TestUtils.assertErrors(diffSettings.getErrors());

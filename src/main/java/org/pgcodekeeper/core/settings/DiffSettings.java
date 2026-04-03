@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.settings;
 
+import org.pgcodekeeper.core.database.api.jdbc.ISupportedVersion;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.ignorelist.IIgnoreList;
 import org.pgcodekeeper.core.ignorelist.IgnoreList;
@@ -37,6 +38,7 @@ public class DiffSettings {
     private final IgnoreSchemaList ignoreSchemaList = new IgnoreSchemaList();
     private final List<Map.Entry<IStatement, IStatement>> additionalDependencies = new ArrayList<>();
     private IMonitor monitor;
+    private ISupportedVersion version;
 
     public DiffSettings(ISettings settings, IMonitor monitor) {
         this.settings = settings;
@@ -97,5 +99,15 @@ public class DiffSettings {
 
     public boolean isAllowedSchema(String schemaName) {
         return ignoreSchemaList.getNameStatus(schemaName);
+    }
+
+    public void setVersion(ISupportedVersion version) {
+        if (null == this.version || !this.version.isLE(version.getVersion())) {
+            this.version = version;
+        }
+    }
+
+    public ISupportedVersion getVersion() {
+        return version;
     }
 }

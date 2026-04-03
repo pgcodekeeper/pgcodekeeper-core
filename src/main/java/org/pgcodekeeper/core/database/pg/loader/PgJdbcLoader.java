@@ -121,6 +121,20 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
     }
 
     @Override
+    public void preLoad() {
+        try (Connection connection = connector.getConnection();
+             Statement statement = connection.createStatement()) {
+            queryCheckGreenplumDb(statement);
+            queryCheckPgVersion(statement);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalArgumentException(e);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    @Override
     public PgDatabase loadInternal() throws IOException, InterruptedException {
         PgDatabase d = createDatabase();
 
@@ -135,8 +149,6 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
             getRunner().run(statement, "SET search_path TO pg_catalog;");
             getRunner().run(statement, "SET timezone = " + Utils.quoteString(timezone));
 
-            queryCheckGreenplumDb();
-            queryCheckPgVersion();
             queryCheckLastSysOid();
             queryTypesForCache();
             queryRoles();
@@ -192,7 +204,6 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
 
             d.sortColumns();
 
-            d.setVersion(PgSupportedVersion.valueOf(getVersion()));
             info(Messages.JdbcLoader_log_succes_queried);
         } catch (InterruptedException ex) {
             throw ex;
@@ -204,7 +215,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
         return d;
     }
 
-    protected void queryCheckGreenplumDb() throws SQLException, InterruptedException {
+    protected void queryCheckGreenplumDb(Statement statement) throws SQLException, InterruptedException {
         setCurrentOperation(Messages.JdbcLoaderBase_log_check_gp_db);
         try (ResultSet res = getRunner().runScript(statement, QUERY_CHECK_GREENPLUM)) {
             if (res.next()) {
@@ -214,7 +225,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
         debug(Messages.JdbcLoaderBase_log_get_result_gp, isGreenplumDb);
     }
 
-    protected void queryCheckPgVersion() throws SQLException, InterruptedException {
+    protected void queryCheckPgVersion(Statement statement) throws SQLException, InterruptedException {
         setCurrentOperation(Messages.JdbcLoaderBase_log_reading_pg_version);
         int version;
         try (ResultSet res = runner.runScript(statement, QUERY_CHECK_PG_VERSION)) {
@@ -228,6 +239,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
         if (isGreenplumDb && !PgSupportedVersion.GP_VERSION_6.isLE(version)) {
             throw new IllegalStateException(Messages.JdbcLoaderBase_unsupported_gp_version);
         }
+        diffSettings.setVersion(PgSupportedVersion.valueOf(version));
     }
 
     protected void queryCheckLastSysOid() throws SQLException, InterruptedException {

@@ -15,26 +15,26 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms;
 
+import java.nio.file.Path;
+import java.util.Collection;
+
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.script.IScriptBuilder;
 import org.pgcodekeeper.core.database.ms.jdbc.MsJdbcConnector;
-import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.ms.loader.MsDumpLoader;
 import org.pgcodekeeper.core.database.ms.loader.MsJdbcLoader;
 import org.pgcodekeeper.core.database.ms.loader.MsProjectLoader;
 import org.pgcodekeeper.core.database.ms.project.MsModelExporter;
 import org.pgcodekeeper.core.database.ms.project.MsProjectUpdater;
+import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.ms.script.MsScriptBuilder;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
-
-import java.nio.file.Path;
-import java.util.Collection;
 
 /**
  * {@link IDatabaseProvider} implementation for MS SQL Server databases.

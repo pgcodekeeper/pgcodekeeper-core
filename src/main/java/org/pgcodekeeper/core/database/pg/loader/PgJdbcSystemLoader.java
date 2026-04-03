@@ -39,10 +39,7 @@ import org.pgcodekeeper.core.database.base.schema.meta.MetaFunction;
 import org.pgcodekeeper.core.database.base.schema.meta.MetaOperator;
 import org.pgcodekeeper.core.database.base.schema.meta.MetaRelation;
 import org.pgcodekeeper.core.database.base.schema.meta.MetaStorage;
-import org.pgcodekeeper.core.database.pg.jdbc.IPgJdbcReader;
-import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
-import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcType;
-import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcUtils;
+import org.pgcodekeeper.core.database.pg.jdbc.*;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Function_argsContext;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Function_argumentsContext;
 import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Identifier_nontypeContext;
@@ -167,8 +164,8 @@ final class PgJdbcSystemLoader extends PgJdbcLoader {
             getRunner().run(statement, "SET search_path TO pg_catalog;");
             getRunner().run(statement, "SET timezone = " + Utils.quoteString(timezone));
 
-            queryCheckGreenplumDb();
-            queryCheckPgVersion();
+            queryCheckGreenplumDb(statement);
+            queryCheckPgVersion(statement);
             queryCheckLastSysOid();
             queryTypesForCache();
 

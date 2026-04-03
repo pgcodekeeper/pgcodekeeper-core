@@ -60,7 +60,7 @@ class MsMoveDataDiffTest {
         assertDiffSame(databaseProvider, dbOld, fileNameTemplate, diffSettings);
         assertDiffSame(databaseProvider, dbNew, fileNameTemplate, diffSettings);
 
-        String script = PgCodeKeeperApi.diff(databaseProvider, dbOld, dbNew, new DiffSettings(settings));
+        String script = PgCodeKeeperApi.diff(databaseProvider, dbOld, dbNew, diffSettings);
         String content = script.replaceAll("([0-9a-fA-F]{32})", "randomly_generated_part");
 
         assertResult(content, fileNameTemplate, MsMoveDataDiffTest.class);
