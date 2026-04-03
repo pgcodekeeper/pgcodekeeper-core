@@ -287,7 +287,7 @@ public final class ActionsToScriptConverter {
                     getAlterTableScript(joinableActions);
                     return;
                 }
-                SQLScript temp = new SQLScript(settings, obj.getSeparator());
+                SQLScript temp = new SQLScript(script.getDiffSettings(), obj.getSeparator());
                 ObjectState state = obj.appendAlterSQL(action.getNewObj(), temp);
 
                 if (state.in(ObjectState.ALTER, ObjectState.ALTER_WITH_DEP)) {

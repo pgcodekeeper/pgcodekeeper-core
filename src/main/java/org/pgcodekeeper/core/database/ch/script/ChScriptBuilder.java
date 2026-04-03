@@ -36,7 +36,7 @@ public class ChScriptBuilder extends AbstractScriptBuilder {
     protected String getScript(Set<ActionContainer> actions, Set<IStatement> toRefresh,
                                List<TreeElement> selected,
                                IDatabase oldDb, IDatabase newDb) {
-        SQLScript script = new SQLScript(getSettings(), oldDb.getSeparator());
+        SQLScript script = new SQLScript(diffSettings, oldDb.getSeparator());
         ActionsToScriptConverter.fillScript(script, actions, toRefresh, oldDb, newDb, selected);
         return script.getFullScript();
     }

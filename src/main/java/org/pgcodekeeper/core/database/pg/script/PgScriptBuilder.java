@@ -46,7 +46,7 @@ public class PgScriptBuilder extends AbstractScriptBuilder {
                                IDatabase oldDb, IDatabase newDb)
             throws IOException {
         var settings = getSettings();
-        SQLScript script = new SQLScript(settings, oldDb.getSeparator());
+        SQLScript script = new SQLScript(diffSettings, oldDb.getSeparator());
         for (String preFilePath : settings.getPreFilePath()) {
             addPrePostPath(script, preFilePath, SQLActionType.PRE);
         }

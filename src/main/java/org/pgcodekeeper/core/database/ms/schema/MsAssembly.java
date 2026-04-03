@@ -20,6 +20,7 @@ import java.util.*;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 
 /**
@@ -56,7 +57,7 @@ public class MsAssembly extends MsAbstractStatement {
      * @return the preview SQL string with truncated binaries
      */
     public String getPreview(ISettings settings) {
-        SQLScript script = new SQLScript(settings, getSeparator());
+        SQLScript script = new SQLScript(new DiffSettings(settings), getSeparator());
         getAssemblyFullSQL(true, script);
         return script.getFullScript();
     }
