@@ -62,7 +62,14 @@ public abstract class AbstractJdbcLoader<T extends IDatabase> extends AbstractLo
         super(diffSettings, connector.getDbName());
         this.connector = connector;
         this.runner = new JdbcRunner(getMonitor());
+        preLoad();
     }
+
+    /**
+     * This method loads common settings {@link DiffSettings}, if it's need,
+     * before comparing database instances{@link IDatabase}.
+     */
+    protected abstract void preLoad();
 
     protected <P extends Parser, R> void submitAntlrTask(BiFunction<List<Object>, String, P> parserCreateFunction,
                                                          Function<P, R> parserCtxReader, Consumer<R> finalizer) {

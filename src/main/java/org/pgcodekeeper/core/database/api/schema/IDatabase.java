@@ -68,7 +68,7 @@ public interface IDatabase extends IStatementContainer {
     }
 
     /**
-     * @return database version
+     * @return default database version
      */
     ISupportedVersion getVersion();
 

@@ -83,7 +83,8 @@ class ChDiffTest {
     void ignorePrivilegesTest(String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         settings.setIgnorePrivileges(true);
-        String script = getScript(databaseProvider, fileNameTemplate, new DiffSettings(settings), ChDiffTest.class);
+        DiffSettings diffSettings = new DiffSettings(settings);
+        String script = getScript(databaseProvider, fileNameTemplate, diffSettings, ChDiffTest.class);
         assertResult(script, fileNameTemplate, ChDiffTest.class);
     }
 
@@ -95,7 +96,8 @@ class ChDiffTest {
         var fileNameTemplate = "ch_create_table_with_on_cluster";
         var settings = new CoreSettings();
         settings.setClusterName("test");
-        String script = getScript(databaseProvider, fileNameTemplate, new DiffSettings(settings), ChDiffTest.class);
+        DiffSettings diffSettings = new DiffSettings(settings);
+        String script = getScript(databaseProvider, fileNameTemplate, diffSettings, ChDiffTest.class);
         assertResult(script, fileNameTemplate, ChDiffTest.class);
     }
 }

@@ -69,7 +69,7 @@ class ChJdbcLoaderTest extends JdbcLoaderTest {
         var script = Files.readString(TestUtils.getFilePath(dumpFileName, getClass()));
 
         var loader = createDumpLoader(() -> new ByteArrayInputStream(script.getBytes(StandardCharsets.UTF_8)),
-                dumpFileName, settings, databaseProvider);
+                dumpFileName, diffSettings);
         ScriptParser parser = new ScriptParser(loader, dumpFileName, script);
 
         var url = TestContainerType.CH_24.getUrl();
@@ -86,13 +86,13 @@ class ChJdbcLoaderTest extends JdbcLoaderTest {
             var actual = PgCodeKeeperApi.diff(databaseProvider, dumpDb, remoteDb, diffSettings);
             Assertions.assertEquals("", actual, "Incorrect run dump %s on Database".formatted(dumpFileName));
         } finally {
-            clearDb(settings, startConfDb, connector, url, databaseProvider);
+            clearDb(settings, startConfDb, connector, url, databaseProvider, diffSettings);
         }
     }
 
     @Override
     protected AbstractDumpLoader<?> createDumpLoader(InputStreamProvider input, String inputObjectName,
-                                                     ISettings settings, IDatabaseProvider databaseProvider) {
-        return new ChDumpLoader(input, inputObjectName, new DiffSettings(settings));
+                                                     DiffSettings diffSettings) {
+        return new ChDumpLoader(input, inputObjectName, diffSettings);
     }
 }

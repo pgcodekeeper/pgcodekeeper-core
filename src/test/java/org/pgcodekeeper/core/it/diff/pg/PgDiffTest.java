@@ -634,8 +634,9 @@ class PgDiffTest {
             "compare_view;                  Comparing a query in a view",
             "compare_function;              Comparing a signature in a function",
     })
-    void compareTest(String fileNameTemplate, String description) throws IOException, InterruptedException {
-        String script = getScript(databaseProvider, fileNameTemplate, new DiffSettings(), PgDiffTest.class);
+    void compareTest(String fileNameTemplate) throws IOException, InterruptedException {
+        String script = getScript(databaseProvider, fileNameTemplate,
+                new DiffSettings(), PgDiffTest.class);
         assertEquals("", script.trim());
     }
 
@@ -651,7 +652,8 @@ class PgDiffTest {
     void commentsInScriptEndTest(String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         settings.setCommentsToEnd(true);
-        String script = getScript(databaseProvider, fileNameTemplate, new DiffSettings(settings), PgDiffTest.class);
+        String script = getScript(databaseProvider, fileNameTemplate,
+                new DiffSettings(settings), PgDiffTest.class);
         assertResult(script, fileNameTemplate, PgDiffTest.class);
     }
 
@@ -678,7 +680,8 @@ class PgDiffTest {
     void correctOrderScriptTest(String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         settings.setAddTransaction(true);
-        String script = getScript(databaseProvider, fileNameTemplate, new DiffSettings(settings), PgDiffTest.class);
+        String script = getScript(databaseProvider, fileNameTemplate,
+                new DiffSettings(settings), PgDiffTest.class);
         assertResult(script, fileNameTemplate, PgDiffTest.class);
     }
 
@@ -689,7 +692,8 @@ class PgDiffTest {
     void compareTableWithIgnoreColumnOrderTest(String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         settings.setIgnoreColumnOrder(true);
-        String script = getScript(databaseProvider, fileNameTemplate, new DiffSettings(settings), PgDiffTest.class);
+        String script = getScript(databaseProvider, fileNameTemplate,
+                new DiffSettings(settings), PgDiffTest.class);
         assertResult(script, fileNameTemplate, PgDiffTest.class);
     }
 

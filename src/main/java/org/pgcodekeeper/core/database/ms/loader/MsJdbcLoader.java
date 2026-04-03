@@ -70,6 +70,19 @@ public final class MsJdbcLoader extends AbstractJdbcLoader<MsDatabase> {
     }
 
     @Override
+    public void preLoad() {
+        try (Connection connection = connector.getConnection();
+             Statement statement = connection.createStatement()) {
+            queryCheckMsVersion(statement);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalArgumentException(e);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    @Override
     public MsDatabase loadInternal() throws IOException, InterruptedException {
         MsDatabase d = createDatabase();
 
@@ -87,8 +100,6 @@ public final class MsJdbcLoader extends AbstractJdbcLoader<MsDatabase> {
 
             // TODO add counting objects later
 //            setupMonitorWork();
-
-            queryCheckMsVersion();
 
             LOG.info(Messages.JdbcLoader_log_read_db_objects);
             new MsSchemasReader(this, d).read();
@@ -121,13 +132,14 @@ public final class MsJdbcLoader extends AbstractJdbcLoader<MsDatabase> {
         return d;
     }
 
-    private void queryCheckMsVersion() throws SQLException, InterruptedException {
+    private void queryCheckMsVersion(Statement statement) throws SQLException, InterruptedException {
         setCurrentOperation(Messages.JdbcLoaderBase_log_reading_ms_version);
         try (ResultSet res = runner.runScript(statement, QUERY_CHECK_MS_VERSION)) {
             version = res.next() ? res.getInt(1) : MsSupportedVersion.VERSION_17.getVersion();
             if (!MsSupportedVersion.VERSION_17.isLE(version)) {
                 throw new IllegalStateException(Messages.JdbcLoaderBase_unsupported_ms_sql_version);
             }
+            diffSettings.setVersion(MsSupportedVersion.valueOf(version));
 
             debug(Messages.JdbcLoaderBase_log_load_version, version);
         }

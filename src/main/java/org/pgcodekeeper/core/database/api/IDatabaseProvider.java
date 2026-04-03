@@ -15,6 +15,9 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.api;
 
+import java.nio.file.Path;
+import java.util.Collection;
+
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.api.loader.IDumpLoader;
 import org.pgcodekeeper.core.database.api.loader.IJdbcLoader;
@@ -27,9 +30,6 @@ import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
-
-import java.nio.file.Path;
-import java.util.Collection;
 
 /**
  * Interface for DBMS

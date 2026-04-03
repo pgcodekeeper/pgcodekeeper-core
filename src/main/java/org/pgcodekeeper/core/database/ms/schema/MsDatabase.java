@@ -56,7 +56,6 @@ public class MsDatabase extends MsAbstractStatement implements IDatabase {
     private final Map<String, MsRole> roles = new LinkedHashMap<>();
     private final Map<String, MsUser> users = new LinkedHashMap<>();
 
-    private MsSupportedVersion version = MsSupportedVersion.VERSION_17;
     /**
      * Current default schema.
      */
@@ -282,13 +281,9 @@ public class MsDatabase extends MsAbstractStatement implements IDatabase {
         return Collections.unmodifiableCollection(schemas.values());
     }
 
-    public void setVersion(MsSupportedVersion version) {
-        this.version = version;
-    }
-
     @Override
     public ISupportedVersion getVersion() {
-        return version;
+        return MsSupportedVersion.getDefaultVersion();
     }
 
     @Override
@@ -388,8 +383,6 @@ public class MsDatabase extends MsAbstractStatement implements IDatabase {
 
     @Override
     protected MsDatabase getCopy() {
-        MsDatabase dbDst = new MsDatabase();
-        dbDst.setVersion(version);
-        return dbDst;
+        return new MsDatabase();
     }
 }

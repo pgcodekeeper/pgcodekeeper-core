@@ -77,6 +77,10 @@ public abstract class AbstractDumpLoader<T extends IDatabase> extends AbstractLo
         return db;
     }
 
+    protected abstract ISchema createDefaultSchema();
+
+    public abstract void loadWithoutAnalyze(T db, Queue<AntlrTask<?>> antlrTasks);
+
     @Override
     public void setMode(ParserListenerMode mode) {
         this.mode = mode;
@@ -85,11 +89,4 @@ public abstract class AbstractDumpLoader<T extends IDatabase> extends AbstractLo
     public void setOverridesMap(Map<AbstractStatement, StatementOverride> overrides) {
         this.overrides = overrides;
     }
-
-    public abstract void loadWithoutAnalyze(T db, Queue<AntlrTask<?>> antlrTasks);
-
-    @Override
-    protected abstract T createDatabase();
-
-    protected abstract ISchema createDefaultSchema();
 }

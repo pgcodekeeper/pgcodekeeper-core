@@ -54,6 +54,10 @@ public enum PgSupportedVersion implements ISupportedVersion {
         return text;
     }
 
+    public static ISupportedVersion getDefaultVersion() {
+        return VERSION_14;
+    }
+
     /**
      * Returns the highest supported version that is less than or equal to the specified version.
      * If no matching version is found, returns VERSION_9_4 as the default.

@@ -57,6 +57,11 @@ public final class ChJdbcLoader extends AbstractJdbcLoader<ChDatabase> {
     }
 
     @Override
+    public void preLoad() {
+        diffSettings.setVersion(ChSupportedVersion.DEFAULT);
+    }
+
+    @Override
     public ChDatabase loadInternal() throws IOException, InterruptedException {
         ChDatabase d = createDatabase();
 

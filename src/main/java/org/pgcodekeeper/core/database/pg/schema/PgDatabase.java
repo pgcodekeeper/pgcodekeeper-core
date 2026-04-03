@@ -68,7 +68,6 @@ public class PgDatabase extends PgAbstractStatement implements IDatabase {
     private final Map<String, PgSchema> schemas = new LinkedHashMap<>();
 
     private PgSchema defaultSchema;
-    private PgSupportedVersion version = PgSupportedVersion.VERSION_14;
 
     /**
      * Creates a new PostgreSQL database.
@@ -354,13 +353,9 @@ public class PgDatabase extends PgAbstractStatement implements IDatabase {
         return Collections.unmodifiableCollection(schemas.values());
     }
 
-    public void setVersion(PgSupportedVersion version) {
-        this.version = version;
-    }
-
     @Override
     public ISupportedVersion getVersion() {
-        return version;
+        return PgSupportedVersion.getDefaultVersion();
     }
 
     @Override
@@ -433,8 +428,6 @@ public class PgDatabase extends PgAbstractStatement implements IDatabase {
 
     @Override
     protected PgDatabase getCopy() {
-        PgDatabase dbDst = new PgDatabase();
-        dbDst.setVersion(version);
-        return dbDst;
+        return new PgDatabase();
     }
 }

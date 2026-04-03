@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.it.parser.pg;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;

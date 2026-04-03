@@ -26,8 +26,7 @@ import java.util.Set;
 
 public class ChLibraryLoader extends AbstractLibraryLoader<ChDatabase> {
 
-    public ChLibraryLoader(ChDatabase database, Path metaPath, Set<String> loadedPaths,
-                           DiffSettings diffSettings) {
+    public ChLibraryLoader(ChDatabase database, Path metaPath, Set<String> loadedPaths, DiffSettings diffSettings) {
         super(database, metaPath, loadedPaths, diffSettings);
     }
 

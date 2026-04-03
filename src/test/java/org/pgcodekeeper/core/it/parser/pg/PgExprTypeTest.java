@@ -19,7 +19,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.it.parser.pg;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
@@ -100,9 +99,10 @@ class PgExprTypeTest {
             throws InterruptedException, IOException {
         PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
 
+        var diffSettings = new DiffSettings(settings);
         IDatabase dbNew = IntegrationTestUtils.loadTestDump(databaseProvider,
-                fileNameTemplate + postfix, PgExprTypeTest.class, new DiffSettings(settings), false);
-        MetaContainer metaDb = MetaUtils.createTreeFromDb(dbNew);
+                fileNameTemplate + postfix, PgExprTypeTest.class, diffSettings, false);
+        MetaContainer metaDb = MetaUtils.createTreeFromDb(dbNew, diffSettings.getVersion());
         FullAnalyze.fullAnalyze(dbNew, metaDb, new ArrayList<>());
         return metaDb;
     }

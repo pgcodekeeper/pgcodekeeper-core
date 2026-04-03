@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.pgcodekeeper.core.database.api.jdbc.ISupportedVersion;
 import org.pgcodekeeper.core.database.api.launcher.IAnalysisLauncher;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
@@ -61,7 +62,6 @@ public class ChDatabase extends ChAbstractStatement implements IDatabase {
      * Current default schema.
      */
     private ChSchema defaultSchema;
-    private ChSupportedVersion version = ChSupportedVersion.DEFAULT;
 
     public ChDatabase() {
         super("DB_name_placeholder");
@@ -178,12 +178,8 @@ public class ChDatabase extends ChAbstractStatement implements IDatabase {
     }
 
     @Override
-    public ChSupportedVersion getVersion() {
-        return version;
-    }
-
-    public void setVersion(ChSupportedVersion version) {
-        this.version = version;
+    public ISupportedVersion getVersion() {
+        return ChSupportedVersion.getDefaultVersion();
     }
 
     @Override
@@ -284,8 +280,6 @@ public class ChDatabase extends ChAbstractStatement implements IDatabase {
 
     @Override
     protected ChDatabase getCopy() {
-        ChDatabase dbDst = new ChDatabase();
-        dbDst.setVersion(version);
-        return dbDst;
+        return new ChDatabase();
     }
 }

@@ -61,8 +61,6 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
         return loadedDb;
     }
 
-    protected abstract T loadInternal() throws IOException, InterruptedException;
-
     @Override
     public T getDatabase() {
         return loadedDb;
@@ -88,7 +86,7 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
     public T loadAndAnalyze() throws IOException, InterruptedException {
         T db = load();
         IMonitor.checkCancelled(getMonitor());
-        FullAnalyze.fullAnalyze(db, diffSettings.getErrors());
+        FullAnalyze.fullAnalyze(db, diffSettings.getErrors(), diffSettings.getVersion());
         return db;
     }
 
@@ -112,6 +110,8 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
         var msg = message.formatted(args);
         LOG.info(msg);
     }
+
+    protected abstract T loadInternal() throws IOException, InterruptedException;
 
     /**
      * Creates a new database instance.

@@ -18,6 +18,7 @@ package org.pgcodekeeper.core.database.base.schema.meta;
 import java.util.*;
 import java.util.stream.Stream;
 
+import org.pgcodekeeper.core.database.api.jdbc.ISupportedVersion;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
@@ -36,13 +37,14 @@ public final class MetaUtils {
      * @param db the database object
      * @return the metadata container with all database objects
      */
-    public static MetaContainer createTreeFromDb(IDatabase db) {
+    public static MetaContainer createTreeFromDb(IDatabase db, ISupportedVersion version) {
         MetaContainer tree = new MetaContainer();
         db.getDescendants()
                 .map(MetaUtils::createMetaFromStatement)
                 .forEach(tree::addStatement);
 
-        MetaStorage.getSystemObjects(db.getVersion()).forEach(tree::addStatement);
+        var v = version == null ? db.getVersion() : version;
+        MetaStorage.getSystemObjects(v).forEach(tree::addStatement);
 
         return tree;
     }

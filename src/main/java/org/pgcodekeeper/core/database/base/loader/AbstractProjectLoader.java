@@ -80,7 +80,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
         this.libs = libs;
         this.libsWithoutPriv = libsWithoutPriv;
         this.metaPath = metaPath;
-        readIgnoreLists();
+        preLoad();
     }
 
     @Override
@@ -102,9 +102,6 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
     public void setLib(boolean isLib) {
         this.isLib = isLib;
     }
-
-    @Override
-    protected abstract T createDatabase();
 
     protected abstract AbstractDumpLoader<T> createDumpLoader(Path file);
 
@@ -149,6 +146,30 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
             return false;
         }
         return checkFilename == null || checkFilename.test(fileName);
+    }
+
+    /**
+     * This method loads common settings {@link DiffSettings}, if it's need,
+     * before comparing database instances{@link IDatabase}.
+     */
+    protected void preLoad() {
+        if (diffSettings.getSettings().isDisableAutoLoad()) {
+            return;
+        }
+
+        try {
+            Path ignoreFile = dirPath.resolve(IGNORE_FILE);
+            if (Files.isRegularFile(ignoreFile)) {
+                diffSettings.addIgnoreList(ignoreFile);
+            }
+
+            Path ignoreSchemaFile = dirPath.resolve(IGNORE_SCHEMA_FILE);
+            if (Files.isRegularFile(ignoreSchemaFile)) {
+                diffSettings.addIgnoreSchemaList(ignoreSchemaFile);
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException(Messages.AbstractProjectLoader_failed_to_read_ignore_lists, e);
+        }
     }
 
     private void loadOverrides(T db) throws IOException, InterruptedException {
@@ -214,25 +235,5 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
         }
         libraryLoader.loadLibraries(false, libs);
         libraryLoader.loadLibraries(true, libsWithoutPriv);
-    }
-
-    private void readIgnoreLists() {
-        if (diffSettings.getSettings().isDisableAutoLoad()) {
-            return;
-        }
-
-        try {
-            Path ignoreFile = dirPath.resolve(IGNORE_FILE);
-            if (Files.isRegularFile(ignoreFile)) {
-                diffSettings.addIgnoreList(ignoreFile);
-            }
-
-            Path ignoreSchemaFile = dirPath.resolve(IGNORE_SCHEMA_FILE);
-            if (Files.isRegularFile(ignoreSchemaFile)) {
-                diffSettings.addIgnoreSchemaList(ignoreSchemaFile);
-            }
-        } catch (IOException e) {
-            throw new IllegalArgumentException(Messages.AbstractProjectLoader_failed_to_read_ignore_lists, e);
-        }
     }
 }
