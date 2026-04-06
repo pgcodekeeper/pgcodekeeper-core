@@ -55,6 +55,7 @@ public final class FullAnalyze {
      *
      * @param db     the database to analyze
      * @param errors list to collect analysis errors
+     * @param version version of database
      * @throws InterruptedException if analysis is interrupted
      * @throws IOException          if analysis fails
      */

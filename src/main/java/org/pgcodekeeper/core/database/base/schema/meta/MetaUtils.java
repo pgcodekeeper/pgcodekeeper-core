@@ -35,6 +35,7 @@ public final class MetaUtils {
      * Creates a metadata container from a database object.
      *
      * @param db the database object
+     * @param version version of database
      * @return the metadata container with all database objects
      */
     public static MetaContainer createTreeFromDb(IDatabase db, ISupportedVersion version) {
