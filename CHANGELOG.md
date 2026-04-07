@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [14.2.0] - 2026-04-07
+
+### Added
+
 - Added localization of missing lines.
 - Added the setting for generating a migration script based on the current version of the database (the setting is currently not implemented).
 
@@ -2466,7 +2474,8 @@ We increment major version in this release due to decision to shift our developm
 
 - ORDER BY parsing has been added to the aggregate functions.
 
-[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.1.1...HEAD
+[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.2.0...HEAD
+[14.2.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.1.1...v14.2.0
 [14.1.1]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.1.0...v14.1.1
 [14.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.0.0...v14.1.0
 [14.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v13.1.0...v14.0.0
