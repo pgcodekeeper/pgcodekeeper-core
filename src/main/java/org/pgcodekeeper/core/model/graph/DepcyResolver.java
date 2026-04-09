@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -29,15 +28,7 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import org.jgrapht.graph.DefaultEdge;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.IArgument;
-import org.pgcodekeeper.core.database.api.schema.IColumn;
-import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.database.api.schema.IFunction;
-import org.pgcodekeeper.core.database.api.schema.ISchema;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.api.schema.ITable;
-import org.pgcodekeeper.core.database.api.schema.ObjectState;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.ms.schema.MsAbstractFunction;
 import org.pgcodekeeper.core.database.ms.schema.MsSourceStatement;
@@ -47,6 +38,7 @@ import org.pgcodekeeper.core.database.ms.schema.MsView;
 import org.pgcodekeeper.core.database.pg.schema.PgIndex;
 import org.pgcodekeeper.core.database.pg.schema.PgSequence;
 import org.pgcodekeeper.core.database.pg.schema.PgTypedTable;
+import org.pgcodekeeper.core.dependencieslist.Dependency;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.DiffSettings;
@@ -583,8 +575,8 @@ public final class DepcyResolver {
 
     public static Set<ActionContainer> resolve(IDatabase oldDb,
                                                IDatabase newDb,
-                                               List<Entry<IStatement, IStatement>> additionalDependenciesOldDb,
-                                               List<Entry<IStatement, IStatement>> additionalDependenciesNewDb,
+                                               List<Dependency> additionalDependenciesOldDb,
+                                               List<Dependency> additionalDependenciesNewDb,
                                                Set<IStatement> toRefresh,
                                                List<DbObject> dbObjects,
                                                DiffSettings diffSettings) {

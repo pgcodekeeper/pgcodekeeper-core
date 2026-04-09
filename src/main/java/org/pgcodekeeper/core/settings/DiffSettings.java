@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.settings;
 
 import org.pgcodekeeper.core.database.api.jdbc.ISupportedVersion;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.dependencieslist.Dependency;
 import org.pgcodekeeper.core.ignorelist.IIgnoreList;
 import org.pgcodekeeper.core.ignorelist.IgnoreList;
 import org.pgcodekeeper.core.ignorelist.IgnoreSchemaList;
@@ -28,7 +28,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 public class DiffSettings {
 
@@ -36,7 +35,8 @@ public class DiffSettings {
     private final List<Object> errors = new ArrayList<>();
     private final IgnoreList ignoreList = new IgnoreList();
     private final IgnoreSchemaList ignoreSchemaList = new IgnoreSchemaList();
-    private final List<Map.Entry<IStatement, IStatement>> additionalDependencies = new ArrayList<>();
+    private final List<Dependency> additionalDependencies = new ArrayList<>();
+
     private IMonitor monitor;
     private ISupportedVersion version;
 
@@ -73,11 +73,11 @@ public class DiffSettings {
         IIgnoreList.parseIgnoreList(ignoreSchemaListPath, ignoreSchemaList);
     }
 
-    public List<Map.Entry<IStatement, IStatement>> getAdditionalDependencies() {
+    public List<Dependency> getAdditionalDependencies() {
         return additionalDependencies;
     }
 
-    public void addAdditionalDependencies(Collection<Map.Entry<IStatement, IStatement>> deps) {
+    public void addAdditionalDependencies(Collection<Dependency> deps) {
         additionalDependencies.addAll(deps);
     }
 

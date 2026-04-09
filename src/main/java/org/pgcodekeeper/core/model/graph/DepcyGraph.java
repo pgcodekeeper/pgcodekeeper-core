@@ -23,15 +23,13 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.pg.schema.*;
+import org.pgcodekeeper.core.dependencieslist.Dependency;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map.Entry;
+import java.util.*;
 
 /**
  * Database dependency graph for managing object relationships and dependencies.
@@ -261,14 +259,19 @@ public final class DepcyGraph {
     /**
      * Adds custom dependencies to the graph.
      *
-     * @param depcies list of custom dependency pairs to add
+     * @param dependencies list of custom dependency pairs to add
      */
-    public void addCustomDepcies(List<Entry<IStatement, IStatement>> depcies) {
-        if (depcies == null) {
+    public void addCustomDepcies(List<Dependency> dependencies) {
+        if (dependencies == null) {
             return;
         }
-        for (var depcy : depcies) {
-            graph.addEdge(depcy.getKey(), depcy.getValue());
+        for (var dep : dependencies) {
+            IStatement source = db.getStatement(dep.source());
+            IStatement target = db.getStatement(dep.target());
+
+            if (source != null && target != null) {
+                graph.addEdge(source, target);
+            }
         }
     }
 }

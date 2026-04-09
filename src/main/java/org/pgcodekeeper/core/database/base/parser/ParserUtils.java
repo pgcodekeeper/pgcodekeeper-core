@@ -20,8 +20,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 import org.antlr.v4.runtime.*;
-import org.pgcodekeeper.core.database.base.parser.generated.IgnoreListLexer;
-import org.pgcodekeeper.core.database.base.parser.generated.IgnoreListParser;
+import org.pgcodekeeper.core.database.base.parser.generated.*;
 import org.pgcodekeeper.core.sql.KeywordCategory;
 
 /**
@@ -55,6 +54,22 @@ public class ParserUtils {
         lexer.addErrorListener(listener);
         parser.removeErrorListeners();
         parser.addErrorListener(listener);
+    }
+
+    /**
+     * Creates a dependencies list parser from the given file.
+     *
+     * @param depsFile the path to the dependencies list file
+     * @return a configured parser instance
+     * @throws IOException if the file cannot be read
+     */
+    public static DependenciesListParser createDependenciesListParser(Path depsFile) throws IOException {
+        String parsedObjectName = depsFile.toString();
+        var stream = CharStreams.fromPath(depsFile);
+        Lexer lexer = new DependenciesListLexer(stream);
+        DependenciesListParser parser = new DependenciesListParser(new CommonTokenStream(lexer));
+        addErrorListener(lexer, parser, parsedObjectName, null, 0, 0, 0);
+        return parser;
     }
 
     /**
