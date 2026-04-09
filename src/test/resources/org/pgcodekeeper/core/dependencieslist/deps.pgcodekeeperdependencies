@@ -1,0 +1,7 @@
+view public.emp_view->table public.emp;
+FUNCTION public.user_code(integer)->FUNCTION public.pr(boolean, boolean);
+taBLE public.the_part -> INDEX public.the_part_index_c1_idx;
+Extension ext1 -> FOREIGN DATA WRAPPER dummy;
+SCHEMA public -> table public.emp;
+FUNCTION public.calculate_rectangle_area(NUMERIC(10), NUMERIC(10,2)) -> FUNCTION public.validate_decimal(boolean);
+table public.the_part -> Column public.the_part.col1;

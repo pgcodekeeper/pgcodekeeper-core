@@ -37,6 +37,7 @@ import org.pgcodekeeper.core.database.api.schema.IPrivilege;
 import org.pgcodekeeper.core.database.api.schema.ITable;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.base.schema.StatementOverride;
+import org.pgcodekeeper.core.dependencieslist.DependenciesReader;
 import org.pgcodekeeper.core.library.LibraryXmlStore;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
@@ -54,6 +55,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
     public static final String IGNORE_FILE = ".pgcodekeeperignore";
     public static final String IGNORE_SCHEMA_FILE = ".pgcodekeeperignoreschema";
     public static final String OVERRIDES_DIR = "OVERRIDES";
+    public static final String ADDITIONAL_DEPENDENCIES_FILE = ".pgcodekeeperdependencies";
 
     protected final Path metaPath;
     protected final Map<AbstractStatement, StatementOverride> overrides = new LinkedHashMap<>();
@@ -157,6 +159,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
             return;
         }
 
+        // load ignored lists
         try {
             Path ignoreFile = dirPath.resolve(IGNORE_FILE);
             if (Files.isRegularFile(ignoreFile)) {
@@ -169,6 +172,12 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
             }
         } catch (IOException e) {
             throw new IllegalArgumentException(Messages.AbstractProjectLoader_failed_to_read_ignore_lists, e);
+        }
+
+        // load additional dependencies
+        Path depsPath = dirPath.resolve(ADDITIONAL_DEPENDENCIES_FILE);
+        if (Files.isRegularFile(depsPath)) {
+            diffSettings.addAdditionalDependencies(DependenciesReader.getDependencies(depsPath));
         }
     }
 

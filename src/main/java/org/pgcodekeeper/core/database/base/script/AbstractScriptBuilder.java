@@ -24,13 +24,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Map.Entry;
 
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.api.schema.ITable;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.script.IScriptBuilder;
+import org.pgcodekeeper.core.dependencieslist.Dependency;
 import org.pgcodekeeper.core.ignorelist.IgnoreList;
 import org.pgcodekeeper.core.model.difftree.CompareTree;
 import org.pgcodekeeper.core.model.difftree.DiffTree;
@@ -85,8 +82,8 @@ public abstract class AbstractScriptBuilder implements IScriptBuilder {
     }
 
     private Set<ActionContainer> resolveDependencies(List<TreeElement> selected, IDatabase oldDb, IDatabase newDb,
-            List<Entry<IStatement, IStatement>> additionalDependenciesOldDb,
-            List<Entry<IStatement, IStatement>> additionalDependenciesNewDb, Set<IStatement> toRefresh) {
+            List<Dependency> additionalDependenciesOldDb,
+            List<Dependency> additionalDependenciesNewDb, Set<IStatement> toRefresh) {
         addColumnsAsElements(oldDb, newDb, selected);
 
         selected.sort(new CompareTree());

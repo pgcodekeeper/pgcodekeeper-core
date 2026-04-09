@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Added automatic reading of the .pgcodekeeperdependencies file with additional dependencies when loading a project.
+
 ### Changed
 
 ### Fixed

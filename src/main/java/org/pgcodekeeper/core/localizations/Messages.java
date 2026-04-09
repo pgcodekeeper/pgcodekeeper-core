@@ -59,6 +59,8 @@ public final class Messages {
 
     public static String AbstractStatementReader_start;
 
+    public static String DependenciesReader_parser_error;
+
     public static String AbstractStatement_already_has_a_parent;
 
     public static String AbstractStatement_null_statement;

@@ -24,13 +24,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.database.api.schema.*;
+import org.pgcodekeeper.core.dependencieslist.Dependency;
 import org.pgcodekeeper.core.ignorelist.IgnoreList;
 import org.pgcodekeeper.core.library.Library;
 import org.pgcodekeeper.core.library.LibrarySource;
@@ -382,7 +381,7 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
         }
 
         @Override
-        public List<Map.Entry<IStatement, IStatement>> getAdditionalDependencies() {
+        public List<Dependency> getAdditionalDependencies() {
             return diffSettings.getAdditionalDependencies();
         }
 
