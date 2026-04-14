@@ -18,6 +18,7 @@ package org.pgcodekeeper.core.model.graph;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.dependencieslist.Dependency;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
 import org.pgcodekeeper.core.model.difftree.TreeFlattener;
@@ -51,16 +52,18 @@ public final class DepcyTreeExtender {
     /**
      * Creates a new dependency tree extender.
      *
-     * @param dbSource source database schema
-     * @param dbTarget target database schema
-     * @param root     root element of the tree to analyze
+     * @param dbSource               source database schema
+     * @param dbTarget               target database schema
+     * @param root                   root element of the tree to analyze
+     * @param additionalDependencies list of additional dependencies
      */
-    public DepcyTreeExtender(IDatabase dbSource, IDatabase dbTarget, TreeElement root) {
+    public DepcyTreeExtender(IDatabase dbSource, IDatabase dbTarget, TreeElement root,
+            List<Dependency> additionalDependencies) {
         this.dbSource = dbSource;
         this.dbTarget = dbTarget;
         this.root = root;
         userSelection = new TreeFlattener().onlySelected().flatten(root);
-        depRes = new SimpleDepcyResolver(dbSource, dbTarget, false);
+        depRes = new SimpleDepcyResolver(dbSource, dbTarget, false, additionalDependencies);
     }
 
     /**
