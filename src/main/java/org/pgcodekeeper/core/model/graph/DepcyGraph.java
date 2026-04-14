@@ -261,7 +261,7 @@ public final class DepcyGraph {
      *
      * @param dependencies list of custom dependency pairs to add
      */
-    public void addCustomDepcies(List<Dependency> dependencies) {
+    public void addCustomDepcies(Collection<Dependency> dependencies) {
         if (dependencies == null) {
             return;
         }

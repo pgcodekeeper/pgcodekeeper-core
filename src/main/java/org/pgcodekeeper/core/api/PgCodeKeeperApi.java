@@ -273,7 +273,9 @@ public final class PgCodeKeeperApi {
                                                    boolean invertFilter)
             throws IOException, InterruptedException {
         var db = loader.loadAndAnalyze();
-        return DepcyFinder.byPatterns(depth, reverse, filterTypes, invertFilter, db, objectNames);
+        var diffSettings = loader.getDiffSettings();
+        return DepcyFinder.byPatterns(depth, reverse, filterTypes, invertFilter, db, objectNames,
+                diffSettings.getAdditionalDependencies());
     }
 
     /**

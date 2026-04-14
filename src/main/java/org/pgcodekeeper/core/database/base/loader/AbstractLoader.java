@@ -125,6 +125,11 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
         return diffSettings.getSettings();
     }
 
+    @Override
+    public DiffSettings getDiffSettings() {
+        return diffSettings;
+    }
+
     public IMonitor getMonitor() {
         return diffSettings.getMonitor();
     }
