@@ -17,12 +17,14 @@ package org.pgcodekeeper.core.model.graph;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
+import org.pgcodekeeper.core.dependencieslist.Dependency;
 import org.pgcodekeeper.core.localizations.Messages;
 
 /**
@@ -38,27 +40,25 @@ public class SimpleDepcyResolver {
     private final DepcyGraph newDepcyGraph;
 
     /**
-     * Creates a dependency resolver with old database only.
-     *
-     * @param oldDatabase   the old database schema
-     * @param isShowColumns whether to show column dependencies
-     */
-    public SimpleDepcyResolver(IDatabase oldDatabase, boolean isShowColumns) {
-        this(oldDatabase, null, isShowColumns);
-    }
-
-    /**
      * Creates a dependency resolver with both old and new database schemas.
      *
-     * @param oldDatabase   the old database schema
-     * @param newDatabase   the new database schema, can be null
-     * @param isShowColumns whether to show column dependencies
+     * @param oldDatabase            the old database schema
+     * @param newDatabase            the new database schema, can be null
+     * @param isShowColumns          whether to show column dependencies
+     * @param additionalDependencies list of additional dependencies
      */
-    public SimpleDepcyResolver(IDatabase oldDatabase, IDatabase newDatabase, boolean isShowColumns) {
+    public SimpleDepcyResolver(IDatabase oldDatabase, IDatabase newDatabase, boolean isShowColumns,
+            List<Dependency> additionalDependencies) {
         this.oldDb = oldDatabase;
         this.newDb = newDatabase;
         this.oldDepcyGraph = new DepcyGraph(oldDatabase, !isShowColumns);
-        this.newDepcyGraph = newDatabase == null ? null : new DepcyGraph(newDatabase, !isShowColumns);
+        oldDepcyGraph.addCustomDepcies(additionalDependencies);
+        if (newDatabase == null) {
+            this.newDepcyGraph = null;
+        } else {
+            this.newDepcyGraph = new DepcyGraph(newDatabase, !isShowColumns);
+            newDepcyGraph.addCustomDepcies(additionalDependencies);
+        }
     }
 
     /**
