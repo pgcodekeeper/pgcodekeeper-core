@@ -22,6 +22,7 @@ import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ITable;
 import org.pgcodekeeper.core.database.base.schema.StatementUtils;
+import org.pgcodekeeper.core.dependencieslist.Dependency;
 import org.pgcodekeeper.core.utils.Utils;
 
 import java.util.*;
@@ -44,9 +45,11 @@ public class DepcyFinder {
     private final List<PrintObj> printObjects = new ArrayList<>();
 
     private DepcyFinder(IDatabase db, int depth, boolean isReverse,
-                        Collection<DbObjType> filterObjTypes, boolean isInvertFilter) {
+                        Collection<DbObjType> filterObjTypes, boolean isInvertFilter,
+                        Collection<Dependency> additionalDependencies) {
         this.db = db;
         DepcyGraph dg = new DepcyGraph(db);
+        dg.addCustomDepcies(additionalDependencies);
         this.graph = isReverse ? dg.getGraph() : dg.getReversedGraph();
         this.depth = depth;
         if (filterObjTypes.isEmpty()) {
@@ -70,7 +73,25 @@ public class DepcyFinder {
      */
     public static List<String> byPatterns(int depth, boolean isReverse, Collection<DbObjType> filterObjTypes,
                                           boolean isInvertFilter, IDatabase db, Collection<String> names) {
-        DepcyFinder depcyFinder = new DepcyFinder(db, depth, isReverse, filterObjTypes, isInvertFilter);
+        return byPatterns(depth, isReverse, filterObjTypes, isInvertFilter, db, names, Collections.emptyList());
+    }
+
+    /**
+     * Finds dependencies by matching object name patterns with additional dependencies.
+     *
+     * @param depth maximum depth to search
+     * @param isReverse whether to search reverse dependencies
+     * @param filterObjTypes object types to filter by
+     * @param isInvertFilter whether to invert the filter
+     * @param db the database to search in
+     * @param names collection of name patterns to match
+     * @param additionalDependencies collection of additional dependencies
+     * @return list of formatted dependency strings
+     */
+    public static List<String> byPatterns(int depth, boolean isReverse, Collection<DbObjType> filterObjTypes,
+                                          boolean isInvertFilter, IDatabase db, Collection<String> names,
+                                          Collection<Dependency> additionalDependencies) {
+        var depcyFinder = new DepcyFinder(db, depth, isReverse, filterObjTypes, isInvertFilter, additionalDependencies);
         depcyFinder.searchDeps(names);
         return depcyFinder.getResult();
     }
@@ -86,7 +107,23 @@ public class DepcyFinder {
      */
     public static List<String> byStatement(int depth, boolean isReverse, Collection<DbObjType> filterObjTypes,
                                            IStatement st) {
-        DepcyFinder depcyFinder = new DepcyFinder(st.getDatabase(), depth, isReverse, filterObjTypes, false);
+        return byStatement(depth, isReverse, filterObjTypes, st, Collections.emptyList());
+    }
+
+    /**
+     * Finds dependencies for a specific database statement with additional dependencies.
+     *
+     * @param depth          maximum depth to search
+     * @param isReverse      whether to search reverse dependencies
+     * @param filterObjTypes object types to filter by
+     * @param st             the statement to find dependencies for
+     * @param additionalDependencies collection of additional dependencies
+     * @return list of formatted dependency strings
+     */
+    public static List<String> byStatement(int depth, boolean isReverse, Collection<DbObjType> filterObjTypes,
+                                           IStatement st, Collection<Dependency> additionalDependencies) {
+        var depcyFinder = new DepcyFinder(st.getDatabase(), depth, isReverse, filterObjTypes, false,
+                additionalDependencies);
         depcyFinder.fillTree(st, START_LEVEL, new HashSet<>(), null, 0);
         return depcyFinder.getResult();
     }
