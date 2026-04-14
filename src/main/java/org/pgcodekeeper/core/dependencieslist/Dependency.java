@@ -41,6 +41,8 @@ import org.pgcodekeeper.core.database.api.schema.*;
  */
 public final record Dependency(ObjectReference source, ObjectReference target, boolean isStrong) {
 
+    private static final String DEPENDENCY_FORMAT = "%s %s -> %s %s;";
+
     /**
      * Canonical constructor with isStrong defaulting to {@code true}.
      * <p>
@@ -52,4 +54,11 @@ public final record Dependency(ObjectReference source, ObjectReference target, b
     public Dependency(ObjectReference source, ObjectReference target) {
         this(source, target, true);
     }
-  }
+
+    @Override
+    public final String toString() {
+        return DEPENDENCY_FORMAT.formatted(
+                source().type().getTypeName(), source().getFullName(),
+                target().type().getTypeName(), target().getFullName());
+    }
+}
