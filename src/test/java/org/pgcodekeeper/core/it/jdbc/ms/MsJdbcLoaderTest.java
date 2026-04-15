@@ -107,7 +107,7 @@ class MsJdbcLoaderTest extends JdbcLoaderTest {
             var actual = PgCodeKeeperApi.diff(databaseProvider, dumpDb, remoteDb, diffSettings);
             Assertions.assertEquals("", actual, "Incorrect run dump %s on Database".formatted(dumpFileName));
         } finally {
-            clearDb(settings, startConfDb, connector, url, databaseProvider, diffSettings);
+            clearDb(startConfDb, connector, url, databaseProvider, diffSettings);
         }
     }
 

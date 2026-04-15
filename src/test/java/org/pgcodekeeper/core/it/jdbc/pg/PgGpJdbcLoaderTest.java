@@ -21,14 +21,12 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
-import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.parser.ScriptParser;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
-import org.pgcodekeeper.core.database.pg.jdbc.PgSupportedVersion;
 import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.it.jdbc.base.JdbcLoaderTest;
 import org.pgcodekeeper.core.monitor.NullMonitor;
@@ -55,6 +53,7 @@ class PgGpJdbcLoaderTest extends JdbcLoaderTest {
             "operator, PG_16",
             "statistics, PG_16",
             "view, PG_16",
+            "not_null, PG_18",
             "dump_test, GP_6",
             "operator, GP_6",
             "view, GP_6",
@@ -63,17 +62,31 @@ class PgGpJdbcLoaderTest extends JdbcLoaderTest {
             "statistics, GP_7",
             "view, GP_7",
     })
-    void pgGpJdbcLoaderTest(String fileName, String contTypeName) throws Exception {
-        var contType = TestContainerType.valueOf(contTypeName);
-        var lowerCaseTypeName = contTypeName.toLowerCase(Locale.ROOT);
-        var url = contType.getUrl();
-        jdbcLoaderTest(lowerCaseTypeName + "_" + fileName + FILES_POSTFIX.SQL,
-                lowerCaseTypeName + ".pgcodekeeperignore", url, new CoreSettings());
+    void jdbcLoaderTest(String fileName, String contTypeName) throws Exception {
+        var settings = new CoreSettings();
+        settings.setEnableFunctionBodiesDependencies(true);
+        jdbcLoaderTest(false, fileName, contTypeName, settings);
     }
 
-    protected void jdbcLoaderTest(String dumpFileName, String ignoreListName, String url, CoreSettings settings) throws Exception {
-        settings.setEnableFunctionBodiesDependencies(true);
+    @ParameterizedTest
+    @CsvSource({
+            "view, PG_16",
+            "not_null, PG_18"
+    })
+    void jdbcLoaderSpecialTest(String fileName, String contTypeName) throws Exception {
+        var settings = new CoreSettings();
+        settings.setSimplifyNotNull(true);
+        settings.setSimplifyView(true);
+        jdbcLoaderTest(true, fileName, contTypeName, settings);
+    }
+
+    protected void jdbcLoaderTest(boolean hasDiff, String fileName, String contTypeName, ISettings settings)
+            throws Exception {
+        var url = TestContainerType.valueOf(contTypeName).getUrl();
+        var lowerCaseTypeName = contTypeName.toLowerCase(Locale.ROOT);
+        var ignoreListName = lowerCaseTypeName + ".pgcodekeeperignore";
         var diffSettings = new DiffSettings(settings);
+        var dumpFileName = lowerCaseTypeName + "_" + fileName + FILES_POSTFIX.SQL;
         var path = TestUtils.getFilePath(dumpFileName, getClass());
         var dumpDb = databaseProvider.getDumpLoader(path, diffSettings).loadAndAnalyze();
         var script = Files.readString(TestUtils.getFilePath(dumpFileName, getClass()));
@@ -93,15 +106,24 @@ class PgGpJdbcLoaderTest extends JdbcLoaderTest {
                 diffSettings.addIgnoreList(ignoreList);
             }
             var actual = PgCodeKeeperApi.diff(databaseProvider, dumpDb, remoteDb, diffSettings);
-            Assertions.assertEquals("", actual, "Incorrect run dump %s on Database".formatted(dumpFileName));
+
+            String expected;
+            if (hasDiff) {
+                expected = Files.readString(TestUtils.getFilePath(
+                        lowerCaseTypeName + "_" + fileName + FILES_POSTFIX.DIFF_SQL, getClass()));
+            } else {
+                expected = "";
+            }
+
+            Assertions.assertEquals(expected, actual, "Incorrect run dump %s on Database".formatted(dumpFileName));
         } finally {
-            clearDb(settings, startConfDb, connector, url, databaseProvider, diffSettings);
+            clearDb(startConfDb, connector, url, databaseProvider, diffSettings);
         }
     }
 
     @Override
     protected AbstractDumpLoader<?> createDumpLoader(InputStreamProvider input, String inputObjectName,
-                                                     DiffSettings diffSettings) {
+            DiffSettings diffSettings) {
         return new PgDumpLoader(input, inputObjectName, diffSettings);
     }
 }

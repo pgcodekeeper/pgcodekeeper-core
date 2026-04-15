@@ -1,0 +1,7 @@
+SET search_path = pg_catalog;
+
+ALTER TABLE public.user_code_some_long_table_name
+	RENAME CONSTRAINT con1 TO user_code_some_long_table_n_some_long_column_name_for__not_null;
+
+ALTER TABLE public.user_code_some_long_table_name2
+	RENAME CONSTRAINT con2 TO user_code_some_long_table_n_some_long_column_name_for__not_null;

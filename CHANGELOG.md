@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Added automatic reading of the .pgcodekeeperdependencies file with additional dependencies when loading a project.
+- Added option to simplify reading of NOT NULL constraints via JDBC for PostgreSQL 18+.
 
 ### Changed
 

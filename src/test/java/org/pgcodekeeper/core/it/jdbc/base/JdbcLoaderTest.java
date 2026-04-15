@@ -23,7 +23,6 @@ import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
 import org.pgcodekeeper.core.database.base.parser.ScriptParser;
 import org.pgcodekeeper.core.monitor.NullMonitor;
-import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
@@ -36,9 +35,8 @@ public abstract class JdbcLoaderTest {
 
     public static final String CLEAN_DB_SCRIPT = "clean db script";
 
-    protected void clearDb(CoreSettings settings, IDatabase startConfDb,
-                           IJdbcConnector connector, String url, IDatabaseProvider databaseProvider,
-                           DiffSettings diffSettings)
+    protected void clearDb(IDatabase startConfDb, IJdbcConnector connector, String url,
+                           IDatabaseProvider databaseProvider, DiffSettings diffSettings)
             throws IOException, InterruptedException, SQLException {
         var oldDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
         var dropScript = PgCodeKeeperApi.diff(databaseProvider, oldDb, startConfDb, diffSettings);

@@ -21,7 +21,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
-import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
@@ -33,7 +32,6 @@ import org.pgcodekeeper.core.it.jdbc.base.JdbcLoaderTest;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.DiffSettings;
-import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 import org.pgcodekeeper.core.utils.testcontainer.TestContainerType;
 
@@ -86,7 +84,7 @@ class ChJdbcLoaderTest extends JdbcLoaderTest {
             var actual = PgCodeKeeperApi.diff(databaseProvider, dumpDb, remoteDb, diffSettings);
             Assertions.assertEquals("", actual, "Incorrect run dump %s on Database".formatted(dumpFileName));
         } finally {
-            clearDb(settings, startConfDb, connector, url, databaseProvider, diffSettings);
+            clearDb(startConfDb, connector, url, databaseProvider, diffSettings);
         }
     }
 

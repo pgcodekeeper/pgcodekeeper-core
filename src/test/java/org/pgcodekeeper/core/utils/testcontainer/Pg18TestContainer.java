@@ -15,20 +15,20 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.utils.testcontainer;
 
+import org.pgcodekeeper.core.database.api.jdbc.ISupportedVersion;
 import org.pgcodekeeper.core.database.pg.jdbc.PgSupportedVersion;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
-final class Pg16TestContainer extends PgAbstractTestContainer {
-
+public class Pg18TestContainer extends PgAbstractTestContainer {
     @Override
-    public PgSupportedVersion getVersion() {
-        return PgSupportedVersion.VERSION_16;
+    public ISupportedVersion getVersion() {
+        return PgSupportedVersion.VERSION_18;
     }
 
     @Override
     public GenericContainer<?> getTestContainer() {
-        return new PostgreSQLContainer("postgres:16.4-alpine3.20")
+        return new PostgreSQLContainer("postgres:18-alpine")
                 .withUsername(TEST_USER)
                 .withPassword(TEST_PASSWORD);
     }

@@ -15,21 +15,13 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.utils.testcontainer;
 
-import org.pgcodekeeper.core.database.pg.jdbc.PgSupportedVersion;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.postgresql.PostgreSQLContainer;
+public abstract class PgAbstractTestContainer implements ITestContainer{
 
-final class Pg16TestContainer extends PgAbstractTestContainer {
-
-    @Override
-    public PgSupportedVersion getVersion() {
-        return PgSupportedVersion.VERSION_16;
-    }
+    protected static final String TEST_USER = "test";
+    protected static final String TEST_PASSWORD = "1245789630";
 
     @Override
-    public GenericContainer<?> getTestContainer() {
-        return new PostgreSQLContainer("postgres:16.4-alpine3.20")
-                .withUsername(TEST_USER)
-                .withPassword(TEST_PASSWORD);
+    public String getDraftUrl() {
+        return "jdbc:postgresql://localhost:%s/test" + "?user=%s&password=%s".formatted(TEST_USER, TEST_PASSWORD);
     }
 }
