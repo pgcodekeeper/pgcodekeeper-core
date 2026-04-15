@@ -2,6 +2,7 @@
 /.classpath
 /.idea
 /.settings
+/.vscode
 /gen
 /target
 /bin/

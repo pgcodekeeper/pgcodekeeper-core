@@ -134,10 +134,15 @@ public final class PgConstraintsReader extends PgAbstractSearchPathJdbcReader {
             }
         }
 
-        var notNullConstraint = new PgConstraintNotNull(constraintName);
-        notNullConstraint.setNoInherit(res.getBoolean("connoinherit"));
-        notNullConstraint.setNotValid(!res.getBoolean("convalidated"));
-        loader.setComment(notNullConstraint, res);
+        PgConstraintNotNull notNullConstraint;
+        if (loader.getSettings().isSimplifyNotNull()) {
+            notNullConstraint =  new PgConstraintNotNull(table.getName(), columnName);
+        } else {
+            notNullConstraint = new PgConstraintNotNull(constraintName);
+            notNullConstraint.setNoInherit(res.getBoolean("connoinherit"));
+            notNullConstraint.setNotValid(!res.getBoolean("convalidated"));
+            loader.setComment(notNullConstraint, res);
+        }
 
         column.setNotNullConstraint(notNullConstraint);
         notNullConstraint.setParent(column);

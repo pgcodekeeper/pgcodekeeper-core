@@ -154,6 +154,13 @@ public interface ISettings {
     boolean isSimplifyView();
 
     /**
+     * Checks if not null CONSTRAINT should be simplified.
+     *
+     * @return true if not null CONSTRAINT simplification is enabled
+     */
+    boolean isSimplifyNotNull();
+
+    /**
      * Checks if function body checking should be disabled.
      *
      * @return true if function body checking is disabled

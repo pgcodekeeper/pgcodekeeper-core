@@ -21,6 +21,7 @@ import org.testcontainers.containers.GenericContainer;
 public enum TestContainerType {
 
     PG_16(new Pg16TestContainer()),
+    PG_18(new Pg18TestContainer()),
     MS_16(new Ms16TestContainer()),
     CH_24(new Ch24TestContainer()),
     GP_6(new Gp6TestContainer()),

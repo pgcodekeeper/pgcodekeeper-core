@@ -35,6 +35,7 @@ public class CoreSettings implements ISettings {
     private boolean ignorePrivileges;
     private boolean keepNewlines;
     private boolean simplifyView;
+    private boolean simplifyNotNull;
     private boolean addTransaction;
     private boolean disableCheckFunctionBodies;
     private boolean enableFunctionBodiesDependencies;
@@ -227,6 +228,15 @@ public class CoreSettings implements ISettings {
     }
 
     @Override
+    public boolean isSimplifyNotNull() {
+        return simplifyNotNull;
+    }
+
+    public void setSimplifyNotNull(boolean simplifyNotNull) {
+        this.simplifyNotNull = simplifyNotNull;
+    }
+
+    @Override
     public boolean isDisableCheckFunctionBodies() {
         return disableCheckFunctionBodies;
     }
@@ -348,6 +358,7 @@ public class CoreSettings implements ISettings {
         settings.preFilePath = preFilePath;
         settings.selectedOnly = selectedOnly;
         settings.simplifyView = simplifyView;
+        settings.simplifyNotNull = simplifyNotNull;
         settings.stopNotAllowed = stopNotAllowed;
         settings.timeZone = timeZone;
         settings.printUsing = printUsing;
