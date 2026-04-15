@@ -9,12 +9,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- Added automatic reading of the .pgcodekeeperdependencies file with additional dependencies when loading a project.
-- Added option to simplify reading of NOT NULL constraints via JDBC for PostgreSQL 18+.
-
 ### Changed
 
 ### Fixed
+
+## [14.3.0] - 2026-04-15
+
+### Added
+
+- Added automatic reading of the .pgcodekeeperdependencies file with additional dependencies when loading a project.
+- Added option to simplify reading of NOT NULL constraints via JDBC for PostgreSQL 18+.
 
 ## [14.2.0] - 2026-04-07
 
@@ -2477,7 +2481,8 @@ We increment major version in this release due to decision to shift our developm
 
 - ORDER BY parsing has been added to the aggregate functions.
 
-[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.2.0...HEAD
+[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.3.0...HEAD
+[14.3.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.2.0...v14.3.0
 [14.2.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.1.1...v14.2.0
 [14.1.1]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.1.0...v14.1.1
 [14.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.0.0...v14.1.0
