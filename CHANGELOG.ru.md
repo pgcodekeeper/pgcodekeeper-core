@@ -9,12 +9,16 @@
 
 ### Добавлено
 
-- Добавлено автоматическое чтение файла .pgcodekeeperdependencies с дополнительными зависимостями при загрузке проекта.
-- Добавлена опция для упрощенного чтения ограничений NOT NULL через JDBC для PostgreSQL 18+.
-
 ### Изменено
 
 ### Исправлено
+
+## [14.3.0] - 2026-04-15
+
+### Добавлено
+
+- Добавлено автоматическое чтение файла .pgcodekeeperdependencies с дополнительными зависимостями при загрузке проекта.
+- Добавлена опция для упрощенного чтения ограничений NOT NULL через JDBC для PostgreSQL 18+.
 
 ## [14.2.0] - 2026-04-07
 
@@ -2478,7 +2482,8 @@
 
 - Добавлен парсинг ORDER BY для агрегатных функции.
 
-[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.2.0...HEAD
+[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.3.0...HEAD
+[14.3.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.2.0...v14.3.0
 [14.2.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.1.1...v14.2.0
 [14.1.1]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.1.0...v14.1.1
 [14.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.0.0...v14.1.0
