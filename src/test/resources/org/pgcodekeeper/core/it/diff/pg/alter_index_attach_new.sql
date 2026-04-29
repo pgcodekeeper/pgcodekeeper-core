@@ -1,4 +1,3 @@
-
 CREATE TABLE public.main_table (
     c1 bigint not null,
     c2 bigint not null,

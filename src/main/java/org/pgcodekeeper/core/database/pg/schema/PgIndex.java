@@ -69,7 +69,7 @@ public class PgIndex extends PgAbstractStatement implements IIndex {
         int startSize = script.getSize();
         PgIndex newIndex = (PgIndex) newCondition;
 
-        if (!compareUnalterable(newIndex)) {
+        if (!compareUnalterable(newIndex) || (null != inherit && !Objects.equals(inherit, newIndex.inherit))) {
             if (script.getSettings().isConcurrentlyMode()) {
                 // generate optimized command sequence for concurrent index creation
                 String tmpName = "tmp" + Utils.getRandom().nextInt(Integer.MAX_VALUE) + "_" + name;
@@ -89,6 +89,10 @@ public class PgIndex extends PgAbstractStatement implements IIndex {
                 script.addStatement("COMMIT TRANSACTION");
             }
             return ObjectState.RECREATE;
+        }
+
+        if (null == inherit && null != newIndex.inherit) {
+            script.addStatement(ALTER_INDEX + newIndex.inherit.getQualifiedName() + " ATTACH PARTITION " + getQualifiedName());
         }
 
         if (!Objects.equals(tablespace, newIndex.tablespace)) {
@@ -338,6 +342,7 @@ public class PgIndex extends PgAbstractStatement implements IIndex {
         }
         return obj instanceof PgIndex index && super.compare(obj)
                 && compareUnalterable(index)
+                && Objects.equals(inherit, index.inherit)
                 && isClustered == index.isClustered
                 && Objects.equals(tablespace, index.tablespace)
                 && Objects.equals(options, index.options);
@@ -348,7 +353,6 @@ public class PgIndex extends PgAbstractStatement implements IIndex {
                 && unique == index.unique
                 && Objects.equals(where, index.where)
                 && Objects.equals(includes, index.includes)
-                && Objects.equals(inherit, index.inherit)
                 && Objects.equals(method, index.method)
                 && nullsDistinction == index.nullsDistinction;
     }

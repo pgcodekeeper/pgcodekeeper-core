@@ -1,10 +1,10 @@
 
 CREATE TABLE public.main_table (
     c1 bigint not null,
-    с2 bigint not null,
-    с3 bigint
+    c2 bigint not null,
+    c3 bigint
 )
-PARTITION BY LIST (с2);
+PARTITION BY LIST (c2);
 
 ALTER TABLE public.main_table ALTER COLUMN c1 ADD GENERATED ALWAYS AS IDENTITY (
     SEQUENCE NAME public.main_table_c1_seq
