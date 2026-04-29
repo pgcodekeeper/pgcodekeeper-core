@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Improved script generation when changing an index on partitioned tables PostgreSQL.
+
 ### Fixed
 
 ## [14.3.0] - 2026-04-15

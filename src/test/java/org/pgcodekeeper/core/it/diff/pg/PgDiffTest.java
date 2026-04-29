@@ -619,7 +619,10 @@ class PgDiffTest {
             // Test scenario when not null constraint is modified
             "modify_not_null",
             // Test creating tables with not null constraint
-            "create_table_not_null"
+            "create_table_not_null",
+            // Test scenario when at index added inherit
+            "alter_index_attach"
+            
     })
     void diffTest(String fileNameTemplate) throws IOException, InterruptedException {
         assertDiff(databaseProvider, fileNameTemplate, PgDiffTest.class);

@@ -1,4 +1,3 @@
-
 CREATE TABLE public.main_table (
     c1 bigint not null,
     c2 bigint not null,
@@ -26,5 +25,3 @@ CREATE TABLE public.table_part1 PARTITION OF public.main_table
 FOR VALUES IN ('55');
 
 CREATE INDEX IF NOT EXISTS table_part1_c3_idx ON public.table_part1 USING btree (c3);
-
-ALTER INDEX public.main_table_c3_idx ATTACH PARTITION public.table_part1_c3_idx;
