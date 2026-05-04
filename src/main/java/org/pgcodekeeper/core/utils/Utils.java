@@ -29,6 +29,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -373,6 +374,8 @@ public final class Utils {
     public static Pair<IDatabase, IDatabase> loadDatabases(ILoader oldDbLoader, ILoader newDbLoader,
                                                            IMonitor subMonitor, boolean isParallelLoad)
             throws IOException, InterruptedException {
+        oldDbLoader.preLoad();
+        newDbLoader.preLoad();
         if (isParallelLoad) {
             return loadDatabasesInParallelMode(oldDbLoader, newDbLoader, subMonitor);
         }
@@ -440,6 +443,29 @@ public final class Utils {
 
     public static Random getRandom() {
         return RANDOM;
+    }
+
+    /**
+     * Collects the chain of localized messages from an exception and its causes,
+     * removing duplicates.
+     *
+     * @param throwable the exception to analyze
+     * @return a string with unique messages joined by " -> ", or empty string if throwable is null
+     */
+    public static String getFullLocalizedMessage(Throwable throwable) {
+        if (throwable == null) {
+            return "";
+        }
+
+        Set<String> uniqueMessages = new LinkedHashSet<>();
+        for (Throwable t = throwable; t != null; t = t.getCause()) {
+            String message = t.getLocalizedMessage();
+            if (message != null && !message.isBlank()) {
+                uniqueMessages.add(message.trim());
+            }
+        }
+
+        return String.join(" -> ", uniqueMessages);
     }
 
     private Utils() {

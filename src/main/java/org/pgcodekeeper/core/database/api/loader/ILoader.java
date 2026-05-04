@@ -35,6 +35,11 @@ public interface ILoader {
     IDatabase load() throws IOException, InterruptedException;
 
     /**
+     * Pre loads the required items, do nothing by default
+     */
+    default void preLoad() throws IOException, InterruptedException {}
+
+    /**
      * Loads the database schema and runs full expression analysis.
      *
      * @return loaded and fully analyzed database

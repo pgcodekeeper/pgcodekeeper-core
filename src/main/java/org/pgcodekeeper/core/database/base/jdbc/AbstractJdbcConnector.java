@@ -57,7 +57,7 @@ public abstract class AbstractJdbcConnector implements IJdbcConnector {
             loadDriver();
             return DriverManager.getConnection(getUrl(), makeProperties());
         } catch (SQLException e) {
-            throw new IOException(e.getLocalizedMessage(), e);
+            throw new IOException(Utils.getFullLocalizedMessage(e), e);
         }
     }
 

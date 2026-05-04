@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - Improved script generation when changing an index on partitioned tables PostgreSQL.
+- Improved the error message text when connecting to the database.
 
 ### Fixed
 
