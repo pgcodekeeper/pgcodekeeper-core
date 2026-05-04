@@ -58,7 +58,11 @@ public final class ChJdbcLoader extends AbstractJdbcLoader<ChDatabase> {
 
     @Override
     public void preLoad() {
+        if (isPreloaded) {
+            return;
+        }
         diffSettings.setVersion(ChSupportedVersion.DEFAULT);
+        isPreloaded = true;
     }
 
     @Override

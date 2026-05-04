@@ -46,6 +46,8 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
     protected String databaseName;
     private T loadedDb;
 
+    protected boolean isPreloaded = false;
+
     protected AbstractLoader(DiffSettings diffSettings, String databaseName) {
         this.diffSettings = diffSettings;
         this.databaseName = databaseName;
@@ -56,7 +58,7 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
         if (loadedDb != null) {
             return loadedDb;
         }
-
+        preLoad();
         loadedDb = loadInternal();
         return loadedDb;
     }

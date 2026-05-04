@@ -39,7 +39,6 @@ import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.base.schema.StatementOverride;
 import org.pgcodekeeper.core.dependencieslist.DependenciesReader;
 import org.pgcodekeeper.core.library.LibraryXmlStore;
-import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.Utils;
@@ -82,7 +81,6 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
         this.libs = libs;
         this.libsWithoutPriv = libsWithoutPriv;
         this.metaPath = metaPath;
-        preLoad();
     }
 
     @Override
@@ -154,24 +152,25 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
      * This method loads common settings {@link DiffSettings}, if it's need,
      * before comparing database instances{@link IDatabase}.
      */
-    protected void preLoad() {
+    @Override
+    public void preLoad() throws IOException {
+        if (isPreloaded) {
+            return;
+        }
+
         if (diffSettings.getSettings().isDisableAutoLoad()) {
             return;
         }
 
         // load ignored lists
-        try {
-            Path ignoreFile = dirPath.resolve(IGNORE_FILE);
-            if (Files.isRegularFile(ignoreFile)) {
-                diffSettings.addIgnoreList(ignoreFile);
-            }
+        Path ignoreFile = dirPath.resolve(IGNORE_FILE);
+        if (Files.isRegularFile(ignoreFile)) {
+            diffSettings.addIgnoreList(ignoreFile);
+        }
 
-            Path ignoreSchemaFile = dirPath.resolve(IGNORE_SCHEMA_FILE);
-            if (Files.isRegularFile(ignoreSchemaFile)) {
-                diffSettings.addIgnoreSchemaList(ignoreSchemaFile);
-            }
-        } catch (IOException e) {
-            throw new IllegalArgumentException(Messages.AbstractProjectLoader_failed_to_read_ignore_lists, e);
+        Path ignoreSchemaFile = dirPath.resolve(IGNORE_SCHEMA_FILE);
+        if (Files.isRegularFile(ignoreSchemaFile)) {
+            diffSettings.addIgnoreSchemaList(ignoreSchemaFile);
         }
 
         // load additional dependencies
@@ -179,6 +178,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
         if (Files.isRegularFile(depsPath)) {
             diffSettings.addAdditionalDependencies(DependenciesReader.getDependencies(depsPath));
         }
+        isPreloaded = true;
     }
 
     private void loadOverrides(T db) throws IOException, InterruptedException {

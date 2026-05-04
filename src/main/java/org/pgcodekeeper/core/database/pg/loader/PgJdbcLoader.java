@@ -121,16 +121,21 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
     }
 
     @Override
-    public void preLoad() {
+    public void preLoad() throws IOException, InterruptedException {
+        if (isPreloaded) {
+            return;
+        }
         try (Connection connection = connector.getConnection();
              Statement statement = connection.createStatement()) {
             queryCheckGreenplumDb(statement);
             queryCheckPgVersion(statement);
-        } catch (InterruptedException e) {
+            isPreloaded = true;
+        } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
-            throw new IllegalArgumentException(e);
+            throw ex;
         } catch (Exception e) {
-            throw new IllegalArgumentException(e);
+            throw new IOException(Messages.Connection_DatabaseJdbcAccessError.formatted(getCurrentLocation(),
+                    e.getLocalizedMessage()), e);
         }
     }
 
@@ -206,6 +211,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
 
             info(Messages.JdbcLoader_log_succes_queried);
         } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
             throw ex;
         } catch (Exception e) {
             // connection is closed at this point, trust Postgres to rollback it; we're a read-only xact anyway
