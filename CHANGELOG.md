@@ -11,10 +11,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- Improved script generation when changing an index on partitioned tables PostgreSQL.
-- Improved the error message text when connecting to the database.
-
 ### Fixed
+
+## [14.4.0] - 2026-05-05
+
+### Changed
+
+- Improved code generation when changing an index on partitioned tables PostgreSQL.
+- Improved the error message text when connecting to the database.
 
 ## [14.3.0] - 2026-04-15
 
@@ -2484,7 +2488,8 @@ We increment major version in this release due to decision to shift our developm
 
 - ORDER BY parsing has been added to the aggregate functions.
 
-[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.3.0...HEAD
+[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.4.0...HEAD
+[14.4.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.3.0...v14.4.0
 [14.3.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.2.0...v14.3.0
 [14.2.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.1.1...v14.2.0
 [14.1.1]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.1.0...v14.1.1
