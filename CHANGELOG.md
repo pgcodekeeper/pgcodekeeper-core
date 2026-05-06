@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+## [14.4.1] - 2026-05-06
+
+### Fixed
+
 - Fixed a bug when working with Arenadata DB 7.4.0 and higher.
 
 ## [14.4.0] - 2026-05-05
@@ -2490,7 +2494,8 @@ We increment major version in this release due to decision to shift our developm
 
 - ORDER BY parsing has been added to the aggregate functions.
 
-[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.4.0...HEAD
+[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.4.1...HEAD
+[14.4.1]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.4.0...v14.4.1
 [14.4.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.3.0...v14.4.0
 [14.3.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.2.0...v14.3.0
 [14.2.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.1.1...v14.2.0
