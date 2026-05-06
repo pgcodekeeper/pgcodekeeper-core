@@ -52,6 +52,7 @@ import java.util.function.Function;
 public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
 
     private static final String GREENPLUM = "Greenplum";
+    private static final String GREENGAGE = "Greengage";
     private static final String EXTENSION_VERSION = "1.";
 
     private static final String QUERY_CHECK_GREENPLUM = new QueryBuilder()
@@ -225,7 +226,8 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
         setCurrentOperation(Messages.JdbcLoaderBase_log_check_gp_db);
         try (ResultSet res = getRunner().runScript(statement, QUERY_CHECK_GREENPLUM)) {
             if (res.next()) {
-                isGreenplumDb = res.getString(1).contains(GREENPLUM);
+                String version = res.getString(1);
+                isGreenplumDb = version.contains(GREENPLUM) || version.contains(GREENGAGE);
             }
         }
         debug(Messages.JdbcLoaderBase_log_get_result_gp, isGreenplumDb);
