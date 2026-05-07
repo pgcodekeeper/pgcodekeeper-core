@@ -19,12 +19,12 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.schema;
 
-import java.util.Objects;
-
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IFunction;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
+
+import java.util.Objects;
 
 /**
  * PostgreSQL function implementation.
@@ -33,6 +33,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
  */
 public class PgFunction extends PgAbstractFunction {
 
+    private static final String TRIGGER_RETURN_TYPE = "trigger";
     private String returns;
 
     /**
@@ -52,6 +53,14 @@ public class PgFunction extends PgAbstractFunction {
     @Override
     public String getReturns() {
         return returns;
+    }
+
+    /**
+     * @return {@code true} if this function returns {@code trigger} and therefore
+     *         is usable as a trigger handler.
+     */
+    public boolean isTriggerFunction() {
+        return TRIGGER_RETURN_TYPE.equalsIgnoreCase(returns);
     }
 
     @Override

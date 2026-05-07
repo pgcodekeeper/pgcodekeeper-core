@@ -15,15 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.api;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
 import org.pgcodekeeper.core.DangerStatement;
 import org.pgcodekeeper.core.database.api.IDatabaseProvider;
 import org.pgcodekeeper.core.database.api.loader.ILoader;
@@ -40,6 +31,15 @@ import org.pgcodekeeper.core.model.graph.DepcyFinder;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Utils;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Main API class for pgCodeKeeper database operations.
@@ -179,7 +179,7 @@ public final class PgCodeKeeperApi {
      *
      * @param provider      the database provider determining SQL dialect and exporter/updater implementation
      * @param oldDbLoader   loader for the old database version (existing project state), or {@code null} for a full export
-     * @param newDbLoader   loader for the new new database version (target state)
+     * @param newDbLoader   loader for the new database version (target state)
      * @param projectPath   path to the target project directory
      * @param overridesOnly option to update only overrides
      * @param diffSettings unified context object containing settings, monitor, ignore list, and error accumulator
@@ -229,7 +229,7 @@ public final class PgCodeKeeperApi {
      *
      * @param provider      the database provider determining SQL dialect and exporter/updater implementation
      * @param oldDb         the old database version (existing project state), or {@code null} for a full export
-     * @param newDb         the new new database version (target state)
+     * @param newDb         the new database version (target state)
      * @param selected      the selected elements
      * @param projectPath   path to the target project directory
      * @param overridesOnly option to update only overrides
@@ -245,17 +245,48 @@ public final class PgCodeKeeperApi {
                                        boolean overridesOnly,
                                        ISettings settings)
             throws IOException {
+        exportToProject(provider, oldDb, newDb, selected, projectPath, overridesOnly, settings, null);
+    }
+
+    /**
+     * Exports or updates project or overrides files based on selected elements, using
+     * an externally supplied directory layout.
+     *
+     * @param provider      the database provider determining SQL dialect and exporter/updater implementation
+     * @param oldDb         the old database version (existing project state), or {@code null} for a full export
+     * @param newDb         the new database version (target state)
+     * @param selected      the selected elements
+     * @param projectPath   path to the target project directory
+     * @param overridesOnly option to update only overrides
+     * @param settings      configuration settings
+     * @param structureFile path to a properties file containing directory layout overrides
+     *                      to apply, or {@code null} to use the default layout. The file may
+     *                      have any name. When non-{@code null}, the resolved layout is
+     *                      persisted to the exported project as {@code structure.properties}
+     *                      regardless of the source filename.
+     * @throws IOException          if I/O operations fail, if the directory does not exist,
+     *                              if the directory is not empty (export) or if path is a file
+     */
+    public static void exportToProject(IDatabaseProvider provider,
+                                       IDatabase oldDb,
+                                       IDatabase newDb,
+                                       List<TreeElement> selected,
+                                       Path projectPath,
+                                       boolean overridesOnly,
+                                       ISettings settings,
+                                       Path structureFile)
+            throws IOException {
         if (oldDb != null) {
             provider.getProjectUpdater(newDb, oldDb, selected, projectPath, overridesOnly, settings).updatePartial();
         } else {
-            provider.getModelExporter(projectPath, newDb, selected, settings).exportProject();
+            provider.getModelExporter(projectPath, newDb, selected, settings, structureFile).exportProject();
         }
     }
 
     /**
      * Analyzes database object dependencies and builds a dependency graph.
      *
-     * @param loader       loader for the the database to analyze
+     * @param loader       loader for the database to analyze
      * @param objectNames  collection of object name patterns to search for (e.g., "public.users", "*.orders")
      * @param depth        depth of dependency analysis (e.g., 10 levels)
      * @param reverse      false = direct dependencies (what this depends on), true = reverse dependencies (what depends on this)

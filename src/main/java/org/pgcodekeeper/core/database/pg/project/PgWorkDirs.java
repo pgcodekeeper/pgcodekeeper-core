@@ -15,104 +15,78 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.project;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.api.schema.ISubElement;
-import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.utils.FileUtils;
+import org.pgcodekeeper.core.database.base.project.AbstractWorkDirs;
+import org.pgcodekeeper.core.database.base.project.DirRule;
+import org.pgcodekeeper.core.database.pg.schema.PgAbstractForeignTable;
+import org.pgcodekeeper.core.database.pg.schema.PgFunction;
+import org.pgcodekeeper.core.database.pg.schema.PgMaterializedView;
 
 import java.nio.file.Path;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Directory structure definitions for PostgreSQL project loader.
  */
-public final class PgWorkDirs {
+public class PgWorkDirs extends AbstractWorkDirs {
 
-    public static final String SCHEMA = "SCHEMA";
-
-    private static final List<String> DIRECTORY_NAMES = List.of(
-            SCHEMA, "EXTENSION", "EVENT_TRIGGER", "USER_MAPPING", "CAST", "SERVER", "FDW");
-
-    private static final EnumSet<DbObjType> DIR_LOAD_ORDER = EnumSet.of(
-            DbObjType.COLLATION, DbObjType.TYPE, DbObjType.DOMAIN, DbObjType.SEQUENCE,
-            DbObjType.FUNCTION, DbObjType.PROCEDURE, DbObjType.AGGREGATE, DbObjType.OPERATOR,
-            DbObjType.TABLE, DbObjType.VIEW, DbObjType.STATISTICS, DbObjType.DICTIONARY,
-            DbObjType.FTS_PARSER, DbObjType.FTS_TEMPLATE, DbObjType.FTS_DICTIONARY, DbObjType.FTS_CONFIGURATION);
-
-    public static List<String> getDirectoryNames() {
-        return DIRECTORY_NAMES;
-    }
-
-    public static Set<DbObjType> getDirLoadOrder() {
-        return DIR_LOAD_ORDER;
+    /**
+     * Creates PgWorkDirs with default directory structure only.
+     */
+    public PgWorkDirs() {
+        super(null);
     }
 
     /**
-     * Gets the relative filesystem path for a PostgreSQL database statement.
+     * Creates PgWorkDirs and applies overrides from the given alt-dirs properties file.
+     * Supports standard {@link DbObjType} keys and the following custom keys:
+     * <ul>
+     *   <li>{@code MAT_VIEW} — materialized views (subset of {@code VIEW})</li>
+     *   <li>{@code FOREIGN_TABLE} — foreign tables (subset of {@code TABLE})</li>
+     *   <li>{@code TRIGGER_FUNC} — trigger functions (subset of {@code FUNCTION})</li>
+     * </ul>
      *
-     * @param st      the database statement
-     * @param baseDir the base directory path
-     * @return relative path where the statement should be stored
-     * @throws IllegalStateException if the object type is not supported
+     * @param altDirsFile path to the alt-dirs properties file (any filename),
+     *                    or {@code null} for defaults only
      */
-    public static Path getRelativeFolderPath(IStatement st, Path baseDir) {
-        DbObjType type = st.getStatementType();
-        return switch (type) {
-            case EXTENSION, SERVER, USER_MAPPING, CAST, EVENT_TRIGGER, FOREIGN_DATA_WRAPPER -> baseDir
-                    .resolve(getDirectoryNameForType(type));
-            case SCHEMA -> {
-                String schemaName = FileUtils.getValidFilename(st.getBareName());
-                yield baseDir.resolve(SCHEMA).resolve(schemaName);
-            }
-            case COLLATION, SEQUENCE, TYPE, DOMAIN, VIEW, TABLE, FUNCTION, PROCEDURE, AGGREGATE, OPERATOR,
-                 FTS_TEMPLATE, FTS_PARSER, FTS_DICTIONARY, FTS_CONFIGURATION, STATISTICS, COLUMN -> {
-                var parentSt = st.getParent();
-                String schemaName = FileUtils.getValidFilename(parentSt.getBareName());
-                if (type == DbObjType.COLUMN) {
-                    type = DbObjType.TABLE;
-                }
-                yield baseDir.resolve(SCHEMA).resolve(schemaName).resolve(getDirectoryNameForType(type));
-            }
-            default -> throw new IllegalStateException(Messages.DbObjType_unsupported_type + type);
-        };
+    public PgWorkDirs(Path altDirsFile) {
+        super(altDirsFile);
     }
 
-    /**
-     * Gets the relative file path for a PostgreSQL database statement.
-     *
-     * @param st the database statement
-     * @return relative path for the statement's file
-     */
-    public static Path getRelativeFilePath(IStatement st) {
-        if (st instanceof ISubElement) {
-            st = st.getParent();
-        }
-        Path path = getRelativeFolderPath(st, Path.of(""));
-        return path.resolve(FileUtils.getValidFilename(st.getBareName()) + Consts.SQL_POSTFIX);
+    @Override
+    protected Map<String, DirRule> getDefaultDirNames() {
+        Map<String, DirRule> result = new LinkedHashMap<>();
+        result.put("SCHEMA", new DirRule("SCHEMA", DbObjType.SCHEMA, false));
+        result.put("COLLATION", new DirRule("COLLATION", DbObjType.COLLATION, true));
+        result.put("TYPE", new DirRule("TYPE", DbObjType.TYPE, true));
+        result.put("DOMAIN", new DirRule("DOMAIN", DbObjType.DOMAIN, true));
+        result.put("SEQUENCE", new DirRule("SEQUENCE", DbObjType.SEQUENCE, true));
+        result.put("TRIGGER_FUNC", new DirRule("FUNCTION", DbObjType.FUNCTION, true, true, st -> st instanceof PgFunction f && f.isTriggerFunction()));
+        result.put("FUNCTION", new DirRule("FUNCTION", DbObjType.FUNCTION, true));
+        result.put("PROCEDURE", new DirRule("PROCEDURE", DbObjType.PROCEDURE, true));
+        result.put("AGGREGATE", new DirRule("AGGREGATE", DbObjType.AGGREGATE, true));
+        result.put("OPERATOR", new DirRule("OPERATOR", DbObjType.OPERATOR, true));
+        result.put("FOREIGN_TABLE", new DirRule("TABLE", DbObjType.TABLE, true, true, PgAbstractForeignTable.class::isInstance));
+        result.put("TABLE", new DirRule("TABLE", DbObjType.TABLE, true));
+        result.put("MAT_VIEW", new DirRule("VIEW", DbObjType.VIEW, true, true, PgMaterializedView.class::isInstance));
+        result.put("VIEW", new DirRule("VIEW", DbObjType.VIEW, true));
+        result.put("STATISTICS", new DirRule("STATISTICS", DbObjType.STATISTICS, true));
+        result.put("FTS_PARSER", new DirRule("FTS_PARSER", DbObjType.FTS_PARSER, true));
+        result.put("FTS_TEMPLATE", new DirRule("FTS_TEMPLATE", DbObjType.FTS_TEMPLATE, true));
+        result.put("FTS_DICTIONARY", new DirRule("FTS_DICTIONARY", DbObjType.FTS_DICTIONARY, true));
+        result.put("FTS_CONFIGURATION", new DirRule("FTS_CONFIGURATION", DbObjType.FTS_CONFIGURATION, true));
+        result.put("EXTENSION", new DirRule("EXTENSION", DbObjType.EXTENSION, false));
+        result.put("EVENT_TRIGGER", new DirRule("EVENT_TRIGGER", DbObjType.EVENT_TRIGGER, false));
+        result.put("USER_MAPPING", new DirRule("USER_MAPPING", DbObjType.USER_MAPPING, false));
+        result.put("CAST", new DirRule("CAST", DbObjType.CAST, false));
+        result.put("SERVER", new DirRule("SERVER", DbObjType.SERVER, false));
+        result.put("FOREIGN_DATA_WRAPPER", new DirRule("FDW", DbObjType.FOREIGN_DATA_WRAPPER, false));
+        return result;
     }
 
-    /**
-     * Gets the directory name for a PostgreSQL database object type.
-     *
-     * @param type the database object type
-     * @return directory name for the type
-     * @throws IllegalStateException if the object type is not supported
-     */
-    public static String getDirectoryNameForType(DbObjType type) {
-        return switch (type) {
-            case FOREIGN_DATA_WRAPPER -> "FDW";
-            case CONSTRAINT, INDEX, RULE, TRIGGER, POLICY, COLUMN -> null;
-            case EXTENSION, SERVER, USER_MAPPING, CAST, EVENT_TRIGGER, SCHEMA, COLLATION, SEQUENCE, TYPE, DOMAIN,
-                 VIEW, TABLE, FUNCTION, PROCEDURE, AGGREGATE, OPERATOR, FTS_TEMPLATE, FTS_PARSER, FTS_DICTIONARY,
-                 FTS_CONFIGURATION, STATISTICS -> type.name();
-            default -> throw new IllegalStateException(Messages.DbObjType_unsupported_type + type);
-        };
-    }
-
-    private PgWorkDirs() {
+    @Override
+    protected boolean isSplitBySchemaByDefault() {
+        return true;
     }
 }

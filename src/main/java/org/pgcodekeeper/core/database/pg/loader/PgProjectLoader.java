@@ -15,22 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.loader;
 
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.loader.AbstractLibraryLoader;
 import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
+import org.pgcodekeeper.core.database.base.project.AbstractWorkDirs;
 import org.pgcodekeeper.core.database.pg.project.PgWorkDirs;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
-import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
-import org.pgcodekeeper.core.utils.Utils;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.stream.Stream;
 
 /**
  * PostgreSQL project loader for loading database schemas from project directory structures.
@@ -38,12 +33,13 @@ import java.util.stream.Stream;
 public class PgProjectLoader extends AbstractProjectLoader<PgDatabase> {
 
     public PgProjectLoader(Path dirPath, DiffSettings diffSettings) {
-        super(dirPath, diffSettings);
+        super(dirPath, diffSettings, new PgWorkDirs(AbstractWorkDirs.resolveAltDirsFile(dirPath)));
     }
 
     public PgProjectLoader(Path dirPath, DiffSettings diffSettings, Collection<String> libXmls,
                            Collection<String> libs, Collection<String> libsWithoutPriv, Path metaPath) {
-        super(dirPath, diffSettings, libXmls, libs, libsWithoutPriv, metaPath);
+        super(dirPath, diffSettings, new PgWorkDirs(AbstractWorkDirs.resolveAltDirsFile(dirPath)),
+                libXmls, libs, libsWithoutPriv, metaPath);
     }
 
     @Override
@@ -59,40 +55,5 @@ public class PgProjectLoader extends AbstractProjectLoader<PgDatabase> {
     @Override
     protected AbstractLibraryLoader<PgDatabase> createLibraryLoader(PgDatabase db) {
         return new PgLibraryLoader(db, metaPath, new HashSet<>(), diffSettings);
-    }
-
-    @Override
-    protected void loadStructure(Path dir, PgDatabase db) throws IOException, InterruptedException {
-        for (String dirName : PgWorkDirs.getDirectoryNames()) {
-            if (PgWorkDirs.SCHEMA.equals(dirName)) {
-                loadPgSchemaStructure(dir, db, dirName);
-            } else {
-                loadSubdir(dir, dirName, db);
-            }
-        }
-    }
-
-    private void loadPgSchemaStructure(Path baseDir, PgDatabase db, String commonDir)
-            throws IOException, InterruptedException {
-
-        Path schemasCommonDir = baseDir.resolve(commonDir);
-        // skip walking SCHEMA folder if it does not exist
-        if (!Files.isDirectory(schemasCommonDir)) {
-            return;
-        }
-
-        // read out schemas names, and work in loop on each
-        try (Stream<Path> schemas = Files.list(schemasCommonDir)) {
-            for (Path schemaDir : Utils.streamIterator(schemas)) {
-                IMonitor.checkCancelled(getMonitor());
-                if (Files.isDirectory(schemaDir) && isAllowedSchema(schemaDir.getFileName().toString())) {
-                    loadSubdir(schemasCommonDir, schemaDir.getFileName().toString(), db);
-                    for (DbObjType dirSub : PgWorkDirs.getDirLoadOrder()) {
-                        IMonitor.checkCancelled(getMonitor());
-                        loadSubdir(schemaDir, dirSub.name(), db);
-                    }
-                }
-            }
-        }
     }
 }

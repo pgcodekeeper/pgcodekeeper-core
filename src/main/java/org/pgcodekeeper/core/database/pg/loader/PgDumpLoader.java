@@ -59,7 +59,9 @@ public class PgDumpLoader extends AbstractDumpLoader<PgDatabase> {
         if (overrides != null) {
             listener = new PgOverridesListener(db, databaseName, mode, diffSettings, overrides);
         } else {
-            listener = new PgCustomParserListener(db, databaseName, mode, diffSettings, antlrTasks);
+            var l = new PgCustomParserListener(db, databaseName, mode, diffSettings, antlrTasks);
+            l.setWorkDirs(workDirs);
+            listener = l;
         }
         PgParserUtils.parseSqlStream(input, databaseName, diffSettings, monitoringLevel, listener, antlrTasks);
     }

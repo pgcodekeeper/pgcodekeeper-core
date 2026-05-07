@@ -19,6 +19,7 @@ import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IPrivilege;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.project.AbstractOverridesModelExporter;
+import org.pgcodekeeper.core.database.base.project.AbstractWorkDirs;
 import org.pgcodekeeper.core.database.pg.schema.PgPrivilege;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.script.SQLScript;
@@ -26,7 +27,6 @@ import org.pgcodekeeper.core.settings.ISettings;
 
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -35,30 +35,11 @@ import java.util.Set;
  */
 public class PgOverridesModelExporter extends AbstractOverridesModelExporter {
 
-    /**
-     * Creates a new PgOverridesModelExporter.
-     *
-     * @param outDir         output directory for export
-     * @param newDb          new database schema
-     * @param oldDb          old database schema
-     * @param changedObjects collection of changed tree elements
-     * @param sqlEncoding    SQL file encoding
-     * @param settings       export settings
-     */
-    public PgOverridesModelExporter(Path outDir, IDatabase newDb, IDatabase oldDb,
+    public PgOverridesModelExporter(Path outDir, Path projectPath, IDatabase newDb, IDatabase oldDb,
                                     Collection<TreeElement> changedObjects,
                                     String sqlEncoding, ISettings settings) {
-        super(outDir, newDb, oldDb, changedObjects, sqlEncoding, settings);
-    }
-
-    @Override
-    protected List<String> getDirectoryNames() {
-        return PgWorkDirs.getDirectoryNames();
-    }
-
-    @Override
-    protected Path getRelativeFilePath(IStatement st) {
-        return PgWorkDirs.getRelativeFilePath(st);
+        super(outDir, newDb, oldDb, changedObjects, sqlEncoding, settings,
+                new PgWorkDirs(AbstractWorkDirs.resolveAltDirsFile(projectPath)));
     }
 
     @Override

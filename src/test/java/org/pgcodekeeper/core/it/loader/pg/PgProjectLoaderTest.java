@@ -25,6 +25,7 @@ import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
+import org.pgcodekeeper.core.database.base.project.AbstractWorkDirs;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.project.PgModelExporter;
 import org.pgcodekeeper.core.ignorelist.IgnoreList;
@@ -55,6 +56,7 @@ class PgProjectLoaderTest {
     private static final String RESOURCE_FIRST_LIB = "lib_first_table.sql";
     private static final String RESOURCE_SECOND_LIB = "lib_second_table.sql";
     private static final String RESOURCE_OVERRIDE_EMP = "override_emp.sql";
+    private static final String RESOURCE_OVERRIDE_EMP_STAMP = "override_emp_stamp.sql";
 
     private final PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
 
@@ -247,6 +249,61 @@ class PgProjectLoaderTest {
             Assertions.assertNull(libTable.getOwner());
             Assertions.assertTrue(libTable.getPrivileges().isEmpty());
         }
+    }
+
+    @Test
+    void testProjectLoaderWithAltDirs(@TempDir Path dir) throws IOException, InterruptedException {
+        var settings = new CoreSettings();
+        var diffSettings = new DiffSettings(settings);
+        Path projectDir = dir.resolve("project");
+        createProject(projectDir, diffSettings);
+
+        Files.writeString(projectDir.resolve(AbstractWorkDirs.ALT_DIRS_FILENAME),
+                "TRIGGER_FUNC=TRIGGER_FUNCTION");
+        Path funcDir = projectDir.resolve("SCHEMA/public/FUNCTION");
+        Path triggerFuncDir = projectDir.resolve("SCHEMA/public/TRIGGER_FUNCTION");
+        Files.createDirectories(triggerFuncDir);
+        Files.move(funcDir.resolve("emp_stamp.sql"), triggerFuncDir.resolve("emp_stamp.sql"));
+
+        IDatabase db = databaseProvider.getProjectLoader(projectDir, diffSettings).load();
+
+        var regularFunc = db.getStatement(
+                new ObjectReference("public", "people_worker_shedule()", DbObjType.FUNCTION));
+        Assertions.assertNotNull(regularFunc, "Regular function should be loaded from default directory");
+
+        var triggerFunc = db.getStatement(
+                new ObjectReference("public", "emp_stamp()", DbObjType.FUNCTION));
+        Assertions.assertNotNull(triggerFunc, "Trigger function should be loaded from alt directory");
+    }
+
+    @Test
+    void testProjectLoaderWithOverridesAndAltDirs(@TempDir Path dir) throws IOException, InterruptedException {
+        var diffSettings = new DiffSettings(new CoreSettings());
+        Path projectDir = dir.resolve("project");
+        createProject(projectDir, diffSettings);
+
+        Files.writeString(projectDir.resolve(AbstractWorkDirs.ALT_DIRS_FILENAME),
+                "TRIGGER_FUNC=TRIGGER_FUNCTION");
+        Path funcDir = projectDir.resolve("SCHEMA/public/FUNCTION");
+        Path triggerFuncDir = projectDir.resolve("SCHEMA/public/TRIGGER_FUNCTION");
+        Files.createDirectories(triggerFuncDir);
+        Files.move(funcDir.resolve("emp_stamp.sql"), triggerFuncDir.resolve("emp_stamp.sql"));
+
+        Path overrideDir = projectDir.resolve("OVERRIDES/SCHEMA/public/TRIGGER_FUNCTION");
+        Files.createDirectories(overrideDir);
+        var overridePath = TestUtils.getFilePath(RESOURCE_OVERRIDE_EMP_STAMP, getClass());
+        Files.copy(overridePath, overrideDir.resolve("emp_stamp.sql"));
+
+        IDatabase db = databaseProvider.getProjectLoader(projectDir, diffSettings).load();
+
+        var empStamp = db.getStatement(
+                new ObjectReference("public", "emp_stamp()", DbObjType.FUNCTION));
+        Assertions.assertNotNull(empStamp);
+        Assertions.assertEquals("override_user", empStamp.getOwner());
+        var hasExecuteGrant = empStamp.getPrivileges().stream().anyMatch(
+                p -> !p.isRevoke() && "EXECUTE".equals(p.getPermission())
+                        && "override_user".equals(p.getRole()));
+        Assertions.assertTrue(hasExecuteGrant);
     }
 
     private void assertNotLoaded(IDatabase db, String tableName) {

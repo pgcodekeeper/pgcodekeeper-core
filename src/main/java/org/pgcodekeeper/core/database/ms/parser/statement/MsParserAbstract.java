@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.parser.statement;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,7 +24,6 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IOptionContainer;
 import org.pgcodekeeper.core.database.api.schema.ISimpleColumnContainer;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.api.schema.ObjectReference;
@@ -49,7 +47,6 @@ import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.On_optionCo
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Qualified_nameContext;
 import org.pgcodekeeper.core.database.ms.parser.generated.TSQLParser.Table_constraint_bodyContext;
 import org.pgcodekeeper.core.database.ms.parser.launcher.MsExpressionAnalysisLauncher;
-import org.pgcodekeeper.core.database.ms.project.MsWorkDirs;
 import org.pgcodekeeper.core.database.ms.schema.MsColumn;
 import org.pgcodekeeper.core.database.ms.schema.MsConstraint;
 import org.pgcodekeeper.core.database.ms.schema.MsConstraintCheck;
@@ -79,7 +76,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
     }
 
     protected MsConstraint getMsPKConstraint(String schema, String table, String conName,
-                                                   Table_constraint_bodyContext body) {
+                                             Table_constraint_bodyContext body) {
         var constrPk = new MsConstraintPk(conName, body.PRIMARY() != null);
         var clusteredCtx = body.clustered();
         constrPk.setClustered(clusteredCtx != null && clusteredCtx.CLUSTERED() != null);
@@ -392,16 +389,6 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
     @Override
     protected boolean isSystemSchema(String schema) {
         return MsDiffUtils.isSystemSchema(schema);
-    }
-
-    @Override
-    protected Path getRelativeFilePath(IStatement st) {
-        return MsWorkDirs.getRelativeFilePath(st);
-    }
-
-    @Override
-    protected List<String> getDirectoryNames() {
-        return MsWorkDirs.getDirectoryNames();
     }
 
     @Override

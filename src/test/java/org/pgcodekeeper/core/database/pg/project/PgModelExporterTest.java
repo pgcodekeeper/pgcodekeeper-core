@@ -16,6 +16,8 @@
 package org.pgcodekeeper.core.database.pg.project;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.Consts;
@@ -24,20 +26,47 @@ import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectReference;
+import org.pgcodekeeper.core.database.base.project.AbstractWorkDirs;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
+import org.pgcodekeeper.core.database.pg.schema.PgFunction;
+import org.pgcodekeeper.core.database.pg.schema.PgSchema;
+import org.pgcodekeeper.core.database.pg.schema.PgSimpleTable;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 /**
  * Test for PostgreSQL database model export functionality
  */
 class PgModelExporterTest {
+
+    @Test
+    void testExporterReadsAltDirsFromOutDir(@TempDir Path tempDir) throws IOException {
+        Files.writeString(tempDir.resolve(AbstractWorkDirs.ALT_DIRS_FILENAME),
+                "TRIGGER_FUNC=TRIGGER_FUNCTION\nTABLE=ALT_TABLE");
+
+        var exporter = new PgModelExporter(tempDir, null, null, null, Consts.UTF_8, new CoreSettings());
+
+        var schema = new PgSchema("public");
+        var table = new PgSimpleTable("my_table");
+        var triggerFunc = new PgFunction("my_trigger_func");
+        triggerFunc.setReturns("trigger");
+        schema.addChild(table);
+        schema.addChild(triggerFunc);
+
+        Assertions.assertEquals(Path.of("SCHEMA", "public", "ALT_TABLE", "my_table.sql"),
+                exporter.getRelativeFilePath(table));
+        Assertions.assertEquals(
+                Path.of("SCHEMA", "public", "TRIGGER_FUNCTION", "my_trigger_func.sql"),
+                exporter.getRelativeFilePath(triggerFunc));
+    }
 
     @ParameterizedTest
     @CsvSource({
@@ -58,14 +87,12 @@ class PgModelExporterTest {
         var stmt = getStatement(db, stmtName, type);
         var actual = exporter.getDumpSql(stmt);
 
-        // check that exporter generate script is equals generated script with default settings
-        Assertions.assertEquals(getCreationSQL(stmt), actual, "this should be equals");
+        Assertions.assertEquals(getCreationSQL(stmt), actual);
 
         var script = new SQLScript(diffSettings, db.getSeparator());
         stmt.getCreationSQL(script);
 
-        // check that exporter generates script is not equals generated script with user settings
-        Assertions.assertNotEquals(script.getFullScript(), actual, "this should be not equals");
+        Assertions.assertNotEquals(script.getFullScript(), actual);
     }
 
     /**

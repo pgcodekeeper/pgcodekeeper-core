@@ -15,22 +15,17 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ch.loader;
 
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.loader.AbstractLibraryLoader;
 import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
+import org.pgcodekeeper.core.database.base.project.AbstractWorkDirs;
 import org.pgcodekeeper.core.database.ch.project.ChWorkDirs;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
-import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
-import org.pgcodekeeper.core.utils.Utils;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.stream.Stream;
 
 /**
  * ClickHouse project loader for loading database schemas from project directory structures.
@@ -38,12 +33,13 @@ import java.util.stream.Stream;
 public class ChProjectLoader extends AbstractProjectLoader<ChDatabase> {
 
     public ChProjectLoader(Path dirPath, DiffSettings diffSettings) {
-        super(dirPath, diffSettings);
+        super(dirPath, diffSettings, new ChWorkDirs(AbstractWorkDirs.resolveAltDirsFile(dirPath)));
     }
 
     public ChProjectLoader(Path dirPath, DiffSettings diffSettings, Collection<String> libXmls,
                            Collection<String> libs, Collection<String> libsWithoutPriv, Path metaPath) {
-        super(dirPath, diffSettings, libXmls, libs, libsWithoutPriv, metaPath);
+        super(dirPath, diffSettings, new ChWorkDirs(AbstractWorkDirs.resolveAltDirsFile(dirPath)),
+                libXmls, libs, libsWithoutPriv, metaPath);
     }
 
     @Override
@@ -59,37 +55,5 @@ public class ChProjectLoader extends AbstractProjectLoader<ChDatabase> {
     @Override
     protected AbstractLibraryLoader<ChDatabase> createLibraryLoader(ChDatabase db) {
         return new ChLibraryLoader(db, metaPath, new HashSet<>(), diffSettings);
-    }
-
-    @Override
-    protected void loadStructure(Path dir, ChDatabase db) throws IOException, InterruptedException {
-        for (String dirName : ChWorkDirs.getDirectoryNames()) {
-            if (ChWorkDirs.DATABASE.equals(dirName)) {
-                loadDatabaseStructure(dir, db, dirName);
-            } else {
-                loadSubdir(dir, dirName, db);
-            }
-        }
-    }
-
-    private void loadDatabaseStructure(Path baseDir, ChDatabase db, String commonDir)
-            throws IOException, InterruptedException {
-        Path databasesCommonDir = baseDir.resolve(commonDir);
-        if (!Files.isDirectory(databasesCommonDir)) {
-            return;
-        }
-
-        try (Stream<Path> databases = Files.list(databasesCommonDir)) {
-            for (Path databaseDir : Utils.streamIterator(databases)) {
-                IMonitor.checkCancelled(getMonitor());
-                if (Files.isDirectory(databaseDir) && isAllowedSchema(databaseDir.getFileName().toString())) {
-                    loadSubdir(databasesCommonDir, databaseDir.getFileName().toString(), db);
-                    for (DbObjType dirSub : ChWorkDirs.getDirLoadOrder()) {
-                        IMonitor.checkCancelled(getMonitor());
-                        loadSubdir(databaseDir, dirSub.name(), db);
-                    }
-                }
-            }
-        }
     }
 }

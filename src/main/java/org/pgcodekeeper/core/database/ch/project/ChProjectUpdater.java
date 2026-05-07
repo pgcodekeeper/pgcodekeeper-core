@@ -23,7 +23,6 @@ import org.pgcodekeeper.core.settings.ISettings;
 
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Project updater for ClickHouse databases.
@@ -48,11 +47,6 @@ public class ChProjectUpdater extends AbstractProjectUpdater {
     }
 
     @Override
-    protected List<String> getDirectoryNames() {
-        return ChWorkDirs.getDirectoryNames();
-    }
-
-    @Override
     protected AbstractModelExporter createModelExporter(Path outDir, IDatabase db, String sqlEncoding) {
         return new ChModelExporter(outDir, db, sqlEncoding, settings);
     }
@@ -67,6 +61,6 @@ public class ChProjectUpdater extends AbstractProjectUpdater {
     protected AbstractModelExporter createOverridesModelExporter(Path outDir, IDatabase newDb, IDatabase oldDb,
                                                                  Collection<TreeElement> changedObjects,
                                                                  String sqlEncoding) {
-        return new ChOverridesModelExporter(outDir, newDb, oldDb, changedObjects, sqlEncoding, settings);
+        return new ChOverridesModelExporter(outDir, dirExport, newDb, oldDb, changedObjects, sqlEncoding, settings);
     }
 }

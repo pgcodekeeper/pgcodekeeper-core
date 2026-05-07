@@ -15,101 +15,57 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.ms.project;
 
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.ISearchPath;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.api.schema.ISubElement;
-import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.utils.FileUtils;
+import org.pgcodekeeper.core.database.base.project.AbstractWorkDirs;
+import org.pgcodekeeper.core.database.base.project.DirRule;
 
 import java.nio.file.Path;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Directory structure definitions for MS SQL Server project loader.
  */
-public final class MsWorkDirs {
+public class MsWorkDirs extends AbstractWorkDirs {
 
     public static final String SECURITY = "Security";
     public static final String SCHEMAS = "Schemas";
-    public static final String USERS = "Users";
-    public static final String ROLES = "Roles";
 
-    private static final String ASSEMBLIES = "Assemblies";
-
-    private static final List<String> DIRECTORY_NAMES = List.of(
-            ASSEMBLIES, "Types", "Tables", "Views", "Sequences",
-            "Functions", "Stored Procedures", SECURITY);
-
-    public static List<String> getDirectoryNames() {
-        return DIRECTORY_NAMES;
-    }
-
-    public static boolean isInSchema(String dirSub) {
-        return !ASSEMBLIES.equals(dirSub) && !SECURITY.equals(dirSub);
+    /**
+     * Creates MsWorkDirs with default directory structure only.
+     */
+    public MsWorkDirs() {
+        super(null);
     }
 
     /**
-     * Gets the relative filesystem path for a MS SQL Server database statement.
+     * Creates MsWorkDirs and applies overrides from the given alt-dirs properties file.
      *
-     * @param st      the database statement
-     * @param baseDir the base directory path
-     * @return relative path where the statement should be stored
-     * @throws IllegalStateException if the object type is not supported
+     * @param altDirsFile path to the alt-dirs properties file (any filename),
+     *                    or {@code null} for defaults only
      */
-    public static Path getRelativeFolderPath(IStatement st, Path baseDir) {
-        DbObjType type = st.getStatementType();
-        return switch (type) {
-            case SCHEMA, ROLE, USER -> baseDir.resolve(SECURITY).resolve(getDirectoryNameForType(type));
-            case ASSEMBLY, SEQUENCE, VIEW, TABLE, FUNCTION, PROCEDURE, TYPE -> baseDir
-                    .resolve(getDirectoryNameForType(type));
-            default -> throw new IllegalStateException(Messages.DbObjType_unsupported_type + type);
-        };
+    public MsWorkDirs(Path altDirsFile) {
+        super(altDirsFile);
     }
 
-    /**
-     * Gets the relative file path for a MS SQL Server database statement.
-     *
-     * @param st the database statement
-     * @return relative path for the statement's file
-     */
-    public static Path getRelativeFilePath(IStatement st) {
-        if (st instanceof ISubElement) {
-            st = st.getParent();
-        }
-        Path path = getRelativeFolderPath(st, Path.of(""));
-        String fileName = FileUtils.getValidFilename(st.getBareName()) + Consts.SQL_POSTFIX;
-        if (st instanceof ISearchPath sp) {
-            fileName = FileUtils.getValidFilename(sp.getSchemaName()) + '.' + fileName;
-        }
-        return path.resolve(fileName);
+    @Override
+    protected Map<String, DirRule> getDefaultDirNames() {
+        Map<String, DirRule> result = new LinkedHashMap<>();
+        result.put("SCHEMA", new DirRule(SECURITY + '/' + SCHEMAS, DbObjType.SCHEMA, false));
+        result.put("ROLE", new DirRule(SECURITY + "/Roles", DbObjType.ROLE, false));
+        result.put("USER", new DirRule(SECURITY + "/Users", DbObjType.USER, false));
+        result.put("ASSEMBLY", new DirRule("Assemblies", DbObjType.ASSEMBLY, false));
+        result.put("TYPE", new DirRule("Types", DbObjType.TYPE, true));
+        result.put("TABLE", new DirRule("Tables", DbObjType.TABLE, true));
+        result.put("VIEW", new DirRule("Views", DbObjType.VIEW, true));
+        result.put("SEQUENCE", new DirRule("Sequences", DbObjType.SEQUENCE, true));
+        result.put("FUNCTION", new DirRule("Functions", DbObjType.FUNCTION, true));
+        result.put("PROCEDURE", new DirRule("Stored Procedures", DbObjType.PROCEDURE, true));
+        return result;
     }
 
-    /**
-     * Gets the directory name for a MS SQL Server database object type.
-     *
-     * @param type the database object type
-     * @return directory name for the type
-     * @throws IllegalStateException if the object type is not supported
-     */
-    public static String getDirectoryNameForType(DbObjType type) {
-        return switch (type) {
-            case SCHEMA -> SCHEMAS;
-            case ROLE -> ROLES;
-            case USER -> USERS;
-            case ASSEMBLY -> ASSEMBLIES;
-            case SEQUENCE -> "Sequences";
-            case VIEW -> "Views";
-            case TABLE -> "Tables";
-            case FUNCTION -> "Functions";
-            case PROCEDURE -> "Stored Procedures";
-            case TYPE -> "Types";
-            case CONSTRAINT, INDEX, TRIGGER, COLUMN, STATISTICS -> null;
-            default -> throw new IllegalStateException(Messages.DbObjType_unsupported_type + type);
-        };
-    }
-
-    private MsWorkDirs() {
+    @Override
+    protected boolean isSplitBySchemaByDefault() {
+        return false;
     }
 }

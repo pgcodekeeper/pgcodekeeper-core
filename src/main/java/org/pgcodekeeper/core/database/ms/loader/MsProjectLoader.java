@@ -22,11 +22,11 @@ import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.loader.AbstractLibraryLoader;
 import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
 import org.pgcodekeeper.core.database.base.parser.AntlrTaskManager;
+import org.pgcodekeeper.core.database.base.project.AbstractWorkDirs;
 import org.pgcodekeeper.core.database.ms.project.MsWorkDirs;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.ms.schema.MsSchema;
 import org.pgcodekeeper.core.database.ms.utils.MsConsts;
-import org.pgcodekeeper.core.monitor.IMonitor;
 import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
@@ -40,12 +40,13 @@ import java.util.HashSet;
 public class MsProjectLoader extends AbstractProjectLoader<MsDatabase> {
 
     public MsProjectLoader(Path dirPath, DiffSettings diffSettings) {
-        super(dirPath, diffSettings);
+        super(dirPath, diffSettings, new MsWorkDirs(AbstractWorkDirs.resolveAltDirsFile(dirPath)));
     }
 
     public MsProjectLoader(Path dirPath, DiffSettings diffSettings, Collection<String> libXmls,
                            Collection<String> libs, Collection<String> libsWithoutPriv, Path metaPath) {
-        super(dirPath, diffSettings, libXmls, libs, libsWithoutPriv, metaPath);
+        super(dirPath, diffSettings, new MsWorkDirs(AbstractWorkDirs.resolveAltDirsFile(dirPath)),
+                libXmls, libs, libsWithoutPriv, metaPath);
     }
 
     @Override
@@ -64,27 +65,11 @@ public class MsProjectLoader extends AbstractProjectLoader<MsDatabase> {
     }
 
     @Override
-    protected void loadStructure(Path dir, MsDatabase db) throws InterruptedException, IOException {
-        Path securityFolder = dir.resolve(MsWorkDirs.SECURITY);
-
-        loadSubdir(securityFolder, MsWorkDirs.SCHEMAS, db, fileName -> isAllowedSchema(fileName.split("\\.")[0]));
+    protected void afterSchemaLoad(MsDatabase db) throws InterruptedException, IOException {
         // DBO schema check requires schema loads to finish first
         AntlrTaskManager.finish(antlrTasks);
         collectDumpLoaderErrors();
         addDboSchema(db);
-
-        loadSubdir(securityFolder, MsWorkDirs.ROLES, db);
-        loadSubdir(securityFolder, MsWorkDirs.USERS, db);
-
-        for (String dirSub : MsWorkDirs.getDirectoryNames()) {
-            IMonitor.checkCancelled(getMonitor());
-            if (MsWorkDirs.isInSchema(dirSub)) {
-                // get schema name from file names (format: schema.objectname.sql) and filter
-                loadSubdir(dir, dirSub, db, fileName -> isAllowedSchema(fileName.split("\\.")[0]));
-                continue;
-            }
-            loadSubdir(dir, dirSub, db);
-        }
     }
 
     private void addDboSchema(MsDatabase db) {

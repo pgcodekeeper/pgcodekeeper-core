@@ -23,6 +23,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
+import org.pgcodekeeper.core.database.api.project.IWorkDirs;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
@@ -52,6 +53,7 @@ public class CustomParserListener<T extends IDatabase> {
     protected final ParserListenerMode mode;
     protected final String filename;
     protected final DiffSettings diffSettings;
+    protected IWorkDirs workDirs;
 
     /**
      * Creates a new parser listener for building database schemas.
@@ -69,6 +71,10 @@ public class CustomParserListener<T extends IDatabase> {
         this.diffSettings = diffSettings;
     }
 
+    public void setWorkDirs(IWorkDirs workDirs) {
+        this.workDirs = workDirs;
+    }
+
     public ISettings getSettings() {
         return diffSettings.getSettings();
     }
@@ -81,6 +87,7 @@ public class CustomParserListener<T extends IDatabase> {
      * @param ctx statememnt's first token rule
      */
     protected void safeParseStatement(ParserAbstract<T> p, ParserRuleContext ctx) {
+        p.setWorkDirs(workDirs);
         safeParseStatement(() -> p.parseObject(filename, mode, ctx), ctx);
     }
 
