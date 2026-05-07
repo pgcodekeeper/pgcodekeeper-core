@@ -173,7 +173,8 @@ public class MsTable extends MsAbstractStatementContainer implements ITable, ISi
         int startSize = script.getSize();
         MsTable newTable = (MsTable) newCondition;
 
-        if (isRecreated(newTable, script.getSettings())) {
+        var diffSettings = script.getDiffSettings();
+        if (isNeedRecreate(newTable) || isColumnsOrderChanged(newTable, diffSettings.getSettings())) {
             return ObjectState.RECREATE;
         }
 
@@ -182,12 +183,6 @@ public class MsTable extends MsAbstractStatementContainer implements ITable, ISi
         alterPrivileges(newTable, script);
 
         return getObjectState(script, startSize);
-    }
-
-    @Override
-    public boolean isRecreated(ITable newTable, ISettings settings) {
-        return newTable instanceof MsTable newMsTable &&
-                (isNeedRecreate(newMsTable) || isColumnsOrderChanged(newMsTable, settings));
     }
 
     private boolean isNeedRecreate(MsTable newTable) {

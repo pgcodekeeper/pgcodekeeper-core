@@ -91,8 +91,6 @@ public final class DepcyResolver {
      */
     private final Map<IStatement, ObjectState> states = new HashMap<>();
 
-    private final Map<String, Boolean> recreatedObjs = new HashMap<>();
-
     private final DiffSettings diffSettings;
 
     public DepcyResolver(IDatabase oldDatabase, IDatabase newDatabase, DiffSettings diffSettings, Set<IStatement> toRefresh) {
@@ -569,8 +567,8 @@ public final class DepcyResolver {
         return states.computeIfAbsent(oldSt, x -> oldSt.appendAlterSQL(newSt, new SQLScript(diffSettings, newSt.getSeparator())));
     }
 
-    private Boolean getRecreatedObj(ITable oldTable, ITable newTable) {
-        return recreatedObjs.computeIfAbsent(oldTable.getQualifiedName(), x -> oldTable.isRecreated(newTable, diffSettings.getSettings()));
+    private boolean getRecreatedObj(ITable oldTable, ITable newTable) {
+        return getObjectState(oldTable, newTable) == ObjectState.RECREATE;
     }
 
     public static Set<ActionContainer> resolve(IDatabase oldDb,

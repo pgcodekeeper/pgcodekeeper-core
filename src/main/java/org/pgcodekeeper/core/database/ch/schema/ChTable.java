@@ -113,7 +113,8 @@ public class ChTable extends ChAbstractStatement implements ITable, IOptionConta
         int startSize = script.getSize();
         ChTable newTable = (ChTable) newCondition;
 
-        if (isRecreated(newTable, script.getSettings())) {
+        var diffSettings = script.getDiffSettings();
+        if (isNeedRecreate(newTable) || isColumnsOrderChanged(newTable, diffSettings.getSettings())) {
             return ObjectState.RECREATE;
         }
 
@@ -121,12 +122,6 @@ public class ChTable extends ChAbstractStatement implements ITable, IOptionConta
         engine.appendAlterSQL(newTable.engine, getAlterTable(false), script);
         compareComment(newTable.getComment(), script);
         return getObjectState(script, startSize);
-    }
-
-    @Override
-    public boolean isRecreated(ITable newTable, ISettings settings) {
-        return newTable instanceof ChTable newChTable
-                && (isNeedRecreate(newChTable) || isColumnsOrderChanged(newChTable, settings));
     }
 
     protected boolean isNeedRecreate(ChTable newTable) {
