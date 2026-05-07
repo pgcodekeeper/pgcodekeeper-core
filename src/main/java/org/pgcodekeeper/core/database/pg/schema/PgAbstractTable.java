@@ -22,6 +22,7 @@ import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.script.SQLActionType;
 import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Pair;
 import org.pgcodekeeper.core.utils.Utils;
@@ -178,13 +179,14 @@ public abstract class PgAbstractTable extends PgAbstractStatementContainer imple
             column.appendComments(script);
         }
     }
-
+    
     @Override
     public ObjectState appendAlterSQL(IStatement newCondition, SQLScript script) {
         int startSize = script.getSize();
         PgAbstractTable newTable = (PgAbstractTable) newCondition;
 
-        if (isRecreated(newTable, script.getSettings())) {
+        var diffSettings = script.getDiffSettings();
+        if (isNeedRecreate(newTable, diffSettings) || isColumnsOrderChanged(newTable, diffSettings.getSettings())) {
             return ObjectState.RECREATE;
         }
 
@@ -200,13 +202,14 @@ public abstract class PgAbstractTable extends PgAbstractStatementContainer imple
         return getObjectState(script, startSize);
     }
 
-    @Override
-    public final boolean isRecreated(ITable newTable, ISettings settings) {
-        return newTable instanceof PgAbstractTable newPgTable &&
-                (isNeedRecreate(newPgTable) || isColumnsOrderChanged(newPgTable, settings));
-    }
-
-    protected boolean isNeedRecreate(PgAbstractTable newTable) {
+    /**
+     * Checks whether the table needs to be recreated due to changes in its options.
+     * 
+     * @param newTable     the reference table to compare with
+     * @param diffSettings diff setting
+     * @return {@code true} if recreation is required, {@code false} otherwiseьм
+     */
+    protected boolean isNeedRecreate(PgAbstractTable newTable, DiffSettings diffSettings) {
         if (options.equals(newTable.getOptions())) {
             return false;
         }

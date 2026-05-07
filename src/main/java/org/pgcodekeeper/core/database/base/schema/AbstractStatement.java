@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.pgcodekeeper.core.database.api.jdbc.ISupportedVersion;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IPrivilege;
@@ -280,6 +281,7 @@ public abstract class AbstractStatement implements IStatement, IHashable {
      *
      * @return the author name, or null if not specified
      */
+    @Override
     public String getAuthor() {
         return meta.getAuthor();
     }
@@ -333,6 +335,7 @@ public abstract class AbstractStatement implements IStatement, IHashable {
         return comment != null && !comment.isEmpty();
     }
 
+    @Override
     public void setComment(String comment) {
         this.comment = comment;
         resetHash();
@@ -487,6 +490,11 @@ public abstract class AbstractStatement implements IStatement, IHashable {
     @Override
     public String getSeparator() {
         return SEPARATOR;
+    }
+
+    protected boolean checkSyntaxVersion(DiffSettings diffSettings, ISupportedVersion version) {
+        return diffSettings.getSettings().isUseActualVersionSyntax()
+                && version.isLE(diffSettings.getVersion().getVersion());
     }
 
     /**

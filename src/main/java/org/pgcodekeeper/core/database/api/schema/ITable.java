@@ -16,6 +16,7 @@
 package org.pgcodekeeper.core.database.api.schema;
 
 import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Collection;
@@ -59,6 +60,7 @@ public interface ITable extends IRelation, IStatementContainer {
      */
     void appendMoveDataSql(IStatement newCondition, SQLScript script, String tblTmpBareName,
                                   List<String> identityCols);
+
     /**
      * Compares this table with the {@code newTable} to determine if a full table recreation is required.
      * A full recreation (DROP and CREATE) is needed when the tables differ in ways that cannot
@@ -68,8 +70,14 @@ public interface ITable extends IRelation, IStatementContainer {
      * @param settings application settings that may affect the comparison logic
      * @return {@code true} if the table requires recreation (DROP and CREATE) rather than
      * being alterable, {@code false} if the changes can be applied via ALTER TABLE
+     *
+     * @deprecated will be removed in a future version; use appendAlterSQL instead
      */
-    boolean isRecreated(ITable newTable, ISettings settings);
+    @Deprecated(forRemoval = true)
+    default boolean isRecreated(ITable newTable, ISettings settings) {
+        var state = appendAlterSQL(newTable, new SQLScript(new DiffSettings(settings), getSeparator()));
+        return ObjectState.RECREATE == state;
+    }
 
     /**
      *

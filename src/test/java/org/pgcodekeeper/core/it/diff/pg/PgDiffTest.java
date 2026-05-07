@@ -23,10 +23,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
+import org.pgcodekeeper.core.database.pg.jdbc.PgSupportedVersion;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.pgcodekeeper.core.it.IntegrationTestUtils.*;
@@ -622,7 +624,7 @@ class PgDiffTest {
             "create_table_not_null",
             // Test scenario when at index added inherit
             "alter_index_attach"
-            
+
     })
     void diffTest(String fileNameTemplate) throws IOException, InterruptedException {
         assertDiff(databaseProvider, fileNameTemplate, PgDiffTest.class);
@@ -652,7 +654,7 @@ class PgDiffTest {
             "alter_comments_in_end",
             "alter_children_comments_in_end"
     })
-    void commentsInScriptEndTest(String fileNameTemplate) throws IOException, InterruptedException {
+    void commentsToEndTest(String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         settings.setCommentsToEnd(true);
         String script = getScript(databaseProvider, fileNameTemplate,
@@ -680,7 +682,7 @@ class PgDiffTest {
     @ValueSource(strings = {
             "alter_greenplum_table"
     })
-    void correctOrderScriptTest(String fileNameTemplate) throws IOException, InterruptedException {
+    void addTransactionTest(String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         settings.setAddTransaction(true);
         String script = getScript(databaseProvider, fileNameTemplate,
@@ -692,7 +694,7 @@ class PgDiffTest {
     @ValueSource(strings = {
             "alter_gp_external_table_option_with_ignore_column_order"
     })
-    void compareTableWithIgnoreColumnOrderTest(String fileNameTemplate) throws IOException, InterruptedException {
+    void ignoreColumnOrderTest(String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         settings.setIgnoreColumnOrder(true);
         String script = getScript(databaseProvider, fileNameTemplate,
@@ -708,11 +710,25 @@ class PgDiffTest {
             "add_drop_trigger",
             "add_drop_rule"
     })
-    void testAddDropStatementForObj(String fileNameTemplate) throws IOException, InterruptedException {
+    void dropBeforeCreateTest(String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         settings.setDropBeforeCreate(true);
 
         String script = getScript(databaseProvider, fileNameTemplate, new DiffSettings(settings), PgDiffTest.class);
         assertResult(script, fileNameTemplate, PgDiffTest.class);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "alter_greenplum_table_dbv, GP_VERSION_6",
+        "alter_greenplum_table_dbv, GP_VERSION_7"
+    })
+    void actualVersionSyntaxTest(String fileNameTemplate, String version) throws IOException, InterruptedException {
+        var settings = new CoreSettings();
+        settings.setActualVersionSyntax(true);
+        var diffSettings = new DiffSettings(settings);
+        diffSettings.setVersion(PgSupportedVersion.valueOf(version));
+        String script = getScript(databaseProvider, fileNameTemplate, diffSettings, PgDiffTest.class);
+        assertResult(script, fileNameTemplate + '_' + version.toLowerCase(Locale.ROOT), PgDiffTest.class);
     }
 }

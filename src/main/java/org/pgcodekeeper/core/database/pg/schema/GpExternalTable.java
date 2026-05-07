@@ -24,6 +24,7 @@ import org.pgcodekeeper.core.database.api.schema.IOptionContainer;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 
 /**
@@ -152,8 +153,8 @@ public class GpExternalTable extends PgAbstractTable implements IForeignTable, P
     }
 
     @Override
-    protected boolean isNeedRecreate(PgAbstractTable newTable) {
-        return super.isNeedRecreate(newTable)
+    protected boolean isNeedRecreate(PgAbstractTable newTable, DiffSettings diffSettings) {
+        return super.isNeedRecreate(newTable, diffSettings)
                 || !this.getClass().equals(newTable.getClass())
                 || !Objects.equals(getOptions(), newTable.getOptions())
                 || !compareExternalOptions((GpExternalTable) newTable);

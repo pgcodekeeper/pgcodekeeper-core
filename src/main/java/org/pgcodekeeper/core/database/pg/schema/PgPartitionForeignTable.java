@@ -21,6 +21,7 @@ import org.pgcodekeeper.core.database.api.schema.IPartitionTable;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
+import org.pgcodekeeper.core.settings.DiffSettings;
 
 /**
  * Partition foreign table object for PostgreSQL.
@@ -57,8 +58,8 @@ public class PgPartitionForeignTable extends PgAbstractForeignTable implements I
     }
 
     @Override
-    protected boolean isNeedRecreate(PgAbstractTable newTable) {
-        return super.isNeedRecreate(newTable)
+    protected boolean isNeedRecreate(PgAbstractTable newTable, DiffSettings diffSettings) {
+        return super.isNeedRecreate(newTable, diffSettings)
                 || !(Objects.equals(partitionBounds, ((PgPartitionForeignTable) newTable).partitionBounds))
                 || !inherits.equals(newTable.inherits);
     }
