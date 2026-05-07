@@ -17,6 +17,7 @@ package org.pgcodekeeper.core.database.base.loader;
 
 import org.pgcodekeeper.core.database.api.loader.IDumpLoader;
 import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
+import org.pgcodekeeper.core.database.api.project.IWorkDirs;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.AntlrTask;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
@@ -40,6 +41,7 @@ public abstract class AbstractDumpLoader<T extends IDatabase> extends AbstractLo
     protected final int monitoringLevel;
     protected ParserListenerMode mode = ParserListenerMode.NORMAL;
     protected Map<AbstractStatement, StatementOverride> overrides;
+    protected IWorkDirs workDirs;
 
     protected AbstractDumpLoader(InputStreamProvider input, String databaseName,
                                  DiffSettings diffSettings, int monitoringLevel) {
@@ -88,5 +90,9 @@ public abstract class AbstractDumpLoader<T extends IDatabase> extends AbstractLo
 
     public void setOverridesMap(Map<AbstractStatement, StatementOverride> overrides) {
         this.overrides = overrides;
+    }
+
+    public void setWorkDirs(IWorkDirs workDirs) {
+        this.workDirs = workDirs;
     }
 }

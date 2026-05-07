@@ -59,7 +59,9 @@ public class MsDumpLoader extends AbstractDumpLoader<MsDatabase> {
         if (overrides != null) {
             listener = new MsOverridesListener(db, databaseName, mode, diffSettings, overrides);
         } else {
-            listener = new MsCustomParserListener(db, databaseName, mode, diffSettings);
+            var l = new MsCustomParserListener(db, databaseName, mode, diffSettings);
+            l.setWorkDirs(workDirs);
+            listener = l;
         }
         MsParserUtils.parseSqlStream(input, databaseName, diffSettings, monitoringLevel, listener, antlrTasks);
     }

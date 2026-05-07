@@ -23,14 +23,17 @@ import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.FileUtils;
 import org.pgcodekeeper.core.utils.TempDir;
+import org.pgcodekeeper.core.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader.OVERRIDES_DIR;
 
@@ -51,7 +54,7 @@ public abstract class AbstractProjectUpdater implements IProjectUpdater {
     private final IDatabase dbOld;
     private final Collection<TreeElement> changedObjects;
     private final String encoding;
-    private final Path dirExport;
+    protected final Path dirExport;
     private final boolean overridesOnly;
 
     protected final ISettings settings;
@@ -77,13 +80,6 @@ public abstract class AbstractProjectUpdater implements IProjectUpdater {
         this.overridesOnly = overridesOnly;
         this.settings = settings;
     }
-
-    /**
-     * Gets the list of top-level directory names for this database type.
-     *
-     * @return list of directory names
-     */
-    protected abstract List<String> getDirectoryNames();
 
     /**
      * Creates a model exporter for full database export.
@@ -172,7 +168,7 @@ public abstract class AbstractProjectUpdater implements IProjectUpdater {
             return;
         }
 
-        for (String subdirName : getDirectoryNames()) {
+        for (String subdirName : listProjectDirs(dirExport, dirTmp)) {
             updateFolder(dirTmp, subdirName);
         }
 
@@ -232,11 +228,9 @@ public abstract class AbstractProjectUpdater implements IProjectUpdater {
     }
 
     private void safeCleanProjectDir(Path dirTmp) throws IOException {
-        for (String subdirName : getDirectoryNames()) {
+        for (String subdirName : listProjectDirs(dirExport, dirTmp)) {
             moveFolder(dirTmp, subdirName);
         }
-
-        moveFolder(dirTmp, OVERRIDES_DIR);
     }
 
     private void moveFolder(Path dirTmp, String folder) throws IOException {
@@ -247,11 +241,21 @@ public abstract class AbstractProjectUpdater implements IProjectUpdater {
     }
 
     private void restoreProjectDir(Path dirTmp) throws IOException {
-        for (String subdirName : getDirectoryNames()) {
+        for (String subdirName : listProjectDirs(dirTmp, null)) {
             restoreFolder(dirTmp, subdirName);
         }
+    }
 
-        restoreFolder(dirTmp, OVERRIDES_DIR);
+    private static List<String> listProjectDirs(Path dir, Path exclude) throws IOException {
+        try (Stream<Path> stream = Files.list(dir)) {
+            List<String> result = new ArrayList<>();
+            for (Path path : Utils.streamIterator(stream)) {
+                if (Files.isDirectory(path) && !path.equals(exclude)) {
+                    result.add(path.getFileName().toString());
+                }
+            }
+            return result;
+        }
     }
 
     private void restoreFolder(Path dirTmp, String folder) throws IOException {

@@ -16,14 +16,13 @@
 package org.pgcodekeeper.core.database.ms.project;
 
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.base.project.AbstractModelExporter;
+import org.pgcodekeeper.core.database.base.project.AbstractWorkDirs;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Model exporter for MS SQL Server databases.
@@ -32,41 +31,21 @@ import java.util.List;
  */
 public class MsModelExporter extends AbstractModelExporter {
 
-    /**
-     * Creates a new MsModelExporter for full database export.
-     *
-     * @param outDir      output directory, should be empty or not exist
-     * @param db          database to export
-     * @param sqlEncoding SQL file encoding
-     * @param settings    export settings
-     */
     public MsModelExporter(Path outDir, IDatabase db, String sqlEncoding, ISettings settings) {
-        super(outDir, db, sqlEncoding, settings);
+        super(outDir, db, sqlEncoding, settings, new MsWorkDirs(AbstractWorkDirs.resolveAltDirsFile(outDir)));
     }
 
-    /**
-     * Creates a new MsModelExporter for partial or project export.
-     *
-     * @param outDir         output directory
-     * @param newDb          new database schema
-     * @param oldDb          old database schema, can be null for project export
-     * @param changedObjects collection of changed objects
-     * @param sqlEncoding    SQL file encoding
-     * @param settings       export settings
-     */
     public MsModelExporter(Path outDir, IDatabase newDb, IDatabase oldDb,
                            Collection<TreeElement> changedObjects,
                            String sqlEncoding, ISettings settings) {
-        super(outDir, newDb, oldDb, changedObjects, sqlEncoding, settings);
+        super(outDir, newDb, oldDb, changedObjects, sqlEncoding, settings,
+                new MsWorkDirs(AbstractWorkDirs.resolveAltDirsFile(outDir)));
     }
 
-    @Override
-    protected List<String> getDirectoryNames() {
-        return MsWorkDirs.getDirectoryNames();
-    }
-
-    @Override
-    protected Path getRelativeFilePath(IStatement st) {
-        return MsWorkDirs.getRelativeFilePath(st);
+    public MsModelExporter(Path outDir, IDatabase newDb, IDatabase oldDb, Path structureFile,
+                           Collection<TreeElement> changedObjects,
+                           String sqlEncoding, ISettings settings) {
+        super(outDir, newDb, oldDb, changedObjects, sqlEncoding, settings, new MsWorkDirs(structureFile),
+                structureFile != null);
     }
 }

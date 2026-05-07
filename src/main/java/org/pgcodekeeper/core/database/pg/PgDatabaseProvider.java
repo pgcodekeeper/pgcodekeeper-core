@@ -68,6 +68,12 @@ public class PgDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
+    public PgModelExporter getModelExporter(Path outDir, IDatabase newDb, Collection<TreeElement> changedObjects,
+                                            ISettings settings, Path structureFile) {
+        return new PgModelExporter(outDir, newDb, null, structureFile, changedObjects, Consts.UTF_8, settings);
+    }
+
+    @Override
     public PgProjectUpdater getProjectUpdater(IDatabase newDb, IDatabase oldDb, Collection<TreeElement> changedObjects,
                                               Path projectPath, boolean overridesOnly, ISettings settings) {
         return new PgProjectUpdater(newDb, oldDb, changedObjects, Consts.UTF_8, projectPath, overridesOnly, settings);

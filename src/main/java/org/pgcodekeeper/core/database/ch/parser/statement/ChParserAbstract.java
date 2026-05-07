@@ -17,21 +17,18 @@ package org.pgcodekeeper.core.database.ch.parser.statement;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.ObjectReference;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
+import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
 import org.pgcodekeeper.core.database.ch.parser.launcher.ChExpressionAnalysisLauncher;
-import org.pgcodekeeper.core.database.ch.project.ChWorkDirs;
 import org.pgcodekeeper.core.database.ch.schema.*;
 import org.pgcodekeeper.core.database.ch.utils.ChDiffUtils;
 import org.pgcodekeeper.core.settings.ISettings;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -247,16 +244,6 @@ public abstract class ChParserAbstract extends ParserAbstract<ChDatabase> {
     @Override
     protected boolean isSystemSchema(String schema) {
         return ChDiffUtils.isSystemSchema(schema);
-    }
-
-    @Override
-    protected Path getRelativeFilePath(IStatement st) {
-        return ChWorkDirs.getRelativeFilePath(st);
-    }
-
-    @Override
-    protected List<String> getDirectoryNames() {
-        return ChWorkDirs.getDirectoryNames();
     }
 
     @Override

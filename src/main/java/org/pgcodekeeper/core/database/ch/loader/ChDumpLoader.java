@@ -59,7 +59,9 @@ public class ChDumpLoader extends AbstractDumpLoader<ChDatabase> {
         if (overrides != null) {
             listener = new ChOverridesListener(db, databaseName, mode, diffSettings, overrides);
         } else {
-            listener = new ChCustomParserListener(db, databaseName, mode, diffSettings);
+            var l = new ChCustomParserListener(db, databaseName, mode, diffSettings);
+            l.setWorkDirs(workDirs);
+            listener = l;
         }
         ChParserUtils.parseSqlStream(input, databaseName, diffSettings, monitoringLevel, listener, antlrTasks);
     }

@@ -68,6 +68,12 @@ public class MsDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
+    public MsModelExporter getModelExporter(Path outDir, IDatabase newDb, Collection<TreeElement> changedObjects,
+                                            ISettings settings, Path structureFile) {
+        return new MsModelExporter(outDir, newDb, null, structureFile, changedObjects, Consts.UTF_8, settings);
+    }
+
+    @Override
     public MsProjectUpdater getProjectUpdater(IDatabase newDb, IDatabase oldDb, Collection<TreeElement> changedObjects,
                                               Path projectPath, boolean overridesOnly, ISettings settings) {
         return new MsProjectUpdater(newDb, oldDb, changedObjects, Consts.UTF_8, projectPath, overridesOnly, settings);

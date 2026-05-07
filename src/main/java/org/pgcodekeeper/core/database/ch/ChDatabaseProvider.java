@@ -68,6 +68,12 @@ public class ChDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
+    public ChModelExporter getModelExporter(Path outDir, IDatabase newDb, Collection<TreeElement> changedObjects,
+                                            ISettings settings, Path structureFile) {
+        return new ChModelExporter(outDir, newDb, null, structureFile, changedObjects, Consts.UTF_8, settings);
+    }
+
+    @Override
     public ChProjectUpdater getProjectUpdater(IDatabase newDb, IDatabase oldDb, Collection<TreeElement> changedObjects,
                                               Path projectPath, boolean overridesOnly, ISettings settings) {
         return new ChProjectUpdater(newDb, oldDb, changedObjects, Consts.UTF_8, projectPath, overridesOnly, settings);

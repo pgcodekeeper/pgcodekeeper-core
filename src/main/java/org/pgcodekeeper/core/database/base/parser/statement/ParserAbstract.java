@@ -15,31 +15,15 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.parser.statement;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Locale;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
-import org.pgcodekeeper.core.database.api.schema.ArgMode;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.database.api.schema.ISchema;
-import org.pgcodekeeper.core.database.api.schema.IStatement;
-import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
-import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
+import org.pgcodekeeper.core.database.api.project.IWorkDirs;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
-import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.exception.MisplacedObjectException;
@@ -47,6 +31,12 @@ import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Utils;
+
+import java.util.List;
+import java.util.Locale;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 /**
  * Abstract base class for database object parsers that provides common parsing functionality
@@ -71,10 +61,15 @@ public abstract class ParserAbstract<S extends IDatabase> {
 
     private boolean refMode;
     protected String fileName;
+    private IWorkDirs workDirs;
 
     protected ParserAbstract(S db, ISettings settings) {
         this.db = db;
         this.settings = settings;
+    }
+
+    public void setWorkDirs(IWorkDirs workDirs) {
+        this.workDirs = workDirs;
     }
 
     /**
@@ -281,40 +276,16 @@ public abstract class ParserAbstract<S extends IDatabase> {
     }
 
     protected void checkLocation(IStatement statement, Token errToken) {
-        if (isRefMode() || fileName == null) {
+        if (isRefMode() || fileName == null || workDirs == null) {
             return;
         }
 
-        String filePath = getRelativeFilePath(statement).toString();
-        if (!Utils.endsWithIgnoreCase(fileName, filePath) && isInProject()) {
+        String filePath = workDirs.getRelativeFilePath(statement).toString();
+        if (!Utils.endsWithIgnoreCase(fileName, filePath)) {
             throw new MisplacedObjectException(LOCATION_ERROR.formatted(
                     statement.getBareName(), filePath), errToken);
         }
     }
-
-    protected abstract Path getRelativeFilePath(IStatement st);
-
-    private boolean isInProject() {
-        List<String> dirs = getDirectoryNames();
-        Path parent = Paths.get(fileName).toAbsolutePath().getParent();
-        while (true) {
-            Path folder = parent.getFileName();
-            parent = parent.getParent();
-
-            // file name for root is null
-            if (folder == null || parent == null) {
-                return false;
-            }
-
-            // if we find the project directory, then we check the marker at the level above
-            if (dirs.contains(folder.toString())
-                    && Files.exists(parent.resolve(Consts.FILENAME_WORKING_DIR_MARKER))) {
-                return true;
-            }
-        }
-    }
-
-    protected abstract List<String> getDirectoryNames();
 
     protected ObjectLocation getLocation(List<? extends ParserRuleContext> ids,
                                          DbObjType type, String action, boolean isDep, String signature,
@@ -503,5 +474,5 @@ public abstract class ParserAbstract<S extends IDatabase> {
 
     private void addReference(ObjectLocation loc) {
         db.addReference(fileName, loc);
-    };
+    }
 }

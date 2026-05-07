@@ -69,6 +69,21 @@ public interface IDatabaseProvider {
                                     ISettings settings);
 
     /**
+     * @param outDir         target directory for the exported project
+     * @param newDb          the database schema to export
+     * @param changedObjects list of changed tree elements to include in export
+     * @param settings       configuration settings
+     * @param structureFile  path to a properties file containing directory layout overrides
+     *                       to apply, or {@code null} to use the default layout. The file
+     *                       may have any name. When non-{@code null}, the resolved layout
+     *                       is persisted to the exported project as {@code structure.properties}
+     *                       regardless of the source filename.
+     * @return model exporter for the DBMS
+     */
+    IModelExporter getModelExporter(Path outDir, IDatabase newDb, Collection<TreeElement> changedObjects,
+                                    ISettings settings, Path structureFile);
+
+    /**
      * @param newDb          the new database version with changes
      * @param oldDb          the old database version
      * @param changedObjects list of changed tree elements to apply

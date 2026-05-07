@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.base.project;
 
+import org.pgcodekeeper.core.database.api.project.IWorkDirs;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.localizations.Messages;
@@ -50,11 +51,13 @@ public abstract class AbstractOverridesModelExporter extends AbstractModelExport
      * @param changedObjects collection of changed tree elements
      * @param sqlEncoding    SQL file encoding
      * @param settings       export settings
+     * @param workDirs       directory layout derived from the project being overridden
      */
     protected AbstractOverridesModelExporter(Path outDir, IDatabase newDb, IDatabase oldDb,
                                              Collection<TreeElement> changedObjects,
-                                             String sqlEncoding, ISettings settings) {
-        super(outDir, newDb, oldDb, changedObjects, sqlEncoding, settings);
+                                             String sqlEncoding, ISettings settings,
+                                             IWorkDirs workDirs) {
+        super(outDir, newDb, oldDb, changedObjects, sqlEncoding, settings, workDirs);
     }
 
     @Override

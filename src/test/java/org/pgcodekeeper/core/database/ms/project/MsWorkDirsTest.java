@@ -17,37 +17,38 @@ package org.pgcodekeeper.core.database.ms.project;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.pgcodekeeper.core.database.ms.schema.MsColumn;
-import org.pgcodekeeper.core.database.ms.schema.MsSchema;
-import org.pgcodekeeper.core.database.ms.schema.MsTable;
+import org.junit.jupiter.api.io.TempDir;
+import org.pgcodekeeper.core.database.base.project.AbstractWorkDirs;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 final class MsWorkDirsTest {
 
     @Test
-    void testGetRelativeFilePathForTable() {
-        var schema = new MsSchema("dbo");
-        var table = new MsTable("my_table");
-        schema.addTable(table);
+    void testDefaultMappings() {
+        var mapping = new MsWorkDirs().getDirMapping();
 
-        Path result = MsWorkDirs.getRelativeFilePath(table);
-
-        Path expectedTablePath = Path.of("Tables", "dbo.my_table.sql");
-        Assertions.assertEquals(expectedTablePath, result);
+        Assertions.assertEquals("Security/Schemas", mapping.get("SCHEMA").getDirName());
+        Assertions.assertEquals("Security/Roles", mapping.get("ROLE").getDirName());
+        Assertions.assertEquals("Security/Users", mapping.get("USER").getDirName());
+        Assertions.assertEquals("Tables", mapping.get("TABLE").getDirName());
+        Assertions.assertEquals("Views", mapping.get("VIEW").getDirName());
+        Assertions.assertEquals("Stored Procedures", mapping.get("PROCEDURE").getDirName());
+        Assertions.assertFalse(new MsWorkDirs().isSplitBySchema());
     }
 
     @Test
-    void testGetRelativeFilePathForColumn() {
-        var schema = new MsSchema("dbo");
-        var table = new MsTable("my_table");
-        schema.addTable(table);
-        var column = new MsColumn("col1");
-        table.addColumn(column);
+    void testLoadsAltDirsFromPropertiesFile(@TempDir Path tempDir) throws Exception {
+        Path altDirsFile = tempDir.resolve(AbstractWorkDirs.ALT_DIRS_FILENAME);
+        Files.writeString(altDirsFile,
+                "TABLE=ALT_Tables\nPROCEDURE=Procs\nis_split_by_schema=true");
 
-        Path result = MsWorkDirs.getRelativeFilePath(column);
+        var workDirs = new MsWorkDirs(altDirsFile);
 
-        Path expectedTablePath = Path.of("Tables", "dbo.my_table.sql");
-        Assertions.assertEquals(expectedTablePath, result);
+        Assertions.assertEquals("ALT_Tables", workDirs.getDirMapping().get("TABLE").getDirName());
+        Assertions.assertEquals("Procs", workDirs.getDirMapping().get("PROCEDURE").getDirName());
+        Assertions.assertEquals("Views", workDirs.getDirMapping().get("VIEW").getDirName());
+        Assertions.assertTrue(workDirs.isSplitBySchema());
     }
 }

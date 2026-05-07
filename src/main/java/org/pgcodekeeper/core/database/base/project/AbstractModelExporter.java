@@ -16,7 +16,9 @@
 package org.pgcodekeeper.core.database.base.project;
 
 import org.pgcodekeeper.core.Consts;
+import org.pgcodekeeper.core.database.api.project.IDirRule;
 import org.pgcodekeeper.core.database.api.project.IModelExporter;
+import org.pgcodekeeper.core.database.api.project.IWorkDirs;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
@@ -82,6 +84,15 @@ public abstract class AbstractModelExporter implements IModelExporter {
 
     protected final ISettings settings;
 
+    protected final IWorkDirs workDirs;
+
+    /**
+     * When {@code true}, the current directory layout is persisted to the exported
+     * project at the end of the export. When {@code false}, layout defaults were
+     * used and no layout configuration is written.
+     */
+    private final boolean saveLayout;
+
     /**
      * Creates a new AbstractModelExporter for full database export.
      *
@@ -89,9 +100,11 @@ public abstract class AbstractModelExporter implements IModelExporter {
      * @param db          database to export
      * @param sqlEncoding SQL file encoding
      * @param settings    export settings
+     * @param workDirs    directory layout to use for this export
      */
-    protected AbstractModelExporter(Path outDir, IDatabase db, String sqlEncoding, ISettings settings) {
-        this(outDir, db, null, null, sqlEncoding, settings);
+    protected AbstractModelExporter(Path outDir, IDatabase db, String sqlEncoding, ISettings settings,
+                                    IWorkDirs workDirs) {
+        this(outDir, db, null, null, sqlEncoding, settings, workDirs, false);
     }
 
     /**
@@ -103,10 +116,31 @@ public abstract class AbstractModelExporter implements IModelExporter {
      * @param changedObjects collection of changed objects
      * @param sqlEncoding    SQL file encoding
      * @param settings       export settings
+     * @param workDirs       directory layout to use for this export
      */
     protected AbstractModelExporter(Path outDir, IDatabase newDb, IDatabase oldDb,
                                     Collection<TreeElement> changedObjects,
-                                    String sqlEncoding, ISettings settings) {
+                                    String sqlEncoding, ISettings settings,
+                                    IWorkDirs workDirs) {
+        this(outDir, newDb, oldDb, changedObjects, sqlEncoding, settings, workDirs, false);
+    }
+
+    /**
+     * Creates a new AbstractModelExporter with an externally supplied directory layout.
+     *
+     * @param outDir         output directory
+     * @param newDb          new database schema
+     * @param oldDb          old database schema, can be null for project export
+     * @param changedObjects collection of changed objects
+     * @param sqlEncoding    SQL file encoding
+     * @param settings       export settings
+     * @param workDirs       directory layout to use for this export
+     * @param saveLayout     when {@code true}, the layout is persisted to the exported project
+     */
+    protected AbstractModelExporter(Path outDir, IDatabase newDb, IDatabase oldDb,
+                                    Collection<TreeElement> changedObjects,
+                                    String sqlEncoding, ISettings settings,
+                                    IWorkDirs workDirs, boolean saveLayout) {
         // we should create new settings to get correct script in project files
         var set = new CoreSettings();
         set.setFormatConfiguration(settings.getFormatConfiguration());
@@ -118,22 +152,13 @@ public abstract class AbstractModelExporter implements IModelExporter {
         this.sqlEncoding = sqlEncoding;
         this.changeList = changedObjects;
         this.settings = set;
+        this.workDirs = workDirs;
+        this.saveLayout = saveLayout;
     }
 
-    /**
-     * Gets the list of top-level directory names for this database type.
-     *
-     * @return list of directory names
-     */
-    protected abstract List<String> getDirectoryNames();
-
-    /**
-     * Gets the relative file path for a database statement within project structure.
-     *
-     * @param st the database statement
-     * @return relative path for the statement's file
-     */
-    protected abstract Path getRelativeFilePath(IStatement st);
+    public Path getRelativeFilePath(IStatement st) {
+        return workDirs.getRelativeFilePath(st);
+    }
 
     @Override
     public void exportFull() throws IOException {
@@ -147,22 +172,22 @@ public abstract class AbstractModelExporter implements IModelExporter {
 
     private void createOutDir() throws IOException {
         LOG.info(Messages.ModelExporter_log_create_dirs);
-        if (Files.exists(outDir)) {
-            if (!Files.isDirectory(outDir)) {
-                var msg = Messages.ModelExporter_log_create_dir_err_no_dir.formatted(outDir);
-                LOG.error(msg);
-                throw new NotDirectoryException(outDir.toString());
-            }
-
-            for (String subdirName : getDirectoryNames()) {
-                if (Files.exists(outDir.resolve(subdirName))) {
-                    String msg = Messages.ModelExporter_log_create_dir_err_contains_dir.formatted(subdirName);
-                    LOG.error(msg);
-                    throw new DirectoryException(msg);
-                }
-            }
-        } else {
+        if (!Files.exists(outDir)) {
             Files.createDirectories(outDir);
+            return;
+        }
+        if (!Files.isDirectory(outDir)) {
+            var msg = Messages.ModelExporter_log_create_dir_err_no_dir.formatted(outDir);
+            LOG.error(msg);
+            throw new NotDirectoryException(outDir.toString());
+        }
+        for (IDirRule rule : workDirs.getDirMapping().values()) {
+            String dirName = rule.getDirName().split("/")[0];
+            if (Files.exists(outDir.resolve(dirName))) {
+                String msg = Messages.ModelExporter_log_create_dir_err_contains_dir.formatted(dirName);
+                LOG.error(msg);
+                throw new DirectoryException(msg);
+            }
         }
     }
 
@@ -242,6 +267,9 @@ public abstract class AbstractModelExporter implements IModelExporter {
         }
 
         writeProjVersion(outDir.resolve(Consts.FILENAME_WORKING_DIR_MARKER));
+        if (saveLayout) {
+            workDirs.saveAltDirs(outDir);
+        }
     }
 
     protected void dumpStatement(IStatement st, Map<Path, StringBuilder> dumps) {

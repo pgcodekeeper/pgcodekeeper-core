@@ -17,37 +17,37 @@ package org.pgcodekeeper.core.database.ch.project;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.pgcodekeeper.core.database.ch.schema.ChColumn;
-import org.pgcodekeeper.core.database.ch.schema.ChSchema;
-import org.pgcodekeeper.core.database.ch.schema.ChTable;
+import org.junit.jupiter.api.io.TempDir;
+import org.pgcodekeeper.core.database.base.project.AbstractWorkDirs;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 final class ChWorkDirsTest {
 
     @Test
-    void testGetRelativeFilePathForTable() {
-        var schema = new ChSchema("default");
-        var table = new ChTable("my_table");
-        schema.addChild(table);
+    void testDefaultMappings() {
+        var mapping = new ChWorkDirs().getDirMapping();
 
-        Path result = ChWorkDirs.getRelativeFilePath(table);
-
-        Path expectedTablePath = Path.of("DATABASE", "default", "TABLE", "my_table.sql");
-        Assertions.assertEquals(expectedTablePath, result);
+        Assertions.assertEquals("DATABASE", mapping.get("SCHEMA").getDirName());
+        Assertions.assertEquals("TABLE", mapping.get("TABLE").getDirName());
+        Assertions.assertEquals("VIEW", mapping.get("VIEW").getDirName());
+        Assertions.assertEquals("DICTIONARY", mapping.get("DICTIONARY").getDirName());
+        Assertions.assertEquals("FUNCTION", mapping.get("FUNCTION").getDirName());
+        Assertions.assertEquals("ROLE", mapping.get("ROLE").getDirName());
+        Assertions.assertTrue(new ChWorkDirs().isSplitBySchema());
     }
 
     @Test
-    void testGetRelativeFilePathForColumn() {
-        var schema = new ChSchema("default");
-        var table = new ChTable("my_table");
-        schema.addChild(table);
-        var column = new ChColumn("col1");
-        table.addColumn(column);
+    void testLoadsAltDirsFromPropertiesFile(@TempDir Path tempDir) throws Exception {
+        Path altDirsFile = tempDir.resolve(AbstractWorkDirs.ALT_DIRS_FILENAME);
+        Files.writeString(altDirsFile, "TABLE=ALT_TABLE\nDICTIONARY=DICTS\nis_split_by_schema=false");
 
-        Path result = ChWorkDirs.getRelativeFilePath(column);
+        var workDirs = new ChWorkDirs(altDirsFile);
 
-        Path expectedTablePath = Path.of("DATABASE", "default", "TABLE", "my_table.sql");
-        Assertions.assertEquals(expectedTablePath, result);
+        Assertions.assertEquals("ALT_TABLE", workDirs.getDirMapping().get("TABLE").getDirName());
+        Assertions.assertEquals("DICTS", workDirs.getDirMapping().get("DICTIONARY").getDirName());
+        Assertions.assertEquals("VIEW", workDirs.getDirMapping().get("VIEW").getDirName());
+        Assertions.assertFalse(workDirs.isSplitBySchema());
     }
 }
