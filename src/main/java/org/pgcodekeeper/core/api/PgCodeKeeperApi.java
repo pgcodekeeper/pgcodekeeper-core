@@ -168,7 +168,7 @@ public final class PgCodeKeeperApi {
                                        Path projectPath,
                                        DiffSettings diffSettings)
             throws IOException, InterruptedException {
-        exportToProject(provider, oldDbLoader, newDbLoader, projectPath, false, diffSettings);
+        exportToProject(provider, oldDbLoader, newDbLoader, projectPath, false, null, diffSettings);
     }
 
     /**
@@ -192,6 +192,40 @@ public final class PgCodeKeeperApi {
                                        ILoader newDbLoader,
                                        Path projectPath,
                                        boolean overridesOnly,
+                                       DiffSettings diffSettings)
+            throws IOException, InterruptedException {
+        exportToProject(provider, oldDbLoader, newDbLoader, projectPath, overridesOnly, null, diffSettings);
+    }
+
+    /**
+     * Exports or updates project or overrides files based on database schema, using
+     * an externally supplied directory layout.
+     * <p>
+     * If {@code oldDb} is {@code null}, exports {@code newDb} schema to an empty project directory.
+     * If {@code oldDb} is provided, updates the existing project with changes between {@code oldDb} and {@code newDb}.
+     *
+     * @param provider      the database provider determining SQL dialect and exporter/updater implementation
+     * @param oldDbLoader   loader for the old database version (existing project state), or {@code null} for a full export
+     * @param newDbLoader   loader for the new database version (target state)
+     * @param projectPath   path to the target project directory
+     * @param overridesOnly option to update only overrides
+     * @param structureFile path to a properties file containing directory layout overrides
+     *                      to apply, or {@code null} to use the default layout. The file may
+     *                      have any name. When non-{@code null}, the resolved layout is
+     *                      persisted to the exported project as {@code structure.properties}
+     *                      regardless of the source filename. Only used when {@code oldDbLoader}
+     *                      is {@code null} (full export).
+     * @param diffSettings unified context object containing settings, monitor, ignore list, and error accumulator
+     * @throws IOException          if I/O operations fail, if the directory does not exist,
+     *                              if the directory is not empty (export) or if path is a file
+     * @throws InterruptedException if the thread is interrupted during the operation
+     */
+    public static void exportToProject(IDatabaseProvider provider,
+                                       ILoader oldDbLoader,
+                                       ILoader newDbLoader,
+                                       Path projectPath,
+                                       boolean overridesOnly,
+                                       Path structureFile,
                                        DiffSettings diffSettings)
             throws IOException, InterruptedException {
         var subMonitor = diffSettings.getMonitor().createSubMonitor();
@@ -220,7 +254,7 @@ public final class PgCodeKeeperApi {
                 .flatten(root);
 
         subMonitor.setTaskName(Messages.PgCodeKeeperApi_exporting_project);
-        exportToProject(provider, oldDb, newDb, selected, projectPath, overridesOnly, settings);
+        exportToProject(provider, oldDb, newDb, selected, projectPath, overridesOnly, settings, structureFile);
         subMonitor.worked(20);
     }
 
