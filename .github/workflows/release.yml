@@ -20,8 +20,10 @@ jobs:
           java-version: '17'
 
       - name: Import GPG key
+        env: 
+          GPG_KEY_DATA: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" > private.key
+          echo "$GPG_KEY_DATA" > private.key
           gpg --batch --pinentry-mode loopback --import private.key
           rm -f private.key
 
@@ -29,7 +31,7 @@ jobs:
         run: rm -f ~/.m2/settings.xml
 
       - name: Setup Maven settings
-        uses: 1arp/create-a-file-action@0.4.5
+        uses: 1arp/create-a-file-action@6b7fed8f0bcec18f7685ff950011088e7ef5e378 #v0.4.5
         with:
           path: /home/runner/.m2
           isAbsolutePath: true
