@@ -1,204 +1,95 @@
-Reference: action = SELECT, line number = 6, charPositionInLine = 0
-Reference: action = SELECT, line number = 10, charPositionInLine = 0
-Reference: action = SELECT, line number = 20, charPositionInLine = 0
-Reference: action = SELECT, line number = 27, charPositionInLine = 0
-Reference: Object = nums (VIEW), action = CREATE, line number = 35, charPositionInLine = 22
-Reference: action = SELECT, line number = 40, charPositionInLine = 0
-Reference: Object = nums (VIEW), action = CREATE, line number = 42, charPositionInLine = 33
-Reference: action = SELECT, line number = 47, charPositionInLine = 0
-Reference: action = SELECT, line number = 50, charPositionInLine = 0
-Reference: action = SELECT, line number = 57, charPositionInLine = 0
-Reference: action = SELECT, line number = 64, charPositionInLine = 0
-Reference: action = SELECT, line number = 71, charPositionInLine = 0
-Reference: action = SELECT, line number = 74, charPositionInLine = 0
-Reference: action = SELECT, line number = 83, charPositionInLine = 0
-Reference: Object = department (TABLE), action = CREATE, line number = 100, charPositionInLine = 18
-Reference: Object = department (TABLE), action = INSERT, line number = 106, charPositionInLine = 12
-Reference: Object = department (TABLE), action = INSERT, line number = 107, charPositionInLine = 12
-Reference: Object = department (TABLE), action = INSERT, line number = 108, charPositionInLine = 12
-Reference: Object = department (TABLE), action = INSERT, line number = 109, charPositionInLine = 12
-Reference: Object = department (TABLE), action = INSERT, line number = 110, charPositionInLine = 12
-Reference: Object = department (TABLE), action = INSERT, line number = 111, charPositionInLine = 12
-Reference: Object = department (TABLE), action = INSERT, line number = 112, charPositionInLine = 12
-Reference: Object = department (TABLE), action = INSERT, line number = 113, charPositionInLine = 12
-Reference: action = SELECT, line number = 117, charPositionInLine = 0
+Reference: action = SELECT, line number = 1, charPositionInLine = 0
+Reference: action = SELECT, line number = 2, charPositionInLine = 0
+Reference: action = SELECT, line number = 4, charPositionInLine = 0
+Reference: action = SELECT, line number = 13, charPositionInLine = 0
+Reference: action = SELECT, line number = 25, charPositionInLine = 0
+Reference: action = SELECT, line number = 30, charPositionInLine = 0
+Reference: action = SELECT, line number = 38, charPositionInLine = 0
+Reference: action = SELECT, line number = 51, charPositionInLine = 0
+Reference: Object = tree (TABLE), action = INSERT, line number = 60, charPositionInLine = 12
+Reference: action = SELECT, line number = 67, charPositionInLine = 0
+Reference: action = SELECT, line number = 80, charPositionInLine = 0
+Reference: action = SELECT, line number = 94, charPositionInLine = 0
+Reference: action = SELECT, line number = 103, charPositionInLine = 0
+Reference: action = SELECT, line number = 113, charPositionInLine = 0
+Reference: action = SELECT, line number = 125, charPositionInLine = 0
 Reference: action = SELECT, line number = 131, charPositionInLine = 0
-Reference: action = SELECT, line number = 146, charPositionInLine = 0
-Reference: action = SELECT, line number = 160, charPositionInLine = 0
-Reference: action = SELECT, line number = 168, charPositionInLine = 0
-Reference: action = SELECT, line number = 181, charPositionInLine = 0
-Reference: Object = vsubdepartment (VIEW), action = CREATE, line number = 187, charPositionInLine = 22
-Reference: action = SELECT, line number = 199, charPositionInLine = 0
-Reference: action = SELECT, line number = 202, charPositionInLine = 0
-Reference: action = SELECT, line number = 203, charPositionInLine = 0
-Reference: Object = sums_1_100 (VIEW), action = CREATE, line number = 206, charPositionInLine = 12
-Reference: action = SELECT, line number = 217, charPositionInLine = 0
-Reference: action = SELECT, line number = 225, charPositionInLine = 0
-Reference: action = SELECT, line number = 238, charPositionInLine = 0
-Reference: Object = tree (TABLE), action = CREATE, line number = 250, charPositionInLine = 23
-Reference: Object = tree (TABLE), action = INSERT, line number = 255, charPositionInLine = 12
-Reference: action = SELECT, line number = 262, charPositionInLine = 0
-Reference: action = SELECT, line number = 275, charPositionInLine = 0
-Reference: action = SELECT, line number = 289, charPositionInLine = 0
-Reference: Object = graph (TABLE), action = CREATE, line number = 301, charPositionInLine = 18
-Reference: Object = graph (TABLE), action = INSERT, line number = 303, charPositionInLine = 12
-Reference: action = SELECT, line number = 311, charPositionInLine = 0
-Reference: action = SELECT, line number = 321, charPositionInLine = 0
-Reference: action = SELECT, line number = 333, charPositionInLine = 0
+Reference: action = SELECT, line number = 136, charPositionInLine = 0
+Reference: action = SELECT, line number = 143, charPositionInLine = 0
+Reference: action = SELECT, line number = 150, charPositionInLine = 0
+Reference: action = SELECT, line number = 159, charPositionInLine = 0
+Reference: Object = y (TABLE), action = INSERT, line number = 171, charPositionInLine = 12
+Reference: Object = y (TABLE), action = UPDATE, line number = 177, charPositionInLine = 7
+Reference: Object = y (TABLE), action = DELETE, line number = 184, charPositionInLine = 12
+Reference: action = SELECT, line number = 186, charPositionInLine = 0
+Reference: action = SELECT, line number = 187, charPositionInLine = 0
+Reference: action = SELECT, line number = 188, charPositionInLine = 0
+Reference: action = SELECT, line number = 189, charPositionInLine = 0
+Reference: action = SELECT, line number = 190, charPositionInLine = 0
+Reference: action = SELECT, line number = 193, charPositionInLine = 0
+Reference: action = SELECT, line number = 198, charPositionInLine = 0
+Reference: action = SELECT, line number = 204, charPositionInLine = 0
+Reference: action = SELECT, line number = 210, charPositionInLine = 0
+Reference: action = SELECT, line number = 216, charPositionInLine = 0
+Reference: action = SELECT, line number = 221, charPositionInLine = 0
+Reference: action = SELECT, line number = 224, charPositionInLine = 0
+Reference: action = SELECT, line number = 228, charPositionInLine = 0
+Reference: action = SELECT, line number = 232, charPositionInLine = 0
+Reference: action = SELECT, line number = 236, charPositionInLine = 0
+Reference: action = SELECT, line number = 240, charPositionInLine = 0
+Reference: action = SELECT, line number = 246, charPositionInLine = 0
+Reference: action = SELECT, line number = 252, charPositionInLine = 0
+Reference: action = SELECT, line number = 260, charPositionInLine = 0
+Reference: action = SELECT, line number = 269, charPositionInLine = 0
+Reference: action = SELECT, line number = 277, charPositionInLine = 0
+Reference: action = SELECT, line number = 286, charPositionInLine = 0
+Reference: action = SELECT, line number = 293, charPositionInLine = 0
+Reference: action = SELECT, line number = 299, charPositionInLine = 0
+Reference: action = SELECT, line number = 300, charPositionInLine = 0
+Reference: action = SELECT, line number = 304, charPositionInLine = 0
+Reference: action = SELECT, line number = 308, charPositionInLine = 0
+Reference: action = SELECT, line number = 315, charPositionInLine = 0
+Reference: action = SELECT, line number = 331, charPositionInLine = 0
 Reference: action = SELECT, line number = 339, charPositionInLine = 0
-Reference: action = SELECT, line number = 344, charPositionInLine = 0
-Reference: action = SELECT, line number = 351, charPositionInLine = 0
-Reference: action = SELECT, line number = 358, charPositionInLine = 0
-Reference: action = SELECT, line number = 367, charPositionInLine = 0
-Reference: Object = y (TABLE), action = CREATE, line number = 380, charPositionInLine = 23
-Reference: Object = y (TABLE), action = INSERT, line number = 381, charPositionInLine = 12
-Reference: Object = y (TABLE), action = INSERT, line number = 386, charPositionInLine = 12
-Reference: action = SELECT, line number = 389, charPositionInLine = 0
-Reference: Object = y (TABLE), action = UPDATE, line number = 394, charPositionInLine = 7
-Reference: action = SELECT, line number = 396, charPositionInLine = 0
-Reference: Object = y (TABLE), action = DELETE, line number = 403, charPositionInLine = 12
-Reference: action = SELECT, line number = 405, charPositionInLine = 0
-Reference: Object = y (TABLE), action = DROP, line number = 407, charPositionInLine = 11
-Reference: action = SELECT, line number = 414, charPositionInLine = 0
-Reference: action = SELECT, line number = 417, charPositionInLine = 0
-Reference: action = SELECT, line number = 421, charPositionInLine = 0
-Reference: action = SELECT, line number = 424, charPositionInLine = 0
-Reference: action = SELECT, line number = 428, charPositionInLine = 0
-Reference: action = SELECT, line number = 432, charPositionInLine = 0
-Reference: Object = y (TABLE), action = CREATE, line number = 435, charPositionInLine = 23
-Reference: Object = y (TABLE), action = INSERT, line number = 436, charPositionInLine = 12
-Reference: action = SELECT, line number = 440, charPositionInLine = 0
-Reference: action = SELECT, line number = 446, charPositionInLine = 0
-Reference: action = SELECT, line number = 452, charPositionInLine = 0
-Reference: action = SELECT, line number = 458, charPositionInLine = 0
+Reference: action = SELECT, line number = 347, charPositionInLine = 0
+Reference: action = SELECT, line number = 355, charPositionInLine = 0
+Reference: action = SELECT, line number = 370, charPositionInLine = 0
+Reference: action = SELECT, line number = 380, charPositionInLine = 0
+Reference: action = SELECT, line number = 406, charPositionInLine = 0
+Reference: action = SELECT, line number = 437, charPositionInLine = 0
+Reference: action = SELECT, line number = 455, charPositionInLine = 0
 Reference: action = SELECT, line number = 463, charPositionInLine = 0
-Reference: action = SELECT, line number = 466, charPositionInLine = 0
-Reference: action = SELECT, line number = 470, charPositionInLine = 0
-Reference: action = SELECT, line number = 474, charPositionInLine = 0
-Reference: action = SELECT, line number = 478, charPositionInLine = 0
+Reference: action = SELECT, line number = 471, charPositionInLine = 0
 Reference: action = SELECT, line number = 482, charPositionInLine = 0
-Reference: action = SELECT, line number = 488, charPositionInLine = 0
-Reference: action = SELECT, line number = 494, charPositionInLine = 0
-Reference: action = SELECT, line number = 502, charPositionInLine = 0
-Reference: action = SELECT, line number = 511, charPositionInLine = 0
-Reference: action = SELECT, line number = 519, charPositionInLine = 0
-Reference: action = SELECT, line number = 528, charPositionInLine = 0
-Reference: action = SELECT, line number = 535, charPositionInLine = 0
-Reference: Object = x (TABLE), action = CREATE, line number = 542, charPositionInLine = 23
-Reference: Object = x.r2 (RULE), action = CREATE, line number = 543, charPositionInLine = 12
-Reference: Object = x (TABLE), action = null, line number = 543, charPositionInLine = 31
-Reference: action = SELECT, line number = 549, charPositionInLine = 0
-Reference: action = SELECT, line number = 550, charPositionInLine = 0
-Reference: action = SELECT, line number = 554, charPositionInLine = 0
-Reference: action = SELECT, line number = 558, charPositionInLine = 0
-Reference: action = SELECT, line number = 565, charPositionInLine = 0
-Reference: action = SELECT, line number = 581, charPositionInLine = 0
-Reference: action = SELECT, line number = 589, charPositionInLine = 0
-Reference: action = SELECT, line number = 597, charPositionInLine = 0
-Reference: action = SELECT, line number = 605, charPositionInLine = 0
-Reference: action = SELECT, line number = 620, charPositionInLine = 0
-Reference: action = SELECT, line number = 630, charPositionInLine = 0
-Reference: action = SELECT, line number = 656, charPositionInLine = 0
-Reference: action = SELECT, line number = 687, charPositionInLine = 0
-Reference: action = SELECT, line number = 704, charPositionInLine = 0
-Reference: action = SELECT, line number = 707, charPositionInLine = 0
-Reference: action = SELECT, line number = 714, charPositionInLine = 0
-Reference: action = SELECT, line number = 717, charPositionInLine = 0
-Reference: action = SELECT, line number = 724, charPositionInLine = 0
-Reference: action = SELECT, line number = 727, charPositionInLine = 0
-Reference: action = SELECT, line number = 738, charPositionInLine = 0
-Reference: Object = y.y_rule (RULE), action = CREATE, line number = 741, charPositionInLine = 12
-Reference: Object = y (TABLE), action = null, line number = 741, charPositionInLine = 35
-Reference: action = SELECT, line number = 744, charPositionInLine = 0
-Reference: action = SELECT, line number = 749, charPositionInLine = 0
-Reference: Object = y.y.y_rule (RULE), action = DROP, line number = 751, charPositionInLine = 10
-Reference: Object = y (SCHEMA), action = null, line number = 751, charPositionInLine = 20
-Reference: action = SELECT, line number = 757, charPositionInLine = 0
-Reference: Object = bug6051 (TABLE), action = INSERT, line number = 760, charPositionInLine = 12
-Reference: action = SELECT, line number = 762, charPositionInLine = 0
-Reference: Object = bug6051_2 (TABLE), action = CREATE, line number = 764, charPositionInLine = 18
-Reference: Object = bug6051.bug6051_ins (RULE), action = CREATE, line number = 766, charPositionInLine = 12
-Reference: Object = bug6051 (TABLE), action = null, line number = 766, charPositionInLine = 40
-Reference: Object = bug6051 (TABLE), action = INSERT, line number = 771, charPositionInLine = 12
-Reference: action = SELECT, line number = 773, charPositionInLine = 0
-Reference: action = SELECT, line number = 774, charPositionInLine = 0
-Reference: action = SELECT, line number = 777, charPositionInLine = 0
-Reference: action = SELECT, line number = 787, charPositionInLine = 0
-Reference: Object = y (TABLE), action = INSERT, line number = 795, charPositionInLine = 12
-Reference: action = SELECT, line number = 797, charPositionInLine = 0
-Reference: action = SELECT, line number = 800, charPositionInLine = 0
-Reference: action = SELECT, line number = 805, charPositionInLine = 0
-Reference: Object = withz (TABLE), action = ALTER, line number = 809, charPositionInLine = 12
-Reference: action = SELECT, line number = 811, charPositionInLine = 0
-Reference: action = SELECT, line number = 820, charPositionInLine = 0
-Reference: action = SELECT, line number = 828, charPositionInLine = 0
-Reference: Object = withz (TABLE), action = INSERT, line number = 835, charPositionInLine = 12
-Reference: Object = withz (TABLE), action = INSERT, line number = 838, charPositionInLine = 12
-Reference: Object = withz (TABLE), action = INSERT, line number = 841, charPositionInLine = 12
-Reference: Object = withz (TABLE), action = INSERT, line number = 844, charPositionInLine = 12
-Reference: Object = withz (TABLE), action = INSERT, line number = 847, charPositionInLine = 12
-Reference: Object = withz (TABLE), action = INSERT, line number = 859, charPositionInLine = 12
-Reference: Object = withz (TABLE), action = DROP, line number = 863, charPositionInLine = 11
-Reference: action = TRUNCATE, line number = 867, charPositionInLine = 0
-Reference: Object = y (TABLE), action = INSERT, line number = 868, charPositionInLine = 12
-Reference: Object = yy (TABLE), action = CREATE, line number = 869, charPositionInLine = 23
-Reference: action = SELECT, line number = 871, charPositionInLine = 0
-Reference: action = SELECT, line number = 878, charPositionInLine = 0
-Reference: action = SELECT, line number = 879, charPositionInLine = 0
-Reference: action = SELECT, line number = 881, charPositionInLine = 0
-Reference: action = SELECT, line number = 888, charPositionInLine = 0
-Reference: action = SELECT, line number = 889, charPositionInLine = 0
-Reference: action = TRUNCATE, line number = 893, charPositionInLine = 0
-Reference: Object = y (TABLE), action = INSERT, line number = 894, charPositionInLine = 12
-Reference: Object = y_trigger() (FUNCTION), action = CREATE, line number = 896, charPositionInLine = 16
-Reference: Object = y.y_trig (TRIGGER), action = CREATE, line number = 903, charPositionInLine = 15
-Reference: Object = y (TABLE), action = null, line number = 903, charPositionInLine = 39
-Reference: action = SELECT, line number = 906, charPositionInLine = 0
-Reference: action = SELECT, line number = 916, charPositionInLine = 0
-Reference: Object = y.y.y_trig (TRIGGER), action = DROP, line number = 918, charPositionInLine = 13
-Reference: Object = y (SCHEMA), action = null, line number = 918, charPositionInLine = 23
-Reference: Object = y.y_trig (TRIGGER), action = CREATE, line number = 920, charPositionInLine = 15
-Reference: Object = y (TABLE), action = null, line number = 920, charPositionInLine = 38
-Reference: action = SELECT, line number = 923, charPositionInLine = 0
-Reference: action = SELECT, line number = 933, charPositionInLine = 0
-Reference: Object = y.y.y_trig (TRIGGER), action = DROP, line number = 935, charPositionInLine = 13
-Reference: Object = y (SCHEMA), action = null, line number = 935, charPositionInLine = 23
-Reference: Object = y_trigger() (FUNCTION), action = CREATE, line number = 937, charPositionInLine = 27
-Reference: Object = y.y_trig (TRIGGER), action = CREATE, line number = 944, charPositionInLine = 15
-Reference: Object = y (TABLE), action = null, line number = 944, charPositionInLine = 38
-Reference: action = SELECT, line number = 947, charPositionInLine = 0
-Reference: action = SELECT, line number = 957, charPositionInLine = 0
-Reference: Object = y.y.y_trig (TRIGGER), action = DROP, line number = 959, charPositionInLine = 13
-Reference: Object = y (SCHEMA), action = null, line number = 959, charPositionInLine = 23
-Reference: Object = y_trigger (FUNCTION), action = DROP, line number = 960, charPositionInLine = 14
-Reference: Object = parent (TABLE), action = CREATE, line number = 964, charPositionInLine = 18
-Reference: Object = child1 (TABLE), action = CREATE, line number = 965, charPositionInLine = 18
-Reference: Object = child2 (TABLE), action = CREATE, line number = 966, charPositionInLine = 18
-Reference: Object = parent (TABLE), action = INSERT, line number = 968, charPositionInLine = 12
-Reference: Object = child1 (TABLE), action = INSERT, line number = 969, charPositionInLine = 12
-Reference: Object = child2 (TABLE), action = INSERT, line number = 970, charPositionInLine = 12
-Reference: Object = parent (TABLE), action = UPDATE, line number = 973, charPositionInLine = 7
-Reference: action = SELECT, line number = 975, charPositionInLine = 0
-Reference: Object = parent (TABLE), action = UPDATE, line number = 978, charPositionInLine = 7
-Reference: action = SELECT, line number = 980, charPositionInLine = 0
-Reference: Object = parent (TABLE), action = DELETE, line number = 983, charPositionInLine = 12
-Reference: action = SELECT, line number = 985, charPositionInLine = 0
-Reference: Object = parent (TABLE), action = DELETE, line number = 988, charPositionInLine = 12
-Reference: action = SELECT, line number = 990, charPositionInLine = 0
-Reference: action = EXPLAIN, line number = 994, charPositionInLine = 0
-Reference: action = SELECT, line number = 1001, charPositionInLine = 0
-Reference: action = SELECT, line number = 1008, charPositionInLine = 0
-Reference: action = SELECT, line number = 1014, charPositionInLine = 0
-Reference: Object = y.y_rule (RULE), action = CREATE, line number = 1020, charPositionInLine = 12
-Reference: Object = y (TABLE), action = null, line number = 1020, charPositionInLine = 35
-Reference: action = SELECT, line number = 1021, charPositionInLine = 0
-Reference: Object = y.y.y_rule (RULE), action = DROP, line number = 1025, charPositionInLine = 10
-Reference: Object = y (SCHEMA), action = null, line number = 1025, charPositionInLine = 20
-Reference: action = SELECT, line number = 1028, charPositionInLine = 0
-Reference: Object = test (TABLE), action = INSERT, line number = 1031, charPositionInLine = 37
-Reference: Object = test (TABLE), action = CREATE, line number = 1036, charPositionInLine = 18
-Reference: Object = test (TABLE), action = INSERT, line number = 1037, charPositionInLine = 37
-Reference: action = SELECT, line number = 1038, charPositionInLine = 0
-Reference: Object = test (TABLE), action = DROP, line number = 1039, charPositionInLine = 11
-Reference: action = SELECT, line number = 1041, charPositionInLine = 0
-Reference: action = SELECT, line number = 1050, charPositionInLine = 0
+Reference: Object = bug6051 (TABLE), action = INSERT, line number = 488, charPositionInLine = 12
+Reference: action = SELECT, line number = 491, charPositionInLine = 0
+Reference: Object = y (TABLE), action = INSERT, line number = 507, charPositionInLine = 12
+Reference: action = SELECT, line number = 510, charPositionInLine = 0
+Reference: action = SELECT, line number = 515, charPositionInLine = 0
+Reference: action = SELECT, line number = 524, charPositionInLine = 0
+Reference: Object = withz (TABLE), action = INSERT, line number = 536, charPositionInLine = 12
+Reference: Object = withz (TABLE), action = INSERT, line number = 539, charPositionInLine = 12
+Reference: Object = withz (TABLE), action = INSERT, line number = 542, charPositionInLine = 12
+Reference: Object = withz (TABLE), action = INSERT, line number = 545, charPositionInLine = 12
+Reference: Object = withz (TABLE), action = INSERT, line number = 548, charPositionInLine = 12
+Reference: Object = withz (TABLE), action = INSERT, line number = 560, charPositionInLine = 12
+Reference: action = SELECT, line number = 566, charPositionInLine = 0
+Reference: action = SELECT, line number = 573, charPositionInLine = 0
+Reference: action = SELECT, line number = 580, charPositionInLine = 0
+Reference: action = SELECT, line number = 590, charPositionInLine = 0
+Reference: action = SELECT, line number = 600, charPositionInLine = 0
+Reference: Object = parent (TABLE), action = UPDATE, line number = 611, charPositionInLine = 7
+Reference: Object = parent (TABLE), action = UPDATE, line number = 614, charPositionInLine = 7
+Reference: Object = parent (TABLE), action = DELETE, line number = 617, charPositionInLine = 12
+Reference: Object = parent (TABLE), action = DELETE, line number = 620, charPositionInLine = 12
+Reference: action = EXPLAIN, line number = 624, charPositionInLine = 0
+Reference: action = SELECT, line number = 631, charPositionInLine = 0
+Reference: action = SELECT, line number = 638, charPositionInLine = 0
+Reference: action = SELECT, line number = 644, charPositionInLine = 0
+Reference: action = SELECT, line number = 649, charPositionInLine = 0
+Reference: action = SELECT, line number = 655, charPositionInLine = 0
+Reference: Object = test (TABLE), action = INSERT, line number = 658, charPositionInLine = 37
+Reference: Object = test (TABLE), action = INSERT, line number = 663, charPositionInLine = 37
+Reference: action = SELECT, line number = 664, charPositionInLine = 0
+Reference: action = SELECT, line number = 666, charPositionInLine = 0
+Reference: action = SELECT, line number = 675, charPositionInLine = 0

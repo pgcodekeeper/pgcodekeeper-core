@@ -1,170 +1,15 @@
---
--- Tests for common table expressions (WITH query, ... SELECT ...)
---
+WITH q1(x,y) AS (SELECT 1,2) SELECT * FROM q1, q1 AS q2;
+WITH q AS (SELECT 'foo' AS x) SELECT x, x IS OF (text) AS is_text FROM q;
 
--- Basic WITH
-WITH q1(x,y) AS (SELECT 1,2)
-SELECT * FROM q1, q1 AS q2;
-
--- Multiple uses are evaluated only once
-SELECT count(*) FROM (
-  WITH q1(x) AS (SELECT random() FROM generate_series(1, 5))
-    SELECT * FROM q1
-  UNION
-    SELECT * FROM q1
-) ss;
-
--- WITH RECURSIVE
-
--- sum of 1..100
-WITH RECURSIVE t(n) AS (
-    VALUES (1)
-UNION ALL
-    SELECT n+1 FROM t WHERE n < 100
-)
-SELECT sum(n) FROM t;
-
-WITH RECURSIVE t(n) AS (
-    SELECT (VALUES(1))
-UNION ALL
-    SELECT n+1 FROM t WHERE n < 5
-)
-SELECT * FROM t;
-
--- recursive view
-CREATE RECURSIVE VIEW nums (n) AS
-    VALUES (1)
-UNION ALL
-    SELECT n+1 FROM nums WHERE n < 5;
-
-SELECT * FROM nums;
-
-CREATE OR REPLACE RECURSIVE VIEW nums (n) AS
-    VALUES (1)
-UNION ALL
-    SELECT n+1 FROM nums WHERE n < 6;
-
-SELECT * FROM nums;
-
--- This is an infinite loop with UNION ALL, but not with UNION
-WITH RECURSIVE t(n) AS (
-    SELECT 1
-UNION
-    SELECT 10-n FROM t)
-SELECT * FROM t;
-
--- This'd be an infinite loop, but outside query reads only as much as needed
-WITH RECURSIVE t(n) AS (
-    VALUES (1)
-UNION ALL
-    SELECT n+1 FROM t)
-SELECT * FROM t LIMIT 10;
-
--- UNION case should have same property
-WITH RECURSIVE t(n) AS (
-    SELECT 1
-UNION
-    SELECT n+1 FROM t)
-SELECT * FROM t LIMIT 10;
-
--- Test behavior with an unknown-type literal in the WITH
-WITH q AS (SELECT 'foo' AS x)
-SELECT x, x IS OF (text) AS is_text FROM q;
-
-WITH RECURSIVE t(n) AS (
-    SELECT 'foo'
-UNION ALL
-    SELECT n || ' bar' FROM t WHERE length(n) < 20
-)
-SELECT n, n IS OF (text) AS is_text FROM t;
-
--- In a perfect world, this would work and resolve the literal as int ...
--- but for now, we have to be content with resolving to text too soon.
-WITH RECURSIVE t(n) AS (
-    SELECT '7'
-UNION ALL
-    SELECT n+1 FROM t WHERE n < 10
-)
-SELECT n, n IS OF (int) AS is_int FROM t;
-
---
--- Some examples with a tree
---
--- department structure represented here is as follows:
---
--- ROOT-+->A-+->B-+->C
---      |         |
---      |         +->D-+->F
---      +->E-+->G
-
-CREATE TEMP TABLE department (
-	id INTEGER PRIMARY KEY,  -- department ID
-	parent_department INTEGER REFERENCES department, -- upper department ID
-	name TEXT -- department name
-);
-
-INSERT INTO department VALUES (0, NULL, 'ROOT');
-INSERT INTO department VALUES (1, 0, 'A');
-INSERT INTO department VALUES (2, 1, 'B');
-INSERT INTO department VALUES (3, 2, 'C');
-INSERT INTO department VALUES (4, 2, 'D');
-INSERT INTO department VALUES (5, 0, 'E');
-INSERT INTO department VALUES (6, 4, 'F');
-INSERT INTO department VALUES (7, 5, 'G');
-
-
--- extract all departments under 'A'. Result should be A, B, C, D and F
 WITH RECURSIVE subdepartment AS
 (
-	-- non recursive term
-	SELECT name as root_name, * FROM department WHERE name = 'A'
-
-	UNION ALL
-
-	-- recursive term
-	SELECT sd.root_name, d.* FROM department AS d, subdepartment AS sd
-		WHERE d.parent_department = sd.id
+  SELECT name as root_name, * FROM department WHERE name = 'A'
+  UNION ALL
+  SELECT sd.root_name, d.* FROM department AS d, subdepartment AS sd
+    WHERE d.parent_department = sd.id
 )
 SELECT * FROM subdepartment ORDER BY name;
 
--- extract all departments under 'A' with "level" number
-WITH RECURSIVE subdepartment(level, id, parent_department, name) AS
-(
-	-- non recursive term
-	SELECT 1, * FROM department WHERE name = 'A'
-
-	UNION ALL
-
-	-- recursive term
-	SELECT sd.level + 1, d.* FROM department AS d, subdepartment AS sd
-		WHERE d.parent_department = sd.id
-)
-SELECT * FROM subdepartment ORDER BY name;
-
--- extract all departments under 'A' with "level" number.
--- Only shows level 2 or more
-WITH RECURSIVE subdepartment(level, id, parent_department, name) AS
-(
-	-- non recursive term
-	SELECT 1, * FROM department WHERE name = 'A'
-
-	UNION ALL
-
-	-- recursive term
-	SELECT sd.level + 1, d.* FROM department AS d, subdepartment AS sd
-		WHERE d.parent_department = sd.id
-)
-SELECT * FROM subdepartment WHERE level >= 2 ORDER BY name;
-
--- "RECURSIVE" is ignored if the query has no self-reference
-WITH RECURSIVE subdepartment AS
-(
-	-- note lack of recursive UNION structure
-	SELECT * FROM department WHERE name = 'A'
-)
-SELECT * FROM subdepartment ORDER BY name;
-
--- inside subqueries
 SELECT count(*) FROM (
     WITH RECURSIVE t(n) AS (
         SELECT 1 UNION ALL SELECT n + 1 FROM t WHERE n < 500
@@ -177,43 +22,11 @@ SELECT count(*) FROM (
             SELECT * FROM t WHERE n < 50000
          ) AS t WHERE n < 100);
 
--- use same CTE twice at different subquery levels
 WITH q1(x,y) AS (
     SELECT hundred, sum(ten) FROM tenk1 GROUP BY hundred
-  )
+)
 SELECT count(*) FROM q1 WHERE y > (SELECT sum(y)/100 FROM q1 qsub);
 
--- via a VIEW
-CREATE TEMPORARY VIEW vsubdepartment AS
-	WITH RECURSIVE subdepartment AS
-	(
-		 -- non recursive term
-		SELECT * FROM department WHERE name = 'A'
-		UNION ALL
-		-- recursive term
-		SELECT d.* FROM department AS d, subdepartment AS sd
-			WHERE d.parent_department = sd.id
-	)
-	SELECT * FROM subdepartment;
-
-SELECT * FROM vsubdepartment ORDER BY name;
-
--- Check reverse listing
-SELECT pg_get_viewdef('vsubdepartment'::regclass);
-SELECT pg_get_viewdef('vsubdepartment'::regclass, true);
-
--- Another reverse-listing example
-CREATE VIEW sums_1_100 AS
-WITH RECURSIVE t(n) AS (
-    VALUES (1)
-UNION ALL
-    SELECT n+1 FROM t WHERE n < 100
-)
-SELECT sum(n) FROM t;
-
-
-
--- corner case in which sub-WITH gets initialized first
 with recursive q as (
       select * from department
     union all
@@ -243,14 +56,6 @@ WITH RECURSIVE t(i,j) AS (
 		JOIN t ON (t2.i = t.i+1))
 
 	SELECT * FROM t;
-
---
--- different tree example
---
-CREATE TEMPORARY TABLE tree(
-    id INTEGER PRIMARY KEY,
-    parent_id INTEGER REFERENCES tree(id)
-);
 
 INSERT INTO tree
 VALUES (1, NULL), (2, 1), (3,1), (4,2), (5,2), (6,2), (7,3), (8,3),
@@ -294,19 +99,6 @@ UNION ALL
 )
 SELECT t1.id, t2.path, t2 FROM t AS t1 JOIN t AS t2 ON
 (t1.id=t2.id);
-
---
--- test cycle detection
---
-create temp table graph( f int, t int, label text );
-
-insert into graph values
-	(1, 2, 'arc 1 -> 2'),
-	(1, 3, 'arc 1 -> 3'),
-	(2, 3, 'arc 2 -> 3'),
-	(1, 4, 'arc 1 -> 4'),
-	(4, 5, 'arc 4 -> 5'),
-	(5, 1, 'arc 5 -> 1');
 
 with recursive search_graph(f, t, label, path, cycle) as (
 	select *, array[row(g.f, g.t)], false from graph g
@@ -373,27 +165,16 @@ WITH RECURSIVE
      (SELECT * FROM y UNION ALL SELECT id+1 FROM z WHERE id < 10)
  SELECT * FROM z;
 
---
--- Test WITH attached to a data-modifying statement
---
-
-CREATE TEMPORARY TABLE y (a INTEGER);
-INSERT INTO y SELECT generate_series(1, 10);
-
 WITH t AS (
 	SELECT a FROM y
 )
 INSERT INTO y
 SELECT a+20 FROM t RETURNING *;
 
-SELECT * FROM y;
-
 WITH t AS (
 	SELECT a FROM y
 )
 UPDATE y SET a = y.a-10 FROM t WHERE y.a > 20 AND t.a = y.a RETURNING y.a;
-
-SELECT * FROM y;
 
 WITH RECURSIVE t(a) AS (
 	SELECT 11
@@ -402,38 +183,15 @@ WITH RECURSIVE t(a) AS (
 )
 DELETE FROM y USING t WHERE t.a = y.a RETURNING y.a;
 
-SELECT * FROM y;
-
-DROP TABLE y;
-
---
--- error cases
---
-
--- INTERSECT
-WITH RECURSIVE x(n) AS (SELECT 1 INTERSECT SELECT n+1 FROM x)
-	SELECT * FROM x;
-
-WITH RECURSIVE x(n) AS (SELECT 1 INTERSECT ALL SELECT n+1 FROM x)
-	SELECT * FROM x;
-
--- EXCEPT
-WITH RECURSIVE x(n) AS (SELECT 1 EXCEPT SELECT n+1 FROM x)
-	SELECT * FROM x;
-
-WITH RECURSIVE x(n) AS (SELECT 1 EXCEPT ALL SELECT n+1 FROM x)
-	SELECT * FROM x;
-
--- no non-recursive term
-WITH RECURSIVE x(n) AS (SELECT n FROM x)
-	SELECT * FROM x;
+WITH RECURSIVE x(n) AS (SELECT 1 INTERSECT SELECT n+1 FROM x) SELECT * FROM x;
+WITH RECURSIVE x(n) AS (SELECT 1 INTERSECT ALL SELECT n+1 FROM x) SELECT * FROM x;
+WITH RECURSIVE x(n) AS (SELECT 1 EXCEPT SELECT n+1 FROM x) SELECT * FROM x;
+WITH RECURSIVE x(n) AS (SELECT 1 EXCEPT ALL SELECT n+1 FROM x) SELECT * FROM x;
+WITH RECURSIVE x(n) AS (SELECT n FROM x) SELECT * FROM x;
 
 -- recursive term in the left hand side (strictly speaking, should allow this)
 WITH RECURSIVE x(n) AS (SELECT n FROM x UNION ALL SELECT 1)
 	SELECT * FROM x;
-
-CREATE TEMPORARY TABLE y (a INTEGER);
-INSERT INTO y SELECT generate_series(1, 10);
 
 -- LEFT JOIN
 
@@ -538,16 +296,8 @@ WITH RECURSIVE foo(i) AS
    SELECT (i+1)::numeric(10,0) FROM foo WHERE i < 10)
 SELECT * FROM foo;
 
--- disallow OLD/NEW reference in CTE
-CREATE TEMPORARY TABLE x (n integer);
-CREATE RULE r2 AS ON UPDATE TO x DO INSTEAD
-    WITH t AS (SELECT OLD.*) UPDATE y SET a = t.n FROM t;
-
---
--- test for bug #4902
---
 with cte(foo) as ( values(42) ) values((select foo from cte));
-with cte(foo) as ( select 42 ) select * from ((select foo from cte)) q;
+with cte(foo) as ( select 42 ) select * from ((select foo from cte)) q;  -- ambiguity
 
 -- test CTE referencing an outer-level variable (to see that changed-parameter
 -- signaling still works properly after fixing this bug)
@@ -701,8 +451,6 @@ WITH t AS (
 )
 SELECT * FROM t;
 
-SELECT * FROM y;
-
 -- UPDATE ... RETURNING
 WITH t AS (
     UPDATE y
@@ -711,8 +459,6 @@ WITH t AS (
 )
 SELECT * FROM t;
 
-SELECT * FROM y;
-
 -- DELETE ... RETURNING
 WITH t AS (
     DELETE FROM y
@@ -720,8 +466,6 @@ WITH t AS (
     RETURNING *
 )
 SELECT * FROM t;
-
-SELECT * FROM y;
 
 -- forward reference
 WITH RECURSIVE t AS (
@@ -735,43 +479,13 @@ SELECT * FROM t
 UNION ALL
 SELECT * FROM t2;
 
-SELECT * FROM y;
-
--- unconditional DO INSTEAD rule
-CREATE RULE y_rule AS ON DELETE TO y DO INSTEAD
-  INSERT INTO y VALUES(42) RETURNING *;
-
 WITH t AS (
 	DELETE FROM y RETURNING *
 )
 SELECT * FROM t;
 
-SELECT * FROM y;
-
-DROP RULE y_rule ON y;
-
--- check merging of outer CTE with CTE in a rule action
---CREATE TEMP TABLE bug6051 AS
---  select i from generate_series(1,3) as t(i);
-
-SELECT * FROM bug6051;
-
 WITH t1 AS ( DELETE FROM bug6051 RETURNING * )
 INSERT INTO bug6051 SELECT * FROM t1;
-
-SELECT * FROM bug6051;
-
-CREATE TEMP TABLE bug6051_2 (i int);
-
-CREATE RULE bug6051_ins AS ON INSERT TO bug6051 DO INSTEAD
- INSERT INTO bug6051_2
- SELECT NEW.i;
-
-WITH t1 AS ( DELETE FROM bug6051 RETURNING * )
-INSERT INTO bug6051 SELECT * FROM t1;
-
-SELECT * FROM bug6051;
-SELECT * FROM bug6051_2;
 
 -- a truly recursive CTE in the same list
 WITH RECURSIVE t(a) AS (
@@ -784,8 +498,6 @@ WITH RECURSIVE t(a) AS (
 )
 SELECT * FROM t2 JOIN y USING (a) ORDER BY a;
 
-SELECT * FROM y;
-
 -- data-modifying WITH in a modifying statement
 WITH t AS (
     DELETE FROM y
@@ -794,19 +506,11 @@ WITH t AS (
 )
 INSERT INTO y SELECT -a FROM t RETURNING *;
 
-SELECT * FROM y;
-
 -- check that WITH query is run to completion even if outer query isn't
 WITH t AS (
     UPDATE y SET a = a * 100 RETURNING *
 )
 SELECT * FROM t LIMIT 10;
-
-SELECT * FROM y;
-
--- data-modifying WITH containing INSERT...ON CONFLICT DO UPDATE
---CREATE TABLE withz AS SELECT i AS k, (i || ' v')::text v FROM generate_series(1, 16, 3) i;
-ALTER TABLE withz ADD UNIQUE (k);
 
 WITH t AS (
     INSERT INTO withz SELECT i, 'insert'
@@ -823,9 +527,6 @@ WITH aa AS (
     RETURNING *
 )
 SELECT * FROM aa;
-
--- New query/snapshot demonstrates side-effects of previous query.
-SELECT * FROM withz ORDER BY k;
 
 --
 -- Ensure subqueries within the update clause work, even if they
@@ -860,13 +561,7 @@ INSERT INTO withz VALUES(2, 'Red') ON CONFLICT (k) DO
 UPDATE SET (k, v) = (SELECT k, v FROM upsert_cte WHERE upsert_cte.k = withz.k)
 RETURNING k, v;
 
-DROP TABLE withz;
-
 -- check that run to completion happens in proper ordering
-
-TRUNCATE TABLE y;
-INSERT INTO y SELECT generate_series(1, 3);
-CREATE TEMPORARY TABLE yy (a INTEGER);
 
 WITH RECURSIVE t1 AS (
   INSERT INTO y SELECT * FROM y RETURNING *
@@ -875,33 +570,12 @@ WITH RECURSIVE t1 AS (
 )
 SELECT 1;
 
-SELECT * FROM y;
-SELECT * FROM yy;
-
 WITH RECURSIVE t1 AS (
   INSERT INTO yy SELECT * FROM t2 RETURNING *
 ), t2 AS (
   INSERT INTO y SELECT * FROM y RETURNING *
 )
 SELECT 1;
-
-SELECT * FROM y;
-SELECT * FROM yy;
-
--- triggers
-
-TRUNCATE TABLE y;
-INSERT INTO y SELECT generate_series(1, 10);
-
-CREATE FUNCTION y_trigger() RETURNS trigger AS $$
-begin
-  raise notice 'y_trigger: a = %', new.a;
-  return new;
-end;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER y_trig BEFORE INSERT ON y FOR EACH ROW
-    EXECUTE PROCEDURE y_trigger();
 
 WITH t AS (
     INSERT INTO y
@@ -913,13 +587,6 @@ WITH t AS (
 )
 SELECT * FROM t;
 
-SELECT * FROM y;
-
-DROP TRIGGER y_trig ON y;
-
-CREATE TRIGGER y_trig AFTER INSERT ON y FOR EACH ROW
-    EXECUTE PROCEDURE y_trigger();
-
 WITH t AS (
     INSERT INTO y
     VALUES
@@ -929,20 +596,6 @@ WITH t AS (
     RETURNING *
 )
 SELECT * FROM t LIMIT 1;
-
-SELECT * FROM y;
-
-DROP TRIGGER y_trig ON y;
-
-CREATE OR REPLACE FUNCTION y_trigger() RETURNS trigger AS $$
-begin
-  raise notice 'y_trigger';
-  return null;
-end;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER y_trig AFTER INSERT ON y FOR EACH STATEMENT
-    EXECUTE PROCEDURE y_trigger();
 
 WITH t AS (
     INSERT INTO y
@@ -954,40 +607,17 @@ WITH t AS (
 )
 SELECT * FROM t;
 
-SELECT * FROM y;
-
-DROP TRIGGER y_trig ON y;
-DROP FUNCTION y_trigger();
-
--- WITH attached to inherited UPDATE or DELETE
-
-CREATE TEMP TABLE parent ( id int, val text );
-CREATE TEMP TABLE child1 ( ) INHERITS ( parent );
-CREATE TEMP TABLE child2 ( ) INHERITS ( parent );
-
-INSERT INTO parent VALUES ( 1, 'p1' );
-INSERT INTO child1 VALUES ( 11, 'c11' ),( 12, 'c12' );
-INSERT INTO child2 VALUES ( 23, 'c21' ),( 24, 'c22' );
-
 WITH rcte AS ( SELECT sum(id) AS totalid FROM parent )
 UPDATE parent SET id = id + totalid FROM rcte;
-
-SELECT * FROM parent;
 
 WITH wcte AS ( INSERT INTO child1 VALUES ( 42, 'new' ) RETURNING id AS newid )
 UPDATE parent SET id = id + newid FROM wcte;
 
-SELECT * FROM parent;
-
 WITH rcte AS ( SELECT max(id) AS maxid FROM parent )
 DELETE FROM parent USING rcte WHERE id = maxid;
 
-SELECT * FROM parent;
-
 WITH wcte AS ( INSERT INTO child2 VALUES ( 42, 'new2' ) RETURNING id AS newid )
 DELETE FROM parent USING wcte WHERE id = newid;
-
-SELECT * FROM parent;
 
 -- check EXPLAIN VERBOSE for a wCTE with RETURNING
 
@@ -1016,13 +646,10 @@ SELECT * FROM (
 	SELECT * FROM t
 ) ss;
 
--- most variants of rules aren't allowed
-CREATE RULE y_rule AS ON INSERT TO y WHERE a=0 DO INSTEAD DELETE FROM y;
 WITH t AS (
 	INSERT INTO y VALUES(0)
 )
 VALUES(FALSE);
-DROP RULE y_rule ON y;
 
 -- check that parser lookahead for WITH doesn't cause any odd behavior
 with ordinality as (select 1 as x) select * from ordinality;
@@ -1033,10 +660,8 @@ WITH test AS (SELECT 42) INSERT INTO test VALUES (1);
 -- check response to attempt to modify table with same name as a CTE (perhaps
 -- surprisingly it works, because CTEs don't hide tables from data-modifying
 -- statements)
-create temp table test (i int);
 with test as (select 42) insert into test select * from test;
 select * from test;
-drop table test;
 
 with recursive search_graph(f, t, label) as (
     select * from graph0 g
