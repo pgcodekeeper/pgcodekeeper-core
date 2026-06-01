@@ -33,37 +33,7 @@ import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.api.schema.meta.IMetaContainer;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.After_opsContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Alias_clauseContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.From_function_column_defContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.From_itemContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.From_primaryContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.From_rows_with_aliasContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Function_callContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Groupby_clauseContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Grouping_elementContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Grouping_element_listContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.IdentifierContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.IndirectionContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Indirection_listContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Indirection_varContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Orderby_clauseContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Perform_stmtContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Schema_qualified_nameContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Select_listContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Select_opsContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Select_primaryContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Select_stmtContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Select_stmt_no_parensContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Select_sublistContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Table_subqueryContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Value_expression_primaryContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Values_stmtContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Values_valuesContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.VexContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.Window_definitionContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.With_clauseContext;
-import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.With_queryContext;
+import org.pgcodekeeper.core.database.pg.parser.generated.SQLParser.*;
 import org.pgcodekeeper.core.database.pg.parser.rulectx.PgSelectOps;
 import org.pgcodekeeper.core.database.pg.parser.rulectx.PgSelectStmt;
 import org.pgcodekeeper.core.database.pg.parser.rulectx.PgVex;
@@ -582,16 +552,19 @@ public final class PgSelect extends PgAbstractExprWithNmspc<Select_stmtContext> 
                     lateralAllowed = primary.LATERAL() != null;
                     List<ModPair<String, String>> columnList = new PgSelect(this).analyze(subquery.select_stmt());
 
-                    String tableSubQueryAlias = alias.alias.getText();
-                    addReference(tableSubQueryAlias, null);
+                    var aliasCtx = alias.alias;
+                    if (aliasCtx != null) {
+                        String tableSubQueryAlias = aliasCtx.getText();
+                        addReference(tableSubQueryAlias, null);
 
-                    var columnAliases = alias.column_alias;
-                    for (int i = 0; i < columnAliases.size() && i < columnList.size(); i++) {
-                        columnList.set(i, new ModPair<>(columnAliases.get(i).getText(),
-                                columnList.get(i).getSecond()));
+                        var columnAliases = alias.column_alias;
+                        for (int i = 0; i < columnAliases.size() && i < columnList.size(); i++) {
+                            columnList.set(i, new ModPair<>(columnAliases.get(i).getText(),
+                                    columnList.get(i).getSecond()));
+                        }
+
+                        complexNamespace.put(tableSubQueryAlias, new ArrayList<>(columnList));
                     }
-
-                    complexNamespace.put(tableSubQueryAlias, new ArrayList<>(columnList));
                 } finally {
                     lateralAllowed = oldLateral;
                 }

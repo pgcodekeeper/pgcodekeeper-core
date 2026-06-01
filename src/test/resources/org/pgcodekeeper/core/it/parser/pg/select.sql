@@ -1457,3 +1457,4 @@ SELECT js,
 FROM (VALUES ('[{"a":"1"},
  {"b":"2","b":"3"}]')) foo(js);
 SELECT _txt IS JSON;
+select count(*) from (select tt.a, tt.b, tt.c, tt.d from testtable tt group by 1,2,3,4);

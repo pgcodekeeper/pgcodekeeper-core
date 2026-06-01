@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Fixed parser errors for PostgreSQL.
+
 ## [14.4.1] - 2026-05-06
 
 ### Fixed

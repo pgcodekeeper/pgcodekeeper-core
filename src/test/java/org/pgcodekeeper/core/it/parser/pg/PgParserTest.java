@@ -122,7 +122,6 @@ class PgParserTest {
             //some strings are unsupported
             "strings",
             "subscription",
-            "subselect",
             "sysviews",
             "time",
             "timestamp",
@@ -137,7 +136,6 @@ class PgParserTest {
             "user_mapping",
             "view",
             "window",
-            "with",
             "pg_unicode_escaping"
     })
     void parse(final String fileNameTemplate) throws IOException {
@@ -150,7 +148,9 @@ class PgParserTest {
         "groupingsets, 47",
         "partition_aggregate, 1",
         "partition_prune, 6",
-        "select, 2"
+        "select, 2",
+        "subselect, 1",
+        "with, 1",
     })
     void parse(String fileNameTemplate, int allowedAmbiguity) throws IOException {
         List<Object> errors = new ArrayList<>();
