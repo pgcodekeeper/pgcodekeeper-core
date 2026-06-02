@@ -9,14 +9,24 @@
 
 ### Добавлено
 
-- Добавлена поддержка нового синтаксиса для таблиц в Greenplum 7.
-- Добавлена поддержка альтернативных имён директорий в структуре проекта через файл `structure.properties`.
-
 ### Изменено
 
 ### Исправлено
 
+## [14.5.0] - 2026-06-02
+
+### Добавлено
+
+- Добавлена поддержка нового синтаксиса для таблиц в Greenplum 7.
+- Добавлена поддержка альтернативных имён директорий в структуре проекта через файл `structure.properties`.
+
+### Исправлено
+
 - Исправлены ошибки парсинга в PostgreSQL.
+
+### Безопасность
+
+- Повышена версия JDBC драйвера для PostgreSQL из-за CVE-2026-42198.
 
 ## [14.4.1] - 2026-05-06
 
@@ -2500,7 +2510,8 @@
 
 - Добавлен парсинг ORDER BY для агрегатных функции.
 
-[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.4.1...HEAD
+[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.5.0...HEAD
+[14.5.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.4.1...v14.5.0
 [14.4.1]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.4.0...v14.4.1
 [14.4.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.3.0...v14.4.0
 [14.3.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.2.0...v14.3.0
