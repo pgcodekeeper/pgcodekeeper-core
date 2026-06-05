@@ -165,7 +165,10 @@ public abstract class AbstractModelExporter implements IModelExporter {
         createOutDir();
 
         Map<Path, StringBuilder> dumps = new HashMap<>();
-        newDb.getDescendants().sorted(ExportTableOrder.INSTANCE).forEach(st -> dumpStatement(st, dumps));
+        newDb.getDescendants()
+                .filter(st -> !st.isLib())
+                .sorted(ExportTableOrder.INSTANCE)
+                .forEach(st -> dumpStatement(st, dumps));
 
         writeDumps(dumps);
     }
