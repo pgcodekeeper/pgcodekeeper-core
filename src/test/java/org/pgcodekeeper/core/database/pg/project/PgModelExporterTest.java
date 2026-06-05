@@ -29,6 +29,7 @@ import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.base.project.AbstractWorkDirs;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
+import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.schema.PgFunction;
 import org.pgcodekeeper.core.database.pg.schema.PgSchema;
 import org.pgcodekeeper.core.database.pg.schema.PgSimpleTable;
@@ -66,6 +67,21 @@ class PgModelExporterTest {
         Assertions.assertEquals(
                 Path.of("SCHEMA", "public", "TRIGGER_FUNCTION", "my_trigger_func.sql"),
                 exporter.getRelativeFilePath(triggerFunc));
+    }
+
+    @Test
+    void testExportFullExcludesLibraryObjects(@TempDir Path tempDir) throws IOException {
+        var db = new PgDatabase();
+        db.addChild(new PgSchema("proj_schema"));
+
+        var libSchema = new PgSchema("lib_schema");
+        libSchema.setLibName("mylib");
+        db.addChild(libSchema);
+
+        new PgModelExporter(tempDir, db, Consts.UTF_8, new CoreSettings()).exportFull();
+
+        Assertions.assertTrue(Files.exists(tempDir.resolve(Path.of("SCHEMA", "proj_schema", "proj_schema.sql"))));
+        Assertions.assertFalse(Files.exists(tempDir.resolve(Path.of("SCHEMA", "lib_schema"))));
     }
 
     @ParameterizedTest
