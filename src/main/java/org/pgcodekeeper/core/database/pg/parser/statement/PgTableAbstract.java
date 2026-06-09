@@ -281,13 +281,11 @@ public abstract class PgTableAbstract extends PgParserAbstract {
         for (Constraint_commonContext column_constraint : constraints) {
             addTableConstraint(column_constraint, col, table, schemaName);
         }
-        if (options != null) {
-            if (table instanceof PgAbstractForeignTable) {
-                for (Foreign_optionContext option : options.foreign_option()) {
-                    var opt = option.sconst();
-                    String value = opt == null ? "" : opt.getText();
-                    fillOptionParams(value, option.col_label().getText(), false, col::addForeignOption);
-                }
+        if (options != null && table instanceof PgAbstractForeignTable) {
+            for (Foreign_optionContext option : options.foreign_option()) {
+                var opt = option.sconst();
+                String value = opt == null ? "" : opt.getText();
+                fillOptionParams(value, option.col_label().getText(), false, col::addForeignOption);
             }
         }
         if (encOptions != null) {
