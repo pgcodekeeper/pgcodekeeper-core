@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Fixed adding library objects to a project during export.
 - Fixed code generation for index when altering in CONCURRENTLY mode.
+- Fixed migration script generation when changing a generated column in PostgreSQL.
 
 ## [14.5.0] - 2026-06-02
 
