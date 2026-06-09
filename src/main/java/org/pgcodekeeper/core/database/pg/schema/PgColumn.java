@@ -267,9 +267,7 @@ public class PgColumn extends PgAbstractStatement
         int startSize = script.getSize();
         PgColumn newColumn = (PgColumn) newCondition;
 
-        if (!Objects.equals(generationOption, newColumn.generationOption)
-                || isGeneratedColumnChanged(newColumn)
-                || !compareCompressOptions(newColumn)) {
+        if (isGeneratedColumnChanged(newColumn) || !compareCompressOptions(newColumn)) {
             return ObjectState.RECREATE;
         }
 
@@ -304,10 +302,19 @@ public class PgColumn extends PgAbstractStatement
     }
 
     private boolean isGeneratedColumnChanged(PgColumn newColumn) {
-        return generationOption != null
-                && (!Objects.equals(defaultValue, newColumn.defaultValue)
-                || !Objects.equals(type, newColumn.type)
-                || !Objects.equals(collation, newColumn.collation));
+        if (Objects.equals(generationOption, newColumn.generationOption)) {
+            if (generationOption == null) {
+                return false;
+            }
+
+            if (Objects.equals(defaultValue, newColumn.defaultValue)
+                    && Objects.equals(type, newColumn.type)
+                    && Objects.equals(collation, newColumn.collation)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private boolean compareCompressOptions(PgColumn newColumn) {
@@ -698,6 +705,7 @@ public class PgColumn extends PgAbstractStatement
         resetHash();
     }
 
+    @Override
     public boolean isNotNull() {
         return notNullConstraint != null;
     }
@@ -775,6 +783,7 @@ public class PgColumn extends PgAbstractStatement
         resetHash();
     }
 
+    @Override
     public String getType() {
         return type;
     }
