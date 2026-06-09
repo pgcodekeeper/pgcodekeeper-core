@@ -111,6 +111,8 @@ class PgDiffTest {
             "add_column_generated",
             // Tests scenario where generated COLUMN is modified.
             "modify_column_generated",
+            // Tests scenario where only the TYPE of generated COLUMN is modified
+            "modify_column_generated_type",
             // Test scenario where new EVENT TRIGGER is added.
             "add_event_trigger",
             // Test scenario where EVENT TRIGGER is modified.

@@ -268,7 +268,7 @@ public class PgColumn extends PgAbstractStatement
         PgColumn newColumn = (PgColumn) newCondition;
 
         if (!Objects.equals(generationOption, newColumn.generationOption)
-                || (generationOption != null && !Objects.equals(defaultValue, newColumn.defaultValue))
+                || isGeneratedColumnChanged(newColumn)
                 || !compareCompressOptions(newColumn)) {
             return ObjectState.RECREATE;
         }
@@ -301,6 +301,13 @@ public class PgColumn extends PgAbstractStatement
         compareIdentity(identityType, newColumn.identityType, sequence, newColumn.sequence, script);
         appendAlterComments(newColumn, script);
         return getObjectState(isNeedDependencies.get(), script, startSize);
+    }
+
+    private boolean isGeneratedColumnChanged(PgColumn newColumn) {
+        return generationOption != null
+                && (!Objects.equals(defaultValue, newColumn.defaultValue)
+                || !Objects.equals(type, newColumn.type)
+                || !Objects.equals(collation, newColumn.collation));
     }
 
     private boolean compareCompressOptions(PgColumn newColumn) {
