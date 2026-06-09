@@ -21,6 +21,10 @@ import org.pgcodekeeper.core.localizations.Messages;
 
 public final class PgJdbcUtils {
 
+    private PgJdbcUtils() {
+        // only statics
+    }
+
     public static <T> T[] getColArray(ResultSet rs, String columnName) throws SQLException {
         return getColArray(rs, columnName, false);
     }

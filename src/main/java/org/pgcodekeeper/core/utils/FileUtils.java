@@ -28,7 +28,6 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.DosFileAttributeView;
 import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -46,11 +45,9 @@ public final class FileUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileUtils.class);
 
-    private static final boolean IS_POSIX = FileSystems.getDefault().supportedFileAttributeViews().contains("posix"); //$NON-NLS-1$
+    private static final FileAttribute<?>[] EMPTY_PERMISSIONS = new FileAttribute<?>[0];
 
-    private static final FileAttribute<?> POSIX_PERMISSIONS =
-            PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")); //$NON-NLS-1$
-
+    private static final String TEMP_DIR_PREFIX = "pgCodeKeeper_"; //$NON-NLS-1$
     private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
     private static final Random RANDOM = new SecureRandom();
@@ -58,6 +55,8 @@ public final class FileUtils {
     private static final DateTimeFormatter FILE_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd HH''mm''ss"); //$NON-NLS-1$
     private static final Pattern INVALID_FILENAME = Pattern.compile("[\\\\/:*?\"<>|]"); //$NON-NLS-1$
     private static final Pattern MS_DB_NAME_PATTERN = Pattern.compile("=[^;]+;"); //$NON-NLS-1$
+
+    private static Path baseTempDir;
 
     /**
      * Deletes folder and its contents recursively.
@@ -182,7 +181,7 @@ public final class FileUtils {
      */
     public static Path getLoadedFilePath(Path metaPath, URI uri) {
         String path = uri.getPath();
-        String fileName = FileUtils.getValidFilename(Paths.get(path).getFileName().toString());
+        String fileName = FileUtils.getValidFilename(Path.of(path).getFileName().toString());
         String name = fileName + '_' + Utils.md5(path).substring(0, 10);
         return metaPath.resolve(name);
     }
@@ -315,14 +314,14 @@ public final class FileUtils {
 
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    Path destFile = Paths.get(destDir.toString(), file.toString());
+                    Path destFile = Path.of(destDir.toString(), file.toString());
                     Files.copy(file, destFile, StandardCopyOption.REPLACE_EXISTING);
                     return FileVisitResult.CONTINUE;
                 }
 
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                    Path dirToCreate = Paths.get(destDir.toString(), dir.toString());
+                    Path dirToCreate = Path.of(destDir.toString(), dir.toString());
                     if (Files.notExists(dirToCreate)) {
                         Files.createDirectory(dirToCreate);
                     }
@@ -343,8 +342,7 @@ public final class FileUtils {
     }
 
     /**
-     * Creates temporary file with secure permissions.
-     * On POSIX systems, sets permissions to rwx------. On other systems, uses file attribute methods.
+     * Creates temporary file.
      *
      * @param prefix the file name prefix
      * @param suffix the file name suffix
@@ -352,13 +350,28 @@ public final class FileUtils {
      * @throws IOException if file creation fails
      */
     public static Path createTempFile(String prefix, String suffix) throws IOException {
-        var msg = Messages.FileUtils_creating_temp_file.formatted(prefix);
-        LOG.info(msg);
-        if (IS_POSIX) {
-            return Files.createTempFile(prefix, suffix, POSIX_PERMISSIONS);
-        }
+        Path tempDir = getDefaultTempDirectory();
+        var path = createTempFile(tempDir, prefix, suffix);
+        path.toFile().deleteOnExit();
+        return path;
+    }
 
-        return Files.createTempFile(prefix, suffix);
+    /**
+     * Creates default temporary directory
+     *
+     * @throws IOException if directory creation fails
+     */
+    private static synchronized Path getDefaultTempDirectory() throws IOException {
+        if (baseTempDir == null) {
+            baseTempDir = Files.createTempDirectory(TEMP_DIR_PREFIX, getFilePermission());
+            baseTempDir.toFile().deleteOnExit();
+        }
+        return baseTempDir;
+    }
+
+    private static FileAttribute<?>[] getFilePermission() {
+        // sonar false positive bypass plug
+        return EMPTY_PERMISSIONS;
     }
 
     /**
@@ -391,5 +404,6 @@ public final class FileUtils {
     }
 
     private FileUtils() {
+        // only statics
     }
 }

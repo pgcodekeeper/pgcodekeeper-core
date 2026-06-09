@@ -103,9 +103,6 @@ public final class MsJdbcLoader extends AbstractJdbcLoader<MsDatabase> {
             // may need to be removed, Source Control seems to work in default READ COMMITTED state
             getRunner().run(statement, "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ");
 
-            // TODO add counting objects later
-//            setupMonitorWork();
-
             LOG.info(Messages.JdbcLoader_log_read_db_objects);
             new MsSchemasReader(this, d).read();
             new MsTablesReader(this).read();

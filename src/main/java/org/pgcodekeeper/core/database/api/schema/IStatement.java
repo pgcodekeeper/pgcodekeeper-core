@@ -50,7 +50,7 @@ public interface IStatement {
      */
     default IDatabase getDatabase() {
         return (IDatabase) getParent();
-    };
+    }
 
     /**
      * Gets the type name of this statement for SQL generation.

@@ -69,7 +69,7 @@ public class MsFKReader extends AbstractSearchPathJdbcReader<MsJdbcLoader> imple
         constrFk.setDelAction(getAction(res.getInt("delete_referential_action")));
         constrFk.setUpdAction(getAction(res.getInt("update_referential_action")));
         constrFk.setNotForRepl(res.getBoolean("is_not_for_replication"));
-        MsTable table = (MsTable) schema.getChild(res.getString("table_name"), DbObjType.TABLE);;
+        MsTable table = (MsTable) schema.getChild(res.getString("table_name"), DbObjType.TABLE);
         table.addChild(constrFk);
     }
 
@@ -111,10 +111,10 @@ public class MsFKReader extends AbstractSearchPathJdbcReader<MsJdbcLoader> imple
                 .join("JOIN sys.columns rc WITH (NOLOCK) ON sfkc.referenced_column_id=rc.column_id AND rc.object_id=sfkc.referenced_object_id")
                 .where("res.object_id=sfkc.constraint_object_id")
                 .orderBy("sfkc.constraint_column_id")
-                .postAction("FOR XML RAW, ROOT");
+                .postAction(FOR_XML_RAW_ROOT);
 
         builder.column("aa.cols");
-        builder.join("CROSS APPLY", subSelect, "aa (cols)");
+        builder.join(CROSS_APPLY, subSelect, "aa (cols)");
     }
 
     @Override

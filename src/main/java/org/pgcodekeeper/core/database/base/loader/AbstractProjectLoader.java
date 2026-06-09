@@ -32,7 +32,6 @@ import org.pgcodekeeper.core.utils.Utils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -345,7 +344,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
         }
         for (String xml : libXmls) {
             IMonitor.checkCancelled(getMonitor());
-            libraryLoader.loadXml(new LibraryXmlStore(Paths.get(xml)));
+            libraryLoader.loadXml(new LibraryXmlStore(Path.of(xml)));
         }
         libraryLoader.loadLibraries(false, libs);
         libraryLoader.loadLibraries(true, libsWithoutPriv);

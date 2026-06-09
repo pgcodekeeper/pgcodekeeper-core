@@ -43,6 +43,8 @@ import com.microsoft.sqlserver.jdbc.SQLServerException;
  */
 public class QueriesBatchCallable extends StatementCallable<String> {
 
+    private static final String NEW_LINE = "\n  Line: "; //$NON-NLS-1$
+
     private final List<ObjectLocation> batches;
     private final IMonitor monitor;
     private final Connection connection;
@@ -102,7 +104,7 @@ public class QueriesBatchCallable extends StatementCallable<String> {
             }
 
             if (reporter != null) {
-                reporter.writeMessage(Messages.QueriesBatchCallable_script_finished); // $NON-NLS-1$
+                reporter.writeMessage(Messages.QueriesBatchCallable_script_finished);
             }
         } catch (PSQLException ex) {
             ServerErrorMessage sem = ex.getServerErrorMessage();
@@ -116,7 +118,7 @@ public class QueriesBatchCallable extends StatementCallable<String> {
                     appendPosition(sb, finalModifiedQuery[0], offset);
                 } else {
                     if (currQuery.getLineNumber() > 1) {
-                        sb.append("\n  Line: ").append(currQuery.getLineNumber()); //$NON-NLS-1$
+                        sb.append(NEW_LINE).append(currQuery.getLineNumber());
                     }
                     sb.append('\n').append(currQuery.getSql());
                 }
@@ -133,9 +135,9 @@ public class QueriesBatchCallable extends StatementCallable<String> {
             StringBuilder sb = new StringBuilder(err.getErrorMessage());
             if (currQuery != null) {
                 if (err.getLineNumber() > 1) {
-                    sb.append("\n  Line: ").append(err.getLineNumber()); //$NON-NLS-1$
+                    sb.append(NEW_LINE).append(err.getLineNumber());
                 } else if (currQuery.getLineNumber() > 1) {
-                    sb.append("\n  Line: ").append(currQuery.getLineNumber()); //$NON-NLS-1$
+                    sb.append(NEW_LINE).append(currQuery.getLineNumber());
                 }
                 sb.append('\n').append(currQuery.getSql());
                 reporter.reportErrorLocation(currQuery.getOffset(),

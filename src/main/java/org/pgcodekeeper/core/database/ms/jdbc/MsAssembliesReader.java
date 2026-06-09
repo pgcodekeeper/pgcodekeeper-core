@@ -88,10 +88,10 @@ public class MsAssembliesReader extends AbstractJdbcReader<MsJdbcLoader> impleme
                 .from("sys.assembly_files af WITH (NOLOCK)")
                 .where("res.assembly_id = af.assembly_id")
                 .where("af.assembly_id > 65535")
-                .postAction("FOR XML RAW, ROOT");
+                .postAction(FOR_XML_RAW_ROOT);
 
         builder.column("bb.binaries");
-        builder.join("CROSS APPLY", binaries, "bb (binaries)");
+        builder.join(CROSS_APPLY, binaries, "bb (binaries)");
     }
 
     @Override

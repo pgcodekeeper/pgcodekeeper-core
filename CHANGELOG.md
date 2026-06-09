@@ -11,9 +11,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Improved work with temporary files.
+
 ### Fixed
 
-- Fixed adding library objects to a project during export
+- Fixed adding library objects to a project during export.
+- Fixed code generation for index when altering in CONCURRENTLY mode.
 
 ## [14.5.0] - 2026-06-02
 

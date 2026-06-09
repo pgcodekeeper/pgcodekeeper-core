@@ -100,7 +100,9 @@ public class PgPartitionTable extends PgAbstractRegularTable implements IPartiti
 
     private StringBuilder appendTablePartiton(String tableName, String state) {
         return new StringBuilder(ALTER_TABLE).append(tableName)
-                .append("\n\t%s PARTITION ".formatted(state))
+                .append("\n\t")
+                .append(state)
+                .append(" PARTITION ")
                 .append(parent.getQuotedName())
                 .append('.')
                 .append(getQuotedName());

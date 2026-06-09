@@ -23,7 +23,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -80,7 +79,7 @@ public final class Utils {
      * @param object the serializable object to write
      */
     public static void serialize(String path, Serializable object) {
-        serialize(Paths.get(path), object);
+        serialize(Path.of(path), object);
     }
 
     /**

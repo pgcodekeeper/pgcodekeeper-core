@@ -164,24 +164,26 @@ public final class ChEngine implements Serializable, IHashable {
         Map<String, String> modifyOptions = new HashMap<>();
 
         String newValue;
-        for (String option : options.keySet()) {
+        for (Entry<String, String> option : options.entrySet()) {
+            var key = option.getKey();
             // added to reset if in new condition havn't this option
-            if (!newOptions.containsKey(option)) {
-                resetOptions.add(option);
+            if (!newOptions.containsKey(key)) {
+                resetOptions.add(key);
                 continue;
             }
 
             // add to modify if options have different values
-            newValue = newOptions.get(option);
-            if (!Objects.equals(newValue, options.get(option))) {
-                modifyOptions.put(option, newValue);
+            newValue = newOptions.get(key);
+            if (!Objects.equals(newValue, option.getValue())) {
+                modifyOptions.put(key, newValue);
             }
         }
 
         // add to modify if old condition havn't this option
-        for (String key : newOptions.keySet()) {
+        for (Entry<String, String> newOption : newOptions.entrySet()) {
+            var key = newOption.getKey();
             if (!options.containsKey(key)) {
-                modifyOptions.put(key, newOptions.get(key));
+                modifyOptions.put(key, newOption.getValue());
             }
         }
 

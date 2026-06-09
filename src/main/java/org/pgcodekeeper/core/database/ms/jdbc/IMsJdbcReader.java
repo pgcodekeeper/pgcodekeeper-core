@@ -19,6 +19,9 @@ import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
 
 public interface IMsJdbcReader {
 
+    String CROSS_APPLY = "CROSS APPLY";
+    String FOR_XML_RAW_ROOT = "FOR XML RAW, ROOT";
+
     QueryBuilder MS_PRIVILEGES_JOIN_SUBSELECT = new QueryBuilder()
             .column("perm.state_desc AS sd")
             .column("perm.permission_name AS pn")
@@ -26,13 +29,13 @@ public interface IMsJdbcReader {
             .from("sys.database_principals roleprinc WITH (NOLOCK)")
             .join("JOIN sys.database_permissions perm WITH (NOLOCK) ON perm.grantee_principal_id = roleprinc.principal_id")
             .join("LEFT JOIN sys.columns col WITH (NOLOCK) ON col.object_id = perm.major_id AND col.column_id = perm.minor_id")
-            .postAction("FOR XML RAW, ROOT");
+            .postAction(FOR_XML_RAW_ROOT);
 
     default void addMsPrivilegesPart(QueryBuilder builder) {
         var subSelect = formatMsPrivileges(MS_PRIVILEGES_JOIN_SUBSELECT.copy());
         builder
                 .column("aa.acl")
-                .join("CROSS APPLY", subSelect, "aa (acl)");
+                .join(CROSS_APPLY, subSelect, "aa (acl)");
     }
 
     default QueryBuilder formatMsPrivileges(QueryBuilder privileges) {

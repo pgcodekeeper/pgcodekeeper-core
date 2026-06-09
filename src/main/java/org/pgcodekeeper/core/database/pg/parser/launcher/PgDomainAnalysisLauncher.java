@@ -45,7 +45,7 @@ public class PgDomainAnalysisLauncher extends PgAbstractAnalysisLauncher {
     @Override
     public Set<ObjectLocation> analyze(ParserRuleContext ctx, IMetaContainer meta) {
         PgValueExprWithNmspc vex = new PgValueExprWithNmspc(meta);
-        vex.addNamespaceVariable(new Pair<>("VALUE", IPgTypesSetManually.UNKNOWN));
+        vex.addNamespaceVariable(new Pair<>("VALUE", PgTypesSetManually.UNKNOWN));
         return analyze((VexContext) ctx, vex);
     }
 }

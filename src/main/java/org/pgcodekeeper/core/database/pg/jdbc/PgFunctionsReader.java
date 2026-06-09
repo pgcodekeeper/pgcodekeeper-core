@@ -210,11 +210,8 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
             String val = param.substring(eq + 1);
 
             switch (par) {
-                case "temp_tablespaces":
-                case "session_preload_libraries":
-                case "shared_preload_libraries":
-                case "local_preload_libraries":
-                case "search_path":
+                case "temp_tablespaces", "session_preload_libraries", "shared_preload_libraries",
+                "local_preload_libraries", "search_path":
                     function.addConfiguration(par, null);
                     loader.submitAntlrTask(val, SQLParser::vex_eof,
                             ctx -> {
@@ -298,7 +295,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
                 break;
         }
 
-        //// The order is important for adding dependencies. Two steps.
+        // The order is important for adding dependencies. Two steps.
 
         // First step: filling all types and arguments.
         fillArguments(aggregate, res);

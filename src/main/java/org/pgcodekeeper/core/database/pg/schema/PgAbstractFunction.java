@@ -67,7 +67,7 @@ public abstract class PgAbstractFunction extends PgAbstractStatement implements 
     @Override
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
-        appendFunctionFullSQL(sbSQL, true);
+        appendFunctionFullSQL(sbSQL);
         script.addStatement(sbSQL);
         appendOwnerSQL(script);
         appendPrivileges(script);
@@ -88,7 +88,7 @@ public abstract class PgAbstractFunction extends PgAbstractStatement implements 
             isNeedDepcies = isNeedDepcies(newFunction);
 
             StringBuilder sbSQL = new StringBuilder();
-            newFunction.appendFunctionFullSQL(sbSQL, false);
+            newFunction.appendFunctionFullSQL(sbSQL);
             script.addStatement(sbSQL);
         }
 
@@ -103,7 +103,7 @@ public abstract class PgAbstractFunction extends PgAbstractStatement implements 
         return !deps.equals(newFunction.deps);
     }
 
-    protected void appendFunctionFullSQL(StringBuilder sbSQL, boolean isCreate) {
+    protected void appendFunctionFullSQL(StringBuilder sbSQL) {
         sbSQL.append("CREATE OR REPLACE ");
         sbSQL.append(getStatementType());
         sbSQL.append(' ');

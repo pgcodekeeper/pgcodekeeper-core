@@ -224,7 +224,7 @@ public class MsIndicesAndPKReader extends AbstractSearchPathJdbcReader<MsJdbcLoa
                 .where("c.object_id = res.object_id")
                 .where("c.index_id = res.index_id")
                 .orderBy("c.key_ordinal")
-                .postAction("FOR XML RAW, ROOT");
+                .postAction(FOR_XML_RAW_ROOT);
 
         if (MsSupportedVersion.VERSION_22.isLE(loader.getVersion())) {
             subSelect.column("c.column_store_order_ordinal AS col_order");
@@ -232,7 +232,7 @@ public class MsIndicesAndPKReader extends AbstractSearchPathJdbcReader<MsJdbcLoa
 
         builder
                 .column("cc.cols")
-                .join("CROSS APPLY", subSelect, "cc (cols)");
+                .join(CROSS_APPLY, subSelect, "cc (cols)");
     }
 
     @Override

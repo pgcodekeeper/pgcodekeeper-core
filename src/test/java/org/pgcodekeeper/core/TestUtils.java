@@ -20,7 +20,6 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -47,7 +46,7 @@ public final class TestUtils {
         }
 
         try {
-            return Paths.get(resource.toURI());
+            return Path.of(resource.toURI());
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Invalid resource URI: " + resourceName, e);
         }

@@ -89,7 +89,7 @@ public final class PgValueExpr extends PgAbstractExpr {
 
         if (vex.eq() != null || vex.and() != null) {
             // BETWEEN is handled as AND, no separate processing required
-            return new ModPair<>(NONAME, IPgTypesSetManually.BOOLEAN);
+            return new ModPair<>(NONAME, PgTypesSetManually.BOOLEAN);
         }
 
         OpContext op = vex.op();
@@ -104,7 +104,7 @@ public final class PgValueExpr extends PgAbstractExpr {
                 if (selectStmt != null) {
                     new PgSelect(this).analyze(selectStmt);
                 }
-                return new ModPair<>(NONAME, IPgTypesSetManually.BOOLEAN);
+                return new ModPair<>(NONAME, PgTypesSetManually.BOOLEAN);
             }
 
             Type_listContext typeList = vex.typeList();
@@ -112,7 +112,7 @@ public final class PgValueExpr extends PgAbstractExpr {
                 for (Data_typeContext type : typeList.data_type()) {
                     addTypeDepcy(type);
                 }
-                return new ModPair<>(NONAME, IPgTypesSetManually.BOOLEAN);
+                return new ModPair<>(NONAME, PgTypesSetManually.BOOLEAN);
             }
 
             if (operandsList.size() == 1) {
@@ -121,13 +121,13 @@ public final class PgValueExpr extends PgAbstractExpr {
                 if (indir != null) {
                     indirection(indir.indirection(), ret);
                     if (indir.MULTIPLY() != null) {
-                        ret = new ModPair<>(NONAME, IPgTypesSetManually.QUALIFIED_ASTERISK);
+                        ret = new ModPair<>(NONAME, PgTypesSetManually.QUALIFIED_ASTERISK);
                     }
                 }
                 return ret;
             }
             // TODO add record type placeholder?
-            return new ModPair<>("row", IPgTypesSetManually.UNKNOWN);
+            return new ModPair<>("row", PgTypesSetManually.UNKNOWN);
         }
 
         if (vex.is() != null
@@ -145,7 +145,7 @@ public final class PgValueExpr extends PgAbstractExpr {
                 || vex.notNull() != null) {
             // check IS after "OF ( type_list )"
             // check unary NOT after all NOT-containing alternatives
-            return new ModPair<>(NONAME, IPgTypesSetManually.BOOLEAN);
+            return new ModPair<>(NONAME, PgTypesSetManually.BOOLEAN);
         }
 
         if (vex.collateIdentifier() != null) {
@@ -160,7 +160,7 @@ public final class PgValueExpr extends PgAbstractExpr {
         }
 
         log(vex.getVexCtx(), Messages.ValueExpr_log_no_vex_alternative);
-        return new ModPair<>(NONAME, IPgTypesSetManually.UNKNOWN);
+        return new ModPair<>(NONAME, PgTypesSetManually.UNKNOWN);
     }
 
     private void cast(PgVex operand, Data_typeContext dataType) {
@@ -222,13 +222,13 @@ public final class PgValueExpr extends PgAbstractExpr {
 
             String returns = resultOperFunction.getReturns();
             if (returns == null) {
-                returns = IPgTypesSetManually.FUNCTION_COLUMN;
+                returns = PgTypesSetManually.FUNCTION_COLUMN;
             }
 
             return new ModPair<>(NONAME, returns);
         }
 
-        return new ModPair<>(NONAME, IPgTypesSetManually.FUNCTION_COLUMN);
+        return new ModPair<>(NONAME, PgTypesSetManually.FUNCTION_COLUMN);
     }
 
     /*
@@ -265,7 +265,7 @@ public final class PgValueExpr extends PgAbstractExpr {
         } else if ((function = primary.function_call()) != null) {
             ret = function(function);
         } else if (primary.NULL() != null) {
-            ret = new ModPair<>(NONAME, IPgTypesSetManually.ANYTYPE);
+            ret = new ModPair<>(NONAME, PgTypesSetManually.ANYTYPE);
         } else if ((caseExpr = primary.case_expression()) != null) {
             ret = null;
             for (VexContext v : caseExpr.vex()) {
@@ -279,7 +279,7 @@ public final class PgValueExpr extends PgAbstractExpr {
             }
         } else if ((subquery = primary.table_subquery()) != null) {
             new PgSelect(this).analyze(subquery.select_stmt());
-            ret = new ModPair<>("exists", IPgTypesSetManually.BOOLEAN);
+            ret = new ModPair<>("exists", PgTypesSetManually.BOOLEAN);
         } else if ((subSelectStmt = primary.select_stmt_no_parens()) != null) {
             PgSelect select = new PgSelect(this);
             ret = getSubselectColumn(select.analyze(subSelectStmt));
@@ -287,13 +287,13 @@ public final class PgValueExpr extends PgAbstractExpr {
             if (indir != null) {
                 indirection(indir.indirection(), ret);
                 if (indir.MULTIPLY() != null) {
-                    ret = new ModPair<>(NONAME, IPgTypesSetManually.QUALIFIED_ASTERISK);
+                    ret = new ModPair<>(NONAME, PgTypesSetManually.QUALIFIED_ASTERISK);
                 }
             }
         } else if ((compMod = primary.comparison_mod()) != null) {
             // type doesn't matter since this is not a real expression
             // this is always an operand of comparison operator, which will reset the type
-            ret = new ModPair<>(NONAME, IPgTypesSetManually.UNKNOWN);
+            ret = new ModPair<>(NONAME, PgTypesSetManually.UNKNOWN);
             VexContext compModVex = compMod.vex();
             if (compModVex != null) {
                 analyze(new PgVex(compModVex));
@@ -312,7 +312,7 @@ public final class PgValueExpr extends PgAbstractExpr {
             ret.setSecond(ret.getSecond() + "[]");
         } else if (primary.MULTIPLY() != null) {
             // handled in Select analyzer
-            ret = new ModPair<>(NONAME, IPgTypesSetManually.QUALIFIED_ASTERISK);
+            ret = new ModPair<>(NONAME, PgTypesSetManually.QUALIFIED_ASTERISK);
         } else if ((typeCoercion = primary.type_coercion()) != null) {
             String type;
             if (typeCoercion.INTERVAL() != null) {
@@ -329,10 +329,10 @@ public final class PgValueExpr extends PgAbstractExpr {
             for (VexContext v : overlaps.vex()) {
                 analyze(new PgVex(v));
             }
-            ret = new ModPair<>("overlaps", IPgTypesSetManually.BOOLEAN);
+            ret = new ModPair<>("overlaps", PgTypesSetManually.BOOLEAN);
         } else {
             log(primary, Messages.ValueExpr_log_no_primary_alternative);
-            ret = new ModPair<>(NONAME, IPgTypesSetManually.UNKNOWN);
+            ret = new ModPair<>(NONAME, PgTypesSetManually.UNKNOWN);
         }
         return ret;
     }
@@ -341,7 +341,7 @@ public final class PgValueExpr extends PgAbstractExpr {
             List<ModPair<String, String>> list) {
         if (list.isEmpty()) {
             log(Messages.ValueExpr_log_subselect_empty);
-            return new ModPair<>(NONAME, IPgTypesSetManually.UNKNOWN);
+            return new ModPair<>(NONAME, PgTypesSetManually.UNKNOWN);
         }
         return list.get(0);
     }
@@ -360,7 +360,7 @@ public final class PgValueExpr extends PgAbstractExpr {
         List<IndirectionContext> indir = indirList.indirection();
         if (indirList.MULTIPLY() != null) {
             indirection(indir, null);
-            return new ModPair<>(NONAME, IPgTypesSetManually.QUALIFIED_ASTERISK);
+            return new ModPair<>(NONAME, PgTypesSetManually.QUALIFIED_ASTERISK);
         }
         /*
         String columnName = id.getText();
@@ -389,7 +389,7 @@ public final class PgValueExpr extends PgAbstractExpr {
         ModPair<String, String> ret;
         if (ids.size() > 3) {
             log(indirection, Messages.ValueExpr_log_long_indirection);
-            ret = new ModPair<>(NONAME, IPgTypesSetManually.UNKNOWN);
+            ret = new ModPair<>(NONAME, PgTypesSetManually.UNKNOWN);
         } else {
             ret = processColumn(ids);
         }
@@ -433,7 +433,7 @@ public final class PgValueExpr extends PgAbstractExpr {
                 }
 
                 left.setFirst(null);
-                left.setSecond(IPgTypesSetManually.UNKNOWN);
+                left.setSecond(PgTypesSetManually.UNKNOWN);
             }
         }
     }
@@ -448,7 +448,7 @@ public final class PgValueExpr extends PgAbstractExpr {
             ret = analyze(new PgVex(vex));
         }
 
-        return ret != null ? ret : new ModPair<>(NONAME, IPgTypesSetManually.UNKNOWN);
+        return ret != null ? ret : new ModPair<>(NONAME, PgTypesSetManually.UNKNOWN);
     }
 
     /**
@@ -510,9 +510,8 @@ public final class PgValueExpr extends PgAbstractExpr {
         Collection<IFunction> functions = availableFunctions(schemaName);
 
         if (args.size() == 1 && argsType.size() == 1
-                && IPgTypesSetManually.QUALIFIED_ASTERISK.equals(argsType.get(0))) {
-            //// In this case function's argument is '*' or 'source.*'.
-
+                && PgTypesSetManually.QUALIFIED_ASTERISK.equals(argsType.get(0))) {
+            // In this case function's argument is '*' or 'source.*'.
             IFunction func = null;
             for (IFunction f : functions) {
                 if (f.getArguments().size() == 1
@@ -528,7 +527,7 @@ public final class PgValueExpr extends PgAbstractExpr {
             }
 
             return new ModPair<>(functionName, func != null ?
-                    getFunctionReturns(func) : IPgTypesSetManually.FUNCTION_COLUMN);
+                    getFunctionReturns(func) : PgTypesSetManually.FUNCTION_COLUMN);
         }
 
         IFunction resultFunction = resolveCall(functionName, argsType, argsName, functions);
@@ -537,7 +536,7 @@ public final class PgValueExpr extends PgAbstractExpr {
             return new ModPair<>(functionName, getFunctionReturns(resultFunction));
         }
 
-        return new ModPair<>(functionName, IPgTypesSetManually.FUNCTION_COLUMN);
+        return new ModPair<>(functionName, PgTypesSetManually.FUNCTION_COLUMN);
     }
 
     private ModPair<String, String> functionSpecial(Function_callContext function) {
@@ -556,7 +555,7 @@ public final class PgValueExpr extends PgAbstractExpr {
         if ((extract = function.extract_function()) != null) {
             analyze(new PgVex(extract.vex()));
             // parser defines this as a call to an overload of pg_catalog.date_part
-            ret = new ModPair<>("date_part", IPgTypesSetManually.DOUBLE);
+            ret = new ModPair<>("date_part", PgTypesSetManually.DOUBLE);
         } else if ((system = function.system_function()) != null) {
             Cast_specificationContext cast = system.cast_specification();
             if (cast != null) {
@@ -567,7 +566,7 @@ public final class PgValueExpr extends PgAbstractExpr {
             } else {
                 ret = new ModPair<>(system.USER() != null ? "current_user"
                         : system.getChild(0).getText().toLowerCase(Locale.ROOT),
-                        IPgTypesSetManually.NAME);
+                        PgTypesSetManually.NAME);
             }
         } else if ((datetime = function.date_time_function()) != null) {
             ret = analyzeDate(datetime);
@@ -582,18 +581,18 @@ public final class PgValueExpr extends PgAbstractExpr {
             ret = analyzeJson(args, json);
         } else if ((mer = function.merge_support_function()) != null) {
             String colname = mer.getChild(0).getText().toLowerCase(Locale.ROOT);
-            ret = new ModPair<>(colname, IPgTypesSetManually.TEXT);
+            ret = new ModPair<>(colname, PgTypesSetManually.TEXT);
         } else if ((con = function.function_construct()) != null) {
             args = con.vex();
 
             String colname = con.getChild(0).getText().toLowerCase(Locale.ROOT);
             String coltype;
             if (con.XMLCONCAT() != null) {
-                coltype = IPgTypesSetManually.XML;
+                coltype = PgTypesSetManually.XML;
             } else if (con.ROW() != null) {
-                coltype = IPgTypesSetManually.UNKNOWN;
+                coltype = PgTypesSetManually.UNKNOWN;
             } else if (con.GROUPING() != null) {
-                coltype = IPgTypesSetManually.INTEGER;
+                coltype = PgTypesSetManually.INTEGER;
             } else {
                 VexContext vex = args.get(0);
                 args = args.subList(1, args.size());
@@ -602,7 +601,7 @@ public final class PgValueExpr extends PgAbstractExpr {
             ret = new ModPair<>(colname, coltype);
         } else {
             log(function, Messages.ValueExpr_log_no_function_special_alternative);
-            ret = new ModPair<>(NONAME, IPgTypesSetManually.UNKNOWN);
+            ret = new ModPair<>(NONAME, PgTypesSetManually.UNKNOWN);
         }
 
         if (args != null) {
@@ -620,7 +619,7 @@ public final class PgValueExpr extends PgAbstractExpr {
         }
 
         String colname = string.getChild(0).getText().toLowerCase(Locale.ROOT);
-        String coltype = IPgTypesSetManually.TEXT;
+        String coltype = PgTypesSetManually.TEXT;
         if (string.TRIM() != null) {
             if (string.LEADING() != null) {
                 colname = "ltrim";
@@ -630,16 +629,16 @@ public final class PgValueExpr extends PgAbstractExpr {
                 colname = "btrim";
             }
         } else if (string.POSITION() != null) {
-            coltype = IPgTypesSetManually.INTEGER;
+            coltype = PgTypesSetManually.INTEGER;
         }
 
         return new ModPair<>(colname, coltype);
     }
 
     private ModPair<String, String> analyzeXml(List<VexContext> args, Xml_functionContext xml) {
-        String coltype = IPgTypesSetManually.XML;
+        String coltype = PgTypesSetManually.XML;
         if (xml.XMLEXISTS() != null) {
-            coltype = IPgTypesSetManually.BOOLEAN;
+            coltype = PgTypesSetManually.BOOLEAN;
         } else if (xml.XMLSERIALIZE() != null) {
             Data_typeContext type = xml.data_type();
             coltype = PgParserAbstract.getTypeName(type);
@@ -652,7 +651,7 @@ public final class PgValueExpr extends PgAbstractExpr {
                     addTypeDepcy(col.data_type());
                 }
             }
-            coltype = IPgTypesSetManually.FUNCTION_TABLE;
+            coltype = PgTypesSetManually.FUNCTION_TABLE;
         }
 
         String colname = xml.getChild(0).getText().toLowerCase(Locale.ROOT);
@@ -664,23 +663,23 @@ public final class PgValueExpr extends PgAbstractExpr {
         String coltype;
         if (datetime.CURRENT_DATE() != null) {
             colname = "date";
-            coltype = IPgTypesSetManually.DATE;
+            coltype = PgTypesSetManually.DATE;
         } else if (datetime.CURRENT_TIME() != null) {
             colname = "timetz";
-            coltype = IPgTypesSetManually.TIMETZ;
+            coltype = PgTypesSetManually.TIMETZ;
         } else if (datetime.CURRENT_TIMESTAMP() != null) {
             colname = "now";
-            coltype = IPgTypesSetManually.TIMESTAMPTZ;
+            coltype = PgTypesSetManually.TIMESTAMPTZ;
         } else if (datetime.LOCALTIME() != null) {
             colname = "time";
-            coltype = IPgTypesSetManually.TIME;
+            coltype = PgTypesSetManually.TIME;
         } else if (datetime.LOCALTIMESTAMP() != null) {
             colname = "timestamp";
-            coltype = IPgTypesSetManually.TIMESTAMP;
+            coltype = PgTypesSetManually.TIMESTAMP;
         } else {
             log(datetime, Messages.ValueExpr_log_no_datetime_alternative);
             colname = NONAME;
-            coltype = IPgTypesSetManually.UNKNOWN;
+            coltype = PgTypesSetManually.UNKNOWN;
         }
         return new ModPair<>(colname, coltype);
     }
@@ -691,30 +690,30 @@ public final class PgValueExpr extends PgAbstractExpr {
             retClause = json.json_object_content().json_return_clause();
         }
 
-        String coltype = IPgTypesSetManually.JSON;
+        String coltype = PgTypesSetManually.JSON;
         if (retClause != null) {
             Data_typeContext type = retClause.data_type();
             coltype = PgParserAbstract.getTypeName(type);
             addTypeDepcy(type);
         } else if (json.JSON_ARRAY() != null || json.JSON_ARRAYAGG() != null) {
-            coltype = IPgTypesSetManually.JSON + "[]";
+            coltype = PgTypesSetManually.JSON + "[]";
         } else if (json.JSON_EXISTS() != null) {
-            coltype = IPgTypesSetManually.BOOLEAN;
+            coltype = PgTypesSetManually.BOOLEAN;
         } else if (json.JSON_QUERY() != null) {
-            coltype = IPgTypesSetManually.JSONB;
+            coltype = PgTypesSetManually.JSONB;
         } else if (json.JSON_VALUE() != null) {
-            coltype = IPgTypesSetManually.TEXT;
+            coltype = PgTypesSetManually.TEXT;
         } else if (json.JSON_SERIALIZE() != null) {
-            coltype = IPgTypesSetManually.TEXT;
+            coltype = PgTypesSetManually.TEXT;
         } else if (json.JSON_TABLE() != null) {
             analyzeJsonColumns(args, json.json_columns());
-            coltype = IPgTypesSetManually.FUNCTION_TABLE;
+            coltype = PgTypesSetManually.FUNCTION_TABLE;
         } else if (json.JSON_SCALAR() != null) {
             var inputType = analyze(new PgVex(json.vex())).getSecond();
-            if (IPgTypesSetManually.BOOLEAN.equals(inputType)) {
-                coltype = IPgTypesSetManually.BOOLEAN;
-            } else if (IPgTypesSetManually.TEXT.equals(inputType)) {
-                coltype = IPgTypesSetManually.TEXT;
+            if (PgTypesSetManually.BOOLEAN.equals(inputType)) {
+                coltype = PgTypesSetManually.BOOLEAN;
+            } else if (PgTypesSetManually.TEXT.equals(inputType)) {
+                coltype = PgTypesSetManually.TEXT;
             }
         }
 
@@ -805,7 +804,7 @@ public final class PgValueExpr extends PgAbstractExpr {
                 }
 
                 var type = arg.getDataType();
-                String argDataType = "\"any\"".equalsIgnoreCase(type) ? IPgTypesSetManually.ANY : type;
+                String argDataType = "\"any\"".equalsIgnoreCase(type) ? PgTypesSetManually.ANY : type;
                 if (sourceType.equals(argDataType)) {
                     ++exactMatches;
                 } else if (!typesMatch(sourceType, argDataType)) {
@@ -885,10 +884,10 @@ public final class PgValueExpr extends PgAbstractExpr {
         arg = arg.toLowerCase(Locale.ROOT);
 
         arg = switch (arg) {
-            case IPgTypesSetManually.SERIAL -> IPgTypesSetManually.INTEGER;
-            case IPgTypesSetManually.SMALLSERIAL -> IPgTypesSetManually.SMALLINT;
-            case IPgTypesSetManually.BIGSERIAL -> IPgTypesSetManually.BIGINT;
-            default -> arg.startsWith(IPgTypesSetManually.NUMERIC) ? IPgTypesSetManually.NUMERIC : arg;
+            case PgTypesSetManually.SERIAL -> PgTypesSetManually.INTEGER;
+            case PgTypesSetManually.SMALLSERIAL -> PgTypesSetManually.SMALLINT;
+            case PgTypesSetManually.BIGSERIAL -> PgTypesSetManually.BIGINT;
+            default -> arg.startsWith(PgTypesSetManually.NUMERIC) ? PgTypesSetManually.NUMERIC : arg;
         };
 
         return arg;
@@ -902,12 +901,12 @@ public final class PgValueExpr extends PgAbstractExpr {
     }
 
     private static boolean isAnyTypes(String type) {
-        return IPgTypesSetManually.ANYTYPE.equalsIgnoreCase(type)
-                || IPgTypesSetManually.ANY.equalsIgnoreCase(type)
-                || IPgTypesSetManually.ANYARRAY.equalsIgnoreCase(type)
-                || IPgTypesSetManually.ANYRANGE.equalsIgnoreCase(type)
-                || IPgTypesSetManually.ANYENUM.equalsIgnoreCase(type)
-                || IPgTypesSetManually.ANYNOARRAY.equalsIgnoreCase(type);
+        return PgTypesSetManually.ANYTYPE.equalsIgnoreCase(type)
+                || PgTypesSetManually.ANY.equalsIgnoreCase(type)
+                || PgTypesSetManually.ANYARRAY.equalsIgnoreCase(type)
+                || PgTypesSetManually.ANYRANGE.equalsIgnoreCase(type)
+                || PgTypesSetManually.ANYENUM.equalsIgnoreCase(type)
+                || PgTypesSetManually.ANYNOARRAY.equalsIgnoreCase(type);
     }
 
     private String getOperatorToken(PgVex vex) {
@@ -931,7 +930,7 @@ public final class PgValueExpr extends PgAbstractExpr {
         returningTableColumns = returnColumns.entrySet().stream()
                 .map(e -> new Pair<>(e.getKey(), e.getValue()))
                 .toList();
-        return IPgTypesSetManually.FUNCTION_TABLE;
+        return PgTypesSetManually.FUNCTION_TABLE;
     }
 
     /**
@@ -1024,27 +1023,27 @@ public final class PgValueExpr extends PgAbstractExpr {
         Truth_valueContext truthValue;
 
         if (constCtx.iconst() != null) {
-            ret = IPgTypesSetManually.INTEGER;
+            ret = PgTypesSetManually.INTEGER;
         } else if (constCtx.fconst() != null) {
-            ret = IPgTypesSetManually.NUMERIC;
+            ret = PgTypesSetManually.NUMERIC;
         } else if ((charString = constCtx.sconst()) != null) {
             String text = charString.getText();
             if (text.regionMatches(true, 0, "B", 0, 1) || text.regionMatches(true, 0, "X", 0, 1)) {
-                ret = IPgTypesSetManually.BIT;
+                ret = PgTypesSetManually.BIT;
             } else if (text.regionMatches(true, 0, "N", 0, 1)) {
-                ret = IPgTypesSetManually.BPCHAR;
+                ret = PgTypesSetManually.BPCHAR;
             } else {
-                ret = IPgTypesSetManually.TEXT;
+                ret = PgTypesSetManually.TEXT;
             }
         } else if ((truthValue = constCtx.truth_value()) != null) {
             if (truthValue.TRUE() != null || truthValue.FALSE() != null) {
-                ret = IPgTypesSetManually.BOOLEAN;
+                ret = PgTypesSetManually.BOOLEAN;
             } else {
-                ret = IPgTypesSetManually.TEXT;
+                ret = PgTypesSetManually.TEXT;
             }
         } else {
             log(constCtx, Messages.ValueExpr_log_no_literal_alternative);
-            ret = IPgTypesSetManually.UNKNOWN;
+            ret = PgTypesSetManually.UNKNOWN;
         }
         return ret;
     }

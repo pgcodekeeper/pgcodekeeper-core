@@ -51,7 +51,7 @@ public class PgColumn extends PgAbstractStatement
     private static final Logger LOG = LoggerFactory.getLogger(PgColumn.class);
 
     private static final String ALTER_FOREIGN_OPTION = "%s OPTIONS (%s %s %s)";
-    private static final String COMPRESSION = " COMPRESSION ";
+    private static final String COMPRESSION_CONST = " COMPRESSION ";
     private static final String ALTER_COLUMN = "\n\tALTER COLUMN ";
     private static final String COLLATE = " COLLATE ";
     private static final String NULL = " NULL";
@@ -98,7 +98,7 @@ public class PgColumn extends PgAbstractStatement
             sbDefinition.append(' ');
             sbDefinition.append(type);
             if (compression != null) {
-                sbDefinition.append(COMPRESSION).append(quote(compression));
+                sbDefinition.append(COMPRESSION_CONST).append(quote(compression));
             }
 
             if (collation != null) {
@@ -151,7 +151,7 @@ public class PgColumn extends PgAbstractStatement
                     .append(' ')
                     .append(type);
             if (compression != null) {
-                sb.append(COMPRESSION).append(quote(compression));
+                sb.append(COMPRESSION_CONST).append(quote(compression));
             }
             if (collation != null) {
                 sb.append(COLLATE).append(collation);

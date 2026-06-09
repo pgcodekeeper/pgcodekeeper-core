@@ -89,7 +89,7 @@ public class PgAggregate extends PgAbstractFunction {
     }
 
     @Override
-    protected void appendFunctionFullSQL(StringBuilder sb, boolean isCreate) {
+    protected void appendFunctionFullSQL(StringBuilder sb) {
         sb.append("CREATE AGGREGATE ");
         appendFullName(sb);
 

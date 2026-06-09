@@ -303,7 +303,7 @@ public final class PgSelect extends PgAbstractExprWithNmspc<Select_stmtContext> 
             // analyze all before parse asterisk
             ModPair<String, String> columnPair = vex.analyze(selectSublistVex);
 
-            if (IPgTypesSetManually.QUALIFIED_ASTERISK.equals(columnPair.getSecond())
+            if (PgTypesSetManually.QUALIFIED_ASTERISK.equals(columnPair.getSecond())
                     && analyzeAster(selectSublistVex, ret)) {
                 continue;
             }
@@ -607,7 +607,7 @@ public final class PgSelect extends PgAbstractExprWithNmspc<Select_stmtContext> 
 
         List<Pair<String, String>> colPairs = new ArrayList<>();
         fromRows.column_alias
-                .forEach(identifier -> colPairs.add(new ModPair<>(identifier.getText(), IPgTypesSetManually.COLUMN)));
+                .forEach(identifier -> colPairs.add(new ModPair<>(identifier.getText(), PgTypesSetManually.COLUMN)));
 
         var definitions = fromRows.from_function_column_def();
         var definition = definitions.isEmpty() ? null : definitions.get(0);

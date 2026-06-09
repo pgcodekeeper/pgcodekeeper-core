@@ -79,10 +79,10 @@ public class MsRolesReader extends AbstractJdbcReader<MsJdbcLoader> implements I
                 .from("sys.database_role_members AS rm WITH (NOLOCK)")
                 .join("INNER JOIN sys.database_principals p1 WITH (NOLOCK) ON rm.member_principal_id=p1.principal_id")
                 .where("rm.role_principal_id=res.principal_id")
-                .postAction("FOR XML RAW, ROOT");
+                .postAction(FOR_XML_RAW_ROOT);
 
         builder.column("cc.groups");
-        builder.join("CROSS APPLY", subSelect, "cc (groups)");
+        builder.join(CROSS_APPLY, subSelect, "cc (groups)");
     }
 
     @Override

@@ -76,9 +76,7 @@ public final class DiffTree {
      * @param right  the right (new) column list
      * @param parent the parent tree element
      * @param list   the list to add column differences to
-     * @deprecated this method is deprecated
      */
-    @Deprecated
     public static void addColumns(Collection<IColumn> left, Collection<IColumn> right,
                                   TreeElement parent, List<TreeElement> list) {
         for (IColumn sLeft : left) {

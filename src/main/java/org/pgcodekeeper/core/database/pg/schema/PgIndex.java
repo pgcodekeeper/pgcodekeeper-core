@@ -135,8 +135,7 @@ public class PgIndex extends PgAbstractStatement implements IIndex {
         if (inherit != null || settings.isGenerateExists()) {
             sbSQL.append("IF NOT EXISTS ");
         }
-        sbSQL.append(getQuotedName())
-                .append(" ON ");
+        sbSQL.append(quote(name)).append(" ON ");
         if (parent instanceof PgAbstractRegularTable regTable && regTable.getPartitionBy() != null) {
             sbSQL.append("ONLY ");
         }
