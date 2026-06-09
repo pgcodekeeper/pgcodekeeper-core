@@ -88,7 +88,7 @@ public final class MsStatisticsReader extends AbstractSearchPathJdbcReader<MsJdb
                 .where("st_col.object_id = res.object_id")
                 .where("st_col.stats_id = res.stats_id")
                 .orderBy("st_col.stats_column_id")
-                .postAction("FOR XML RAW, ROOT");
+                .postAction(FOR_XML_RAW_ROOT);
 
         builder
                 .column("res.name")
@@ -98,7 +98,7 @@ public final class MsStatisticsReader extends AbstractSearchPathJdbcReader<MsJdb
                 .column("res.no_recompute")
                 .column("res.is_incremental")
                 .from("sys.stats res WITH (NOLOCK)")
-                .join("CROSS APPLY", subSelect, "st_col (cols)")
+                .join(CROSS_APPLY, subSelect, "st_col (cols)")
                 .join("LEFT JOIN sys.objects cont WITH (NOLOCK) ON cont.object_id = res.object_id")
                 .where("res.user_created = 1");
 

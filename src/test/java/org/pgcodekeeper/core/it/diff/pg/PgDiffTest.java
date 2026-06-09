@@ -202,10 +202,10 @@ class PgDiffTest {
             // Tests scenario where SEQUENCE with data type is modified.
             "modify_sequence_data_type",
             // Tests scenario where new PARTITION TABLE is modified.
-            // TODO при формировании скрипта не учитываются пересечения партиций
-            // ATTACH PARTITION public.cities_fg FOR VALUES IN ('e', 'g');
-            // выполняется раньше чем
-            // DROP FOREIGN TABLE public.f_cities_e;
+            // TODO: Partition intersections are not taken into account when generating the script.
+            // ATTACH PARTITION public.cities_fg FOR VALUES IN ('e', 'g')
+            // executes before
+            // DROP FOREIGN TABLE public.f_cities_e
             "modify_partition_table",
             // Tests scenario where compared PARTITION TABLE.
             "compare_partition_table",

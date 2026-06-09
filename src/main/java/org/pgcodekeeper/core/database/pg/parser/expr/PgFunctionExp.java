@@ -100,7 +100,7 @@ public final class PgFunctionExp extends PgAbstractExprWithNmspc<Plpgsql_functio
                 }
 
                 new PgSelect(this).analyze(new PgSelectStmt(dec.select_stmt()));
-                addNamespaceVariable(new Pair<>(alias, IPgTypesSetManually.CURSOR));
+                addNamespaceVariable(new Pair<>(alias, PgTypesSetManually.CURSOR));
             }
         }
     }
@@ -134,7 +134,7 @@ public final class PgFunctionExp extends PgAbstractExprWithNmspc<Plpgsql_functio
             if (pair != null) {
                 type = pair.getSecond();
             } else {
-                type = IPgTypesSetManually.UNKNOWN;
+                type = PgTypesSetManually.UNKNOWN;
                 log(Messages.Function_log_variable_not_found, variable);
             }
 
@@ -251,9 +251,9 @@ public final class PgFunctionExp extends PgAbstractExprWithNmspc<Plpgsql_functio
         IdentifierContext cur = start.cursor;
         if (cur != null) {
             // record
-            addNamespaceVariable(new Pair<>(cur.getText(), IPgTypesSetManually.UNKNOWN));
+            addNamespaceVariable(new Pair<>(cur.getText(), PgTypesSetManually.UNKNOWN));
         } else if (start.DOUBLE_DOT() != null) {
-            addNamespaceVariable(new Pair<>(start.alias.getText(), IPgTypesSetManually.INTEGER));
+            addNamespaceVariable(new Pair<>(start.alias.getText(), PgTypesSetManually.INTEGER));
         }
 
         List<VexContext> vexs = start.vex();

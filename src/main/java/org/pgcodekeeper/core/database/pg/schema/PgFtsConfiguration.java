@@ -119,8 +119,7 @@ public class PgFtsConfiguration extends PgAbstractStatement implements ISearchPa
 
     private String getAlterConfiguration(String action, String fragment, String dictionary) {
         StringBuilder sqlAction = new StringBuilder(ALTER_CONFIGURATION).append(getQualifiedName())
-                .append("\n\t%s MAPPING FOR ".formatted(action))
-                .append(fragment);
+                .append("\n\t").append(action).append(" MAPPING FOR ").append(fragment);
         if (null != dictionary) {
             sqlAction.append(WITH).append(dictionary);
         }

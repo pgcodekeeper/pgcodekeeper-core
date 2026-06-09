@@ -119,7 +119,7 @@ public class ChTable extends ChAbstractStatement implements ITable, IOptionConta
         }
 
         compareProjections(newTable.projections, script);
-        engine.appendAlterSQL(newTable.engine, getAlterTable(false), script);
+        engine.appendAlterSQL(newTable.engine, getAlterTable(), script);
         compareComment(newTable.getComment(), script);
         return getObjectState(script, startSize);
     }
@@ -137,21 +137,23 @@ public class ChTable extends ChAbstractStatement implements ITable, IOptionConta
         Set<String> toDrops = new HashSet<>();
         Map<String, String> toAdds = new LinkedHashMap<>();
 
-        for (String oldKey : projections.keySet()) {
-            if (!newProjections.containsKey(oldKey)) {
-                toDrops.add(oldKey);
+        for (Entry<String, String> projection : projections.entrySet()) {
+            var key = projection.getKey();
+            if (!newProjections.containsKey(key)) {
+                toDrops.add(key);
                 continue;
             }
-            var newValue = newProjections.get(oldKey);
-            if (!Objects.equals(newValue, projections.get(oldKey))) {
-                toDrops.add(oldKey);
-                toAdds.put(oldKey, newValue);
+            var newValue = newProjections.get(key);
+            if (!Objects.equals(newValue, projection.getValue())) {
+                toDrops.add(key);
+                toAdds.put(key, newValue);
             }
         }
 
-        for (String newKey : newProjections.keySet()) {
-            if (!projections.containsKey(newKey)) {
-                toAdds.put(newKey, newProjections.get(newKey));
+        for (Entry<String, String> newProjection : newProjections.entrySet()) {
+            var key = newProjection.getKey();
+            if (!projections.containsKey(key)) {
+                toAdds.put(key, newProjection.getValue());
             }
         }
 
@@ -160,11 +162,11 @@ public class ChTable extends ChAbstractStatement implements ITable, IOptionConta
 
     private void appendAlterProjections(Set<String> toDrops, Map<String, String> toAdds, SQLScript script) {
         for (String toDrop : toDrops) {
-            script.addStatement(getAlterTable(false) + "\n\tDROP PROJECTION IF EXISTS " + toDrop);
+            script.addStatement(getAlterTable() + "\n\tDROP PROJECTION IF EXISTS " + toDrop);
         }
         for (Entry<String, String> toAdd : toAdds.entrySet()) {
             StringBuilder sb = new StringBuilder();
-            sb.append(getAlterTable(false)).append("\n\tADD PROJECTION ");
+            sb.append(getAlterTable()).append("\n\tADD PROJECTION ");
             appendIfNotExists(sb, script.getSettings());
             sb.append(toAdd.getKey()).append(' ').append(toAdd.getValue());
             script.addStatement(sb);
@@ -176,12 +178,12 @@ public class ChTable extends ChAbstractStatement implements ITable, IOptionConta
             return;
         }
         StringBuilder sb = new StringBuilder();
-        sb.append(getAlterTable(false)).append("\n\tMODIFY COMMENT ");
+        sb.append(getAlterTable()).append("\n\tMODIFY COMMENT ");
         sb.append(Objects.requireNonNullElse(newComment, "''"));
         script.addStatement(sb);
     }
 
-    public String getAlterTable(boolean only) {
+    public String getAlterTable() {
         return ALTER_TABLE + getQualifiedName();
     }
 
@@ -214,13 +216,10 @@ public class ChTable extends ChAbstractStatement implements ITable, IOptionConta
 
         String tblTmpQName = getParent().getQuotedName() + '.' + quote(tblTmpBareName);
         String cols = colsForMovingData.stream().map(this::quote).collect(Collectors.joining(", "));
-        List<String> identityColsForMovingData = identityCols == null ? Collections.emptyList()
-                : identityCols.stream().filter(colsForMovingData::contains).toList();
-        writeInsert(script, newTable, tblTmpQName, identityColsForMovingData, cols);
+        writeInsert(script, newTable, tblTmpQName, cols);
     }
 
-    protected void writeInsert(SQLScript script, ChTable newTable, String tblTmpQName,
-                               List<String> identityColsForMovingData, String cols) {
+    private void writeInsert(SQLScript script, ChTable newTable, String tblTmpQName, String cols) {
         StringBuilder sbInsert = new StringBuilder();
         sbInsert.append("INSERT INTO ").append(newTable.getQualifiedName()).append('(').append(cols).append(")");
         sbInsert.append("\nSELECT ").append(cols).append(" FROM ").append(tblTmpQName);

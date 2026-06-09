@@ -134,7 +134,7 @@ public final class IgnoreParser {
         IgnoreParser ignoreParser = new IgnoreParser(ignoreList);
         if (ignoreLists != null) {
             for (String ignoreListPath : ignoreLists) {
-                ignoreParser.parse(Paths.get(ignoreListPath));
+                ignoreParser.parse(Path.of(ignoreListPath));
             }
         }
         return ignoreList;

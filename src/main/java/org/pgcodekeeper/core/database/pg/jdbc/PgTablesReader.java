@@ -325,7 +325,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
                 addDep(column, collationSchema, collationName, DbObjType.COLLATION);
             }
 
-            if (colHasDefault[i]) {
+            if (Boolean.TRUE.equals(colHasDefault[i])) {
                 String columnDefault = colDefaults[i];
                 IPgJdbcReader.checkObjectValidity(columnDefault, DbObjType.COLUMN, colNames[i]);
                 if (!columnDefault.isEmpty()) {

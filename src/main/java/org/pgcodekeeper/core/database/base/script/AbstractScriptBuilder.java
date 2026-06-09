@@ -110,7 +110,6 @@ public abstract class AbstractScriptBuilder implements IScriptBuilder {
                 objects, diffSettings);
     }
 
-    @Deprecated
     private void addColumnsAsElements(IDatabase oldDb, IDatabase newDb, List<TreeElement> selected) {
         List<TreeElement> tempColumns = new ArrayList<>();
         for (TreeElement el : selected) {

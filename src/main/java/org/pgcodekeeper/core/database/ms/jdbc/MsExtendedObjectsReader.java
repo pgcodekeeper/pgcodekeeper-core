@@ -192,10 +192,10 @@ public class MsExtendedObjectsReader extends AbstractSearchPathJdbcReader<MsJdbc
                 .join("JOIN sys.types t WITH (NOLOCK) ON c.user_type_id = t.user_type_id")
                 .where("c.object_id = res.object_id")
                 .orderBy("c.column_id")
-                .postAction("FOR XML RAW, ROOT");
+                .postAction(FOR_XML_RAW_ROOT);
 
         builder.column("ccc.cols");
-        builder.join("CROSS APPLY", subSelect, "ccc (cols)");
+        builder.join(CROSS_APPLY, subSelect, "ccc (cols)");
     }
 
     private void addMsArgsPart(QueryBuilder builder) {
@@ -219,9 +219,9 @@ public class MsExtendedObjectsReader extends AbstractSearchPathJdbcReader<MsJdbc
                 .where("p.parameter_id > 0")
                 .where("so.object_id = res.object_id")
                 .orderBy("id")
-                .postAction("FOR XML RAW, ROOT");
+                .postAction(FOR_XML_RAW_ROOT);
 
         builder.column("cc.args");
-        builder.join("CROSS APPLY", subSelect, "cc (args)");
+        builder.join(CROSS_APPLY, subSelect, "cc (args)");
     }
 }

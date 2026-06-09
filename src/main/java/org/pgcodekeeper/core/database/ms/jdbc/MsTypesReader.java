@@ -167,10 +167,10 @@ public final class MsTypesReader extends AbstractSearchPathJdbcReader<MsJdbcLoad
                 .column("c.definition AS def")
                 .from("sys.check_constraints c WITH (NOLOCK)")
                 .where("c.parent_object_id=ttt.type_table_object_id")
-                .postAction("FOR XML RAW, ROOT");
+                .postAction(FOR_XML_RAW_ROOT);
 
         builder.column("ch.checks");
-        builder.join("CROSS APPLY", checks, "ch (checks)");
+        builder.join(CROSS_APPLY, checks, "ch (checks)");
     }
 
     private void addMsColumnsPart(QueryBuilder builder) {
@@ -201,10 +201,10 @@ public final class MsTypesReader extends AbstractSearchPathJdbcReader<MsJdbcLoad
                 .join("  OR (baset.system_type_id = c.system_type_id AND baset.user_type_id = c.user_type_id AND baset.is_user_defined = 0 AND baset.is_assembly_type = 1)")
                 .where("ttt.type_table_object_id=c.object_id")
                 .orderBy("c.column_id")
-                .postAction("FOR XML RAW, ROOT");
+                .postAction(FOR_XML_RAW_ROOT);
 
         builder.column("cc.cols");
-        builder.join("CROSS APPLY", subSelect, "cc (cols)");
+        builder.join(CROSS_APPLY, subSelect, "cc (cols)");
     }
 
     private void addMsIndicesPart(QueryBuilder builder) {
@@ -216,7 +216,7 @@ public final class MsTypesReader extends AbstractSearchPathJdbcReader<MsJdbcLoad
                 .where("c.object_id = si.object_id")
                 .where("c.index_id = si.index_id")
                 .orderBy("c.index_column_id")
-                .postAction("FOR XML RAW, ROOT");
+                .postAction(FOR_XML_RAW_ROOT);
 
         QueryBuilder subSelect = new QueryBuilder()
                 .column("si.name")
@@ -230,14 +230,14 @@ public final class MsTypesReader extends AbstractSearchPathJdbcReader<MsJdbcLoad
                 .from("sys.indexes AS si WITH (NOLOCK)")
                 .join("LEFT JOIN sys.objects o WITH (NOLOCK) ON si.object_id = o.object_id")
                 .join("LEFT JOIN sys.hash_indexes hi WITH (NOLOCK) ON hi.object_id = si.object_id AND hi.index_id = si.index_id")
-                .join("CROSS APPLY", subSubSelect, "ccc (cols)")
+                .join(CROSS_APPLY, subSubSelect, "ccc (cols)")
                 .where("si.object_id=ttt.type_table_object_id")
                 .where("si.index_id > 0")
                 .where("si.is_hypothetical = 0")
-                .postAction("FOR XML RAW, ROOT");
+                .postAction(FOR_XML_RAW_ROOT);
 
         builder.column("ii.indices");
-        builder.join("CROSS APPLY", subSelect, "ii (indices)");
+        builder.join(CROSS_APPLY, subSelect, "ii (indices)");
     }
 
     @Override

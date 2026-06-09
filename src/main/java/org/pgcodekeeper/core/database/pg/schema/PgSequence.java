@@ -247,14 +247,14 @@ public class PgSequence extends PgAbstractStatement implements ISequence {
     public void setMinMaxInc(long inc, Long max, Long min, String dataType, long precision) {
         String type = dataType != null ? dataType : BIGINT;
         this.increment = Long.toString(inc);
-        if (max == null || (inc > 0 && max == getBoundaryTypeVal(type, true, 0L))
+        if (max == null || (inc > 0 && max == getBoundaryTypeVal(type, true, precision))
                 || (inc < 0 && max == -1)) {
             this.maxValue = null;
         } else {
             this.maxValue = "" + max;
         }
         if (min == null || (inc > 0 && min == 1)
-                || (inc < 0 && min == getBoundaryTypeVal(type, false, 0L))) {
+                || (inc < 0 && min == getBoundaryTypeVal(type, false, precision))) {
             this.minValue = null;
         } else {
             this.minValue = "" + min;

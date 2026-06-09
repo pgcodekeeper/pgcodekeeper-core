@@ -194,12 +194,7 @@ public class MsSequence extends MsAbstractStatement implements ISequence {
     public void setDataType(String dataType) {
         String type = dataType.toLowerCase(Locale.ROOT);
         switch (type) {
-            case "tinyint":
-            case "smallint":
-            case "int":
-            case BIGINT:
-            case "numeric":
-            case "decimal":
+            case "tinyint", "smallint", "int", BIGINT, "numeric", "decimal":
                 // set lowercased version for simple system types
                 break;
             default:

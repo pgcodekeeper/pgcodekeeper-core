@@ -58,7 +58,7 @@ public class ChColumn extends ChAbstractStatement implements IColumn {
     @Override
     public void getCreationSQL(SQLScript script) {
         var sb = new StringBuilder();
-        sb.append(getAlterTable(false)).append("\n\tADD COLUMN ");
+        sb.append(getAlterTable()).append("\n\tADD COLUMN ");
         appendIfNotExists(sb, script.getSettings());
         sb.append(ChDiffUtils.quoteName(name));
 
@@ -199,7 +199,7 @@ public class ChColumn extends ChAbstractStatement implements IColumn {
             return;
         }
         StringBuilder sb = new StringBuilder();
-        sb.append(getAlterTable(false));
+        sb.append(getAlterTable());
         if (newComment == null) {
             sb.append(" MODIFY COLUMN ").append(ChDiffUtils.quoteName(name)).append(" REMOVE COMMENT");
         } else {
@@ -211,7 +211,7 @@ public class ChColumn extends ChAbstractStatement implements IColumn {
     }
 
     private void appendAlterColumn(StringBuilder sb, ISettings settings) {
-        sb.append(getAlterTable(false)).append(" MODIFY COLUMN ");
+        sb.append(getAlterTable()).append(" MODIFY COLUMN ");
         appendIfExists(sb, settings);
         sb.append(ChDiffUtils.quoteName(name));
     }
@@ -225,7 +225,7 @@ public class ChColumn extends ChAbstractStatement implements IColumn {
     @Override
     public void getDropSQL(SQLScript script, boolean optionExists) {
         StringBuilder sb = new StringBuilder();
-        sb.append(getAlterTable(false)).append("\n\tDROP COLUMN ");
+        sb.append(getAlterTable()).append("\n\tDROP COLUMN ");
         if (optionExists) {
             sb.append(IF_EXISTS);
         }
@@ -246,8 +246,8 @@ public class ChColumn extends ChAbstractStatement implements IColumn {
         }
     }
 
-    private String getAlterTable(boolean only) {
-        return ((ChTable) parent).getAlterTable(only);
+    private String getAlterTable() {
+        return ((ChTable) parent).getAlterTable();
     }
 
     public void setDefaultValue(final String defaultValue) {

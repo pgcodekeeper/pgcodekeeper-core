@@ -90,7 +90,7 @@ public class ChIndex extends ChAbstractStatement implements IIndex {
     }
 
     private String getAlterTable() {
-        return ((ChTable) parent).getAlterTable(false);
+        return ((ChTable) parent).getAlterTable();
     }
 
     @Override

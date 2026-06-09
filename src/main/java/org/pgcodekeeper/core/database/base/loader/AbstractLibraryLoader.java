@@ -20,7 +20,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -50,7 +49,7 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
 
     private static final String LOG_DIR = ".pgcodekeeper-core";
     private static final String DEPS_DIR = "dependencies";
-    private static final Path META_PATH = Paths.get(System.getProperty("user.home"), LOG_DIR, DEPS_DIR);
+    private static final Path META_PATH = Path.of(System.getProperty("user.home"), LOG_DIR, DEPS_DIR);
 
     protected final T database;
     protected final Path metaPath;
@@ -147,7 +146,7 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
             case LOCAL:
                 // continue below
         }
-        Path p = Paths.get(path);
+        Path p = Path.of(path);
         if (!p.isAbsolute() && xmlPath != null) {
             p = xmlPath.resolveSibling(p).normalize();
         }
@@ -256,7 +255,7 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
     private T loadURI(URI uri, boolean isIgnorePrivileges)
             throws InterruptedException, IOException {
         String path = uri.getPath();
-        String fileName = FileUtils.getValidFilename(Paths.get(path).getFileName().toString());
+        String fileName = FileUtils.getValidFilename(Path.of(path).getFileName().toString());
         String name = fileName + '_' + Utils.md5(path).substring(0, 10);
 
         Path dir = metaPath.resolve(name);

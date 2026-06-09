@@ -18,7 +18,6 @@ package org.pgcodekeeper.core.database.pg.script;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -78,7 +77,7 @@ public class PgScriptBuilder extends AbstractScriptBuilder {
     }
 
     private void addPrePostPath(SQLScript script, String scriptPath, SQLActionType actionType) throws IOException {
-        Path path = Paths.get(scriptPath);
+        Path path = Path.of(scriptPath);
         addPrePostPath(script, path, actionType);
     }
 

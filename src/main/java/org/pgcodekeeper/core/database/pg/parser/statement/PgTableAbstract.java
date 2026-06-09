@@ -288,8 +288,6 @@ public abstract class PgTableAbstract extends PgParserAbstract {
                     String value = opt == null ? "" : opt.getText();
                     fillOptionParams(value, option.col_label().getText(), false, col::addForeignOption);
                 }
-            } else {
-                //throw new IllegalStateException("Options used only for foreign table");
             }
         }
         if (encOptions != null) {

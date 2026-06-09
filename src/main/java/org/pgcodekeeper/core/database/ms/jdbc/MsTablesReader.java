@@ -294,11 +294,11 @@ public class MsTablesReader extends AbstractSearchPathJdbcReader<MsJdbcLoader> i
                 .join("LEFT JOIN sys.masked_columns mc WITH (NOLOCK) ON mc.object_id = c.object_id AND c.column_id = mc.column_id")
                 .where("c.object_id = res.object_id")
                 .orderBy("c.column_id")
-                .postAction("FOR XML RAW, ROOT");
+                .postAction(FOR_XML_RAW_ROOT);
 
         builder
                 .column("cc.cols")
-                .join("CROSS APPLY", subSelect, "cc (cols)");
+                .join(CROSS_APPLY, subSelect, "cc (cols)");
     }
 
     private void addMsTablespacePart(QueryBuilder builder) {
@@ -309,6 +309,6 @@ public class MsTablesReader extends AbstractSearchPathJdbcReader<MsJdbcLoader> i
                 .where("ind.object_id = res.object_id");
 
         builder.column("tt.name AS space_name");
-        builder.join("CROSS APPLY", cols, "tt");
+        builder.join(CROSS_APPLY, cols, "tt");
     }
 }

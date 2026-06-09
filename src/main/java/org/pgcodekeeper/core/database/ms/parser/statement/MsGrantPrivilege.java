@@ -144,7 +144,7 @@ public final class MsGrantPrivilege extends MsParserAbstract {
 
         AbstractStatement st;
         if (type == null || type.OBJECT() != null || type.TYPE() != null) {
-            MsSchema schema = (MsSchema) getSchemaSafe(
+            MsSchema schema = getSchemaSafe(
                     Arrays.asList(object.qualified_name().schema, nameCtx));
             st = getSafe((k, v) -> k.getChildren().filter(
                             e -> e.getBareName().equals(v))

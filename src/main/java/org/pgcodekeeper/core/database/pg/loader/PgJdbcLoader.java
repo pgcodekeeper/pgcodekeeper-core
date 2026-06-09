@@ -374,10 +374,11 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
      * @param columnId              column name, if this aclItemsArrayAsString is column
      *                              privilege string; otherwise null
      * @param schemaName            name of schema for 'PgStatement st'
-     */
-    /*
-     * See parseAclItem() in dumputils.c
+     *
+     * @see parseAclItem() in dumputils.c
+     * <br>
      * For privilege characters see JdbcAclParser.PrivilegeTypes
+     * <br>
      * Order of all characters (for all types of objects combined) : raxdtDXCcTUw
      */
     private void setPrivileges(AbstractStatement st, String stSignature,
@@ -408,7 +409,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
             case AGGREGATE:
                 // For grant permissions to AGGREGATE in postgres used operator 'FUNCTION'.
                 // For example grant permissions to AGGREGATE public.mode(boolean):
-                // GRANT ALL ON FUNCTION public.mode(boolean) TO test_user;
+                // GRANT ALL ON FUNCTION public.mode(boolean) TO test_user
                 stType = "FUNCTION";
 
                 // For grant permissions to AGGREGATE without arguments as signature

@@ -58,7 +58,7 @@ public final class PgCreateAggregate extends PgParserAbstract {
         List<ParserRuleContext> ids = getIdentifiers(ctx.name);
         PgAggregate aggregate = new PgAggregate(QNameParser.getFirstName(ids));
 
-        //// The order is important for adding dependencies. Two steps.
+        // The order is important for adding dependencies. Two steps.
 
         // First step: filling all types and arguments.
 

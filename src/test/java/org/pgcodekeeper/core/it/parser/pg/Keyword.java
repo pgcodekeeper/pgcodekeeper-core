@@ -613,7 +613,7 @@ public class Keyword {
      *
      * @return a formatted string with keywords in token format (e.g., "KEYWORD: 'KEYWORD';")
      */
-    public static String getAllTokensByGroups() {
+    static String getAllTokensByGroups() {
         KeywordCategory[] prevCat = new KeywordCategory[1];
         char[] prevFirstLetter = new char[1];
         StringBuilder result = new StringBuilder();
@@ -654,7 +654,7 @@ public class Keyword {
      *
      * @return a formatted string with keywords organized by categories in list format
      */
-    public static String getAllWordsByGroups() {
+     static String getAllWordsByGroups() {
         Map<KeywordCategory, StringBuilder> map = new EnumMap<>(KeywordCategory.class);
         StringBuilder sbBare = new StringBuilder();
         StringBuilder result = new StringBuilder();

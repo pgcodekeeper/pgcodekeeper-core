@@ -433,10 +433,11 @@ public final class TreeElement {
      * for getting object from database.
      *
      * @param el the parent element
-     * @deprecated this method should only be used for column relationships
      */
-    @Deprecated
     public void setParent(TreeElement el) {
+        if (type != DbObjType.COLUMN) {
+            throw new IllegalStateException("The setParent method cannot be called on an object of type " + type);
+        }
         this.parent = el;
     }
 }

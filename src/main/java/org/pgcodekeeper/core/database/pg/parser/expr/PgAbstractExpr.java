@@ -155,7 +155,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
         ParserRuleContext schemaNameCtx = QNameParser.getThirdNameCtx(ids);
         String schemaName = schemaNameCtx == null ? null : schemaNameCtx.getText();
 
-        String columnType = IPgTypesSetManually.COLUMN;
+        String columnType = PgTypesSetManually.COLUMN;
         Entry<String, ObjectReference> ref = findReference(schemaName, columnParent, columnName);
         List<Pair<String, String>> refComplex;
         if (ref != null) {
@@ -180,7 +180,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
                         .findAny()
                         .orElseGet(() -> {
                             log(columnParentCtx, Messages.AbstractExpr_log_column_not_found_in_complex, columnName, columnParent);
-                            return IPgTypesSetManually.COLUMN;
+                            return PgTypesSetManually.COLUMN;
                         });
             } else {
                 log(columnParentCtx, Messages.AbstractExpr_log_complex_not_found, columnParent);
@@ -212,7 +212,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
             case "ctid" -> "tid";
             default -> columns.findAny().map(Pair::getSecond).orElseGet(() -> {
                 log(Messages.AbstractExpr_log_column_not_found_in_relation, colName, relationName);
-                return IPgTypesSetManually.COLUMN;
+                return PgTypesSetManually.COLUMN;
             });
         };
 
@@ -281,7 +281,7 @@ public abstract class PgAbstractExpr extends AbstractExpr {
             Pair<IRelation, Pair<String, String>> relCol = findColumn(name);
             if (relCol == null) {
                 log(id, Messages.AbstractExpr_log_tableless_column_not_resolved, name);
-                return new ModPair<>(name, IPgTypesSetManually.COLUMN);
+                return new ModPair<>(name, PgTypesSetManually.COLUMN);
             }
             IRelation rel = relCol.getFirst();
             col = relCol.getSecond();

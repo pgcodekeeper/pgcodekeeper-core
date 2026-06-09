@@ -50,10 +50,7 @@ public class PgPrivilege extends AbstractPrivilege {
         boolean isFunctionOrTypeOrDomain = false;
         String typeName;
         switch (type) {
-            case FUNCTION:
-            case PROCEDURE:
-            case TYPE:
-            case DOMAIN:
+            case FUNCTION, PROCEDURE, TYPE, DOMAIN:
                 isFunctionOrTypeOrDomain = true;
                 typeName = type.name();
                 break;
@@ -70,9 +67,7 @@ public class PgPrivilege extends AbstractPrivilege {
             case VIEW:
                 typeName = DbObjType.TABLE.name();
                 break;
-            case SCHEMA:
-            case SEQUENCE:
-            case TABLE:
+            case SCHEMA, SEQUENCE, TABLE:
                 typeName = type.name();
                 break;
             default:
