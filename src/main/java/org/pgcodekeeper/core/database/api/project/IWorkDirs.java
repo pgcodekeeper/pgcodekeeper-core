@@ -21,6 +21,7 @@ import org.pgcodekeeper.core.database.api.schema.IStatement;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -80,4 +81,20 @@ public interface IWorkDirs {
      * @throws IOException if the configuration file cannot be written
      */
     void saveAltDirs(Path projectPath) throws IOException;
+
+    /**
+     * Returns the distinct top-level directory names of this layout, i.e. the
+     * directories created directly under the project root.
+     *
+     * @return distinct top-level directory names of this layout
+     */
+    default List<String> getTopLevelDirNames() {
+        boolean split = isSplitBySchema();
+        return getDirMapping().values().stream()
+                .filter(rule -> !split || !rule.isSubElement())
+                .map(rule -> rule.getDirName().split("/")[0])
+                .filter(name -> !name.isBlank())
+                .distinct()
+                .toList();
+    }
 }

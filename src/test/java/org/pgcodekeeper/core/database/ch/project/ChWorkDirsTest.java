@@ -22,6 +22,7 @@ import org.pgcodekeeper.core.database.base.project.AbstractWorkDirs;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 final class ChWorkDirsTest {
 
@@ -49,5 +50,13 @@ final class ChWorkDirsTest {
         Assertions.assertEquals("DICTS", workDirs.getDirMapping().get("DICTIONARY").getDirName());
         Assertions.assertEquals("VIEW", workDirs.getDirMapping().get("VIEW").getDirName());
         Assertions.assertFalse(workDirs.isSplitBySchema());
+    }
+
+    @Test
+    void testTopDirNames() {
+        var workDirs = new ChWorkDirs();
+        var expected = List.of("DATABASE", "FUNCTION", "USER", "POLICY", "ROLE");
+        var actual = workDirs.getTopLevelDirNames();
+        Assertions.assertEquals(expected, actual);
     }
 }

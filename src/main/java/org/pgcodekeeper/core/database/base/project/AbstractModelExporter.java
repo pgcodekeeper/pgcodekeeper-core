@@ -160,6 +160,15 @@ public abstract class AbstractModelExporter implements IModelExporter {
         return workDirs.getRelativeFilePath(st);
     }
 
+    /**
+     * Returns the directory layout used by this exporter.
+     *
+     * @return the work directories layout
+     */
+    public IWorkDirs getWorkDirs() {
+        return workDirs;
+    }
+
     @Override
     public void exportFull() throws IOException {
         createOutDir();
