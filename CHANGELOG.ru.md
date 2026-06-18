@@ -11,6 +11,12 @@
 
 ### Изменено
 
+### Исправлено
+
+## [14.6.0] - 2026-06-18
+
+### Изменено
+
 - Улучшена работа с временными файлами.
 
 ### Исправлено
@@ -2517,7 +2523,8 @@
 
 - Добавлен парсинг ORDER BY для агрегатных функции.
 
-[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.5.0...HEAD
+[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.6.0...HEAD
+[14.6.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.5.0...v14.6.0
 [14.5.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.4.1...v14.5.0
 [14.4.1]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.4.0...v14.4.1
 [14.4.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.3.0...v14.4.0
