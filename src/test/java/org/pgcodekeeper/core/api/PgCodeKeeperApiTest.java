@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -26,7 +27,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.TestUtils;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
+import org.pgcodekeeper.core.database.base.project.AbstractWorkDirs;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
+import org.pgcodekeeper.core.database.pg.project.PgWorkDirs;
 import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.DiffSettings;
 
@@ -169,6 +173,34 @@ class PgCodeKeeperApiTest {
         // Verify both tables exist and have correct content
         assertFileContent(firstTableFile, expectedFirstTableContent);
         assertFileContent(secondTableFile, expectedSecondTableContent);
+        TestUtils.assertErrors(diffSettings.getErrors());
+    }
+
+    @Test
+    void fullUpdatePreservesMetadataDirsTest(@TempDir Path tempDir) throws IOException, InterruptedException {
+        Path settingsDir = tempDir.resolve(".settings");
+        Files.createDirectories(settingsDir);
+
+        IDatabase newDb = provider.getDumpLoader(getFilePath("test_export.sql"), diffSettings).loadAndAnalyze();
+        provider.getProjectUpdater(newDb, null, List.of(), tempDir, false, new CoreSettings()).updateFull(true);
+
+        assertTrue(Files.exists(settingsDir));
+        TestUtils.assertErrors(diffSettings.getErrors());
+    }
+
+    @Test
+    void fullUpdateCleansRenamedDirsAndKeepsForeignTest(@TempDir Path tempDir)
+            throws IOException, InterruptedException {
+        Files.createDirectories(tempDir.resolve("MIGRATION"));
+        Files.createDirectories(tempDir.resolve("SCHEMA"));
+        Files.writeString(tempDir.resolve(AbstractWorkDirs.ALT_DIRS_FILENAME), "SCHEMA=DB\n");
+
+        IDatabase newDb = provider.getDumpLoader(getFilePath("test_export.sql"), diffSettings).loadAndAnalyze();
+        provider.getProjectUpdater(newDb, null, List.of(), tempDir, false, new CoreSettings())
+                .updateFull(true, new PgWorkDirs());
+
+        assertTrue(Files.exists(tempDir.resolve("MIGRATION")));
+        assertFalse(Files.exists(tempDir.resolve("SCHEMA")));
         TestUtils.assertErrors(diffSettings.getErrors());
     }
 

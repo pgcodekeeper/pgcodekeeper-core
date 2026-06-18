@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Fixed full project update to clean only the project's own directories.
 - Fixed adding library objects to a project during export.
 - Fixed code generation for index when altering in CONCURRENTLY mode.
 - Fixed migration script generation when changing a generated column in PostgreSQL.

@@ -27,6 +27,7 @@ import org.pgcodekeeper.core.database.pg.schema.PgView;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Properties;
 
 final class PgWorkDirsTest {
@@ -133,5 +134,13 @@ final class PgWorkDirsTest {
         workDirs.saveAltDirs(tempDir);
         boolean exists = Files.isRegularFile(tempDir.resolve(AbstractWorkDirs.ALT_DIRS_FILENAME));
         Assertions.assertFalse(exists);
+    }
+
+    @Test
+    void testTopDirNames() {
+        var workDirs = new PgWorkDirs();
+        var expected = List.of("SCHEMA", "EXTENSION", "EVENT_TRIGGER", "USER_MAPPING", "CAST", "SERVER", "FDW");
+        var actual = workDirs.getTopLevelDirNames();
+        Assertions.assertEquals(expected, actual);
     }
 }

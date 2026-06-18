@@ -16,6 +16,7 @@
 package org.pgcodekeeper.core.database.base.project;
 
 import org.pgcodekeeper.core.database.api.project.IProjectUpdater;
+import org.pgcodekeeper.core.database.api.project.IWorkDirs;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.exception.PgCodeKeeperException;
 import org.pgcodekeeper.core.localizations.Messages;
@@ -32,7 +33,9 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader.OVERRIDES_DIR;
@@ -199,15 +202,16 @@ public abstract class AbstractProjectUpdater implements IProjectUpdater {
     }
 
     @Override
-    public void updateFull(boolean projectOnly) throws IOException {
+    public void updateFull(boolean projectOnly, IWorkDirs previousWorkDirs) throws IOException {
         LOG.info(Messages.ProjectUpdater_log_start_full_update);
         boolean caughtProcessingEx = false;
         try (TempDir tmp = new TempDir(dirExport, "tmp-export")) { //$NON-NLS-1$
             Path dirTmp = tmp.get();
 
             try {
-                safeCleanProjectDir(dirTmp);
-                createModelExporter(dirExport, dbNew, encoding).exportFull();
+                AbstractModelExporter exporter = createModelExporter(dirExport, dbNew, encoding);
+                safeCleanProjectDir(dirTmp, exporter.getWorkDirs(), previousWorkDirs);
+                exporter.exportFull();
                 if (projectOnly) {
                     restoreFolder(dirTmp, OVERRIDES_DIR);
                 }
@@ -227,8 +231,13 @@ public abstract class AbstractProjectUpdater implements IProjectUpdater {
         }
     }
 
-    private void safeCleanProjectDir(Path dirTmp) throws IOException {
-        for (String subdirName : listProjectDirs(dirExport, dirTmp)) {
+    private void safeCleanProjectDir(Path dirTmp, IWorkDirs workDirs, IWorkDirs previousWorkDirs) throws IOException {
+        Set<String> ownedDirs = new LinkedHashSet<>(workDirs.getTopLevelDirNames());
+        if (previousWorkDirs != null) {
+            ownedDirs.addAll(previousWorkDirs.getTopLevelDirNames());
+        }
+        ownedDirs.add(OVERRIDES_DIR);
+        for (String subdirName : ownedDirs) {
             moveFolder(dirTmp, subdirName);
         }
     }
@@ -246,12 +255,15 @@ public abstract class AbstractProjectUpdater implements IProjectUpdater {
         }
     }
 
-    private static List<String> listProjectDirs(Path dir, Path exclude) throws IOException {
+    private List<String> listProjectDirs(Path dir, Path exclude) throws IOException {
         try (Stream<Path> stream = Files.list(dir)) {
             List<String> result = new ArrayList<>();
             for (Path path : Utils.streamIterator(stream)) {
-                if (Files.isDirectory(path) && !path.equals(exclude)) {
-                    result.add(path.getFileName().toString());
+                String name = path.getFileName().toString();
+                if (Files.isDirectory(path)
+                        && !path.equals(exclude)
+                        && !name.startsWith(".")) {
+                    result.add(name);
                 }
             }
             return result;

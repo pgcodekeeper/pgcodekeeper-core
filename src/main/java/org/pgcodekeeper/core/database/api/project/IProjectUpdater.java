@@ -34,5 +34,19 @@ public interface IProjectUpdater {
      * @param projectOnly whether to preserve overrides directory during update
      * @throws IOException if update operation fails
      */
-    void updateFull(boolean projectOnly) throws IOException;
+    default void updateFull(boolean projectOnly) throws IOException {
+        updateFull(projectOnly, null);
+    }
+
+    /**
+     * Performs full update of database project.
+     * Completely regenerates project structure with optional overrides preservation.
+     * Only the project's own working directories are cleaned.
+     *
+     * @param projectOnly      whether to preserve overrides directory during update
+     * @param previousWorkDirs the layout the project currently uses on disk, or {@code null}
+     *                         to clean only the new layout's directories
+     * @throws IOException if update operation fails
+     */
+    void updateFull(boolean projectOnly, IWorkDirs previousWorkDirs) throws IOException;
 }
