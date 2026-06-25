@@ -22,6 +22,7 @@ import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.parser.ScriptParser;
@@ -71,12 +72,13 @@ class ChJdbcLoaderTest extends JdbcLoaderTest {
         ScriptParser parser = new ScriptParser(loader, dumpFileName, script);
 
         var url = TestContainerType.CH_24.getUrl();
-        var startConfDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
+        var startConfDb = loadStartConfDb(databaseProvider, url, diffSettings);
         IJdbcConnector connector = new ChJdbcConnector(url);
+        IDatabase remoteDb = null;
         try {
             new JdbcRunner(new NullMonitor()).runBatches(connector, parser.batch(), null);
 
-            var remoteDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
+            remoteDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
             List<Path> ignoreLists = List.of(TestUtils.getFilePath("ch.pgcodekeeperignore", getClass()));
             for (var ignorePath : ignoreLists) {
                 diffSettings.addIgnoreList(ignorePath);
@@ -84,7 +86,7 @@ class ChJdbcLoaderTest extends JdbcLoaderTest {
             var actual = PgCodeKeeperApi.diff(databaseProvider, dumpDb, remoteDb, diffSettings);
             Assertions.assertEquals("", actual, "Incorrect run dump %s on Database".formatted(dumpFileName));
         } finally {
-            clearDb(startConfDb, connector, url, databaseProvider, diffSettings);
+            clearDb(startConfDb, remoteDb, connector, url, databaseProvider, diffSettings);
         }
     }
 
