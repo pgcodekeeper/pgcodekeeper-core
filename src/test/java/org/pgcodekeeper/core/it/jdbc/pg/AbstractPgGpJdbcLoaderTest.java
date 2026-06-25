@@ -16,12 +16,11 @@
 package org.pgcodekeeper.core.it.jdbc.pg;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.parser.ScriptParser;
@@ -30,7 +29,6 @@ import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
 import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.it.jdbc.base.JdbcLoaderTest;
 import org.pgcodekeeper.core.monitor.NullMonitor;
-import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
@@ -43,42 +41,9 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 
-class PgGpJdbcLoaderTest extends JdbcLoaderTest {
+abstract class AbstractPgGpJdbcLoaderTest extends JdbcLoaderTest {
 
     private final PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
-
-    @ParameterizedTest
-    @CsvSource({
-            "dump_test, PG_16",
-            "operator, PG_16",
-            "statistics, PG_16",
-            "view, PG_16",
-            "not_null, PG_18",
-            "dump_test, GP_6",
-            "operator, GP_6",
-            "view, GP_6",
-            "dump_test, GP_7",
-            "operator, GP_7",
-            "statistics, GP_7",
-            "view, GP_7",
-    })
-    void jdbcLoaderTest(String fileName, String contTypeName) throws Exception {
-        var settings = new CoreSettings();
-        settings.setEnableFunctionBodiesDependencies(true);
-        jdbcLoaderTest(false, fileName, contTypeName, settings);
-    }
-
-    @ParameterizedTest
-    @CsvSource({
-            "view, PG_16",
-            "not_null, PG_18"
-    })
-    void jdbcLoaderSpecialTest(String fileName, String contTypeName) throws Exception {
-        var settings = new CoreSettings();
-        settings.setSimplifyNotNull(true);
-        settings.setSimplifyView(true);
-        jdbcLoaderTest(true, fileName, contTypeName, settings);
-    }
 
     protected void jdbcLoaderTest(boolean hasDiff, String fileName, String contTypeName, ISettings settings)
             throws Exception {
@@ -95,12 +60,13 @@ class PgGpJdbcLoaderTest extends JdbcLoaderTest {
                 dumpFileName, diffSettings);
         ScriptParser parser = new ScriptParser(loader, dumpFileName, script);
 
-        var startConfDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
+        var startConfDb = loadStartConfDb(databaseProvider, url, diffSettings);
         IJdbcConnector connector = new PgJdbcConnector(url);
+        IDatabase remoteDb = null;
         try {
             new JdbcRunner(new NullMonitor()).runBatches(connector, parser.batch(), null);
 
-            var remoteDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
+            remoteDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
             List<Path> ignoreLists = List.of(TestUtils.getFilePath(ignoreListName, getClass()));
             for (var ignoreList : ignoreLists) {
                 diffSettings.addIgnoreList(ignoreList);
@@ -117,7 +83,7 @@ class PgGpJdbcLoaderTest extends JdbcLoaderTest {
 
             Assertions.assertEquals(expected, actual, "Incorrect run dump %s on Database".formatted(dumpFileName));
         } finally {
-            clearDb(startConfDb, connector, url, databaseProvider, diffSettings);
+            clearDb(startConfDb, remoteDb, connector, url, databaseProvider, diffSettings);
         }
     }
 

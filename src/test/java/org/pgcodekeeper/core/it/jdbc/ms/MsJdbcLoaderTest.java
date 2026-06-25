@@ -22,6 +22,7 @@ import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
 import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
 import org.pgcodekeeper.core.database.base.loader.AbstractDumpLoader;
 import org.pgcodekeeper.core.database.base.parser.ScriptParser;
@@ -89,8 +90,9 @@ class MsJdbcLoaderTest extends JdbcLoaderTest {
                 dumpFileName, diffSettings);
         ScriptParser parser = new ScriptParser(loader, dumpFileName, script);
 
-        var startConfDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
+        var startConfDb = loadStartConfDb(databaseProvider, url, diffSettings);
         IJdbcConnector connector = new MsJdbcConnector(url);
+        IDatabase remoteDb = null;
         try {
             var runner = new JdbcRunner(new NullMonitor());
             if (isMemoryOptimized) {
@@ -99,7 +101,7 @@ class MsJdbcLoaderTest extends JdbcLoaderTest {
                 runner.runBatches(connector, parser.batch(), null);
             }
 
-            var remoteDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
+            remoteDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
             List<Path> ignoreLists = List.of(TestUtils.getFilePath("ms.pgcodekeeperignore", getClass()));
             for (Path ignorePath : ignoreLists) {
                 diffSettings.addIgnoreList(ignorePath);
@@ -107,7 +109,7 @@ class MsJdbcLoaderTest extends JdbcLoaderTest {
             var actual = PgCodeKeeperApi.diff(databaseProvider, dumpDb, remoteDb, diffSettings);
             Assertions.assertEquals("", actual, "Incorrect run dump %s on Database".formatted(dumpFileName));
         } finally {
-            clearDb(startConfDb, connector, url, databaseProvider, diffSettings);
+            clearDb(startConfDb, remoteDb, connector, url, databaseProvider, diffSettings);
         }
     }
 

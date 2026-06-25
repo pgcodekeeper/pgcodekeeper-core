@@ -56,7 +56,7 @@ public enum TestContainerType {
         return finalUrl;
     }
 
-    private void initContainer() {
+    private synchronized void initContainer() {
         if (container.isCreated()) {
             return;
         }

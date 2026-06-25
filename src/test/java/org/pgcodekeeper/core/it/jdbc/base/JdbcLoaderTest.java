@@ -30,15 +30,35 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class JdbcLoaderTest {
 
     public static final String CLEAN_DB_SCRIPT = "clean db script";
 
-    protected void clearDb(IDatabase startConfDb, IJdbcConnector connector, String url,
+    private static final Map<String, IDatabase> START_CONF_DB_CACHE = new ConcurrentHashMap<>();
+
+    /**
+     * Loads the start-configuration database from {@code url} using {@code databaseProvider}, caching it on first use
+     * and returning the cached instance on subsequent calls. The cache is keyed by {@code url}.
+     */
+    protected IDatabase loadStartConfDb(IDatabaseProvider databaseProvider, String url, DiffSettings diffSettings)
+            throws IOException, InterruptedException {
+        var cached = START_CONF_DB_CACHE.get(url);
+        if (cached != null) {
+            return cached;
+        }
+        var startConfDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
+        START_CONF_DB_CACHE.put(url, startConfDb);
+        return startConfDb;
+    }
+
+    protected void clearDb(IDatabase startConfDb, IDatabase currentDb, IJdbcConnector connector, String url,
                            IDatabaseProvider databaseProvider, DiffSettings diffSettings)
             throws IOException, InterruptedException, SQLException {
-        var oldDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
+        var oldDb = currentDb != null ? currentDb
+                : databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
         var dropScript = PgCodeKeeperApi.diff(databaseProvider, oldDb, startConfDb, diffSettings);
 
         var loader = createDumpLoader(() -> new ByteArrayInputStream(dropScript.getBytes(StandardCharsets.UTF_8)),
