@@ -279,9 +279,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
 
         // load additional dependencies
         Path depsPath = dirPath.resolve(ADDITIONAL_DEPENDENCIES_FILE);
-        if (Files.isRegularFile(depsPath)) {
-            diffSettings.addAdditionalDependencies(DependenciesReader.getDependencies(depsPath));
-        }
+        diffSettings.addAdditionalDependencies(DependenciesReader.getDependencies(depsPath));
         isPreloaded = true;
     }
 

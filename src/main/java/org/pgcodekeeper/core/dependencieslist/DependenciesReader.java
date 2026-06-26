@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.dependencieslist;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,11 +42,13 @@ public final class DependenciesReader {
     private DependenciesReader() {}
 
     public static List<Dependency> getDependencies(Path depsPath) {
-        try {
-            var parser = ParserUtils.createDependenciesListParser(depsPath);
-            return new DependenciesReader().getDependencies(parser);
-        } catch (Exception ex) {
-            LOG.error(Messages.DependenciesReader_parser_error.formatted(depsPath), ex);
+        if (Files.isRegularFile(depsPath)) {
+            try {
+                var parser = ParserUtils.createDependenciesListParser(depsPath);
+                return new DependenciesReader().getDependencies(parser);
+            } catch (Exception ex) {
+                LOG.error(Messages.DependenciesReader_parser_error.formatted(depsPath), ex);
+            }
         }
         return new ArrayList<>();
     }
