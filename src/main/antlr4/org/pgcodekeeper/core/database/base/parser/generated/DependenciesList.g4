@@ -5,7 +5,7 @@ options {
 }
 
 compileUnit
-    : deps_definition+ EOF
+    : deps_definition* EOF
     ;
 
 deps_definition
