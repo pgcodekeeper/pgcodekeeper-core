@@ -945,12 +945,23 @@ move_stmt
     ;
 
 json_pair
-    : json_value COLON json_value
+    : json_key COLON json_value
+    ;
+
+json_key
+    : DOUBLE_QUOTED_IDENTIFIER
+    | literal
     ;
 
 json_value
-    : DOUBLE_QUOTED_IDENTIFIER
-    | literal
+    : LBRACE (json_pair (COMMA json_pair)*)? RBRACE
+    | LBRACKET (json_value (COMMA json_value)*)? RBRACKET
+    | DOUBLE_QUOTED_IDENTIFIER
+    | signed_number_literal
+    | STRING_LITERAL
+    | NULL
+    | BINARY_LITERAL
+    | IDENTIFIER
     ;
 
 insert_stmt
@@ -964,7 +975,7 @@ columns_clause
 
 data_clause
     : FROM INFILE STRING_LITERAL (COMPRESSION identifier)? settings_clause?
-    | FORMAT identifier
+    | FORMAT identifier (json_value (COMMA? json_value)*)?
     | VALUES values_values (COMMA values_values)*
     | select_stmt
     ;

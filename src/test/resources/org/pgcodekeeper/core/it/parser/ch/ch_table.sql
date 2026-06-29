@@ -994,6 +994,10 @@ CREATE TABLE test (json JSON) ENGINE = Memory;
 CREATE TABLE test (json JSON(a.b UInt32)) ENGINE = Memory;
 CREATE TABLE test (json JSON(a.b UInt32, SKIP a.e)) ENGINE = Memory;
 CREATE TABLE test (id UInt64, json JSON(max_dynamic_paths=3)) ENGINE=Memory ORDER BY id;
+CREATE TABLE test (json JSON(max_dynamic_paths=1)) ENGINE = Memory;
+CREATE TABLE test (json JSON(max_dynamic_types=8)) ENGINE = Memory;
+CREATE TABLE test (json JSON(SKIP REGEXP 'path.to.skip.*')) ENGINE = Memory;
+CREATE TABLE test (json JSON(max_dynamic_paths=10, max_dynamic_types=8, a.b UInt32, a.b.c String, SKIP a.e, SKIP REGEXP 'paths.*')) ENGINE = Memory;
 CREATE TABLE test (id UInt32, vec QBit(Float32, 8)) ENGINE = Memory;
 
 --Buffer
