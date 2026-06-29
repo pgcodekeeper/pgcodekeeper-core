@@ -1408,4 +1408,10 @@ select arrayMap( x -> x % 3 ? 1 : null, range(3)) as k from system.numbers_mt li
 SELECT () as empty_tuple;
 SELECT ((), 1, 'test');
 SELECT * FROM t WHERE x = ();
+SELECT json, JSONAllPathsWithTypes(json) FROM test;
+SELECT JSONExtract('{"a": "hello", "b": [-100, 200.0, 300]}', 'Tuple(String, Array(Float64))') AS res;
+SELECT JSONHas('{"a": "hello", "b": [-100, 200.0, 300]}', -2);
+SELECT JSON_QUERY('{"array":[[0, 1, 2, 3, 4, 5], [0, -1, -2, -3, -4, -5]]}', '$.array[*][0 to 2, 4]');
+SELECT JSON_VALUE('{"hello":"world"}', '$.b') settings function_json_value_return_type_allow_nullable=true;
+SELECT toJSONString(tuple(1.25, NULL, NaN, +inf, -inf, [])) SETTINGS output_format_json_quote_denormals = 1;
 SELECT ifNull(x, ()) FROM t;

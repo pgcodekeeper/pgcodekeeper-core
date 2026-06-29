@@ -359,3 +359,20 @@ INSERT INTO test_table FROM INFILE '/path/to/file.csv' COMPRESSION 'gzip';
 INSERT INTO test_table FROM INFILE '/path/to/file.csv' COMPRESSION 'gzip' FORMAT CSV;
 INSERT INTO test_table FROM INFILE '/path/to/file.csv' SETTINGS max_threads = 4;
 INSERT INTO test_table FROM INFILE '/path/to/file.csv' SETTINGS max_threads = 4 FORMAT CSV;
+INSERT INTO test FORMAT JSONEachRow {"json" : {"a" : 42}}, {"json" : {"b" : "Hello"}}, {"json" : {"a" : [1, 2, 3], "c" : "2020-01-01"}};
+INSERT INTO t_json_desc FORMAT JSONAsObject {"k1": 10};
+INSERT INTO t_json_desc FORMAT JSONAsObject
+[
+    {"k1": 10, "k2": "value1"},
+    {"k1": 20, "k2": "value2"},
+    {"k1": 30, "k2": "value3"}
+];
+INSERT INTO t_json_desc FORMAT JSONAsObject
+{"k1": 10, "k2": "value1"}
+{"k1": 20, "k2": "value2"}
+{"k1": 30, "k2": "value3"};
+INSERT INTO test FORMAT JSONEachRow {"b": true, "n": false, "z": null, "neg": -3.14, "exp": 1.5e3, "s": "txt", "empty_obj": {}, "empty_arr": []};
+INSERT INTO test FORMAT JSONEachRow {"nested": {"arr": [{"x": 1}, {"x": -2}], "flag": true, "deep": {"a": {"b": [null, "v"]}}}};
+INSERT INTO test FORMAT JSONEachRow {"a": 1}{"a": 2}{"a": 3};
+INSERT INTO test FORMAT JSONAsObject [{"k": 1}, {"k": 2}];
+INSERT INTO test FORMAT JSONEachRow {"mixed": [1, "two", true, null, [3, 4], {"k": "v"}]};
