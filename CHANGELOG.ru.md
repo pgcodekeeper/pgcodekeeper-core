@@ -9,9 +9,15 @@
 
 ### Добавлено
 
-- Улучшены правела парсера для работы с форматами JSON в ClikHouse.
-
 ### Изменено
+
+### Исправлено
+
+## [14.7.0] - 2026-06-30
+
+### Добавлено
+
+- Улучшены правила парсера для работы с форматами JSON в ClikHouse.
 
 ### Исправлено
 
@@ -2527,7 +2533,8 @@
 
 - Добавлен парсинг ORDER BY для агрегатных функции.
 
-[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.6.0...HEAD
+[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.7.0...HEAD
+[14.7.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.6.0...v14.7.0
 [14.6.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.5.0...v14.6.0
 [14.5.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.4.1...v14.5.0
 [14.4.1]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.4.0...v14.4.1
