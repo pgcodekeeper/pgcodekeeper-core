@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [14.7.0] - 2026-06-30
 
-### Added
+### Changed
 
 - Improved parser rules for working with JSON formats in ClikHouse.
 
