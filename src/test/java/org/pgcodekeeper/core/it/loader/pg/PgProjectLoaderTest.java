@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.pgcodekeeper.core.Consts;
 import org.pgcodekeeper.core.TestUtils;
+import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
@@ -45,6 +46,9 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.pgcodekeeper.core.it.IntegrationTestUtils.*;
 
@@ -226,28 +230,28 @@ class PgProjectLoaderTest {
         IDatabase db = databaseProvider.getProjectLoader(projectDir, diffSettings).load();
 
         var emp = db.getStatement(new ObjectReference("public", "emp", DbObjType.TABLE));
-        Assertions.assertNotNull(emp);
+        assertNotNull(emp);
         var hasSelectGrant = emp.getPrivileges().stream().anyMatch(
                 p -> !p.isRevoke() && "SELECT".equals(p.getPermission())
                         && "override_user".equals(p.getRole()));
 
         Assertions.assertEquals("override_user", emp.getOwner());
-        Assertions.assertTrue(hasSelectGrant);
+        assertTrue(hasSelectGrant);
     }
 
     private void assertLibLoaded(IDatabase db, String tableName, boolean isWithPrivileges) {
         var libTableRef = new ObjectReference("public", tableName, DbObjType.TABLE);
         var libTable = db.getStatement(libTableRef);
 
-        Assertions.assertNotNull(libTable);
-        Assertions.assertTrue(libTable.isLib());
+        assertNotNull(libTable);
+        assertTrue(libTable.isLib());
 
         if (isWithPrivileges) {
             Assertions.assertEquals("lib_user", libTable.getOwner());
             Assertions.assertFalse(libTable.getPrivileges().isEmpty());
         } else {
-            Assertions.assertNull(libTable.getOwner());
-            Assertions.assertTrue(libTable.getPrivileges().isEmpty());
+            assertNull(libTable.getOwner());
+            assertTrue(libTable.getPrivileges().isEmpty());
         }
     }
 
@@ -269,11 +273,11 @@ class PgProjectLoaderTest {
 
         var regularFunc = db.getStatement(
                 new ObjectReference("public", "people_worker_shedule()", DbObjType.FUNCTION));
-        Assertions.assertNotNull(regularFunc, "Regular function should be loaded from default directory");
+        assertNotNull(regularFunc, "Regular function should be loaded from default directory");
 
         var triggerFunc = db.getStatement(
                 new ObjectReference("public", "emp_stamp()", DbObjType.FUNCTION));
-        Assertions.assertNotNull(triggerFunc, "Trigger function should be loaded from alt directory");
+        assertNotNull(triggerFunc, "Trigger function should be loaded from alt directory");
     }
 
     @Test
@@ -298,19 +302,45 @@ class PgProjectLoaderTest {
 
         var empStamp = db.getStatement(
                 new ObjectReference("public", "emp_stamp()", DbObjType.FUNCTION));
-        Assertions.assertNotNull(empStamp);
+        assertNotNull(empStamp);
         Assertions.assertEquals("override_user", empStamp.getOwner());
         var hasExecuteGrant = empStamp.getPrivileges().stream().anyMatch(
                 p -> !p.isRevoke() && "EXECUTE".equals(p.getPermission())
                         && "override_user".equals(p.getRole()));
-        Assertions.assertTrue(hasExecuteGrant);
+        assertTrue(hasExecuteGrant);
+    }
+
+    @Test
+    void testSingleProjectFileLoader(@TempDir Path dir) throws IOException, InterruptedException {
+        Path projectDir = dir.resolve("project");
+        createProject(projectDir, new DiffSettings(new CoreSettings()));
+
+        Path tableFile = projectDir.resolve("SCHEMA/country/TABLE/city.sql");
+        var dumpLoader = databaseProvider.getDumpLoader(tableFile, new DiffSettings(new CoreSettings()));
+        dumpLoader.setMode(ParserListenerMode.SINGLE);
+        var db = dumpLoader.loadAndAnalyze();
+        var ref = new ObjectReference("country", "city", DbObjType.TABLE);
+        assertTrue(dumpLoader.getErrors().isEmpty());
+        assertNotNull(db.getStatement(ref));
+
+        dumpLoader = databaseProvider.getDumpLoader(tableFile, new DiffSettings(new CoreSettings()));
+        dumpLoader.setMode(ParserListenerMode.NORMAL);
+        db = dumpLoader.loadAndAnalyze();
+        assertFalse(dumpLoader.getErrors().isEmpty());
+        assertNull(db.getStatement(ref));
+
+        dumpLoader = databaseProvider.getDumpLoader(tableFile, new DiffSettings(new CoreSettings()));
+        dumpLoader.setMode(ParserListenerMode.REF);
+        db = dumpLoader.loadAndAnalyze();
+        assertTrue(dumpLoader.getErrors().isEmpty(), dumpLoader.getErrors().toString());
+        assertNull(db.getStatement(ref));
     }
 
     private void assertNotLoaded(IDatabase db, String tableName) {
         var libTableRef = new ObjectReference("public", tableName, DbObjType.TABLE);
         var libTable = db.getStatement(libTableRef);
 
-        Assertions.assertNull(libTable);
+        assertNull(libTable);
     }
 
     private void createProject(Path dir, DiffSettings diffSettings)

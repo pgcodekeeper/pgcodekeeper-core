@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
+import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
 import org.pgcodekeeper.core.database.api.schema.ObjectReference;
@@ -102,7 +103,7 @@ public final class PgAlterSequence extends PgParserAbstract {
      * @throws UnresolvedReferenceException if object not found or location is broken
      */
     private void setLogged(Set_loggedContext loggedCtx, List<ParserRuleContext> ids) {
-        if (isRefMode()) {
+        if (ParserListenerMode.REF == getParserMode()) {
             return;
         }
 

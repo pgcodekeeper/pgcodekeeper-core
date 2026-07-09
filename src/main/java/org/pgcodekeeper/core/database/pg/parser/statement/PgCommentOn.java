@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
@@ -90,7 +91,7 @@ public final class PgCommentOn extends PgParserAbstract {
         if (obj.COLUMN() != null) {
             addObjReference(ids, DbObjType.COLUMN, ACTION_COMMENT);
 
-            if (isRefMode()) {
+            if (ParserListenerMode.REF == getParserMode()) {
                 return;
             }
 

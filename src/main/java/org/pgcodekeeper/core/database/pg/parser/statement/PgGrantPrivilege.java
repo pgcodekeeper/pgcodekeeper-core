@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
@@ -130,7 +131,7 @@ public final class PgGrantPrivilege extends PgParserAbstract {
         for (Schema_qualified_nameContext name : obj.names_references().schema_qualified_name()) {
             addObjReference(getIdentifiers(name), type, state);
 
-            if (!isRefMode()) {
+            if (ParserListenerMode.REF != getParserMode()) {
                 addToDB(name, type, state, permissions, roles, isGO);
             }
         }
@@ -168,7 +169,7 @@ public final class PgGrantPrivilege extends PgParserAbstract {
             DbObjType type = obj.PROCEDURE() == null ? DbObjType.FUNCTION : DbObjType.PROCEDURE;
             addObjReference(funcIds, type, state, parseArguments(funct.function_args()));
 
-            if (isRefMode()) {
+            if (ParserListenerMode.REF == getParserMode()) {
                 continue;
             }
 
@@ -211,7 +212,7 @@ public final class PgGrantPrivilege extends PgParserAbstract {
         // TODO waits for column references
         // addObjReference(Arrays.asList(QNameParser.getSchemaNameCtx(ids), firstPart, colName), DbObjType.COLUMN, StatementActions.NONE)
 
-        if (isRefMode()) {
+        if (ParserListenerMode.REF == getParserMode()) {
             return;
         }
 

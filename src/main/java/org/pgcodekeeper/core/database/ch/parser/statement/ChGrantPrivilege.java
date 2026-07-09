@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 
+import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.base.schema.*;
@@ -55,7 +56,7 @@ public final class ChGrantPrivilege extends ChParserAbstract {
 
     @Override
     public void parseObject() {
-        if (settings.isIgnorePrivileges() || isRefMode()) {
+        if (settings.isIgnorePrivileges() || ParserListenerMode.REF == getParserMode()) {
             addOutlineRefForCommentOrRule(state, ctx);
             return;
         }

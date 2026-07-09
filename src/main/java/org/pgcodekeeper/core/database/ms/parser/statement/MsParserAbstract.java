@@ -21,12 +21,8 @@ import java.util.List;
 import java.util.Objects;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.pgcodekeeper.core.database.api.schema.DbObjType;
-import org.pgcodekeeper.core.database.api.schema.IOptionContainer;
-import org.pgcodekeeper.core.database.api.schema.ISimpleColumnContainer;
-import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
-import org.pgcodekeeper.core.database.api.schema.ObjectLocation;
-import org.pgcodekeeper.core.database.api.schema.ObjectReference;
+import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
+import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.QNameParser;
 import org.pgcodekeeper.core.database.base.parser.statement.ParserAbstract;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
@@ -135,7 +131,7 @@ public abstract class MsParserAbstract extends ParserAbstract<MsDatabase> {
     }
 
     protected void addHistTableDep(On_optionContext onOpt, IOptionContainer stmt) {
-        if (onOpt == null || isRefMode()) {
+        if (onOpt == null || ParserListenerMode.REF == getParserMode()) {
             return;
         }
 

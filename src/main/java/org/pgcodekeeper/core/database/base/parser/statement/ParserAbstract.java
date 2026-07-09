@@ -59,7 +59,7 @@ public abstract class ParserAbstract<S extends IDatabase> {
     protected final S db;
     protected final ISettings settings;
 
-    private boolean refMode;
+    private ParserListenerMode parserMode;
     protected String fileName;
     private IWorkDirs workDirs;
 
@@ -81,7 +81,7 @@ public abstract class ParserAbstract<S extends IDatabase> {
      */
     public void parseObject(String fileName, ParserListenerMode mode, ParserRuleContext ctx) {
         this.fileName = fileName;
-        refMode = ParserListenerMode.REF == mode;
+        parserMode = mode;
         if (ParserListenerMode.SCRIPT == mode) {
             fillQueryLocation(ctx);
         } else {
@@ -89,8 +89,8 @@ public abstract class ParserAbstract<S extends IDatabase> {
         }
     }
 
-    protected boolean isRefMode() {
-        return refMode;
+    protected ParserListenerMode getParserMode() {
+        return parserMode;
     }
 
     /**
@@ -243,7 +243,7 @@ public abstract class ParserAbstract<S extends IDatabase> {
      */
     public <T extends IStatement, R extends IStatement> R getSafe(BiFunction<T, String, R> getter,
                                                                   T container, String name, Token errToken) {
-        if (isRefMode()) {
+        if (ParserListenerMode.REF == getParserMode()) {
             return null;
         }
         R statement = getter.apply(container, name);
@@ -276,7 +276,7 @@ public abstract class ParserAbstract<S extends IDatabase> {
     }
 
     protected void checkLocation(IStatement statement, Token errToken) {
-        if (isRefMode() || fileName == null || workDirs == null) {
+        if (ParserListenerMode.REF == getParserMode() || fileName == null || workDirs == null) {
             return;
         }
 
@@ -304,9 +304,9 @@ public abstract class ParserAbstract<S extends IDatabase> {
         if (schemaCtx != null) {
             addObjReference(List.of(schemaCtx), DbObjType.SCHEMA, null);
             schemaName = schemaCtx.getText();
-        } else if (refMode && !isDep) {
+        } else if (ParserListenerMode.REF == parserMode && !isDep) {
             schemaName = null;
-        } else if (refMode || isDep) {
+        } else if (ParserListenerMode.REF == parserMode || isDep) {
             return null;
         } else {
             throw new UnresolvedReferenceException(SCHEMA_ERROR + getFullCtxText(nameCtx),
@@ -338,7 +338,7 @@ public abstract class ParserAbstract<S extends IDatabase> {
 
     protected <T extends IStatement, U> void doSafe(BiConsumer<T, U> adder,
                                                     T statement, U object) {
-        if (!refMode) {
+        if (ParserListenerMode.REF != parserMode) {
             adder.accept(statement, object);
         }
     }
@@ -350,7 +350,7 @@ public abstract class ParserAbstract<S extends IDatabase> {
     protected void addDepSafe(AbstractStatement st, List<? extends ParserRuleContext> ids, DbObjType type, String signature) {
         ObjectLocation loc = getLocation(ids, type, null, true, signature, LocationType.REFERENCE);
         if (loc != null && !isSystemSchema(loc.getSchema())) {
-            if (!refMode) {
+            if (ParserListenerMode.REF != parserMode) {
                 st.addDependency(loc.getObjectReference());
             }
             addReference(loc);
@@ -363,7 +363,7 @@ public abstract class ParserAbstract<S extends IDatabase> {
         ParserRuleContext schemaCtx = QNameParser.getSchemaNameCtx(ids);
 
         if (schemaCtx == null) {
-            if (refMode) {
+            if (ParserListenerMode.REF == parserMode) {
                 return null;
             }
             throw new UnresolvedReferenceException(SCHEMA_ERROR + QNameParser.getFirstName(ids),
@@ -371,8 +371,13 @@ public abstract class ParserAbstract<S extends IDatabase> {
         }
 
         ISchema schema = db.getSchema(schemaCtx.getText());
+        if (schema != null || ParserListenerMode.REF == parserMode) {
+            return schema;
+        }
 
-        if (schema != null || refMode) {
+        if (ParserListenerMode.SINGLE == parserMode) {
+            schema = createSchema(schemaCtx.getText());
+            db.addChild(schema);
             return schema;
         }
 
@@ -386,7 +391,7 @@ public abstract class ParserAbstract<S extends IDatabase> {
         if (schemaCtx != null) {
             return schemaCtx.getText();
         }
-        if (refMode) {
+        if (ParserListenerMode.REF == parserMode) {
             return null;
         }
 
