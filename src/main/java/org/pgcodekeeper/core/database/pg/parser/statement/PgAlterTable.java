@@ -20,6 +20,7 @@ import java.util.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.pgcodekeeper.core.DangerStatement;
+import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.parser.*;
 import org.pgcodekeeper.core.database.base.schema.*;
@@ -113,7 +114,7 @@ public final class PgAlterTable extends PgTableAbstract {
                         DbObjType.CONSTRAINT, ACTION_DROP);
             }
 
-            if (isRefMode()) {
+            if (ParserListenerMode.REF == getParserMode()) {
                 continue;
             }
 
@@ -164,7 +165,7 @@ public final class PgAlterTable extends PgTableAbstract {
             }
         }
         var alterPartition = ctx.alter_partition_gp();
-        if (alterPartition != null && !isRefMode()) {
+        if (alterPartition != null && ParserListenerMode.REF != getParserMode()) {
             tabl = getSafe(PgSchema::getTable, schema, nameCtx);
             parseGpPartitionTemplate((GpPartitionTable) tabl, alterPartition, stream);
         }
@@ -186,7 +187,7 @@ public final class PgAlterTable extends PgTableAbstract {
             if (constr != null) {
                 if (constr instanceof PgConstraintPk pk) {
                     doSafe(PgConstraintPk::setClustered, pk, true);
-                } else if (!isRefMode()) {
+                } else if (ParserListenerMode.REF != getParserMode()) {
                     throw new IllegalArgumentException(Messages.Constraint_WarningMismatchedConstraintTypeForClusterOn);
                 }
             } else {

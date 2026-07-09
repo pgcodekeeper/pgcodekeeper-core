@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Added a new parser mode for processing individual project files.
+
 ### Changed
 
 ### Fixed

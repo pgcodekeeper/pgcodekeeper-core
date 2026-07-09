@@ -18,6 +18,7 @@ package org.pgcodekeeper.core.database.pg.parser.statement;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.api.schema.ObjectLocation.LocationType;
 import org.pgcodekeeper.core.database.base.parser.CodeUnitToken;
@@ -188,7 +189,7 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
      * @param st    object
      */
     protected void fillOwnerTo(IdentifierContext owner, AbstractStatement st) {
-        if (owner == null || settings.isIgnorePrivileges() || isRefMode()) {
+        if (owner == null || settings.isIgnorePrivileges() || ParserListenerMode.REF == getParserMode()) {
             return;
         }
         st.setOwner(owner.getText());
@@ -493,5 +494,4 @@ public abstract class PgParserAbstract extends ParserAbstract<PgDatabase> {
     protected boolean isSystemSchema(String schema) {
         return PgDiffUtils.isSystemSchema(schema);
     }
-
 }
