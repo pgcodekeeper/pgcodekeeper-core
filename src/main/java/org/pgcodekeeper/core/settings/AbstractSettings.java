@@ -132,5 +132,5 @@ public abstract class AbstractSettings implements ISettings {
         return null;
     }
 
-    abstract AbstractSettings shallowCopy();
+    protected abstract AbstractSettings shallowCopy();
 }
