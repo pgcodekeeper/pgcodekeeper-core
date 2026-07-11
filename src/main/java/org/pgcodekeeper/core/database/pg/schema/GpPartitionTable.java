@@ -20,7 +20,7 @@ import java.util.*;
 
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.SQLScript;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 
 /**
  * Greenplum partition table implementation.
@@ -61,8 +61,8 @@ public class GpPartitionTable extends PgAbstractRegularTable {
     }
 
     @Override
-    protected boolean isNeedRecreate(PgAbstractTable newTable, DiffSettings diffSettings) {
-        return super.isNeedRecreate(newTable, diffSettings) || !this.getClass().equals(newTable.getClass());
+    protected boolean isNeedRecreate(PgAbstractTable newTable, ISettings settings) {
+        return super.isNeedRecreate(newTable, settings) || !this.getClass().equals(newTable.getClass());
     }
 
     @Override

@@ -173,8 +173,8 @@ public class MsTable extends MsAbstractStatementContainer implements ITable, ISi
         int startSize = script.getSize();
         MsTable newTable = (MsTable) newCondition;
 
-        var diffSettings = script.getDiffSettings();
-        if (isNeedRecreate(newTable) || isColumnsOrderChanged(newTable, diffSettings.getSettings())) {
+        var settings = script.getSettings();
+        if (isNeedRecreate(newTable) || isColumnsOrderChanged(newTable, settings)) {
             return ObjectState.RECREATE;
         }
 

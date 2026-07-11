@@ -34,7 +34,6 @@ import org.pgcodekeeper.core.exception.ObjectCreationException;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +51,7 @@ public class CustomParserListener<T extends IDatabase> {
     protected final T db;
     protected final ParserListenerMode mode;
     protected final String filename;
-    protected final DiffSettings diffSettings;
+    protected final ISettings settings;
     protected IWorkDirs workDirs;
 
     /**
@@ -61,14 +60,14 @@ public class CustomParserListener<T extends IDatabase> {
      * @param database     the target database schema
      * @param filename     name of the file being parsed
      * @param mode         parsing mode
-     * @param diffSettings unified context object containing settings, monitor, and error accumulator
+     * @param settings configuration settings
      */
     public CustomParserListener(T database, String filename,
-                                ParserListenerMode mode, DiffSettings diffSettings) {
+                                ParserListenerMode mode, ISettings settings) {
         this.db = database;
         this.filename = filename;
         this.mode = mode;
-        this.diffSettings = diffSettings;
+        this.settings = settings;
     }
 
     public void setWorkDirs(IWorkDirs workDirs) {
@@ -76,11 +75,11 @@ public class CustomParserListener<T extends IDatabase> {
     }
 
     public ISettings getSettings() {
-        return diffSettings.getSettings();
+        return settings;
     }
 
     public IMonitor getMonitor() {
-        return diffSettings.getMonitor();
+        return settings.getMonitor();
     }
 
     /**
@@ -98,10 +97,10 @@ public class CustomParserListener<T extends IDatabase> {
             }
             r.run();
         } catch (UnresolvedReferenceException ex) {
-            diffSettings.addError(handleUnresolvedReference(ex, filename));
+            settings.addError(handleUnresolvedReference(ex, filename));
         } catch (Exception e) {
             if (ctx != null) {
-                diffSettings.addError(handleParserContextException(e, filename, ctx));
+                settings.addError(handleParserContextException(e, filename, ctx));
             } else {
                 LOG.error(Messages.CustomParserListener_statement_context_is_missing, e);
             }

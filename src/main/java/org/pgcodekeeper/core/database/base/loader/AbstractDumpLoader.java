@@ -23,7 +23,7 @@ import org.pgcodekeeper.core.database.base.parser.AntlrTask;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.database.base.schema.StatementOverride;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.io.IOException;
@@ -44,18 +44,18 @@ public abstract class AbstractDumpLoader<T extends IDatabase> extends AbstractLo
     protected IWorkDirs workDirs;
 
     protected AbstractDumpLoader(InputStreamProvider input, String databaseName,
-                                 DiffSettings diffSettings, int monitoringLevel) {
-        super(diffSettings, databaseName);
+                                 ISettings settings, int monitoringLevel) {
+        super(settings, databaseName);
         this.input = input;
         this.monitoringLevel = monitoringLevel;
     }
 
-    protected AbstractDumpLoader(InputStreamProvider input, String dbOriginName, DiffSettings diffSettings) {
-        this(input, dbOriginName, diffSettings, 0);
+    protected AbstractDumpLoader(InputStreamProvider input, String dbOriginName, ISettings settings) {
+        this(input, dbOriginName, settings, 0);
     }
 
-    protected AbstractDumpLoader(Path inputFile, DiffSettings diffSettings) {
-        this(() -> Files.newInputStream(inputFile), inputFile.toString(), diffSettings, 1);
+    protected AbstractDumpLoader(Path inputFile, ISettings settings) {
+        this(() -> Files.newInputStream(inputFile), inputFile.toString(), settings, 1);
     }
 
     @Override

@@ -23,7 +23,6 @@ import org.pgcodekeeper.core.database.ms.MsDatabaseProvider;
 import org.pgcodekeeper.core.database.ms.project.MsModelExporter;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -39,14 +38,13 @@ class MsProjectLoaderTest {
     void testProjectLoaderWithIgnoredSchemas(@TempDir Path dir) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         MsDatabaseProvider databaseProvider = new MsDatabaseProvider();
-        DiffSettings diffSettings = new DiffSettings(settings);
-        var msDbDump = loadTestDump(databaseProvider, RESOURCE_MS_DUMP, IntegrationTestUtils.class, diffSettings);
+        var msDbDump = loadTestDump(databaseProvider, RESOURCE_MS_DUMP, IntegrationTestUtils.class, settings);
 
         new MsModelExporter(dir, msDbDump, Consts.UTF_8, settings).exportFull();
 
         createIgnoredSchemaFile(dir);
 
-        var db = databaseProvider.getProjectLoader(dir, diffSettings).load();
+        var db = databaseProvider.getProjectLoader(dir, settings).load();
 
         for (var dbSchema : db.getSchemas()) {
             if (IGNORED_SCHEMAS_LIST.contains(dbSchema.getName())) {

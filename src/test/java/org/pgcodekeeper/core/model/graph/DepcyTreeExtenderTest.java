@@ -26,7 +26,7 @@ import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.CoreSettings;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -75,13 +75,13 @@ class DepcyTreeExtenderTest {
         String fileName = "depcy_schema_" + fileIndex + FILES_POSTFIX.SQL;
         String targetFileName = "depcy_schema_new_" + fileIndex + FILES_POSTFIX.SQL;
 
-        var diffSettings = new DiffSettings();
-        IDatabase dbSource = loadTestDump(databaseProvider, fileName, DepcyTreeExtenderTest.class, diffSettings);
-        IDatabase dbTarget = loadTestDump(databaseProvider, targetFileName, DepcyTreeExtenderTest.class, diffSettings);
+        var settings = new CoreSettings();
+        IDatabase dbSource = loadTestDump(databaseProvider, fileName, DepcyTreeExtenderTest.class, settings);
+        IDatabase dbTarget = loadTestDump(databaseProvider, targetFileName, DepcyTreeExtenderTest.class, settings);
 
         TreeElement tree = new TreeElement("Database", DbObjType.DATABASE, DiffSide.BOTH);
         predefined.setUserSelection(tree);
-        var dte = new DepcyTreeExtender(dbSource, dbTarget, tree, diffSettings.getAdditionalDependencies());
+        var dte = new DepcyTreeExtender(dbSource, dbTarget, tree, settings.getAdditionalDependencies());
         Set<TreeElement> depcy = dte.getDepcies();
         Set<TreeElement> depcyPredefined = predefined.getDepcySet(dbSource, dbTarget, tree);
         Assertions.assertEquals(depcyPredefined, depcy, "List of dependencies is not as expected");

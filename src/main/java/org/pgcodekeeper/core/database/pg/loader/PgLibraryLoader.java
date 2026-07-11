@@ -20,7 +20,7 @@ import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.base.loader.AbstractLibraryLoader;
 import org.pgcodekeeper.core.database.pg.jdbc.PgJdbcConnector;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 
 import java.nio.file.Path;
 import java.util.Set;
@@ -28,8 +28,8 @@ import java.util.Set;
 public class PgLibraryLoader extends AbstractLibraryLoader<PgDatabase> {
 
     public PgLibraryLoader(PgDatabase database, Path metaPath, Set<String> loadedPaths,
-                           DiffSettings diffSettings) {
-        super(database, metaPath, loadedPaths, diffSettings);
+                           ISettings settings) {
+        super(database, metaPath, loadedPaths, settings);
     }
 
     @Override
@@ -38,23 +38,23 @@ public class PgLibraryLoader extends AbstractLibraryLoader<PgDatabase> {
     }
 
     @Override
-    protected PgDumpLoader getDumpLoader(Path p, DiffSettings diffSettings) {
-        return new PgDumpLoader(p, diffSettings);
+    protected PgDumpLoader getDumpLoader(Path p, ISettings settings) {
+        return new PgDumpLoader(p, settings);
     }
 
     @Override
-    protected PgJdbcLoader createJdbcLoader(String url, DiffSettings diffSettings) {
+    protected PgJdbcLoader createJdbcLoader(String url, ISettings settings) {
         IJdbcConnector con = new PgJdbcConnector(url);
-        return new PgJdbcLoader(con, Consts.UTC, diffSettings);
+        return new PgJdbcLoader(con, Consts.UTC, settings);
     }
 
     @Override
-    protected PgProjectLoader getProjectLoader(Path p, DiffSettings diffSettings) {
-        return new PgProjectLoader(p, diffSettings);
+    protected PgProjectLoader getProjectLoader(Path p, ISettings settings) {
+        return new PgProjectLoader(p, settings);
     }
 
     @Override
     protected PgLibraryLoader getCopy(PgDatabase db) {
-        return new PgLibraryLoader(db, metaPath, loadedPaths, diffSettings);
+        return new PgLibraryLoader(db, metaPath, loadedPaths, settings);
     }
 }

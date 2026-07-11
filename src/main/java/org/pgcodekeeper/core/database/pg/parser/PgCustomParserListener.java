@@ -86,7 +86,7 @@ import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 
 /**
  * Custom ANTLR listener for parsing PostgreSQL SQL statements.
@@ -106,12 +106,12 @@ public final class PgCustomParserListener extends CustomParserListener<PgDatabas
      * @param database     the target database schema to populate
      * @param filename     name of the file being parsed
      * @param mode         parsing mode
-     * @param diffSettings unified context object containing settings, monitor, and error accumulator
+     * @param settings configuration settings
      * @param antlrTasks   queue for asynchronous parsing tasks
      */
     public PgCustomParserListener(PgDatabase database, String filename, ParserListenerMode mode,
-                                   DiffSettings diffSettings, Queue<AntlrTask<?>> antlrTasks) {
-        super(database, filename, mode, diffSettings);
+                                   ISettings settings, Queue<AntlrTask<?>> antlrTasks) {
+        super(database, filename, mode, settings);
         this.antlrTasks = antlrTasks;
     }
 
@@ -190,7 +190,7 @@ public final class PgCustomParserListener extends CustomParserListener<PgDatabas
         } else if (ctx.create_collation_statement() != null) {
             p = new PgCreateCollation(ctx.create_collation_statement(), db, getSettings());
         } else if (ctx.create_function_statement() != null) {
-            p = new PgCreateFunction(ctx.create_function_statement(), db, diffSettings.getErrors(), antlrTasks, getSettings());
+            p = new PgCreateFunction(ctx.create_function_statement(), db, settings.getErrors(), antlrTasks, getSettings());
         } else if (ctx.create_aggregate_statement() != null) {
             p = new PgCreateAggregate(ctx.create_aggregate_statement(), db, getSettings());
         } else if (ctx.create_operator_statement() != null) {

@@ -16,9 +16,16 @@
 package org.pgcodekeeper.core.settings;
 
 import org.pgcodekeeper.core.database.api.formatter.IFormatConfiguration;
+import org.pgcodekeeper.core.database.api.jdbc.ISupportedVersion;
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
+import org.pgcodekeeper.core.dependencieslist.Dependency;
+import org.pgcodekeeper.core.ignorelist.IgnoreList;
+import org.pgcodekeeper.core.monitor.IMonitor;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Interface defining configuration settings for database comparison and migration operations.
@@ -230,6 +237,111 @@ public interface ISettings {
      * @return a new settings instance with the same configuration
      */
     ISettings copy();
+
+    /**
+     * Gets the progress monitor for the current operation.
+     *
+     * @return the progress monitor
+     */
+    IMonitor getMonitor();
+
+    /**
+     * Sets the progress monitor for the current operation.
+     *
+     * @param monitor the progress monitor
+     */
+    void setMonitor(IMonitor monitor);
+
+    /**
+     * Gets the ignore list used to filter objects during diff operations.
+     *
+     * @return the ignore list
+     */
+    IgnoreList getIgnoreList();
+
+    /**
+     * Parses the ignore list file and adds its rules to the ignore list.
+     *
+     * @param ignoreListPath path to the ignore list file
+     * @throws IOException if the file cannot be read or parsed
+     */
+    void addIgnoreList(Path ignoreListPath) throws IOException;
+
+    /**
+     * Parses the ignore schema list file and adds its rules to the ignore schema list.
+     *
+     * @param ignoreSchemaListPath path to the ignore schema list file
+     * @throws IOException if the file cannot be read or parsed
+     */
+    void addIgnoreSchemaList(Path ignoreSchemaListPath) throws IOException;
+
+    /**
+     * Checks whether the schema is allowed by the ignore schema list.
+     *
+     * @param schemaName schema name to check
+     * @return true if the schema should be processed
+     */
+    boolean isAllowedSchema(String schemaName);
+
+    /**
+     * Gets additional dependencies used during dependency resolution.
+     *
+     * @return list of additional dependencies
+     */
+    List<Dependency> getAdditionalDependencies();
+
+    /**
+     * Adds additional dependencies used during dependency resolution.
+     *
+     * @param deps dependencies to add
+     */
+    void addAdditionalDependencies(Collection<Dependency> deps);
+
+    /**
+     * Gets errors collected during loading and parsing.
+     *
+     * @return list of collected errors
+     */
+    List<Object> getErrors();
+
+    /**
+     * Adds an error to the error accumulator.
+     *
+     * @param error error to add
+     */
+    void addError(Object error);
+
+    /**
+     * Adds errors to the error accumulator.
+     *
+     * @param errors errors to add
+     */
+    void addErrors(Collection<Object> errors);
+
+    /**
+     * Clears all errors.
+     */
+    void clearErrors();
+
+    /**
+     * Gets the detected database version.
+     *
+     * @return the database version, or null if not detected yet
+     */
+    ISupportedVersion getVersion();
+
+    /**
+     * Stores the detected database version. If a version is already set,
+     * the higher of the two is kept.
+     *
+     * @param version detected database version
+     */
+    void setVersion(ISupportedVersion version);
+
+    /**
+     * Resets the database version.
+     */
+    void resetVersion();
 
     /**
      * Sets whether privileges should be ignored during comparison.

@@ -38,7 +38,7 @@ import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeFlattener;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -67,14 +67,13 @@ class PgProjectLoaderTest {
     @Test
     void testProjectLoaderWithIgnoredSchemas(@TempDir Path dir) throws IOException, InterruptedException {
         var settings = new CoreSettings();
-        DiffSettings diffSettings = new DiffSettings(settings);
-        IDatabase dbDump = loadTestDump(databaseProvider, RESOURCE_DUMP, IntegrationTestUtils.class, diffSettings);
+        IDatabase dbDump = loadTestDump(databaseProvider, RESOURCE_DUMP, IntegrationTestUtils.class, settings);
 
         new PgModelExporter(dir, dbDump, Consts.UTF_8, settings).exportFull();
 
         createIgnoredSchemaFile(dir);
 
-        IDatabase db = databaseProvider.getProjectLoader(dir, diffSettings).load();
+        IDatabase db = databaseProvider.getProjectLoader(dir, settings).load();
 
         for (var dbSchema : db.getSchemas()) {
             if (IGNORED_SCHEMAS_LIST.contains(dbSchema.getName())) {
@@ -89,9 +88,8 @@ class PgProjectLoaderTest {
     @Test
     void testModelExporterWithIgnoredLists(@TempDir Path dir) throws IOException, InterruptedException {
         var settings = new CoreSettings();
-        var diffSettings = new DiffSettings(settings);
 
-        IDatabase dbDump = loadTestDump(databaseProvider, RESOURCE_DUMP, IntegrationTestUtils.class, diffSettings);
+        IDatabase dbDump = loadTestDump(databaseProvider, RESOURCE_DUMP, IntegrationTestUtils.class, settings);
         TreeElement root = DiffTree.create(settings, dbDump, null, null);
         root.setAllChecked();
 
@@ -107,7 +105,7 @@ class PgProjectLoaderTest {
 
         new PgModelExporter(dir, dbDump, null, selected, Consts.UTF_8, settings).exportProject();
 
-        IDatabase loader = databaseProvider.getProjectLoader(dir, diffSettings).load();
+        IDatabase loader = databaseProvider.getProjectLoader(dir, settings).load();
         var ignoredObj = "people";
         boolean result = loader.getDescendants().map(IStatement::getName).noneMatch(ignoredObj::startsWith);
         assertTrue(result);
@@ -117,10 +115,9 @@ class PgProjectLoaderTest {
     void testProjectLoaderWithoutAutoLoad(@TempDir Path dir) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         settings.setDisableAutoLoad(true);
-        var diffSettings = new DiffSettings(settings);
         Path projectDir = dir.resolve("project");
 
-        createProject(projectDir, diffSettings);
+        createProject(projectDir, settings);
 
         String libPath = TestUtils.getFilePath(RESOURCE_FIRST_LIB, getClass()).toString();
         new LibraryXmlStore(projectDir.resolve(LibraryXmlStore.FILE_NAME)).writeDependencies(List.of(
@@ -129,11 +126,11 @@ class PgProjectLoaderTest {
         createIgnoredSchemaFile(projectDir);
         createIgnoreListFile(projectDir);
 
-        IDatabase db = databaseProvider.getProjectLoader(projectDir, diffSettings).load();
+        IDatabase db = databaseProvider.getProjectLoader(projectDir, settings).load();
 
         boolean result = db.getSchemas().stream().map(IStatement::getName).anyMatch(IGNORED_SCHEMAS_LIST::contains);
         assertTrue(result, "Ignored schemas not loaded");
-        assertTrue(diffSettings.getIgnoreList().getList().isEmpty());
+        assertTrue(settings.getIgnoreList().getList().isEmpty());
 
         assertNotLoaded(db, "lib_first_table");
     }
@@ -141,13 +138,12 @@ class PgProjectLoaderTest {
     @Test
     void testProjectLoaderWithLibrary(@TempDir Path dir) throws IOException, InterruptedException {
         var settings = new CoreSettings();
-        var diffSettings = new DiffSettings(settings);
         Path projectDir = dir.resolve("project");
-        createProject(projectDir, diffSettings);
+        createProject(projectDir, settings);
 
         String libPath = TestUtils.getFilePath(RESOURCE_FIRST_LIB, getClass()).toString();
 
-        IDatabase db = databaseProvider.getProjectLoader(projectDir, diffSettings, Collections.emptyList(),
+        IDatabase db = databaseProvider.getProjectLoader(projectDir, settings, Collections.emptyList(),
                 List.of(libPath), Collections.emptyList(), dir.resolve("meta")).load();
 
         assertLibLoaded(db, "lib_first_table", true);
@@ -156,13 +152,12 @@ class PgProjectLoaderTest {
     @Test
     void testProjectLoaderWithLibraryWithoutPrivileges(@TempDir Path dir) throws IOException, InterruptedException {
         var settings = new CoreSettings();
-        var diffSettings = new DiffSettings(settings);
         Path projectDir = dir.resolve("project");
-        createProject(projectDir, diffSettings);
+        createProject(projectDir, settings);
 
         String libPath = TestUtils.getFilePath(RESOURCE_FIRST_LIB, getClass()).toString();
 
-        IDatabase db = databaseProvider.getProjectLoader(projectDir, diffSettings, Collections.emptyList(),
+        IDatabase db = databaseProvider.getProjectLoader(projectDir, settings, Collections.emptyList(),
                 Collections.emptyList(), List.of(libPath), dir.resolve("meta")).load();
 
         assertLibLoaded(db, "lib_first_table", false);
@@ -171,9 +166,8 @@ class PgProjectLoaderTest {
     @Test
     void testProjectLoaderWithLibraryFromXml(@TempDir Path dir) throws IOException, InterruptedException {
         var settings = new CoreSettings();
-        var diffSettings = new DiffSettings(settings);
         Path projectDir = dir.resolve("project");
-        createProject(projectDir, diffSettings);
+        createProject(projectDir, settings);
 
         String libWithPrivPath = TestUtils.getFilePath(RESOURCE_FIRST_LIB, getClass()).toString();
         String libWithoutPrivPath = TestUtils.getFilePath(RESOURCE_SECOND_LIB, getClass()).toString();
@@ -183,7 +177,7 @@ class PgProjectLoaderTest {
                 new Library("", libWithPrivPath, false, ""),
                 new Library("", libWithoutPrivPath, true, "")), false);
 
-        IDatabase db = databaseProvider.getProjectLoader(projectDir, diffSettings, List.of(depsFile.toString()),
+        IDatabase db = databaseProvider.getProjectLoader(projectDir, settings, List.of(depsFile.toString()),
                 Collections.emptyList(), Collections.emptyList(), dir.resolve("meta")).load();
 
         assertLibLoaded(db, "lib_first_table", true);
@@ -193,9 +187,8 @@ class PgProjectLoaderTest {
     @Test
     void testProjectLoaderWithIsLibTrue(@TempDir Path dir) throws IOException, InterruptedException {
         var settings = new CoreSettings();
-        var diffSettings = new DiffSettings(settings);
         Path projectDir = dir.resolve("project");
-        createProject(projectDir, diffSettings);
+        createProject(projectDir, settings);
 
         String libPath = TestUtils.getFilePath(RESOURCE_FIRST_LIB, getClass()).toString();
         new LibraryXmlStore(projectDir.resolve(LibraryXmlStore.FILE_NAME)).writeDependencies(List.of(
@@ -206,7 +199,7 @@ class PgProjectLoaderTest {
         new LibraryXmlStore(externalXml).writeDependencies(List.of(
                 new Library("", externalLibPath, false, "")), false);
 
-        var loader = databaseProvider.getProjectLoader(projectDir, diffSettings, List.of(externalXml.toString()),
+        var loader = databaseProvider.getProjectLoader(projectDir, settings, List.of(externalXml.toString()),
                 Collections.emptyList(), Collections.emptyList(), dir.resolve("meta"));
         loader.setLib(true);
         IDatabase db = loader.load();
@@ -218,16 +211,15 @@ class PgProjectLoaderTest {
     @Test
     void testProjectLoaderWithOverrides(@TempDir Path dir) throws IOException, InterruptedException {
         var settings = new CoreSettings();
-        var diffSettings = new DiffSettings(settings);
         Path projectDir = dir.resolve("project");
-        createProject(projectDir, diffSettings);
+        createProject(projectDir, settings);
 
         Path overrideDir = projectDir.resolve("OVERRIDES/SCHEMA/public/TABLE");
         Files.createDirectories(overrideDir);
         var empPath = TestUtils.getFilePath(RESOURCE_OVERRIDE_EMP, getClass());
         Files.copy(empPath, overrideDir.resolve("emp.sql"));
 
-        IDatabase db = databaseProvider.getProjectLoader(projectDir, diffSettings).load();
+        IDatabase db = databaseProvider.getProjectLoader(projectDir, settings).load();
 
         var emp = db.getStatement(new ObjectReference("public", "emp", DbObjType.TABLE));
         assertNotNull(emp);
@@ -258,9 +250,8 @@ class PgProjectLoaderTest {
     @Test
     void testProjectLoaderWithAltDirs(@TempDir Path dir) throws IOException, InterruptedException {
         var settings = new CoreSettings();
-        var diffSettings = new DiffSettings(settings);
         Path projectDir = dir.resolve("project");
-        createProject(projectDir, diffSettings);
+        createProject(projectDir, settings);
 
         Files.writeString(projectDir.resolve(AbstractWorkDirs.ALT_DIRS_FILENAME),
                 "TRIGGER_FUNC=TRIGGER_FUNCTION");
@@ -269,7 +260,7 @@ class PgProjectLoaderTest {
         Files.createDirectories(triggerFuncDir);
         Files.move(funcDir.resolve("emp_stamp.sql"), triggerFuncDir.resolve("emp_stamp.sql"));
 
-        IDatabase db = databaseProvider.getProjectLoader(projectDir, diffSettings).load();
+        IDatabase db = databaseProvider.getProjectLoader(projectDir, settings).load();
 
         var regularFunc = db.getStatement(
                 new ObjectReference("public", "people_worker_shedule()", DbObjType.FUNCTION));
@@ -282,9 +273,9 @@ class PgProjectLoaderTest {
 
     @Test
     void testProjectLoaderWithOverridesAndAltDirs(@TempDir Path dir) throws IOException, InterruptedException {
-        var diffSettings = new DiffSettings(new CoreSettings());
+        var settings = new CoreSettings();
         Path projectDir = dir.resolve("project");
-        createProject(projectDir, diffSettings);
+        createProject(projectDir, settings);
 
         Files.writeString(projectDir.resolve(AbstractWorkDirs.ALT_DIRS_FILENAME),
                 "TRIGGER_FUNC=TRIGGER_FUNCTION");
@@ -298,7 +289,7 @@ class PgProjectLoaderTest {
         var overridePath = TestUtils.getFilePath(RESOURCE_OVERRIDE_EMP_STAMP, getClass());
         Files.copy(overridePath, overrideDir.resolve("emp_stamp.sql"));
 
-        IDatabase db = databaseProvider.getProjectLoader(projectDir, diffSettings).load();
+        IDatabase db = databaseProvider.getProjectLoader(projectDir, settings).load();
 
         var empStamp = db.getStatement(
                 new ObjectReference("public", "emp_stamp()", DbObjType.FUNCTION));
@@ -313,23 +304,23 @@ class PgProjectLoaderTest {
     @Test
     void testSingleProjectFileLoader(@TempDir Path dir) throws IOException, InterruptedException {
         Path projectDir = dir.resolve("project");
-        createProject(projectDir, new DiffSettings(new CoreSettings()));
+        createProject(projectDir, new CoreSettings());
 
         Path tableFile = projectDir.resolve("SCHEMA/country/TABLE/city.sql");
-        var dumpLoader = databaseProvider.getDumpLoader(tableFile, new DiffSettings(new CoreSettings()));
+        var dumpLoader = databaseProvider.getDumpLoader(tableFile, new CoreSettings());
         dumpLoader.setMode(ParserListenerMode.SINGLE);
         var db = dumpLoader.loadAndAnalyze();
         var ref = new ObjectReference("country", "city", DbObjType.TABLE);
         assertTrue(dumpLoader.getErrors().isEmpty());
         assertNotNull(db.getStatement(ref));
 
-        dumpLoader = databaseProvider.getDumpLoader(tableFile, new DiffSettings(new CoreSettings()));
+        dumpLoader = databaseProvider.getDumpLoader(tableFile, new CoreSettings());
         dumpLoader.setMode(ParserListenerMode.NORMAL);
         db = dumpLoader.loadAndAnalyze();
         assertFalse(dumpLoader.getErrors().isEmpty());
         assertNull(db.getStatement(ref));
 
-        dumpLoader = databaseProvider.getDumpLoader(tableFile, new DiffSettings(new CoreSettings()));
+        dumpLoader = databaseProvider.getDumpLoader(tableFile, new CoreSettings());
         dumpLoader.setMode(ParserListenerMode.REF);
         db = dumpLoader.loadAndAnalyze();
         assertTrue(dumpLoader.getErrors().isEmpty(), dumpLoader.getErrors().toString());
@@ -343,10 +334,10 @@ class PgProjectLoaderTest {
         assertNull(libTable);
     }
 
-    private void createProject(Path dir, DiffSettings diffSettings)
+    private void createProject(Path dir, ISettings settings)
             throws IOException, InterruptedException {
-        IDatabase dbDump = loadTestDump(databaseProvider, RESOURCE_DUMP, IntegrationTestUtils.class, diffSettings);
-        new PgModelExporter(dir, dbDump, Consts.UTF_8, diffSettings.getSettings()).exportFull();
+        IDatabase dbDump = loadTestDump(databaseProvider, RESOURCE_DUMP, IntegrationTestUtils.class, settings);
+        new PgModelExporter(dir, dbDump, Consts.UTF_8, settings).exportFull();
     }
 
 }

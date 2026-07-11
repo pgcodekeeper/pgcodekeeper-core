@@ -29,85 +29,108 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class DiffSettings {
+/**
+ * Base implementation of {@link ISettings} that owns the per-operation state:
+ * progress monitor, ignore lists, additional dependencies, error accumulator and
+ * detected database version.
+ */
+public abstract class AbstractSettings implements ISettings {
 
-    private final ISettings settings;
     private final List<Object> errors = new ArrayList<>();
     private final IgnoreList ignoreList = new IgnoreList();
     private final IgnoreSchemaList ignoreSchemaList = new IgnoreSchemaList();
     private final List<Dependency> additionalDependencies = new ArrayList<>();
 
-    private IMonitor monitor;
+    private IMonitor monitor = new NullMonitor();
     private ISupportedVersion version;
 
-    public DiffSettings(ISettings settings, IMonitor monitor) {
-        this.settings = settings;
-        this.monitor = monitor;
-    }
-
-    public DiffSettings(ISettings settings) {
-        this(settings, new NullMonitor());
-    }
-
-    public DiffSettings() {
-        this(new CoreSettings(), new NullMonitor());
-    }
-
-    public ISettings getSettings() {
-        return settings;
-    }
-
+    @Override
     public IMonitor getMonitor() {
         return monitor;
     }
 
-    public IgnoreList getIgnoreList() {
-        return ignoreList;
-    }
-
-    public void addIgnoreList(Path ignoreListPath) throws IOException {
-        IIgnoreList.parseIgnoreList(ignoreListPath, ignoreList);
-    }
-
-    public void addIgnoreSchemaList(Path ignoreSchemaListPath) throws IOException {
-        IIgnoreList.parseIgnoreList(ignoreSchemaListPath, ignoreSchemaList);
-    }
-
-    public List<Dependency> getAdditionalDependencies() {
-        return additionalDependencies;
-    }
-
-    public void addAdditionalDependencies(Collection<Dependency> deps) {
-        additionalDependencies.addAll(deps);
-    }
-
-    public List<Object> getErrors() {
-        return errors;
-    }
-
-    public void addError(Object error) {
-        errors.add(error);
-    }
-
-    public void addErrors(Collection<Object> errors) {
-        this.errors.addAll(errors);
-    }
-
+    @Override
     public void setMonitor(IMonitor monitor) {
         this.monitor = monitor;
     }
 
+    @Override
+    public IgnoreList getIgnoreList() {
+        return ignoreList;
+    }
+
+    @Override
+    public void addIgnoreList(Path ignoreListPath) throws IOException {
+        IIgnoreList.parseIgnoreList(ignoreListPath, ignoreList);
+    }
+
+    @Override
+    public void addIgnoreSchemaList(Path ignoreSchemaListPath) throws IOException {
+        IIgnoreList.parseIgnoreList(ignoreSchemaListPath, ignoreSchemaList);
+    }
+
+    @Override
     public boolean isAllowedSchema(String schemaName) {
         return ignoreSchemaList.getNameStatus(schemaName);
     }
 
+    @Override
+    public List<Dependency> getAdditionalDependencies() {
+        return additionalDependencies;
+    }
+
+    @Override
+    public void addAdditionalDependencies(Collection<Dependency> deps) {
+        additionalDependencies.addAll(deps);
+    }
+
+    @Override
+    public List<Object> getErrors() {
+        return errors;
+    }
+
+    @Override
+    public void addError(Object error) {
+        errors.add(error);
+    }
+
+    @Override
+    public void addErrors(Collection<Object> errors) {
+        this.errors.addAll(errors);
+    }
+
+    @Override
+    public void clearErrors() {
+        errors.clear();
+    }
+
+    @Override
+    public ISupportedVersion getVersion() {
+        return version;
+    }
+
+    @Override
     public void setVersion(ISupportedVersion version) {
         if (null == this.version || !this.version.isLE(version.getVersion())) {
             this.version = version;
         }
     }
 
-    public ISupportedVersion getVersion() {
-        return version;
+    @Override
+    public void resetVersion() {
+        this.version = null;
     }
+
+    @Override
+    public ISettings copy() {
+        var copy = shallowCopy();
+        copy.version = version;
+        copy.errors.addAll(errors);
+        copy.additionalDependencies.addAll(additionalDependencies);
+        copy.ignoreList.addAll(ignoreList.getList());
+        copy.ignoreSchemaList.addAll(ignoreSchemaList.getList());
+        return null;
+    }
+
+    abstract AbstractSettings shallowCopy();
 }

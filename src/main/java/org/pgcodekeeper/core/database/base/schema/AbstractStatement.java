@@ -42,7 +42,6 @@ import org.pgcodekeeper.core.hasher.IHashable;
 import org.pgcodekeeper.core.hasher.JavaHasher;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.script.SQLScript;
-import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 
 /**
@@ -145,7 +144,7 @@ public abstract class AbstractStatement implements IStatement, IHashable {
 
     @Override
     public String getSQL(boolean isFormatted, ISettings settings) {
-        SQLScript script = new SQLScript(new DiffSettings(settings), getSeparator());
+        SQLScript script = new SQLScript(settings, getSeparator());
         getCreationSQL(script);
         String sql = script.getFullScript();
         if (!isFormatted || !settings.isAutoFormatObjectCode()) {
@@ -492,9 +491,9 @@ public abstract class AbstractStatement implements IStatement, IHashable {
         return SEPARATOR;
     }
 
-    protected boolean checkSyntaxVersion(DiffSettings diffSettings, ISupportedVersion version) {
-        return diffSettings.getSettings().isUseActualVersionSyntax()
-                && version.isLE(diffSettings.getVersion().getVersion());
+    protected boolean checkSyntaxVersion(ISettings settings, ISupportedVersion version) {
+        return settings.isUseActualVersionSyntax()
+                && version.isLE(settings.getVersion().getVersion());
     }
 
     /**

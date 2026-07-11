@@ -27,7 +27,7 @@ import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.exception.MonitorCancelledRuntimeException;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Utils;
 
 import java.sql.Connection;
@@ -58,8 +58,8 @@ public abstract class AbstractJdbcLoader<T extends IDatabase> extends AbstractLo
     protected Connection connection;
     protected Statement statement;
 
-    protected AbstractJdbcLoader(IJdbcConnector connector, DiffSettings diffSettings) {
-        super(diffSettings, connector.getDbName());
+    protected AbstractJdbcLoader(IJdbcConnector connector, ISettings settings) {
+        super(settings, connector.getDbName());
         this.connector = connector;
         this.runner = new JdbcRunner(getMonitor());
     }
@@ -74,7 +74,7 @@ public abstract class AbstractJdbcLoader<T extends IDatabase> extends AbstractLo
             P p = parserCreateFunction.apply(list, location);
             return parserCtxReader.apply(p);
         }, r -> {
-            diffSettings.addErrors(list);
+            settings.addErrors(list);
             if (getMonitor().isCancelled()) {
                 throw new MonitorCancelledRuntimeException();
             }

@@ -48,7 +48,7 @@ import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.utils.Pair;
 import org.pgcodekeeper.core.utils.Utils;
 import org.slf4j.Logger;
@@ -130,7 +130,7 @@ final class PgJdbcSystemLoader extends PgJdbcLoader {
      * @param connector the JDBC connector for database connection
      */
     private PgJdbcSystemLoader(IJdbcConnector connector) {
-        super(connector, Consts.UTC, new DiffSettings(null));
+        super(connector, Consts.UTC, new CoreSettings());
     }
 
     /**

@@ -51,7 +51,7 @@ import org.pgcodekeeper.core.database.pg.schema.PgSchema;
 import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 
 /**
  * Custom ANTLR listener for processing PostgreSQL SQL statements with override support.
@@ -68,12 +68,12 @@ public final class PgOverridesListener extends CustomParserListener<PgDatabase>
      * @param db           the target database schema
      * @param filename     name of the file being parsed
      * @param mode         parsing mode
-     * @param diffSettings unified context object containing settings, monitor, and error accumulator
+     * @param settings configuration settings
      * @param overrides    map of statement overrides to apply
      */
     public PgOverridesListener(PgDatabase db, String filename, ParserListenerMode mode,
-                                DiffSettings diffSettings, Map<AbstractStatement, StatementOverride> overrides) {
-        super(db, filename, mode, diffSettings);
+                                ISettings settings, Map<AbstractStatement, StatementOverride> overrides) {
+        super(db, filename, mode, settings);
         this.overrides = overrides;
     }
 

@@ -22,7 +22,6 @@ import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 
@@ -36,10 +35,10 @@ class BrokenScriptTest {
     void brokenScriptTest(String fileNameTemplate, String expectedError) throws IOException, InterruptedException {
         var provider = new PgDatabaseProvider();
         String resource = fileNameTemplate + FILES_POSTFIX.SQL;
-        var diffSettings = new DiffSettings(new CoreSettings());
+        var settings = new CoreSettings();
 
-        provider.getDumpLoader(TestUtils.getFilePath(resource, getClass()), diffSettings).loadAndAnalyze();
-        var errors = diffSettings.getErrors();
+        provider.getDumpLoader(TestUtils.getFilePath(resource, getClass()), settings).loadAndAnalyze();
+        var errors = settings.getErrors();
 
         Assertions.assertEquals(1, errors.size());
         String actualError = errors.get(0).toString();

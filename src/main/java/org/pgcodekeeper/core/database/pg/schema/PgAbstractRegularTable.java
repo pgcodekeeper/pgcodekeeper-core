@@ -22,7 +22,6 @@ import org.pgcodekeeper.core.database.api.schema.ISimpleOptionContainer;
 import org.pgcodekeeper.core.database.pg.jdbc.PgSupportedVersion;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.script.*;
-import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 
 /**
@@ -195,8 +194,8 @@ public abstract class PgAbstractRegularTable extends PgAbstractTable implements 
             script.addStatement(sql.toString(), SQLActionType.END);
         }
 
-        var diffSettings = script.getDiffSettings();
-        if (checkSyntaxVersion(diffSettings, PgSupportedVersion.GP_VERSION_7) && !Objects.equals(method, newRegTable.method)) {
+        var settings = script.getSettings();
+        if (checkSyntaxVersion(settings, PgSupportedVersion.GP_VERSION_7) && !Objects.equals(method, newRegTable.method)) {
             script.addStatement(getAlterTable(false) + " SET ACCESS METHOD " + newRegTable.method);
         }
     }
@@ -235,8 +234,8 @@ public abstract class PgAbstractRegularTable extends PgAbstractTable implements 
     }
 
     @Override
-    protected boolean isNeedRecreate(PgAbstractTable newTable, DiffSettings diffSettings) {
-        if (super.isNeedRecreate(newTable, diffSettings)) {
+    protected boolean isNeedRecreate(PgAbstractTable newTable, ISettings settings) {
+        if (super.isNeedRecreate(newTable, settings)) {
             return true;
         }
 
@@ -244,12 +243,12 @@ public abstract class PgAbstractRegularTable extends PgAbstractTable implements 
             return true;
         }
 
-        return !compareMethod(regTable, diffSettings)
+        return !compareMethod(regTable, settings)
                 || !Objects.equals(partitionBy, regTable.partitionBy);
     }
 
-    private boolean compareMethod(PgAbstractRegularTable regTable, DiffSettings diffSettings) {
-        if (checkSyntaxVersion(diffSettings, PgSupportedVersion.GP_VERSION_7)) {
+    private boolean compareMethod(PgAbstractRegularTable regTable, ISettings settings) {
+        if (checkSyntaxVersion(settings, PgSupportedVersion.GP_VERSION_7)) {
             return true;
         }
 

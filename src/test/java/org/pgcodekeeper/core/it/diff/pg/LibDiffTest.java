@@ -26,7 +26,6 @@ import org.pgcodekeeper.core.database.pg.loader.PgLibraryLoader;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,19 +65,18 @@ class LibDiffTest {
         var settings = new CoreSettings();
         PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
         settings.setIgnorePrivileges(isIgnorePrivileges);
-        var diffSettings = new DiffSettings(settings);
         List<String> libs = new ArrayList<>();
         for (String lib : libList) {
             libs.add(TestUtils.getFilePath(lib, getClass()).toString());
         }
         PgDatabase dbOld = new PgDatabase();
         PgDatabase dbNew = (PgDatabase) IntegrationTestUtils.loadTestDump(databaseProvider,
-                fileNameTemplate + FILES_POSTFIX.NEW_SQL, getClass(), diffSettings);
+                fileNameTemplate + FILES_POSTFIX.NEW_SQL, getClass(), settings);
 
-        PgLibraryLoader loader = new PgLibraryLoader(dbNew, null, new HashSet<>(), diffSettings);
+        PgLibraryLoader loader = new PgLibraryLoader(dbNew, null, new HashSet<>(), settings);
         loader.loadLibraries(isIgnorePrivileges, libs);
 
-        String script = PgCodeKeeperApi.diff(databaseProvider, dbOld, dbNew, diffSettings);
+        String script = PgCodeKeeperApi.diff(databaseProvider, dbOld, dbNew, settings);
 
         IntegrationTestUtils.assertResult(script, fileNameTemplate, getClass());
     }

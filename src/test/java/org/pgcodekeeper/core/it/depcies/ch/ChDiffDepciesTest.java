@@ -23,7 +23,6 @@ import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.ch.ChDatabaseProvider;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.util.Map;
@@ -69,8 +68,7 @@ class ChDiffDepciesTest {
         var settings = new CoreSettings();
         IDatabaseProvider databaseProvider = new ChDatabaseProvider();
         settings.setEnableFunctionBodiesDependencies(true);
-        var diffSettings = new DiffSettings(settings);
         IntegrationTestUtils.assertEqualsDependencies(databaseProvider, dbTemplate, userTemplateName, selectedObjs,
-                getClass(), diffSettings);
+                getClass(), settings);
     }
 }

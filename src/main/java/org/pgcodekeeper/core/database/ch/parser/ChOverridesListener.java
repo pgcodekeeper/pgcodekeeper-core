@@ -24,7 +24,7 @@ import org.pgcodekeeper.core.database.base.schema.*;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
 import org.pgcodekeeper.core.database.ch.parser.statement.ChGrantPrivilege;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 
 /**
  * ANTLR listener for processing ClickHouse SQL statements with override support.
@@ -40,12 +40,12 @@ public final class ChOverridesListener extends CustomParserListener<ChDatabase> 
      * @param database     the target database schema
      * @param filename     name of the file being parsed
      * @param mode         parsing mode
-     * @param diffSettings unified context object containing settings, monitor, and error accumulator
+     * @param settings configuration settings
      * @param overrides    map of statement overrides to apply
      */
     public ChOverridesListener(ChDatabase database, String filename, ParserListenerMode mode,
-                                  DiffSettings diffSettings, Map<AbstractStatement, StatementOverride> overrides) {
-        super(database, filename, mode, diffSettings);
+                                  ISettings settings, Map<AbstractStatement, StatementOverride> overrides) {
+        super(database, filename, mode, settings);
         this.overrides = overrides;
     }
 

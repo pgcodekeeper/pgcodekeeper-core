@@ -21,7 +21,7 @@ import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
 import org.pgcodekeeper.core.database.base.project.AbstractWorkDirs;
 import org.pgcodekeeper.core.database.ch.project.ChWorkDirs;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -32,13 +32,13 @@ import java.util.HashSet;
  */
 public class ChProjectLoader extends AbstractProjectLoader<ChDatabase> {
 
-    public ChProjectLoader(Path dirPath, DiffSettings diffSettings) {
-        super(dirPath, diffSettings, new ChWorkDirs(AbstractWorkDirs.resolveAltDirsFile(dirPath)));
+    public ChProjectLoader(Path dirPath, ISettings settings) {
+        super(dirPath, settings, new ChWorkDirs(AbstractWorkDirs.resolveAltDirsFile(dirPath)));
     }
 
-    public ChProjectLoader(Path dirPath, DiffSettings diffSettings, Collection<String> libXmls,
+    public ChProjectLoader(Path dirPath, ISettings settings, Collection<String> libXmls,
                            Collection<String> libs, Collection<String> libsWithoutPriv, Path metaPath) {
-        super(dirPath, diffSettings, new ChWorkDirs(AbstractWorkDirs.resolveAltDirsFile(dirPath)),
+        super(dirPath, settings, new ChWorkDirs(AbstractWorkDirs.resolveAltDirsFile(dirPath)),
                 libXmls, libs, libsWithoutPriv, metaPath);
     }
 
@@ -49,11 +49,11 @@ public class ChProjectLoader extends AbstractProjectLoader<ChDatabase> {
 
     @Override
     protected AbstractDumpLoader<ChDatabase> createDumpLoader(Path file) {
-        return new ChDumpLoader(file, diffSettings);
+        return new ChDumpLoader(file, settings);
     }
 
     @Override
     protected AbstractLibraryLoader<ChDatabase> createLibraryLoader(ChDatabase db) {
-        return new ChLibraryLoader(db, metaPath, new HashSet<>(), diffSettings);
+        return new ChLibraryLoader(db, metaPath, new HashSet<>(), settings);
     }
 }

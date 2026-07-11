@@ -32,7 +32,6 @@ import org.pgcodekeeper.core.database.ch.project.ChProjectUpdater;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.database.ch.script.ChScriptBuilder;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
-import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
@@ -80,38 +79,38 @@ public class ChDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public ChJdbcLoader getJdbcLoader(String url, DiffSettings diffSettings) {
-        return getJdbcLoader(getJdbcConnector(url), diffSettings);
+    public ChJdbcLoader getJdbcLoader(String url, ISettings settings) {
+        return getJdbcLoader(getJdbcConnector(url), settings);
     }
 
     @Override
-    public ChJdbcLoader getJdbcLoader(IJdbcConnector connector, DiffSettings diffSettings) {
-        return new ChJdbcLoader(connector, diffSettings);
+    public ChJdbcLoader getJdbcLoader(IJdbcConnector connector, ISettings settings) {
+        return new ChJdbcLoader(connector, settings);
     }
 
     @Override
-    public ChDumpLoader getDumpLoader(Path path, DiffSettings diffSettings) {
-        return new ChDumpLoader(path, diffSettings);
+    public ChDumpLoader getDumpLoader(Path path, ISettings settings) {
+        return new ChDumpLoader(path, settings);
     }
 
     @Override
-    public ChDumpLoader getDumpLoader(InputStreamProvider input, String name, DiffSettings diffSettings) {
-        return new ChDumpLoader(input, name, diffSettings);
+    public ChDumpLoader getDumpLoader(InputStreamProvider input, String name, ISettings settings) {
+        return new ChDumpLoader(input, name, settings);
     }
 
     @Override
-    public ChProjectLoader getProjectLoader(Path path, DiffSettings diffSettings) {
-        return new ChProjectLoader(path, diffSettings);
+    public ChProjectLoader getProjectLoader(Path path, ISettings settings) {
+        return new ChProjectLoader(path, settings);
     }
 
     @Override
-    public ChProjectLoader getProjectLoader(Path path, DiffSettings diffSettings, Collection<String> libXmls,
+    public ChProjectLoader getProjectLoader(Path path, ISettings settings, Collection<String> libXmls,
                                             Collection<String> libs, Collection<String> libsWithoutPriv, Path metaPath) {
-        return new ChProjectLoader(path, diffSettings, libXmls, libs, libsWithoutPriv, metaPath);
+        return new ChProjectLoader(path, settings, libXmls, libs, libsWithoutPriv, metaPath);
     }
 
     @Override
-    public IScriptBuilder getScriptBuilder(DiffSettings diffSettings) {
-        return new ChScriptBuilder(diffSettings);
+    public IScriptBuilder getScriptBuilder(ISettings settings) {
+        return new ChScriptBuilder(settings);
     }
 }

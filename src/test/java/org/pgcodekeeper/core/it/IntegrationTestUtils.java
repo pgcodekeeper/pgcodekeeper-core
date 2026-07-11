@@ -30,7 +30,7 @@ import org.pgcodekeeper.core.database.base.parser.FullAnalyze;
 import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.io.IOException;
@@ -50,38 +50,38 @@ public final class IntegrationTestUtils {
     public static final List<String> IGNORED_SCHEMAS_LIST = List.of("worker", "country", "ignore1", "ignore4vrw");
 
     public static IDatabase loadTestDump(IDatabaseProvider databaseProvider, String resource, Class<?> c,
-                                         DiffSettings diffSettings)
+                                         ISettings settings)
             throws IOException, InterruptedException {
-        return loadTestDump(databaseProvider, resource, c, diffSettings, true);
+        return loadTestDump(databaseProvider, resource, c, settings, true);
     }
 
     public static IDatabase loadTestDump(IDatabaseProvider databaseProvider, String resource, Class<?> c,
-                                         DiffSettings diffSettings, boolean analysis)
+                                         ISettings settings, boolean analysis)
             throws IOException, InterruptedException {
         InputStreamProvider input = () -> c.getResourceAsStream(resource);
         String inputObjectName = "test/" + c.getName() + '/' + resource;
 
-        var loader = databaseProvider.getDumpLoader(input, inputObjectName, diffSettings);
+        var loader = databaseProvider.getDumpLoader(input, inputObjectName, settings);
 
         IDatabase db = loader.load();
         if (analysis) {
-            FullAnalyze.fullAnalyze(db, diffSettings.getErrors(), diffSettings.getVersion());
+            FullAnalyze.fullAnalyze(db, settings.getErrors(), settings.getVersion());
         }
 
-        TestUtils.assertErrors(diffSettings.getErrors());
+        TestUtils.assertErrors(settings.getErrors());
         return db;
     }
 
     public static void assertDiffSame(IDatabaseProvider provider, IDatabase db, String template,
-                                      DiffSettings diffSettings)
+                                      ISettings settings)
             throws IOException, InterruptedException {
-        assertDiff(provider, db, db, diffSettings, "File name template: " + template);
+        assertDiff(provider, db, db, settings, "File name template: " + template);
     }
 
     public static void assertDiff(IDatabaseProvider provider, IDatabase oldDb, IDatabase newDb,
-                                  DiffSettings diffSettings, String errorMessage)
+                                  ISettings settings, String errorMessage)
             throws IOException, InterruptedException {
-        String script = PgCodeKeeperApi.diff(provider, oldDb, newDb, diffSettings);
+        String script = PgCodeKeeperApi.diff(provider, oldDb, newDb, settings);
         Assertions.assertEquals("", script.trim(), errorMessage);
     }
 
@@ -110,37 +110,37 @@ public final class IntegrationTestUtils {
 
     public static void assertDiff(IDatabaseProvider databaseProvider, String fileNameTemplate, Class<?> clazz)
             throws IOException, InterruptedException {
-        var diffSettings = new DiffSettings(new CoreSettings());
-        String script = getScript(databaseProvider, fileNameTemplate, diffSettings, clazz);
+        var settings = new CoreSettings();
+        String script = getScript(databaseProvider, fileNameTemplate, settings, clazz);
         assertResult(script, fileNameTemplate, clazz);
     }
 
     public static String getScript(IDatabaseProvider databaseProvider, String fileNameTemplate,
-                                   DiffSettings diffSettings, Class<?> clazz)
+                                   ISettings settings, Class<?> clazz)
             throws IOException, InterruptedException {
-        var dbOld = loadTestDump(databaseProvider, fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, diffSettings);
-        assertDiffSame(databaseProvider, dbOld, fileNameTemplate, diffSettings);
+        var dbOld = loadTestDump(databaseProvider, fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, settings);
+        assertDiffSame(databaseProvider, dbOld, fileNameTemplate, settings);
 
-        var dbNew = loadTestDump(databaseProvider, fileNameTemplate + FILES_POSTFIX.NEW_SQL, clazz, diffSettings);
-        assertDiffSame(databaseProvider, dbNew, fileNameTemplate, diffSettings);
+        var dbNew = loadTestDump(databaseProvider, fileNameTemplate + FILES_POSTFIX.NEW_SQL, clazz, settings);
+        assertDiffSame(databaseProvider, dbNew, fileNameTemplate, settings);
 
-        return PgCodeKeeperApi.diff(databaseProvider, dbOld, dbNew, diffSettings);
+        return PgCodeKeeperApi.diff(databaseProvider, dbOld, dbNew, settings);
     }
 
     public static void assertEqualsDependencies(IDatabaseProvider databaseProvider, String dbTemplate,
                                                 String userTemplateName, Map<String, DbObjType> selected,
-                                                Class<?> clazz, DiffSettings diffSettings)
+                                                Class<?> clazz, ISettings settings)
             throws IOException, InterruptedException {
-        var oldDbFull = loadTestDump(databaseProvider, dbTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, diffSettings);
-        var newDbFull = loadTestDump(databaseProvider, dbTemplate + FILES_POSTFIX.NEW_SQL, clazz, diffSettings);
+        var oldDbFull = loadTestDump(databaseProvider, dbTemplate + FILES_POSTFIX.ORIGINAL_SQL, clazz, settings);
+        var newDbFull = loadTestDump(databaseProvider, dbTemplate + FILES_POSTFIX.NEW_SQL, clazz, settings);
 
-        assertDiffSame(databaseProvider, oldDbFull, dbTemplate, diffSettings);
-        assertDiffSame(databaseProvider, newDbFull, dbTemplate, diffSettings);
+        assertDiffSame(databaseProvider, oldDbFull, dbTemplate, settings);
+        assertDiffSame(databaseProvider, newDbFull, dbTemplate, settings);
 
-        TreeElement tree = DiffTree.create(diffSettings.getSettings(), oldDbFull, newDbFull, null);
+        TreeElement tree = DiffTree.create(settings, oldDbFull, newDbFull, null);
 
         setSelected(selected, tree, oldDbFull, newDbFull);
-        String script = PgCodeKeeperApi.diff(databaseProvider, oldDbFull, newDbFull, diffSettings, tree);
+        String script = PgCodeKeeperApi.diff(databaseProvider, oldDbFull, newDbFull, settings, tree);
         var userSelTemplate = null == userTemplateName ? dbTemplate : dbTemplate + "_" + userTemplateName;
         assertResult(script, userSelTemplate, clazz);
     }

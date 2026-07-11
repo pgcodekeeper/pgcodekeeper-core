@@ -29,7 +29,6 @@ import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeFlattener;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
@@ -109,10 +108,9 @@ class PgPartialExporterTest {
         String targetFilename = "TestPartialExportTarget.sql";
         var settings = new CoreSettings();
         settings.setInCharsetName(Consts.UTF_8);
-        var diffSettings = new DiffSettings(settings);
 
-        dbSource = loadTestDump(databaseProvider, sourceFilename, PgPartialExporterTest.class, diffSettings, false);
-        dbTarget = loadTestDump(databaseProvider, targetFilename, PgPartialExporterTest.class, diffSettings, false);
+        dbSource = loadTestDump(databaseProvider, sourceFilename, PgPartialExporterTest.class, settings, false);
+        dbTarget = loadTestDump(databaseProvider, targetFilename, PgPartialExporterTest.class, settings, false);
 
         Assertions.assertNotNull(dbSource);
         Assertions.assertNotNull(dbTarget);

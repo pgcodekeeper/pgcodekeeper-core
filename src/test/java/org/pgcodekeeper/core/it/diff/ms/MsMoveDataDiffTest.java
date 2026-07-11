@@ -21,7 +21,6 @@ import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.api.PgCodeKeeperApi;
 import org.pgcodekeeper.core.database.ms.MsDatabaseProvider;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 
@@ -50,17 +49,16 @@ class MsMoveDataDiffTest {
         var settings = new CoreSettings();
         MsDatabaseProvider databaseProvider = new MsDatabaseProvider();
         settings.setDataMovementMode(true);
-        var diffSettings = new DiffSettings(settings);
 
         var dbOld = loadTestDump(
-                databaseProvider, fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, MsMoveDataDiffTest.class, diffSettings);
+                databaseProvider, fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, MsMoveDataDiffTest.class, settings);
         var dbNew = loadTestDump(
-                databaseProvider, fileNameTemplate + FILES_POSTFIX.NEW_SQL, MsMoveDataDiffTest.class, diffSettings);
+                databaseProvider, fileNameTemplate + FILES_POSTFIX.NEW_SQL, MsMoveDataDiffTest.class, settings);
 
-        assertDiffSame(databaseProvider, dbOld, fileNameTemplate, diffSettings);
-        assertDiffSame(databaseProvider, dbNew, fileNameTemplate, diffSettings);
+        assertDiffSame(databaseProvider, dbOld, fileNameTemplate, settings);
+        assertDiffSame(databaseProvider, dbNew, fileNameTemplate, settings);
 
-        String script = PgCodeKeeperApi.diff(databaseProvider, dbOld, dbNew, diffSettings);
+        String script = PgCodeKeeperApi.diff(databaseProvider, dbOld, dbNew, settings);
         String content = script.replaceAll("([0-9a-fA-F]{32})", "randomly_generated_part");
 
         assertResult(content, fileNameTemplate, MsMoveDataDiffTest.class);

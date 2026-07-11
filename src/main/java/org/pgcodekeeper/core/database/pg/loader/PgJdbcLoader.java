@@ -28,7 +28,7 @@ import org.pgcodekeeper.core.database.pg.utils.PgConsts;
 import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Utils;
 
 import java.io.IOException;
@@ -114,10 +114,10 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
      *
      * @param connector    the JDBC connector for establishing database connections
      * @param timezone     the timezone to set for the database connection
-     * @param diffSettings unified context object containing settings, ignore list, and error accumulator
+     * @param settings configuration settings
      */
-    public PgJdbcLoader(IJdbcConnector connector, String timezone, DiffSettings diffSettings) {
-        super(connector, diffSettings);
+    public PgJdbcLoader(IJdbcConnector connector, String timezone, ISettings settings) {
+        super(connector, settings);
         this.timezone = timezone;
     }
 
@@ -247,7 +247,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
         if (isGreenplumDb && !PgSupportedVersion.GP_VERSION_6.isLE(version)) {
             throw new IllegalStateException(Messages.JdbcLoaderBase_unsupported_gp_version);
         }
-        diffSettings.setVersion(PgSupportedVersion.valueOf(version));
+        settings.setVersion(PgSupportedVersion.valueOf(version));
     }
 
     protected void queryCheckLastSysOid() throws SQLException, InterruptedException {

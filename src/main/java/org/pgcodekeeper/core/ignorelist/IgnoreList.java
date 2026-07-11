@@ -16,7 +16,6 @@
 package org.pgcodekeeper.core.ignorelist;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -47,9 +46,7 @@ public class IgnoreList implements IIgnoreList {
         return Collections.unmodifiableList(rules);
     }
 
-    /**
-     * Clears all ignore rules from the list.
-     */
+    @Override
     public void clearList() {
         rules.clear();
     }
@@ -81,18 +78,6 @@ public class IgnoreList implements IIgnoreList {
             }
         }
         return null;
-    }
-
-    /**
-     * Adds all ignore rules from the collection to this list.
-     * Each rule is processed through the standard add logic to handle merging.
-     *
-     * @param collection collection of ignore rules to add
-     */
-    public void addAll(Collection<IgnoredObject> collection) {
-        for (IgnoredObject rule : collection) {
-            add(rule);
-        }
     }
 
     /**

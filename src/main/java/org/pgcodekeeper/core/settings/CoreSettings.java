@@ -29,7 +29,7 @@ import java.util.List;
  * Provides default implementations for all configuration options including database type,
  * character encoding, file paths, and various migration behavior flags.
  */
-public class CoreSettings implements ISettings {
+public class CoreSettings extends AbstractSettings {
 
     private boolean printUsing = true;
     private boolean ignorePrivileges;
@@ -336,7 +336,7 @@ public class CoreSettings implements ISettings {
     }
 
     @Override
-    public CoreSettings copy() {
+    public CoreSettings shallowCopy() {
         var settings = new CoreSettings();
         settings.addTransaction = addTransaction;
         settings.allowedTypes = allowedTypes;
@@ -367,6 +367,7 @@ public class CoreSettings implements ISettings {
         settings.disableAutoLoad = disableAutoLoad;
         settings.formatConfiguration = formatConfiguration;
         settings.isAutoFormatObjectCode = isAutoFormatObjectCode;
+        settings.isUseActualVersionSyntax = isUseActualVersionSyntax;
         return settings;
     }
 }

@@ -32,7 +32,7 @@ import org.pgcodekeeper.core.database.ch.loader.ChDumpLoader;
 import org.pgcodekeeper.core.it.jdbc.base.JdbcLoaderTest;
 import org.pgcodekeeper.core.monitor.NullMonitor;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 import org.pgcodekeeper.core.utils.testcontainer.TestContainerType;
 
@@ -60,39 +60,38 @@ class ChJdbcLoaderTest extends JdbcLoaderTest {
         var settings = new CoreSettings();
         settings.setAddTransaction(true);
         settings.setEnableFunctionBodiesDependencies(true);
-        var diffSettings = new DiffSettings(settings);
 
         String dumpFileName = fileName + FILES_POSTFIX.SQL;
         var path = TestUtils.getFilePath(dumpFileName, getClass());
-        var dumpDb = databaseProvider.getDumpLoader(path, diffSettings).loadAndAnalyze();
+        var dumpDb = databaseProvider.getDumpLoader(path, settings).loadAndAnalyze();
         var script = Files.readString(TestUtils.getFilePath(dumpFileName, getClass()));
 
         var loader = createDumpLoader(() -> new ByteArrayInputStream(script.getBytes(StandardCharsets.UTF_8)),
-                dumpFileName, diffSettings);
+                dumpFileName, settings);
         ScriptParser parser = new ScriptParser(loader, dumpFileName, script);
 
         var url = TestContainerType.CH_24.getUrl();
-        var startConfDb = loadStartConfDb(databaseProvider, url, diffSettings);
+        var startConfDb = loadStartConfDb(databaseProvider, url, settings);
         IJdbcConnector connector = new ChJdbcConnector(url);
         IDatabase remoteDb = null;
         try {
             new JdbcRunner(new NullMonitor()).runBatches(connector, parser.batch(), null);
 
-            remoteDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
+            remoteDb = databaseProvider.getJdbcLoader(url, settings).loadAndAnalyze();
             List<Path> ignoreLists = List.of(TestUtils.getFilePath("ch.pgcodekeeperignore", getClass()));
             for (var ignorePath : ignoreLists) {
-                diffSettings.addIgnoreList(ignorePath);
+                settings.addIgnoreList(ignorePath);
             }
-            var actual = PgCodeKeeperApi.diff(databaseProvider, dumpDb, remoteDb, diffSettings);
+            var actual = PgCodeKeeperApi.diff(databaseProvider, dumpDb, remoteDb, settings);
             Assertions.assertEquals("", actual, "Incorrect run dump %s on Database".formatted(dumpFileName));
         } finally {
-            clearDb(startConfDb, remoteDb, connector, url, databaseProvider, diffSettings);
+            clearDb(startConfDb, remoteDb, connector, url, databaseProvider, settings);
         }
     }
 
     @Override
     protected AbstractDumpLoader<?> createDumpLoader(InputStreamProvider input, String inputObjectName,
-                                                     DiffSettings diffSettings) {
-        return new ChDumpLoader(input, inputObjectName, diffSettings);
+                                                     ISettings settings) {
+        return new ChDumpLoader(input, inputObjectName, settings);
     }
 }

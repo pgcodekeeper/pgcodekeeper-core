@@ -24,7 +24,6 @@ import org.pgcodekeeper.core.database.ms.MsDatabaseProvider;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.model.graph.DepcyFinder;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -67,7 +66,7 @@ class MsDepcyFinderTest {
         settings.setEnableFunctionBodiesDependencies(true);
 
         IDatabase db = IntegrationTestUtils.loadTestDump(databaseProvider, fileName + FILES_POSTFIX.SQL,
-                getClass(), new DiffSettings(settings));
+                getClass(), settings);
 
         var deps = DepcyFinder.byPatterns(10, isReverse, Collections.emptyList(), false, db, List.of(objectName));
         String actual = String.join("\n", deps);

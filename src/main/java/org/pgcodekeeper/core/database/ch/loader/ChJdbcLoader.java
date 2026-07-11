@@ -23,7 +23,7 @@ import org.pgcodekeeper.core.database.ch.parser.generated.CHParser;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +50,10 @@ public final class ChJdbcLoader extends AbstractJdbcLoader<ChDatabase> {
      * Creates a new ClickHouse JDBC loader with the specified parameters.
      *
      * @param connector    the JDBC connector for establishing database connections
-     * @param diffSettings unified context object containing settings, ignore list, and error accumulator
+     * @param settings configuration settings
      */
-    public ChJdbcLoader(IJdbcConnector connector, DiffSettings diffSettings) {
-        super(connector, diffSettings);
+    public ChJdbcLoader(IJdbcConnector connector, ISettings settings) {
+        super(connector, settings);
     }
 
     @Override
@@ -61,7 +61,7 @@ public final class ChJdbcLoader extends AbstractJdbcLoader<ChDatabase> {
         if (isPreloaded) {
             return;
         }
-        diffSettings.setVersion(ChSupportedVersion.DEFAULT);
+        settings.setVersion(ChSupportedVersion.DEFAULT);
         isPreloaded = true;
     }
 

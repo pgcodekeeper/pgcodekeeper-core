@@ -20,7 +20,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.database.ch.ChDatabaseProvider;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 
@@ -83,8 +82,7 @@ class ChDiffTest {
     void ignorePrivilegesTest(String fileNameTemplate) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         settings.setIgnorePrivileges(true);
-        DiffSettings diffSettings = new DiffSettings(settings);
-        String script = getScript(databaseProvider, fileNameTemplate, diffSettings, ChDiffTest.class);
+        String script = getScript(databaseProvider, fileNameTemplate, settings, ChDiffTest.class);
         assertResult(script, fileNameTemplate, ChDiffTest.class);
     }
 
@@ -96,8 +94,7 @@ class ChDiffTest {
         var fileNameTemplate = "ch_create_table_with_on_cluster";
         var settings = new CoreSettings();
         settings.setClusterName("test");
-        DiffSettings diffSettings = new DiffSettings(settings);
-        String script = getScript(databaseProvider, fileNameTemplate, diffSettings, ChDiffTest.class);
+        String script = getScript(databaseProvider, fileNameTemplate, settings, ChDiffTest.class);
         assertResult(script, fileNameTemplate, ChDiffTest.class);
     }
 }

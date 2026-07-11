@@ -41,7 +41,7 @@ import org.pgcodekeeper.core.database.ms.parser.statement.MsGrantPrivilege;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.exception.UnresolvedReferenceException;
 import org.pgcodekeeper.core.localizations.Messages;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 
 /**
  * Custom ANTLR listener for processing Microsoft SQL Server (T-SQL) statements with override support.
@@ -58,12 +58,12 @@ public final class MsOverridesListener extends CustomParserListener<MsDatabase>
      * @param db           the target Microsoft SQL Server database schema
      * @param filename     name of the file being parsed
      * @param mode         parsing mode (NORMAL or SCRIPT)
-     * @param diffSettings unified context object containing settings, monitor, and error accumulator
+     * @param settings configuration settings
      * @param overrides    map of statement overrides to apply
      */
     public MsOverridesListener(MsDatabase db, String filename, ParserListenerMode mode,
-                                 DiffSettings diffSettings, Map<AbstractStatement, StatementOverride> overrides) {
-        super(db, filename, mode, diffSettings);
+                                 ISettings settings, Map<AbstractStatement, StatementOverride> overrides) {
+        super(db, filename, mode, settings);
         this.overrides = overrides;
     }
 

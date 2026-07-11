@@ -17,6 +17,7 @@ package org.pgcodekeeper.core.ignorelist;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -38,6 +39,23 @@ public interface IIgnoreList {
      * @param rule the ignore rule to add
      */
     void add(IgnoredObject rule);
+
+    /**
+     * Adds all ignore rules from the collection to this list. Each rule is
+     * processed through the standard add logic to handle merging.
+     *
+     * @param rules collection of ignore rules to add
+     */
+    default void addAll(Collection<IgnoredObject> rules) {
+        for (IgnoredObject rule : rules) {
+            add(rule);
+        }
+    }
+
+    /**
+     * Clears all ignore rules from the list.
+     */
+    void clearList();
 
     /**
      * Sets the default show behavior for this ignore list.
