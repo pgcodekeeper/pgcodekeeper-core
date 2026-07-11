@@ -33,7 +33,6 @@ import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.utils.PgDiffUtils;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.utils.Pair;
 import org.pgcodekeeper.core.utils.Utils;
 
@@ -99,10 +98,9 @@ class PgExprTypeTest {
             throws InterruptedException, IOException {
         PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
 
-        var diffSettings = new DiffSettings(settings);
         IDatabase dbNew = IntegrationTestUtils.loadTestDump(databaseProvider,
-                fileNameTemplate + postfix, PgExprTypeTest.class, diffSettings, false);
-        MetaContainer metaDb = MetaUtils.createTreeFromDb(dbNew, diffSettings.getVersion());
+                fileNameTemplate + postfix, PgExprTypeTest.class, settings, false);
+        MetaContainer metaDb = MetaUtils.createTreeFromDb(dbNew, settings.getVersion());
         FullAnalyze.fullAnalyze(dbNew, metaDb, new ArrayList<>());
         return metaDb;
     }

@@ -29,7 +29,6 @@ import org.pgcodekeeper.core.database.ms.project.MsModelExporter;
 import org.pgcodekeeper.core.database.ms.schema.*;
 import org.pgcodekeeper.core.database.ms.utils.MsConsts;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.nio.file.Path;
 
@@ -68,15 +67,14 @@ class MsAntlrLoaderTest {
         var settings = new CoreSettings();
         settings.setInCharsetName(ENCODING);
         settings.setKeepNewlines(true);
-        var diffSettings = new DiffSettings(settings);
         IDatabase d = databaseProvider.getDumpLoader(
-                TestUtils.getFilePath(fileName, MsAntlrLoaderTest.class), diffSettings).loadAndAnalyze();
+                TestUtils.getFilePath(fileName, MsAntlrLoaderTest.class), settings).loadAndAnalyze();
 
-        assertDiff(databaseProvider, dbPredefined, d, diffSettings, "PgDumpLoader: predefined object is not equal to file " + fileName);
+        assertDiff(databaseProvider, dbPredefined, d, settings, "PgDumpLoader: predefined object is not equal to file " + fileName);
 
         // test deepCopy mechanism
-        assertDiff(databaseProvider, d, (IDatabase) d.deepCopy(), diffSettings, "PgStatement deep copy altered");
-        assertDiff(databaseProvider, dbPredefined, d, diffSettings, "PgStatement deep copy altered original");
+        assertDiff(databaseProvider, d, (IDatabase) d.deepCopy(), settings, "PgStatement deep copy altered");
+        assertDiff(databaseProvider, dbPredefined, d, settings, "PgStatement deep copy altered original");
     }
 
     void exportFullDb(String fileName, IDatabase dbPredefined, Path exportDir) throws Exception {
@@ -84,20 +82,19 @@ class MsAntlrLoaderTest {
         var settings = new CoreSettings();
         settings.setInCharsetName(ENCODING);
         settings.setKeepNewlines(true);
-        var diffSettings = new DiffSettings(settings);
 
         IDatabase dbFromFile = new MsDatabaseProvider().getDumpLoader(
-                TestUtils.getFilePath(fileName, MsAntlrLoaderTest.class), diffSettings).loadAndAnalyze();
+                TestUtils.getFilePath(fileName, MsAntlrLoaderTest.class), settings).loadAndAnalyze();
 
         new MsModelExporter(exportDir, dbPredefined, ENCODING, settings).exportFull();
 
-        IDatabase dbAfterExport = databaseProvider.getProjectLoader(exportDir, diffSettings).loadAndAnalyze();
+        IDatabase dbAfterExport = databaseProvider.getProjectLoader(exportDir, settings).loadAndAnalyze();
 
         // check the same db similarity before and after export
-        assertDiff(databaseProvider, dbPredefined, dbAfterExport, diffSettings, "Predefined object PgDB" + fileName +
+        assertDiff(databaseProvider, dbPredefined, dbAfterExport, settings, "Predefined object PgDB" + fileName +
                 " is not equal to exported'n'loaded.");
 
-        assertDiff(databaseProvider, dbAfterExport, dbFromFile, diffSettings,
+        assertDiff(databaseProvider, dbAfterExport, dbFromFile, settings,
                 "Exported predefined object is not equal to file " + fileName);
     }
 
@@ -1153,6 +1150,6 @@ class MsAntlrLoaderTest {
 
     private static MsDatabase createDumpDB() {
         var settings = new CoreSettings();
-        return new MsDumpLoader(() -> null, null, new DiffSettings(settings)).createDatabaseWithSchema();
+        return new MsDumpLoader(() -> null, null, settings).createDatabaseWithSchema();
     }
 }

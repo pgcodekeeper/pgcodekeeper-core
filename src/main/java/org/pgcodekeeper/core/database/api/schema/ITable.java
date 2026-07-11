@@ -16,7 +16,6 @@
 package org.pgcodekeeper.core.database.api.schema;
 
 import org.pgcodekeeper.core.script.SQLScript;
-import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.util.Collection;
@@ -75,7 +74,7 @@ public interface ITable extends IRelation, IStatementContainer {
      */
     @Deprecated(forRemoval = true)
     default boolean isRecreated(ITable newTable, ISettings settings) {
-        var state = appendAlterSQL(newTable, new SQLScript(new DiffSettings(settings), getSeparator()));
+        var state = appendAlterSQL(newTable, new SQLScript(settings, getSeparator()));
         return ObjectState.RECREATE == state;
     }
 

@@ -23,7 +23,7 @@ import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.base.jdbc.JdbcRunner;
 import org.pgcodekeeper.core.database.base.parser.ScriptParser;
 import org.pgcodekeeper.core.monitor.NullMonitor;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.io.ByteArrayInputStream;
@@ -43,36 +43,36 @@ public abstract class JdbcLoaderTest {
      * Loads the start-configuration database from {@code url} using {@code databaseProvider}, caching it on first use
      * and returning the cached instance on subsequent calls. The cache is keyed by {@code url}.
      */
-    protected IDatabase loadStartConfDb(IDatabaseProvider databaseProvider, String url, DiffSettings diffSettings)
+    protected IDatabase loadStartConfDb(IDatabaseProvider databaseProvider, String url, ISettings settings)
             throws IOException, InterruptedException {
         var cached = START_CONF_DB_CACHE.get(url);
         if (cached != null) {
             return cached;
         }
-        var startConfDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
+        var startConfDb = databaseProvider.getJdbcLoader(url, settings).loadAndAnalyze();
         START_CONF_DB_CACHE.put(url, startConfDb);
         return startConfDb;
     }
 
     protected void clearDb(IDatabase startConfDb, IDatabase currentDb, IJdbcConnector connector, String url,
-                           IDatabaseProvider databaseProvider, DiffSettings diffSettings)
+                           IDatabaseProvider databaseProvider, ISettings settings)
             throws IOException, InterruptedException, SQLException {
         var oldDb = currentDb != null ? currentDb
-                : databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
-        var dropScript = PgCodeKeeperApi.diff(databaseProvider, oldDb, startConfDb, diffSettings);
+                : databaseProvider.getJdbcLoader(url, settings).loadAndAnalyze();
+        var dropScript = PgCodeKeeperApi.diff(databaseProvider, oldDb, startConfDb, settings);
 
         var loader = createDumpLoader(() -> new ByteArrayInputStream(dropScript.getBytes(StandardCharsets.UTF_8)),
-                CLEAN_DB_SCRIPT, diffSettings);
+                CLEAN_DB_SCRIPT, settings);
         new JdbcRunner(new NullMonitor()).runBatches(connector,
                 new ScriptParser(loader, CLEAN_DB_SCRIPT, dropScript).batch(), null);
 
-        var newDb = databaseProvider.getJdbcLoader(url, diffSettings).loadAndAnalyze();
-        var diff = PgCodeKeeperApi.diff(databaseProvider, startConfDb, newDb, diffSettings);
+        var newDb = databaseProvider.getJdbcLoader(url, settings).loadAndAnalyze();
+        var diff = PgCodeKeeperApi.diff(databaseProvider, startConfDb, newDb, settings);
         if (!diff.isEmpty()) {
             throw new IllegalStateException("Database cleared incorrect. in database:\n\n" + diff);
         }
     }
 
     protected abstract IDumpLoader createDumpLoader(InputStreamProvider input, String inputObjectName,
-            DiffSettings diffSettings);
+            ISettings settings);
 }

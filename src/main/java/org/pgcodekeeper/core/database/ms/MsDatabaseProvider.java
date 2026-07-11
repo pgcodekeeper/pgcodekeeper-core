@@ -32,7 +32,6 @@ import org.pgcodekeeper.core.database.ms.project.MsProjectUpdater;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.ms.script.MsScriptBuilder;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
-import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
@@ -80,38 +79,38 @@ public class MsDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public MsJdbcLoader getJdbcLoader(String url, DiffSettings diffSettings) {
-        return getJdbcLoader(getJdbcConnector(url), diffSettings);
+    public MsJdbcLoader getJdbcLoader(String url, ISettings settings) {
+        return getJdbcLoader(getJdbcConnector(url), settings);
     }
 
     @Override
-    public MsJdbcLoader getJdbcLoader(IJdbcConnector connector, DiffSettings diffSettings) {
-        return new MsJdbcLoader(connector, diffSettings);
+    public MsJdbcLoader getJdbcLoader(IJdbcConnector connector, ISettings settings) {
+        return new MsJdbcLoader(connector, settings);
     }
 
     @Override
-    public MsDumpLoader getDumpLoader(Path path, DiffSettings diffSettings) {
-        return new MsDumpLoader(path, diffSettings);
+    public MsDumpLoader getDumpLoader(Path path, ISettings settings) {
+        return new MsDumpLoader(path, settings);
     }
 
     @Override
-    public MsDumpLoader getDumpLoader(InputStreamProvider input, String name, DiffSettings diffSettings) {
-        return new MsDumpLoader(input, name, diffSettings);
+    public MsDumpLoader getDumpLoader(InputStreamProvider input, String name, ISettings settings) {
+        return new MsDumpLoader(input, name, settings);
     }
 
     @Override
-    public MsProjectLoader getProjectLoader(Path path, DiffSettings diffSettings) {
-        return new MsProjectLoader(path, diffSettings);
+    public MsProjectLoader getProjectLoader(Path path, ISettings settings) {
+        return new MsProjectLoader(path, settings);
     }
 
     @Override
-    public MsProjectLoader getProjectLoader(Path path, DiffSettings diffSettings, Collection<String> libXmls,
+    public MsProjectLoader getProjectLoader(Path path, ISettings settings, Collection<String> libXmls,
                                             Collection<String> libs, Collection<String> libsWithoutPriv, Path metaPath) {
-        return new MsProjectLoader(path, diffSettings, libXmls, libs, libsWithoutPriv, metaPath);
+        return new MsProjectLoader(path, settings, libXmls, libs, libsWithoutPriv, metaPath);
     }
 
     @Override
-    public IScriptBuilder getScriptBuilder(DiffSettings diffSettings) {
-        return new MsScriptBuilder(diffSettings);
+    public IScriptBuilder getScriptBuilder(ISettings settings) {
+        return new MsScriptBuilder(settings);
     }
 }

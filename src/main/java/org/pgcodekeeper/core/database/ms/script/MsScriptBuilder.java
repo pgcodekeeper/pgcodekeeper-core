@@ -25,18 +25,18 @@ import org.pgcodekeeper.core.model.graph.ActionContainer;
 import org.pgcodekeeper.core.model.graph.ActionsToScriptConverter;
 import org.pgcodekeeper.core.script.SQLActionType;
 import org.pgcodekeeper.core.script.SQLScript;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 
 public class MsScriptBuilder extends AbstractScriptBuilder {
 
-    public MsScriptBuilder(DiffSettings diffSettings) {
-        super(diffSettings);
+    public MsScriptBuilder(ISettings settings) {
+        super(settings);
     }
 
     @Override
     protected String getScript(Set<ActionContainer> actions, Set<IStatement> toRefresh, List<TreeElement> selected,
             IDatabase oldDb, IDatabase newDb) {
-        SQLScript script = new SQLScript(diffSettings, newDb.getSeparator());
+        SQLScript script = new SQLScript(settings, newDb.getSeparator());
         if (getSettings().isAddTransaction()) {
             script.addStatement("BEGIN TRANSACTION", SQLActionType.BEGIN); //$NON-NLS-1$
         }

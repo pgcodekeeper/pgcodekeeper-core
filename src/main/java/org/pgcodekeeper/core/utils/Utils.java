@@ -52,6 +52,7 @@ import org.pgcodekeeper.core.database.api.loader.ILoader;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
+import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -362,29 +363,34 @@ public final class Utils {
     /**
      * Loads databases from loaders
      *
-     * @param oldDbLoader    loader for the old database
-     * @param newDbLoader    loader for the new database
-     * @param subMonitor     the progress monitor for tracking operation progress
-     * @param isParallelLoad flag indicating whether to load databases in parallel mode
+     * @param oldDbLoader loader for the old database
+     * @param newDbLoader loader for the new database
+     * @param settings    configuration settings
+     * @param monitor     the progress monitor for tracking operation progress
      * @return pair of databases (old and new)
      * @throws IOException          if I/O operations fail
-     * @throws InterruptedException if the thread is interrupted during the operation
+     * @throws InterruptedException if the thread is interrupted during the
+     *                              operation
      */
     public static Pair<IDatabase, IDatabase> loadDatabases(ILoader oldDbLoader, ILoader newDbLoader,
-                                                           IMonitor subMonitor, boolean isParallelLoad)
+            ISettings settings, IMonitor monitor)
             throws IOException, InterruptedException {
+        // clearing temporary fields in case of a restart
+        settings.clearErrors();
+        settings.resetVersion();
+
         oldDbLoader.preLoad();
         newDbLoader.preLoad();
-        if (isParallelLoad) {
-            return loadDatabasesInParallelMode(oldDbLoader, newDbLoader, subMonitor);
+        if (settings.isParallelLoad()) {
+            return loadDatabasesInParallelMode(oldDbLoader, newDbLoader, monitor);
         }
-        subMonitor.setTaskName(Messages.Utils_loading_old_database);
+        monitor.setTaskName(Messages.Utils_loading_old_database);
         var oldDb = oldDbLoader.loadAndAnalyze();
-        subMonitor.worked(30);
+        monitor.worked(30);
 
-        subMonitor.setTaskName(Messages.Utils_loading_new_database);
+        monitor.setTaskName(Messages.Utils_loading_new_database);
         var newDb = newDbLoader.loadAndAnalyze();
-        subMonitor.worked(30);
+        monitor.worked(30);
 
         return new Pair<>(oldDb, newDb);
     }

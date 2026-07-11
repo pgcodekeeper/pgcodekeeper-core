@@ -28,7 +28,6 @@ import org.pgcodekeeper.core.model.difftree.DiffTree;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.difftree.TreeFlattener;
 import org.pgcodekeeper.core.model.graph.DepcyFinder;
-import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Utils;
 
@@ -51,29 +50,27 @@ public final class PgCodeKeeperApi {
      *
      * @param oldDbLoader  loader for the old database version to compare from
      * @param newDbLoader  loader for the new database version to compare to
-     * @param diffSettings unified context object containing settings, ignore list, and error accumulator
+     * @param settings configuration settings
      * @return the root element of generated tree
      * @throws IOException          if I/O operations fail
      * @throws InterruptedException if the thread is interrupted during the operation
      */
     public static TreeElement createTree(ILoader oldDbLoader,
                                          ILoader newDbLoader,
-                                         DiffSettings diffSettings)
+                                         ISettings settings)
             throws IOException, InterruptedException {
-        var subMonitor = diffSettings.getMonitor().createSubMonitor();
+        var subMonitor = settings.getMonitor().createSubMonitor();
         subMonitor.setWorkRemaining(65);
 
-        boolean isParallelLoad = diffSettings.getSettings().isParallelLoad();
-        var databases = Utils.loadDatabases(oldDbLoader, newDbLoader, subMonitor, isParallelLoad);
+        var databases = Utils.loadDatabases(oldDbLoader, newDbLoader, settings, subMonitor);
 
         subMonitor.setTaskName(Messages.PgCodeKeeperApi_creating_tree);
-        TreeElement root = DiffTree.create(diffSettings.getSettings(), databases.getFirst(), databases.getSecond(),
-                diffSettings.getMonitor());
+        TreeElement root = DiffTree.create(settings, databases.getFirst(), databases.getSecond(),
+                settings.getMonitor());
         subMonitor.worked(5);
 
         return root;
     }
-
 
     /**
      * Compares two databases and generates a migration script.
@@ -81,8 +78,7 @@ public final class PgCodeKeeperApi {
      * @param provider     the database provider determining SQL dialect
      * @param oldDbLoader  loader for the old database version to compare from
      * @param newDbLoader  loader for the new database version to compare to
-     * @param diffSettings unified context object containing settings, ignore list,
-     *                     and error accumulator
+     * @param settings configuration settings
      * @return the generated migration script as a string
      * @throws IOException          if I/O operations fail
      * @throws InterruptedException if the thread is interrupted during the
@@ -91,15 +87,14 @@ public final class PgCodeKeeperApi {
     public static String diff(IDatabaseProvider provider,
                               ILoader oldDbLoader,
                               ILoader newDbLoader,
-                              DiffSettings diffSettings)
+                              ISettings settings)
             throws IOException, InterruptedException {
-        var subMonitor = diffSettings.getMonitor().createSubMonitor();
+        var subMonitor = settings.getMonitor().createSubMonitor();
         subMonitor.setWorkRemaining(70);
-        boolean isParallelLoad = diffSettings.getSettings().isParallelLoad();
-        var databases = Utils.loadDatabases(oldDbLoader, newDbLoader, subMonitor, isParallelLoad);
+        var databases = Utils.loadDatabases(oldDbLoader, newDbLoader, settings, subMonitor);
 
         subMonitor.setTaskName(Messages.PgCodeKeeperApi_building_script);
-        var script = diff(provider, databases.getFirst(), databases.getSecond(), diffSettings);
+        var script = diff(provider, databases.getFirst(), databases.getSecond(), settings);
         subMonitor.worked(10);
 
         return script;
@@ -111,7 +106,7 @@ public final class PgCodeKeeperApi {
      * @param provider     the database provider determining SQL dialect
      * @param oldDb        the old database version to compare from
      * @param newDb        the new database version to compare to
-     * @param diffSettings unified context object containing settings, ignore list, and error accumulator
+     * @param settings configuration settings
      * @return the generated migration script as a string
      * @throws IOException          if I/O operations fail
      * @throws InterruptedException if the thread is interrupted during the operation
@@ -119,11 +114,11 @@ public final class PgCodeKeeperApi {
     public static String diff(IDatabaseProvider provider,
                               IDatabase oldDb,
                               IDatabase newDb,
-                              DiffSettings diffSettings)
+                              ISettings settings)
             throws IOException, InterruptedException {
-        TreeElement root = DiffTree.create(diffSettings.getSettings(), oldDb, newDb, diffSettings.getMonitor());
+        TreeElement root = DiffTree.create(settings, oldDb, newDb, settings.getMonitor());
         root.setAllChecked();
-        return diff(provider, oldDb, newDb, diffSettings, root);
+        return diff(provider, oldDb, newDb, settings, root);
     }
 
     /**
@@ -132,7 +127,7 @@ public final class PgCodeKeeperApi {
      * @param provider     the database provider determining SQL dialect
      * @param oldDb        the old database version to compare from
      * @param newDb        the new database version to compare to
-     * @param diffSettings unified context object containing settings, ignore list, and error accumulator
+     * @param settings configuration settings
      * @param root         root element of tree
      * @return the generated migration script as a string
      * @throws IOException if I/O operations fail
@@ -140,10 +135,10 @@ public final class PgCodeKeeperApi {
     public static String diff(IDatabaseProvider provider,
                               IDatabase oldDb,
                               IDatabase newDb,
-                              DiffSettings diffSettings,
+                              ISettings settings,
                               TreeElement root)
             throws IOException {
-        var scriptBuilder = provider.getScriptBuilder(diffSettings);
+        var scriptBuilder = provider.getScriptBuilder(settings);
         return scriptBuilder.createScript(root, oldDb, newDb);
     }
 
@@ -157,7 +152,7 @@ public final class PgCodeKeeperApi {
      * @param oldDbLoader  loader for the old database version (existing project state), or {@code null} for a full export
      * @param newDbLoader  loader for the new new database version (target state)
      * @param projectPath  path to the target project directory
-     * @param diffSettings unified context object containing settings, monitor, ignore list, and error accumulator
+     * @param settings configuration settings
      * @throws IOException          if I/O operations fail, if the directory does not exist,
      *                              if the directory is not empty (export) or if path is a file
      * @throws InterruptedException if the thread is interrupted during the operation
@@ -166,9 +161,9 @@ public final class PgCodeKeeperApi {
                                        ILoader oldDbLoader,
                                        ILoader newDbLoader,
                                        Path projectPath,
-                                       DiffSettings diffSettings)
+                                       ISettings settings)
             throws IOException, InterruptedException {
-        exportToProject(provider, oldDbLoader, newDbLoader, projectPath, false, null, diffSettings);
+        exportToProject(provider, oldDbLoader, newDbLoader, projectPath, false, null, settings);
     }
 
     /**
@@ -182,7 +177,7 @@ public final class PgCodeKeeperApi {
      * @param newDbLoader   loader for the new database version (target state)
      * @param projectPath   path to the target project directory
      * @param overridesOnly option to update only overrides
-     * @param diffSettings unified context object containing settings, monitor, ignore list, and error accumulator
+     * @param settings configuration settings
      * @throws IOException          if I/O operations fail, if the directory does not exist,
      *                              if the directory is not empty (export) or if path is a file
      * @throws InterruptedException if the thread is interrupted during the operation
@@ -192,9 +187,9 @@ public final class PgCodeKeeperApi {
                                        ILoader newDbLoader,
                                        Path projectPath,
                                        boolean overridesOnly,
-                                       DiffSettings diffSettings)
+                                       ISettings settings)
             throws IOException, InterruptedException {
-        exportToProject(provider, oldDbLoader, newDbLoader, projectPath, overridesOnly, null, diffSettings);
+        exportToProject(provider, oldDbLoader, newDbLoader, projectPath, overridesOnly, null, settings);
     }
 
     /**
@@ -215,7 +210,7 @@ public final class PgCodeKeeperApi {
      *                      persisted to the exported project as {@code structure.properties}
      *                      regardless of the source filename. Only used when {@code oldDbLoader}
      *                      is {@code null} (full export).
-     * @param diffSettings unified context object containing settings, monitor, ignore list, and error accumulator
+     * @param settings configuration settings
      * @throws IOException          if I/O operations fail, if the directory does not exist,
      *                              if the directory is not empty (export) or if path is a file
      * @throws InterruptedException if the thread is interrupted during the operation
@@ -226,9 +221,9 @@ public final class PgCodeKeeperApi {
                                        Path projectPath,
                                        boolean overridesOnly,
                                        Path structureFile,
-                                       DiffSettings diffSettings)
+                                       ISettings settings)
             throws IOException, InterruptedException {
-        var subMonitor = diffSettings.getMonitor().createSubMonitor();
+        var subMonitor = settings.getMonitor().createSubMonitor();
         subMonitor.setWorkRemaining(100);
 
         subMonitor.setTaskName(Messages.Utils_loading_old_database);
@@ -239,11 +234,10 @@ public final class PgCodeKeeperApi {
         var newDb = newDbLoader.loadAndAnalyze();
         subMonitor.worked(30);
 
-        IgnoreList ignoreList = diffSettings.getIgnoreList();
-        ISettings settings = diffSettings.getSettings();
+        IgnoreList ignoreList = settings.getIgnoreList();
 
         subMonitor.setTaskName(Messages.PgCodeKeeperApi_creating_tree);
-        TreeElement root = DiffTree.create(settings, oldDb, newDb, diffSettings.getMonitor());
+        TreeElement root = DiffTree.create(settings, oldDb, newDb, settings.getMonitor());
         root.setAllChecked();
         subMonitor.worked(20);
 
@@ -338,9 +332,9 @@ public final class PgCodeKeeperApi {
                                                    boolean invertFilter)
             throws IOException, InterruptedException {
         var db = loader.loadAndAnalyze();
-        var diffSettings = loader.getDiffSettings();
+        var settings = loader.getSettings();
         return DepcyFinder.byPatterns(depth, reverse, filterTypes, invertFilter, db, objectNames,
-                diffSettings.getAdditionalDependencies());
+                settings.getAdditionalDependencies());
     }
 
     /**
@@ -349,7 +343,7 @@ public final class PgCodeKeeperApi {
      * @param provider       the database provider determining SQL dialect
      * @param name           name of the script source (used as file identifier for parsing)
      * @param sql            the SQL script to check
-     * @param diffSettings   parsing settings
+     * @param settings   parsing settings
      * @param allowedDangers set of allowed dangerous operations
      * @return set of detected dangerous operations
      * @throws IOException          if I/O operations fail
@@ -357,15 +351,15 @@ public final class PgCodeKeeperApi {
      */
     public static Set<DangerStatement> checkDangerousStatements(IDatabaseProvider provider,
                                                                 String name, String sql,
-                                                                DiffSettings diffSettings,
+                                                                ISettings settings,
                                                                 Collection<DangerStatement> allowedDangers)
             throws IOException, InterruptedException {
-        var subMonitor = diffSettings.getMonitor().createSubMonitor();
+        var subMonitor = settings.getMonitor().createSubMonitor();
         subMonitor.setWorkRemaining(100);
 
         subMonitor.setTaskName(Messages.PgCodeKeeperApi_parsing_script);
         ScriptParser parser = new ScriptParser(provider.getDumpLoader(() -> new ByteArrayInputStream(
-                sql.getBytes(StandardCharsets.UTF_8)), name, diffSettings), name, sql);
+                sql.getBytes(StandardCharsets.UTF_8)), name, settings), name, sql);
         subMonitor.worked(50);
 
         subMonitor.setTaskName(Messages.PgCodeKeeperApi_checking_dangerous_statements);
@@ -382,20 +376,20 @@ public final class PgCodeKeeperApi {
      * @param name         name of the script source (used as file identifier for parsing)
      * @param sql          the SQL script to execute
      * @param url          full JDBC URL of the target database
-     * @param diffSettings parsing and execution settings
+     * @param settings parsing and execution settings
      * @throws IOException          if there is an error reading the script
      * @throws InterruptedException if the thread is interrupted during the operation
      * @throws SQLException         if a database access error occurs during execution
      */
     public static void runSQL(IDatabaseProvider provider, String name, String sql, String url,
-                              DiffSettings diffSettings)
+                              ISettings settings)
             throws IOException, InterruptedException, SQLException {
-        var subMonitor = diffSettings.getMonitor().createSubMonitor();
+        var subMonitor = settings.getMonitor().createSubMonitor();
         subMonitor.setWorkRemaining(100);
 
         subMonitor.setTaskName(Messages.PgCodeKeeperApi_parsing_script);
         ScriptParser parser = new ScriptParser(provider.getDumpLoader(() -> new ByteArrayInputStream(
-                sql.getBytes(StandardCharsets.UTF_8)), name, diffSettings), name, sql);
+                sql.getBytes(StandardCharsets.UTF_8)), name, settings), name, sql);
         subMonitor.worked(30);
 
         subMonitor.setTaskName(Messages.PgCodeKeeperApi_executing_script);

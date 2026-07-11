@@ -24,19 +24,19 @@ import org.pgcodekeeper.core.model.difftree.TreeElement;
 import org.pgcodekeeper.core.model.graph.ActionContainer;
 import org.pgcodekeeper.core.model.graph.ActionsToScriptConverter;
 import org.pgcodekeeper.core.script.SQLScript;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 
 public class ChScriptBuilder extends AbstractScriptBuilder {
 
-    public ChScriptBuilder(DiffSettings diffSettings) {
-        super(diffSettings);
+    public ChScriptBuilder(ISettings settings) {
+        super(settings);
     }
 
     @Override
     protected String getScript(Set<ActionContainer> actions, Set<IStatement> toRefresh,
                                List<TreeElement> selected,
                                IDatabase oldDb, IDatabase newDb) {
-        SQLScript script = new SQLScript(diffSettings, oldDb.getSeparator());
+        SQLScript script = new SQLScript(settings, oldDb.getSeparator());
         ActionsToScriptConverter.fillScript(script, actions, toRefresh, oldDb, newDb, selected);
         return script.getFullScript();
     }

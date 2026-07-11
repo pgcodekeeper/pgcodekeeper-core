@@ -22,7 +22,7 @@ import org.pgcodekeeper.core.database.base.parser.CustomParserListener;
 import org.pgcodekeeper.core.database.ch.parser.generated.CHParser.*;
 import org.pgcodekeeper.core.database.ch.parser.statement.*;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 
 /**
  * Custom ANTLR listener for parsing ClickHouse SQL statements.
@@ -36,11 +36,11 @@ public final class ChCustomParserListener extends CustomParserListener<ChDatabas
      * @param database     the target database schema to populate
      * @param filename     name of the file being parsed
      * @param mode         parsing mode
-     * @param diffSettings unified context object containing settings, monitor, and error accumulator
+     * @param settings configuration settings
      */
     public ChCustomParserListener(ChDatabase database, String filename, ParserListenerMode mode,
-                                     DiffSettings diffSettings) {
-        super(database, filename, mode, diffSettings);
+                                     ISettings settings) {
+        super(database, filename, mode, settings);
     }
 
     @Override

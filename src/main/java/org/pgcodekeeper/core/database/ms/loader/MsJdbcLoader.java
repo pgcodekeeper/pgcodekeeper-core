@@ -32,7 +32,7 @@ import org.pgcodekeeper.core.database.ms.schema.MsTable;
 import org.pgcodekeeper.core.database.ms.utils.MsDiffUtils;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,10 +63,10 @@ public final class MsJdbcLoader extends AbstractJdbcLoader<MsDatabase> {
      * Creates a new Microsoft SQL Server JDBC loader with the specified parameters.
      *
      * @param connector    the JDBC connector for establishing database connections
-     * @param diffSettings unified context object containing settings, ignore list, and error accumulator
+     * @param settings configuration settings
      */
-    public MsJdbcLoader(IJdbcConnector connector, DiffSettings diffSettings) {
-        super(connector, diffSettings);
+    public MsJdbcLoader(IJdbcConnector connector, ISettings settings) {
+        super(connector, settings);
     }
 
     @Override
@@ -142,7 +142,7 @@ public final class MsJdbcLoader extends AbstractJdbcLoader<MsDatabase> {
             if (!MsSupportedVersion.VERSION_17.isLE(version)) {
                 throw new IllegalStateException(Messages.JdbcLoaderBase_unsupported_ms_sql_version);
             }
-            diffSettings.setVersion(MsSupportedVersion.valueOf(version));
+            settings.setVersion(MsSupportedVersion.valueOf(version));
 
             debug(Messages.JdbcLoaderBase_log_load_version, version);
         }

@@ -27,15 +27,12 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.pgcodekeeper.core.Consts;
-import org.pgcodekeeper.core.database.api.schema.*;
-import org.pgcodekeeper.core.dependencieslist.Dependency;
-import org.pgcodekeeper.core.ignorelist.IgnoreList;
+import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.library.Library;
 import org.pgcodekeeper.core.library.LibrarySource;
 import org.pgcodekeeper.core.library.LibraryXmlStore;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.FileUtils;
 import org.pgcodekeeper.core.utils.Utils;
@@ -58,8 +55,8 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
     protected boolean loadNested;
 
     protected AbstractLibraryLoader(T database, Path metaPath, Set<String> loadedPaths,
-                                    DiffSettings diffSettings) {
-        super(diffSettings, "");
+                                    ISettings settings) {
+        super(settings, "");
         this.database = database;
         this.metaPath = metaPath != null ? metaPath : META_PATH;
         this.loadedPaths = loadedPaths;
@@ -174,11 +171,11 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
      * @return loaded database
      */
     private T loadDirectory(Path path, boolean isIgnorePrivileges) throws IOException, InterruptedException {
-        DiffSettings copyDiffSettings = getDiffSettingsCopy(isIgnorePrivileges);
+        ISettings libSettings = getLibSettings(isIgnorePrivileges);
 
         // project
         if (Files.exists(path.resolve(Consts.FILENAME_WORKING_DIR_MARKER))) {
-            var projectLoader = getProjectLoader(path, copyDiffSettings);
+            var projectLoader = getProjectLoader(path, libSettings);
             projectLoader.setLib(true);
             T db = projectLoader.load();
 
@@ -191,28 +188,22 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
 
         // simple directory
         T db = createDatabase();
-        readStatementsFromDirectory(path, db, copyDiffSettings);
+        readStatementsFromDirectory(path, db, libSettings);
         finishLoaders();
         return db;
     }
 
     /**
-     * Creates a copy of the diff settings with the isIgnorePrivileges parameter overridden.
+     * Creates a view of the settings with the isIgnorePrivileges parameter overridden.
      * <p>
-     * Note: The returned diff settings ignores ignore list and ignore schema list configurations
+     * Note: The returned settings ignores ignore list and ignore schema list configurations
      * from library sources. Libraries inherit these settings from the main database instead.
      *
      * @param isIgnorePrivileges new value
-     * @return new diff settings wrapped in LibDiffSettings that ignores library-specific ignore lists
+     * @return settings wrapped in LibSettings that ignores library-specific ignore lists
      */
-    private LibDiffSettings getDiffSettingsCopy(boolean isIgnorePrivileges) {
-        if (getSettings().isIgnorePrivileges()) {
-            return new LibDiffSettings(diffSettings);
-        }
-
-        ISettings copySettings = getSettings().copy();
-        copySettings.setIgnorePrivileges(isIgnorePrivileges);
-        return new LibDiffSettings(copySettings, diffSettings);
+    private ISettings getLibSettings(boolean isIgnorePrivileges) {
+        return new LibSettings(settings, settings.isIgnorePrivileges() || isIgnorePrivileges);
     }
 
     private T loadZip(Path path, boolean isIgnorePrivileges)
@@ -229,7 +220,7 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
      * @return loaded database
      */
     private T loadJdbc(String url, boolean isIgnorePrivileges) throws IOException, InterruptedException {
-        var loader = createJdbcLoader(url, getDiffSettingsCopy(isIgnorePrivileges));
+        var loader = createJdbcLoader(url, getLibSettings(isIgnorePrivileges));
         return loader.load();
     }
 
@@ -241,7 +232,7 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
      * @return loaded database
      */
     private T loadDump(Path path, boolean isIgnorePrivileges) throws IOException, InterruptedException {
-        var loader = getDumpLoader(path, getDiffSettingsCopy(isIgnorePrivileges));
+        var loader = getDumpLoader(path, getLibSettings(isIgnorePrivileges));
         return loader.load();
     }
 
@@ -265,7 +256,7 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
         return getLibraryDependency(dir.toString(), isIgnorePrivileges);
     }
 
-    private void readStatementsFromDirectory(Path f, T db, DiffSettings diffSettings)
+    private void readStatementsFromDirectory(Path f, T db, ISettings settings)
             throws IOException, InterruptedException {
         try (Stream<Path> stream = Files.list(f)) {
             List<Path> dirs = new ArrayList<>();
@@ -274,24 +265,24 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
                 if (Files.isDirectory(sub)) {
                     dirs.add(sub);
                 } else {
-                    readStatementsFromFile(sub, db, diffSettings);
+                    readStatementsFromFile(sub, db, settings);
                 }
             }
 
             for (Path sub : dirs) {
                 IMonitor.checkCancelled(getMonitor());
-                readStatementsFromDirectory(sub, db, diffSettings);
+                readStatementsFromDirectory(sub, db, settings);
             }
         }
     }
 
-    private void readStatementsFromFile(Path sub, T db, DiffSettings diffSettings)
+    private void readStatementsFromFile(Path sub, T db, ISettings settings)
             throws InterruptedException, IOException {
         String filePath = sub.toString();
         if (filePath.endsWith(".zip")) {
-            db.addLib(getLibraryDependency(filePath, diffSettings.getSettings().isIgnorePrivileges()), null, null);
+            db.addLib(getLibraryDependency(filePath, settings.isIgnorePrivileges()), null, null);
         } else if (filePath.endsWith(Consts.SQL_POSTFIX)) {
-            var loader = getDumpLoader(sub, diffSettings);
+            var loader = getDumpLoader(sub, settings);
             loader.loadWithoutAnalyze(db, antlrTasks);
         }
     }
@@ -300,28 +291,28 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
      * Returns a dump loader specific to the database type.
      *
      * @param path         file path
-     * @param diffSettings diff settings
+     * @param settings configuration settings
      * @return loader
      */
-    protected abstract AbstractDumpLoader<T> getDumpLoader(Path path, DiffSettings diffSettings);
+    protected abstract AbstractDumpLoader<T> getDumpLoader(Path path, ISettings settings);
 
     /**
      * Returns a jdbc loader specific to the database type.
      *
      * @param url          jdbc url
-     * @param diffSettings diff settings
+     * @param settings configuration settings
      * @return loader
      */
-    protected abstract AbstractJdbcLoader<T> createJdbcLoader(String url, DiffSettings diffSettings);
+    protected abstract AbstractJdbcLoader<T> createJdbcLoader(String url, ISettings settings);
 
     /**
      * Returns a project loader specific to the database type.
      *
      * @param path         project path
-     * @param diffSettings diff settings
+     * @param settings configuration settings
      * @return loader
      */
-    protected abstract AbstractProjectLoader<T> getProjectLoader(Path path, DiffSettings diffSettings) throws IOException;
+    protected abstract AbstractProjectLoader<T> getProjectLoader(Path path, ISettings settings) throws IOException;
 
     /**
      * Creates a copy of the loader to load nested libraries.
@@ -330,79 +321,4 @@ public abstract class AbstractLibraryLoader<T extends IDatabase> extends Abstrac
      * @return library loader copy
      */
     protected abstract AbstractLibraryLoader<T> getCopy(T db);
-
-    /**
-     * Wrapper for DiffSettings that prevents libraries from adding their own ignore lists.
-     * <p>
-     * This class ensures that library dependencies do not override the main database's
-     * ignore list and ignore schema list settings. When loading library schemas, any
-     * {@code .pgcodekeeperignore} or {@code .pgcodekeeper-schema-list} files found in
-     * library sources are ignored. Libraries inherit ignore list settings from the main
-     * database configuration instead.
-     */
-    private static class LibDiffSettings extends DiffSettings {
-
-        private final ISettings settings;
-        private final DiffSettings diffSettings;
-
-        public LibDiffSettings(ISettings settings, DiffSettings diffSettings) {
-            this.settings = settings;
-            this.diffSettings = diffSettings;
-        }
-
-        public LibDiffSettings(DiffSettings diffSettings) {
-            this(diffSettings.getSettings(), diffSettings);
-        }
-
-        @Override
-        public void addIgnoreList(Path ignoreListPath) {
-            // no impl
-        }
-
-        @Override
-        public void addIgnoreSchemaList(Path ignoreSchemaListPath) {
-            // no impl
-        }
-
-        @Override
-        public ISettings getSettings() {
-            return settings;
-        }
-
-        @Override
-        public IMonitor getMonitor() {
-            return diffSettings.getMonitor();
-        }
-
-        @Override
-        public IgnoreList getIgnoreList() {
-            return diffSettings.getIgnoreList();
-        }
-
-        @Override
-        public List<Dependency> getAdditionalDependencies() {
-            return diffSettings.getAdditionalDependencies();
-        }
-
-        @Override
-        public List<Object> getErrors() {
-            return diffSettings.getErrors();
-        }
-
-        @Override
-        public void addError(Object error) {
-            diffSettings.addError(error);
-        }
-
-        @Override
-        public void addErrors(Collection<Object> errors) {
-            diffSettings.addErrors(errors);
-        }
-
-        @Override
-        public boolean isAllowedSchema(String schemaName) {
-            return diffSettings.isAllowedSchema(schemaName);
-        }
-    }
-
 }

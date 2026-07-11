@@ -21,7 +21,6 @@ import org.pgcodekeeper.core.database.base.parser.AntlrTask;
 import org.pgcodekeeper.core.database.base.parser.AntlrTaskManager;
 import org.pgcodekeeper.core.database.base.parser.FullAnalyze;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +39,7 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractLoader.class);
 
     protected final Queue<AntlrTask<?>> antlrTasks = new ArrayDeque<>();
-    protected final DiffSettings diffSettings;
+    protected final ISettings settings;
     protected String currentOperation;
     protected int version;
     protected String databaseName;
@@ -48,8 +47,8 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
 
     protected boolean isPreloaded = false;
 
-    protected AbstractLoader(DiffSettings diffSettings, String databaseName) {
-        this.diffSettings = diffSettings;
+    protected AbstractLoader(ISettings settings, String databaseName) {
+        this.settings = settings;
         this.databaseName = databaseName;
     }
 
@@ -70,11 +69,11 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
 
     @Override
     public List<Object> getErrors() {
-        return Collections.unmodifiableList(diffSettings.getErrors());
+        return Collections.unmodifiableList(settings.getErrors());
     }
 
     public void addError(Object error) {
-        diffSettings.addError(error);
+        settings.addError(error);
     }
 
     /**
@@ -88,7 +87,7 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
     public T loadAndAnalyze() throws IOException, InterruptedException {
         T db = load();
         IMonitor.checkCancelled(getMonitor());
-        FullAnalyze.fullAnalyze(db, diffSettings.getErrors(), diffSettings.getVersion());
+        FullAnalyze.fullAnalyze(db, settings.getErrors(), settings.getVersion());
         return db;
     }
 
@@ -124,19 +123,14 @@ public abstract class AbstractLoader<T extends IDatabase> implements ILoader {
 
     @Override
     public ISettings getSettings() {
-        return diffSettings.getSettings();
-    }
-
-    @Override
-    public DiffSettings getDiffSettings() {
-        return diffSettings;
+        return settings;
     }
 
     public IMonitor getMonitor() {
-        return diffSettings.getMonitor();
+        return settings.getMonitor();
     }
 
     public boolean isAllowedSchema(String schemaName) {
-        return diffSettings.isAllowedSchema(schemaName);
+        return settings.isAllowedSchema(schemaName);
     }
 }

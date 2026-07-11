@@ -24,7 +24,7 @@ import org.pgcodekeeper.core.database.ch.parser.IChContextProcessor;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
 import org.pgcodekeeper.core.database.ch.schema.ChSchema;
 import org.pgcodekeeper.core.database.ch.utils.ChConsts;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.nio.file.Path;
@@ -35,12 +35,12 @@ import java.util.Queue;
  */
 public class ChDumpLoader extends AbstractDumpLoader<ChDatabase> {
 
-    public ChDumpLoader(InputStreamProvider input, String inputObjectName, DiffSettings diffSettings) {
-        super(input, inputObjectName, diffSettings);
+    public ChDumpLoader(InputStreamProvider input, String inputObjectName, ISettings settings) {
+        super(input, inputObjectName, settings);
     }
 
-    public ChDumpLoader(Path inputFile, DiffSettings diffSettings) {
-        super(inputFile, diffSettings);
+    public ChDumpLoader(Path inputFile, ISettings settings) {
+        super(inputFile, settings);
     }
 
     @Override
@@ -57,12 +57,12 @@ public class ChDumpLoader extends AbstractDumpLoader<ChDatabase> {
     public void loadWithoutAnalyze(ChDatabase db, Queue<AntlrTask<?>> antlrTasks) {
         IChContextProcessor listener;
         if (overrides != null) {
-            listener = new ChOverridesListener(db, databaseName, mode, diffSettings, overrides);
+            listener = new ChOverridesListener(db, databaseName, mode, settings, overrides);
         } else {
-            var l = new ChCustomParserListener(db, databaseName, mode, diffSettings);
+            var l = new ChCustomParserListener(db, databaseName, mode, settings);
             l.setWorkDirs(workDirs);
             listener = l;
         }
-        ChParserUtils.parseSqlStream(input, databaseName, diffSettings, monitoringLevel, listener, antlrTasks);
+        ChParserUtils.parseSqlStream(input, databaseName, settings, monitoringLevel, listener, antlrTasks);
     }
 }

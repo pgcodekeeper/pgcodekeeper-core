@@ -36,7 +36,6 @@ import org.pgcodekeeper.core.database.pg.schema.PgSimpleTable;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.script.SQLScript;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -94,10 +93,9 @@ class PgModelExporterTest {
         PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
         settings.setGenerateConstraintNotValid(true);
         settings.setGenerateExists(true);
-        var diffSettings = new DiffSettings(settings);
 
         IDatabase db = IntegrationTestUtils.loadTestDump(databaseProvider, template + FILES_POSTFIX.SQL,
-                getClass(), diffSettings);
+                getClass(), settings);
 
         var exporter = new PgModelExporter(null, db, Consts.UTF_8, settings);
         var stmt = getStatement(db, stmtName, type);
@@ -105,7 +103,7 @@ class PgModelExporterTest {
 
         Assertions.assertEquals(getCreationSQL(stmt), actual);
 
-        var script = new SQLScript(diffSettings, db.getSeparator());
+        var script = new SQLScript(settings, db.getSeparator());
         stmt.getCreationSQL(script);
 
         Assertions.assertNotEquals(script.getFullScript(), actual);
@@ -131,7 +129,7 @@ class PgModelExporterTest {
      * @return - generated script
      */
     private String getCreationSQL(IStatement statement) {
-        var script = new SQLScript(new DiffSettings(new CoreSettings()), statement.getSeparator());
+        var script = new SQLScript(new CoreSettings(), statement.getSeparator());
         statement.getCreationSQL(script);
         return script.getFullScript();
     }

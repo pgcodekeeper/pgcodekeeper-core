@@ -27,42 +27,42 @@ Currently static methods are available:
 ```java
 // Example 1: Compare two databases from JDBC connections and generate migration script
 ISettings settings = new CoreSettings();
-DiffSettings diffSettings = new DiffSettings(settings);
 
 // settings init...
 
 IDatabaseProvider databaseProvider = new PgDatabaseProvider();
-IJdbcLoader oldDb = databaseProvider.getJdbcLoader("jdbc:postgresql://localhost/old_db", diffSettings);
+IJdbcLoader oldDb = databaseProvider.getJdbcLoader("jdbc:postgresql://localhost/old_db", settings);
 
-IJdbcLoader newDb = databaseProvider.getJdbcLoader("jdbc:postgresql://localhost/new_db", diffSettings);
+IJdbcLoader newDb = databaseProvider.getJdbcLoader("jdbc:postgresql://localhost/new_db", settings);
 
-String migrationScript = PgCodeKeeperApi.diff(databaseProvider, oldDb, newDb, diffSettings);
+String migrationScript = PgCodeKeeperApi.diff(databaseProvider, oldDb, newDb, settings);
 
 // Example 2: Load database from project and compare with JDBC database
-IDatabase projectDb = databaseProvider.getProjectLoader("/path/to/project", diffSettings).loadAndAnalyze();
-IDatabase liveDb = databaseProvider.getJdbcLoader("jdbc:postgresql://localhost/live_db", diffSettings).loadAndAnalyze();
-String script = PgCodeKeeperApi.diff(databaseProvider, projectDb, liveDb, diffSettings);
+IDatabase projectDb = databaseProvider.getProjectLoader("/path/to/project", settings).loadAndAnalyze();
+IDatabase liveDb = databaseProvider.getJdbcLoader("jdbc:postgresql://localhost/live_db", settings).loadAndAnalyze();
+String script = PgCodeKeeperApi.diff(databaseProvider, projectDb, liveDb, settings);
 
 // Example 3: Compare databases with object filtering using ignore list
 
-IDatabase db1 = databaseProvider.getJdbcLoader("jdbc:postgresql://localhost/db1", diffSettings).loadAndAnalyze();
-IDatabase db2 = databaseProvider.getProjectLoader("/path/to/project", diffSettings).loadAndAnalyze();
-diffSettings.addIgnoreList("/path/to/object_ignore_list.pgcodekeeperignore");
+IDatabase db1 = databaseProvider.getJdbcLoader("jdbc:postgresql://localhost/db1", settings).loadAndAnalyze();
+IDatabase db2 = databaseProvider.getProjectLoader("/path/to/project", settings).loadAndAnalyze();
+settings.addIgnoreList("/path/to/object_ignore_list.pgcodekeeperignore");
 
-String diff = PgCodeKeeperApi.diff(databaseProvider, db1, db2, diffSettings);
+String diff = PgCodeKeeperApi.diff(databaseProvider, db1, db2, settings);
 
 // Example 4: Export database to project with filtering and progress monitoring
-DiffSettings newDiffSettings = new DiffSettings(settings, new NullMonitor());
+CoreSettings newSettings = new CoreSettings();
+newSettings.setMonitor(new NullMonitor());
 
-IJdbcLoader db = databaseProvider.getJdbcLoader("jdbc:postgresql://localhost/db", newDiffSettings);
+IJdbcLoader db = databaseProvider.getJdbcLoader("jdbc:postgresql://localhost/db", newSettings);
 
-diffSettings.addIgnoreList("/path/to/object_ignore_list.pgcodekeeperignore");
-PgCodeKeeperApi.exportToProject(databaseProvider, null, db, "/path/to/export", diffSettings);
+newSettings.addIgnoreList("/path/to/object_ignore_list.pgcodekeeperignore");
+PgCodeKeeperApi.exportToProject(databaseProvider, null, db, "/path/to/export", newSettings);
 
 // Example 5: Update project with changes from database loader
-IDumpLoader project = databaseProvider.getProjectLoader("/path/to/project", diffSettings);
-IJdbcLoader updatedDb = databaseProvider.getJdbcLoader("jdbc:postgresql://localhost/updated_db", diffSettings);
-PgCodeKeeperApi.exportToProject(databaseProvider, project, updatedDb, "/path/to/project", diffSettings);
+IDumpLoader project = databaseProvider.getProjectLoader("/path/to/project", settings);
+IJdbcLoader updatedDb = databaseProvider.getJdbcLoader("jdbc:postgresql://localhost/updated_db", settings);
+PgCodeKeeperApi.exportToProject(databaseProvider, project, updatedDb, "/path/to/project", settings);
 ```
 
 ## Documentation
@@ -128,13 +128,12 @@ Majority of tests are here.
 ### Program Lifecycle
 
 General program lifecycle goes as follows:
-1. `ISettings` object is filled with operation parameters.
-2. `DiffSettings` object is filled with ignore lists, ignore schema list parameters.
-3. `IDatabase`s are loaded from requested sources, including their libraries and privilege overrides. Ignored schemas are skipped at this step.
+1. `ISettings` object is filled with operation parameters, ignore lists and ignore schema list parameters.
+2. `IDatabase`s are loaded from requested sources, including their libraries and privilege overrides. Ignored schemas are skipped at this step.
    1. During the load dependencies of each object are found and recorded. Expressions are also analyzed to extract their dependencies including overloaded function calls.
    2. All parser and expression analysis operations are run in parallel using `AntlrParser.ANTLR_POOL` thread pool to speed up the process. Parallel operations are serialized by calling `finishLoaders` at the end of each loading process.
-4. The diff tree (represented by root `TreeElement`) is created by comparing two `IDatabase`s.
-5. The diff tree, now containing "user selection", is used to selectively update project files on disk, or to generate a migration script.
-6. In latter case, each "selected" TreeElement is passed to `DepcyResolver` to generate script actions fulfilling the requested change, including actions on dependent objects. To do this, JGraphT object dependency graphs are built using dependency information found at the loading stage.
-7. Generated actions are now converted into SQL code with some last-moment post-processing and filtering.
-8. Generated SQL script is returned as a String for user to review and run on their database.
+3. The diff tree (represented by root `TreeElement`) is created by comparing two `IDatabase`s.
+4. The diff tree, now containing "user selection", is used to selectively update project files on disk, or to generate a migration script.
+5. In latter case, each "selected" TreeElement is passed to `DepcyResolver` to generate script actions fulfilling the requested change, including actions on dependent objects. To do this, JGraphT object dependency graphs are built using dependency information found at the loading stage.
+6. Generated actions are now converted into SQL code with some last-moment post-processing and filtering.
+7. Generated SQL script is returned as a String for user to review and run on their database.

@@ -23,21 +23,24 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.pgcodekeeper.core.database.pg.jdbc.PgSupportedVersion;
 
-class DiffSettingsTest {
+class CoreSettingsTest {
 
     @Test
     void versionSetterTest() {
-        var diffSetting = new DiffSettings();
+        var settings = new CoreSettings();
 
-        Assertions.assertNull(diffSetting.getVersion());
+        Assertions.assertNull(settings.getVersion());
 
-        diffSetting.setVersion(PgSupportedVersion.VERSION_16);
-        Assertions.assertEquals(PgSupportedVersion.VERSION_16, diffSetting.getVersion());
+        settings.setVersion(PgSupportedVersion.VERSION_16);
+        Assertions.assertEquals(PgSupportedVersion.VERSION_16, settings.getVersion());
 
-        diffSetting.setVersion(PgSupportedVersion.GP_VERSION_7);
-        Assertions.assertEquals(PgSupportedVersion.GP_VERSION_7, diffSetting.getVersion());
+        settings.setVersion(PgSupportedVersion.GP_VERSION_7);
+        Assertions.assertEquals(PgSupportedVersion.GP_VERSION_7, settings.getVersion());
 
-        diffSetting.setVersion(PgSupportedVersion.VERSION_14);
-        Assertions.assertEquals(PgSupportedVersion.GP_VERSION_7, diffSetting.getVersion());
+        settings.setVersion(PgSupportedVersion.VERSION_14);
+        Assertions.assertEquals(PgSupportedVersion.GP_VERSION_7, settings.getVersion());
+
+        settings.resetVersion();
+        Assertions.assertNull(settings.getVersion());
     }
 }

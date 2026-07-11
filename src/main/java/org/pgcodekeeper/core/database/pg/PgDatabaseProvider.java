@@ -32,7 +32,6 @@ import org.pgcodekeeper.core.database.pg.project.PgProjectUpdater;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.script.PgScriptBuilder;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
-import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
@@ -80,40 +79,40 @@ public class PgDatabaseProvider implements IDatabaseProvider {
     }
 
     @Override
-    public PgJdbcLoader getJdbcLoader(String url, DiffSettings diffSettings) {
-        return getJdbcLoader(getJdbcConnector(url), diffSettings);
+    public PgJdbcLoader getJdbcLoader(String url, ISettings settings) {
+        return getJdbcLoader(getJdbcConnector(url), settings);
     }
 
     @Override
-    public PgJdbcLoader getJdbcLoader(IJdbcConnector connector, DiffSettings diffSettings) {
-        String timezone = diffSettings.getSettings().getTimeZone() == null
-                ? Consts.UTC : diffSettings.getSettings().getTimeZone();
-        return new PgJdbcLoader(connector, timezone, diffSettings);
+    public PgJdbcLoader getJdbcLoader(IJdbcConnector connector, ISettings settings) {
+        String timezone = settings.getTimeZone() == null
+                ? Consts.UTC : settings.getTimeZone();
+        return new PgJdbcLoader(connector, timezone, settings);
     }
 
     @Override
-    public PgDumpLoader getDumpLoader(Path path, DiffSettings diffSettings) {
-        return new PgDumpLoader(path, diffSettings);
+    public PgDumpLoader getDumpLoader(Path path, ISettings settings) {
+        return new PgDumpLoader(path, settings);
     }
 
     @Override
-    public PgDumpLoader getDumpLoader(InputStreamProvider input, String name, DiffSettings diffSettings) {
-        return new PgDumpLoader(input, name, diffSettings);
+    public PgDumpLoader getDumpLoader(InputStreamProvider input, String name, ISettings settings) {
+        return new PgDumpLoader(input, name, settings);
     }
 
     @Override
-    public PgProjectLoader getProjectLoader(Path path, DiffSettings diffSettings) {
-        return new PgProjectLoader(path, diffSettings);
+    public PgProjectLoader getProjectLoader(Path path, ISettings settings) {
+        return new PgProjectLoader(path, settings);
     }
 
     @Override
-    public PgProjectLoader getProjectLoader(Path path, DiffSettings diffSettings, Collection<String> libXmls,
+    public PgProjectLoader getProjectLoader(Path path, ISettings settings, Collection<String> libXmls,
                                             Collection<String> libs, Collection<String> libsWithoutPriv, Path metaPath) {
-        return new PgProjectLoader(path, diffSettings, libXmls, libs, libsWithoutPriv, metaPath);
+        return new PgProjectLoader(path, settings, libXmls, libs, libsWithoutPriv, metaPath);
     }
 
     @Override
-    public IScriptBuilder getScriptBuilder(DiffSettings diffSettings) {
-        return new PgScriptBuilder(diffSettings);
+    public IScriptBuilder getScriptBuilder(ISettings settings) {
+        return new PgScriptBuilder(settings);
     }
 }

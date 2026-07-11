@@ -22,7 +22,6 @@ import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.script.SQLActionType;
 import org.pgcodekeeper.core.script.SQLScript;
-import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Pair;
 import org.pgcodekeeper.core.utils.Utils;
@@ -91,7 +90,7 @@ public abstract class PgAbstractTable extends PgAbstractStatementContainer imple
     public void getCreationSQL(SQLScript script) {
         final StringBuilder sbSQL = new StringBuilder();
 
-        SQLScript temp = new SQLScript(script.getDiffSettings(), getSeparator());
+        SQLScript temp = new SQLScript(script.getSettings(), getSeparator());
 
         appendName(sbSQL, script.getSettings());
         appendColumns(sbSQL, temp);
@@ -185,8 +184,8 @@ public abstract class PgAbstractTable extends PgAbstractStatementContainer imple
         int startSize = script.getSize();
         PgAbstractTable newTable = (PgAbstractTable) newCondition;
 
-        var diffSettings = script.getDiffSettings();
-        if (isNeedRecreate(newTable, diffSettings) || isColumnsOrderChanged(newTable, diffSettings.getSettings())) {
+        var settings = script.getSettings();
+        if (isNeedRecreate(newTable, settings) || isColumnsOrderChanged(newTable, settings)) {
             return ObjectState.RECREATE;
         }
 
@@ -206,10 +205,10 @@ public abstract class PgAbstractTable extends PgAbstractStatementContainer imple
      * Checks whether the table needs to be recreated due to changes in its options.
      * 
      * @param newTable     the reference table to compare with
-     * @param diffSettings diff setting
-     * @return {@code true} if recreation is required, {@code false} otherwiseьм
+     * @param settings     configuration settings
+     * @return {@code true} if recreation is required, {@code false} otherwise
      */
-    protected boolean isNeedRecreate(PgAbstractTable newTable, DiffSettings diffSettings) {
+    protected boolean isNeedRecreate(PgAbstractTable newTable, ISettings settings) {
         if (options.equals(newTable.getOptions())) {
             return false;
         }

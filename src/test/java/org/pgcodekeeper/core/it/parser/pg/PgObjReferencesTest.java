@@ -23,7 +23,6 @@ import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.pg.loader.PgDumpLoader;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 
@@ -132,8 +131,8 @@ class PgObjReferencesTest {
     })
     void compareReferences(final String fileNameTemplate) throws IOException, InterruptedException {
         String resource = fileNameTemplate + FILES_POSTFIX.SQL;
-        var diffSettings = new DiffSettings(new CoreSettings());
-        var loader = new PgDumpLoader(() -> getClass().getResourceAsStream(resource), resource, diffSettings);
+        var settings = new CoreSettings();
+        var loader = new PgDumpLoader(() -> getClass().getResourceAsStream(resource), resource, settings);
         loader.setMode(ParserListenerMode.REF);
         var db = loader.load();
 
@@ -142,7 +141,7 @@ class PgObjReferencesTest {
 
         String actual = IntegrationTestUtils.getRefsAsString(db.getObjReferences()).strip();
 
-        TestUtils.assertErrors(diffSettings.getErrors());
+        TestUtils.assertErrors(settings.getErrors());
         TestUtils.assertIgnoreNewLines(expected, actual);
     }
 
@@ -152,8 +151,8 @@ class PgObjReferencesTest {
     })
     void compareAnalysisReferences(final String fileNameTemplate) throws IOException, InterruptedException {
         String resource = fileNameTemplate + FILES_POSTFIX.SQL;
-        var diffSettings = new DiffSettings(new CoreSettings());
-        var loader = new PgDumpLoader(() -> getClass().getResourceAsStream(resource), resource, diffSettings);
+        var settings = new CoreSettings();
+        var loader = new PgDumpLoader(() -> getClass().getResourceAsStream(resource), resource, settings);
         loader.setMode(ParserListenerMode.NORMAL);
         var db = loader.loadAndAnalyze();
 
@@ -162,7 +161,7 @@ class PgObjReferencesTest {
 
         String actual = IntegrationTestUtils.getRefsAsString(db.getObjReferences()).strip();
 
-        TestUtils.assertErrors(diffSettings.getErrors());
+        TestUtils.assertErrors(settings.getErrors());
         TestUtils.assertIgnoreNewLines(expected, actual);
     }
 }

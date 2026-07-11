@@ -23,7 +23,6 @@ import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 
@@ -63,16 +62,15 @@ class PgMoveDataDiffTest {
         var settings = new CoreSettings();
         PgDatabaseProvider databaseProvider = new PgDatabaseProvider();
         settings.setDataMovementMode(true);
-        var diffSettings = new DiffSettings(settings);
         IDatabase dbOld = loadTestDump(
-                databaseProvider, fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, PgMoveDataDiffTest.class, diffSettings);
+                databaseProvider, fileNameTemplate + FILES_POSTFIX.ORIGINAL_SQL, PgMoveDataDiffTest.class, settings);
         IDatabase dbNew = loadTestDump(
-                databaseProvider, fileNameTemplate + FILES_POSTFIX.NEW_SQL, PgMoveDataDiffTest.class, diffSettings);
+                databaseProvider, fileNameTemplate + FILES_POSTFIX.NEW_SQL, PgMoveDataDiffTest.class, settings);
 
-        IntegrationTestUtils.assertDiffSame(databaseProvider, dbOld, fileNameTemplate, diffSettings);
-        IntegrationTestUtils.assertDiffSame(databaseProvider, dbNew, fileNameTemplate, diffSettings);
+        IntegrationTestUtils.assertDiffSame(databaseProvider, dbOld, fileNameTemplate, settings);
+        IntegrationTestUtils.assertDiffSame(databaseProvider, dbNew, fileNameTemplate, settings);
 
-        String script = PgCodeKeeperApi.diff(databaseProvider, dbOld, dbNew, diffSettings);
+        String script = PgCodeKeeperApi.diff(databaseProvider, dbOld, dbNew, settings);
         String content = script.replaceAll("([0-9a-fA-F]{32})", "randomly_generated_part");
 
         IntegrationTestUtils.assertResult(content, fileNameTemplate, PgMoveDataDiffTest.class);

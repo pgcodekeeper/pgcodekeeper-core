@@ -27,7 +27,7 @@ import org.pgcodekeeper.core.database.ms.project.MsWorkDirs;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.ms.schema.MsSchema;
 import org.pgcodekeeper.core.database.ms.utils.MsConsts;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -39,13 +39,13 @@ import java.util.HashSet;
  */
 public class MsProjectLoader extends AbstractProjectLoader<MsDatabase> {
 
-    public MsProjectLoader(Path dirPath, DiffSettings diffSettings) {
-        super(dirPath, diffSettings, new MsWorkDirs(AbstractWorkDirs.resolveAltDirsFile(dirPath)));
+    public MsProjectLoader(Path dirPath, ISettings settings) {
+        super(dirPath, settings, new MsWorkDirs(AbstractWorkDirs.resolveAltDirsFile(dirPath)));
     }
 
-    public MsProjectLoader(Path dirPath, DiffSettings diffSettings, Collection<String> libXmls,
+    public MsProjectLoader(Path dirPath, ISettings settings, Collection<String> libXmls,
                            Collection<String> libs, Collection<String> libsWithoutPriv, Path metaPath) {
-        super(dirPath, diffSettings, new MsWorkDirs(AbstractWorkDirs.resolveAltDirsFile(dirPath)),
+        super(dirPath, settings, new MsWorkDirs(AbstractWorkDirs.resolveAltDirsFile(dirPath)),
                 libXmls, libs, libsWithoutPriv, metaPath);
     }
 
@@ -56,12 +56,12 @@ public class MsProjectLoader extends AbstractProjectLoader<MsDatabase> {
 
     @Override
     protected AbstractDumpLoader<MsDatabase> createDumpLoader(Path file) {
-        return new MsDumpLoader(file, diffSettings);
+        return new MsDumpLoader(file, settings);
     }
 
     @Override
     protected AbstractLibraryLoader<MsDatabase> createLibraryLoader(MsDatabase db) {
-        return new MsLibraryLoader(db, metaPath, new HashSet<>(), diffSettings);
+        return new MsLibraryLoader(db, metaPath, new HashSet<>(), settings);
     }
 
     @Override

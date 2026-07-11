@@ -24,7 +24,7 @@ import org.pgcodekeeper.core.database.ms.parser.MsParserUtils;
 import org.pgcodekeeper.core.database.ms.schema.MsDatabase;
 import org.pgcodekeeper.core.database.ms.schema.MsSchema;
 import org.pgcodekeeper.core.database.ms.utils.MsConsts;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.nio.file.Path;
@@ -35,12 +35,12 @@ import java.util.Queue;
  */
 public class MsDumpLoader extends AbstractDumpLoader<MsDatabase> {
 
-    public MsDumpLoader(InputStreamProvider input, String inputObjectName, DiffSettings diffSettings) {
-        super(input, inputObjectName, diffSettings);
+    public MsDumpLoader(InputStreamProvider input, String inputObjectName, ISettings settings) {
+        super(input, inputObjectName, settings);
     }
 
-    public MsDumpLoader(Path inputFile, DiffSettings diffSettings) {
-        super(inputFile, diffSettings);
+    public MsDumpLoader(Path inputFile, ISettings settings) {
+        super(inputFile, settings);
     }
 
     @Override
@@ -57,12 +57,12 @@ public class MsDumpLoader extends AbstractDumpLoader<MsDatabase> {
     public void loadWithoutAnalyze(MsDatabase db, Queue<AntlrTask<?>> antlrTasks) {
         IMsContextProcessor listener;
         if (overrides != null) {
-            listener = new MsOverridesListener(db, databaseName, mode, diffSettings, overrides);
+            listener = new MsOverridesListener(db, databaseName, mode, settings, overrides);
         } else {
-            var l = new MsCustomParserListener(db, databaseName, mode, diffSettings);
+            var l = new MsCustomParserListener(db, databaseName, mode, settings);
             l.setWorkDirs(workDirs);
             listener = l;
         }
-        MsParserUtils.parseSqlStream(input, databaseName, diffSettings, monitoringLevel, listener, antlrTasks);
+        MsParserUtils.parseSqlStream(input, databaseName, settings, monitoringLevel, listener, antlrTasks);
     }
 }

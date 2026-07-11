@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.database.pg.PgDatabaseProvider;
 import org.pgcodekeeper.core.database.pg.jdbc.PgSupportedVersion;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -643,7 +642,7 @@ class PgDiffTest {
     })
     void compareTest(String fileNameTemplate) throws IOException, InterruptedException {
         String script = getScript(databaseProvider, fileNameTemplate,
-                new DiffSettings(), PgDiffTest.class);
+                new CoreSettings(), PgDiffTest.class);
         assertEquals("", script.trim());
     }
 
@@ -660,7 +659,7 @@ class PgDiffTest {
         var settings = new CoreSettings();
         settings.setCommentsToEnd(true);
         String script = getScript(databaseProvider, fileNameTemplate,
-                new DiffSettings(settings), PgDiffTest.class);
+                settings, PgDiffTest.class);
         assertResult(script, fileNameTemplate, PgDiffTest.class);
     }
 
@@ -676,7 +675,7 @@ class PgDiffTest {
         var settings = new CoreSettings();
         settings.setGenerateExistDoBlock(true);
 
-        String script = getScript(databaseProvider, fileNameTemplate, new DiffSettings(settings), PgDiffTest.class);
+        String script = getScript(databaseProvider, fileNameTemplate, settings, PgDiffTest.class);
         assertResult(script, fileNameTemplate, PgDiffTest.class);
     }
 
@@ -688,7 +687,7 @@ class PgDiffTest {
         var settings = new CoreSettings();
         settings.setAddTransaction(true);
         String script = getScript(databaseProvider, fileNameTemplate,
-                new DiffSettings(settings), PgDiffTest.class);
+                settings, PgDiffTest.class);
         assertResult(script, fileNameTemplate, PgDiffTest.class);
     }
 
@@ -700,7 +699,7 @@ class PgDiffTest {
         var settings = new CoreSettings();
         settings.setIgnoreColumnOrder(true);
         String script = getScript(databaseProvider, fileNameTemplate,
-                new DiffSettings(settings), PgDiffTest.class);
+                settings, PgDiffTest.class);
         assertResult(script, fileNameTemplate, PgDiffTest.class);
     }
 
@@ -716,7 +715,7 @@ class PgDiffTest {
         var settings = new CoreSettings();
         settings.setDropBeforeCreate(true);
 
-        String script = getScript(databaseProvider, fileNameTemplate, new DiffSettings(settings), PgDiffTest.class);
+        String script = getScript(databaseProvider, fileNameTemplate, settings, PgDiffTest.class);
         assertResult(script, fileNameTemplate, PgDiffTest.class);
     }
 
@@ -728,9 +727,8 @@ class PgDiffTest {
     void actualVersionSyntaxTest(String fileNameTemplate, String version) throws IOException, InterruptedException {
         var settings = new CoreSettings();
         settings.setActualVersionSyntax(true);
-        var diffSettings = new DiffSettings(settings);
-        diffSettings.setVersion(PgSupportedVersion.valueOf(version));
-        String script = getScript(databaseProvider, fileNameTemplate, diffSettings, PgDiffTest.class);
+        settings.setVersion(PgSupportedVersion.valueOf(version));
+        String script = getScript(databaseProvider, fileNameTemplate, settings, PgDiffTest.class);
         assertResult(script, fileNameTemplate + '_' + version.toLowerCase(Locale.ROOT), PgDiffTest.class);
     }
 }

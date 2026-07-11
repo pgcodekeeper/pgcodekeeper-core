@@ -27,7 +27,6 @@ import org.pgcodekeeper.core.database.api.project.IProjectUpdater;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.database.api.script.IScriptBuilder;
 import org.pgcodekeeper.core.model.difftree.TreeElement;
-import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
@@ -88,19 +87,6 @@ public interface IDatabaseProvider {
      * @param oldDb          the old database version
      * @param changedObjects list of changed tree elements to apply
      * @param projectPath    path to the project directory to update
-     * @param settings       configuration settings
-     * @return project updater for the DBMS
-     */
-    default IProjectUpdater getProjectUpdater(IDatabase newDb, IDatabase oldDb, Collection<TreeElement> changedObjects,
-                                              Path projectPath, ISettings settings) {
-        return getProjectUpdater(newDb, oldDb, changedObjects, projectPath, false, settings);
-    }
-
-    /**
-     * @param newDb          the new database version with changes
-     * @param oldDb          the old database version
-     * @param changedObjects list of changed tree elements to apply
-     * @param projectPath    path to the project directory to update
      * @param overridesOnly  update overrides only
      * @param settings       configuration settings
      * @return project updater for the DBMS
@@ -110,51 +96,51 @@ public interface IDatabaseProvider {
 
     /**
      * @param url          full jdbc url
-     * @param diffSettings unified context object containing settings, monitor, ignore schema list, and error accumulator
+     * @param settings configuration settings
      * @return jdbc loader for the DBMS
      * @see IJdbcLoader
-     * @see DiffSettings
+     * @see ISettings
      */
-    IJdbcLoader getJdbcLoader(String url, DiffSettings diffSettings);
+    IJdbcLoader getJdbcLoader(String url, ISettings settings);
 
     /**
      * @param connector    jdbc connector for the DBMS
-     * @param diffSettings unified context object containing settings, monitor, ignore schema list, and error accumulator
+     * @param settings configuration settings
      * @return jdbc loader for the DBMS
      * @see IJdbcLoader
-     * @see DiffSettings
+     * @see ISettings
      */
-    IJdbcLoader getJdbcLoader(IJdbcConnector connector, DiffSettings diffSettings);
+    IJdbcLoader getJdbcLoader(IJdbcConnector connector, ISettings settings);
 
     /**
      * @param path         path to dump file
-     * @param diffSettings unified context object containing settings, monitor, and error accumulator
+     * @param settings configuration settings
      * @return dump loader for the DBMS
      * @see IDumpLoader
-     * @see DiffSettings
+     * @see ISettings
      */
-    IDumpLoader getDumpLoader(Path path, DiffSettings diffSettings);
+    IDumpLoader getDumpLoader(Path path, ISettings settings);
 
     /**
      * @param input        input stream provider for SQL content
      * @param name         name of the source (for error reporting)
-     * @param diffSettings configuration settings
+     * @param settings configuration settings
      * @return dump loader for DBMS
      */
-    IDumpLoader getDumpLoader(InputStreamProvider input, String name, DiffSettings diffSettings);
+    IDumpLoader getDumpLoader(InputStreamProvider input, String name, ISettings settings);
 
     /**
      * @param path         path to project directory
-     * @param diffSettings unified context object containing settings, monitor, ignore schema list, and error accumulator
+     * @param settings configuration settings
      * @return project loader for the DBMS
      * @see IProjectLoader
-     * @see DiffSettings
+     * @see ISettings
      */
-    IProjectLoader getProjectLoader(Path path, DiffSettings diffSettings);
+    IProjectLoader getProjectLoader(Path path, ISettings settings);
 
     /**
      * @param path            path to project directory
-     * @param diffSettings    unified context object containing settings, monitor, ignore schema list, and error accumulator
+     * @param settings    configuration settings
      * @param libXmls         paths to XML files with library dependency definitions
      * @param libs            paths to library dependencies
      * @param libsWithoutPriv paths to library dependencies with ignored privileges
@@ -162,14 +148,14 @@ public interface IDatabaseProvider {
      *                        if no ZIP or URI libraries are expected
      * @return project loader for the DBMS
      * @see IProjectLoader
-     * @see DiffSettings
+     * @see ISettings
      */
-    IProjectLoader getProjectLoader(Path path, DiffSettings diffSettings, Collection<String> libXmls,
+    IProjectLoader getProjectLoader(Path path, ISettings settings, Collection<String> libXmls,
                                     Collection<String> libs, Collection<String> libsWithoutPriv, Path metaPath);
 
     /**
-     * @param diffSettings configuration settings
+     * @param settings configuration settings
      * @return return script builder
      */
-    IScriptBuilder getScriptBuilder(DiffSettings diffSettings);
+    IScriptBuilder getScriptBuilder(ISettings settings);
 }

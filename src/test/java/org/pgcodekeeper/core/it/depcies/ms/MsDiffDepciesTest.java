@@ -22,7 +22,6 @@ import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.ms.MsDatabaseProvider;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -61,7 +60,7 @@ class MsDiffDepciesTest {
     void dependencyTest(final String dbTemplate, String userTemplateName, Map<String, DbObjType> selectedObjs)
             throws IOException, InterruptedException {
         IntegrationTestUtils.assertEqualsDependencies(databaseProvider, dbTemplate, userTemplateName, selectedObjs,
-                getClass(), new DiffSettings());
+                getClass(), new CoreSettings());
     }
 
     private static Stream<Arguments> provideSelectedObjectsWithFunctionBody() {
@@ -88,6 +87,6 @@ class MsDiffDepciesTest {
         var settings = new CoreSettings();
         settings.setEnableFunctionBodiesDependencies(true);
         IntegrationTestUtils.assertEqualsDependencies(databaseProvider, dbTemplate, userTemplateName, selectedObjs,
-                getClass(), new DiffSettings(settings));
+                getClass(), settings);
     }
 }

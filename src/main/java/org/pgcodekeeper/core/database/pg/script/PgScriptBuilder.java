@@ -31,13 +31,13 @@ import org.pgcodekeeper.core.model.graph.ActionContainer;
 import org.pgcodekeeper.core.model.graph.ActionsToScriptConverter;
 import org.pgcodekeeper.core.script.SQLActionType;
 import org.pgcodekeeper.core.script.SQLScript;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Utils;
 
 public class PgScriptBuilder extends AbstractScriptBuilder {
 
-    public PgScriptBuilder(DiffSettings diffSettings) {
-        super(diffSettings);
+    public PgScriptBuilder(ISettings settings) {
+        super(settings);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class PgScriptBuilder extends AbstractScriptBuilder {
                                IDatabase oldDb, IDatabase newDb)
             throws IOException {
         var settings = getSettings();
-        SQLScript script = new SQLScript(diffSettings, oldDb.getSeparator());
+        SQLScript script = new SQLScript(settings, oldDb.getSeparator());
         for (String preFilePath : settings.getPreFilePath()) {
             addPrePostPath(script, preFilePath, SQLActionType.PRE);
         }

@@ -53,9 +53,7 @@ public class IgnoreSchemaList implements IIgnoreList {
         return Collections.unmodifiableList(rules);
     }
 
-    /**
-     * Clears all ignore rules from the list.
-     */
+    @Override
     public void clearList() {
         rules.clear();
     }

@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.pgcodekeeper.core.database.api.loader.ILoader;
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
 import org.pgcodekeeper.core.monitor.IMonitor;
+import org.pgcodekeeper.core.settings.CoreSettings;
 import org.pgcodekeeper.core.utils.Utils;
 
 /**
@@ -61,8 +62,11 @@ class ParallelLoadTest {
         when(oldDbLoader.loadAndAnalyze()).thenThrow(ioException);
         when(newDbLoader.loadAndAnalyze()).thenReturn(newDb);
 
+        var settings = new CoreSettings();
+        settings.setParallelLoad(true);
+
         IOException thrown = assertThrows(IOException.class, () ->
-                Utils.loadDatabases(oldDbLoader, newDbLoader, subMonitor, true));
+                Utils.loadDatabases(oldDbLoader, newDbLoader, settings, subMonitor));
 
         assertEquals(ioException, thrown);
         verify(subMonitor).setCancelled(true);
@@ -74,8 +78,11 @@ class ParallelLoadTest {
         IOException ioException = new IOException("new DB read error");
         when(newDbLoader.loadAndAnalyze()).thenThrow(ioException);
 
+        var settings = new CoreSettings();
+        settings.setParallelLoad(true);
+
         IOException thrown = assertThrows(IOException.class,
-                () -> Utils.loadDatabases(oldDbLoader, newDbLoader, subMonitor, true));
+                () -> Utils.loadDatabases(oldDbLoader, newDbLoader, settings, subMonitor));
 
         assertEquals(ioException, thrown);
         verify(subMonitor).setCancelled(true);

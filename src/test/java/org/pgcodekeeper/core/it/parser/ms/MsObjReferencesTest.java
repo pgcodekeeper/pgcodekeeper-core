@@ -23,7 +23,6 @@ import org.pgcodekeeper.core.database.api.parser.ParserListenerMode;
 import org.pgcodekeeper.core.database.ms.loader.MsDumpLoader;
 import org.pgcodekeeper.core.it.IntegrationTestUtils;
 import org.pgcodekeeper.core.settings.CoreSettings;
-import org.pgcodekeeper.core.settings.DiffSettings;
 
 import java.io.IOException;
 
@@ -78,8 +77,7 @@ class MsObjReferencesTest {
         var settings = new CoreSettings();
 
         String resource = fileNameTemplate + FILES_POSTFIX.SQL;
-        var diffSettings = new DiffSettings(settings);
-        var loader = new MsDumpLoader(() -> getClass().getResourceAsStream(resource), resource, diffSettings);
+        var loader = new MsDumpLoader(() -> getClass().getResourceAsStream(resource), resource, settings);
         loader.setMode(ParserListenerMode.REF);
         var db = loader.load();
 
@@ -88,7 +86,7 @@ class MsObjReferencesTest {
 
         String actual = IntegrationTestUtils.getRefsAsString(db.getObjReferences()).strip();
 
-        TestUtils.assertErrors(diffSettings.getErrors());
+        TestUtils.assertErrors(settings.getErrors());
         TestUtils.assertIgnoreNewLines(expected, actual);
     }
 }

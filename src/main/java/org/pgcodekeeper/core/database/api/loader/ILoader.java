@@ -16,7 +16,6 @@
 package org.pgcodekeeper.core.database.api.loader;
 
 import org.pgcodekeeper.core.database.api.schema.IDatabase;
-import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 
 import java.io.IOException;
@@ -60,11 +59,6 @@ public interface ILoader {
      * @return configuration settings
      */
     ISettings getSettings();
-
-    /**
-     * @return diff settings
-     */
-    DiffSettings getDiffSettings();
 
     /**
      * @return unmodifiable list of errors during loading

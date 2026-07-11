@@ -113,8 +113,8 @@ public class ChTable extends ChAbstractStatement implements ITable, IOptionConta
         int startSize = script.getSize();
         ChTable newTable = (ChTable) newCondition;
 
-        var diffSettings = script.getDiffSettings();
-        if (isNeedRecreate(newTable) || isColumnsOrderChanged(newTable, diffSettings.getSettings())) {
+        var settings = script.getSettings();
+        if (isNeedRecreate(newTable) || isColumnsOrderChanged(newTable, settings)) {
             return ObjectState.RECREATE;
         }
 

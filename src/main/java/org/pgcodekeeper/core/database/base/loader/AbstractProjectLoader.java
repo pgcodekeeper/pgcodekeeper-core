@@ -26,7 +26,7 @@ import org.pgcodekeeper.core.database.base.schema.StatementOverride;
 import org.pgcodekeeper.core.dependencieslist.DependenciesReader;
 import org.pgcodekeeper.core.library.LibraryXmlStore;
 import org.pgcodekeeper.core.monitor.IMonitor;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.Utils;
 
 import java.io.IOException;
@@ -62,15 +62,15 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
     private final Collection<String> libs;
     private final Collection<String> libsWithoutPriv;
 
-    protected AbstractProjectLoader(Path dirPath, DiffSettings diffSettings, IWorkDirs workDirs) {
-        this(dirPath, diffSettings, workDirs, Collections.emptyList(), Collections.emptyList(),
+    protected AbstractProjectLoader(Path dirPath, ISettings settings, IWorkDirs workDirs) {
+        this(dirPath, settings, workDirs, Collections.emptyList(), Collections.emptyList(),
                 Collections.emptyList(), null);
     }
 
-    protected AbstractProjectLoader(Path dirPath, DiffSettings diffSettings, IWorkDirs workDirs,
+    protected AbstractProjectLoader(Path dirPath, ISettings settings, IWorkDirs workDirs,
                                     Collection<String> libXmls, Collection<String> libs,
                                     Collection<String> libsWithoutPriv, Path metaPath) {
-        super(diffSettings, dirPath.getFileName().toString());
+        super(settings, dirPath.getFileName().toString());
         this.dirPath = dirPath;
         this.workDirs = workDirs;
         this.libXmls = libXmls;
@@ -253,7 +253,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
     }
 
     /**
-     * This method loads common settings {@link DiffSettings}, if it's need,
+     * This method loads common settings {@link ISettings}, if it's need,
      * before comparing database instances{@link IDatabase}.
      */
     @Override
@@ -262,24 +262,24 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
             return;
         }
 
-        if (diffSettings.getSettings().isDisableAutoLoad()) {
+        if (settings.isDisableAutoLoad()) {
             return;
         }
 
         // load ignored lists
         Path ignoreFile = dirPath.resolve(IGNORE_FILE);
         if (Files.isRegularFile(ignoreFile)) {
-            diffSettings.addIgnoreList(ignoreFile);
+            settings.addIgnoreList(ignoreFile);
         }
 
         Path ignoreSchemaFile = dirPath.resolve(IGNORE_SCHEMA_FILE);
         if (Files.isRegularFile(ignoreSchemaFile)) {
-            diffSettings.addIgnoreSchemaList(ignoreSchemaFile);
+            settings.addIgnoreSchemaList(ignoreSchemaFile);
         }
 
         // load additional dependencies
         Path depsPath = dirPath.resolve(ADDITIONAL_DEPENDENCIES_FILE);
-        diffSettings.addAdditionalDependencies(DependenciesReader.getDependencies(depsPath));
+        settings.addAdditionalDependencies(DependenciesReader.getDependencies(depsPath));
         isPreloaded = true;
     }
 
@@ -333,7 +333,7 @@ public abstract class AbstractProjectLoader<T extends IDatabase> extends Abstrac
     private void loadLibraries(T db) throws IOException, InterruptedException {
         var libraryLoader = createLibraryLoader(db);
 
-        if (!diffSettings.getSettings().isDisableAutoLoad()) {
+        if (!settings.isDisableAutoLoad()) {
             // check project libraries
             Path depsFile = dirPath.resolve(LibraryXmlStore.FILE_NAME);
             if (Files.isRegularFile(depsFile)) {

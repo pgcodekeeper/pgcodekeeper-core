@@ -21,7 +21,7 @@ import org.pgcodekeeper.core.database.base.loader.AbstractProjectLoader;
 import org.pgcodekeeper.core.database.base.project.AbstractWorkDirs;
 import org.pgcodekeeper.core.database.pg.project.PgWorkDirs;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -32,13 +32,13 @@ import java.util.HashSet;
  */
 public class PgProjectLoader extends AbstractProjectLoader<PgDatabase> {
 
-    public PgProjectLoader(Path dirPath, DiffSettings diffSettings) {
-        super(dirPath, diffSettings, new PgWorkDirs(AbstractWorkDirs.resolveAltDirsFile(dirPath)));
+    public PgProjectLoader(Path dirPath, ISettings settings) {
+        super(dirPath, settings, new PgWorkDirs(AbstractWorkDirs.resolveAltDirsFile(dirPath)));
     }
 
-    public PgProjectLoader(Path dirPath, DiffSettings diffSettings, Collection<String> libXmls,
+    public PgProjectLoader(Path dirPath, ISettings settings, Collection<String> libXmls,
                            Collection<String> libs, Collection<String> libsWithoutPriv, Path metaPath) {
-        super(dirPath, diffSettings, new PgWorkDirs(AbstractWorkDirs.resolveAltDirsFile(dirPath)),
+        super(dirPath, settings, new PgWorkDirs(AbstractWorkDirs.resolveAltDirsFile(dirPath)),
                 libXmls, libs, libsWithoutPriv, metaPath);
     }
 
@@ -49,11 +49,11 @@ public class PgProjectLoader extends AbstractProjectLoader<PgDatabase> {
 
     @Override
     protected AbstractDumpLoader<PgDatabase> createDumpLoader(Path file) {
-        return new PgDumpLoader(file, diffSettings);
+        return new PgDumpLoader(file, settings);
     }
 
     @Override
     protected AbstractLibraryLoader<PgDatabase> createLibraryLoader(PgDatabase db) {
-        return new PgLibraryLoader(db, metaPath, new HashSet<>(), diffSettings);
+        return new PgLibraryLoader(db, metaPath, new HashSet<>(), settings);
     }
 }

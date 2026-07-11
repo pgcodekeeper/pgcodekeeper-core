@@ -24,7 +24,7 @@ import org.pgcodekeeper.core.database.pg.parser.PgParserUtils;
 import org.pgcodekeeper.core.database.pg.schema.PgDatabase;
 import org.pgcodekeeper.core.database.pg.schema.PgSchema;
 import org.pgcodekeeper.core.database.pg.utils.PgConsts;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 import org.pgcodekeeper.core.utils.InputStreamProvider;
 
 import java.nio.file.Path;
@@ -35,12 +35,12 @@ import java.util.Queue;
  */
 public class PgDumpLoader extends AbstractDumpLoader<PgDatabase> {
 
-    public PgDumpLoader(InputStreamProvider input, String inputObjectName, DiffSettings diffSettings) {
-        super(input, inputObjectName, diffSettings);
+    public PgDumpLoader(InputStreamProvider input, String inputObjectName, ISettings settings) {
+        super(input, inputObjectName, settings);
     }
 
-    public PgDumpLoader(Path inputFile, DiffSettings diffSettings) {
-        super(inputFile, diffSettings);
+    public PgDumpLoader(Path inputFile, ISettings settings) {
+        super(inputFile, settings);
     }
 
     @Override
@@ -57,12 +57,12 @@ public class PgDumpLoader extends AbstractDumpLoader<PgDatabase> {
     public void loadWithoutAnalyze(PgDatabase db, Queue<AntlrTask<?>> antlrTasks) {
         IPgContextProcessor listener;
         if (overrides != null) {
-            listener = new PgOverridesListener(db, databaseName, mode, diffSettings, overrides);
+            listener = new PgOverridesListener(db, databaseName, mode, settings, overrides);
         } else {
-            var l = new PgCustomParserListener(db, databaseName, mode, diffSettings, antlrTasks);
+            var l = new PgCustomParserListener(db, databaseName, mode, settings, antlrTasks);
             l.setWorkDirs(workDirs);
             listener = l;
         }
-        PgParserUtils.parseSqlStream(input, databaseName, diffSettings, monitoringLevel, listener, antlrTasks);
+        PgParserUtils.parseSqlStream(input, databaseName, settings, monitoringLevel, listener, antlrTasks);
     }
 }

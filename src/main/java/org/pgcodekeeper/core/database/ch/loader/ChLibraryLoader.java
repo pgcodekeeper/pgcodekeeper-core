@@ -19,15 +19,15 @@ import org.pgcodekeeper.core.database.api.jdbc.IJdbcConnector;
 import org.pgcodekeeper.core.database.base.loader.AbstractLibraryLoader;
 import org.pgcodekeeper.core.database.ch.jdbc.ChJdbcConnector;
 import org.pgcodekeeper.core.database.ch.schema.ChDatabase;
-import org.pgcodekeeper.core.settings.DiffSettings;
+import org.pgcodekeeper.core.settings.ISettings;
 
 import java.nio.file.Path;
 import java.util.Set;
 
 public class ChLibraryLoader extends AbstractLibraryLoader<ChDatabase> {
 
-    public ChLibraryLoader(ChDatabase database, Path metaPath, Set<String> loadedPaths, DiffSettings diffSettings) {
-        super(database, metaPath, loadedPaths, diffSettings);
+    public ChLibraryLoader(ChDatabase database, Path metaPath, Set<String> loadedPaths, ISettings settings) {
+        super(database, metaPath, loadedPaths, settings);
     }
 
     @Override
@@ -36,23 +36,23 @@ public class ChLibraryLoader extends AbstractLibraryLoader<ChDatabase> {
     }
 
     @Override
-    protected ChDumpLoader getDumpLoader(Path p, DiffSettings diffSettings) {
-        return new ChDumpLoader(p, diffSettings);
+    protected ChDumpLoader getDumpLoader(Path p, ISettings settings) {
+        return new ChDumpLoader(p, settings);
     }
 
     @Override
-    protected ChJdbcLoader createJdbcLoader(String url, DiffSettings diffSettings) {
+    protected ChJdbcLoader createJdbcLoader(String url, ISettings settings) {
         IJdbcConnector con = new ChJdbcConnector(url);
-        return new ChJdbcLoader(con, diffSettings);
+        return new ChJdbcLoader(con, settings);
     }
 
     @Override
-    protected ChProjectLoader getProjectLoader(Path p, DiffSettings diffSettings) {
-        return new ChProjectLoader(p, diffSettings);
+    protected ChProjectLoader getProjectLoader(Path p, ISettings settings) {
+        return new ChProjectLoader(p, settings);
     }
 
     @Override
     protected ChLibraryLoader getCopy(ChDatabase db) {
-        return new ChLibraryLoader(db, metaPath, loadedPaths, diffSettings);
+        return new ChLibraryLoader(db, metaPath, loadedPaths, settings);
     }
 }

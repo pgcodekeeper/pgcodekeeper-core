@@ -37,35 +37,33 @@ import org.pgcodekeeper.core.model.difftree.TreeElement.DiffSide;
 import org.pgcodekeeper.core.model.graph.ActionContainer;
 import org.pgcodekeeper.core.model.graph.DbObject;
 import org.pgcodekeeper.core.model.graph.DepcyResolver;
-import org.pgcodekeeper.core.settings.DiffSettings;
 import org.pgcodekeeper.core.settings.ISettings;
 
 public abstract class AbstractScriptBuilder implements IScriptBuilder {
 
     private static final String EMPTY_SCRIPT = ""; // $NON-NLS-1$
 
-    protected final DiffSettings diffSettings;
+    protected final ISettings settings;
 
     /**
      * Creates a new AbstractScriptBuilder instance with the specified settings.
      *
-     * @param diffSettings unified context object containing settings, ignore list,
-     *                     and error accumulator
+     * @param settings configuration settings
      */
-    protected AbstractScriptBuilder(DiffSettings diffSettings) {
-        this.diffSettings = diffSettings;
+    protected AbstractScriptBuilder(ISettings settings) {
+        this.settings = settings;
     }
 
     @Override
     public String createScript(TreeElement root, IDatabase oldDb, IDatabase newDb) throws IOException {
-        List<TreeElement> selected = getSelectedElements(root, diffSettings.getIgnoreList());
+        List<TreeElement> selected = getSelectedElements(root, settings.getIgnoreList());
         if (selected.isEmpty()) {
             return EMPTY_SCRIPT;
         }
 
         Set<IStatement> toRefresh = new LinkedHashSet<>();
-        var actions = resolveDependencies(selected, oldDb, newDb, diffSettings.getAdditionalDependencies(),
-                diffSettings.getAdditionalDependencies(), toRefresh);
+        var actions = resolveDependencies(selected, oldDb, newDb, settings.getAdditionalDependencies(),
+                settings.getAdditionalDependencies(), toRefresh);
         if (actions.isEmpty()) {
             return EMPTY_SCRIPT;
         }
@@ -107,7 +105,7 @@ public abstract class AbstractScriptBuilder implements IScriptBuilder {
             objects.add(new DbObject(oldStatement, newStatement));
         }
         return DepcyResolver.resolve(oldDb, newDb, additionalDependenciesOldDb, additionalDependenciesNewDb, toRefresh,
-                objects, diffSettings);
+                objects, settings);
     }
 
     private void addColumnsAsElements(IDatabase oldDb, IDatabase newDb, List<TreeElement> selected) {
@@ -123,7 +121,7 @@ public abstract class AbstractScriptBuilder implements IScriptBuilder {
     }
 
     protected ISettings getSettings() {
-        return diffSettings.getSettings();
+        return settings;
     }
 
     protected abstract String getScript(Set<ActionContainer> actions, Set<IStatement> toRefresh,
