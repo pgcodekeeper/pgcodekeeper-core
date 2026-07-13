@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - Simplified API methods by removing the DiffSettings class and moving its logic to the ISettings class.
+- Updated library dependencies.
 
 ### Fixed
 
