@@ -9,14 +9,20 @@
 
 ### Добавлено
 
+### Изменено
+
+### Исправлено
+
+## [15.0.0] - 2026-07-14
+
+### Добавлено
+
 - Добавлен новый режим работы парсера для обработки отдельных файлов проекта.
 
 ### Изменено
 
 - Упрощены API методы за счет удаления класса DiffSettings, его логика перенесена в класс ISettings.
 - Обновлены библиотечные зависимости.
-
-### Исправлено
 
 ## [14.7.0] - 2026-06-30
 
@@ -2538,7 +2544,8 @@
 
 - Добавлен парсинг ORDER BY для агрегатных функции.
 
-[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.7.0...HEAD
+[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.0.0...HEAD
+[15.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.7.0...v15.0.0
 [14.7.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.6.0...v14.7.0
 [14.6.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.5.0...v14.6.0
 [14.5.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.4.1...v14.5.0

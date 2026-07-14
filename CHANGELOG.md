@@ -9,14 +9,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [15.0.0] - 2026-07-14
+
+### Added
+
 - Added a new parser mode for processing individual project files.
 
 ### Changed
 
 - Simplified API methods by removing the DiffSettings class and moving its logic to the ISettings class.
 - Updated library dependencies.
-
-### Fixed
 
 ## [14.7.0] - 2026-06-30
 
@@ -2537,7 +2543,8 @@ We increment major version in this release due to decision to shift our developm
 
 - ORDER BY parsing has been added to the aggregate functions.
 
-[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.7.0...HEAD
+[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.0.0...HEAD
+[15.0.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.7.0...v15.0.0
 [14.7.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.6.0...v14.7.0
 [14.6.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.5.0...v14.6.0
 [14.5.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v14.4.1...v14.5.0
