@@ -28,6 +28,7 @@ import org.pgcodekeeper.core.database.api.schema.ISequence;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.ObjectReference;
 import org.pgcodekeeper.core.database.api.schema.ObjectState;
+import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
 import org.pgcodekeeper.core.hasher.Hasher;
 import org.pgcodekeeper.core.localizations.Messages;
 import org.pgcodekeeper.core.script.SQLActionType;
@@ -185,6 +186,20 @@ public class PgSequence extends PgAbstractStatement implements ISequence {
 
         return getObjectState(script, startSize);
     }
+
+    @Override
+    protected void appendAlterOwner(AbstractStatement newObj, SQLScript script) {
+        var newOwner = newObj.getOwner();
+        if (!Objects.equals(owner, newOwner) && newOwner != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(ALTER_SEQUENCE);
+            appendFullName(sb);
+            sb.append(" OWNER TO ").append(quote(newOwner));
+
+            script.addStatement(sb.toString(), SQLActionType.END);
+        }
+    }
+
 
     private boolean compareSequenceBody(PgSequence newSequence, StringBuilder sbSQL) {
         final String oldType = dataType;
