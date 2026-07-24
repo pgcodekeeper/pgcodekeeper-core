@@ -111,6 +111,12 @@ public final class PgAlterSequence extends PgParserAbstract {
 
         var schema = getSchemaSafe(ids);
         var seqName = QNameParser.getFirstName(ids);
+
+        PgSequence sequence = schema.getSequence(seqName);
+        if (sequence != null) {
+            return;
+        }
+
         var nameToken = QNameParser.getFirstNameCtx(ids).getStart();
 
         for (var table : schema.getTables()) {
