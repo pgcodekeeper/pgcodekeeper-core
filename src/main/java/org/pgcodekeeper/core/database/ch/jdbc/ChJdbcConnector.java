@@ -17,8 +17,10 @@ package org.pgcodekeeper.core.database.ch.jdbc;
 
 import java.io.IOException;
 import java.sql.*;
+import java.util.Properties;
 
 import org.pgcodekeeper.core.database.base.jdbc.AbstractJdbcConnector;
+import org.pgcodekeeper.core.utils.Utils;
 
 import com.clickhouse.jdbc.Driver;
 
@@ -67,5 +69,10 @@ public class ChJdbcConnector extends AbstractJdbcConnector {
     @Override
     public String getBatchDelimiter() {
         return null;
+    }
+
+    @Override
+    protected String getAppNameParamName() {
+        return "client_name";
     }
 }
