@@ -83,8 +83,15 @@ public abstract class AbstractJdbcConnector implements IJdbcConnector {
      */
     protected Properties makeProperties() {
         Properties props = new Properties();
-        props.setProperty("ApplicationName", "pgCodeKeeper, version: " + Utils.getVersion());
+        props.setProperty(getAppNameParamName(), "pgCodeKeeper, version: " + Utils.getVersion());
         return props;
+    }
+
+    /**
+     * @return parameter name for application definition
+     */
+    protected String getAppNameParamName() {
+        return "ApplicationName";
     }
 
     /**
