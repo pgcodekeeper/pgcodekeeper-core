@@ -241,7 +241,7 @@ public class PgJdbcLoader extends AbstractJdbcLoader<PgDatabase> {
             setVersion(version);
             debug(Messages.JdbcLoaderBase_log_load_version, getVersion());
         }
-        if (!isGreenplumDb && !PgSupportedVersion.VERSION_14.isLE(version)) {
+        if (!isGreenplumDb && !PgSupportedVersion.VERSION_15.isLE(version)) {
             throw new IllegalStateException(Messages.JdbcLoaderBase_unsupported_pg_version);
         }
         if (isGreenplumDb && !PgSupportedVersion.GP_VERSION_6.isLE(version)) {

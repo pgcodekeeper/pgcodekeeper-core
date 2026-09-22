@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+### Removed
+
+- Removed support for PostgreSQL versions below 15.
+
 ## [15.3.0] - 2026-08-10
 
 ### Added

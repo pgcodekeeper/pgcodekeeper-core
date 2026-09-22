@@ -57,7 +57,7 @@ public final class PgStatisticsReader extends PgAbstractSearchPathJdbcReader {
                         loader.getSettings())
                         .parseStatistics(stat));
 
-        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_15.isLE(loader.getVersion())) {
             var statVal = res.getString("stxstattarget");
             if (null != statVal) {
                 stat.setStatistics(Integer.parseInt(statVal));
@@ -92,7 +92,7 @@ public final class PgStatisticsReader extends PgAbstractSearchPathJdbcReader {
                 .column("pg_catalog.pg_get_statisticsobjdef(res.oid::pg_catalog.oid) AS def")
                 .from("pg_catalog.pg_statistic_ext res");
 
-        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_15.isLE(loader.getVersion())) {
             builder.column("res.stxstattarget");
         }
     }

@@ -24,7 +24,6 @@ import org.pgcodekeeper.core.database.api.jdbc.ISupportedVersion;
 public enum PgSupportedVersion implements ISupportedVersion {
     GP_VERSION_6(90400, "9.4"),
     GP_VERSION_7(120012, "12.12"),
-    VERSION_14(140000, "14.0"),
     VERSION_15(150000, "15.0"),
     VERSION_16(160000, "16.0"),
     VERSION_17(170000, "17.0"),
@@ -55,7 +54,7 @@ public enum PgSupportedVersion implements ISupportedVersion {
     }
 
     public static ISupportedVersion getDefaultVersion() {
-        return VERSION_14;
+        return VERSION_15;
     }
 
     /**

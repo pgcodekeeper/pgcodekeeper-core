@@ -252,7 +252,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
             body = sb.toString();
         } else if (definition != null && !definition.isEmpty() && !"-".equals(definition)) {
             body = PgDiffUtils.quoteStringDollar(definition);
-        } else if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
+        } else if (PgSupportedVersion.VERSION_15.isLE(loader.getVersion())) {
             String probody = res.getString("prosqlbody");
             // must not be null at this point, otherwise function has no body (?)
             IPgJdbcReader.checkObjectValidity(probody, DbObjType.FUNCTION, function.getBareName());
@@ -622,7 +622,7 @@ public final class PgFunctionsReader extends PgAbstractSearchPathJdbcReader {
                     .column("res.proiswindow");
         }
 
-        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_15.isLE(loader.getVersion())) {
             builder.column("""
                     case when (res.prosrc is null or res.prosrc='') and l.lanname = 'sql'
                         then pg_get_function_sqlbody(res.oid) end as prosqlbody""");
