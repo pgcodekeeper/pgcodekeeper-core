@@ -37,7 +37,7 @@ class CoreSettingsTest {
         settings.setVersion(PgSupportedVersion.GP_VERSION_7);
         Assertions.assertEquals(PgSupportedVersion.GP_VERSION_7, settings.getVersion());
 
-        settings.setVersion(PgSupportedVersion.VERSION_14);
+        settings.setVersion(PgSupportedVersion.VERSION_16);
         Assertions.assertEquals(PgSupportedVersion.GP_VERSION_7, settings.getVersion());
 
         settings.resetVersion();

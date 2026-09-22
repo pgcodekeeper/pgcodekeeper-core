@@ -183,7 +183,7 @@ public final class PgTypesReader extends PgAbstractSearchPathJdbcReader {
             setFunctionWithDep(PgBaseType::setAnalyzeFunction, t, typanalyzeset, FUNC_SIGN.INTERNAL.getName());
         }
 
-        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_15.isLE(loader.getVersion())) {
             String typsubscript = res.getString("typsubscript");
             if (!EMPTY_FUNCTION.equals(typsubscript)) {
                 setFunctionWithDep(PgBaseType::setSubscriptFunction, t, typsubscript, FUNC_SIGN.INTERNAL.getName());
@@ -353,7 +353,7 @@ public final class PgTypesReader extends PgAbstractSearchPathJdbcReader {
                     FUNC_SIGN.SUBTYPE_DIFF.getName().formatted(t.getSubtype()));
         }
 
-        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_15.isLE(loader.getVersion())) {
             long multiRangeLong = res.getLong("rngmultirange");
             if (multiRangeLong != 0) {
                 PgJdbcType multiRangeType = loader.getCachedTypeByOid(multiRangeLong);
@@ -423,7 +423,7 @@ public final class PgTypesReader extends PgAbstractSearchPathJdbcReader {
                 .join("LEFT JOIN pg_catalog.pg_range r ON r.rngtypid = res.oid")
                 .join("LEFT JOIN pg_catalog.pg_opclass opc ON opc.oid = r.rngsubopc");
 
-        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_15.isLE(loader.getVersion())) {
             builder.column("r.rngmultitypid::bigint AS rngmultirange");
         }
     }
@@ -447,7 +447,7 @@ public final class PgTypesReader extends PgAbstractSearchPathJdbcReader {
                 .column("res.typelem::bigint")
                 .column("res.typdelim");
 
-        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_15.isLE(loader.getVersion())) {
             builder.column("res.typsubscript");
         }
 

@@ -266,7 +266,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
             colGenerated = PgJdbcUtils.getColArray(res, "col_generated", true);
         }
         String[] colCompression = null;
-        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_15.isLE(loader.getVersion())) {
             colCompression = PgJdbcUtils.getColArray(res, "col_compression", true);
         }
         String[] colEncOptions = null;
@@ -627,7 +627,7 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
             subQueryBuilder.column("pg_catalog.array_agg(a.attgenerated ORDER BY a.attnum) AS col_generated");
         }
 
-        if (PgSupportedVersion.VERSION_14.isLE(loader.getVersion())) {
+        if (PgSupportedVersion.VERSION_15.isLE(loader.getVersion())) {
             builder.column("columns.col_compression");
             subQueryBuilder.column("pg_catalog.array_agg(a.attcompression ORDER BY a.attnum) AS col_compression");
         }
