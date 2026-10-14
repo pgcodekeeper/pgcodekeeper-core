@@ -80,3 +80,18 @@ CREATE TABLE public.cities_4544 PARTITION OF public.cities
 FOR VALUES IN ('f', 'g');
 
 ALTER TABLE public.cities_4544 OWNER TO khazieva_gr;
+
+---------------------------------------------------------------------------------------------------------
+--compare with no diff
+
+CREATE TABLE public.test_table (
+	id bigint NOT NULL,
+	firm_id integer NOT NULL,
+	act_date date NOT NULL,
+	activity_count integer NOT NULL,
+	change_operation integer NOT NULL
+)
+PARTITION BY RANGE (act_date);
+
+CREATE TABLE public.test_table_default PARTITION OF public.test_table
+DEFAULT;

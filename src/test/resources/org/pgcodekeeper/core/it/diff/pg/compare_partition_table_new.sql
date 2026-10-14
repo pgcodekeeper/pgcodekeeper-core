@@ -70,3 +70,26 @@ CREATE TABLE public.cities57 PARTITION OF public.cities_cd_10_to_100
 FOR VALUES FROM ('1') TO ('10');
 
 ALTER TABLE public.cities57 OWNER TO khazieva_gr;
+
+---------------------------------------------------------------------------------------------------------
+--compare with no diff
+
+CREATE TABLE public.test_table (
+    id bigint NOT NULL,
+    firm_id integer NOT NULL,
+    act_date date NOT NULL,
+    activity_count integer NOT NULL,
+    change_operation integer NOT NULL
+)
+PARTITION BY RANGE (act_date);
+
+
+CREATE TABLE public.test_table_default (
+    id bigint NOT NULL,
+    firm_id integer NOT NULL,
+    act_date date NOT NULL,
+    activity_count integer NOT NULL,
+    change_operation integer NOT NULL
+);
+
+ALTER TABLE ONLY public.test_table ATTACH PARTITION public.test_table_default DEFAULT;

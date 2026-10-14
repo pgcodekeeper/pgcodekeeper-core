@@ -298,6 +298,19 @@ public class PgSchema extends PgAbstractStatement implements ISchema {
         return getChildByName(tables, name);
     }
 
+    /**
+     * Replaces table by name
+     *
+     * @param newSt new table
+     */
+    public void replaceTable(PgAbstractTable newSt) {
+        var oldSt = tables.remove(getNameInCorrectCase(newSt.getName()));
+        if (oldSt != null) {
+            oldSt.setParent(null);
+        }
+        addChild(newSt);
+    }
+
     public Collection<PgAbstractTable> getTables() {
         return Collections.unmodifiableCollection(tables.values());
     }
