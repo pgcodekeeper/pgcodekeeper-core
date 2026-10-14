@@ -71,6 +71,11 @@ public final class PgAlterTable extends PgTableAbstract {
 
         ObjectLocation loc = addObjReference(ids, DbObjType.TABLE, ACTION_ALTER);
 
+        if (null != ctx.alter_partition() && ParserListenerMode.REF != getParserMode()) {
+            parsePartition(ctx.alter_partition().partition_table_value(), schema);
+            return;
+        }
+
         for (Table_actionContext tablAction : ctx.table_action()) {
             IdentifierContext column = tablAction.column;
             Column_actionContext colAction = tablAction.column_action();
@@ -169,6 +174,15 @@ public final class PgAlterTable extends PgTableAbstract {
             tabl = getSafe(PgSchema::getTable, schema, nameCtx);
             parseGpPartitionTemplate((GpPartitionTable) tabl, alterPartition, stream);
         }
+    }
+
+    private void parsePartition(Partition_table_valueContext partitionTableValueContext, PgSchema schema) {
+        List<ParserRuleContext> ids = getIdentifiers(partitionTableValueContext.schema_qualified_name());
+        String tableName = QNameParser.getFirstName(ids);
+        String partBound = getFullCtxText(partitionTableValueContext.for_values_bound());
+        var partTable = new PgPartitionTable(tableName, partBound);
+        addInherit(partTable, getIdentifiers(ctx.name));
+        schema.replaceTable(partTable);
     }
 
     private void fillRelationAction(ISchema schema, ParserRuleContext nameCtx, Table_actionContext tablAction) {

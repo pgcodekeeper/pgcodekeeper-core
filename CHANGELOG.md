@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Fixed an error when reading partitions from a PostgreSQL dump.
+
 ### Removed
 
 - Removed support for PostgreSQL versions below 15.
