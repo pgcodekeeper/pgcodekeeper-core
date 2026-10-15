@@ -75,3 +75,11 @@ Reference: action = CREATE SPATIAL INDEX, line number = 120, charPositionInLine 
 Reference: action = CREATE SPATIAL INDEX, line number = 127, charPositionInLine = 0
 Reference: action = CREATE SPATIAL INDEX, line number = 131, charPositionInLine = 0
 Reference: action = CREATE SPATIAL INDEX, line number = 140, charPositionInLine = 0
+Reference: action = CREATE VECTOR, line number = 147, charPositionInLine = 0
+Reference: action = CREATE VECTOR, line number = 154, charPositionInLine = 0
+Reference: action = CREATE VECTOR, line number = 158, charPositionInLine = 0
+Reference: action = CREATE VECTOR, line number = 162, charPositionInLine = 0
+Reference: action = CREATE VECTOR, line number = 167, charPositionInLine = 0
+Reference: action = CREATE JSON, line number = 173, charPositionInLine = 0
+Reference: action = CREATE JSON, line number = 176, charPositionInLine = 0
+Reference: action = CREATE JSON, line number = 180, charPositionInLine = 0

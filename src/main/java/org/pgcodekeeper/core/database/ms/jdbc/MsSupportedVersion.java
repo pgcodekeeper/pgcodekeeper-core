@@ -24,7 +24,8 @@ import org.pgcodekeeper.core.database.api.jdbc.ISupportedVersion;
 public enum MsSupportedVersion implements ISupportedVersion {
     VERSION_17(14, "2017"),
     VERSION_19(15, "2019"),
-    VERSION_22(16, "2022");
+    VERSION_22(16, "2022"),
+    VERSION_25(22, "2025");
 
     private final int version;
     private final String text;

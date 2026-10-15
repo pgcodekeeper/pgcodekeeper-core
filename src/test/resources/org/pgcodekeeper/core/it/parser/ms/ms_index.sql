@@ -141,3 +141,41 @@ CREATE SPATIAL INDEX SIndx_geography_col3
    ON t1(object)
    WITH (GRIDS = (LEVEL_3 = HIGH, LEVEL_2 = HIGH));
 GO
+
+-- VECTOR INDEX
+
+CREATE VECTOR INDEX vec_idx
+    ON dbo.wikipedia_articles (title_vector)
+    WITH (
+        TYPE = 'DISKANN',
+        METRIC = 'COSINE'
+    );
+
+CREATE VECTOR INDEX idx_embeddings_vector
+ON product_embeddings(embedding)
+WITH (METRIC = 'cosine');
+
+CREATE VECTOR INDEX vec_idx
+    ON [dbo].[wikipedia_articles] ([title_vector])
+        WITH (METRIC = 'COSINE', TYPE = 'DISKANN');
+
+CREATE VECTOR INDEX vec_idx
+    ON [dbo].[wikipedia_articles] ([title_vector])
+        WITH (METRIC = 'DOT', TYPE = 'DISKANN', MAXDOP = 8)
+    ON [SECONDARY];
+
+CREATE VECTOR INDEX vec_idx ON Articles(embedding)
+WITH (METRIC = 'cosine', TYPE = 'diskann');
+GO
+
+-- JSON INDEX
+
+CREATE JSON INDEX json_content_index
+    ON docs (content);
+
+CREATE JSON INDEX json_content_index
+    ON docs (content)
+    FOR ('$.a', '$.b') WITH (FILLFACTOR = 80);
+
+CREATE JSON INDEX CustomersJsonIndex
+    ON dbo.Customers (customer_info) WITH (OPTIMIZE_FOR_ARRAY_SEARCH = ON);
