@@ -144,6 +144,7 @@ schema_create
     | create_fulltext_index
     | create_fulltext_stoplist
     | create_index
+    | create_json_index
     | create_key
     | create_login_sql_server
     | create_master_key_sql_server
@@ -171,6 +172,7 @@ schema_create
     | create_table
     | create_type
     | create_user
+    | create_vector_index
     | create_workload_group
     | create_xml_index
     | create_xml_schema_collection)
@@ -1247,6 +1249,18 @@ alter_workload_group
            | GROUP_MAX_REQUESTS EQUAL group_max_requests=DECIMAL)+
           RR_BRACKET)?
     (USING workload_group_pool_name=id)?
+    ;
+
+create_vector_index
+    : VECTOR INDEX id ON qualified_name LR_BRACKET id RR_BRACKET array_vector_options? (ON (id | DEFAULT))?
+    ;
+
+array_vector_options
+    : WITH LR_BRACKET vector_option (COMMA vector_option)* RR_BRACKET
+    ;
+
+vector_option
+    : (METRIC | TYPE | MAXDOP) EQUAL expression
     ;
 
 // https://docs.microsoft.com/en-us/sql/t-sql/statements/create-workload-group-transact-sql
@@ -2381,6 +2395,13 @@ cripto_list
     : (CERTIFICATE | ASYMMETRIC KEY) id (WITH (PASSWORD EQUAL STRING | SIGNATURE EQUAL BINARY))?
     ;
 
+create_json_index
+    : JSON INDEX qualified_name ON qualified_name LR_BRACKET id RR_BRACKET 
+        (FOR LR_BRACKET expression_list RR_BRACKET)?
+        (WITH LR_BRACKET index_option (COMMA index_option)* RR_BRACKET)?
+        (ON (id | DEFAULT))?
+    ;
+
 // https://docs.microsoft.com/en-us/sql/t-sql/statements/create-symmetric-key-transact-sql
 create_key
     : SYMMETRIC KEY id (AUTHORIZATION id)? (FROM PROVIDER id)? WITH ((key_options | ENCRYPTION BY encryption_mechanism) COMMA?)+
@@ -3463,6 +3484,8 @@ simple_id
     | ALLOW_CONNECTIONS
     | ALLOW_ENCRYPTED_VALUE_MODIFICATIONS
     | ALLOW_MULTIPLE_EVENT_LOSS
+    | ALLOW_PAGE_LOCKS
+    | ALLOW_ROW_LOCKS
     | ALLOW_SINGLE_EVENT_LOSS
     | ALLOW_SNAPSHOT_ISOLATION
     | ALLOWED
@@ -3574,6 +3597,7 @@ simple_id
     | CURSOR_DEFAULT
     | CYCLE
     | DATA
+    | DATA_COMPRESSION
     | DATA_CONSISTENCY_CHECK
     | DATA_DELETION
     | DATA_SOURCE
@@ -3611,6 +3635,7 @@ simple_id
     | DISABLED
     | DISTRIBUTED_AGG
     | DOCUMENT
+    | DROP_EXISTING
     | DTC_SUPPORT
     | DYNAMIC
     | ELEMENTS
@@ -3806,6 +3831,7 @@ simple_id
     | MESSAGE_FORWARD_SIZE
     | MESSAGE_FORWARDING
     | METADATA_ONLY
+    | METRIC
     | MIGRATION_STATE
     | MIN_ACTIVE_ROWVERSION
     | MIN_CPU_PERCENT
@@ -3873,6 +3899,7 @@ simple_id
     | OPERATOR_AUDIT
     | OPTIMISTIC
     | OPTIMIZE
+    | OPTIMIZE_FOR_ARRAY_SEARCH
     | OUT
     | OUTBOUND
     | OUTPUT
@@ -4153,6 +4180,7 @@ simple_id
     | VALID_XML
     | VALIDATION
     | VALUE
+    | VECTOR
     | VERBOSELOGGING
     | VERIFYONLY
     | VERSION
