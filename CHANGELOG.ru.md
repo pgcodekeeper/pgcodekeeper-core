@@ -13,6 +13,8 @@
 
 ### Изменено
 
+- Обновлены библиотечные зависимости. Для использования [Windows аутентификации](https://pgcodekeeper.readthedocs.io/ru/latest/windowsauth.html#id2) требуется обновить [DDL](https://github.com/microsoft/mssql-jdbc/releases/tag/v13.6.1).
+
 ### Исправлено
 
 - Исправлена ошибка при чтения партиций из дампа PostgreSQL.
