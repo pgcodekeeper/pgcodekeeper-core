@@ -14,7 +14,7 @@ Reference: action = CREATE SUBSCRIPTION, line number = 13, charPositionInLine = 
 Reference: action = CREATE SUBSCRIPTION, line number = 14, charPositionInLine = 0
 Reference: action = CREATE SUBSCRIPTION, line number = 15, charPositionInLine = 0
 Reference: action = CREATE SUBSCRIPTION, line number = 16, charPositionInLine = 0
-Reference: action = ALTER SUBSCRIPTION, line number = 17, charPositionInLine = 0
+Reference: action = CREATE SUBSCRIPTION, line number = 17, charPositionInLine = 0
 Reference: action = ALTER SUBSCRIPTION, line number = 18, charPositionInLine = 0
 Reference: action = ALTER SUBSCRIPTION, line number = 19, charPositionInLine = 0
 Reference: action = ALTER SUBSCRIPTION, line number = 20, charPositionInLine = 0
@@ -33,3 +33,6 @@ Reference: action = ALTER SUBSCRIPTION, line number = 32, charPositionInLine = 0
 Reference: action = ALTER SUBSCRIPTION, line number = 33, charPositionInLine = 0
 Reference: action = ALTER SUBSCRIPTION, line number = 34, charPositionInLine = 0
 Reference: action = ALTER SUBSCRIPTION, line number = 35, charPositionInLine = 0
+Reference: action = ALTER SUBSCRIPTION, line number = 36, charPositionInLine = 0
+Reference: action = ALTER SUBSCRIPTION, line number = 37, charPositionInLine = 0
+Reference: action = ALTER SUBSCRIPTION, line number = 38, charPositionInLine = 0

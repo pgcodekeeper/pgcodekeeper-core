@@ -34,6 +34,7 @@ public class PgForeignDataWrapper extends PgAbstractStatement
 
     private String handler;
     private String validator;
+    private String connection;
 
     /**
      * Creates a new PostgreSQL foreign data wrapper.
@@ -64,6 +65,9 @@ public class PgForeignDataWrapper extends PgAbstractStatement
         }
         if (validator != null) {
             sb.append(" VALIDATOR ").append(validator);
+        }
+        if (null != connection) {
+            sb.append(" CONNECTION ").append(connection);
         }
         if (!options.isEmpty()) {
             sb.append(' ');
@@ -106,6 +110,18 @@ public class PgForeignDataWrapper extends PgAbstractStatement
             script.addStatement(sql);
         }
 
+        if (!Objects.equals(newForeign.connection, connection)) {
+            StringBuilder sql = new StringBuilder();
+            sql.append(getAlterHeader());
+            if (null != newForeign.connection) {
+                sql.append(" CONNECTION ").append(newForeign.connection);
+                isNeedDepcies = true;
+            } else {
+                sql.append(" NO CONNECTION");
+            }
+            script.addStatement(sql);
+        }
+
         compareOptions(newForeign, script);
         appendAlterOwner(newForeign, script);
         alterPrivileges(newForeign, script);
@@ -135,10 +151,16 @@ public class PgForeignDataWrapper extends PgAbstractStatement
         resetHash();
     }
 
+    public void setConnection(String connectFunc) {
+        this.connection = connectFunc;
+        resetHash();
+    }
+
     @Override
     public void computeHash(Hasher hasher) {
         hasher.put(handler);
         hasher.put(validator);
+        hasher.put(connection);
         hasher.put(options);
     }
 
@@ -151,6 +173,7 @@ public class PgForeignDataWrapper extends PgAbstractStatement
                 && super.compare(fdw)
                 && Objects.equals(handler, fdw.handler)
                 && Objects.equals(validator, fdw.validator)
+                && Objects.equals(connection, fdw.connection)
                 && Objects.equals(options, fdw.options);
     }
 
@@ -159,6 +182,7 @@ public class PgForeignDataWrapper extends PgAbstractStatement
         PgForeignDataWrapper copyFwd = new PgForeignDataWrapper(name);
         copyFwd.setHandler(handler);
         copyFwd.setValidator(validator);
+        copyFwd.setConnection(connection);
         copyFwd.options.putAll(options);
         return copyFwd;
     }

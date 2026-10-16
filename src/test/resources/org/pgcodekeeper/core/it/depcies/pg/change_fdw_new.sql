@@ -1,6 +1,7 @@
 CREATE FOREIGN DATA WRAPPER mywrapper 
 HANDLER public.handler_func
-VALIDATOR public.fdw_test_validator;
+VALIDATOR public.fdw_test_validator
+CONNECTION public.my_fdw_conninfo;
 
 ALTER FOREIGN DATA WRAPPER mywrapper OWNER TO khazieva_gr;
 
@@ -23,3 +24,7 @@ CREATE OR REPLACE FUNCTION public.handler_func() RETURNS fdw_handler
 LANGUAGE C STRICT;
 
 ALTER FUNCTION public.handler_func() OWNER TO khazieva_gr;
+
+CREATE OR REPLACE FUNCTION public.my_fdw_conninfo(oid, oid, internal) RETURNS void
+    LANGUAGE plpgsql
+    AS $$ begin return; end; $$;

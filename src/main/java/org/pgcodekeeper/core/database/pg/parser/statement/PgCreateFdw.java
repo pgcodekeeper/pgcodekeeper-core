@@ -41,6 +41,8 @@ public final class PgCreateFdw extends PgParserAbstract {
      */
     public static final String HANDLER_SIGNATURE = "()";
 
+    public static final String CONNECTION_SIGNATURE = "(oid, oid, internal)";
+
     private final Create_foreign_data_wrapper_statementContext ctx;
 
     /**
@@ -67,6 +69,11 @@ public final class PgCreateFdw extends PgParserAbstract {
             fDW.setValidator(getFullCtxText(ctx.validator_func));
             addDepSafe(fDW, getIdentifiers(ctx.validator_func), DbObjType.FUNCTION, VALIDATOR_SIGNATURE);
         }
+        if (null != ctx.connect_func) {
+            fDW.setConnection(getFullCtxText(ctx.connect_func));
+            addDepSafe(fDW, getIdentifiers(ctx.connect_func), DbObjType.FUNCTION, CONNECTION_SIGNATURE);
+        }
+
         Define_foreign_optionsContext options = ctx.define_foreign_options();
         if (options != null) {
             for (Foreign_optionContext option : options.foreign_option()) {

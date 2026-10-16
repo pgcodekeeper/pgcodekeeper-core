@@ -580,3 +580,5 @@ insert into parted_conflict values(0, 'cero', 1)
 
 drop table parted_conflict;
 drop function parted_conflict_update_func();
+
+INSERT INTO products (id, name, quantity) VALUES (1, 'Widget', 10) ON CONFLICT (id) DO SELECT WHERE products.quantity > 0;

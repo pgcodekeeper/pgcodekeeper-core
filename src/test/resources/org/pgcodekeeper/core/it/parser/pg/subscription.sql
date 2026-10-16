@@ -14,6 +14,7 @@ CREATE SUBSCRIPTION testsub2 CONNECTION 'dbname=doesnotexist' PUBLICATION testpu
 CREATE SUBSCRIPTION testsub2 CONNECTION 'dbname=doesnotexist' PUBLICATION testpub WITH (slot_name = NONE, enabled = false);
 CREATE SUBSCRIPTION testsub2 CONNECTION 'dbname=doesnotexist' PUBLICATION testpub WITH (slot_name = NONE, create_slot = false);
 CREATE SUBSCRIPTION testsub3 CONNECTION 'dbname=doesnotexist' PUBLICATION testpub WITH (slot_name = NONE, connect = false);
+CREATE SUBSCRIPTION my_subscription SERVER my_remote_server PUBLICATION my_publication, another_publication WITH (enabled = true, create_slot = true, slot_name = 'my_slot');
 ALTER SUBSCRIPTION testsub3 REFRESH PUBLICATION;
 ALTER SUBSCRIPTION testsub CONNECTION 'foobar';
 ALTER SUBSCRIPTION testsub SET PUBLICATION testpub2, testpub3 WITH (refresh = false);
@@ -33,5 +34,7 @@ ALTER SUBSCRIPTION testsub OWNER TO regress_subscription_user2;
 ALTER SUBSCRIPTION testsub SET (slot_name = NONE);
 ALTER SUBSCRIPTION regress_testsub SKIP (lsn = NONE);
 ALTER SUBSCRIPTION regress_testsub SKIP (lsn = '0/12345');
+ALTER SUBSCRIPTION name SERVER server_name;
+ALTER SUBSCRIPTION name REFRESH SEQUENCES;
 DROP SUBSCRIPTION IF EXISTS testsub;
 DROP SUBSCRIPTION testsub;

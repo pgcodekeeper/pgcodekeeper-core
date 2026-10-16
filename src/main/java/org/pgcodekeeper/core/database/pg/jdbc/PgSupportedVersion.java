@@ -27,7 +27,8 @@ public enum PgSupportedVersion implements ISupportedVersion {
     VERSION_15(150000, "15.0"),
     VERSION_16(160000, "16.0"),
     VERSION_17(170000, "17.0"),
-    VERSION_18(180000, "18.0");
+    VERSION_18(180000, "18.0"),
+    VERSION_19(190000, "19.0");
 
     private final int version;
     private final String text;

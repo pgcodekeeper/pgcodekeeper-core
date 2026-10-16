@@ -65,7 +65,7 @@ public class Keyword {
      * Regex search and replacement strings for kwlist.h -> Java transformation:
      *
      * PG_KEYWORD\(("\w+"), \w+, (\w+), (\w+)\)
-     * addKw\(map, KeywordCategory.$1, $2, $3\);
+     * addKw\(map, $1, KeywordCategory.$2, $3\);
      */
     private static void addKeywords(Map<String, Keyword> map) {
         addKw(map, "abort", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
@@ -245,6 +245,7 @@ public class Keyword {
         addKw(map, "hour", KeywordCategory.UNRESERVED_KEYWORD, AS_LABEL);
         addKw(map, "identity", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "if", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
+        addKw(map, "ignore", KeywordCategory.UNRESERVED_KEYWORD, AS_LABEL);
         addKw(map, "ilike", KeywordCategory.TYPE_FUNC_NAME_KEYWORD, BARE_LABEL);
         addKw(map, "immediate", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "immutable", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
@@ -277,7 +278,7 @@ public class Keyword {
         addKw(map, "isnull", KeywordCategory.TYPE_FUNC_NAME_KEYWORD, AS_LABEL);
         addKw(map, "isolation", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "join", KeywordCategory.TYPE_FUNC_NAME_KEYWORD, BARE_LABEL);
-        addKw(map, "json", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
+        addKw(map, "json", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);  // COL_NAME_KEYWORD
         addKw(map, "json_array", KeywordCategory.COL_NAME_KEYWORD, BARE_LABEL);
         addKw(map, "json_arrayagg", KeywordCategory.COL_NAME_KEYWORD, BARE_LABEL);
         addKw(map, "json_exists", KeywordCategory.COL_NAME_KEYWORD, BARE_LABEL);
@@ -312,6 +313,7 @@ public class Keyword {
         addKw(map, "lock", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "locked", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "logged", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
+        addKw(map, "lsn", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "mapping", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "match", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "matched", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
@@ -417,10 +419,12 @@ public class Keyword {
         addKw(map, "relative", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "release", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "rename", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
+        addKw(map, "repack", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "repeatable", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "replace", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "replica", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "reset", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
+        addKw(map, "respect", KeywordCategory.UNRESERVED_KEYWORD, AS_LABEL);
         addKw(map, "restart", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "restrict", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "return", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
@@ -537,6 +541,7 @@ public class Keyword {
         addKw(map, "views", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "virtual", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "volatile", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
+        addKw(map, "wait", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "when", KeywordCategory.RESERVED_KEYWORD, BARE_LABEL);
         addKw(map, "where", KeywordCategory.RESERVED_KEYWORD, AS_LABEL);
         addKw(map, "whitespace", KeywordCategory.UNRESERVED_KEYWORD, BARE_LABEL);
