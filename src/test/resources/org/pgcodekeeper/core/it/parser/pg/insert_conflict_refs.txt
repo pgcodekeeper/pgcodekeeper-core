@@ -271,3 +271,4 @@ Reference: Object = parted_conflict (TABLE), action = INSERT, line number = 576,
 Reference: Object = parted_conflict (TABLE), action = INSERT, line number = 578, charPositionInLine = 12
 Reference: Object = parted_conflict (TABLE), action = DROP, line number = 581, charPositionInLine = 11
 Reference: Object = parted_conflict_update_func (FUNCTION), action = DROP, line number = 582, charPositionInLine = 14
+Reference: Object = products (TABLE), action = INSERT, line number = 584, charPositionInLine = 12

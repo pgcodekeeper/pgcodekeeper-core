@@ -1455,7 +1455,7 @@ create table parted1_constr (a int, b text);
 alter table parted_constr attach partition parted1_constr
   for values from ('aaaa') to ('bbbb');
 create constraint trigger parted_trig after insert on parted_constr_ancestor
-  deferrable
+  deferrable ENFORCED
   for each row execute procedure trigger_notice_ab();
 create constraint trigger parted_trig_two after insert on parted_constr
   deferrable initially deferred

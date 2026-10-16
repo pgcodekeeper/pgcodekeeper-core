@@ -102,6 +102,8 @@ script_additional
     | execute_statement
     | explain_statement
     | show_statement
+    | repack_statement
+    | WAIT FOR LSN vex array_wait_options?
     ;
 
 additional_statement
@@ -110,7 +112,7 @@ additional_statement
     | UNLISTEN (identifier | MULTIPLY)
     | analyze_keyword (LEFT_PAREN analyze_mode (COMMA analyze_mode)* RIGHT_PAREN | VERBOSE)? table_cols_list?
     | cluster_stmt
-    | CHECKPOINT
+    | CHECKPOINT array_checkpoint_options?
     | LOAD sconst
     | DEALLOCATE PREPARE? (identifier | ALL)
     | RESET ((identifier DOT)? identifier | TIME ZONE | SESSION AUTHORIZATION | ALL)
@@ -121,6 +123,15 @@ additional_statement
     | truncate_stmt
     | notify_stmt
     | reindex_stmt
+    ;
+
+array_checkpoint_options
+    : LEFT_PAREN checkpoint_options (COMMA checkpoint_options)* RIGHT_PAREN
+    ;
+
+checkpoint_options
+    : FLUSH_UNLOGGED boolean_value?
+    | MODE (FAST | SPREAD)
     ;
 
 cluster_stmt
@@ -155,8 +166,34 @@ show_statement
     : SHOW ((identifier DOT)? identifier | ALL | TIME ZONE | TRANSACTION ISOLATION LEVEL | SESSION AUTHORIZATION)
     ;
 
+repack_statement
+    : REPACK array_repack_options? repack_values?
+    ;
+
+array_repack_options
+    : LEFT_PAREN repack_options (COMMA repack_options)* RIGHT_PAREN
+    ;
+
+repack_options
+    : (VERBOSE | ANALYZE | CONCURRENTLY) boolean_value?
+    ;
+
+repack_values
+    : schema_qualified_name (LEFT_PAREN names_references RIGHT_PAREN)? (USING INDEX (identifier)?)?
+    | USING INDEX
+    ;
+
+array_wait_options
+    : WITH LEFT_PAREN wait_options (COMMA wait_options)* RIGHT_PAREN
+    ;
+
+wait_options
+    : (MODE | TIMEOUT) vex
+    | NO_THROW
+    ;
+
 explain_option
-    : (analyze_keyword | VERBOSE | COSTS | SETTINGS | GENERIC_PLAN | BUFFERS | WAL | TIMING | SUMMARY | MEMORY) boolean_value?
+    : (analyze_keyword | VERBOSE | COSTS | SETTINGS | GENERIC_PLAN | BUFFERS | WAL | TIMING | SUMMARY | IO | MEMORY) boolean_value?
     | SERIALIZE (NONE | TEXT | BINARY)?
     | FORMAT (TEXT | XML | JSON | YAML)
     ;
@@ -1057,6 +1094,7 @@ create_statistics_statement
 create_foreign_data_wrapper_statement
     : FOREIGN DATA WRAPPER name=identifier (HANDLER handler_func=schema_qualified_name | NO HANDLER )?
     (VALIDATOR validator_func=schema_qualified_name | NO VALIDATOR)?
+    (CONNECTION connect_func=schema_qualified_name | NO CONNECTION)?
      define_foreign_options?
     ;
 
@@ -1175,7 +1213,7 @@ create_trigger_statement
     | update_true=UPDATE (OF identifier_list)?)OR?)+
     ON table_name=schema_qualified_name
     (FROM referenced_table_name=schema_qualified_name)?
-    table_deferrable? table_initialy_immed?
+    table_deferrable? table_initialy_immed? ENFORCED?
     (REFERENCING trigger_referencing trigger_referencing?)?
     (for_each_true=FOR EACH? (ROW | STATEMENT))?
     when_trigger?
@@ -1457,7 +1495,7 @@ drop_policy_statement
 
 create_subscription_statement
     : SUBSCRIPTION identifier
-    CONNECTION sconst
+    (SERVER identifier | CONNECTION sconst)
     PUBLICATION identifier_list
     with_storage_parameter?
     ;
@@ -1476,6 +1514,8 @@ alter_subscription_action
     | SKIP_ LEFT_PAREN storage_parameter_option RIGHT_PAREN
     | owner_to
     | rename_to
+    | SERVER identifier
+    | REFRESH SEQUENCES
     ;
 
 create_cast_statement
@@ -1554,9 +1594,24 @@ alter_conversion_statement
     ;
 
 create_publication_statement
-    : PUBLICATION identifier
-    (FOR ALL TABLES | FOR publication_object (COMMA publication_object)*)?
-    with_storage_parameter?
+    : PUBLICATION identifier (FOR (array_publication_all_object | array_publication_object))? with_storage_parameter?
+    ;
+
+array_publication_object
+    : publication_object (COMMA publication_object)*
+    ;
+
+array_publication_all_object
+    : ALL objects (COMMA ALL objects)*
+    ;
+
+objects
+    : TABLES (EXCEPT LEFT_PAREN except_table_object (COMMA except_table_object)* RIGHT_PAREN)?
+    | SEQUENCES
+    ;
+
+except_table_object
+    : TABLE only_table_multiply (COMMA only_table_multiply)*
     ;
 
 publication_object
@@ -1575,8 +1630,8 @@ alter_publication_statement
 alter_publication_action
     : rename_to
     | owner_to
-    | SET storage_parameters
-    | (ADD | DROP | SET) publication_object (COMMA publication_object)*
+    | SET (storage_parameters | array_publication_object | array_publication_all_object)
+    | (ADD | DROP) array_publication_object
     ;
 
 only_table_multiply
@@ -1615,8 +1670,7 @@ copy_option_list
 
 copy_option
     : FORMAT? (TEXT | CSV | BINARY)
-    | OIDS boolean_value?
-    | FREEZE boolean_value?
+    | (OIDS | FREEZE | FORCE_ARRAY) boolean_value?
     | (DELIMITER | NULL) AS? sconst
     | (DEFAULT | ENCODING | QUOTE | ESCAPE) sconst
     | HEADER (boolean_value | MATCH)?
@@ -2455,6 +2509,7 @@ bare_label_keyword
     | LOCK
     | LOCKED
     | LOGGED
+    | LSN
     | MAPPING
     | MATCH
     | MATCHED
@@ -2551,6 +2606,7 @@ bare_label_keyword
     | RELATIVE
     | RELEASE
     | RENAME
+    | REPACK
     | REPEATABLE
     | REPLACE
     | REPLICA
@@ -2666,6 +2722,7 @@ bare_label_keyword
     | VIEWS
     | VIRTUAL
     | VOLATILE
+    | WAIT
     | WHEN
     | WHITESPACE
     | WORK
@@ -2804,6 +2861,7 @@ tokens_nonreserved
     | HOUR
     | IDENTITY
     | IF
+    | IGNORE
     | IMMEDIATE
     | IMMUTABLE
     | IMPLICIT
@@ -2840,6 +2898,7 @@ tokens_nonreserved
     | LOCK
     | LOCKED
     | LOGGED
+    | LSN
     | MAPPING
     | MATCH
     | MATCHED
@@ -2919,10 +2978,12 @@ tokens_nonreserved
     | RELATIVE
     | RELEASE
     | RENAME
+    | REPACK
     | REPEATABLE
     | REPLACE
     | REPLICA
     | RESET
+    | RESPECT
     | RESTART
     | RESTRICT
     | RETURN
@@ -3009,6 +3070,7 @@ tokens_nonreserved
     | VIEWS
     | VIRTUAL
     | VOLATILE
+    | WAIT
     | WHITESPACE
     | WITHIN
     | WITHOUT
@@ -3226,11 +3288,14 @@ tokens_nonkeyword
     | EVERY
     | EXCHANGE
     | EXTENDED
+    | FAST
     | FIELDS
     | FILL
     | FINALFUNC
     | FINALFUNC_EXTRA
     | FINALFUNC_MODIFY
+    | FLUSH_UNLOGGED
+    | FORCE_ARRAY
     | FORCE_NOT_NULL
     | FORCE_NULL
     | FORCE_QUOTE
@@ -3244,13 +3309,13 @@ tokens_nonkeyword
     | HYPOTHETICAL
     | ICU_LOCALE
     | ICU_RULES
-    | IGNORE
     | INCLUSIVE
     | INDEX_CLEANUP
     | INIT
     | INITCOND
     | INITPLAN
     | INTERNALLENGTH
+    | IO
     | IS_TEMPLATE
     | LC_COLLATE
     | LC_CTYPE
@@ -3290,6 +3355,7 @@ tokens_nonkeyword
     | NOLOGIN
     | NOREPLICATION
     | NOSUPERUSER
+    | NO_THROW
     | OID
     | ON_ERROR
     | ONLY_DATABASE_STATS
@@ -3332,6 +3398,7 @@ tokens_nonkeyword
     | SKIP_LOCKED
     | SORTOP
     | SPLIT
+    | SPREAD
     | SSPACE
     | STRATEGY
     | STOP
@@ -3343,6 +3410,7 @@ tokens_nonkeyword
     | SUBTYPE_OPCLASS
     | SUMMARY
     | SUPERUSER
+    | TIMEOUT
     | TIMING
     | TYPMOD_IN
     | TYPMOD_OUT
@@ -3596,7 +3664,7 @@ cast_specification
 function_call
     : schema_qualified_name_nontype LEFT_PAREN (set_qualifier? vex_or_named_notation (COMMA vex_or_named_notation)* orderby_clause?)? RIGHT_PAREN
         (WITHIN GROUP LEFT_PAREN orderby_clause RIGHT_PAREN)?
-        filter_clause? (OVER (identifier | window_definition))?
+        filter_clause? ((IGNORE | RESPECT) NULLS)? (OVER (identifier | window_definition))?
     | function_construct
     | extract_function
     | system_function
@@ -3909,7 +3977,7 @@ from_function_column_def
     ;
 
 groupby_clause
-  : GROUP BY grouping_element_list
+  : GROUP BY (ALL | DISTINCT)? grouping_element_list
   ;
 
 grouping_element_list
@@ -4001,6 +4069,7 @@ conflict_object
 
 conflict_action
     : DO NOTHING
+    | DO SELECT (FOR (UPDATE | NO KEY UPDATE | SHARE | KEY SHARE))? (WHERE vex)?
     | DO UPDATE SET update_set (COMMA update_set)* (WHERE vex)?
     ;
 

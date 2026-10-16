@@ -34,6 +34,10 @@ ANALYSE VERBOSE only q.t1 (c1, c2), public.t2 * (c1, c2);
 begin isolation level repeatable read;
 begin;
 CHECKPOINT;
+CHECKPOINT (MODE FAST);
+CHECKPOINT (MODE SPREAD);
+CHECKPOINT (FLUSH_UNLOGGED);
+CHECKPOINT (MODE FAST, FLUSH_UNLOGGED TRUE);
 CLOSE hsc;
 CLUSTER public.t1;
 COMMENT ON STATISTICS ctlt1_a_b_stat IS 'ab stats';
@@ -96,6 +100,7 @@ explain (verbose, costs off, analyse on, timing off, summary off) create table t
 EXPLAIN SELECT 1;
 EXPLAIN (SERIALIZE BINARY) select 1;
 EXPLAIN (MEMORY 'true') select 1;
+EXPLAIN (IO) select 1;
 
 -- Test SERIALIZE option
 explain (analyze, serialize) select * from int8_tbl i8;
@@ -194,3 +199,17 @@ VACUUM (ANALYZE, FULL) ONLY vactst;
 VACUUM (ANALYZE, FULL) vactst *;
 VACUUM;
 /* a /* b /* c */ d /* e */ f */ g /* h */ i */ -- nested comments
+
+REPACK employees;
+REPACK employees USING INDEX employees_ind;
+REPACK (CONCURRENTLY) employees USING INDEX;
+REPACK (ANALYZE, VERBOSE) cases (district, case_nr);
+REPACK;
+REPACK (VERBOSE) USING INDEX;
+
+WAIT FOR LSN '0/0306EE20';
+WAIT FOR LSN '0/0306EE20' WITH (MODE 'standby_flush');
+WAIT FOR LSN '0/0306EE20' WITH (MODE 'standby_write', TIMEOUT '100ms', NO_THROW);
+WAIT FOR LSN '0/0306EE20' WITH (MODE 'primary_flush');
+WAIT FOR LSN '0/0306EE20' WITH (TIMEOUT '0.1s');
+WAIT FOR LSN '0/0306EE20' WITH (TIMEOUT '100ms', NO_THROW);

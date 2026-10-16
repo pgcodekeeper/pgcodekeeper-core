@@ -59,6 +59,13 @@ public final class PgForeignDataWrappersReader extends PgAbstractJdbcReader{
             setFunctionWithDep(PgForeignDataWrapper::setValidator, f, fdwValidator, PgCreateFdw.VALIDATOR_SIGNATURE);
         }
 
+        if (PgSupportedVersion.VERSION_19.isLE(loader.getVersion())) {
+            String fdwConnectFunc = res.getString("fdwconnection");
+            if (!"-".equals(fdwConnectFunc)) {
+                setFunctionWithDep(PgForeignDataWrapper::setConnection, f, fdwConnectFunc, PgCreateFdw.CONNECTION_SIGNATURE);
+            }
+        }
+
         String[] options = PgJdbcUtils.getColArray(res, "fdwoptions", true);
         if (options != null) {
             PgParserAbstract.fillOptionParams(options, f::addOption, false, true, false);
@@ -88,5 +95,9 @@ public final class PgForeignDataWrappersReader extends PgAbstractJdbcReader{
                 .column("res.fdwacl")
                 .column("res.fdwowner")
                 .from("pg_catalog.pg_foreign_data_wrapper res");
+
+        if (PgSupportedVersion.VERSION_19.isLE(loader.getVersion())) {
+            builder.column("res.fdwconnection");
+        }
     }
 }

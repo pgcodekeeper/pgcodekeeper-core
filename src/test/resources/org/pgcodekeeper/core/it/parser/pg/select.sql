@@ -1299,7 +1299,7 @@ SELECT min(generate_series(1, 3)) OVER() FROM few;
 SELECT id,lag(id) OVER(), count(*) OVER(), generate_series(1,3) FROM few;
 SELECT SUM(count(*)) OVER(PARTITION BY generate_series(1,3) ORDER BY generate_series(1,3)), generate_series(1,3) g FROM few GROUP BY g;
 SELECT few.dataa, count(*), min(id), max(id), generate_series(1,3) FROM few GROUP BY few.dataa ORDER BY 5, 1;
-SELECT dataa, datab b, generate_series(1,2) g, count(*) FROM few GROUP BY CUBE(dataa, datab, g) ORDER BY dataa;
+SELECT dataa, datab b, generate_series(1,2) g, count(*) FROM few GROUP BY DISTINCT CUBE(dataa, datab, g) ORDER BY dataa;
 select 'foo' as f, generate_series(1,2) as g from few order by 1;
 SELECT int4mul(generate_series(1,2), 10);
 SELECT generate_series(1,3) IS DISTINCT FROM 2;
@@ -1457,4 +1457,7 @@ SELECT js,
 FROM (VALUES ('[{"a":"1"},
  {"b":"2","b":"3"}]')) foo(js);
 SELECT _txt IS JSON;
-select count(*) from (select tt.a, tt.b, tt.c, tt.d from testtable tt group by 1,2,3,4);
+select count(*) from (select tt.a, tt.b, tt.c, tt.d from testtable tt group by ALL 1,2,3,4);
+SELECT ts, price,
+       lag(price) IGNORE NULLS OVER (ORDER BY ts) AS prev_valid_price
+FROM stock_prices;

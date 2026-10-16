@@ -1,5 +1,11 @@
 SET search_path = pg_catalog;
 
+-- DEPCY: This FUNCTION my_fdw_conninfo is a dependency of TABLE: public.test_ft
+
+CREATE OR REPLACE FUNCTION public.my_fdw_conninfo(oid, oid, internal) RETURNS void
+    LANGUAGE plpgsql
+    AS $$ begin return; end; $$;
+
 -- DEPCY: This FUNCTION fdw_test_validator is a dependency of TABLE: public.test_ft
 
 CREATE OR REPLACE FUNCTION public.fdw_test_validator(text[], oid) RETURNS void
@@ -18,7 +24,7 @@ ALTER FUNCTION public.handler_func() OWNER TO khazieva_gr;
 
 -- DEPCY: This FOREIGN_DATA_WRAPPER mywrapper is a dependency of TABLE: public.test_ft
 
-CREATE FOREIGN DATA WRAPPER mywrapper HANDLER public.handler_func VALIDATOR public.fdw_test_validator;
+CREATE FOREIGN DATA WRAPPER mywrapper HANDLER public.handler_func VALIDATOR public.fdw_test_validator CONNECTION public.my_fdw_conninfo;
 
 ALTER FOREIGN DATA WRAPPER mywrapper OWNER TO khazieva_gr;
 
