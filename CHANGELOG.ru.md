@@ -9,6 +9,14 @@
 
 ### Добавлено
 
+### Изменено
+
+### Исправлено
+
+## [15.4.0] - 2026-10-19
+
+### Добавлено
+
 - Добавлена поддержка MS SQL 2025.
 - Добавлена поддержка PostgreSQL 19.
 
@@ -2602,7 +2610,8 @@
 
 - Добавлен парсинг ORDER BY для агрегатных функции.
 
-[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.3.0...HEAD
+[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.4.0...HEAD
+[15.4.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.3.0...v15.4.0
 [15.3.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.2.0...v15.3.0
 [15.2.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.1.0...v15.2.0
 [15.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.0.0...v15.1.0

@@ -9,8 +9,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [15.4.0] - 2026-10-19
+
+### Added
+
 - Added support for MS SQL 2025.
-- Added support PostgreSQL 19.
+- Added support for PostgreSQL 19.
 
 ### Changed
 
@@ -26,7 +34,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Security
 
-- Increased version of lz4-java librarie due to CVE-2026-106453 and CVE-2026-106452.
+- Increased version of lz4-java library due to CVE-2026-106453 and CVE-2026-106452.
 
 ## [15.3.0] - 2026-08-10
 
@@ -2601,7 +2609,8 @@ We increment major version in this release due to decision to shift our developm
 
 - ORDER BY parsing has been added to the aggregate functions.
 
-[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.3.0...HEAD
+[Unreleased]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.4.0...HEAD
+[15.4.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.3.0...v15.4.0
 [15.3.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.2.0...v15.3.0
 [15.2.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.1.0...v15.2.0
 [15.1.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.0.0...v15.1.0
