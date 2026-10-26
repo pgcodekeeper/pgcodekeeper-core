@@ -80,7 +80,7 @@
         <dependency>
             <groupId>com.clickhouse</groupId>
             <artifactId>jdbc-v2</artifactId>
-            <version>0.10.0</version>
+            <version>0.11.0</version>
         </dependency>
 
         <!--test dependencies-->
@@ -119,34 +119,6 @@
             <artifactId>testcontainers-clickhouse</artifactId>
             <version>${testcontainers.version}</version>
             <scope>test</scope>
-        </dependency>
-
-        <!-- override version with CVE-2026-59949 -->
-        <dependency>
-            <groupId>at.yawk.lz4</groupId>
-            <artifactId>lz4-java</artifactId>
-            <version>1.11.4</version>
-        </dependency>
-
-        <!-- override version with CVE-2026-64607 -->
-        <dependency>
-            <groupId>org.apache.httpcomponents.client5</groupId>
-            <artifactId>httpclient5</artifactId>
-            <version>5.6.4</version>
-        </dependency>
-
-        <!-- override version with CVE-2026-54399 -->
-        <dependency>
-            <groupId>org.apache.httpcomponents.core5</groupId>
-            <artifactId>httpcore5</artifactId>
-            <version>5.4.3</version>
-        </dependency>
-
-        <!-- override version with CVE-2026-54428 -->
-        <dependency>
-            <groupId>org.apache.httpcomponents.core5</groupId>
-            <artifactId>httpcore5-h2</artifactId>
-            <version>5.4.3</version>
         </dependency>
     </dependencies>
 
