@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.pgcodekeeper.core.database.pg.jdbc;
 
-import java.util.function.BiConsumer;
-
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.*;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
@@ -58,15 +56,6 @@ public abstract class PgAbstractSearchPathJdbcReader extends AbstractSearchPathJ
             statement.addDependency(new ObjectReference(schemaName, DbObjType.SCHEMA));
             statement.addDependency(new ObjectReference(schemaName, name, type));
         }
-    }
-
-    /**
-     * @deprecated {@link #setFunctionWithDep(BiConsumer, AbstractStatement, String, String)}
-     */
-    @Deprecated
-    protected <T extends AbstractStatement> void setFunctionWithDep(
-            BiConsumer<T, String> setter, T statement, String function) {
-        setFunctionWithDep(setter, statement, function, null);
     }
 
     @Override

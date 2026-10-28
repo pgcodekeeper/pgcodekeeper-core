@@ -28,7 +28,7 @@ import org.pgcodekeeper.core.settings.ISettings;
  * Operators are symbols that represent specific operations (like +, -, *, etc.)
  * and can be customized for user-defined types with associated functions.
  */
-public class PgOperator extends PgAbstractStatement implements IOperator, ISearchPath {
+public class PgOperator extends PgAbstractStatement implements IOperator {
 
     private String procedure;
     private String leftArg;

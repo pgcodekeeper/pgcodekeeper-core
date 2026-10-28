@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.pgcodekeeper.core.database.api.schema.DbObjType;
 import org.pgcodekeeper.core.database.api.schema.IRelation;
-import org.pgcodekeeper.core.database.api.schema.ISearchPath;
 import org.pgcodekeeper.core.database.api.schema.IStatement;
 import org.pgcodekeeper.core.database.api.schema.IStatementContainer;
 import org.pgcodekeeper.core.database.base.schema.AbstractStatement;
@@ -37,7 +36,7 @@ import org.pgcodekeeper.core.localizations.Messages;
  * indexes, triggers, rules, policies, and constraints as child objects.
  */
 public abstract class MsAbstractStatementContainer extends MsAbstractStatement
-        implements IRelation, IStatementContainer, ISearchPath {
+        implements IRelation, IStatementContainer {
 
     private final Map<String, MsTrigger> triggers = new LinkedHashMap<>();
     private final Map<String, MsIndex> indexes = new LinkedHashMap<>();

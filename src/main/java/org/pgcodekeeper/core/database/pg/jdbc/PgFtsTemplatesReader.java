@@ -43,11 +43,10 @@ public final class PgFtsTemplatesReader extends PgAbstractSearchPathJdbcReader {
 
         String init = res.getString("tmplinit");
         if (!"-".equals(init)) {
-            setFunctionWithDep(PgFtsTemplate::setInitFunction, template, init);
+            setFunctionWithDep(PgFtsTemplate::setInitFunction, template, init, null);
         }
 
-        setFunctionWithDep(PgFtsTemplate::setLexizeFunction,
-                template, res.getString("tmpllexize"));
+        setFunctionWithDep(PgFtsTemplate::setLexizeFunction, template, res.getString("tmpllexize"), null);
 
         // COMMENT
         loader.setComment(template, res);

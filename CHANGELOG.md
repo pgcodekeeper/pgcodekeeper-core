@@ -11,9 +11,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- Updated ClickHouse JDBC driver version.
-
 ### Fixed
+
+### Security
+
+- Updated ClickHouse JDBC driver version due to CVE-2026-102554.
 
 ## [15.4.0] - 2026-10-19
 
