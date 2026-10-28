@@ -41,14 +41,14 @@ public final class PgFtsParsersReader extends PgAbstractSearchPathJdbcReader {
     protected void processResult(ResultSet res, ISchema schema) throws SQLException {
         PgFtsParser parser = new PgFtsParser(res.getString("prsname"));
 
-        setFunctionWithDep(PgFtsParser::setStartFunction, parser, res.getString("prsstart"));
-        setFunctionWithDep(PgFtsParser::setGetTokenFunction, parser, res.getString("prstoken"));
-        setFunctionWithDep(PgFtsParser::setEndFunction, parser, res.getString("prsend"));
-        setFunctionWithDep(PgFtsParser::setLexTypesFunction, parser, res.getString("prslextype"));
+        setFunctionWithDep(PgFtsParser::setStartFunction, parser, res.getString("prsstart"), null);
+        setFunctionWithDep(PgFtsParser::setGetTokenFunction, parser, res.getString("prstoken"), null);
+        setFunctionWithDep(PgFtsParser::setEndFunction, parser, res.getString("prsend"), null);
+        setFunctionWithDep(PgFtsParser::setLexTypesFunction, parser, res.getString("prslextype"), null);
 
         String headline = res.getString("prsheadline");
         if (!"-".equals(headline)) {
-            setFunctionWithDep(PgFtsParser::setHeadLineFunction, parser, headline);
+            setFunctionWithDep(PgFtsParser::setHeadLineFunction, parser, headline, null);
         }
 
         loader.setComment(parser, res);

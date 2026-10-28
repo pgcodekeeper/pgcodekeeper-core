@@ -32,7 +32,7 @@ import java.util.Collections;
  * Provides common functionality for all PostgreSQL constraint types
  * including deferrable and initially deferred properties.
  */
-public abstract class PgConstraint extends PgAbstractStatement implements IConstraint, ISubElement {
+public abstract class PgConstraint extends PgAbstractStatement implements IConstraint {
 
     //If PK exists we get this error code.
     protected static final String INVALID_DEFINITION = "'42P16'";

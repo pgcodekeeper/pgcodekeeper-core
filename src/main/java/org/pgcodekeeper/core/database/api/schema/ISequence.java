@@ -20,7 +20,7 @@ import org.pgcodekeeper.core.hasher.IHashable;
 /**
  * Interface for database sequence
  */
-public interface ISequence extends IStatement, IRelation, IHashable {
+public interface ISequence extends IRelation, IHashable {
 
     @Override
     default DbObjType getStatementType() {

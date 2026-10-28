@@ -38,7 +38,7 @@ import org.pgcodekeeper.core.script.SQLScript;
  * Represents a ClickHouse database schema (database in ClickHouse terms).
  * Contains tables, views, dictionaries and has an associated engine type.
  */
-public class ChSchema extends ChAbstractStatement implements ISchema, IStatementContainer {
+public class ChSchema extends ChAbstractStatement implements ISchema {
 
     private final Map<String, ChTable> tables = new LinkedHashMap<>();
     private final Map<String, ChView> views = new LinkedHashMap<>();
