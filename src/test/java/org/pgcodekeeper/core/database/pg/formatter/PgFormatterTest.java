@@ -16,6 +16,8 @@
 package org.pgcodekeeper.core.database.pg.formatter;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.pgcodekeeper.core.FILES_POSTFIX;
 import org.pgcodekeeper.core.TestUtils;
 import org.pgcodekeeper.core.database.api.formatter.IndentType;
@@ -30,8 +32,12 @@ class PgFormatterTest {
     /**
      * Testing default parameters
      */
-    @Test
-    void testDefault() throws IOException {
+    @ParameterizedTest
+    @ValueSource(strings = { 
+        "Default_config",
+        "Simple_func"
+    })
+    void testDefault(String templateName) throws IOException {
         FormatConfiguration config = new FormatConfiguration();
         config.setAddWhitespaceAfterOp(true);
         config.setAddWhitespaceBeforeOp(true);
@@ -39,8 +45,8 @@ class PgFormatterTest {
         config.setIndentType(IndentType.WHITESPACE);
         config.setRemoveTrailingWhitespace(true);
 
-        String newFile = "new_Default_config";
-        String oldFile = "old_Default_config";
+        String newFile = "new_" + templateName;
+        String oldFile = "old_" + templateName;
         testFormatter(oldFile, newFile, config);
     }
 
