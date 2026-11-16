@@ -48,8 +48,7 @@ public class DepcyFinder {
                         Collection<DbObjType> filterObjTypes, boolean isInvertFilter,
                         Collection<Dependency> additionalDependencies) {
         this.db = db;
-        DepcyGraph dg = new DepcyGraph(db);
-        dg.addCustomDepcies(additionalDependencies);
+        DepcyGraph dg = new DepcyGraph(db, false, additionalDependencies);
         this.graph = isReverse ? dg.getGraph() : dg.getReversedGraph();
         this.depth = depth;
         if (filterObjTypes.isEmpty()) {

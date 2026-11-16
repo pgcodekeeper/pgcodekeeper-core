@@ -16,7 +16,7 @@
 package org.pgcodekeeper.core.model.graph;
 
 import org.jgrapht.Graph;
-import org.jgrapht.alg.cycle.CycleDetector;
+import org.jgrapht.alg.connectivity.GabowStrongConnectivityInspector;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -62,43 +62,25 @@ public final class DepcyGraph {
         return reversedGraph;
     }
 
-    private final IDatabase db;
-
-    /**
-     * Copied database, graph source.<br>
-     * <b>Do not modify</b> any elements in this as it will break
-     * HashSets/HashMaps and with them the generated graph.
-     */
-    public IDatabase getDb() {
-        return db;
-    }
-
-    /**
-     * Creates a dependency graph from the database schema.
-     *
-     * @param graphSrc the source database to build graph from
-     */
-    public DepcyGraph(IDatabase graphSrc) {
-        this(graphSrc, false);
-    }
-
     /**
      * Creates a dependency graph with optional graph reduction.
      *
      * @param graphSrc    the source database to build graph from
      * @param reduceGraph if true, merge column nodes into table nodes
+     * @param additionalDependencies list of additional dependencies
      */
-    public DepcyGraph(IDatabase graphSrc, boolean reduceGraph) {
-        db = (IDatabase) graphSrc.deepCopy();
-        create();
+    public DepcyGraph(IDatabase graphSrc, boolean reduceGraph, Collection<Dependency> additionalDependencies) {
+        create(graphSrc);
         removeCycles();
 
         if (reduceGraph) {
             reduce();
         }
+
+        addCustomDepcies(additionalDependencies, graphSrc);
     }
 
-    private void create() {
+    private void create(IDatabase db) {
         graph.addVertex(db);
 
         // first pass: object tree
@@ -110,13 +92,19 @@ public final class DepcyGraph {
 
         // second pass: dependency graph
         db.getDescendants().flatMap(ITable::columnAdder).forEach(st -> {
-            processDeps(st);
+            for (ObjectReference dep : st.getDependencies()) {
+                IStatement depSt = db.getStatement(dep);
+                if (depSt != null && !st.equals(depSt)) {
+                    graph.addEdge(st, depSt);
+                }
+            }
+
             if (st instanceof IConstraintFk fk) {
-                createFkeyToUnique(fk);
+                createFkeyToUnique(fk, db);
             } else if (st instanceof PgColumn col) {
                 AbstractStatement tbl = col.getParent();
                 if (st.getParent() instanceof PgPartitionTable) {
-                    createChildColToPartTblCol((PgPartitionTable) tbl, col);
+                    createChildColToPartTblCol((PgPartitionTable) tbl, col, db);
                 } else {
                     // Creating the connection between the column of a inherit
                     // table and the columns of its child tables.
@@ -128,6 +116,165 @@ public final class DepcyGraph {
                 }
             }
         });
+    }
+
+    /**
+     * The only way to find this depcy is to compare refcolumns against all existing unique
+     * contraints/keys in reftable.
+     * Unfortunately they might not exist at the stage where {@link AbstractStatement#getDependencies()}
+     * are populated so we have to defer their lookup until here.
+     * @param con foreign key
+     * @param db database
+     */
+    private void createFkeyToUnique(IConstraintFk con, IDatabase db) {
+        Collection<String> refs = con.getForeignColumns();
+        if (refs.isEmpty()) {
+            return;
+        }
+
+        IStatement cont = db.getStatement(
+                new ObjectReference(con.getForeignSchema(), con.getForeignTable(), DbObjType.TABLE));
+
+        if (cont instanceof IStatementContainer c) {
+            for (IStatement refCon : c.getChildrenByType(DbObjType.CONSTRAINT)) {
+                if (refCon instanceof IConstraintPk fkCon && refs.equals(fkCon.getColumns())) {
+                    graph.addEdge(con, refCon);
+                }
+            }
+            for (IStatement ref : c.getChildrenByType(DbObjType.INDEX)) {
+                var refInd = (IIndex) ref;
+                if (refInd.isUnique() && refInd.compareColumns(refs)) {
+                    graph.addEdge(con, refInd);
+                }
+            }
+        }
+    }
+
+    private void removeCycles() {
+        // 1. Gabow's algorithm to find Strongly Connected Components (SCCs).
+        // It runs in linear time O(V + E) and is highly memory-efficient.
+        var inspector = new GabowStrongConnectivityInspector<>(graph);
+
+        // 2. Fetch the components as lightweight sets of vertices.
+        // This avoids creating heavy subgraph objects and minimizes object allocations.
+        List<Set<IStatement>> sets = inspector.stronglyConnectedSets();
+
+        // Reusable buffers — created once per removeCycles() call instead of on every
+        // hasPathInComponent() invocation. This removes HashMap$HashIterator.<init> from the profile.
+        // Identity-based sets/maps are used because JGraphT stores the very same vertex
+        // objects in the graph and in componentVertices, so reference comparison is enough
+        // and avoids the expensive AbstractStatement.equals.
+        Set<IStatement> visitedBuf = Collections.newSetFromMap(new IdentityHashMap<>());
+        Deque<IStatement> queueBuf = new ArrayDeque<>();
+
+        // A temporary list to collect edges scheduled for removal.
+        // This prevents ConcurrentModificationException while traversing the graph structures.
+        List<DefaultEdge> edgesToRemove = new ArrayList<>();
+
+        for (Set<IStatement> componentVertices : sets) {
+            // If a component contains 1 or 0 vertices, it cannot form a cycle with other elements.
+            if (componentVertices.size() <= 1) {
+                continue;
+            }
+
+            // Identity-based view of the component vertices — contains() works by reference,
+            // not via the expensive AbstractStatement.equals.
+            Set<IStatement> componentIdent = Collections.newSetFromMap(new IdentityHashMap<>());
+            componentIdent.addAll(componentVertices);
+
+            // Iterate through the vertices belonging strictly to this "cyclic island".
+            for (IStatement st : componentVertices) {
+                if (!(st instanceof PgAbstractFunction)) {
+                    continue;
+                }
+
+                // Fast pre-filter: the function must have at least one outgoing edge
+                // to a COLUMN inside this same SCC. If there are none, hasPathInComponent()
+                // is not worth calling.
+                List<DefaultEdge> candidateEdges = null;
+                for (DefaultEdge edge : graph.outgoingEdgesOf(st)) {
+                    IStatement vertex = graph.getEdgeTarget(edge);
+                    if (vertex.getStatementType() == DbObjType.COLUMN
+                            && componentIdent.contains(vertex)) {
+                        if (candidateEdges == null) {
+                            candidateEdges = new ArrayList<>();
+                        }
+                        candidateEdges.add(edge);
+                    }
+                }
+
+                if (candidateEdges == null) {
+                    continue;
+                }
+
+                for (DefaultEdge edge : candidateEdges) {
+                    IStatement vertex = graph.getEdgeTarget(edge);
+
+                    // Verify that there is actually a path back from 'vertex' to 'st'
+                    // inside the SCC (confirming this specific edge forms a cycle).
+                    if (hasPathInComponent(vertex, st, componentIdent, visitedBuf, queueBuf)) {
+                        edgesToRemove.add(edge);
+
+                        // Check if the parent table is also involved in the same cycle.
+                        IStatement table = vertex.getParent();
+                        if (table != null) {
+                            DefaultEdge tableEdge = graph.getEdge(st, table);
+                            if (tableEdge != null) {
+                                edgesToRemove.add(tableEdge);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Remove the collected edges and log the actions.
+        for (int i = 0; i < edgesToRemove.size(); i++) {
+            DefaultEdge edge = edgesToRemove.get(i);
+            IStatement source = graph.getEdgeSource(edge);
+            IStatement target = graph.getEdgeTarget(edge);
+
+            if (graph.removeEdge(edge)) {
+                var msg = REMOVE_DEP.formatted(source.getQualifiedName(), target.getQualifiedName());
+                LOG.info(msg);
+            }
+        }
+    }
+
+    /**
+     * Lightweight BFS strictly bounded by the small strongly connected component
+     * to check if 'target' (the function) is reachable from 'start' (the column).
+     *
+     * The visited/queue buffers are reused across calls — the caller is responsible
+     * for clearing them before invoking this method (see removeCycles).
+     */
+    private boolean hasPathInComponent(IStatement start,
+                                       IStatement target,
+                                       Set<IStatement> componentIdent,
+                                       Set<IStatement> visited,
+                                       Deque<IStatement> queue) {
+        visited.clear();
+        queue.clear();
+
+        queue.add(start);
+        visited.add(start);
+
+        while (!queue.isEmpty()) {
+            IStatement current = queue.poll();
+            for (DefaultEdge edge : graph.outgoingEdgesOf(current)) {
+                IStatement next = graph.getEdgeTarget(edge);
+
+                // Identity comparison: the graph holds the very same vertex objects as componentIdent.
+                if (next == target) {
+                    return true;
+                }
+                // Only traverse vertices belonging to this specific SCC.
+                if (componentIdent.contains(next) && visited.add(next)) {
+                    queue.add(next);
+                }
+            }
+        }
+        return false;
     }
 
     private void reduce() {
@@ -161,76 +308,14 @@ public final class DepcyGraph {
         graph.removeAllVertices(toRemove);
     }
 
-    private void removeCycles() {
-        CycleDetector<IStatement, DefaultEdge> detector = new CycleDetector<>(graph);
-
-        for (var st : detector.findCycles()) {
-            if (!(st instanceof PgAbstractFunction)) {
-                continue;
-            }
-
-            for (var vertex : detector.findCyclesContainingVertex(st)) {
-                if (vertex.getStatementType() == DbObjType.COLUMN) {
-                    graph.removeEdge(st, vertex);
-                    var msg = REMOVE_DEP.formatted(st.getQualifiedName(), vertex.getQualifiedName());
-                    LOG.info(msg);
-
-                    var table = vertex.getParent();
-                    if (graph.removeEdge(st, table) != null) {
-                        msg = REMOVE_DEP.formatted(st.getQualifiedName(), table.getQualifiedName());
-                        LOG.info(msg);
-                    }
-                }
-            }
-        }
-    }
-
-    private void processDeps(IStatement st) {
-        for (ObjectReference dep : st.getDependencies()) {
-            IStatement depSt = db.getStatement(dep);
-            if (depSt != null && !st.equals(depSt)) {
-                graph.addEdge(st, depSt);
-            }
-        }
-    }
-
-    /**
-     * The only way to find this depcy is to compare refcolumns against all existing unique
-     * contraints/keys in reftable.
-     * Unfortunately they might not exist at the stage where {@link AbstractStatement#getDependencies()}
-     * are populated so we have to defer their lookup until here.
-     */
-    private void createFkeyToUnique(IConstraintFk con) {
-        Collection<String> refs = con.getForeignColumns();
-        if (refs.isEmpty()) {
-            return;
-        }
-
-        IStatement cont = db.getStatement(
-                new ObjectReference(con.getForeignSchema(), con.getForeignTable(), DbObjType.TABLE));
-
-        if (cont instanceof IStatementContainer c) {
-            for (IStatement refCon : c.getChildrenByType(DbObjType.CONSTRAINT)) {
-                if (refCon instanceof IConstraintPk fkCon && refs.equals(fkCon.getColumns())) {
-                    graph.addEdge(con, refCon);
-                }
-            }
-            for (IStatement ref : c.getChildrenByType(DbObjType.INDEX)) {
-                var refInd = (IIndex) ref;
-                if (refInd.isUnique() && refInd.compareColumns(refs)) {
-                    graph.addEdge(con, refInd);
-                }
-            }
-        }
-    }
-
     /**
      * Creates the connection between the column of a partitioned table and the
      * columns of its sections (child tables).
      * <br />
      * Partitioned tables cannot use the inheritance mechanism, as in simple tables.
+     * @param db database
      */
-    private void createChildColToPartTblCol(PgPartitionTable tbl, PgColumn col) {
+    private void createChildColToPartTblCol(PgPartitionTable tbl, PgColumn col, IDatabase db) {
         for (Inherits in : tbl.getInherits()) {
             IStatement parentTbl = db.getStatement(new ObjectReference(in.key(), in.value(), DbObjType.TABLE));
             if (parentTbl == null) {
@@ -240,7 +325,7 @@ public final class DepcyGraph {
             }
 
             if (parentTbl instanceof PgPartitionTable partTable) {
-                createChildColToPartTblCol(partTable, col);
+                createChildColToPartTblCol(partTable, col, db);
             } else {
                 String colName = col.getName();
                 IColumn parentCol = ((ITable) parentTbl).getColumn(colName);
@@ -260,8 +345,9 @@ public final class DepcyGraph {
      * Adds custom dependencies to the graph.
      *
      * @param dependencies list of custom dependency pairs to add
+     * @param db database
      */
-    public void addCustomDepcies(Collection<Dependency> dependencies) {
+    private void addCustomDepcies(Collection<Dependency> dependencies, IDatabase db) {
         if (dependencies == null) {
             return;
         }
