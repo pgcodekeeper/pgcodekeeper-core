@@ -51,13 +51,11 @@ public class SimpleDepcyResolver {
             List<Dependency> additionalDependencies) {
         this.oldDb = oldDatabase;
         this.newDb = newDatabase;
-        this.oldDepcyGraph = new DepcyGraph(oldDatabase, !isShowColumns);
-        oldDepcyGraph.addCustomDepcies(additionalDependencies);
+        this.oldDepcyGraph = new DepcyGraph(oldDatabase, !isShowColumns, additionalDependencies);
         if (newDatabase == null) {
             this.newDepcyGraph = null;
         } else {
-            this.newDepcyGraph = new DepcyGraph(newDatabase, !isShowColumns);
-            newDepcyGraph.addCustomDepcies(additionalDependencies);
+            this.newDepcyGraph = new DepcyGraph(newDatabase, !isShowColumns, additionalDependencies);
         }
     }
 

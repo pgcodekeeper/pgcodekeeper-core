@@ -93,11 +93,12 @@ public final class DepcyResolver {
 
     private final ISettings settings;
 
-    public DepcyResolver(IDatabase oldDatabase, IDatabase newDatabase, ISettings settings, Set<IStatement> toRefresh) {
+    private DepcyResolver(IDatabase oldDatabase, IDatabase newDatabase, List<Dependency> additionalDependenciesOldDb,
+            List<Dependency> additionalDependenciesNewDb, ISettings settings, Set<IStatement> toRefresh) {
         this.oldDb = oldDatabase;
         this.newDb = newDatabase;
-        this.oldDepcyGraph = new DepcyGraph(oldDatabase);
-        this.newDepcyGraph = new DepcyGraph(newDatabase);
+        this.oldDepcyGraph = new DepcyGraph(oldDatabase, false, additionalDependenciesOldDb);
+        this.newDepcyGraph = new DepcyGraph(newDatabase, false, additionalDependenciesNewDb);
         this.toRefresh = toRefresh;
         this.settings = settings;
     }
@@ -578,9 +579,8 @@ public final class DepcyResolver {
                                                Set<IStatement> toRefresh,
                                                List<DbObject> dbObjects,
                                                ISettings settings) {
-        DepcyResolver depRes = new DepcyResolver(oldDb, newDb, settings, toRefresh);
-        depRes.oldDepcyGraph.addCustomDepcies(additionalDependenciesOldDb);
-        depRes.newDepcyGraph.addCustomDepcies(additionalDependenciesNewDb);
+        DepcyResolver depRes = new DepcyResolver(oldDb, newDb, additionalDependenciesOldDb, additionalDependenciesNewDb,
+                settings, toRefresh);
         depRes.fillObjects(dbObjects);
         depRes.recreateDrops();
         depRes.removeExtraActions();
