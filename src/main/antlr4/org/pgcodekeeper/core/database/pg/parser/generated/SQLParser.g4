@@ -93,7 +93,7 @@ lock_mode
 
 script_additional
     : additional_statement
-    | VACUUM vacuum_mode table_cols_list?
+    | VACUUM vacuum_mode? table_cols_list?
     | (FETCH | MOVE) fetch_move_direction? (FROM | IN)? identifier
     | CLOSE (identifier | ALL)
     | CALL function_call
@@ -216,12 +216,18 @@ table_cols
 
 vacuum_mode
     : LEFT_PAREN vacuum_option (COMMA vacuum_option)* RIGHT_PAREN 
-    | FULL? FREEZE? VERBOSE? analyze_keyword?
+    | old_vacuum_option+
+    ;
+
+old_vacuum_option
+    : FULL
+    | FREEZE
+    | VERBOSE
+    | analyze_keyword
     ;
 
 vacuum_option
-    : (FULL | FREEZE | VERBOSE | analyze_keyword | DISABLE_PAGE_SKIPPING | SKIP_LOCKED | INDEX_CLEANUP | PROCESS_MAIN | TRUNCATE
-      | SKIP_DATABASE_STATS | ONLY_DATABASE_STATS) boolean_value?
+    : (FULL | FREEZE | VERBOSE | analyze_keyword | DISABLE_PAGE_SKIPPING | SKIP_LOCKED | INDEX_CLEANUP | PROCESS_MAIN | TRUNCATE | SKIP_DATABASE_STATS | ONLY_DATABASE_STATS) boolean_value?
     | PARALLEL iconst
     | BUFFER_USAGE_LIMIT (iconst identifier)?
     ;
