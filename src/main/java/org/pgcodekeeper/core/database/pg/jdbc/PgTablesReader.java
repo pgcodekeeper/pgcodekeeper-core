@@ -17,7 +17,6 @@ package org.pgcodekeeper.core.database.pg.jdbc;
 
 import java.sql.*;
 import java.util.*;
-
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.pgcodekeeper.core.database.api.schema.*;
 import org.pgcodekeeper.core.database.base.jdbc.QueryBuilder;
@@ -36,6 +35,7 @@ import org.pgcodekeeper.core.utils.*;
  */
 public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
 
+    private static final String PG_ATTVER = "pg_attver";
     private static final String CREATE_TABLE = "CREATE TABLE noname () ";
     private static final String GP_SYSTEM_OPTIONS = "'format', 'formatter', 'delimiter', 'null', 'escape', 'quote'," +
             " 'header', 'newline', 'fill_missing_fields', 'force_not_null', 'is_writable', 'location_uris'," +
@@ -287,7 +287,11 @@ public final class PgTablesReader extends PgAbstractSearchPathJdbcReader {
             loader.getCachedTypeByOid(colTypeIds[i]).addTypeDepcy(column);
 
             if (colOptions[i] != null) {
-                PgParserAbstract.fillOptionParams(colOptions[i].split(","), column::addOption, false, false, false);
+                PgParserAbstract.fillOptionParams(colOptions[i].split(","), (k, v) -> {
+                    if (!PG_ATTVER.equals(k)) {
+                        column.addOption(k, v);
+                    }
+                }, false, false, false);
             }
             if (colFOptions[i] != null) {
                 PgParserAbstract.fillOptionParams(colFOptions[i].split(","), column::addForeignOption, false, true, false);

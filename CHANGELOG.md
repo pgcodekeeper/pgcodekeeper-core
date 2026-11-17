@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Fixed false differences related to the `pg_attver` column property.
+
 ### Security
 
 - Updated ClickHouse JDBC driver version due to CVE-2026-102554.
