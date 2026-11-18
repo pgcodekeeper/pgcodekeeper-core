@@ -11,6 +11,12 @@
 
 ### Изменено
 
+### Исправлено
+
+## [15.5.0] - 2026-11-18
+
+### Изменено
+
 - Повышена производительность построения графа зависимостей.
 
 ### Исправлено
@@ -2618,7 +2624,8 @@
 
 - Добавлен парсинг ORDER BY для агрегатных функции.
 
-[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.4.0...HEAD
+[Новое]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.5.0...HEAD
+[15.5.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.4.0...v15.5.0
 [15.4.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.3.0...v15.4.0
 [15.3.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.2.0...v15.3.0
 [15.2.0]: https://github.com/pgcodekeeper/pgcodekeeper-core/compare/v15.1.0...v15.2.0
